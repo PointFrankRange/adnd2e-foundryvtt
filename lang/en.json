@@ -1,0 +1,14 @@
+{
+  "MY-MODULE": {
+    "exampleApp": {
+      "title": "My Module Example",
+      "message": "Hello from My Module! Edit src/apps/example-app.ts and templates/example-app.hbs to customize this window."
+    },
+    "settings": {
+      "exampleSetting": {
+        "name": "Example Setting",
+        "hint": "An example world-scoped boolean setting registered in src/helpers/settings.ts."
+      }
+    }
+  }
+}
