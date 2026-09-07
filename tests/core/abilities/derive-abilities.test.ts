@@ -7,8 +7,7 @@ const raw = { str: 18, dex: 16, con: 18, int: 10, wis: 9, cha: 8 };
 describe("deriveAbilities()", () => {
   it("applies racial adjustment before computing modifiers", () => {
     const d = deriveAbilities(raw, { race: "dwarf", isWarrior: true, options: DEFAULT_OPTIONAL_RULES });
-    // eslint-disable-next-line no-constant-condition -- deliberate inline clamp check per task brief
-    expect(d.scores.con).toBe(18 + 1 > 18 ? 18 : 19); // dwarf CON max is 18 -> clamped to 18
+    // dwarf's +1 CON on a raw 18 is clamped to the racial maximum of 18
     expect(d.scores.con).toBe(18);
     expect(d.con.hpAdjustment).toBe(4); // warrior CON 18
     expect(d.scores.cha).toBe(7);
