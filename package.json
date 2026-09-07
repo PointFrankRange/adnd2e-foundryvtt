@@ -6,7 +6,7 @@
   "scripts": {
     "build": "vite build",
     "watch": "vite build --watch",
-    "link": "node scripts/link-module.mjs",
+    "link": "node scripts/link-system.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "format": "prettier --write \"src/**/*.ts\"",
