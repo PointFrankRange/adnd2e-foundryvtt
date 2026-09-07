@@ -7,7 +7,7 @@
     "build": "vite build",
     "watch": "vite build --watch",
     "link": "node scripts/link-system.mjs",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.core.json --noEmit",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "vitest run",

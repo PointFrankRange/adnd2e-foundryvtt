@@ -16,7 +16,7 @@ describe("racial ability adjustments", () => {
     expect(applyRacialAdjustments(raw, "elf")).toMatchObject({ dex: 13, con: 11 });
   });
   it("clamps to racial min/max (Table 7)", () => {
-    // Elf CON max is 18; +1 from a raw 18 stays 18.
+    // elf -1 CON: raw 18 -> 17
     expect(applyRacialAdjustments({ str: 10, dex: 10, con: 18, int: 10, wis: 10, cha: 10 }, "elf").con).toBe(17); // 18 - 1
     // Halfling STR min 7: raw 7, -1 -> clamped up to 7.
     expect(applyRacialAdjustments({ str: 7, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }, "halfling").str).toBe(7);

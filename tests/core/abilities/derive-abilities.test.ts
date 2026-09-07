@@ -5,13 +5,36 @@ import { DEFAULT_OPTIONAL_RULES } from "../../../src/core/options";
 const raw = { str: 18, dex: 16, con: 18, int: 10, wis: 9, cha: 8 };
 
 describe("deriveAbilities()", () => {
-  it("applies racial adjustment before computing modifiers", () => {
-    const d = deriveAbilities(raw, { race: "dwarf", isWarrior: true, options: DEFAULT_OPTIONAL_RULES });
+  it("applies racial adjustment before computing modifiers (with racial limits, creation-time)", () => {
+    const d = deriveAbilities(raw, { race: "dwarf", isWarrior: true, options: DEFAULT_OPTIONAL_RULES, applyRacialLimits: true });
     // dwarf's +1 CON on a raw 18 is clamped to the racial maximum of 18
     expect(d.scores.con).toBe(18);
     expect(d.con.hpAdjustment).toBe(4); // warrior CON 18
     expect(d.scores.cha).toBe(7);
     expect(d.cha.reactionAdj).toBe(-1);
+  });
+
+  it("without applyRacialLimits, the racial delta is NOT clamped (live derivation)", () => {
+    const d = deriveAbilities(raw, { race: "dwarf", isWarrior: true, options: DEFAULT_OPTIONAL_RULES });
+    // dwarf +1 CON on raw 18 -> 19, not truncated to the racial max
+    expect(d.scores.con).toBe(19);
+  });
+
+  it("does not truncate giant-range Strength from magic items (STR 20, human)", () => {
+    const d = deriveAbilities({ ...raw, str: 20 }, { race: "human", isWarrior: true, options: DEFAULT_OPTIONAL_RULES });
+    expect(d.str.damageAdj).toBe(8); // Table 1 STR 20 row is reachable
+  });
+
+  it("validates raw scores first — an out-of-range score throws RangeError", () => {
+    expect(() => deriveAbilities({ ...raw, str: 0 }, { race: "human", isWarrior: false })).toThrow(RangeError);
+  });
+
+  it("halfling fighters do not roll exceptional Strength (PHB)", () => {
+    // raw 19 - halfling's -1 STR delta -> effective 18; the exceptional gate must
+    // still skip the percentile roll because the race is halfling.
+    const d = deriveAbilities({ ...raw, str: 19 }, { race: "halfling", isWarrior: true, options: DEFAULT_OPTIONAL_RULES, exceptionalStrengthPercentile: 100 });
+    expect(d.scores.str).toBe(18);
+    expect(d.str.damageAdj).toBe(2); // plain 18, no 18/00
   });
 
   it("exceptional Strength only when toggle on + warrior + STR 18", () => {

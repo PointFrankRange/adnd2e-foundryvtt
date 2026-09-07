@@ -36,5 +36,7 @@ export function intelligence(score: number): IntelligenceModifiers {
   assertAbilityScore(score, "int");
   const [bonusLanguages, maxSpellLevel, learnSpellChance, maxSpellsPerLevel, illusionImmunityLevel] =
     BY_SCORE[score];
+  // NOTE: OptionalRules.maxSpellsPerLevel gating is applied by the caller (spellbook
+  // logic, a later plan), not here.
   return { bonusLanguages, maxSpellLevel, learnSpellChance, maxSpellsPerLevel, illusionImmunityLevel };
 }
