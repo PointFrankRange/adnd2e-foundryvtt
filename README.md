@@ -4,6 +4,18 @@ A Foundry VTT **game system** (id `adnd2e`) implementing the AD&D 2nd Edition
 rules with heavy automation. Built with TypeScript + Vite, targeting Foundry
 v13 (verified v14).
 
+## Install into Foundry
+
+In **Configuration and Setup → Game Systems → Install System**, paste this
+Manifest URL:
+
+```
+https://github.com/PointFrankRange/adnd2e-foundryvtt/releases/download/latest/system.json
+```
+
+This tracks the rolling `latest` build (published on every push to `master`).
+After a new push, use **Update** in the Game Systems list to pull the newest build.
+
 **Content policy:** this repository contains game *mechanics* only — no rulebook
 text, spell descriptions, monster stat blocks, or magic-item text. A JSON import
 path (added in a later plan) lets you load content you own into your world.

@@ -5,6 +5,13 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    rules: {
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    },
+  },
+  {
+    // Foundry globals — available everywhere EXCEPT the framework-free engine.
+    ignores: ["src/core/**", "tests/core/**"],
     languageOptions: {
       globals: {
         game: "readonly",
@@ -15,8 +22,27 @@ export default tseslint.config(
         canvas: "readonly",
       },
     },
+  },
+  {
+    // The engine must stay pure — no Foundry globals under core/.
+    files: ["src/core/**/*.ts", "tests/core/**/*.ts"],
     rules: {
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "no-restricted-globals": [
+        "error",
+        { name: "game", message: "core/ must not touch Foundry globals" },
+        { name: "Hooks", message: "core/ must not touch Foundry globals" },
+        { name: "foundry", message: "core/ must not touch Foundry globals" },
+        { name: "CONFIG", message: "core/ must not touch Foundry globals" },
+        { name: "ui", message: "core/ must not touch Foundry globals" },
+        { name: "canvas", message: "core/ must not touch Foundry globals" },
+        { name: "Roll", message: "core/ must not touch Foundry globals" },
+        { name: "Actor", message: "core/ must not touch Foundry globals" },
+        { name: "Item", message: "core/ must not touch Foundry globals" },
+        { name: "Dialog", message: "core/ must not touch Foundry globals" },
+        { name: "fromUuid", message: "core/ must not touch Foundry globals" },
+        { name: "Handlebars", message: "core/ must not touch Foundry globals" },
+      ],
+      "no-restricted-imports": ["error", { patterns: ["fvtt-types", "fvtt-types/*", "foundry", "foundry/*", "@league-of-foundry-developers/*"] }],
     },
   },
   {

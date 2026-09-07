@@ -22,5 +22,8 @@
       "extensions": ["css", "hbs", "json"],
       "paths": ["styles", "templates", "lang"]
     }
-  }
+  },
+  "url": "https://github.com/PointFrankRange/adnd2e-foundryvtt",
+  "manifest": "https://github.com/PointFrankRange/adnd2e-foundryvtt/releases/download/latest/system.json",
+  "download": "https://github.com/PointFrankRange/adnd2e-foundryvtt/releases/download/latest/system.zip"
 }
