@@ -158,6 +158,38 @@ Notes:
 `TypeDataModel`, `DataModel`, `foundry.data.fields.*`, `CONFIG`) are the same
 surface. Keep it. The `core/` layer references none of it.
 
+### 3.4 Release & distribution workflow
+
+*(Added 2026-09-07 — not in the original design. Rationale: the user runs a
+**hosted** Foundry server, so `npm run link` / manual file copy is impractical
+for the dev loop. The system must be installable and updatable from a
+GitHub-hosted manifest URL. Built in Plan 1b's first task.)*
+
+- **`system.json` regains three fields** (removed in Plan 1a as empty):
+  - `url` → `https://github.com/PointFrankRange/adnd2e-foundryvtt`
+  - `manifest` → `https://github.com/PointFrankRange/adnd2e-foundryvtt/releases/download/latest/system.json`
+  - `download` → `https://github.com/PointFrankRange/adnd2e-foundryvtt/releases/download/latest/system.zip`
+  - Fixed `latest` tag — predictable, independent of release ordering / prerelease status.
+- **`scripts/prepare-release.mjs`** — run in CI after `npm run build`. Reads
+  `dist/system.json`, rewrites `version` + `manifest` + `download` depending on
+  the trigger, writes it back into `dist/`.
+- **`.github/workflows/release.yml`**:
+  - **push to `master`:** `npm ci && npm run build` → `prepare-release.mjs`
+    sets `version` to `0.1.0-dev.<run_number>` (monotonic, so Foundry always
+    sees a newer version) and `manifest`/`download` to the `latest` URLs → zip
+    the contents of `dist/` into `system.zip` (with `system.json` at the zip
+    root) → `gh release` deletes and recreates a **prerelease** tagged `latest`
+    with `dist/system.json` and `system.zip` as assets.
+  - **push of a `v*` tag:** same build, `version` = the tag (minus the `v`),
+    `manifest`/`download` point at that tag's assets, publishes a normal
+    versioned release **and** refreshes `latest`.
+  - Uses the runner's preinstalled `gh` CLI — no third-party actions.
+- **`ci.yml` stays separate** — the four gates on every push/PR; `release.yml`
+  only publishes. (Plan 1b also bumps `actions/checkout` and `actions/setup-node`
+  to `@v5` in `ci.yml`.)
+- The committed `system.json` carries the `latest`-tag URLs and a placeholder
+  `version` (`0.1.0`); CI overwrites `version` at publish time.
+
 ---
 
 ## 4. Code architecture — two layers
@@ -537,11 +569,23 @@ Implementation needs specific 2E tables: ability-score modifier tables
 spell-slot tables, the non-weapon proficiency list, and encumbrance / movement
 tables.
 
-Workflow: Claude drafts each table from established 2E mechanics, cites the
-PHB/DMG table it corresponds to (e.g. "PHB Table 2: Strength"), and the user
-verifies it against their book before it is locked into a `core/tables/` file
-and its tests. `thelensrpg/dnd2e-foundry` (public domain) may be consulted for
-schema/structure ideas only.
+Workflow *(updated 2026-09-07)*: the user has provided digital copies of the
+**Player's Handbook**, **Dungeon Master Guide**, and **Monstrous Manual** in a
+git-ignored `references/` directory. Claude reads the actual tables from those
+PDFs (rendering pages to images where the OCR text layer is unreliable — these
+are scanned books), transcribes each value into a `core/tables/` file headed
+with a `// PHB Table N, p.XX` citation comment, and writes tests asserting those
+values. The user reviews the resulting PR against their books before merge.
+
+`references/` is gitignored and never committed — the PDFs are the user's
+property and stay local. Only mechanical/factual values (not prose) are
+transcribed into the repo. `thelensrpg/dnd2e-foundry` (public domain) may be
+consulted for schema/structure ideas only.
+
+**Player's Option books are NOT among the provided references** — the
+`OptionalRules` bag reserves `combatAndTactics.*` / `skillsAndPowers.*` /
+`spellsAndMagic.*` keys, but their rule branches are Sub-projects 7–9 and need
+those books at that time. Plan 1b implements core PHB/DMG rules only.
 
 ---
 
