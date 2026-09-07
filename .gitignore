@@ -5,3 +5,4 @@ foundryconfig.json
 *.log
 .DS_Store
 coverage/
+.claude/
