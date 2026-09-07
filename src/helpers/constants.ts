@@ -1,1 +1,1 @@
-export const MODULE_ID = "my-module";
+export const SYSTEM_ID = "adnd2e";
