@@ -1,13 +1,13 @@
-import { MODULE_ID } from "../helpers/constants";
+import { SYSTEM_ID } from "../helpers/constants";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 export class ExampleApplication extends HandlebarsApplicationMixin(ApplicationV2) {
   static override DEFAULT_OPTIONS = {
-    id: `${MODULE_ID}-example-app`,
+    id: `${SYSTEM_ID}-example-app`,
     tag: "div",
     window: {
-      title: "MY-MODULE.exampleApp.title",
+      title: "ADND2E.exampleApp.title",
       icon: "fa-solid fa-dice-d20",
       resizable: true,
     },
@@ -19,13 +19,13 @@ export class ExampleApplication extends HandlebarsApplicationMixin(ApplicationV2
 
   static override PARTS = {
     body: {
-      template: `modules/${MODULE_ID}/templates/example-app.hbs`,
+      template: `systems/${SYSTEM_ID}/templates/example-app.hbs`,
     },
   };
 
   override async _prepareContext(): Promise<object> {
     return {
-      message: game.i18n!.localize("MY-MODULE.exampleApp.message"),
+      message: game.i18n!.localize("ADND2E.exampleApp.message"),
     };
   }
 }

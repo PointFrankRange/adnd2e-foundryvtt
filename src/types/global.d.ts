@@ -2,6 +2,6 @@ export {};
 
 declare global {
   interface SettingConfig {
-    "my-module.exampleSetting": boolean;
+    "adnd2e.exampleSetting": boolean;
   }
 }

@@ -1,5 +1,8 @@
 node_modules/
 dist/
+.superpowers/
 foundryconfig.json
 *.log
 .DS_Store
+coverage/
+.claude/

@@ -7,16 +7,16 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true,
     lib: {
-      entry: "src/module.ts",
+      entry: "src/system.ts",
       formats: ["es"],
-      fileName: () => "module.js",
-      cssFileName: "module",
+      fileName: () => "system.js",
+      cssFileName: "system",
     },
   },
   plugins: [
     viteStaticCopy({
       targets: [
-        { src: "module.json", dest: "." },
+        { src: "system.json", dest: "." },
         { src: "lang", dest: "." },
         { src: "templates", dest: "." },
       ],

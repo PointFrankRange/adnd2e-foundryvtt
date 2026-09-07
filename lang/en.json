@@ -1,13 +1,16 @@
 {
-  "MY-MODULE": {
+  "ADND2E": {
+    "system": {
+      "title": "Advanced Dungeons & Dragons 2nd Edition"
+    },
     "exampleApp": {
-      "title": "My Module Example",
-      "message": "Hello from My Module! Edit src/apps/example-app.ts and templates/example-app.hbs to customize this window."
+      "title": "AD&D 2E",
+      "message": "Placeholder window. Real sheets arrive in a later plan."
     },
     "settings": {
       "exampleSetting": {
         "name": "Example Setting",
-        "hint": "An example world-scoped boolean setting registered in src/helpers/settings.ts."
+        "hint": "Placeholder world setting. The optional-rules registry replaces this in Plan 1c."
       }
     }
   }

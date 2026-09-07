@@ -11,7 +11,7 @@ if (!existsSync(configPath)) {
 }
 
 const { dataPath } = JSON.parse(readFileSync(configPath, "utf-8"));
-const { id: moduleId } = JSON.parse(readFileSync(resolve("module.json"), "utf-8"));
+const { id: systemId } = JSON.parse(readFileSync(resolve("system.json"), "utf-8"));
 
 const target = resolve("dist");
 if (!existsSync(target)) {
@@ -19,14 +19,14 @@ if (!existsSync(target)) {
   process.exit(1);
 }
 
-const modulesDir = join(dataPath, "Data", "modules");
-mkdirSync(modulesDir, { recursive: true });
+const systemsDir = join(dataPath, "Data", "systems");
+mkdirSync(systemsDir, { recursive: true });
 
-const linkDir = join(modulesDir, moduleId);
+const linkDir = join(systemsDir, systemId);
 if (existsSync(linkDir)) {
   rmSync(linkDir, { recursive: true, force: true });
 }
 
 // "junction" works on Windows without admin privileges and is a no-op type on POSIX.
 symlinkSync(target, linkDir, "junction");
-console.log(`Linked ${target} -> ${linkDir}`);
+console.log(`Linked system ${target} -> ${linkDir}`);
