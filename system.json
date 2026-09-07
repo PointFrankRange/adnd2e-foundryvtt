@@ -1,0 +1,29 @@
+{
+  "id": "adnd2e",
+  "title": "Advanced Dungeons & Dragons 2nd Edition",
+  "description": "An implementation of the Advanced Dungeons & Dragons 2nd Edition rules, with heavy automation. Game mechanics only — no rulebook content is included.",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "14"
+  },
+  "authors": [{ "name": "Joshua Frank" }],
+  "esmodules": ["system.js"],
+  "styles": ["system.css"],
+  "languages": [
+    { "lang": "en", "name": "English", "path": "lang/en.json" }
+  ],
+  "grid": { "distance": 5, "units": "ft" },
+  "primaryTokenAttribute": "attributes.hp",
+  "initiative": "1d10",
+  "flags": {
+    "adnd2e": {},
+    "hotReload": {
+      "extensions": ["css", "hbs", "json"],
+      "paths": ["styles", "templates", "lang"]
+    }
+  },
+  "url": "",
+  "manifest": "",
+  "download": ""
+}
