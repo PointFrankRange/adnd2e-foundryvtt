@@ -8,7 +8,7 @@
     "watch": "vite build --watch",
     "link": "node scripts/link-system.mjs",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src",
+    "lint": "eslint .",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "vitest run",
     "test:watch": "vitest",

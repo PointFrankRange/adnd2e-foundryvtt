@@ -19,7 +19,7 @@ export class ExampleApplication extends HandlebarsApplicationMixin(ApplicationV2
 
   static override PARTS = {
     body: {
-      template: `modules/${SYSTEM_ID}/templates/example-app.hbs`,
+      template: `systems/${SYSTEM_ID}/templates/example-app.hbs`,
     },
   };
 

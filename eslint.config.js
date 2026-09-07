@@ -20,6 +20,16 @@ export default tseslint.config(
     },
   },
   {
+    // Node-executed tooling scripts (not shipped in the system bundle).
+    files: ["scripts/**/*.{js,mjs,cjs}", "*.config.{js,ts,mjs}"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+        process: "readonly",
+      },
+    },
+  },
+  {
     ignores: ["dist/**", "packs/**", "coverage/**"],
   },
 );

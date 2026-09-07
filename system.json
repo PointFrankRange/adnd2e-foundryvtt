@@ -22,8 +22,5 @@
       "extensions": ["css", "hbs", "json"],
       "paths": ["styles", "templates", "lang"]
     }
-  },
-  "url": "",
-  "manifest": "",
-  "download": ""
+  }
 }

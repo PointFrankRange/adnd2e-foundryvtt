@@ -114,7 +114,7 @@ Key fields beyond the current manifest:
   },
 
   "grid": { "distance": 5, "units": "ft" },
-  "primaryTokenAttribute": "hp",
+  "primaryTokenAttribute": "attributes.hp",
   "initiative": "1d10",
 
   "packs": [ /* see §7 */ ],
