@@ -4,6 +4,7 @@ import { SAVE_MATRICES, type SaveBand } from "./tables";
 
 export { SAVE_MATRICES };
 export type { SaveBand };
+export * from "./racial";
 
 /**
  * Raw d20 target for a saving throw (roll >= target succeeds), before any
