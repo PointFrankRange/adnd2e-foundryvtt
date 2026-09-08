@@ -7,8 +7,7 @@ import type { OptionalRules } from "../options";
 import type { IntelligenceModifiers, WizardSchool } from "../types";
 import { SPECIALIST_SCHOOLS } from "./tables";
 
-const CHANCE_MIN = 1;
-const CHANCE_MAX = 99;
+const CHANCE_MAX = 100;
 
 export interface SpellbookLimits {
   /** highest spell level learnable/castable; null if INT < 9 */
@@ -93,7 +92,8 @@ export function canLearnSpell(input: CanLearnInput): CanLearnResult {
     return rejected("per-level-cap-reached");
   }
 
-  const chance = Math.min(CHANCE_MAX, Math.max(CHANCE_MIN, limits.chanceToLearn + mod));
+  // Cap at 100 (certainty); no floor — chanceToLearn >= 35 and mod >= -15, so >= 20.
+  const chance = Math.min(CHANCE_MAX, limits.chanceToLearn + mod);
   return { allowed: true, chance, reason: null };
 }
 

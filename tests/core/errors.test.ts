@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { assertAbilityScore, assertLevel, assertXp, assertD20, assertSpellLevel } from "../../src/core/errors";
+import {
+  assertAbilityScore,
+  assertLevel,
+  assertXp,
+  assertD20,
+  assertSpellLevel,
+} from "../../src/core/errors";
 
 describe("assertAbilityScore", () => {
   it("accepts integers 1..25", () => {
