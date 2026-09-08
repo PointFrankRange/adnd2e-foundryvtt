@@ -1,4 +1,4 @@
-// The enumerations the Item DataModel schemas validate against. Kept here as
+// The enumerations the Item and Actor DataModel schemas validate against. Kept here as
 // plain arrays (not in the schema files) so they are unit-testable against the
 // engine unions — defineSchema() imports these and stays logic-free.
 import type { AbilityKey, Alignment, ClassId, CreatureSize, MovementMode, NonweaponGroup, Race, SpellSchool, SphereName, WizardSchool } from "../../core/types";
