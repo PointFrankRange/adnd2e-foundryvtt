@@ -4,6 +4,22 @@ import {
   weaponProficiencySlots, nonweaponProficiencySlots,
 } from "../../../src/core/classes/progression";
 import { FIGHTER, MAGE, CLERIC, THIEF } from "../../../src/core/classes/chassis";
+import type { ClassChassis } from "../../../src/core/types";
+
+const CAPPED: ClassChassis = {
+  ...CLERIC,
+  maxLevel: 14,
+  // 14 real thresholds (arbitrary ascending values for the test)
+  xpThresholds: [0, 2000, 4000, 7500, 12500, 20000, 35000, 60000, 90000, 125000, 200000, 300000, 750000, 1500000],
+  xpPerLevelBeyond20: 0,
+};
+
+const UNCAPPED_FLAT: ClassChassis = {
+  ...CLERIC,
+  maxLevel: null,
+  xpThresholds: [0, 2000, 4000, 7500, 12500, 20000, 35000, 60000, 90000, 125000, 200000, 300000, 750000, 1500000],
+  xpPerLevelBeyond20: 0,
+};
 
 describe("levelForXp", () => {
   it("0 XP is level 1", () => {
@@ -43,6 +59,10 @@ describe("xpForLevel", () => {
     expect(xpForLevel(FIGHTER, 21)).toBe(3250000);
     expect(xpForLevel(FIGHTER, 25)).toBe(3000000 + 250000 * 5);
     expect(xpForLevel(THIEF, 22)).toBe(2200000 + 220000 * 2);
+  });
+  it("throws past the table when there is no beyond-20 rate", () => {
+    expect(xpForLevel(UNCAPPED_FLAT, 14)).toBe(1500000);
+    expect(() => xpForLevel(UNCAPPED_FLAT, 15)).toThrow(RangeError);
   });
   it("round-trips with levelForXp", () => {
     for (const lvl of [1, 5, 9, 13, 20, 21, 30]) {
@@ -116,5 +136,17 @@ describe("proficiency slots", () => {
   it("rejects invalid level", () => {
     expect(() => weaponProficiencySlots(FIGHTER, 0)).toThrow(RangeError);
     expect(() => nonweaponProficiencySlots(FIGHTER, -1)).toThrow(RangeError);
+  });
+});
+
+describe("progression with a maxLevel cap", () => {
+  it("levelForXp never exceeds maxLevel", () => {
+    expect(levelForXp(CAPPED, 1500000)).toBe(14);
+    expect(levelForXp(CAPPED, 99_000_000)).toBe(14);
+    expect(levelForXp(CAPPED, 90000)).toBe(9);
+  });
+  it("xpForLevel throws past the cap", () => {
+    expect(xpForLevel(CAPPED, 14)).toBe(1500000);
+    expect(() => xpForLevel(CAPPED, 15)).toThrow(RangeError);
   });
 });

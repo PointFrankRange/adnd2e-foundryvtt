@@ -2,32 +2,42 @@
 import { assertLevel, assertXp } from "../errors";
 import type { ClassChassis, HitDice } from "../types";
 
-const TABLE_MAX_LEVEL = 20;
-
 export function xpForLevel(chassis: ClassChassis, level: number): number {
   assertLevel(level, "class level");
-  if (level <= TABLE_MAX_LEVEL) {
+  if (chassis.maxLevel != null && level > chassis.maxLevel) {
+    throw new RangeError(
+      `${chassis.id} cannot advance past level ${chassis.maxLevel}, got ${level}`,
+    );
+  }
+  const tableLength = chassis.xpThresholds.length;
+  if (level <= tableLength) {
     return chassis.xpThresholds[level - 1];
   }
-  return chassis.xpThresholds[TABLE_MAX_LEVEL - 1] + (level - TABLE_MAX_LEVEL) * chassis.xpPerLevelBeyond20;
+  if (chassis.xpPerLevelBeyond20 <= 0) {
+    throw new RangeError(
+      `${chassis.id} has no defined XP progression past level ${tableLength}, got ${level}`,
+    );
+  }
+  return chassis.xpThresholds[tableLength - 1] + (level - tableLength) * chassis.xpPerLevelBeyond20;
 }
 
 export function levelForXp(chassis: ClassChassis, xp: number): number {
   assertXp(xp);
-  const top = chassis.xpThresholds[TABLE_MAX_LEVEL - 1];
-  if (xp >= top) {
-    return TABLE_MAX_LEVEL + Math.floor((xp - top) / chassis.xpPerLevelBeyond20);
+  const cap = chassis.maxLevel ?? Number.POSITIVE_INFINITY;
+  const tableLength = chassis.xpThresholds.length;
+  const top = chassis.xpThresholds[tableLength - 1];
+  if (xp >= top && chassis.xpPerLevelBeyond20 > 0) {
+    return Math.min(cap, tableLength + Math.floor((xp - top) / chassis.xpPerLevelBeyond20));
   }
-  // highest table level whose threshold is <= xp
   let level = 1;
-  for (let i = 1; i < TABLE_MAX_LEVEL; i++) {
+  for (let i = 1; i < tableLength; i++) {
     if (xp >= chassis.xpThresholds[i]) {
       level = i + 1;
     } else {
       break;
     }
   }
-  return level;
+  return Math.min(cap, level);
 }
 
 export function hitDice(chassis: ClassChassis, level: number): HitDice {

@@ -22,11 +22,27 @@ const THIEF_XP: readonly number[] = [
   0, 1250, 2500, 5000, 10000, 20000, 40000, 70000, 110000, 160000,
   220000, 440000, 660000, 880000, 1100000, 1320000, 1540000, 1760000, 1980000, 2200000,
 ];
+// PHB Table 14: WARRIOR EXPERIENCE LEVELS (p.26) — Paladin/Ranger column.
+// prettier-ignore
+const PALADIN_RANGER_XP: readonly number[] = [
+  0, 2250, 4500, 9000, 18000, 36000, 75000, 150000, 300000, 600000,
+  900000, 1200000, 1500000, 1800000, 2100000, 2400000, 2700000, 3000000, 3300000, 3600000,
+];
+// PHB Table 23: PRIEST EXPERIENCE LEVELS (p.33) — Druid column, levels 1-14 only
+// (the base-rules cap; level 15 is the unique Grand Druid, 16-20 the hierophant path — PHB p.37).
+// prettier-ignore
+const DRUID_XP: readonly number[] = [
+  0, 2000, 4000, 7500, 12500, 20000, 35000, 60000, 90000, 125000, 200000, 300000, 750000, 1500000,
+];
+// Bard uses the Table 25 Thief/Bard column — identical to THIEF_XP.
 
 const MAGE_WEAPONS = ["dagger", "staff", "dart", "knife", "sling"] as const;
 const THIEF_WEAPONS = [
   "club", "dagger", "dart", "hand crossbow", "knife", "lasso", "short bow", "sling",
   "broad sword", "long sword", "short sword", "staff",
+] as const;
+const DRUID_WEAPONS = [
+  "club", "sickle", "dart", "spear", "dagger", "scimitar", "sling", "staff",
 ] as const;
 
 export const FIGHTER: ClassChassis = {
@@ -48,6 +64,10 @@ export const FIGHTER: ClassChassis = {
   weaponsAllowed: "any",
   weaponSpecializationAllowed: true,
   raceLevelLimits: {},
+  maxLevel: null,
+  spellStartLevel: null,
+  spellProgressionId: null,
+  thiefSkillAccess: null,
 };
 
 export const MAGE: ClassChassis = {
@@ -69,6 +89,10 @@ export const MAGE: ClassChassis = {
   weaponsAllowed: { names: [...MAGE_WEAPONS] },
   weaponSpecializationAllowed: false,
   raceLevelLimits: {},
+  maxLevel: null,
+  spellStartLevel: 1,
+  spellProgressionId: "wizard",
+  thiefSkillAccess: null,
 };
 
 export const CLERIC: ClassChassis = {
@@ -90,6 +114,10 @@ export const CLERIC: ClassChassis = {
   weaponsAllowed: { categories: ["blunt"] },
   weaponSpecializationAllowed: false,
   raceLevelLimits: {},
+  maxLevel: null,
+  spellStartLevel: 1,
+  spellProgressionId: "priest",
+  thiefSkillAccess: null,
 };
 
 export const THIEF: ClassChassis = {
@@ -111,6 +139,119 @@ export const THIEF: ClassChassis = {
   weaponsAllowed: { names: [...THIEF_WEAPONS] },
   weaponSpecializationAllowed: false,
   raceLevelLimits: {},
+  maxLevel: null,
+  spellStartLevel: null,
+  spellProgressionId: null,
+  thiefSkillAccess: [
+    "pick-pockets", "open-locks", "find-remove-traps", "move-silently",
+    "hide-in-shadows", "detect-noise", "climb-walls", "read-languages",
+  ],
+};
+
+export const PALADIN: ClassChassis = {
+  id: "paladin",
+  name: "Paladin",
+  group: "warrior",
+  hitDie: 10,
+  hpAfterNameLevel: 3,
+  conBonusCutoffLevel: 9,
+  primeRequisites: ["str", "cha"],
+  abilityMinimums: { str: 12, con: 9, wis: 13, cha: 17 },
+  xpThresholds: PALADIN_RANGER_XP,
+  xpPerLevelBeyond20: 300000,
+  weaponProficiencies: { initial: 4, levelsPerSlot: 3 },
+  nonweaponProficiencies: { initial: 3, levelsPerSlot: 3 },
+  nonProficiencyPenalty: -2,
+  casterType: "priest",
+  armorAllowed: "any",
+  weaponsAllowed: "any",
+  weaponSpecializationAllowed: false,
+  raceLevelLimits: {},
+  maxLevel: null,
+  spellStartLevel: 9,
+  spellProgressionId: "paladin",
+  thiefSkillAccess: null,
+};
+
+export const RANGER: ClassChassis = {
+  id: "ranger",
+  name: "Ranger",
+  group: "warrior",
+  hitDie: 10,
+  hpAfterNameLevel: 3,
+  conBonusCutoffLevel: 9,
+  primeRequisites: ["str", "dex", "wis"],
+  abilityMinimums: { str: 13, dex: 13, con: 14, wis: 14 },
+  xpThresholds: PALADIN_RANGER_XP,
+  xpPerLevelBeyond20: 300000,
+  weaponProficiencies: { initial: 4, levelsPerSlot: 3 },
+  nonweaponProficiencies: { initial: 3, levelsPerSlot: 3 },
+  nonProficiencyPenalty: -2,
+  casterType: "priest",
+  armorAllowed: "any",
+  weaponsAllowed: "any",
+  weaponSpecializationAllowed: false,
+  raceLevelLimits: {},
+  maxLevel: null,
+  spellStartLevel: 8,
+  spellProgressionId: "ranger",
+  thiefSkillAccess: null,
+};
+
+export const DRUID: ClassChassis = {
+  id: "druid",
+  name: "Druid",
+  group: "priest",
+  hitDie: 8,
+  hpAfterNameLevel: 2,
+  conBonusCutoffLevel: 9,
+  primeRequisites: ["wis", "cha"],
+  abilityMinimums: { wis: 12, cha: 15 },
+  xpThresholds: DRUID_XP,
+  xpPerLevelBeyond20: 0,
+  weaponProficiencies: { initial: 2, levelsPerSlot: 4 },
+  nonweaponProficiencies: { initial: 4, levelsPerSlot: 3 },
+  nonProficiencyPenalty: -3,
+  casterType: "priest",
+  // + wooden shield only; all other armor is forbidden the druid (PHB p.35)
+  armorAllowed: ["leather"],
+  weaponsAllowed: { names: [...DRUID_WEAPONS] },
+  weaponSpecializationAllowed: false,
+  raceLevelLimits: {},
+  maxLevel: 14,
+  spellStartLevel: 1,
+  spellProgressionId: "priest",
+  thiefSkillAccess: null,
+};
+
+export const BARD: ClassChassis = {
+  id: "bard",
+  name: "Bard",
+  group: "rogue",
+  hitDie: 6,
+  hpAfterNameLevel: 2,
+  conBonusCutoffLevel: 10,
+  primeRequisites: ["dex", "cha"],
+  abilityMinimums: { dex: 12, int: 13, cha: 15 },
+  xpThresholds: THIEF_XP,
+  xpPerLevelBeyond20: 220000,
+  weaponProficiencies: { initial: 2, levelsPerSlot: 4 },
+  nonweaponProficiencies: { initial: 3, levelsPerSlot: 4 },
+  nonProficiencyPenalty: -3,
+  casterType: "wizard",
+  // up to and including chain mail; no shield; cannot cast spells while
+  // armored (PHB p.41) — the cast-in-armor gate is a caller concern
+  armorAllowed: [
+    "padded", "leather", "studded leather", "ring mail",
+    "brigandine", "scale mail", "hide", "chain mail",
+  ],
+  weaponsAllowed: "any",
+  weaponSpecializationAllowed: false,
+  raceLevelLimits: {},
+  maxLevel: null,
+  spellStartLevel: 2,
+  spellProgressionId: "bard",
+  thiefSkillAccess: ["pick-pockets", "climb-walls", "detect-noise", "read-languages"],
 };
 
 const BY_ID: Record<ClassId, ClassChassis> = {
@@ -118,6 +259,10 @@ const BY_ID: Record<ClassId, ClassChassis> = {
   mage: MAGE,
   cleric: CLERIC,
   thief: THIEF,
+  paladin: PALADIN,
+  ranger: RANGER,
+  druid: DRUID,
+  bard: BARD,
 };
 
 export function getChassis(id: ClassId): ClassChassis {

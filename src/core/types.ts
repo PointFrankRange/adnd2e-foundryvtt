@@ -72,7 +72,18 @@ export interface DerivedAbilities {
   cha: CharismaModifiers;
 }
 
-export type ClassId = "fighter" | "mage" | "cleric" | "thief";
+export type ClassId =
+  | "fighter"
+  | "mage"
+  | "cleric"
+  | "thief"
+  | "paladin"
+  | "ranger"
+  | "druid"
+  | "bard";
+
+/** Which spell-slot table a caster class uses (PHB Tables 21/24/17/18/32). */
+export type SpellProgressionId = "wizard" | "priest" | "paladin" | "ranger" | "bard";
 
 export type SaveCategory = "ppd" | "rsw" | "pp" | "bw" | "spell";
 
@@ -123,6 +134,18 @@ export interface ClassChassis {
    * Placeholder for Plan 1b.2 — populated by the race plan. Currently `{}`.
    */
   raceLevelLimits: Readonly<Record<string, number | null>>;
+  /** class-intrinsic maximum level (`null` = uncapped; Druid = 14 in the base rules) */
+  maxLevel: number | null;
+  /** first character level this caster gains a spell; `null` only for a non-caster (a caster that casts from level 1 sets `1`) */
+  spellStartLevel: number | null;
+  /** which spell-slot table this class uses (`null` = non-caster) */
+  spellProgressionId: SpellProgressionId | null;
+  /**
+   * The thieving skills this class may spend points on; `null` = none.
+   * Every class states its list explicitly — the Thief's is all eight —
+   * so `chassis.thiefSkillAccess ?? []` is always correct.
+   */
+  thiefSkillAccess: readonly ThiefSkill[] | null;
 }
 
 /** The 16 priest spheres of influence (PHB p.33). */
@@ -166,13 +189,14 @@ export type WizardSchool =
 /**
  * A caster's spell-slot counts for one class at one level.
  * `perLevel[i]` is the castable slots at spell level `i + 1` (wizard: length 9,
- * priest: length 7). `base` is the raw progression-table row; `bonus` is the
- * per-spell-level adjustment (specialist +1 or cumulative Wisdom bonus);
- * `suppressed` lists the 1-indexed spell levels a gate forced to 0
- * (Intelligence cap for a wizard; WIS 17/18 requirement for a priest).
- * base and bonus are pre-gate values; perLevel is authoritative and is 0 at
- * every spell level listed in suppressed (a consumer summing base + bonus would
- * overcount suppressed levels).
+ * priest: length 7, bard: length 6). Paladin and Ranger limited-caster slots
+ * are returned as a bare `readonly number[]` (lengths 4 and 3), not this shape.
+ * `base` is the raw progression-table row; `bonus` is the per-spell-level
+ * adjustment (specialist +1 or cumulative Wisdom bonus); `suppressed` lists
+ * the 1-indexed spell levels a gate forced to 0 (Intelligence cap for a
+ * wizard; WIS 17/18 requirement for a priest). base and bonus are pre-gate
+ * values; perLevel is authoritative and is 0 at every spell level listed in
+ * suppressed (a consumer summing base + bonus would overcount suppressed levels).
  */
 export interface SpellSlots {
   perLevel: readonly number[];
@@ -200,6 +224,12 @@ export type ThiefSkill =
   | "detect-noise"
   | "climb-walls"
   | "read-languages";
+
+/** The four thieving skills a bard may develop (PHB Table 33). */
+export type BardSkill = Extract<
+  ThiefSkill,
+  "pick-pockets" | "detect-noise" | "climb-walls" | "read-languages"
+>;
 
 /**
  * Armor category for the thief-skill armor adjustment (PHB Table 29).

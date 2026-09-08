@@ -11,6 +11,10 @@ import {
   resolveThiefSkill,
   backstabMultiplier,
   pickPocketsDetectionThreshold,
+  BARD_SKILL_BASE,
+  BARD_SKILL_POINT_RULES,
+  bardSkillPointsAvailable,
+  bardSkillBaseScore,
 } from "../../../src/core/proficiencies/thief-skills";
 
 describe("thief-skill tables", () => {
@@ -331,5 +335,48 @@ describe("pickPocketsDetectionThreshold()", () => {
   });
   it("rejects a non-integer thief level in the optional rule", () => {
     expect(() => pickPocketsDetectionThreshold(5, { thiefLevel: 2.5 })).toThrow(RangeError);
+  });
+});
+
+describe("bard thieving skills (PHB Table 33)", () => {
+  it("BARD_SKILL_BASE values: pp 10, dn 20, cw 50, rl 5", () => {
+    expect(BARD_SKILL_BASE).toEqual({
+      "pick-pockets": 10,
+      "detect-noise": 20,
+      "climb-walls": 50,
+      "read-languages": 5,
+    });
+  });
+  it("bardSkillPointsAvailable(1) → 20; (2) → 35; (11) → 170", () => {
+    expect(bardSkillPointsAvailable(1)).toBe(20);
+    expect(bardSkillPointsAvailable(2)).toBe(35);
+    expect(bardSkillPointsAvailable(11)).toBe(170);
+  });
+  it("exposes the bard point-pool rules", () => {
+    expect(BARD_SKILL_POINT_RULES).toEqual({
+      level1Points: 20,
+      pointsPerLevelAfter: 15,
+      hardCap: 95,
+    });
+  });
+  it("bardSkillBaseScore — human, dex 15, leather: climb-walls → 50 (no adjustments)", () => {
+    expect(
+      bardSkillBaseScore("climb-walls", { race: "human", dexterity: 15, armor: "leather" }),
+    ).toBe(50);
+  });
+  it("bardSkillBaseScore — half-elf, dex 18, leather: pick-pockets → 30", () => {
+    // 10 (base) + 10 (half-elf PP) + 10 (Dex 18 PP) + 0 (leather) = 30
+    expect(
+      bardSkillBaseScore("pick-pockets", { race: "half-elf", dexterity: 18, armor: "leather" }),
+    ).toBe(30);
+  });
+  it("bardSkillBaseScore — human, dex 9, padded-studded: pick-pockets → -35", () => {
+    // 10 (base) + 0 (human) + (-15) (Dex 9) + (-30) (padded-studded) = -35
+    expect(
+      bardSkillBaseScore("pick-pockets", { race: "human", dexterity: 9, armor: "padded-studded" }),
+    ).toBe(-35);
+  });
+  it("rejects a bad level", () => {
+    expect(() => bardSkillPointsAvailable(0)).toThrow(RangeError);
   });
 });
