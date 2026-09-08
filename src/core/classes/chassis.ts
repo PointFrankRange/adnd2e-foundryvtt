@@ -140,7 +140,10 @@ export const THIEF: ClassChassis = {
   maxLevel: null,
   spellStartLevel: null,
   spellProgressionId: null,
-  thiefSkillAccess: null,
+  thiefSkillAccess: [
+    "pick-pockets", "open-locks", "find-remove-traps", "move-silently",
+    "hide-in-shadows", "detect-noise", "climb-walls", "read-languages",
+  ],
 };
 
 export const PALADIN: ClassChassis = {
@@ -208,7 +211,8 @@ export const DRUID: ClassChassis = {
   nonweaponProficiencies: { initial: 4, levelsPerSlot: 3 },
   nonProficiencyPenalty: -3,
   casterType: "priest",
-  armorAllowed: ["leather", "padded", "studded leather"],
+  // + wooden shield only; all other armor is forbidden the druid (PHB p.35)
+  armorAllowed: ["leather"],
   weaponsAllowed: { names: [...DRUID_WEAPONS] },
   weaponSpecializationAllowed: false,
   raceLevelLimits: {},
@@ -233,7 +237,12 @@ export const BARD: ClassChassis = {
   nonweaponProficiencies: { initial: 3, levelsPerSlot: 4 },
   nonProficiencyPenalty: -3,
   casterType: "wizard",
-  armorAllowed: "any",
+  // up to and including chain mail; no shield; cannot cast spells while
+  // armored (PHB p.41) — the cast-in-armor gate is a caller concern
+  armorAllowed: [
+    "padded", "leather", "studded leather", "ring mail",
+    "brigandine", "scale mail", "hide", "chain mail",
+  ],
   weaponsAllowed: "any",
   weaponSpecializationAllowed: false,
   raceLevelLimits: {},

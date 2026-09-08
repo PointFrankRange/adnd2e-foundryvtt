@@ -2,7 +2,7 @@
 // Dexterity (Table 28) and armor (Table 29) adjustments; the point budget;
 // backstab multipliers (Table 30); and the pick-pockets detection threshold.
 import { assertAbilityScore, assertLevel } from "../errors";
-import type { Race, ThiefArmor, ThiefSkill } from "../types";
+import type { BardSkill, Race, ThiefArmor, ThiefSkill } from "../types";
 
 export const THIEF_SKILLS: readonly ThiefSkill[] = [
   "pick-pockets",
@@ -169,4 +169,44 @@ export function pickPocketsDetectionThreshold(
     threshold += options.thiefLevel - victimLevel;
   }
   return threshold;
+}
+
+/** PHB Table 33: BARD THIEVING SKILL BASE SCORES (p.42). */
+export const BARD_SKILL_BASE: Readonly<Record<BardSkill, number>> = {
+  "pick-pockets": 10,
+  "detect-noise": 20,
+  "climb-walls": 50,
+  "read-languages": 5,
+};
+
+export const BARD_SKILL_POINT_RULES = {
+  level1Points: 20,
+  pointsPerLevelAfter: 15,
+  hardCap: 95,
+} as const;
+
+/** Cumulative discretionary skill points a bard has by `level` (PHB p.42). */
+export function bardSkillPointsAvailable(level: number): number {
+  assertLevel(level, "bard level");
+  return (
+    BARD_SKILL_POINT_RULES.level1Points +
+    (level - 1) * BARD_SKILL_POINT_RULES.pointsPerLevelAfter
+  );
+}
+
+/**
+ * A bard's thieving-skill base score: Table 33 base + the thief racial
+ * (Table 27), Dexterity (Table 28) and armor (Table 29) adjustments.
+ * May be negative; no cap applied here.
+ */
+export function bardSkillBaseScore(skill: BardSkill, input: ThiefSkillContext): number {
+  assertAbilityScore(input.dexterity, "dex");
+  const dexKey = Math.min(DEX_ADJ_MAX, Math.max(DEX_ADJ_MIN, input.dexterity));
+  const dexAdj = THIEF_DEXTERITY_ADJUSTMENTS[dexKey][skill] ?? 0;
+  return (
+    BARD_SKILL_BASE[skill] +
+    THIEF_RACIAL_ADJUSTMENTS[input.race][skill] +
+    dexAdj +
+    THIEF_ARMOR_ADJUSTMENTS[input.armor][skill]
+  );
 }

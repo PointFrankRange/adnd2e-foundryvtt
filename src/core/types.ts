@@ -140,7 +140,11 @@ export interface ClassChassis {
   spellStartLevel: number | null;
   /** which spell-slot table this class uses (`null` = non-caster) */
   spellProgressionId: SpellProgressionId | null;
-  /** the thieving skills this class may spend points on (`null` = none, or — for the Thief — all of them) */
+  /**
+   * The thieving skills this class may spend points on; `null` = none.
+   * Every class states its list explicitly — the Thief's is all eight —
+   * so `chassis.thiefSkillAccess ?? []` is always correct.
+   */
   thiefSkillAccess: readonly ThiefSkill[] | null;
 }
 
@@ -219,6 +223,12 @@ export type ThiefSkill =
   | "detect-noise"
   | "climb-walls"
   | "read-languages";
+
+/** The four thieving skills a bard may develop (PHB Table 33). */
+export type BardSkill = Extract<
+  ThiefSkill,
+  "pick-pockets" | "detect-noise" | "climb-walls" | "read-languages"
+>;
 
 /**
  * Armor category for the thief-skill armor adjustment (PHB Table 29).

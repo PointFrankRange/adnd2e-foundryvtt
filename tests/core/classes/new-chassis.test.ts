@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PALADIN, RANGER, DRUID, BARD, getChassis } from "../../../src/core/classes/chassis";
+import { PALADIN, RANGER, DRUID, BARD, FIGHTER, THIEF, getChassis } from "../../../src/core/classes/chassis";
 import { levelForXp, xpForLevel } from "../../../src/core/classes/progression";
 import { primeRequisiteXpBonus } from "../../../src/core/abilities";
 
@@ -28,7 +28,7 @@ describe("new chassis — identity & group", () => {
       abilityMinimums: { wis: 12, cha: 15 },
       spellProgressionId: "priest", spellStartLevel: 1, maxLevel: 14,
       weaponsAllowed: { names: ["club", "sickle", "dart", "spear", "dagger", "scimitar", "sling", "staff"] },
-      armorAllowed: ["leather", "padded", "studded leather"],
+      armorAllowed: ["leather"],
     });
   });
   it("Bard", () => {
@@ -38,7 +38,19 @@ describe("new chassis — identity & group", () => {
       abilityMinimums: { dex: 12, int: 13, cha: 15 },
       spellProgressionId: "bard", spellStartLevel: 2,
       thiefSkillAccess: ["pick-pockets", "climb-walls", "detect-noise", "read-languages"],
+      armorAllowed: ["padded", "leather", "studded leather", "ring mail", "brigandine", "scale mail", "hide", "chain mail"],
     });
+  });
+  it("Druid wears leather only; Bard up to chain mail (PHB pp.35/41)", () => {
+    expect(DRUID.armorAllowed).toEqual(["leather"]);
+    expect(BARD.armorAllowed).not.toContain("plate mail");
+  });
+  it("Thief has all eight thieving skills; non-rogues have none", () => {
+    expect(getChassis("thief").thiefSkillAccess).toEqual([
+      "pick-pockets", "open-locks", "find-remove-traps", "move-silently",
+      "hide-in-shadows", "detect-noise", "climb-walls", "read-languages",
+    ]);
+    expect(getChassis("fighter").thiefSkillAccess).toBeNull();
   });
   it("getChassis covers all eight ids", () => {
     for (const id of ["fighter", "mage", "cleric", "thief", "paladin", "ranger", "druid", "bard"] as const) {
