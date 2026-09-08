@@ -5,3 +5,4 @@ export * from "./abilities";
 export * from "./classes";
 export * from "./saves";
 export * from "./dice";
+export * from "./combat";
