@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { resolveSphereAccess, sphereSpellLevelCap, canCastSphereSpell } from "../../../src/core/magic/spheres";
+import {
+  resolveSphereAccess,
+  sphereSpellLevelCap,
+  canCastSphereSpell,
+} from "../../../src/core/magic/spheres";
 import { CLERIC_SPHERE_ACCESS } from "../../../src/core/magic/tables";
 
 describe("resolveSphereAccess()", () => {
@@ -36,7 +40,7 @@ describe("canCastSphereSpell()", () => {
   it("none: never", () => {
     expect(canCastSphereSpell("none", 1)).toBe(false);
   });
-  it("rejects a nonsense spell level", () => {
+  it("returns false for an out-of-range spell level", () => {
     expect(canCastSphereSpell("major", 0)).toBe(false);
   });
 });

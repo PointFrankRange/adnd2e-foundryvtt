@@ -22,7 +22,11 @@ export function sphereSpellLevelCap(access: SphereAccess): number {
   return 0;
 }
 
-/** Whether a priest with `access` to a sphere can cast a spell of `spellLevel` from it. */
+/**
+ * Whether a priest with `access` to a sphere can cast a spell of `spellLevel` from it.
+ * Total function by design — this is called in sheet render loops, so an
+ * out-of-range spellLevel returns false rather than throwing.
+ */
 export function canCastSphereSpell(access: SphereAccess, spellLevel: number): boolean {
   return spellLevel >= 1 && spellLevel <= sphereSpellLevelCap(access);
 }

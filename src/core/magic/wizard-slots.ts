@@ -11,7 +11,11 @@ export interface WizardSlotInput {
   wizardLevel: number;
   /** highest castable spell level — IntelligenceModifiers.maxSpellLevel (1-9) */
   maxSpellLevelKnown: number;
-  /** true for a specialist wizard (+1 spell at every castable spell level) */
+  /**
+   * true for a specialist wizard (+1 spell at every castable spell level —
+   * the extra slot must be filled with a spell of the specialist's own school
+   * (enforced by the memorization layer, not here)).
+   */
   specialist?: boolean;
 }
 

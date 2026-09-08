@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { SphereName } from "../../../src/core/types";
 import {
   WIZARD_SPELL_PROGRESSION,
   PRIEST_SPELL_PROGRESSION,
@@ -42,6 +43,29 @@ describe("PRIEST_SPHERES", () => {
     expect(PRIEST_SPHERES).toContain("necromantic");
     expect(PRIEST_SPHERES).toContain("weather");
   });
+
+  it("PRIEST_SPHERES covers exactly the SphereName union", () => {
+    // adding a SphereName member without updating this sentinel is a compile error
+    const sentinel: Record<SphereName, true> = {
+      all: true,
+      animal: true,
+      astral: true,
+      charm: true,
+      combat: true,
+      creation: true,
+      divination: true,
+      elemental: true,
+      guardian: true,
+      healing: true,
+      necromantic: true,
+      plant: true,
+      protection: true,
+      summoning: true,
+      sun: true,
+      weather: true,
+    };
+    expect(new Set(PRIEST_SPHERES)).toEqual(new Set(Object.keys(sentinel)));
+  });
 });
 
 describe("CLERIC_SPHERE_ACCESS (PHB p.33)", () => {
@@ -64,7 +88,11 @@ describe("SPECIALIST_SCHOOLS (PHB Table 22)", () => {
     }
   });
   it("matches PHB opposition rows", () => {
-    expect(SPECIALIST_SCHOOLS.illusion.opposition).toEqual(["necromancy", "invocation", "abjuration"]);
+    expect(SPECIALIST_SCHOOLS.illusion.opposition).toEqual([
+      "necromancy",
+      "invocation",
+      "abjuration",
+    ]);
     expect(SPECIALIST_SCHOOLS.divination.opposition).toEqual(["conjuration"]);
     expect(SPECIALIST_SCHOOLS.necromancy.opposition).toEqual(["illusion", "enchantment"]);
   });

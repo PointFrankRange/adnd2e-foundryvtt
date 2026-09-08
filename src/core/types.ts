@@ -115,7 +115,8 @@ export interface ClassChassis {
   /** `"any"`, `"none"`, or an explicit allow-list of armor names */
   armorAllowed: "any" | "none" | readonly string[];
   /** `"any"`, or `categories` (weapon classes, e.g. "blunt") and/or `names` (specific weapons) */
-  weaponsAllowed: "any" | { readonly categories?: readonly string[]; readonly names?: readonly string[] };
+  weaponsAllowed:
+    "any" | { readonly categories?: readonly string[]; readonly names?: readonly string[] };
   weaponSpecializationAllowed: boolean;
   /**
    * Race id -> maximum attainable level (`null` = unlimited).
@@ -169,6 +170,9 @@ export type WizardSchool =
  * per-spell-level adjustment (specialist +1 or cumulative Wisdom bonus);
  * `suppressed` lists the 1-indexed spell levels a gate forced to 0
  * (Intelligence cap for a wizard; WIS 17/18 requirement for a priest).
+ * base and bonus are pre-gate values; perLevel is authoritative and is 0 at
+ * every spell level listed in suppressed (a consumer summing base + bonus would
+ * overcount suppressed levels).
  */
 export interface SpellSlots {
   perLevel: readonly number[];

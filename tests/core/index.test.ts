@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { saveTarget, saveBaseTarget, racialSaveBonus, sleepCharmResistance, armorClass, wizardSpellSlots } from "../../src/core";
+import {
+  saveTarget,
+  saveBaseTarget,
+  racialSaveBonus,
+  sleepCharmResistance,
+  armorClass,
+  wizardSpellSlots,
+} from "../../src/core";
 
 describe("src/core barrel", () => {
   it("re-exports the saves API and it computes", () => {

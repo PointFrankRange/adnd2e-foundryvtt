@@ -42,11 +42,13 @@ export function specialistLearnModifier(
 }
 
 export type LearnRejection =
-  | "int-too-low"
-  | "spell-level-exceeds-int"
-  | "opposition-school"
-  | "per-level-cap-reached";
+  "int-too-low" | "spell-level-exceeds-int" | "opposition-school" | "per-level-cap-reached";
 
+/**
+ * Checks whether a wizard can learn a spell. Does not check the wizard's class
+ * level — the caller must first confirm the wizard can cast this spell level
+ * (wizardSpellSlots(...).perLevel[spellLevel - 1] > 0).
+ */
 export interface CanLearnInput {
   int: IntelligenceModifiers;
   spellLevel: number;
@@ -59,7 +61,7 @@ export interface CanLearnInput {
 
 export interface CanLearnResult {
   allowed: boolean;
-  /** effective learn chance in percent (1-99); 0 when not allowed */
+  /** effective learn chance in percent (20-100); 0 when not allowed */
   chance: number;
   reason: LearnRejection | null;
 }

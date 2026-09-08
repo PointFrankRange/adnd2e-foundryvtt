@@ -115,7 +115,10 @@ describe("canLearnSpell()", () => {
       knownAtThisLevel: 11,
     };
     expect(canLearnSpell(base).allowed).toBe(true); // option off by default
-    const r = canLearnSpell({ ...base, options: { ...DEFAULT_OPTIONAL_RULES, maxSpellsPerLevel: true } });
+    const r = canLearnSpell({
+      ...base,
+      options: { ...DEFAULT_OPTIONAL_RULES, maxSpellsPerLevel: true },
+    });
     expect(r).toEqual({ allowed: false, chance: 0, reason: "per-level-cap-reached" });
   });
 
@@ -152,7 +155,9 @@ describe("canLearnSpell()", () => {
   });
 
   it("rejects a nonsense spell level", () => {
-    expect(() => canLearnSpell({ int: int16, spellLevel: 0, spellSchool: "alteration" })).toThrow(RangeError);
+    expect(() => canLearnSpell({ int: int16, spellLevel: 0, spellSchool: "alteration" })).toThrow(
+      RangeError,
+    );
   });
 });
 

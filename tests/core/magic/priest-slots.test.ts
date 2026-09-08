@@ -47,7 +47,11 @@ describe("priestSpellSlots()", () => {
   });
 
   it("WIS 16 suppresses 6th-level slots the priest would otherwise have", () => {
-    const r = priestSpellSlots({ priestLevel: 11, wisdomScore: 16, wisdomBonusSpells: [2, 2, 0, 0, 0, 0, 0] });
+    const r = priestSpellSlots({
+      priestLevel: 11,
+      wisdomScore: 16,
+      wisdomBonusSpells: [2, 2, 0, 0, 0, 0, 0],
+    });
     expect(r.perLevel[5]).toBe(0);
     expect(r.suppressed).toEqual([6]);
   });
@@ -73,14 +77,14 @@ describe("priestSpellSlots()", () => {
   });
 
   it("rejects a bad level, score, or bonus-array length", () => {
-    expect(() => priestSpellSlots({ priestLevel: 0, wisdomScore: 12, wisdomBonusSpells: NO_BONUS })).toThrow(
-      RangeError,
-    );
-    expect(() => priestSpellSlots({ priestLevel: 5, wisdomScore: 0, wisdomBonusSpells: NO_BONUS })).toThrow(
-      RangeError,
-    );
-    expect(() => priestSpellSlots({ priestLevel: 5, wisdomScore: 12, wisdomBonusSpells: [0, 0, 0] })).toThrow(
-      RangeError,
-    );
+    expect(() =>
+      priestSpellSlots({ priestLevel: 0, wisdomScore: 12, wisdomBonusSpells: NO_BONUS }),
+    ).toThrow(RangeError);
+    expect(() =>
+      priestSpellSlots({ priestLevel: 5, wisdomScore: 0, wisdomBonusSpells: NO_BONUS }),
+    ).toThrow(RangeError);
+    expect(() =>
+      priestSpellSlots({ priestLevel: 5, wisdomScore: 12, wisdomBonusSpells: [0, 0, 0] }),
+    ).toThrow(RangeError);
   });
 });
