@@ -48,6 +48,10 @@ export const FIGHTER: ClassChassis = {
   weaponsAllowed: "any",
   weaponSpecializationAllowed: true,
   raceLevelLimits: {},
+  maxLevel: null,
+  spellStartLevel: null,
+  spellProgressionId: null,
+  thiefSkillAccess: null,
 };
 
 export const MAGE: ClassChassis = {
@@ -69,6 +73,10 @@ export const MAGE: ClassChassis = {
   weaponsAllowed: { names: [...MAGE_WEAPONS] },
   weaponSpecializationAllowed: false,
   raceLevelLimits: {},
+  maxLevel: null,
+  spellStartLevel: null,
+  spellProgressionId: "wizard",
+  thiefSkillAccess: null,
 };
 
 export const CLERIC: ClassChassis = {
@@ -90,6 +98,10 @@ export const CLERIC: ClassChassis = {
   weaponsAllowed: { categories: ["blunt"] },
   weaponSpecializationAllowed: false,
   raceLevelLimits: {},
+  maxLevel: null,
+  spellStartLevel: null,
+  spellProgressionId: "priest",
+  thiefSkillAccess: null,
 };
 
 export const THIEF: ClassChassis = {
@@ -111,6 +123,10 @@ export const THIEF: ClassChassis = {
   weaponsAllowed: { names: [...THIEF_WEAPONS] },
   weaponSpecializationAllowed: false,
   raceLevelLimits: {},
+  maxLevel: null,
+  spellStartLevel: null,
+  spellProgressionId: null,
+  thiefSkillAccess: null,
 };
 
 const BY_ID: Record<ClassId, ClassChassis> = {

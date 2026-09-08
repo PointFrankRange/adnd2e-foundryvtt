@@ -56,11 +56,11 @@ describe("deriveAbilities()", () => {
 });
 
 describe("primeRequisiteXpBonus()", () => {
-  it("true at 16+ for the group's prime requisite", () => {
-    expect(primeRequisiteXpBonus("warrior", { ...raw, str: 16 })).toBe(true);
-    expect(primeRequisiteXpBonus("warrior", { ...raw, str: 15 })).toBe(false);
-    expect(primeRequisiteXpBonus("wizard", { ...raw, int: 16 })).toBe(true);
-    expect(primeRequisiteXpBonus("priest", { ...raw, wis: 16 })).toBe(true);
-    expect(primeRequisiteXpBonus("rogue", { ...raw, dex: 16 })).toBe(true);
+  it("true at 16+ for all prime requisites", () => {
+    expect(primeRequisiteXpBonus(["str"], { ...raw, str: 16 })).toBe(true);
+    expect(primeRequisiteXpBonus(["str"], { ...raw, str: 15 })).toBe(false);
+    expect(primeRequisiteXpBonus(["int"], { ...raw, int: 16 })).toBe(true);
+    expect(primeRequisiteXpBonus(["wis"], { ...raw, wis: 16 })).toBe(true);
+    expect(primeRequisiteXpBonus(["dex"], { ...raw, dex: 16 })).toBe(true);
   });
 });

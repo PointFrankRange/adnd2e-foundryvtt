@@ -1,4 +1,4 @@
-import type { AbilityKey, AbilityScores, ClassGroup, DerivedAbilities, Race } from "../types";
+import type { AbilityKey, AbilityScores, DerivedAbilities, Race } from "../types";
 import type { OptionalRules } from "../options";
 import { DEFAULT_OPTIONAL_RULES } from "../options";
 import { strength } from "./strength";
@@ -51,14 +51,13 @@ export function deriveAbilities(raw: AbilityScores, opts: DeriveAbilitiesOptions
   };
 }
 
-const PRIME_REQUISITE: Record<ClassGroup, keyof AbilityScores> = {
-  warrior: "str",
-  wizard: "int",
-  priest: "wis",
-  rogue: "dex",
-};
-
-/** PHB ability chapter: +10% earned XP when the group's prime requisite is 16+. */
-export function primeRequisiteXpBonus(group: ClassGroup, scores: AbilityScores): boolean {
-  return scores[PRIME_REQUISITE[group]] >= 16;
+/**
+ * PHB p.26: a character with a score of 16 or more in **every** one of the
+ * class's prime requisites earns a 10% experience bonus.
+ */
+export function primeRequisiteXpBonus(
+  primeRequisites: readonly AbilityKey[],
+  scores: AbilityScores,
+): boolean {
+  return primeRequisites.every((k) => scores[k] >= 16);
 }

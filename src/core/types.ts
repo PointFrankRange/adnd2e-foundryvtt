@@ -74,6 +74,9 @@ export interface DerivedAbilities {
 
 export type ClassId = "fighter" | "mage" | "cleric" | "thief";
 
+/** Which spell-slot table a caster class uses (PHB Tables 21/24/17/18/32). */
+export type SpellProgressionId = "wizard" | "priest" | "paladin" | "ranger" | "bard";
+
 export type SaveCategory = "ppd" | "rsw" | "pp" | "bw" | "spell";
 
 export interface ProficiencySlotProgression {
@@ -123,6 +126,14 @@ export interface ClassChassis {
    * Placeholder for Plan 1b.2 — populated by the race plan. Currently `{}`.
    */
   raceLevelLimits: Readonly<Record<string, number | null>>;
+  /** class-intrinsic maximum level (`null` = uncapped; Druid = 14 in the base rules) */
+  maxLevel: number | null;
+  /** the character level at which this caster gains its first spell (`null` = non-caster or casts from level 1) */
+  spellStartLevel: number | null;
+  /** which spell-slot table this class uses (`null` = non-caster) */
+  spellProgressionId: SpellProgressionId | null;
+  /** the thieving skills this class may spend points on (`null` = none, or — for the Thief — all of them) */
+  thiefSkillAccess: readonly ThiefSkill[] | null;
 }
 
 /** The 16 priest spheres of influence (PHB p.33). */

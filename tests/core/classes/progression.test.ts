@@ -4,6 +4,19 @@ import {
   weaponProficiencySlots, nonweaponProficiencySlots,
 } from "../../../src/core/classes/progression";
 import { FIGHTER, MAGE, CLERIC, THIEF } from "../../../src/core/classes/chassis";
+import type { ClassChassis } from "../../../src/core/types";
+
+const CAPPED: ClassChassis = {
+  ...getChassis("cleric"),
+  maxLevel: 14,
+  // 14 real thresholds (arbitrary ascending values for the test)
+  xpThresholds: [0, 2000, 4000, 7500, 12500, 20000, 35000, 60000, 90000, 125000, 200000, 300000, 750000, 1500000],
+  xpPerLevelBeyond20: 0,
+};
+
+function getChassis(_id: "cleric"): ClassChassis {
+  return CLERIC;
+}
 
 describe("levelForXp", () => {
   it("0 XP is level 1", () => {
@@ -116,5 +129,17 @@ describe("proficiency slots", () => {
   it("rejects invalid level", () => {
     expect(() => weaponProficiencySlots(FIGHTER, 0)).toThrow(RangeError);
     expect(() => nonweaponProficiencySlots(FIGHTER, -1)).toThrow(RangeError);
+  });
+});
+
+describe("progression with a maxLevel cap", () => {
+  it("levelForXp never exceeds maxLevel", () => {
+    expect(levelForXp(CAPPED, 1500000)).toBe(14);
+    expect(levelForXp(CAPPED, 99_000_000)).toBe(14);
+    expect(levelForXp(CAPPED, 90000)).toBe(9);
+  });
+  it("xpForLevel throws past the cap", () => {
+    expect(xpForLevel(CAPPED, 14)).toBe(1500000);
+    expect(() => xpForLevel(CAPPED, 15)).toThrow(RangeError);
   });
 });
