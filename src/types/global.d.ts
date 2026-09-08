@@ -7,6 +7,20 @@ declare global {
     ADND2E: Adnd2eConfig;
   }
 
+  interface DataModelConfig {
+    Item: {
+      class: typeof import("../data/item/class").ClassItemModel;
+      race: typeof import("../data/item/race").RaceItemModel;
+      weapon: typeof import("../data/item/weapon").WeaponItemModel;
+      armor: typeof import("../data/item/armor").ArmorItemModel;
+      equipment: typeof import("../data/item/equipment").EquipmentItemModel;
+      spell: typeof import("../data/item/spell").SpellItemModel;
+      weaponProficiency: typeof import("../data/item/weapon-proficiency").WeaponProficiencyItemModel;
+      nonweaponProficiency: typeof import("../data/item/nonweapon-proficiency").NonweaponProficiencyItemModel;
+      classFeature: typeof import("../data/item/class-feature").ClassFeatureItemModel;
+    };
+  }
+
   interface SettingConfig {
     // core — wired into OptionalRules
     "adnd2e.exceptionalStrength": boolean;
