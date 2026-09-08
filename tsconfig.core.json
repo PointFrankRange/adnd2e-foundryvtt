@@ -4,5 +4,5 @@
     "types": [],
     "lib": ["ESNext"]
   },
-  "include": ["src/core", "tests/core"]
+  "include": ["src/core", "tests/core", "src/config.ts"]
 }

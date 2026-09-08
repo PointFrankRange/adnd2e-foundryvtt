@@ -11,7 +11,7 @@ export default tseslint.config(
   },
   {
     // Foundry globals — available everywhere EXCEPT the framework-free engine.
-    ignores: ["src/core/**", "tests/core/**"],
+    ignores: ["src/core/**", "tests/core/**", "src/config.ts", "src/settings/registry.ts", "tests/config/**", "tests/settings/**", "tests/lang/**"],
     languageOptions: {
       globals: {
         game: "readonly",
@@ -25,7 +25,7 @@ export default tseslint.config(
   },
   {
     // The engine must stay pure — no Foundry globals under core/.
-    files: ["src/core/**/*.ts", "tests/core/**/*.ts"],
+    files: ["src/core/**/*.ts", "tests/core/**/*.ts", "src/config.ts", "src/settings/registry.ts", "tests/config/**/*.ts", "tests/settings/**/*.ts", "tests/lang/**/*.ts"],
     rules: {
       "no-restricted-globals": [
         "error",
