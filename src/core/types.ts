@@ -123,3 +123,56 @@ export interface ClassChassis {
    */
   raceLevelLimits: Readonly<Record<string, number | null>>;
 }
+
+/** The 16 priest spheres of influence (PHB p.33). */
+export type SphereName =
+  | "all"
+  | "animal"
+  | "astral"
+  | "charm"
+  | "combat"
+  | "creation"
+  | "divination"
+  | "elemental"
+  | "guardian"
+  | "healing"
+  | "necromantic"
+  | "plant"
+  | "protection"
+  | "summoning"
+  | "sun"
+  | "weather";
+
+/** A priest's access level to a sphere (PHB p.33). */
+export type SphereAccess = "major" | "minor" | "none";
+
+/**
+ * The 8 wizard specialist schools (PHB Table 22). The slash-named PHB schools
+ * are collapsed to their coarse key: "conjuration" = Conjuration/Summoning,
+ * "divination" = Greater Divination, "enchantment" = Enchantment/Charm,
+ * "invocation" = Invocation/Evocation. Lesser Divination has no specialist.
+ */
+export type WizardSchool =
+  | "abjuration"
+  | "alteration"
+  | "conjuration"
+  | "divination"
+  | "enchantment"
+  | "illusion"
+  | "invocation"
+  | "necromancy";
+
+/**
+ * A caster's spell-slot counts for one class at one level.
+ * `perLevel[i]` is the castable slots at spell level `i + 1` (wizard: length 9,
+ * priest: length 7). `base` is the raw progression-table row; `bonus` is the
+ * per-spell-level adjustment (specialist +1 or cumulative Wisdom bonus);
+ * `suppressed` lists the 1-indexed spell levels a gate forced to 0
+ * (Intelligence cap for a wizard; WIS 17/18 requirement for a priest).
+ */
+export interface SpellSlots {
+  perLevel: readonly number[];
+  base: readonly number[];
+  bonus: readonly number[];
+  suppressed: readonly number[];
+}

@@ -6,3 +6,4 @@ export * from "./classes";
 export * from "./saves";
 export * from "./dice";
 export * from "./combat";
+export * from "./magic";
