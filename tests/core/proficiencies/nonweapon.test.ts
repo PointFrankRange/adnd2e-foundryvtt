@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { CLASS_PROFICIENCY_GROUPS, nonweaponSlotCost, nonweaponCheck } from "../../../src/core/proficiencies/nonweapon";
+import {
+  CLASS_PROFICIENCY_GROUPS,
+  nonweaponSlotCost,
+  nonweaponCheck,
+} from "../../../src/core/proficiencies/nonweapon";
 
 describe("CLASS_PROFICIENCY_GROUPS (PHB Table 38)", () => {
   it("maps each base class to its groups, always including general", () => {
@@ -43,18 +47,48 @@ describe("nonweaponCheck()", () => {
   });
   it("each slot beyond the first adds +1 to the check", () => {
     // Str 15, modifier 0, 3 slots invested -> target 15 + 0 + 2 = 17
-    const r = nonweaponCheck({ ability: "str", abilityScore: 15, checkModifier: 0, slotsInvested: 3, roll: 17 });
+    const r = nonweaponCheck({
+      ability: "str",
+      abilityScore: 15,
+      checkModifier: 0,
+      slotsInvested: 3,
+      roll: 17,
+    });
     expect(r).toMatchObject({ success: true, target: 17 });
   });
   it("the situational modifier adjusts the target", () => {
-    const easier = nonweaponCheck({ ability: "int", abilityScore: 12, checkModifier: 0, situationalModifier: 4, roll: 16 });
+    const easier = nonweaponCheck({
+      ability: "int",
+      abilityScore: 12,
+      checkModifier: 0,
+      situationalModifier: 4,
+      roll: 16,
+    });
     expect(easier).toMatchObject({ success: true, target: 16 });
-    const harder = nonweaponCheck({ ability: "int", abilityScore: 12, checkModifier: 0, situationalModifier: -4, roll: 9 });
+    const harder = nonweaponCheck({
+      ability: "int",
+      abilityScore: 12,
+      checkModifier: 0,
+      situationalModifier: -4,
+      roll: 9,
+    });
     expect(harder).toMatchObject({ success: false, target: 8 });
   });
   it("rejects a bad roll, ability score, or slot count", () => {
-    expect(() => nonweaponCheck({ ability: "int", abilityScore: 12, checkModifier: 0, roll: 21 })).toThrow(RangeError);
-    expect(() => nonweaponCheck({ ability: "int", abilityScore: 0, checkModifier: 0, roll: 10 })).toThrow(RangeError);
-    expect(() => nonweaponCheck({ ability: "int", abilityScore: 12, checkModifier: 0, slotsInvested: 0, roll: 10 })).toThrow(RangeError);
+    expect(() =>
+      nonweaponCheck({ ability: "int", abilityScore: 12, checkModifier: 0, roll: 21 }),
+    ).toThrow(RangeError);
+    expect(() =>
+      nonweaponCheck({ ability: "int", abilityScore: 0, checkModifier: 0, roll: 10 }),
+    ).toThrow(RangeError);
+    expect(() =>
+      nonweaponCheck({
+        ability: "int",
+        abilityScore: 12,
+        checkModifier: 0,
+        slotsInvested: 0,
+        roll: 10,
+      }),
+    ).toThrow(RangeError);
   });
 });

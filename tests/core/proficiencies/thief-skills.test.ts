@@ -27,23 +27,177 @@ describe("thief-skill tables", () => {
     });
     expect(THIEF_SKILLS).toHaveLength(8);
   });
-  it("Table 27 spot-checks (human is all zero)", () => {
-    for (const skill of THIEF_SKILLS) expect(THIEF_RACIAL_ADJUSTMENTS.human[skill]).toBe(0);
-    expect(THIEF_RACIAL_ADJUSTMENTS.dwarf["find-remove-traps"]).toBe(15);
-    expect(THIEF_RACIAL_ADJUSTMENTS.halfling["hide-in-shadows"]).toBe(15);
-    expect(THIEF_RACIAL_ADJUSTMENTS.gnome["climb-walls"]).toBe(-15);
+  it("Table 27 racial adjustments — every row (PHB p.39)", () => {
+    expect(THIEF_RACIAL_ADJUSTMENTS.human).toEqual({
+      "pick-pockets": 0,
+      "open-locks": 0,
+      "find-remove-traps": 0,
+      "move-silently": 0,
+      "hide-in-shadows": 0,
+      "detect-noise": 0,
+      "climb-walls": 0,
+      "read-languages": 0,
+    });
+    expect(THIEF_RACIAL_ADJUSTMENTS.dwarf).toEqual({
+      "pick-pockets": 0,
+      "open-locks": 10,
+      "find-remove-traps": 15,
+      "move-silently": 0,
+      "hide-in-shadows": 0,
+      "detect-noise": 0,
+      "climb-walls": -10,
+      "read-languages": -5,
+    });
+    expect(THIEF_RACIAL_ADJUSTMENTS.elf).toEqual({
+      "pick-pockets": 5,
+      "open-locks": -5,
+      "find-remove-traps": 0,
+      "move-silently": 5,
+      "hide-in-shadows": 10,
+      "detect-noise": 5,
+      "climb-walls": 0,
+      "read-languages": 0,
+    });
+    expect(THIEF_RACIAL_ADJUSTMENTS.gnome).toEqual({
+      "pick-pockets": 0,
+      "open-locks": 5,
+      "find-remove-traps": 10,
+      "move-silently": 5,
+      "hide-in-shadows": 5,
+      "detect-noise": 10,
+      "climb-walls": -15,
+      "read-languages": 0,
+    });
+    expect(THIEF_RACIAL_ADJUSTMENTS["half-elf"]).toEqual({
+      "pick-pockets": 10,
+      "open-locks": 0,
+      "find-remove-traps": 0,
+      "move-silently": 0,
+      "hide-in-shadows": 5,
+      "detect-noise": 0,
+      "climb-walls": 0,
+      "read-languages": 0,
+    });
+    expect(THIEF_RACIAL_ADJUSTMENTS.halfling).toEqual({
+      "pick-pockets": 5,
+      "open-locks": 5,
+      "find-remove-traps": 5,
+      "move-silently": 10,
+      "hide-in-shadows": 15,
+      "detect-noise": 5,
+      "climb-walls": -15,
+      "read-languages": -5,
+    });
   });
-  it("Table 28 spot-checks (only five skills, DEX 13-15 all zero)", () => {
-    expect(THIEF_DEXTERITY_ADJUSTMENTS[9]["move-silently"]).toBe(-20);
-    expect(THIEF_DEXTERITY_ADJUSTMENTS[19]["open-locks"]).toBe(20);
-    expect(THIEF_DEXTERITY_ADJUSTMENTS[13]["pick-pockets"] ?? 0).toBe(0);
-    expect(THIEF_DEXTERITY_ADJUSTMENTS[16]["open-locks"]).toBe(5);
+
+  it("Table 28 dexterity adjustments — every row (PHB p.39)", () => {
+    expect(THIEF_DEXTERITY_ADJUSTMENTS[9]).toEqual({
+      "pick-pockets": -15,
+      "open-locks": -10,
+      "find-remove-traps": -10,
+      "move-silently": -20,
+      "hide-in-shadows": -10,
+    });
+    expect(THIEF_DEXTERITY_ADJUSTMENTS[10]).toEqual({
+      "pick-pockets": -10,
+      "open-locks": -5,
+      "find-remove-traps": -10,
+      "move-silently": -15,
+      "hide-in-shadows": -5,
+    });
+    expect(THIEF_DEXTERITY_ADJUSTMENTS[11]).toEqual({
+      "pick-pockets": -5,
+      "open-locks": 0,
+      "find-remove-traps": -5,
+      "move-silently": -10,
+      "hide-in-shadows": 0,
+    });
+    expect(THIEF_DEXTERITY_ADJUSTMENTS[12]).toEqual({
+      "pick-pockets": 0,
+      "open-locks": 0,
+      "find-remove-traps": 0,
+      "move-silently": -5,
+      "hide-in-shadows": 0,
+    });
+    expect(THIEF_DEXTERITY_ADJUSTMENTS[13]).toEqual({});
+    expect(THIEF_DEXTERITY_ADJUSTMENTS[14]).toEqual({});
+    expect(THIEF_DEXTERITY_ADJUSTMENTS[15]).toEqual({});
+    expect(THIEF_DEXTERITY_ADJUSTMENTS[16]).toEqual({
+      "pick-pockets": 0,
+      "open-locks": 5,
+      "find-remove-traps": 0,
+      "move-silently": 0,
+      "hide-in-shadows": 0,
+    });
+    expect(THIEF_DEXTERITY_ADJUSTMENTS[17]).toEqual({
+      "pick-pockets": 5,
+      "open-locks": 10,
+      "find-remove-traps": 0,
+      "move-silently": 5,
+      "hide-in-shadows": 5,
+    });
+    expect(THIEF_DEXTERITY_ADJUSTMENTS[18]).toEqual({
+      "pick-pockets": 10,
+      "open-locks": 15,
+      "find-remove-traps": 5,
+      "move-silently": 10,
+      "hide-in-shadows": 10,
+    });
+    expect(THIEF_DEXTERITY_ADJUSTMENTS[19]).toEqual({
+      "pick-pockets": 15,
+      "open-locks": 20,
+      "find-remove-traps": 10,
+      "move-silently": 15,
+      "hide-in-shadows": 15,
+    });
   });
-  it("Table 29 spot-checks (leather is all zero)", () => {
-    for (const skill of THIEF_SKILLS) expect(THIEF_ARMOR_ADJUSTMENTS.leather[skill]).toBe(0);
-    expect(THIEF_ARMOR_ADJUSTMENTS.none["climb-walls"]).toBe(10);
-    expect(THIEF_ARMOR_ADJUSTMENTS["padded-studded"]["pick-pockets"]).toBe(-30);
-    expect(THIEF_ARMOR_ADJUSTMENTS["elven-chain"]["move-silently"]).toBe(-10);
+
+  it("Table 29 armor adjustments — every row (PHB p.39)", () => {
+    expect(THIEF_ARMOR_ADJUSTMENTS.none).toEqual({
+      "pick-pockets": 5,
+      "open-locks": 0,
+      "find-remove-traps": 0,
+      "move-silently": 10,
+      "hide-in-shadows": 5,
+      "detect-noise": 0,
+      "climb-walls": 10,
+      "read-languages": 0,
+    });
+    expect(THIEF_ARMOR_ADJUSTMENTS.leather).toEqual({
+      "pick-pockets": 0,
+      "open-locks": 0,
+      "find-remove-traps": 0,
+      "move-silently": 0,
+      "hide-in-shadows": 0,
+      "detect-noise": 0,
+      "climb-walls": 0,
+      "read-languages": 0,
+    });
+    expect(THIEF_ARMOR_ADJUSTMENTS["elven-chain"]).toEqual({
+      "pick-pockets": -20,
+      "open-locks": -5,
+      "find-remove-traps": -5,
+      "move-silently": -10,
+      "hide-in-shadows": -10,
+      "detect-noise": -5,
+      "climb-walls": -20,
+      "read-languages": 0,
+    });
+    expect(THIEF_ARMOR_ADJUSTMENTS["padded-studded"]).toEqual({
+      "pick-pockets": -30,
+      "open-locks": -10,
+      "find-remove-traps": -10,
+      "move-silently": -20,
+      "hide-in-shadows": -20,
+      "detect-noise": -10,
+      "climb-walls": -30,
+      "read-languages": 0,
+    });
+  });
+
+  it("THIEF_SKILLS is exactly the ThiefSkill union", () => {
+    // THIEF_SKILL_BASE is a total Record<ThiefSkill, number>, so its keys are compile-time exhaustive
+    expect([...THIEF_SKILLS].sort()).toEqual(Object.keys(THIEF_SKILL_BASE).sort());
   });
 });
 
@@ -78,10 +232,32 @@ describe("thiefSkillBaseScore()", () => {
     ).toBe(70);
   });
   it("clamps dexterity to [9, 19] for the adjustment lookup", () => {
-    const at19 = thiefSkillBaseScore("open-locks", { race: "human", dexterity: 19, armor: "leather" });
-    const at25 = thiefSkillBaseScore("open-locks", { race: "human", dexterity: 25, armor: "leather" });
+    const at19 = thiefSkillBaseScore("open-locks", {
+      race: "human",
+      dexterity: 19,
+      armor: "leather",
+    });
+    const at25 = thiefSkillBaseScore("open-locks", {
+      race: "human",
+      dexterity: 25,
+      armor: "leather",
+    });
     expect(at25).toBe(at19); // both use the DEX 19 row (+20) -> 10 + 20 = 30
     expect(at25).toBe(30);
+  });
+  it("clamps a below-minimum dexterity up to 9 for the lookup", () => {
+    const at3 = thiefSkillBaseScore("open-locks", {
+      race: "human",
+      dexterity: 3,
+      armor: "leather",
+    });
+    const at9 = thiefSkillBaseScore("open-locks", {
+      race: "human",
+      dexterity: 9,
+      armor: "leather",
+    });
+    expect(at3).toBe(at9);
+    expect(at3).toBe(0); // base 10 + DEX 9 open-locks -10
   });
   it("can be negative (gnome climb walls in heavy leather)", () => {
     // 60 + (-15) race + 0 DEX + (-30) armor = 15 ... use padded-studded for a negative case:
@@ -94,15 +270,30 @@ describe("thiefSkillBaseScore()", () => {
 describe("resolveThiefSkill()", () => {
   it("adds allocated points and caps at 95", () => {
     expect(
-      resolveThiefSkill("climb-walls", { race: "human", dexterity: 15, armor: "leather", allocatedPoints: 20 }),
+      resolveThiefSkill("climb-walls", {
+        race: "human",
+        dexterity: 15,
+        armor: "leather",
+        allocatedPoints: 20,
+      }),
     ).toBe(80); // 60 + 20
     expect(
-      resolveThiefSkill("climb-walls", { race: "human", dexterity: 15, armor: "leather", allocatedPoints: 50 }),
+      resolveThiefSkill("climb-walls", {
+        race: "human",
+        dexterity: 15,
+        armor: "leather",
+        allocatedPoints: 50,
+      }),
     ).toBe(95); // 60 + 50 = 110 -> cap 95
   });
   it("does not floor a negative score", () => {
     expect(
-      resolveThiefSkill("pick-pockets", { race: "human", dexterity: 9, armor: "padded-studded", allocatedPoints: 0 }),
+      resolveThiefSkill("pick-pockets", {
+        race: "human",
+        dexterity: 9,
+        armor: "padded-studded",
+        allocatedPoints: 0,
+      }),
     ).toBe(-30);
   });
 });
@@ -137,5 +328,8 @@ describe("pickPocketsDetectionThreshold()", () => {
   it("rejects a non-integer or negative victim level", () => {
     expect(() => pickPocketsDetectionThreshold(-1)).toThrow(RangeError);
     expect(() => pickPocketsDetectionThreshold(2.5)).toThrow(RangeError);
+  });
+  it("rejects a non-integer thief level in the optional rule", () => {
+    expect(() => pickPocketsDetectionThreshold(5, { thiefLevel: 2.5 })).toThrow(RangeError);
   });
 });

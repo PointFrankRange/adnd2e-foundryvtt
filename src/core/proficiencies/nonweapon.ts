@@ -55,7 +55,10 @@ export function nonweaponCheck(input: NonweaponCheckInput): NonweaponCheckResult
   assertLevel(slotsInvested, "slotsInvested");
 
   const target =
-    input.abilityScore + input.checkModifier + (slotsInvested - 1) + (input.situationalModifier ?? 0);
+    input.abilityScore +
+    input.checkModifier +
+    (slotsInvested - 1) +
+    (input.situationalModifier ?? 0);
   const autoFail = input.roll === 20;
   return { success: !autoFail && input.roll <= target, autoFail, target, roll: input.roll };
 }

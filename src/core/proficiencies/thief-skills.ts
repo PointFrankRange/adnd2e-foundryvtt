@@ -15,6 +15,10 @@ export const THIEF_SKILLS: readonly ThiefSkill[] = [
   "read-languages",
 ];
 
+// NOTE: a thief's "read-languages" score is computable at any level, but the
+// skill cannot be USED until thief level 4 (PHB p.40) — that gate is a caller
+// concern, not modelled here.
+
 /** PHB Table 26: THIEVING SKILL BASE SCORES (p.39). */
 // prettier-ignore
 export const THIEF_SKILL_BASE: Readonly<Record<ThiefSkill, number>> = {
@@ -24,11 +28,24 @@ export const THIEF_SKILL_BASE: Readonly<Record<ThiefSkill, number>> = {
 
 /** Build a full per-skill row in Table 26 order (used for Tables 27 and 29). */
 function skillRow(
-  pp: number, ol: number, frt: number, ms: number, his: number, dn: number, cw: number, rl: number,
+  pp: number,
+  ol: number,
+  frt: number,
+  ms: number,
+  his: number,
+  dn: number,
+  cw: number,
+  rl: number,
 ): Readonly<Record<ThiefSkill, number>> {
   return {
-    "pick-pockets": pp, "open-locks": ol, "find-remove-traps": frt, "move-silently": ms,
-    "hide-in-shadows": his, "detect-noise": dn, "climb-walls": cw, "read-languages": rl,
+    "pick-pockets": pp,
+    "open-locks": ol,
+    "find-remove-traps": frt,
+    "move-silently": ms,
+    "hide-in-shadows": his,
+    "detect-noise": dn,
+    "climb-walls": cw,
+    "read-languages": rl,
   };
 }
 
@@ -88,7 +105,9 @@ const DEX_ADJ_MAX = 19;
 /** Cumulative discretionary skill points a thief has by `level` (PHB p.38). */
 export function thiefSkillPointsAvailable(level: number): number {
   assertLevel(level, "thief level");
-  return THIEF_SKILL_POINT_RULES.level1Points + (level - 1) * THIEF_SKILL_POINT_RULES.pointsPerLevelAfter;
+  return (
+    THIEF_SKILL_POINT_RULES.level1Points + (level - 1) * THIEF_SKILL_POINT_RULES.pointsPerLevelAfter
+  );
 }
 
 export interface ThiefSkillContext {
@@ -115,7 +134,10 @@ export function resolveThiefSkill(
   skill: ThiefSkill,
   input: ThiefSkillContext & { allocatedPoints: number },
 ): number {
-  return Math.min(THIEF_SKILL_POINT_RULES.hardCap, thiefSkillBaseScore(skill, input) + input.allocatedPoints);
+  return Math.min(
+    THIEF_SKILL_POINT_RULES.hardCap,
+    thiefSkillBaseScore(skill, input) + input.allocatedPoints,
+  );
 }
 
 /** PHB Table 30: BACKSTAB DAMAGE MULTIPLIERS (p.40). */
@@ -138,6 +160,9 @@ export function pickPocketsDetectionThreshold(
 ): number {
   if (!Number.isInteger(victimLevel) || victimLevel < 0) {
     throw new RangeError(`victim level must be an integer >= 0, got ${victimLevel}`);
+  }
+  if (options) {
+    assertLevel(options.thiefLevel, "thief level");
   }
   let threshold = 100 - 3 * victimLevel;
   if (options && options.thiefLevel > victimLevel) {
