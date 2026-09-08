@@ -33,6 +33,9 @@ describe("rangerSpellSlots() (PHB Table 18)", () => {
   it("above 16 reuses the level-16 row", () => {
     expect(rangerSpellSlots(20)).toEqual([3, 3, 3]);
   });
+  it("rejects a bad level", () => {
+    expect(() => rangerSpellSlots(0)).toThrow(RangeError);
+  });
 });
 
 describe("bardSpellSlots() (PHB Table 32)", () => {
@@ -59,5 +62,9 @@ describe("bardSpellSlots() (PHB Table 32)", () => {
   });
   it("above 20 reuses the level-20 row", () => {
     expect(bardSpellSlots({ bardLevel: 25, maxSpellLevelKnown: 6 }).perLevel).toEqual([4, 4, 4, 4, 4, 3]);
+  });
+  it("rejects a bad level and a bad spell-level cap", () => {
+    expect(() => bardSpellSlots({ bardLevel: 0, maxSpellLevelKnown: 6 })).toThrow(RangeError);
+    expect(() => bardSpellSlots({ bardLevel: 2, maxSpellLevelKnown: 0 })).toThrow(RangeError);
   });
 });
