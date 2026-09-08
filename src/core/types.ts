@@ -187,6 +187,37 @@ export type WizardSchool =
   | "necromancy";
 
 /**
+ * The nine schools of magic (PHB p.42) plus Wild (Tome of Magic). Distinct from
+ * `WizardSchool`, which is only the eight *specialist* schools of Table 22:
+ * `SpellSchool` adds Lesser Divination (no specialist) and Wild.
+ */
+export type SpellSchool = WizardSchool | "lesser-divination" | "wild";
+
+/** Creature size categories (PHB p.101 / Monstrous Manual). */
+export type CreatureSize =
+  | "tiny"
+  | "small"
+  | "medium"
+  | "large"
+  | "huge"
+  | "gargantuan";
+
+/** Movement modes a creature can have (Monstrous Manual stat blocks). */
+export type MovementMode = "land" | "burrow" | "climb" | "fly" | "swim";
+
+/** The nine alignments (PHB p.49). */
+export type Alignment =
+  | "lawful-good"
+  | "neutral-good"
+  | "chaotic-good"
+  | "lawful-neutral"
+  | "true-neutral"
+  | "chaotic-neutral"
+  | "lawful-evil"
+  | "neutral-evil"
+  | "chaotic-evil";
+
+/**
  * A caster's spell-slot counts for one class at one level.
  * `perLevel[i]` is the castable slots at spell level `i + 1` (wizard: length 9,
  * priest: length 7, bard: length 6). Paladin and Ranger limited-caster slots
