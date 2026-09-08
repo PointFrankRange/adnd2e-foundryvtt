@@ -41,7 +41,9 @@ const THIEF_WEAPONS = [
   "club", "dagger", "dart", "hand crossbow", "knife", "lasso", "short bow", "sling",
   "broad sword", "long sword", "short sword", "staff",
 ] as const;
-const DRUID_WEAPONS = ["club", "sickle", "dart", "spear", "dagger", "scimitar", "sling", "staff"] as const;
+const DRUID_WEAPONS = [
+  "club", "sickle", "dart", "spear", "dagger", "scimitar", "sling", "staff",
+] as const;
 
 export const FIGHTER: ClassChassis = {
   id: "fighter",
@@ -88,7 +90,7 @@ export const MAGE: ClassChassis = {
   weaponSpecializationAllowed: false,
   raceLevelLimits: {},
   maxLevel: null,
-  spellStartLevel: null,
+  spellStartLevel: 1,
   spellProgressionId: "wizard",
   thiefSkillAccess: null,
 };
@@ -113,7 +115,7 @@ export const CLERIC: ClassChassis = {
   weaponSpecializationAllowed: false,
   raceLevelLimits: {},
   maxLevel: null,
-  spellStartLevel: null,
+  spellStartLevel: 1,
   spellProgressionId: "priest",
   thiefSkillAccess: null,
 };

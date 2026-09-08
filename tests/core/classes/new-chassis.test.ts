@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PALADIN, RANGER, DRUID, BARD, FIGHTER, THIEF, getChassis } from "../../../src/core/classes/chassis";
+import { PALADIN, RANGER, DRUID, BARD, FIGHTER, THIEF, MAGE, CLERIC, getChassis } from "../../../src/core/classes/chassis";
 import { levelForXp, xpForLevel } from "../../../src/core/classes/progression";
 import { primeRequisiteXpBonus } from "../../../src/core/abilities";
 
@@ -51,6 +51,12 @@ describe("new chassis — identity & group", () => {
       "hide-in-shadows", "detect-noise", "climb-walls", "read-languages",
     ]);
     expect(getChassis("fighter").thiefSkillAccess).toBeNull();
+  });
+  it("Mage & Cleric cast from level 1; Fighter & Thief never", () => {
+    expect(getChassis("mage").spellStartLevel).toBe(1);
+    expect(getChassis("cleric").spellStartLevel).toBe(1);
+    expect(getChassis("fighter").spellStartLevel).toBeNull();
+    expect(getChassis("thief").spellStartLevel).toBeNull();
   });
   it("getChassis covers all eight ids", () => {
     for (const id of ["fighter", "mage", "cleric", "thief", "paladin", "ranger", "druid", "bard"] as const) {

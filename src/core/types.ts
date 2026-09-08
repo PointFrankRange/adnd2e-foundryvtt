@@ -136,7 +136,7 @@ export interface ClassChassis {
   raceLevelLimits: Readonly<Record<string, number | null>>;
   /** class-intrinsic maximum level (`null` = uncapped; Druid = 14 in the base rules) */
   maxLevel: number | null;
-  /** the character level at which this caster gains its first spell (`null` = non-caster or casts from level 1) */
+  /** first character level this caster gains a spell; `null` only for a non-caster (a caster that casts from level 1 sets `1`) */
   spellStartLevel: number | null;
   /** which spell-slot table this class uses (`null` = non-caster) */
   spellProgressionId: SpellProgressionId | null;
@@ -189,13 +189,14 @@ export type WizardSchool =
 /**
  * A caster's spell-slot counts for one class at one level.
  * `perLevel[i]` is the castable slots at spell level `i + 1` (wizard: length 9,
- * priest: length 7). `base` is the raw progression-table row; `bonus` is the
- * per-spell-level adjustment (specialist +1 or cumulative Wisdom bonus);
- * `suppressed` lists the 1-indexed spell levels a gate forced to 0
- * (Intelligence cap for a wizard; WIS 17/18 requirement for a priest).
- * base and bonus are pre-gate values; perLevel is authoritative and is 0 at
- * every spell level listed in suppressed (a consumer summing base + bonus would
- * overcount suppressed levels).
+ * priest: length 7, bard: length 6). Paladin and Ranger limited-caster slots
+ * are returned as a bare `readonly number[]` (lengths 4 and 3), not this shape.
+ * `base` is the raw progression-table row; `bonus` is the per-spell-level
+ * adjustment (specialist +1 or cumulative Wisdom bonus); `suppressed` lists
+ * the 1-indexed spell levels a gate forced to 0 (Intelligence cap for a
+ * wizard; WIS 17/18 requirement for a priest). base and bonus are pre-gate
+ * values; perLevel is authoritative and is 0 at every spell level listed in
+ * suppressed (a consumer summing base + bonus would overcount suppressed levels).
  */
 export interface SpellSlots {
   perLevel: readonly number[];

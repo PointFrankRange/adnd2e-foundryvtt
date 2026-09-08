@@ -11,8 +11,8 @@ import {
 
 const PALADIN_START = 9;
 const RANGER_START = 8;
-const RANGER_TABLE_MAX = 16;
-const BARD_TABLE_MAX = 20;
+const RANGER_TABLE_MAX = RANGER_SPELL_PROGRESSION.length;
+const BARD_TABLE_MAX = BARD_SPELL_PROGRESSION.length;
 
 /** Priest spell slots for a paladin (PHB Table 17). No Wisdom bonus. */
 export function paladinSpellSlots(paladinLevel: number): readonly number[] {
