@@ -37,7 +37,7 @@
 | non-proficiency penalty | −2 (warrior) | −2 (warrior) | −3 (priest) | −3 (rogue) |
 | weapon prof slots | 4 / 3 | 4 / 3 | 2 / 4 | 2 / 4 |
 | non-weapon prof slots | 3 / 3 | 3 / 3 | 4 / 3 | 3 / 4 |
-| armor | any | any | `["leather", "padded", "studded leather"]` (+ wooden shield) | any |
+| armor | any | any | `["leather"]` only (+ wooden shield — a shield, not `armorAllowed`; PHB p.35) | `["padded","leather","studded leather","ring mail","brigandine","scale mail","hide","chain mail"]` — up to chain mail, no shield (PHB p.41) |
 | weapons | any | any | `["club","sickle","dart","spear","dagger","scimitar","sling","staff"]` | any |
 | weapon specialization | no | no | no | no |
 | caster type / progression | priest / `"paladin"` | priest / `"ranger"` | priest / `"priest"` | wizard / `"bard"` |
@@ -319,7 +319,7 @@ describe("new chassis — identity & group", () => {
       abilityMinimums: { wis: 12, cha: 15 },
       spellProgressionId: "priest", spellStartLevel: 1, maxLevel: 14,
       weaponsAllowed: { names: ["club", "sickle", "dart", "spear", "dagger", "scimitar", "sling", "staff"] },
-      armorAllowed: ["leather", "padded", "studded leather"],
+      armorAllowed: ["leather"],
     });
   });
   it("Bard", () => {
@@ -329,7 +329,12 @@ describe("new chassis — identity & group", () => {
       abilityMinimums: { dex: 12, int: 13, cha: 15 },
       spellProgressionId: "bard", spellStartLevel: 2,
       thiefSkillAccess: ["pick-pockets", "climb-walls", "detect-noise", "read-languages"],
+      armorAllowed: ["padded", "leather", "studded leather", "ring mail", "brigandine", "scale mail", "hide", "chain mail"],
     });
+  });
+  it("Druid wears leather only; Bard up to chain mail (PHB pp.35/41)", () => {
+    expect(DRUID.armorAllowed).toEqual(["leather"]);
+    expect(BARD.armorAllowed).not.toContain("plate mail");
   });
   it("getChassis covers all eight ids", () => {
     for (const id of ["fighter", "mage", "cleric", "thief", "paladin", "ranger", "druid", "bard"] as const) {
@@ -461,7 +466,7 @@ export const DRUID: ClassChassis = {
   nonweaponProficiencies: { initial: 4, levelsPerSlot: 3 },
   nonProficiencyPenalty: -3,
   casterType: "priest",
-  armorAllowed: ["leather", "padded", "studded leather"],
+  armorAllowed: ["leather"],
   weaponsAllowed: { names: [...DRUID_WEAPONS] },
   weaponSpecializationAllowed: false,
   raceLevelLimits: {},
@@ -486,7 +491,7 @@ export const BARD: ClassChassis = {
   nonweaponProficiencies: { initial: 3, levelsPerSlot: 4 },
   nonProficiencyPenalty: -3,
   casterType: "wizard",
-  armorAllowed: "any",
+  armorAllowed: ["padded", "leather", "studded leather", "ring mail", "brigandine", "scale mail", "hide", "chain mail"],
   weaponsAllowed: "any",
   weaponSpecializationAllowed: false,
   raceLevelLimits: {},
