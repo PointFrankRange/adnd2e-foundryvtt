@@ -223,9 +223,9 @@ src/
       tables.ts          per-class-group save matrices
       index.ts           saves(classLevels[], race, abilityMods, options)
     combat/
-      armor-class.ts     ac({ armor, shield, dexDefensive, magic, situational })
-      attack.ts          attackFormula(thac0, targetAc, mods) -> string  (NOT rolled)
-      resolution.ts      hitResult(attackTotal, thac0, targetAc) -> {hit, byHowMuch}
+      armor-class.ts     armorClass({ baseArmorAc, shield, dexDefensiveAdj, magic, situational })
+      attack.ts          attackModifiers(mods), toHitNumber(thac0, targetAc), hitResult({ naturalD20, attackBonus, thac0, targetAc })
+                         (attackFormula string builder lives in dice/formula.ts; resolution.ts merged into attack.ts)
     magic/
       wizard-slots.ts    slotsByLevel(wizardLevel, intMax, specialistBonus)
       priest-slots.ts    slotsByLevel(priestLevel, wisBonus, sphereAccess)
@@ -430,7 +430,7 @@ Foundry's pipeline: `prepareData()` → `prepareBaseData()` →
   3. `levelForXp` per class → `canLevelUp` flag
   4. HP max — Σ per-class(`hpRolls` + CON adjustment, honouring multiclass averaging and warrior CON cap)
   5. `thac0` — best of class tables + STR (melee) / DEX (ranged) + specialization
-  6. `ac` — `10 − armor − shield − dexDefensive − magic + situational`, per attack context
+  6. `ac` — `baseArmorAc + dexDefensiveAdj − shieldBonus − magicBonus + situational`, per attack context (the `10` is folded into `baseArmorAc`; `dexDefensiveAdj` is already AC-signed, so it is *added*)
   7. `saves` — best-of class/level matrix + racial (per-CON) + ability mods
   8. spell slots — wizard(`level`, INT max-spell-level cap) / priest(`level`, WIS bonus, sphere access)
   9. proficiency slot totals — class progression + INT bonus-language slots

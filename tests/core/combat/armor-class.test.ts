@@ -20,6 +20,8 @@ describe("armorClass()", () => {
   it("clamps to [-10, 10]", () => {
     expect(armorClass({ baseArmorAc: 10, dexDefensiveAdj: 6 }).value).toBe(10); // worse than 10 -> 10
     expect(armorClass({ baseArmorAc: 1, shieldBonus: 1, dexDefensiveAdj: -6, magicBonus: 5 }).value).toBe(-10);
+    expect(armorClass({ baseArmorAc: 10, dexDefensiveAdj: 6 }).raw).toBe(16);
+    expect(armorClass({ baseArmorAc: 1, shieldBonus: 1, dexDefensiveAdj: -6, magicBonus: 5 }).raw).toBe(-11);
   });
 
   it("denyShield drops the shield", () => {
@@ -31,6 +33,7 @@ describe("armorClass()", () => {
   it("denyDexBonus drops a beneficial DEX adj but keeps a penalty", () => {
     expect(armorClass({ baseArmorAc: 8, dexDefensiveAdj: -3, denyDexBonus: true }).value).toBe(8);
     expect(armorClass({ baseArmorAc: 8, dexDefensiveAdj: 4, denyDexBonus: true }).value).toBe(10); // penalty stays (clamped)
+    expect(armorClass({ baseArmorAc: 8, dexDefensiveAdj: 4, denyDexBonus: true }).raw).toBe(12);
     expect(armorClass({ baseArmorAc: 8, dexDefensiveAdj: 2, denyDexBonus: true }).value).toBe(10);
   });
 
@@ -42,7 +45,7 @@ describe("armorClass()", () => {
   });
 
   it("situational modifier: negative improves AC", () => {
-    expect(armorClass({ baseArmorAc: 8, situationalModifier: -2 }).value).toBe(6); // cover
+    expect(armorClass({ baseArmorAc: 8, situationalModifier: -2 }).value).toBe(6); // DM ad-hoc AC bonus
     expect(armorClass({ baseArmorAc: 8, situationalModifier: 2 }).value).toBe(10);
   });
 });

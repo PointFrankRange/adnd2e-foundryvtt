@@ -12,7 +12,10 @@ export interface AttackModifierInput {
   proficiencyModifier?: number;
   /** 0 short, -2 medium, -5 long */
   rangePenalty?: number;
-  /** summed Table 51 situational modifiers */
+  /**
+   * Summed Table 51 situational modifiers, EXCLUDING the missile-range rows
+   * (long -5 / medium -2) — those belong in `rangePenalty`.
+   */
   situationalModifier?: number;
 }
 
@@ -57,20 +60,29 @@ export interface HitResult {
   margin: number;
 }
 
-export function hitResult(
-  naturalD20: number,
-  attackBonus: number,
-  thac0: number,
-  targetAc: number,
-): HitResult {
-  assertD20(naturalD20);
-  const needed = toHitNumber(thac0, targetAc);
-  const total = naturalD20 + attackBonus;
+export interface HitInput {
+  naturalD20: number;
+  attackBonus: number;
+  thac0: number;
+  targetAc: number;
+}
+
+/**
+ * Resolve one attack roll. Natural 20 always hits; natural 1 always misses
+ * (PHB p.92) — both gate on the natural die, not the modified total.
+ *
+ * Table 51's "defender sleeping or held → Automatic" is not modeled here: RAW,
+ * no attack roll is made — the caller skips hitResult and applies a hit directly.
+ */
+export function hitResult(input: HitInput): HitResult {
+  assertD20(input.naturalD20);
+  const needed = toHitNumber(input.thac0, input.targetAc);
+  const total = input.naturalD20 + input.attackBonus;
   const margin = total - needed;
-  if (naturalD20 === 20) {
+  if (input.naturalD20 === 20) {
     return { hit: true, autoHit: true, autoMiss: false, needed, total, margin };
   }
-  if (naturalD20 === 1) {
+  if (input.naturalD20 === 1) {
     return { hit: false, autoHit: false, autoMiss: true, needed, total, margin };
   }
   return { hit: total >= needed, autoHit: false, autoMiss: false, needed, total, margin };

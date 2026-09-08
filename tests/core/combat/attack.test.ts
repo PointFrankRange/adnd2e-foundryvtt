@@ -33,25 +33,26 @@ describe("toHitNumber()", () => {
 
 describe("hitResult()", () => {
   it("plain hit / miss around the needed number", () => {
-    const hit = hitResult(8, 0, 14, 6); // needs 8, rolled 8
+    const hit = hitResult({ naturalD20: 8, attackBonus: 0, thac0: 14, targetAc: 6 }); // needs 8, rolled 8
     expect(hit).toMatchObject({ hit: true, autoHit: false, autoMiss: false, needed: 8, total: 8, margin: 0 });
-    const miss = hitResult(7, 0, 14, 6);
+    const miss = hitResult({ naturalD20: 7, attackBonus: 0, thac0: 14, targetAc: 6 });
     expect(miss).toMatchObject({ hit: false, needed: 8, total: 7, margin: -1 });
   });
   it("attack bonus is added to the natural roll", () => {
-    expect(hitResult(6, 2, 14, 6).hit).toBe(true);  // 6 + 2 = 8 >= 8
-    expect(hitResult(5, 2, 14, 6).hit).toBe(false); // 7 < 8
+    // natural 6 + attackBonus 2 = 8, which meets the needed 8 (thac0 14 - AC 6)
+    expect(hitResult({ naturalD20: 6, attackBonus: 2, thac0: 14, targetAc: 6 }).hit).toBe(true);
+    expect(hitResult({ naturalD20: 5, attackBonus: 2, thac0: 14, targetAc: 6 }).hit).toBe(false); // 7 < 8
   });
   it("natural 20 always hits, even when needed is impossible", () => {
-    const r = hitResult(20, 0, 20, -10); // needs 30
+    const r = hitResult({ naturalD20: 20, attackBonus: 0, thac0: 20, targetAc: -10 }); // needs 30
     expect(r).toMatchObject({ hit: true, autoHit: true, autoMiss: false, needed: 30 });
   });
   it("natural 1 always misses, even when needed is trivial", () => {
-    const r = hitResult(1, 10, 10, 10); // needs 0, total 11
+    const r = hitResult({ naturalD20: 1, attackBonus: 10, thac0: 10, targetAc: 10 }); // needs 0, total 11
     expect(r).toMatchObject({ hit: false, autoHit: false, autoMiss: true, needed: 0 });
   });
   it("rejects a non-d20 natural roll", () => {
-    expect(() => hitResult(0, 0, 14, 6)).toThrow(RangeError);
-    expect(() => hitResult(21, 0, 14, 6)).toThrow(RangeError);
+    expect(() => hitResult({ naturalD20: 0, attackBonus: 0, thac0: 14, targetAc: 6 })).toThrow(RangeError);
+    expect(() => hitResult({ naturalD20: 21, attackBonus: 0, thac0: 14, targetAc: 6 })).toThrow(RangeError);
   });
 });

@@ -693,4 +693,9 @@ Out of scope for Plan 1b.4 (later plans / sub-projects): initiative (individual 
 - **AC:** lower is better. `dexDefensiveAdj` is added as-is (already negative for agile). `shieldBonus` and `magicBonus` are *subtracted* (they improve AC). `situationalModifier` is added as-is, so the caller passes a negative number for cover (a bonus) — documented on the field.
 - **To-hit:** `toHitNumber = thac0 - targetAc`. A negative `targetAc` makes the subtraction *increase* the needed number (`thac0 - (-3) = thac0 + 3`), matching PHB p.89 "if the Armor Class is a negative number, you add it". `hitResult` adds `attackBonus` to the *natural* roll, and the natural-20/natural-1 checks look at the natural roll, not the total — so a +15 bonus never turns a natural 1 into a hit.
 
+**6. Deviations from the spec (`docs/superpowers/specs/2026-09-07-adnd2e-foundation-design.md`), all deliberate improvements:**
+- Spec §4 lists `combat/attack.ts → attackFormula(thac0, targetAc, mods)` and a separate `combat/resolution.ts → hitResult(attackTotal, thac0, targetAc)`. This plan puts `attackFormula(attackBonus)` in `dice/formula.ts`, keeps `hitResult` in `attack.ts` (no `resolution.ts`), and `hitResult` takes the **natural** d20 (not a pre-summed `attackTotal`) — the natural-1/20 rule is unimplementable without the natural die.
+- Spec §5.6 writes `ac = 10 − armor − shield − dexDefensive − magic + situational`. This plan uses `baseArmorAc + dexDefensiveAdj − shieldBonus − magicBonus + situationalModifier`: the `10` is folded into `baseArmorAc` (armor "none" = 10), and `dexDefensiveAdj` is **added** because `dexterity(dex).defensiveAdj` is already AC-signed (negative = agile) — the spec's `− dexDefensive` would invert it.
+- **Action:** spec §4 and §5.6 should be updated to match before Plan 1c consumes these APIs.
+
 No issues requiring rework.

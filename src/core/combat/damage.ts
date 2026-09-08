@@ -33,7 +33,11 @@ export function damageModifiers(input: DamageModifierInput): DamageModifierResul
   };
 }
 
-/** Final damage from a successful hit: rolled dice + bonus, floored at 1. */
+/**
+ * Final damage from a successful weapon hit: rolled dice + bonus, floored at 1.
+ * This is the weapon-hit floor only — damage resistance, immunity, and energy
+ * type are applied by the caller AFTER this.
+ */
 export function damageResult(rolledBaseDamage: number, damageBonus: number): number {
   return Math.max(1, rolledBaseDamage + damageBonus);
 }
