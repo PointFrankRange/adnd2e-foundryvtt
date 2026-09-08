@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { saveTarget, saveBaseTarget, racialSaveBonus, sleepCharmResistance } from "../../src/core";
+import { saveTarget, saveBaseTarget, racialSaveBonus, sleepCharmResistance, armorClass } from "../../src/core";
 
 describe("src/core barrel", () => {
   it("re-exports the saves API and it computes", () => {
@@ -17,5 +17,6 @@ describe("src/core barrel", () => {
         dexDefensiveAdj: 0,
       }).target,
     ).toBe(12);
+    expect(armorClass({ baseArmorAc: 10 }).value).toBe(10);
   });
 });
