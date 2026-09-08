@@ -16,6 +16,44 @@
   "grid": { "distance": 5, "units": "ft" },
   "primaryTokenAttribute": "attributes.hp",
   "initiative": "1d10",
+
+  "documentTypes": {
+    "Actor": {
+      "character": {},
+      "npc": {},
+      "creature": {}
+    },
+    "Item": {
+      "class": {},
+      "race": {},
+      "weapon": {},
+      "armor": {},
+      "equipment": {},
+      "spell": {},
+      "weaponProficiency": {},
+      "nonweaponProficiency": {},
+      "classFeature": {}
+    },
+    "ActiveEffect": {
+      "adnd2e": {}
+    }
+  },
+
+  "packFolders": [
+    {
+      "name": "AD&D 2E — Rules Content",
+      "sorting": "m",
+      "color": "#5d0000",
+      "folders": [
+        { "name": "Classes & Races", "sorting": "a", "packs": [] },
+        { "name": "Proficiencies", "sorting": "a", "packs": [] },
+        { "name": "Equipment", "sorting": "a", "packs": [] },
+        { "name": "Spells", "sorting": "a", "packs": [] }
+      ],
+      "packs": []
+    }
+  ],
+
   "flags": {
     "adnd2e": {},
     "hotReload": {

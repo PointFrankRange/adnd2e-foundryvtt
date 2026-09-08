@@ -1,9 +1,11 @@
 import "../styles/system.scss";
-import { SYSTEM_ID } from "./helpers/constants";
-import { registerSettings } from "./helpers/settings";
+import { buildAdnd2eConfig } from "./config";
+import { SYSTEM_ID } from "./constants";
+import { registerSettings } from "./settings";
 
 Hooks.once("init", () => {
   console.log(`${SYSTEM_ID} | Initializing`);
+  CONFIG.ADND2E = buildAdnd2eConfig();
   registerSettings();
 });
 

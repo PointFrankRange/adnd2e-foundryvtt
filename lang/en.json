@@ -3,14 +3,225 @@
     "system": {
       "title": "Advanced Dungeons & Dragons 2nd Edition"
     },
-    "exampleApp": {
-      "title": "AD&D 2E",
-      "message": "Placeholder window. Real sheets arrive in a later plan."
+    "abilities": {
+      "str": "Strength",
+      "dex": "Dexterity",
+      "con": "Constitution",
+      "int": "Intelligence",
+      "wis": "Wisdom",
+      "cha": "Charisma"
+    },
+    "saves": {
+      "ppd": "Paralyzation, Poison & Death Magic",
+      "rsw": "Rod, Staff & Wand",
+      "pp": "Petrification & Polymorph",
+      "bw": "Breath Weapon",
+      "spell": "Spell"
+    },
+    "classGroups": {
+      "warrior": "Warrior",
+      "wizard": "Wizard",
+      "priest": "Priest",
+      "rogue": "Rogue"
+    },
+    "schools": {
+      "abjuration": "Abjuration",
+      "alteration": "Alteration",
+      "conjuration": "Conjuration / Summoning",
+      "divination": "Divination (Greater)",
+      "enchantment": "Enchantment / Charm",
+      "illusion": "Illusion / Phantasm",
+      "invocation": "Invocation / Evocation",
+      "necromancy": "Necromancy",
+      "lesser-divination": "Divination (Lesser)",
+      "wild": "Wild Magic"
+    },
+    "spheres": {
+      "all": "All",
+      "animal": "Animal",
+      "astral": "Astral",
+      "charm": "Charm",
+      "combat": "Combat",
+      "creation": "Creation",
+      "divination": "Divination",
+      "elemental": "Elemental",
+      "guardian": "Guardian",
+      "healing": "Healing",
+      "necromantic": "Necromantic",
+      "plant": "Plant",
+      "protection": "Protection",
+      "summoning": "Summoning",
+      "sun": "Sun",
+      "weather": "Weather"
+    },
+    "alignments": {
+      "lawful-good": "Lawful Good",
+      "neutral-good": "Neutral Good",
+      "chaotic-good": "Chaotic Good",
+      "lawful-neutral": "Lawful Neutral",
+      "true-neutral": "True Neutral",
+      "chaotic-neutral": "Chaotic Neutral",
+      "lawful-evil": "Lawful Evil",
+      "neutral-evil": "Neutral Evil",
+      "chaotic-evil": "Chaotic Evil"
+    },
+    "sizes": {
+      "tiny": "Tiny",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "huge": "Huge",
+      "gargantuan": "Gargantuan"
+    },
+    "movementModes": {
+      "land": "Land",
+      "burrow": "Burrow",
+      "climb": "Climb",
+      "fly": "Fly",
+      "swim": "Swim"
+    },
+    "damageTypes": {
+      "slashing": "Slashing",
+      "piercing": "Piercing",
+      "bludgeoning": "Bludgeoning",
+      "acid": "Acid",
+      "cold": "Cold",
+      "electricity": "Electricity",
+      "fire": "Fire",
+      "force": "Force",
+      "poison": "Poison",
+      "sonic": "Sonic",
+      "necrotic": "Necrotic",
+      "radiant": "Radiant"
+    },
+    "encumbranceCategories": {
+      "unencumbered": "Unencumbered",
+      "light": "Light",
+      "moderate": "Moderate",
+      "heavy": "Heavy",
+      "severe": "Severe",
+      "immobile": "Immobile"
+    },
+    "creatureIntelligence": {
+      "non": "Non-Intelligent",
+      "animal": "Animal",
+      "semi": "Semi-Intelligent",
+      "low": "Low",
+      "average": "Average",
+      "very": "Very Intelligent",
+      "high": "Highly Intelligent",
+      "exceptional": "Exceptionally Intelligent",
+      "genius": "Genius",
+      "supra-genius": "Supra-Genius",
+      "godlike": "Godlike"
+    },
+    "treasureTypes": {
+      "A": "A", "B": "B", "C": "C", "D": "D", "E": "E", "F": "F", "G": "G",
+      "H": "H", "I": "I", "J": "J", "K": "K", "L": "L", "M": "M", "N": "N",
+      "O": "O", "P": "P", "Q": "Q", "R": "R", "S": "S", "T": "T", "U": "U",
+      "V": "V", "W": "W", "X": "X", "Y": "Y", "Z": "Z"
+    },
+    "weaponStyleGroups": {
+      "single-weapon": "Single-Weapon Style",
+      "two-weapon": "Two-Weapon Style",
+      "weapon-and-shield": "Weapon-and-Shield Style",
+      "two-handed-weapon": "Two-Handed-Weapon Style"
+    },
+    "currency": {
+      "pp": "Platinum",
+      "gp": "Gold",
+      "ep": "Electrum",
+      "sp": "Silver",
+      "cp": "Copper"
     },
     "settings": {
-      "exampleSetting": {
-        "name": "Example Setting",
-        "hint": "Placeholder world setting. The optional-rules registry replaces this in Plan 1c."
+      "exceptionalStrength": {
+        "name": "Exceptional Strength",
+        "hint": "Warriors with Strength 18 roll d100 for an exceptional-Strength band (PHB p.18)."
+      },
+      "maxSpellsPerLevel": {
+        "name": "Enforce Spells Known Per Level",
+        "hint": "Cap a wizard's spells recorded per spell level by Intelligence (PHB Table 4)."
+      },
+      "weaponSpeedInitiative": {
+        "name": "Weapon Speed Affects Initiative",
+        "hint": "Add weapon speed factors and casting times to individual initiative. Requires Sub-project 3."
+      },
+      "spellFailureFromWisdom": {
+        "name": "Priest Spell Failure",
+        "hint": "Apply a priest's chance of spell failure from low Wisdom (PHB Table 5). (not yet enforced)"
+      },
+      "trainingRequiredToLevel": {
+        "name": "Training Required To Advance",
+        "hint": "A character must spend time and money training before gaining a level (DMG optional rule). (not yet enforced)"
+      },
+      "nonweaponProficienciesUsed": {
+        "name": "Use Non-Weapon Proficiencies",
+        "hint": "Enable the non-weapon proficiency system (PHB p.51). (not yet enforced)"
+      },
+      "weaponProficienciesUsed": {
+        "name": "Use Weapon Proficiencies",
+        "hint": "Enable the weapon proficiency system and non-proficiency penalties (PHB p.51). (not yet enforced)"
+      },
+      "multiclassHpAveraging": {
+        "name": "Average Multi-Class Hit Points",
+        "hint": "A multi-class character's hit points are the averaged roll across classes (PHB p.44). (not yet enforced)"
+      },
+      "combatAndTacticsEnabled": {
+        "name": "Combat & Tactics: Enabled",
+        "hint": "Master switch for the Combat & Tactics option group. Individual rules below have no effect until this is on. Requires Sub-project 7."
+      },
+      "criticalHits": {
+        "name": "Combat & Tactics: Critical Hits",
+        "hint": "Natural 20 confirms for extra damage (Combat & Tactics). Requires Sub-project 7."
+      },
+      "calledShots": {
+        "name": "Combat & Tactics: Called Shots",
+        "hint": "Target specific body locations at an attack penalty (Combat & Tactics). Requires Sub-project 7."
+      },
+      "combatManeuvers": {
+        "name": "Combat & Tactics: Combat Maneuvers",
+        "hint": "Disarm, trip, overbear, and similar maneuvers (Combat & Tactics). Requires Sub-project 7."
+      },
+      "armorTypeVsWeaponType": {
+        "name": "Combat & Tactics: Armor vs. Weapon Type",
+        "hint": "Weapon-type modifiers versus armor type (Combat & Tactics). Requires Sub-project 7."
+      },
+      "weaponMastery": {
+        "name": "Combat & Tactics: Weapon Mastery",
+        "hint": "Mastery and high-mastery weapon tiers beyond specialization (Combat & Tactics). Requires Sub-project 7."
+      },
+      "skillsAndPowersEnabled": {
+        "name": "Skills & Powers: Enabled",
+        "hint": "Master switch for the Skills & Powers option group. Requires Sub-project 8."
+      },
+      "subAbilityScores": {
+        "name": "Skills & Powers: Sub-Ability Scores",
+        "hint": "Split each ability into two sub-scores (Skills & Powers). Requires Sub-project 8."
+      },
+      "characterPointBuild": {
+        "name": "Skills & Powers: Character Point Build",
+        "hint": "Buy class and race features with character points (Skills & Powers). Requires Sub-project 8."
+      },
+      "expandedProficiencies": {
+        "name": "Skills & Powers: Expanded Proficiencies",
+        "hint": "The expanded proficiency list and rules (Skills & Powers). Requires Sub-project 8."
+      },
+      "spellsAndMagicEnabled": {
+        "name": "Spells & Magic: Enabled",
+        "hint": "Master switch for the Spells & Magic option group. Requires Sub-project 9."
+      },
+      "spellPoints": {
+        "name": "Spells & Magic: Spell Points",
+        "hint": "Cast from a spell-point pool instead of fixed slots (Spells & Magic). Requires Sub-project 9."
+      },
+      "expandedCastingTime": {
+        "name": "Spells & Magic: Expanded Casting Time",
+        "hint": "The expanded casting-time and interruption rules (Spells & Magic). Requires Sub-project 9."
+      },
+      "channelers": {
+        "name": "Spells & Magic: Channelers",
+        "hint": "The channeler wizard variant (Spells & Magic). Requires Sub-project 9."
       }
     }
   }
