@@ -48,7 +48,7 @@
 - **Paladin / Ranger cast priest spells with no Wisdom bonus** — their slot functions are straight table lookups. The Paladin casts from spheres combat/divination/healing/protection; the Ranger from plant/animal. Sphere gating is a caller/`classFeature` concern (Plan 1c), not this plan.
 - **Druid is a full priest for slots** — the derive layer (Plan 1c) calls the existing `priestSpellSlots({ priestLevel: druidLevel, wisdomScore, wisdomBonusSpells })`. `DRUID_SPHERE_ACCESS` (major: all, animal, elemental, healing, plant, weather; minor: divination) is the deferred Plan 1b.5 carry-forward.
 - **Druid level cap:** the base rules cap a druid at 14 (level 15 = the unique Grand Druid, 16–20 = the hierophant path with a restarted XP progression — PHB p.37). This plan sets `maxLevel: 14` and ships only the L1–14 XP thresholds; the hierophant path is a later-plan feature.
-- **Bard casts wizard spells** (Table 32) from level 2, casting level = bard level, Intelligence-gated for spells-known like a Mage, **no specialization ever**. Its four thief skills use the existing thief point-pool machinery (Plan 1b.6) — this plan only records which four via `thiefSkillAccess`.
+- **Bard casts wizard spells** (Table 32) from level 2, casting level = bard level, Intelligence-gated for spells-known like a Mage, **no specialization ever**. Its four thief skills get their own base scores and budget (Table 33) — `BARD_SKILL_BASE` / `BARD_SKILL_POINT_RULES` / `bardSkillBaseScore` / `bardSkillPointsAvailable` added to `proficiencies/thief-skills.ts`, reusing the thief racial/Dex/armor adjustment tables — and this plan records which four via `thiefSkillAccess`.
 - **`primeRequisiteXpBonus`** must become the multi-ability rule (PHB p.26: *"a score of 16 or more in **all** his prime requisites"*). Old signature `(group: ClassGroup, scores)`; new `(primeRequisites: readonly AbilityKey[], scores: AbilityScores)` → `primeRequisites.every((k) => scores[k] >= 16)`. Its only consumer is Plan 1c (not yet written).
 - **Specialist wizards** are the Mage chassis (`hitDie` d4, `MAGE_XP`, wizard group / THAC0 / saves / progression) with a `specialistSchool`. This plan adds `minAbility` to each `SPECIALIST_SCHOOLS` profile (PHB Table 22: Abjurer 15 wis, Conjurer 15 con, Diviner 16 wis, Enchanter 16 cha, Illusionist 16 dex, Invoker 16 con, Necromancer 16 wis, Transmuter 15 dex). Plan 1c builds the eight `class` items from `{ chassis: MAGE, specialistSchool, minAbility }`.
 - **Out of scope for Plan 1b.2b** (Plan 1c `classFeature` data + later sub-projects): every special ability — lay on hands, cure disease, detect evil, protection aura, turn undead, holy sword (paladin); tracking, species enemy, animal empathy, two-weapon style, followers (ranger); shapechange, plant/animal identification, hierophant progression past 14 (druid); bardic knowledge %, influence reactions, rally allies / counter-fear (bard); paladin/ranger warhorse; multi-/dual-class rules; the `data/` layer.
@@ -230,13 +230,13 @@ export function levelForXp(chassis: ClassChassis, xp: number): number {
 - [ ] **Step 8: Update the four existing chassis** in `src/core/classes/chassis.ts` — add the four new fields to `FIGHTER`, `MAGE`, `CLERIC`, `THIEF`:
 
 ```ts
-// FIGHTER: maxLevel: null, spellStartLevel: null, spellProgressionId: null, thiefSkillAccess: null,
-// MAGE:    maxLevel: null, spellStartLevel: null, spellProgressionId: "wizard", thiefSkillAccess: null,
-// CLERIC:  maxLevel: null, spellStartLevel: null, spellProgressionId: "priest", thiefSkillAccess: null,
-// THIEF:   maxLevel: null, spellStartLevel: null, spellProgressionId: null, thiefSkillAccess: null,
+// FIGHTER: maxLevel: null, spellStartLevel: null, spellProgressionId: null,     thiefSkillAccess: null,
+// MAGE:    maxLevel: null, spellStartLevel: 1,    spellProgressionId: "wizard", thiefSkillAccess: null,
+// CLERIC:  maxLevel: null, spellStartLevel: 1,    spellProgressionId: "priest", thiefSkillAccess: null,
+// THIEF:   maxLevel: null, spellStartLevel: null, spellProgressionId: null,     thiefSkillAccess: [<all eight skills>],
 ```
 
-(THIEF's `thiefSkillAccess` is `null` — a `null` on the Thief means "all skills", per the field doc; only the Bard carries an explicit sub-list.)
+(`spellStartLevel` is `null` only for a non-caster; a caster that casts from level 1 sets `1`. THIEF carries the explicit eight-member `thiefSkillAccess` list; `null` there would mean "no thieving skills" and nothing else.)
 
 - [ ] **Step 9: Run tests + gates**
 
