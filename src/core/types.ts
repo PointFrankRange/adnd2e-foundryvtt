@@ -207,3 +207,18 @@ export type ThiefSkill =
  * for an unarmoured thief or one relying on bracers/cloak magic.
  */
 export type ThiefArmor = "none" | "leather" | "elven-chain" | "padded-studded";
+
+/** Encumbrance category from carried weight vs. Strength (PHB Table 47). */
+export type EncumbranceCategory =
+  | "unencumbered"
+  | "light"
+  | "moderate"
+  | "heavy"
+  | "severe"
+  | "immobile";
+
+/** Which encumbrance variant a caller wants (PHB p.76-79). */
+export type EncumbranceRule = "category" | "table48";
+
+/** The two PC base-movement tiers Table 48 is written for (PHB Table 64). */
+export type MovementTier = 6 | 12;

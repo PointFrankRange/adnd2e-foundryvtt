@@ -32,12 +32,12 @@ describe("weaponSpecializationSlotCost()", () => {
 });
 
 describe("weaponSpecializationEffect()", () => {
-  it("melee specialist gets +1 to hit and +2 damage", () => {
-    expect(weaponSpecializationEffect("melee")).toEqual({ toHit: 1, damage: 2 });
+  it("melee specialist gets +1 to hit and +2 damage, no point-blank bonus", () => {
+    expect(weaponSpecializationEffect("melee")).toEqual({ toHit: 1, damage: 2, pointBlankAttackBonus: 0 });
   });
-  it("bow and crossbow have no flat bonus here (point-blank is Plan 1b.7)", () => {
-    expect(weaponSpecializationEffect("bow")).toEqual({ toHit: 0, damage: 0 });
-    expect(weaponSpecializationEffect("crossbow")).toEqual({ toHit: 0, damage: 0 });
+  it("bow and crossbow specialists get a +2 point-blank bonus, no flat bonus", () => {
+    expect(weaponSpecializationEffect("bow")).toEqual({ toHit: 0, damage: 0, pointBlankAttackBonus: 2 });
+    expect(weaponSpecializationEffect("crossbow")).toEqual({ toHit: 0, damage: 0, pointBlankAttackBonus: 2 });
   });
 });
 
