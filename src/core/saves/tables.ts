@@ -2,15 +2,10 @@
 // Columns: ppd = Paralyzation/Poison/Death Magic, rsw = Rod/Staff/Wand,
 // pp = Petrification/Polymorph, bw = Breath Weapon, spell = Spell.
 // A band applies from minLevel up to (but not including) the next band's minLevel.
-import type { ClassGroup } from "../types";
+import type { ClassGroup, SaveCategory } from "../types";
 
-export interface SaveBand {
+export interface SaveBand extends Record<SaveCategory, number> {
   minLevel: number;
-  ppd: number;
-  rsw: number;
-  pp: number;
-  bw: number;
-  spell: number;
 }
 
 function band(minLevel: number, ppd: number, rsw: number, pp: number, bw: number, spell: number): SaveBand {

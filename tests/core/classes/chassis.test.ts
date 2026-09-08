@@ -19,6 +19,8 @@ describe("class chassis", () => {
       nonweaponProficiencies: { initial: 3, levelsPerSlot: 3 },
       nonProficiencyPenalty: -2,
       casterType: null,
+      armorAllowed: "any",
+      weaponsAllowed: "any",
       weaponSpecializationAllowed: true,
     });
     expect(FIGHTER.xpThresholds).toHaveLength(20);
@@ -38,6 +40,8 @@ describe("class chassis", () => {
       nonweaponProficiencies: { initial: 4, levelsPerSlot: 3 },
       nonProficiencyPenalty: -5,
       casterType: "wizard",
+      armorAllowed: "none",
+      weaponsAllowed: { names: ["dagger", "staff", "dart", "knife", "sling"] },
       weaponSpecializationAllowed: false,
     });
     expect(MAGE.xpThresholds[1]).toBe(2500);
@@ -55,6 +59,8 @@ describe("class chassis", () => {
       nonweaponProficiencies: { initial: 4, levelsPerSlot: 3 },
       nonProficiencyPenalty: -3,
       casterType: "priest",
+      armorAllowed: "any",
+      weaponsAllowed: { categories: ["blunt"] },
       weaponSpecializationAllowed: false,
     });
     expect(CLERIC.xpThresholds[1]).toBe(1500);
@@ -72,6 +78,13 @@ describe("class chassis", () => {
       nonweaponProficiencies: { initial: 3, levelsPerSlot: 4 },
       nonProficiencyPenalty: -3,
       casterType: null,
+      armorAllowed: ["leather", "studded leather", "padded", "elven chain"],
+      weaponsAllowed: {
+        names: [
+          "club", "dagger", "dart", "hand crossbow", "knife", "lasso", "short bow", "sling",
+          "broad sword", "long sword", "short sword", "staff",
+        ],
+      },
       weaponSpecializationAllowed: false,
     });
     expect(THIEF.xpThresholds[1]).toBe(1250);

@@ -26,20 +26,21 @@ describe("thac0()", () => {
   });
 
   it("extends past level 20 by the Table 54 improvement rate", () => {
-    // warrior 1 point / 1 level, from THAC0 1 at L20
+    // warrior 1 point / 1 level
     expect(thac0("warrior", 21)).toBe(0);
     expect(thac0("warrior", 25)).toBe(-4);
-    // rogue 1 point / 2 levels, from THAC0 11 at L20
-    expect(thac0("rogue", 21)).toBe(11);
+    // rogue 1 point / 2 levels
+    expect(thac0("rogue", 21)).toBe(10);
     expect(thac0("rogue", 22)).toBe(10);
-    expect(thac0("rogue", 24)).toBe(9);
-    // priest 2 points / 3 levels, from THAC0 8 at L20
+    expect(thac0("rogue", 23)).toBe(9);
+    // priest 2 points / 3 levels — always even
     expect(thac0("priest", 21)).toBe(8);
-    expect(thac0("priest", 22)).toBe(7);
-    expect(thac0("priest", 23)).toBe(6);
-    // wizard 1 point / 3 levels, from THAC0 14 at L20
+    expect(thac0("priest", 22)).toBe(6);
+    expect(thac0("priest", 25)).toBe(4);
+    // wizard 1 point / 3 levels
     expect(thac0("wizard", 21)).toBe(14);
-    expect(thac0("wizard", 23)).toBe(13);
+    expect(thac0("wizard", 22)).toBe(13);
+    expect(thac0("wizard", 25)).toBe(12);
   });
 
   it("rejects invalid level", () => {

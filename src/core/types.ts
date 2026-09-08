@@ -107,10 +107,10 @@ export interface ClassChassis {
   /** attack-roll penalty for using a non-proficient weapon (negative) */
   nonProficiencyPenalty: number;
   casterType: "wizard" | "priest" | null;
-  /** allowed armor categories; `["none"]` means no armor */
-  armorAllowed: readonly string[];
-  /** `"any"` or an explicit allow-list of weapon names */
-  weaponsAllowed: "any" | readonly string[];
+  /** `"any"`, `"none"`, or an explicit allow-list of armor names */
+  armorAllowed: "any" | "none" | readonly string[];
+  /** `"any"`, or `categories` (weapon classes, e.g. "blunt") and/or `names` (specific weapons) */
+  weaponsAllowed: "any" | { readonly categories?: readonly string[]; readonly names?: readonly string[] };
   weaponSpecializationAllowed: boolean;
   /**
    * Race id -> maximum attainable level (`null` = unlimited).
