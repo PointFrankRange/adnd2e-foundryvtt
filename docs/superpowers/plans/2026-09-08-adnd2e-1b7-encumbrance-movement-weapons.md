@@ -29,7 +29,7 @@
   - **Category boundaries** (Table 47): `unencumbered` when `carried ≤ weightAllowance`; `light` when `≤ threshold(3)`; `moderate` when `≤ threshold(6)`; `heavy` when `≤ threshold(9)`; `severe` when `≤ maxPress`; `immobile` when `> maxPress`.
   - **STR ≤ 3** is a sparse special case (a valid PC minimum for elf / human / half-elf). Its Table-48 row against the base-12 headers is: `carried ≤ 5 → move 12`, `≤ 6 → 10`, `≤ 7 → 8`, `≤ 8 → 5`, `≤ 9 → 3`, `> 9 → immobile`. Its Table-47 bands: `≤ 5` unencumbered, `= 6` light, `= 7` moderate, `8-9` heavy, `= 10` severe, `> 10` immobile. (`weightAllowance` 5, `maxPress` 10.) STR 1-2 are not valid PC scores; they reuse the STR-3 row.
   - **STR ≥ 19** has no PHB Table 47/48 row: use `encumbranceStep = 13` (matches every exceptional band) with `weightAllowance` / `maxPress` from `strength()`. Documented extrapolation.
-- **Modified movement rate** (Table 48): find the smallest `i` in `0..11` with `threshold(i) > carried`; the rate is `HEADERS[tier][i]` where `tier` is `12` (`HEADERS[12] = [12,11,10,9,8,7,6,5,4,3,2,1]`) or `6` (`HEADERS[6] = [6,5,5,4,4,3,3,2,2,1,1,1]`). If `carried > threshold(11)` the character is staggering — rate `1`. If `carried > maxPress` — rate `0` (immobile). The `"category"` rule instead multiplies base move: `unencumbered → base`, `light → floor(base·2/3)`, `moderate → floor(base·1/2)`, `heavy → floor(base·1/3)`, `severe → 1`, `immobile → 0`.
+- **Modified movement rate** (Table 48): find the smallest `i` in `0..11` with `carried <= threshold(i)` (thresholds are **inclusive ceilings** — a character carrying exactly `threshold(i)` moves at `HEADERS[tier][i]`, matching the PHB Tarus example where 140 lb uses the "145 column"); the rate is `HEADERS[tier][i]` where `tier` is `12` (`HEADERS[12] = [12,11,10,9,8,7,6,5,4,3,2,1]`) or `6` (`HEADERS[6] = [6,5,5,4,4,3,3,2,2,1,1,1]`). If `carried > threshold(11)` the character is staggering — rate `1`. If `carried > maxPress` — rate `0` (immobile). The `"category"` rule instead multiplies base move: `unencumbered → base`, `light → floor(base·2/3)`, `moderate → floor(base·1/2)`, `heavy → floor(base·1/3)`, `severe → 1`, `immobile → 0`.
 - **Base movement** (Table 64): human 12, dwarf 6, elf 12, half-elf 12, gnome 6, halfling 6.
 - **Encumbrance combat penalties** (PHB p.79) — a function of the *resulting* movement, not the category name: `currentMove === 1` and `< baseMove` → `{ attackRoll: -4, armorClass: 3 }`; else `currentMove / baseMove ≤ 1/3` → `{ -2, 1 }`; else `≤ 1/2` → `{ -1, 0 }`; else `{ 0, 0 }`. `armorClass` is additive to the AC number (positive = worse, same sign convention as Plan 1b.4's `situationalModifier`). Magical armor's weight does not count toward these effects — the caller passes the reduced carried weight.
 - **Table 35 specialist attacks/round** (PHB p.52) — fighter weapon specialists only (already gated by `canWeaponSpecialize`). Columns by fighter level band: melee / light-crossbow / heavy-crossbow / thrown-dagger / thrown-dart / other-non-bow-missile. **Bow specialists get no extra attacks.** Values are `{ attacks, rounds }` (attacks per that many rounds):
@@ -489,7 +489,7 @@ function table48Rate(input: MovementInput): number {
   const tier: MovementTier = input.baseMove >= 12 ? 12 : 6;
   const thresholds = encumbranceThresholds(input);
   for (let i = 0; i < thresholds.length; i++) {
-    if (thresholds[i] > input.carried) return HEADERS[tier][i];
+    if (input.carried <= thresholds[i]) return HEADERS[tier][i]; // inclusive ceiling
   }
   return 1; // staggering: past the last threshold but within max press
 }
@@ -557,8 +557,8 @@ git commit -m "feat(core): modified movement rate + encumbrance combat penalty (
     - `type WeaponCategory = "melee" | "thrown" | "bow" | "crossbow"`.
     - `type AttackMode = "melee" | "thrown" | "fired"`.
     - `interface WeaponRange { short: number; medium: number; long: number }`
-    - `interface WeaponData { name: string; category: WeaponCategory; damageVsSM: string; damageVsL: string; damageType: DamageType; speedFactor: number; weight: number; size: WeaponSize; rateOfFire: string | null; range: WeaponRange | null; proficiencyGroup: string; handsRequired: 1 | 2 }`
-    - `function selectDamageDice(weapon: Pick<WeaponData, "damageVsSM" | "damageVsL">, targetSize: WeaponSize): string` — `targetSize === "L" ? weapon.damageVsL : weapon.damageVsSM`.
+    - `interface WeaponData { name: string; category: WeaponCategory; damageVsSM: string | null; damageVsL: string | null; damageType: DamageType | null; speedFactor: number; weight: number; size: WeaponSize; rateOfFire: string | null; range: WeaponRange | null; proficiencyGroup: string; handsRequired: 1 | 2 }` — the damage triple is nullable because a bow/crossbow itself has no damage (the ammunition carries it).
+    - `function selectDamageDice(weapon: Pick<WeaponData, "damageVsSM" | "damageVsL">, targetSize: WeaponSize): string | null` — `targetSize === "L" ? weapon.damageVsL : weapon.damageVsSM` (null for a bow/crossbow itself).
   - **`specialist-attacks.ts`:**
     - `type SpecialistWeaponClass = "melee" | "light-crossbow" | "heavy-crossbow" | "thrown-dagger" | "thrown-dart" | "other-missile"`.
     - `interface AttackRate { attacks: number; rounds: number }`
@@ -702,28 +702,37 @@ export interface WeaponRange {
 export interface WeaponData {
   name: string;
   category: WeaponCategory;
-  /** damage dice vs. Small/Medium targets, e.g. "1d8" */
-  damageVsSM: string;
-  /** damage dice vs. Large targets, e.g. "2d6" */
-  damageVsL: string;
-  damageType: DamageType;
+  /**
+   * Damage dice vs. Small/Medium targets, e.g. "1d8". `null` for a bow or
+   * crossbow itself — the PHB weapon table shows "—" there; the ammunition
+   * (arrow / quarrel) carries the damage and type.
+   */
+  damageVsSM: string | null;
+  /** Damage dice vs. Large targets, e.g. "2d6"; `null` for a bow/crossbow itself. */
+  damageVsL: string | null;
+  /** `null` for a bow/crossbow itself — the ammunition carries the type. */
+  damageType: DamageType | null;
   speedFactor: number;
   /** pounds */
   weight: number;
   size: WeaponSize;
   /** rate of fire, e.g. "1", "2", "3/2"; null for weapons with no RoF */
   rateOfFire: string | null;
-  /** range increments in the game's distance unit; null for pure melee weapons */
+  /** range increments, in yards (the PHB weapon-table unit); null for pure melee weapons */
   range: WeaponRange | null;
   proficiencyGroup: string;
   handsRequired: 1 | 2;
 }
 
-/** The damage-dice string for a target of the given size (PHB weapon table columns). */
+/**
+ * The damage-dice string for a target of the given size (PHB weapon table
+ * columns). Returns `null` for a weapon with no damage of its own (a bow /
+ * crossbow — the caller resolves the ammunition's damage instead).
+ */
 export function selectDamageDice(
   weapon: Pick<WeaponData, "damageVsSM" | "damageVsL">,
   targetSize: WeaponSize,
-): string {
+): string | null {
   return targetSize === "L" ? weapon.damageVsL : weapon.damageVsSM;
 }
 ```
