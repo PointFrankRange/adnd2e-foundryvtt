@@ -7,7 +7,18 @@ declare global {
     ADND2E: Adnd2eConfig;
   }
 
+  interface DocumentClassConfig {
+    Actor: typeof import("../documents/actor").Adnd2eActor;
+    Item: typeof import("../documents/item").Adnd2eItem;
+    ActiveEffect: typeof import("../documents/active-effect").Adnd2eActiveEffect;
+  }
+
   interface DataModelConfig {
+    Actor: {
+      character: typeof import("../data/actor/character").CharacterModel;
+      npc: typeof import("../data/actor/npc").NpcModel;
+      creature: typeof import("../data/actor/creature").CreatureModel;
+    };
     Item: {
       class: typeof import("../data/item/class").ClassItemModel;
       race: typeof import("../data/item/race").RaceItemModel;
