@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PALADIN, RANGER, DRUID, BARD, FIGHTER, THIEF, MAGE, CLERIC, getChassis } from "../../../src/core/classes/chassis";
+import { PALADIN, RANGER, DRUID, BARD, getChassis } from "../../../src/core/classes/chassis";
 import { levelForXp, xpForLevel } from "../../../src/core/classes/progression";
 import { primeRequisiteXpBonus } from "../../../src/core/abilities";
 
