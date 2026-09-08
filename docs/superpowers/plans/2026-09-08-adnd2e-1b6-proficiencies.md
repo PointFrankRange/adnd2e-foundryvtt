@@ -603,7 +603,8 @@ export const THIEF_SKILL_BASE: Readonly<Record<ThiefSkill, number>> = {
   "hide-in-shadows": 5, "detect-noise": 15, "climb-walls": 60, "read-languages": 0,
 };
 
-function racialRow(
+/** Build a full per-skill row in Table 26 order (used for Tables 27 and 29). */
+function skillRow(
   pp: number, ol: number, frt: number, ms: number, his: number, dn: number, cw: number, rl: number,
 ): Readonly<Record<ThiefSkill, number>> {
   return {
@@ -615,12 +616,12 @@ function racialRow(
 /** PHB Table 27: THIEVING SKILL RACIAL ADJUSTMENTS (p.39). Human is all zero. */
 // prettier-ignore
 export const THIEF_RACIAL_ADJUSTMENTS: Readonly<Record<Race, Readonly<Record<ThiefSkill, number>>>> = {
-  human:      racialRow(0, 0, 0, 0, 0, 0, 0, 0),
-  dwarf:      racialRow(0, 10, 15, 0, 0, 0, -10, -5),
-  elf:        racialRow(5, -5, 0, 5, 10, 5, 0, 0),
-  gnome:      racialRow(0, 5, 10, 5, 5, 10, -15, 0),
-  "half-elf": racialRow(10, 0, 0, 0, 5, 0, 0, 0),
-  halfling:   racialRow(5, 5, 5, 10, 15, 5, -15, -5),
+  human:      skillRow(0, 0, 0, 0, 0, 0, 0, 0),
+  dwarf:      skillRow(0, 10, 15, 0, 0, 0, -10, -5),
+  elf:        skillRow(5, -5, 0, 5, 10, 5, 0, 0),
+  gnome:      skillRow(0, 5, 10, 5, 5, 10, -15, 0),
+  "half-elf": skillRow(10, 0, 0, 0, 5, 0, 0, 0),
+  halfling:   skillRow(5, 5, 5, 10, 15, 5, -15, -5),
 };
 
 /**
@@ -645,22 +646,13 @@ export const THIEF_DEXTERITY_ADJUSTMENTS: Readonly<
   19: { "pick-pockets": 15,  "open-locks": 20,  "find-remove-traps": 10,  "move-silently": 15,  "hide-in-shadows": 15 },
 };
 
-function armorRow(
-  pp: number, ol: number, frt: number, ms: number, his: number, dn: number, cw: number, rl: number,
-): Readonly<Record<ThiefSkill, number>> {
-  return {
-    "pick-pockets": pp, "open-locks": ol, "find-remove-traps": frt, "move-silently": ms,
-    "hide-in-shadows": his, "detect-noise": dn, "climb-walls": cw, "read-languages": rl,
-  };
-}
-
 /** PHB Table 29: THIEVING SKILL ARMOR ADJUSTMENTS (p.39). "leather" is the thief default — all zero. */
 // prettier-ignore
 export const THIEF_ARMOR_ADJUSTMENTS: Readonly<Record<ThiefArmor, Readonly<Record<ThiefSkill, number>>>> = {
-  none:              armorRow(5, 0, 0, 10, 5, 0, 10, 0),
-  leather:           armorRow(0, 0, 0, 0, 0, 0, 0, 0),
-  "elven-chain":     armorRow(-20, -5, -5, -10, -10, -5, -20, 0),
-  "padded-studded":  armorRow(-30, -10, -10, -20, -20, -10, -30, 0),
+  none:              skillRow(5, 0, 0, 10, 5, 0, 10, 0),
+  leather:           skillRow(0, 0, 0, 0, 0, 0, 0, 0),
+  "elven-chain":     skillRow(-20, -5, -5, -10, -10, -5, -20, 0),
+  "padded-studded":  skillRow(-30, -10, -10, -20, -20, -10, -30, 0),
 };
 
 export const THIEF_SKILL_POINT_RULES = {
@@ -790,7 +782,7 @@ Out of scope for Plan 1b.6 (later plans / sub-projects): Table 35 specialist att
 **4. Coverage:** every new file is small pure functions or `const` data.
 - `weapon.ts` — `weaponAttackPenalty`'s `"proficient"` / `"non-proficient"` / `"related"` arms; both ternary sides of `weaponSpecializationSlotCost` and `weaponSpecializationEffect`; both `&&` operands of `canWeaponSpecialize` (the three test cases cover T/T, T/F, F/T).
 - `nonweapon.ts` — `CLASS_PROFICIENCY_GROUPS` is `const` data; `includes(...)` ternary both sides; `?? 1` and `?? 0` both sides; `autoFail` true/false; `!autoFail && roll <= target` — natural-20 hits the `autoFail` short-circuit, the pass/fail tests hit `roll <= target` both ways; the three guard throws.
-- `thief-skills.ts` — the table `const`s have no executable statements (`racialRow`/`armorRow` helpers are exercised by every table entry); `?? 0` both sides (empty DEX-13 row vs a populated row); the DEX clamp `Math.min`/`Math.max` at both ends and in-range; `resolveThiefSkill`'s `Math.min` at and below 95; `backstabMultiplier`'s four bands + the `assertLevel` throw; `pickPocketsDetectionThreshold`'s `!Number.isInteger(...) || ... < 0` (non-integer and negative both tested), `options` present/absent, `thiefLevel > victimLevel` true/false.
+- `thief-skills.ts` — the table `const`s have no executable statements (the shared `skillRow` helper is exercised by every Table-27 and Table-29 entry); `?? 0` both sides (empty DEX-13 row vs a populated row); the DEX clamp `Math.min`/`Math.max` at both ends and in-range; `resolveThiefSkill`'s `Math.min` at and below 95; `backstabMultiplier`'s four bands + the `assertLevel` throw; `pickPocketsDetectionThreshold`'s `!Number.isInteger(...) || ... < 0` (non-integer and negative both tested), `options` present/absent, `thiefLevel > victimLevel` true/false.
 - No `/* v8 ignore */`. `proficiencies/index.ts` is an `export *` barrel (zero executable statements → 100% by construction).
 
 **5. The rules easy to get wrong (all mirrored in `references/research-notes.md`):**
