@@ -3,6 +3,7 @@ import {
   CLASS_IDS, RACE_IDS, ABILITY_KEYS, SPHERE_NAMES, SPELL_SCHOOLS, WIZARD_SCHOOLS,
   DAMAGE_TYPES, WEAPON_SIZES, WEAPON_CATEGORIES, NONWEAPON_GROUPS, CREATURE_SIZES,
   CASTER_CLASSES, SAVING_THROW_KINDS, DUAL_CLASS_STATES, FEATURE_SOURCE_TYPES, FEATURE_ACTIVATIONS,
+  ALIGNMENTS, MOVEMENT_MODES, DISPOSITIONS, SAVE_MODES, ATTACK_TYPES,
 } from "../../src/data/item/choices";
 
 describe("item schema choice arrays match the engine unions", () => {
@@ -53,5 +54,25 @@ describe("item schema choice arrays match the engine unions", () => {
     expect([...DUAL_CLASS_STATES].sort()).toEqual(["active", "primary", "suppressed"]);
     expect([...FEATURE_SOURCE_TYPES].sort()).toEqual(["class", "kit", "other", "race"]);
     expect([...FEATURE_ACTIVATIONS].sort()).toEqual(["action", "daily", "passive"]);
+  });
+});
+
+describe("actor schema choice arrays", () => {
+  it("ALIGNMENTS = the 9 core Alignment members", () => {
+    expect([...ALIGNMENTS].sort()).toEqual(
+      [
+        "lawful-good", "neutral-good", "chaotic-good",
+        "lawful-neutral", "true-neutral", "chaotic-neutral",
+        "lawful-evil", "neutral-evil", "chaotic-evil",
+      ].sort(),
+    );
+  });
+  it("MOVEMENT_MODES = land/burrow/climb/fly/swim", () => {
+    expect(MOVEMENT_MODES).toEqual(["land", "burrow", "climb", "fly", "swim"]);
+  });
+  it("fixed lists", () => {
+    expect([...DISPOSITIONS].sort()).toEqual(["friendly", "hostile", "neutral"]);
+    expect([...SAVE_MODES].sort()).toEqual(["asClass", "explicit"]);
+    expect([...ATTACK_TYPES].sort()).toEqual(["melee", "ranged"]);
   });
 });
