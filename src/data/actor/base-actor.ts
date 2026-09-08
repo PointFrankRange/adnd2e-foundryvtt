@@ -1,7 +1,7 @@
 // Shared authored-schema fragment for `character` + `npc`, and the abstract
 // TypeDataModel base for all three actor models. Foundry-layer; no logic.
 import { htmlField } from "../common/fields";
-import { ABILITY_KEYS, ALIGNMENTS, SPELL_SCHOOLS, SPHERE_NAMES } from "../item/choices";
+import { ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, SPHERE_NAMES } from "../item/choices";
 
 const { StringField, NumberField, SchemaField, ArrayField } = foundry.data.fields;
 
@@ -52,8 +52,8 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
     }),
     spellcasting: new SchemaField({
       wizard: new SchemaField({
-        specialistSchool: new StringField({ required: true, nullable: true, initial: null, choices: SPELL_SCHOOLS }),
-        opposedSchools: new ArrayField(new StringField({ required: true, blank: false, choices: SPELL_SCHOOLS }), { required: true, initial: [] }),
+        specialistSchool: new StringField({ required: true, nullable: true, initial: null, choices: WIZARD_SCHOOLS }),
+        opposedSchools: new ArrayField(new StringField({ required: true, blank: false, choices: WIZARD_SCHOOLS }), { required: true, initial: [] }),
         spellbookItemIds: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: [] }),
       }),
       priest: new SchemaField({

@@ -1,5 +1,5 @@
 import { htmlField } from "../common/fields";
-import { ALIGNMENTS, ATTACK_TYPES, CREATURE_SIZES, MOVEMENT_MODES, SAVE_MODES } from "../item/choices";
+import { ALIGNMENTS, ATTACK_TYPES, CREATURE_SIZES, SAVE_MODES } from "../item/choices";
 import { Adnd2eActorModel } from "./base-actor";
 
 const { StringField, NumberField, ArrayField, SchemaField } = foundry.data.fields;
@@ -23,10 +23,14 @@ export class CreatureModel extends Adnd2eActorModel {
           value: new NumberField({ required: true, integer: true, initial: 20 }),
           asFighterLevel: new NumberField({ required: true, nullable: true, integer: true, min: 1, initial: null }),
         }),
-        movement: new SchemaField(
-          Object.fromEntries(MOVEMENT_MODES.map((m) => [m, new NumberField({ required: true, integer: true, min: 0, initial: m === "land" ? 12 : 0 })])),
-        ),
-        flyManeuverability: new StringField({ required: true, blank: true, initial: "" }),
+        movement: new SchemaField({
+          land: new NumberField({ required: true, integer: true, min: 0, initial: 12 }),
+          burrow: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+          climb: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+          fly: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+          swim: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+          flyManeuverability: new StringField({ required: true, blank: true, initial: "" }),
+        }),
       }),
       attacks: new ArrayField(
         new SchemaField({
@@ -66,7 +70,6 @@ export class CreatureModel extends Adnd2eActorModel {
         specialDefenses: htmlField(),
         description: htmlField(),
       }),
-      biography: htmlField(),
     };
   }
   // NO prepareDerivedData — the creature derive path is Plan 1c.3d.

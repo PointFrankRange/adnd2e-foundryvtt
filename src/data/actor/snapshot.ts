@@ -1,7 +1,6 @@
-// Thin Foundry adapter: builds the pure ActorSnapshot from a character/npc Actor.
-// Not unit-tested (spec §9) — dev-world verified. All logic lives in deriveCharacter.
-// Task 4 ships this minimal working version; Task 5 hardens it (race/class-walk
-// edge cases, the Schema-cast fallback from Ruling S2).
+// Thin adapter — local-interface casts stand in until the Item/Actor DataModels
+// carry named Schema types (deferred; Ruling S2). Not unit-tested (spec §9) —
+// dev-world verified. All logic lives in deriveCharacter.
 import type { ActorSnapshot, ClassEntry, DualClassState } from "../derive/character";
 import type { ClassId, Race, WizardSchool } from "../../core/types";
 

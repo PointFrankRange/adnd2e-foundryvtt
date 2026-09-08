@@ -876,6 +876,7 @@ git commit -m "feat(system): register Actor DataModels + document classes; snaps
 | §4 `documents/` thin subclasses | Task 5 | empty bodies — override points land with their consumers |
 | §4 `CONFIG.Actor.dataModels` + `documentClass` | Task 5 | |
 | §4 `global.d.ts` augmentation | Task 5 | |
+| §4 `DocumentClassConfig` (CONFIG.<Doc>.documentClass typing) | Task 5 Step 5 | fvtt-types-required for bare `extends Actor` assignability — added by the implementer |
 | §9 pure-core testing | Tasks 2–3 (100% gate); Tasks 1, 4, 5 typecheck + `build` + dev-world | |
 | 1c.2 carry-forward — Item Schema typing | Task 1 | Ruling S2 fallback ladder |
 
