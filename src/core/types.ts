@@ -72,7 +72,15 @@ export interface DerivedAbilities {
   cha: CharismaModifiers;
 }
 
-export type ClassId = "fighter" | "mage" | "cleric" | "thief";
+export type ClassId =
+  | "fighter"
+  | "mage"
+  | "cleric"
+  | "thief"
+  | "paladin"
+  | "ranger"
+  | "druid"
+  | "bard";
 
 /** Which spell-slot table a caster class uses (PHB Tables 21/24/17/18/32). */
 export type SpellProgressionId = "wizard" | "priest" | "paladin" | "ranger" | "bard";
