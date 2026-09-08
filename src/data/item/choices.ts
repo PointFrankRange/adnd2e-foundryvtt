@@ -1,7 +1,7 @@
 // The enumerations the Item DataModel schemas validate against. Kept here as
 // plain arrays (not in the schema files) so they are unit-testable against the
 // engine unions — defineSchema() imports these and stays logic-free.
-import type { AbilityKey, ClassId, CreatureSize, NonweaponGroup, Race, SpellSchool, SphereName, WizardSchool } from "../../core/types";
+import type { AbilityKey, Alignment, ClassId, CreatureSize, MovementMode, NonweaponGroup, Race, SpellSchool, SphereName, WizardSchool } from "../../core/types";
 import type { DamageType, WeaponCategory, WeaponSize } from "../../core/weapons/data";
 
 export const CLASS_IDS: readonly ClassId[] = [
@@ -48,3 +48,15 @@ export const SAVING_THROW_KINDS: readonly string[] = ["none", "negates", "half",
 export const DUAL_CLASS_STATES: readonly string[] = ["primary", "suppressed", "active"];
 export const FEATURE_SOURCE_TYPES: readonly string[] = ["class", "kit", "race", "other"];
 export const FEATURE_ACTIVATIONS: readonly string[] = ["passive", "action", "daily"];
+
+export const ALIGNMENTS: readonly Alignment[] = [
+  "lawful-good", "neutral-good", "chaotic-good",
+  "lawful-neutral", "true-neutral", "chaotic-neutral",
+  "lawful-evil", "neutral-evil", "chaotic-evil",
+];
+
+export const MOVEMENT_MODES: readonly MovementMode[] = ["land", "burrow", "climb", "fly", "swim"];
+
+export const DISPOSITIONS: readonly string[] = ["friendly", "neutral", "hostile"];
+export const SAVE_MODES: readonly string[] = ["explicit", "asClass"];
+export const ATTACK_TYPES: readonly string[] = ["melee", "ranged"];
