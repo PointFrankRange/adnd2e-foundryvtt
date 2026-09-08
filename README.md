@@ -24,6 +24,9 @@ path (added in a later plan) lets you load content you own into your world.
 
 - `src/core/` — framework-free rules engine (pure functions + lookup tables),
   unit-tested with Vitest. Imports nothing from Foundry.
+- `src/config.ts`, `src/settings/registry.ts` — also framework-free: they build
+  `CONFIG.ADND2E` and the optional-rules registry. `src/settings/index.ts` is
+  the thin Foundry glue that registers the settings and reads them back.
 - `src/data/` — Foundry DataModels; thin adapters that delegate computation to `core/`.
 - `src/documents/`, `src/sheets/` — Foundry Document and Application subclasses.
 

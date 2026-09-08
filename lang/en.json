@@ -149,23 +149,23 @@
       },
       "spellFailureFromWisdom": {
         "name": "Priest Spell Failure",
-        "hint": "Apply a priest's chance of spell failure from low Wisdom (PHB Table 5)."
+        "hint": "Apply a priest's chance of spell failure from low Wisdom (PHB Table 5). (not yet enforced)"
       },
       "trainingRequiredToLevel": {
         "name": "Training Required To Advance",
-        "hint": "A character must spend time and money training before gaining a level (DMG optional rule)."
+        "hint": "A character must spend time and money training before gaining a level (DMG optional rule). (not yet enforced)"
       },
       "nonweaponProficienciesUsed": {
         "name": "Use Non-Weapon Proficiencies",
-        "hint": "Enable the non-weapon proficiency system (PHB p.51)."
+        "hint": "Enable the non-weapon proficiency system (PHB p.51). (not yet enforced)"
       },
       "weaponProficienciesUsed": {
         "name": "Use Weapon Proficiencies",
-        "hint": "Enable the weapon proficiency system and non-proficiency penalties (PHB p.51)."
+        "hint": "Enable the weapon proficiency system and non-proficiency penalties (PHB p.51). (not yet enforced)"
       },
       "multiclassHpAveraging": {
         "name": "Average Multi-Class Hit Points",
-        "hint": "A multi-class character's hit points are the averaged roll across classes (PHB p.44)."
+        "hint": "A multi-class character's hit points are the averaged roll across classes (PHB p.44). (not yet enforced)"
       },
       "combatAndTacticsEnabled": {
         "name": "Combat & Tactics: Enabled",

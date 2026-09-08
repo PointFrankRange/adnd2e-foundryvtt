@@ -24,7 +24,7 @@
 
 ## Rulings carried from brainstorming
 
-- **R1 — CONFIG built complete now.** All ~17 `CONFIG.ADND2E` entries from spec §6.1 are populated in this plan. The two Combat-&-Tactics-dependent entries (`weaponProficiencyGroups`) ship as an empty map with a "populated in Sub-project 7" comment — PHB core has no named weapon groups.
+- **R1 — CONFIG built complete now.** All 15 `CONFIG.ADND2E` entries from spec §6.1 are populated in this plan. The two Combat-&-Tactics-dependent entries (`weaponProficiencyGroups`) ship as an empty map with a "populated in Sub-project 7" comment — PHB core has no named weapon groups.
 - **R2 — `OptionalRules` = `core.*` only.** All ~22 setting keys are registered as world settings; `getOptionalRules(): OptionalRules` returns only the eight `core`-group toggles. The `combatAndTactics.*` / `skillsAndPowers.*` / `spellsAndMagic.*` keys persist but are not in the typed bag until their sub-project.
 - **R3 — pure core + thin adapter.** Logic lives in `buildAdnd2eConfig()` / `readOptionalRules(get)` / the `SETTING_DESCRIPTORS` data array — all pure, all covered. `registerSettings()` and `getOptionalRules()` are untested glue.
 - **R4 — `encumbranceCategories` in CONFIG is labels only.** Spec §6.1 says "+ move multipliers"; the multipliers stay solely in `core/encumbrance/movement.ts` (single source of truth). CONFIG carries the six labels.
@@ -54,7 +54,7 @@
 - `src/types/global.d.ts` — augment `CONFIG.ADND2E`; replace the single `exampleSetting` `SettingConfig` entry with the 22 real keys.
 - `system.json` — fill `documentTypes` (3 Actor / 9 Item / 1 ActiveEffect), add `packFolders`, keep `packs` absent.
 - `lang/en.json` — replace `exampleApp` / `exampleSetting` with the full `ADND2E.*` tree.
-- `tsconfig.core.json` — `include` gains `src/config.ts`, `src/settings/registry.ts`, `tests/config`, `tests/settings`, `tests/lang`.
+- `tsconfig.core.json` — `include` gains only `src/config.ts` and `src/settings/registry.ts`; test dirs stay out (JSON/node type graphs).
 - `vitest.config.ts` — `coverage.include` gains `src/config.ts`, `src/settings/registry.ts`.
 - `eslint.config.js` — the "framework-free" `files` list and the "Foundry globals" `ignores` list gain the two pure modules and their test dirs.
 
@@ -241,7 +241,7 @@ git commit -m "feat(core): add SpellSchool/CreatureSize/MovementMode/Alignment; 
   - `type CreatureIntelligenceBand = "non" | "animal" | "semi" | "low" | "average" | "very" | "high" | "exceptional" | "genius" | "supra-genius" | "godlike"`
   - `type TreasureType` — `"A" | "B" | … | "Z"`
   - `interface CurrencyDef { readonly label: string; readonly inCp: number }`
-  - `interface Adnd2eConfig { … }` (17 readonly members — see Step 3)
+  - `interface Adnd2eConfig { … }` (15 readonly members — see Step 3)
   - `function buildAdnd2eConfig(): Adnd2eConfig` — returns a deep-frozen object.
 
 - [ ] **Step 1: Write the failing test** — `tests/config/build-config.test.ts`

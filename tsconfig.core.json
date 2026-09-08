@@ -4,5 +4,10 @@
     "types": [],
     "lib": ["ESNext"]
   },
+  // The two shipped pure modules join src/core here so `tsc` proves them
+  // Foundry-free. Their test dirs (tests/config, tests/settings, tests/lang)
+  // stay out: they import JSON modules / node built-ins whose type graphs need
+  // types this project strips (`types: []`). ESLint's no-restricted-globals
+  // block still fences those test dirs against Foundry globals.
   "include": ["src/core", "tests/core", "src/config.ts", "src/settings/registry.ts"]
 }

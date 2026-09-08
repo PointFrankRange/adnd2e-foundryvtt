@@ -225,6 +225,8 @@ export function buildAdnd2eConfig(): Adnd2eConfig {
       cp: { label: "ADND2E.currency.cp", inCp: 1 },
     },
   };
+  // CONFIG.ADND2E is frozen: later sub-projects and third-party modules extend it
+  // by adding to buildAdnd2eConfig(), not by mutating CONFIG at runtime.
   deepFreeze(cfg as unknown as Record<string, unknown>);
   return cfg;
 }
