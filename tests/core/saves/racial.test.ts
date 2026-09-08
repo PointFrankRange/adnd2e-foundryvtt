@@ -62,6 +62,11 @@ describe("racialSaveBonus", () => {
     expect(racialSaveBonus("dwarf", "spell", 8)).toBe(2);
     expect(racialSaveBonus("dwarf", "spell", 3)).toBe(0);
   });
+
+  it("validates CON even when the race/category does not qualify", () => {
+    expect(() => racialSaveBonus("human", "spell", 999)).toThrow(RangeError);
+    expect(() => racialSaveBonus("elf", "bw", 0)).toThrow(RangeError);
+  });
 });
 
 describe("sleepCharmResistance", () => {

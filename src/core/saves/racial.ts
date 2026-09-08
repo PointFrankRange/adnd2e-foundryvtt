@@ -14,6 +14,7 @@ const CON_SAVE_BANDS: ReadonlyArray<readonly [number, number]> = [
   [Infinity, 5],
 ];
 
+/** PHB Table 9 Constitution saving-throw bonus. Only demihumans use it — see racialSaveBonus. */
 export function racialConSaveBonus(con: number): number {
   assertAbilityScore(con, "con");
   return CON_SAVE_BANDS.find(([max]) => con <= max)![1];
@@ -30,18 +31,31 @@ const RACIAL_SAVE_CATEGORIES: Record<Race, ReadonlySet<SaveCategory | "poison">>
   human: new Set<SaveCategory | "poison">(),
 };
 
+/**
+ * The PHB Table 9 bonus this race gets on a saving throw of this category, or 0
+ * if the race does not qualify. Dwarves/halflings: rod-staff-wand, spell, and
+ * poison (a `ppd` save tagged "poison"). Gnomes: rod-staff-wand and spell only.
+ */
 export function racialSaveBonus(
   race: Race,
   category: SaveCategory,
   con: number,
   tags: readonly SaveEffectTag[] = [],
 ): number {
+  assertAbilityScore(con, "con");
   const applicable = RACIAL_SAVE_CATEGORIES[race];
   const matches =
-    applicable.has(category) || (category === "ppd" && tags.includes("poison") && applicable.has("poison"));
+    applicable.has(category) ||
+    (category === "ppd" && tags.includes("poison") && applicable.has("poison"));
   return matches ? racialConSaveBonus(con) : 0;
 }
 
+/**
+ * Percentage chance to ignore a *sleep* or *charm* effect entirely (elf 90,
+ * half-elf 30, others 0). Roll d100 BEFORE the saving throw; on `roll <= result`
+ * the effect is negated and no save is made. This is NOT a d20 modifier — never
+ * add it to a saveTarget rollModifier.
+ */
 export function sleepCharmResistance(race: Race): number {
   if (race === "elf") return 90;
   if (race === "half-elf") return 30;

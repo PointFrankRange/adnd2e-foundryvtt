@@ -1,4 +1,4 @@
-import type { AbilityKey, AbilityScores, ClassGroup, DerivedAbilities } from "../types";
+import type { AbilityKey, AbilityScores, ClassGroup, DerivedAbilities, Race } from "../types";
 import type { OptionalRules } from "../options";
 import { DEFAULT_OPTIONAL_RULES } from "../options";
 import { strength } from "./strength";
@@ -7,7 +7,7 @@ import { constitution } from "./constitution";
 import { intelligence } from "./intelligence";
 import { wisdom } from "./wisdom";
 import { charisma } from "./charisma";
-import { applyRacialAdjustments, applyRacialDeltas, type Race } from "./racial-adjustments";
+import { applyRacialAdjustments, applyRacialDeltas } from "./racial-adjustments";
 import { assertAbilityScore } from "../errors";
 
 export * from "./racial-adjustments";

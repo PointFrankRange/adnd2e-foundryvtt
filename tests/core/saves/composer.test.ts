@@ -82,4 +82,8 @@ describe("saveTarget()", () => {
   it("rejects invalid level (via saveBaseTarget)", () => {
     expect(() => saveTarget({ ...base, level: 0, category: "spell" })).toThrow(RangeError);
   });
+
+  it("rejects invalid CON even for a non-qualifying race (via racialSaveBonus)", () => {
+    expect(() => saveTarget({ ...base, category: "spell", con: 999 })).toThrow(RangeError);
+  });
 });
