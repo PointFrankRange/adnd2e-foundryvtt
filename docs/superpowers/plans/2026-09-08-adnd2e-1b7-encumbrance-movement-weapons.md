@@ -216,8 +216,7 @@ export function encumbranceStep(strengthScore: number): number {
   if (strengthScore <= 9) return 5;
   if (strengthScore <= 11) return 6;
   if (strengthScore <= 13) return 8;
-  if (strengthScore <= 15) return 10;
-  if (strengthScore === 16) return 10;
+  if (strengthScore <= 16) return 10; // PHB bands 14-15 and 16 both step 10
   if (strengthScore === 17) return 12;
   return 13; // 18 and every exceptional band; >= 19 extrapolated
 }
