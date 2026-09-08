@@ -9,6 +9,8 @@ import {
   backstabMultiplier,
   encumbranceCategory,
   specialistAttacksPerRound,
+  getChassis,
+  paladinSpellSlots,
 } from "../../src/core";
 
 describe("src/core barrel", () => {
@@ -34,5 +36,7 @@ describe("src/core barrel", () => {
       encumbranceCategory({ carried: 0, strengthScore: 18, weightAllowance: 110, maxPress: 255 }),
     ).toBe("unencumbered");
     expect(specialistAttacksPerRound(1, "melee")).toEqual({ attacks: 3, rounds: 2 });
+    expect(getChassis("druid").maxLevel).toBe(14);
+    expect(paladinSpellSlots(9)).toEqual([1, 0, 0, 0]);
   });
 });
