@@ -11,6 +11,11 @@ export interface AbilityScores {
 
 export type ClassGroup = "warrior" | "wizard" | "priest" | "rogue";
 
+export type Race = "human" | "dwarf" | "elf" | "gnome" | "half-elf" | "halfling";
+
+/** Qualifiers on a saving throw that gate category-level modifiers. */
+export type SaveEffectTag = "poison" | "mind-affecting" | "dodgeable";
+
 export interface StrengthModifiers {
   hitProb: number;
   damageAdj: number;

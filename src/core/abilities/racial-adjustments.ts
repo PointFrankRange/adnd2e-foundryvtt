@@ -1,7 +1,5 @@
 // PHB Table 7 (racial ability min/max, p.20) + Table 8 (racial adjustments, p.20).
-import type { AbilityKey, AbilityScores } from "../types";
-
-export type Race = "human" | "dwarf" | "elf" | "gnome" | "half-elf" | "halfling";
+import type { AbilityKey, AbilityScores, Race } from "../types";
 
 export const RACIAL_ABILITY_ADJUSTMENTS: Record<Race, Partial<Record<AbilityKey, number>>> = {
   human: {},
