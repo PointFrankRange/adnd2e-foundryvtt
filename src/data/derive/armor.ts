@@ -1,21 +1,31 @@
 export interface ArmorAcInput {
-  /** AC value the armor grants (e.g. plate = 3); ignored for a shield */
+  /** the armor's AC rating (10 none .. 1 full plate); ignored for a shield */
   baseAc: number;
-  /** enchantment bonus (+1 armor, +2 shield …) */
+  /** this item's magic enchantment bonus (+1 armor, +2 shield …), positive */
   magicBonus: number;
   isShield: boolean;
-  /** AC improvement a shield gives (usually 1) */
+  /** positive magnitude a shield lowers AC by (0 default; 1 for a normal shield) */
   shieldAcBonus: number;
 }
 
+export interface ArmorAcContribution {
+  /** the armor's AC rating, to feed `armorClass({ baseArmorAc })`; `null` for a shield */
+  baseArmorAc: number | null;
+  /** positive magnitude, to feed `armorClass({ shieldBonus })`; `null` for body armor */
+  shieldBonus: number | null;
+  /** this item's magic protection (positive), to sum into `armorClass({ magicBonus })` */
+  magicBonus: number;
+}
+
 /**
- * This item's contribution to the wearer's AC, already AC-signed so Plan 1c.3
- * can sum contributions. Body armor: `baseAc − magicBonus` (a better AC is a
- * lower number, so magic subtracts). Shield: `−(shieldAcBonus + magicBonus)`.
+ * Decompose one armor / shield item into the raw components the engine's
+ * `armorClass()` consumes. Item-local — no actor context. Plan 1c.3's AC
+ * composer takes `baseArmorAc` from the equipped body armor, `shieldBonus`
+ * from the equipped shield, and sums every `magicBonus`.
  */
-export function armorAcContribution(input: ArmorAcInput): { acBonus: number } {
+export function armorAcContribution(input: ArmorAcInput): ArmorAcContribution {
   if (input.isShield) {
-    return { acBonus: -(input.shieldAcBonus + input.magicBonus) };
+    return { baseArmorAc: null, shieldBonus: input.shieldAcBonus, magicBonus: input.magicBonus };
   }
-  return { acBonus: input.baseAc - input.magicBonus };
+  return { baseArmorAc: input.baseAc, shieldBonus: null, magicBonus: input.magicBonus };
 }

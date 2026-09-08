@@ -26,7 +26,7 @@
 ## Rulings carried from brainstorming
 
 - **D1 — `class` and `race` items reference the engine by id.** `class` carries `chassisId: ClassId`, `specialistSchool: WizardSchool | null`, `kit: string | null`, `grantedFeatures: string[]`, and the instance fields `xp` / `hpRolls` / `dualClassState`. `race` carries `raceId: Race`, `size`, `baseMovement`, `infravision`, `classLevelLimits`, `allowedClasses`, `allowedMulticlass`, `bonusLanguages`, `grantedFeatures`. Neither copies a field the engine already holds (`group`, `hitDie`, `xpThresholds`, `armorAllowed`, ability adjustments, thief adjustments, save bonuses …). This supersedes spec §5.4's full-copy `class`/`race` schemas and its `TableRef` fields — recorded as a spec deviation, spec doc unchanged.
-- **D2 — Item DataModels are thin.** Only item-local derived data (no actor context): `physical-item` total weight, `armor` AC contribution, `class`-item level from its own `xp`, and the `weapon` → `WeaponData` projection. Every one is a pure `src/data/derive/` function. THAC0 / AC total / saves / slots / encumbrance category are actor-context — Plan 1c.3.
+- **D2 — Item DataModels are thin.** Only item-local derived data (no actor context): `physical-item` total weight, `armor` AC contribution (raw `armorClass()` inputs, decomposed per item; 1c.3's AC composer assembles them), `class`-item level from its own `xp`, and the `weapon` → `WeaponData` projection. Every one is a pure `src/data/derive/` function. THAC0 / AC total / saves / slots / encumbrance category are actor-context — Plan 1c.3.
 - **D3 — no custom `Item` document subclass.** `TypeDataModel.prepareDerivedData()` runs without one. `src/documents/item.ts` (getRollData, use()) lands in 1c.3 with `documents/actor.ts`.
 - **D4 — loose schema typing is acceptable.** Per-model strict `Schema` types are NOT required; `foundry.abstract.TypeDataModel` with a loose schema is fine for 1c.2 (sheets are stubs until 1c.4 / SP2). The acceptance criterion for the model tasks is `npm run typecheck && npm run lint && npm run build` all green.
 
@@ -38,7 +38,7 @@
 - `src/data/item/subtypes.ts` — `ITEM_SUBTYPES: readonly ItemSubtype[]` (the 9 machine names) + `type ItemSubtype`.
 - `src/data/item/choices.ts` — the field-choice arrays (`CLASS_IDS`, `RACE_IDS`, `WIZARD_SCHOOLS`, `SPELL_SCHOOLS`, `SPHERE_NAMES`, `ABILITY_KEYS`, `DAMAGE_TYPES`, `WEAPON_SIZES`, `WEAPON_CATEGORIES`, `NONWEAPON_GROUPS`, `CREATURE_SIZES`, `CASTER_CLASSES`, `SAVING_THROW_KINDS`, `DUAL_CLASS_STATES`, `FEATURE_SOURCE_TYPES`, `FEATURE_ACTIVATIONS`) — each a `readonly string[]` drift-checked against its `core/types.ts` union.
 - `src/data/derive/physical-item.ts` — `totalWeight({ weight, quantity })`.
-- `src/data/derive/armor.ts` — `armorAcContribution({ baseAc, magicBonus, isShield, shieldAcBonus })`.
+- `src/data/derive/armor.ts` — `armorAcContribution({ baseAc, magicBonus, isShield, shieldAcBonus })` → raw `armorClass()` input components.
 - `src/data/derive/class-item.ts` — `classItemLevel(chassisId, xp)`, `classItemCanLevelUp(chassisId, xp, hpRollsLength)`.
 - `src/data/derive/weapon.ts` — `toWeaponData(source)` → the engine's `WeaponData` shape.
 
@@ -296,7 +296,7 @@ git commit -m "feat(data): item subtype + schema-choice enums, drift-checked aga
 - Consumes: `getChassis` from `src/core/classes/chassis.ts`; `levelForXp` from `src/core/classes/progression.ts`; `WeaponData`, `WeaponCategory`, `WeaponSize`, `DamageType`, `WeaponRange` from `src/core/weapons/data.ts`; `ClassId` from `src/core/types.ts`.
 - Produces:
   - `totalWeight(input: { weight: number; quantity: number }): number`
-  - `armorAcContribution(input: { baseAc: number; magicBonus: number; isShield: boolean; shieldAcBonus: number }): { acBonus: number }`
+  - `armorAcContribution(input: { baseAc: number; magicBonus: number; isShield: boolean; shieldAcBonus: number }): { baseArmorAc: number | null; shieldBonus: number | null; magicBonus: number }`
   - `classItemLevel(chassisId: ClassId, xp: number): number`
   - `classItemCanLevelUp(chassisId: ClassId, xp: number, hpRollsLength: number): boolean`
   - `toWeaponData(source: WeaponSource): WeaponData` where `interface WeaponSource { name: string; category: WeaponCategory; damageVsSM: string | null; damageVsL: string | null; damageType: DamageType | null; speedFactor: number; weight: number; size: WeaponSize; rateOfFire: string | null; range: WeaponRange | null }`
@@ -328,13 +328,17 @@ import { describe, expect, it } from "vitest";
 import { armorAcContribution } from "../../../src/data/derive/armor";
 
 describe("armorAcContribution", () => {
-  it("body armor: baseAc minus the magic bonus (magic lowers AC)", () => {
-    expect(armorAcContribution({ baseAc: 5, magicBonus: 0, isShield: false, shieldAcBonus: 0 }).acBonus).toBe(5);
-    expect(armorAcContribution({ baseAc: 3, magicBonus: 1, isShield: false, shieldAcBonus: 0 }).acBonus).toBe(2);
+  it("body armor: reports its AC rating and magic bonus, no shield component", () => {
+    expect(armorAcContribution({ baseAc: 5, magicBonus: 0, isShield: false, shieldAcBonus: 0 }))
+      .toEqual({ baseArmorAc: 5, shieldBonus: null, magicBonus: 0 });
+    expect(armorAcContribution({ baseAc: 3, magicBonus: 1, isShield: false, shieldAcBonus: 0 }))
+      .toEqual({ baseArmorAc: 3, shieldBonus: null, magicBonus: 1 });
   });
-  it("shield: contributes minus (shieldAcBonus + magicBonus), AC-signed", () => {
-    expect(armorAcContribution({ baseAc: 0, magicBonus: 0, isShield: true, shieldAcBonus: 1 }).acBonus).toBe(-1);
-    expect(armorAcContribution({ baseAc: 0, magicBonus: 2, isShield: true, shieldAcBonus: 1 }).acBonus).toBe(-3);
+  it("shield: reports its bonus magnitude and magic bonus, no body-armor component", () => {
+    expect(armorAcContribution({ baseAc: 0, magicBonus: 0, isShield: true, shieldAcBonus: 1 }))
+      .toEqual({ baseArmorAc: null, shieldBonus: 1, magicBonus: 0 });
+    expect(armorAcContribution({ baseAc: 0, magicBonus: 2, isShield: true, shieldAcBonus: 1 }))
+      .toEqual({ baseArmorAc: null, shieldBonus: 1, magicBonus: 2 });
   });
 });
 ```
@@ -428,25 +432,35 @@ export function totalWeight(input: { weight: number; quantity: number }): number
 
 ```ts
 export interface ArmorAcInput {
-  /** AC value the armor grants (e.g. plate = 3); ignored for a shield */
+  /** the armor's AC rating (10 none .. 1 full plate); ignored for a shield */
   baseAc: number;
-  /** enchantment bonus (+1 armor, +2 shield …) */
+  /** this item's magic enchantment bonus (+1 armor, +2 shield …), positive */
   magicBonus: number;
   isShield: boolean;
-  /** AC improvement a shield gives (usually 1) */
+  /** positive magnitude a shield lowers AC by (0 default; 1 for a normal shield) */
   shieldAcBonus: number;
 }
 
+export interface ArmorAcContribution {
+  /** the armor's AC rating, to feed `armorClass({ baseArmorAc })`; `null` for a shield */
+  baseArmorAc: number | null;
+  /** positive magnitude, to feed `armorClass({ shieldBonus })`; `null` for body armor */
+  shieldBonus: number | null;
+  /** this item's magic protection (positive), to sum into `armorClass({ magicBonus })` */
+  magicBonus: number;
+}
+
 /**
- * This item's contribution to the wearer's AC, already AC-signed so Plan 1c.3
- * can sum contributions. Body armor: `baseAc − magicBonus` (a better AC is a
- * lower number, so magic subtracts). Shield: `−(shieldAcBonus + magicBonus)`.
+ * Decompose one armor / shield item into the raw components the engine's
+ * `armorClass()` consumes. Item-local — no actor context. Plan 1c.3's AC
+ * composer takes `baseArmorAc` from the equipped body armor, `shieldBonus`
+ * from the equipped shield, and sums every `magicBonus`.
  */
-export function armorAcContribution(input: ArmorAcInput): { acBonus: number } {
+export function armorAcContribution(input: ArmorAcInput): ArmorAcContribution {
   if (input.isShield) {
-    return { acBonus: -(input.shieldAcBonus + input.magicBonus) };
+    return { baseArmorAc: null, shieldBonus: input.shieldAcBonus, magicBonus: input.magicBonus };
   }
-  return { acBonus: input.baseAc - input.magicBonus };
+  return { baseArmorAc: input.baseAc, shieldBonus: null, magicBonus: input.magicBonus };
 }
 ```
 

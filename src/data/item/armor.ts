@@ -28,7 +28,7 @@ export class ArmorItemModel extends Adnd2eItemModel {
       weight: number;
       quantity: number;
       totalWeight?: number;
-      acContribution?: unknown;
+      acContribution?: import("../derive/armor").ArmorAcContribution;
     };
     sys.totalWeight = totalWeight({ weight: sys.weight, quantity: sys.quantity });
     sys.acContribution = armorAcContribution({

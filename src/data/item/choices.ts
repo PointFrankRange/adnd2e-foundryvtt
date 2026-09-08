@@ -1,7 +1,7 @@
 // The enumerations the Item DataModel schemas validate against. Kept here as
 // plain arrays (not in the schema files) so they are unit-testable against the
 // engine unions — defineSchema() imports these and stays logic-free.
-import type { AbilityKey, ClassId, CreatureSize, NonweaponGroup, Race, SphereName, WizardSchool } from "../../core/types";
+import type { AbilityKey, ClassId, CreatureSize, NonweaponGroup, Race, SpellSchool, SphereName, WizardSchool } from "../../core/types";
 import type { DamageType, WeaponCategory, WeaponSize } from "../../core/weapons/data";
 
 export const CLASS_IDS: readonly ClassId[] = [
@@ -20,7 +20,7 @@ export const WIZARD_SCHOOLS: readonly WizardSchool[] = [
 ];
 
 /** The nine schools of magic + Wild (= core `SpellSchool`). */
-export const SPELL_SCHOOLS: readonly string[] = [...WIZARD_SCHOOLS, "lesser-divination", "wild"];
+export const SPELL_SCHOOLS: readonly SpellSchool[] = [...WIZARD_SCHOOLS, "lesser-divination", "wild"];
 
 export const SPHERE_NAMES: readonly SphereName[] = [
   "all", "animal", "astral", "charm", "combat", "creation", "divination", "elemental",
