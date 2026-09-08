@@ -7,3 +7,4 @@ export * from "./saves";
 export * from "./dice";
 export * from "./combat";
 export * from "./magic";
+export * from "./proficiencies";
