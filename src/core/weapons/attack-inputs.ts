@@ -2,7 +2,6 @@
 // by how the weapon is used. The engine takes the already-derived adjustment
 // numbers (strength() / dexterity()) — it does not derive them.
 import type { AttackMode } from "./data";
-import { selectDamageDice } from "./data";
 
 export interface WeaponAbilityAdjustments {
   /** strength().hitProb */
@@ -60,9 +59,3 @@ export function resolveWeaponAttackInputs(
     strengthDamageAdj: 0,
   };
 }
-
-/**
- * Re-export from data.ts for convenience (tests use this from attack-inputs,
- * matching the test file organization).
- */
-export { selectDamageDice };

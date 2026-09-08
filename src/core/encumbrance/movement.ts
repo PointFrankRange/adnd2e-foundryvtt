@@ -50,18 +50,20 @@ const CATEGORY_RATE: Record<EncumbranceCategory, (base: number) => number> = {
 };
 
 function table48Rate(input: MovementInput): number {
+  // STR <= 3: carried in (last ceiling, maxPress] is "staggering" (severe) -> rate 1; > maxPress -> immobile (0).
   if (input.strengthScore <= STR3_MAX) {
     if (input.carried > input.maxPress) return 0;
     for (const entry of STR3_ROW) {
       if (input.carried <= entry.maxCarried) return Math.min(entry.rate, input.baseMove);
     }
-    return input.baseMove <= 1 ? 0 : 1;
+    return 1;
   }
   if (input.carried > input.maxPress) return 0;
+  // PC precondition: base moves are 6 or 12 (Table 64); a faster actor is capped to the 12-column headers.
   const tier: MovementTier = input.baseMove >= 12 ? 12 : 6;
   const thresholds = encumbranceThresholds(input);
   for (let i = 0; i < thresholds.length; i++) {
-    if (thresholds[i] > input.carried) return HEADERS[tier][i];
+    if (input.carried <= thresholds[i]) return HEADERS[tier][i]; // inclusive ceiling
   }
   return 1; // staggering: past the last threshold but within max press
 }
@@ -86,7 +88,7 @@ export function encumbrancePenalty(input: {
   baseMove: number;
   currentMove: number;
 }): { attackRoll: number; armorClass: number } {
-  if (input.currentMove === 1 && input.currentMove < input.baseMove) {
+  if (input.currentMove <= 1 && input.currentMove < input.baseMove) {
     return { attackRoll: -4, armorClass: 3 };
   }
   const ratio = input.currentMove / input.baseMove;

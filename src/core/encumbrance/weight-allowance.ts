@@ -50,12 +50,12 @@ export function encumbranceThresholds(
   return Array.from({ length: THRESHOLD_COUNT }, (_unused, i) => input.weightAllowance + i * step);
 }
 
-function str3Category(carried: number): EncumbranceCategory {
+function str3Category(carried: number, maxPress: number): EncumbranceCategory {
   if (carried <= 5) return "unencumbered";
-  if (carried === 6) return "light";
-  if (carried === 7) return "moderate";
+  if (carried <= 6) return "light";
+  if (carried <= 7) return "moderate";
   if (carried <= 9) return "heavy";
-  if (carried === 10) return "severe";
+  if (carried <= maxPress) return "severe";
   return "immobile";
 }
 
@@ -65,7 +65,7 @@ export function encumbranceCategory(input: EncumbranceInput): EncumbranceCategor
   if (!Number.isFinite(input.carried) || input.carried < 0) {
     throw new RangeError(`carried weight must be a number >= 0, got ${input.carried}`);
   }
-  if (input.strengthScore <= STR3_MAX) return str3Category(input.carried);
+  if (input.strengthScore <= STR3_MAX) return str3Category(input.carried, input.maxPress);
 
   const t = encumbranceThresholds(input);
   if (input.carried <= input.weightAllowance) return "unencumbered";

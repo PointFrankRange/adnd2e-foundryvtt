@@ -27,11 +27,22 @@ describe("modifiedMovementRate() — category rule", () => {
 });
 
 describe("modifiedMovementRate() — table48 rule", () => {
+  it("carried exactly at a threshold uses that column (inclusive ceiling)", () => {
+    // STR 18, allowance 110, step 13: threshold(0)=110, threshold(1)=123
+    const atAllowance = modifiedMovementRate({
+      baseMove: 12, carried: 110, strengthScore: 18, weightAllowance: 110, maxPress: 255, rule: "table48",
+    });
+    expect(atAllowance).toEqual({ rate: 12, category: "unencumbered" });
+    const atNext = modifiedMovementRate({
+      baseMove: 12, carried: 123, strengthScore: 18, weightAllowance: 110, maxPress: 255, rule: "table48",
+    });
+    expect(atNext.rate).toBe(11);
+  });
   it("PHB Tarus example: base 12, STR 17 (allowance 85), 140 lbs -> rate 7", () => {
     const r = modifiedMovementRate({
       baseMove: 12, carried: 140, strengthScore: 17, weightAllowance: 85, maxPress: 220, rule: "table48",
     });
-    expect(r.rate).toBe(7); // thresholds 85,97,109,121,133,145,... first > 140 is 145 (index 5) -> HEADERS[12][5] = 7
+    expect(r.rate).toBe(7); // thresholds 85,97,109,121,133,145,... first >= 140 is 145 (index 5) -> HEADERS[12][5] = 7
   });
   it("unencumbered stays at base", () => {
     const r = modifiedMovementRate({
@@ -66,8 +77,6 @@ describe("modifiedMovementRate() — table48 rule", () => {
     expect(at9.rate).toBe(3);
     const pastMax = modifiedMovementRate({ baseMove: 12, carried: 10, strengthScore: 3, weightAllowance: 5, maxPress: 10, rule: "table48" });
     expect(pastMax.rate).toBe(1); // Beyond all STR3_ROW entries but within maxPress
-    const slowPastMax = modifiedMovementRate({ baseMove: 1, carried: 10, strengthScore: 3, weightAllowance: 5, maxPress: 10, rule: "table48" });
-    expect(slowPastMax.rate).toBe(0); // baseMove <= 1 in loop-miss case
     const over = modifiedMovementRate({ baseMove: 12, carried: 11, strengthScore: 3, weightAllowance: 5, maxPress: 10, rule: "table48" });
     expect(over.rate).toBe(0);
   });
@@ -94,5 +103,8 @@ describe("encumbrancePenalty() (PHB p.79)", () => {
   });
   it("a naturally slow (base 1) creature is not penalised", () => {
     expect(encumbrancePenalty({ baseMove: 1, currentMove: 1 })).toEqual({ attackRoll: 0, armorClass: 0 });
+  });
+  it("immobile (move 0) is at least as bad as staggering", () => {
+    expect(encumbrancePenalty({ baseMove: 12, currentMove: 0 })).toEqual({ attackRoll: -4, armorClass: 3 });
   });
 });

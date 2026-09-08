@@ -69,6 +69,11 @@ describe("encumbranceCategory()", () => {
     expect(encumbranceCategory({ ...s3, carried: 10 })).toBe("severe");
     expect(encumbranceCategory({ ...s3, carried: 11 })).toBe("immobile");
   });
+  it("STR <= 3 is monotonic on fractional weight", () => {
+    const s3 = { strengthScore: 3, weightAllowance: 5, maxPress: 10 };
+    expect(encumbranceCategory({ ...s3, carried: 6.5 })).toBe("moderate");
+    expect(encumbranceCategory({ ...s3, carried: 9.5 })).toBe("severe");
+  });
   it("rejects a negative carried weight or bad score", () => {
     expect(() => encumbranceCategory({ ...str18, carried: -1 })).toThrow(RangeError);
     expect(() => encumbranceCategory({ carried: 10, strengthScore: 0, weightAllowance: 5, maxPress: 10 })).toThrow(RangeError);

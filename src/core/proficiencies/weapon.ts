@@ -25,7 +25,7 @@ export function weaponSpecializationSlotCost(category: SpecializationCategory): 
 export interface SpecializationEffect {
   toHit: number;
   damage: number;
-  /** the +2 point-blank attack bonus a bow/crossbow specialist gains (PHB p.52); 0 for melee */
+  /** the +2 point-blank attack bonus a bow/crossbow specialist gains (PHB p.52); 0 for melee. Point-blank range is 6-30 ft for bows, 6-60 ft for crossbows; the caller decides when the target is in that band. */
   pointBlankAttackBonus: number;
 }
 

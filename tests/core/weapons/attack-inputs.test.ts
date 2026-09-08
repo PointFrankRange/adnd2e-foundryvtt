@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { resolveWeaponAttackInputs, selectDamageDice } from "../../../src/core/weapons/attack-inputs";
+import { resolveWeaponAttackInputs } from "../../../src/core/weapons/attack-inputs";
+import { selectDamageDice } from "../../../src/core/weapons/data";
 
 const strong = { strengthHitProb: 1, strengthDamageAdj: 3, dexterityMissileAttackAdj: 2 };
 const weak = { strengthHitProb: -2, strengthDamageAdj: -1, dexterityMissileAttackAdj: 0 };
@@ -39,5 +40,9 @@ describe("selectDamageDice()", () => {
     expect(selectDamageDice(w, "L")).toBe("2d6");
     expect(selectDamageDice(w, "M")).toBe("1d8");
     expect(selectDamageDice(w, "S")).toBe("1d8");
+  });
+  it("returns null for a weapon with no damage of its own", () => {
+    expect(selectDamageDice({ damageVsSM: null, damageVsL: null }, "L")).toBeNull();
+    expect(selectDamageDice({ damageVsSM: null, damageVsL: null }, "M")).toBeNull();
   });
 });

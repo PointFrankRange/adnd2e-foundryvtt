@@ -11,6 +11,7 @@ export type DamageType =
   | "piercing-bludgeoning";
 
 export type WeaponCategory = "melee" | "thrown" | "bow" | "crossbow";
+// A weapon's category is its primary use; range !== null discriminates a thrown/fired weapon. AttackMode (in this file) is how it is used for one attack.
 
 /** How a weapon is being used for a given attack (governs Strength / Dexterity). */
 export type AttackMode = "melee" | "thrown" | "fired";
@@ -24,18 +25,23 @@ export interface WeaponRange {
 export interface WeaponData {
   name: string;
   category: WeaponCategory;
-  /** damage dice vs. Small/Medium targets, e.g. "1d8" */
-  damageVsSM: string;
-  /** damage dice vs. Large targets, e.g. "2d6" */
-  damageVsL: string;
-  damageType: DamageType;
+  /**
+   * Damage dice vs. Small/Medium targets, e.g. "1d8". `null` for a bow or
+   * crossbow itself — the PHB weapon table shows "—" there; the ammunition
+   * (arrow / quarrel) carries the damage and type.
+   */
+  damageVsSM: string | null;
+  /** Damage dice vs. Large targets, e.g. "2d6"; `null` for a bow/crossbow itself. */
+  damageVsL: string | null;
+  /** `null` for a bow/crossbow itself — the ammunition carries the type. */
+  damageType: DamageType | null;
   speedFactor: number;
   /** pounds */
   weight: number;
   size: WeaponSize;
   /** rate of fire, e.g. "1", "2", "3/2"; null for weapons with no RoF */
   rateOfFire: string | null;
-  /** range increments in the game's distance unit; null for pure melee weapons */
+  /** range increments, in yards (the PHB weapon-table unit); null for pure melee weapons */
   range: WeaponRange | null;
   proficiencyGroup: string;
   handsRequired: 1 | 2;
@@ -45,6 +51,6 @@ export interface WeaponData {
 export function selectDamageDice(
   weapon: Pick<WeaponData, "damageVsSM" | "damageVsL">,
   targetSize: WeaponSize,
-): string {
+): string | null {
   return targetSize === "L" ? weapon.damageVsL : weapon.damageVsSM;
 }
