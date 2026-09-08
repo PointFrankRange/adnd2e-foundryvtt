@@ -1,4 +1,4 @@
-import { SYSTEM_ID } from "../helpers/constants";
+import { SYSTEM_ID } from "../constants";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
