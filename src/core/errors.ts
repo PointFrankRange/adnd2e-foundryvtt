@@ -5,3 +5,15 @@ export function assertAbilityScore(value: number, label: AbilityKey): void {
     throw new RangeError(`${label} ability score must be an integer in [1, 25], got ${value}`);
   }
 }
+
+export function assertLevel(value: number, label = "level"): void {
+  if (!Number.isInteger(value) || value < 1) {
+    throw new RangeError(`${label} must be an integer >= 1, got ${value}`);
+  }
+}
+
+export function assertXp(value: number): void {
+  if (!Number.isInteger(value) || value < 0) {
+    throw new RangeError(`experience points must be an integer >= 0, got ${value}`);
+  }
+}

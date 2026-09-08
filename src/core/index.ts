@@ -2,3 +2,5 @@ export * from "./types";
 export * from "./options";
 export * from "./errors";
 export * from "./abilities";
+export * from "./classes";
+export * from "./saves";
