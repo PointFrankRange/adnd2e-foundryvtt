@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assertAbilityScore, assertLevel, assertXp } from "../../src/core/errors";
+import { assertAbilityScore, assertLevel, assertXp, assertD20 } from "../../src/core/errors";
 
 describe("assertAbilityScore", () => {
   it("accepts integers 1..25", () => {
@@ -43,5 +43,18 @@ describe("assertXp", () => {
   it("rejects < 0 and non-integers", () => {
     expect(() => assertXp(-1)).toThrow(RangeError);
     expect(() => assertXp(12.5)).toThrow(RangeError);
+  });
+});
+
+describe("assertD20", () => {
+  it("accepts integers 1..20", () => {
+    expect(() => assertD20(1)).not.toThrow();
+    expect(() => assertD20(20)).not.toThrow();
+  });
+  it("rejects out-of-range and non-integers", () => {
+    expect(() => assertD20(0)).toThrow(RangeError);
+    expect(() => assertD20(21)).toThrow(RangeError);
+    expect(() => assertD20(7.5)).toThrow(RangeError);
+    expect(() => assertD20(Number.NaN)).toThrow(RangeError);
   });
 });

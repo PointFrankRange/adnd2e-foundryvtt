@@ -4,3 +4,4 @@ export * from "./errors";
 export * from "./abilities";
 export * from "./classes";
 export * from "./saves";
+export * from "./dice";

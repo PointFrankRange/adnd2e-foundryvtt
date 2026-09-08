@@ -17,3 +17,9 @@ export function assertXp(value: number): void {
     throw new RangeError(`experience points must be an integer >= 0, got ${value}`);
   }
 }
+
+export function assertD20(value: number): void {
+  if (!Number.isInteger(value) || value < 1 || value > 20) {
+    throw new RangeError(`d20 roll must be an integer in [1, 20], got ${value}`);
+  }
+}
