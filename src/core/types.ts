@@ -180,3 +180,30 @@ export interface SpellSlots {
   bonus: readonly number[];
   suppressed: readonly number[];
 }
+
+/** How well a character knows the weapon they are attacking with (PHB p.52). */
+export type WeaponProficiencyMode = "proficient" | "related" | "non-proficient";
+
+/** The weapon family a fighter specializes in (PHB p.52). */
+export type SpecializationCategory = "melee" | "crossbow" | "bow";
+
+/** A non-weapon proficiency's class group (PHB Table 37/38). */
+export type NonweaponGroup = "general" | "warrior" | "wizard" | "priest" | "rogue";
+
+/** The eight thieving skills (PHB Table 26). */
+export type ThiefSkill =
+  | "pick-pockets"
+  | "open-locks"
+  | "find-remove-traps"
+  | "move-silently"
+  | "hide-in-shadows"
+  | "detect-noise"
+  | "climb-walls"
+  | "read-languages";
+
+/**
+ * Armor category for the thief-skill armor adjustment (PHB Table 29).
+ * "leather" is the thief's default and applies no adjustment; "none" is used
+ * for an unarmoured thief or one relying on bracers/cloak magic.
+ */
+export type ThiefArmor = "none" | "leather" | "elven-chain" | "padded-studded";
