@@ -5,11 +5,18 @@ import type { ClassChassis, HitDice } from "../types";
 export function xpForLevel(chassis: ClassChassis, level: number): number {
   assertLevel(level, "class level");
   if (chassis.maxLevel != null && level > chassis.maxLevel) {
-    throw new RangeError(`${chassis.id} cannot advance past level ${chassis.maxLevel}, got ${level}`);
+    throw new RangeError(
+      `${chassis.id} cannot advance past level ${chassis.maxLevel}, got ${level}`,
+    );
   }
   const tableLength = chassis.xpThresholds.length;
   if (level <= tableLength) {
     return chassis.xpThresholds[level - 1];
+  }
+  if (chassis.xpPerLevelBeyond20 <= 0) {
+    throw new RangeError(
+      `${chassis.id} has no defined XP progression past level ${tableLength}, got ${level}`,
+    );
   }
   return chassis.xpThresholds[tableLength - 1] + (level - tableLength) * chassis.xpPerLevelBeyond20;
 }
