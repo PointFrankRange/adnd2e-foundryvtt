@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assertAbilityScore } from "../../src/core/errors";
+import { assertAbilityScore, assertLevel, assertXp } from "../../src/core/errors";
 
 describe("assertAbilityScore", () => {
   it("accepts integers 1..25", () => {
@@ -15,5 +15,33 @@ describe("assertAbilityScore", () => {
   });
   it("names the offending ability in the message", () => {
     expect(() => assertAbilityScore(0, "wis")).toThrow(/wis/);
+  });
+});
+
+describe("assertLevel", () => {
+  it("accepts integers >= 1", () => {
+    expect(() => assertLevel(1)).not.toThrow();
+    expect(() => assertLevel(20)).not.toThrow();
+    expect(() => assertLevel(41)).not.toThrow();
+  });
+  it("rejects < 1 and non-integers", () => {
+    expect(() => assertLevel(0)).toThrow(RangeError);
+    expect(() => assertLevel(-1)).toThrow(RangeError);
+    expect(() => assertLevel(3.5)).toThrow(RangeError);
+    expect(() => assertLevel(Number.NaN)).toThrow(RangeError);
+  });
+  it("includes the label when given", () => {
+    expect(() => assertLevel(0, "class level")).toThrow(/class level/);
+  });
+});
+
+describe("assertXp", () => {
+  it("accepts integers >= 0", () => {
+    expect(() => assertXp(0)).not.toThrow();
+    expect(() => assertXp(250000)).not.toThrow();
+  });
+  it("rejects < 0 and non-integers", () => {
+    expect(() => assertXp(-1)).toThrow(RangeError);
+    expect(() => assertXp(12.5)).toThrow(RangeError);
   });
 });
