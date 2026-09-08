@@ -7,6 +7,8 @@ import {
   armorClass,
   wizardSpellSlots,
   backstabMultiplier,
+  encumbranceCategory,
+  specialistAttacksPerRound,
 } from "../../src/core";
 
 describe("src/core barrel", () => {
@@ -28,5 +30,9 @@ describe("src/core barrel", () => {
     expect(armorClass({ baseArmorAc: 10 }).value).toBe(10);
     expect(wizardSpellSlots({ wizardLevel: 1, maxSpellLevelKnown: 4 }).perLevel[0]).toBe(1);
     expect(backstabMultiplier(10)).toBe(4);
+    expect(
+      encumbranceCategory({ carried: 0, strengthScore: 18, weightAllowance: 110, maxPress: 255 }),
+    ).toBe("unencumbered");
+    expect(specialistAttacksPerRound(1, "melee")).toEqual({ attacks: 3, rounds: 2 });
   });
 });
