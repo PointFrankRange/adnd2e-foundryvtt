@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { saveTarget, saveBaseTarget, racialSaveBonus, sleepCharmResistance, armorClass } from "../../src/core";
+import {
+  saveTarget,
+  saveBaseTarget,
+  racialSaveBonus,
+  sleepCharmResistance,
+  armorClass,
+  wizardSpellSlots,
+} from "../../src/core";
 
 describe("src/core barrel", () => {
   it("re-exports the saves API and it computes", () => {
@@ -18,5 +25,6 @@ describe("src/core barrel", () => {
       }).target,
     ).toBe(12);
     expect(armorClass({ baseArmorAc: 10 }).value).toBe(10);
+    expect(wizardSpellSlots({ wizardLevel: 1, maxSpellLevelKnown: 4 }).perLevel[0]).toBe(1);
   });
 });

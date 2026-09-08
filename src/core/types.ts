@@ -115,11 +115,68 @@ export interface ClassChassis {
   /** `"any"`, `"none"`, or an explicit allow-list of armor names */
   armorAllowed: "any" | "none" | readonly string[];
   /** `"any"`, or `categories` (weapon classes, e.g. "blunt") and/or `names` (specific weapons) */
-  weaponsAllowed: "any" | { readonly categories?: readonly string[]; readonly names?: readonly string[] };
+  weaponsAllowed:
+    "any" | { readonly categories?: readonly string[]; readonly names?: readonly string[] };
   weaponSpecializationAllowed: boolean;
   /**
    * Race id -> maximum attainable level (`null` = unlimited).
    * Placeholder for Plan 1b.2 — populated by the race plan. Currently `{}`.
    */
   raceLevelLimits: Readonly<Record<string, number | null>>;
+}
+
+/** The 16 priest spheres of influence (PHB p.33). */
+export type SphereName =
+  | "all"
+  | "animal"
+  | "astral"
+  | "charm"
+  | "combat"
+  | "creation"
+  | "divination"
+  | "elemental"
+  | "guardian"
+  | "healing"
+  | "necromantic"
+  | "plant"
+  | "protection"
+  | "summoning"
+  | "sun"
+  | "weather";
+
+/** A priest's access level to a sphere (PHB p.33). */
+export type SphereAccess = "major" | "minor" | "none";
+
+/**
+ * The 8 wizard specialist schools (PHB Table 22). The slash-named PHB schools
+ * are collapsed to their coarse key: "conjuration" = Conjuration/Summoning,
+ * "divination" = Greater Divination, "enchantment" = Enchantment/Charm,
+ * "invocation" = Invocation/Evocation. Lesser Divination has no specialist.
+ */
+export type WizardSchool =
+  | "abjuration"
+  | "alteration"
+  | "conjuration"
+  | "divination"
+  | "enchantment"
+  | "illusion"
+  | "invocation"
+  | "necromancy";
+
+/**
+ * A caster's spell-slot counts for one class at one level.
+ * `perLevel[i]` is the castable slots at spell level `i + 1` (wizard: length 9,
+ * priest: length 7). `base` is the raw progression-table row; `bonus` is the
+ * per-spell-level adjustment (specialist +1 or cumulative Wisdom bonus);
+ * `suppressed` lists the 1-indexed spell levels a gate forced to 0
+ * (Intelligence cap for a wizard; WIS 17/18 requirement for a priest).
+ * base and bonus are pre-gate values; perLevel is authoritative and is 0 at
+ * every spell level listed in suppressed (a consumer summing base + bonus would
+ * overcount suppressed levels).
+ */
+export interface SpellSlots {
+  perLevel: readonly number[];
+  base: readonly number[];
+  bonus: readonly number[];
+  suppressed: readonly number[];
 }

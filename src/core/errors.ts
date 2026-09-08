@@ -23,3 +23,9 @@ export function assertD20(value: number): void {
     throw new RangeError(`d20 roll must be an integer in [1, 20], got ${value}`);
   }
 }
+
+export function assertSpellLevel(value: number): void {
+  if (!Number.isInteger(value) || value < 1 || value > 9) {
+    throw new RangeError(`spell level must be an integer in [1, 9], got ${value}`);
+  }
+}
