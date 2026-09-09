@@ -11,3 +11,6 @@ export class Adnd2eItemSheet extends Base {
     classes: ["adnd2e", "sheet", "item", "raw-field-sheet"],
   };
 }
+
+// pin the class name so DocumentSheetConfig.registerSheet's id (adnd2e.<name>) survives minification
+Object.defineProperty(Adnd2eItemSheet, "name", { value: "Adnd2eItemSheet", configurable: true });

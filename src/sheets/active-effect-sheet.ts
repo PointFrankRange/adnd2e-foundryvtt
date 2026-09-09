@@ -21,3 +21,9 @@ export class Adnd2eActiveEffectConfig extends Base {
     classes: ["adnd2e", "sheet", "active-effect", "raw-field-sheet"],
   };
 }
+
+// pin the class name so DocumentSheetConfig.registerSheet's id (adnd2e.<name>) survives minification
+Object.defineProperty(Adnd2eActiveEffectConfig, "name", {
+  value: "Adnd2eActiveEffectConfig",
+  configurable: true,
+});

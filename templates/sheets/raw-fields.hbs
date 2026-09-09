@@ -1,4 +1,4 @@
-<div class="adnd2e raw-field-sheet">
+<div class="adnd2e raw-field-sheet scrollable">
   <div class="raw-field-list">
     {{#each rows}}
       {{#if this.header}}
@@ -11,7 +11,8 @@
               <input type="checkbox" name="{{this.path}}" {{#if this.value}}checked{{/if}}
                 {{#unless @root.editable}}disabled{{/unless}}>
             {{else if (eq this.kind "select")}}
-              <select name="{{this.path}}" {{#unless @root.editable}}disabled{{/unless}}>
+              <select name="{{this.path}}" {{#if this.nullable}}data-null="true"{{/if}}
+                {{#unless @root.editable}}disabled{{/unless}}>
                 {{#each this.choices}}
                   <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                 {{/each}}

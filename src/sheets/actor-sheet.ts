@@ -13,3 +13,6 @@ export class Adnd2eActorSheet extends Base {
     classes: ["adnd2e", "sheet", "actor", "raw-field-sheet"],
   };
 }
+
+// pin the class name so DocumentSheetConfig.registerSheet's id (adnd2e.<name>) survives minification
+Object.defineProperty(Adnd2eActorSheet, "name", { value: "Adnd2eActorSheet", configurable: true });
