@@ -1,27 +1,54 @@
-// The `adnd2e` ActiveEffect sub-type (spec §5.5). Its schema spreads the core
-// ActiveEffectTypeDataModel schema so the `changes` array (with its `phase` field
-// on v14, and the core `type` validator) is preserved; adds the metadata the
-// magic-item / spell-effect / condition systems key on, plus the native
-// `isSuppressed` hook for suppressWhenUnequipped.
+// The `adnd2e` ActiveEffect sub-type (spec §5.5). Its schema defines the core
+// `changes` ArrayField itself (v14 requires every AE TypeDataModel to do so,
+// preserving `type` / `phase` / `priority` — see `Game##verifyActiveEffectModels`
+// in `client/game.mjs`), then adds the metadata the magic-item / spell-effect /
+// condition systems key on, plus the native `isSuppressed` hook for
+// suppressWhenUnequipped.
 //
 // The class extends bare `TypeDataModel` rather than `ActiveEffectTypeDataModel`:
 // fvtt-types (v13-beta) does not model the latter, and putting a `typeof`-based
 // runtime value in the `extends` clause makes `ActiveEffect.Implementation`
 // (which resolves through `CONFIG.ActiveEffect.dataModels` back to this class)
-// circular. `ActiveEffectTypeDataModel` adds no instance behaviour — only
-// `defineSchema()` — so spreading that schema is runtime-equivalent. Ruling S2.
+// circular. Ruling S2. We do NOT reach for `foundry.data.ActiveEffectTypeDataModel`
+// at `defineSchema()` time: it is not reliably present on the `foundry.data`
+// namespace when `Localization` first reads `.schema` during `Game.initialize`
+// (`Cannot read properties of undefined (reading 'defineSchema')`), so the
+// `changes` fields are spelled out here instead — a faithful copy of
+// `common/data/active-effect.mjs`.
 import { SPELL_SCHOOLS } from "../item/choices";
 
-const { StringField, BooleanField } = foundry.data.fields;
+const { StringField, BooleanField, NumberField, SchemaField, ArrayField } = foundry.data.fields;
+const AnyField = (foundry.data.fields as unknown as { AnyField: typeof StringField }).AnyField;
 
-/** Runtime handle on the core ActiveEffect type model's schema (the `changes`
- *  ArrayField, with `phase`). Not surfaced by fvtt-types. Ruling S2. */
-function coreActiveEffectSchema(): foundry.data.fields.DataSchema {
-  return (
-    foundry.data as unknown as {
-      ActiveEffectTypeDataModel: { defineSchema(): foundry.data.fields.DataSchema };
-    }
-  ).ActiveEffectTypeDataModel.defineSchema();
+/** Validate an `EffectChangeData#type` string — mirrors the private
+ *  `ActiveEffectTypeDataModel.#validateType` (`common/data/active-effect.mjs`):
+ *  either dot-delimited alphanumeric substrings, or `custom.{number}`. */
+function validateChangeType(type: string): true {
+  if (type.length < 3) throw new Error("must be at least three characters long");
+  if (!/^custom\.-?\d+$/.test(type) && !type.split(".").every((s) => /^[a-z0-9]+$/i.test(s))) {
+    throw new Error(
+      'A change type must either be a sequence of dot-delimited, alpha-numeric substrings or of the form "custom.{number}"',
+    );
+  }
+  return true;
+}
+
+/** The core ActiveEffect `changes` ArrayField, defined locally (Ruling S2). */
+function changesField(): InstanceType<typeof ArrayField> {
+  return new ArrayField(
+    new SchemaField({
+      key: new StringField({ required: true }),
+      type: new StringField({
+        required: true,
+        blank: false,
+        initial: "add",
+        validate: validateChangeType,
+      }),
+      value: new AnyField({ required: true, nullable: true, serializable: true, initial: "" }),
+      phase: new StringField({ required: true, blank: false, initial: "initial" }),
+      priority: new NumberField(),
+    }),
+  );
 }
 
 export class Adnd2eActiveEffectModel extends foundry.abstract.TypeDataModel<
@@ -30,7 +57,7 @@ export class Adnd2eActiveEffectModel extends foundry.abstract.TypeDataModel<
 > {
   static defineSchema(): foundry.data.fields.DataSchema {
     return {
-      ...coreActiveEffectSchema(),
+      changes: changesField(),
       conditionId: new StringField({ required: true, nullable: true, blank: false, initial: null }),
       isCondition: new BooleanField({ required: true, initial: false }),
       suppressWhenUnequipped: new BooleanField({ required: true, initial: false }),
