@@ -112,7 +112,7 @@ describe("saveTargetBest", () => {
   });
 
   it("still layers the character-level modifiers onto the winning base", () => {
-    // dwarf CON 16 -> +3 racial bonus on rsw; breath weapon gets the DEX defensive adj
+    // dwarf CON 16 -> +4 racial bonus on rsw (Table 9 CON 14-17 band); breath weapon gets the DEX defensive adj
     const r = saveTargetBest({
       groups: [{ group: "warrior", level: 3 }],
       category: "rsw", race: "dwarf", con: 16, wisMagicalDefenseAdj: 0, dexDefensiveAdj: -2,
@@ -763,7 +763,7 @@ describe("deriveSaves", () => {
     expect(s.bw.effectiveTarget).toBe(s.bw.target - s.bw.rollModifier);
   });
 
-  it("dwarf CON 16 gets the +3 racial bonus vs rod/staff/wand", () => {
+  it("dwarf CON 16 gets the +4 racial bonus vs rod/staff/wand", () => {
     const s = deriveSaves({
       groups: [{ group: "warrior", level: 1 }], race: "dwarf", con: 16,
       wisMagicalDefenseAdj: 0, dexDefensiveAdj: 0,
