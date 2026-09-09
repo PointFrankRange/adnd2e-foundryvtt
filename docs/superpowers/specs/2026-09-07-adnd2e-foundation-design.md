@@ -392,7 +392,10 @@ shape is intentionally identical so a built NPC can be promoted to a PC.
 - `attributes.hp.max` / `.value` (rolled from HD, or `fixedHp`)
 - `attributes.thac0.value` when `asFighterLevel` set
 - `saves.effective` when `mode === "asClass"`
-- `details.xpValue` when override is null (HD-band base + special-ability adds)
+- `details.xpValue` — **deferred to SP6** (monster tooling). `xpValue` stays a
+  nullable authored field; nothing derives it in SP1. The DMG p.47 HD-band +
+  special-ability table needs a structured special-ability field the schema does
+  not yet carry.
 
 ### 5.4 Items
 
@@ -451,12 +454,16 @@ Foundry's pipeline: `prepareData()` → `prepareBaseData()` →
   9. proficiency slot totals — class progression + INT bonus-language slots
   10. encumbrance — STR `weightAllowance` vs. Σ item weight → category → `movementRate`
 
-Anything an ActiveEffect must modify *after* these computations (e.g. a
-"+1 to all saves" item) is applied as a **second pass**: derived values are
-written, then AE changes whose `key` targets a derived path are re-applied. The
-implementation uses the well-trodden pattern of splitting effects into
-"affects base" (default Foundry timing) and "affects derived" (manual
-re-application at the end of `prepareDerivedData`), keyed by target path prefix.
+Anything an ActiveEffect must modify *after* these computations (a "+1 to all
+saves" item) is applied as a **second pass**. `Adnd2eActor.prepareDerivedData()`
+calls `super` (which runs the derive-and-cache), then re-applies every effect
+change whose `key` passes `isDeferredChangeKey(key, actorType)` — a static
+allow-list (`src/data/derive/effect-keys.ts`) of the `system.*` prefixes each
+actor type's derive step writes. The early (pre-derive) application of those
+changes is harmless: `prepareDerivedData` overwrites it and the second pass
+re-applies on the correct value. Separately, `Adnd2eActor.allApplicableEffects()`
+skips an `adnd2e` effect whose parent item is an unequipped weapon/armor/equipment
+(`system.suppressWhenUnequipped`).
 
 ---
 
