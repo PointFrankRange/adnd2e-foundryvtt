@@ -192,17 +192,64 @@ export function applyRacialAdjustment(model: foundry.abstract.TypeDataModel.Any)
   for (const k of ABILITY_KEYS) sys.abilities[k].score = adj[k];
 }
 
+/** The `system.*` write surface for `deriveAndCache` (spec §5.1 paths). */
+interface DerivedWriteSurface {
+  abilities: Record<string, { mods?: unknown }>;
+  classes: unknown;
+  multiclassPending: boolean;
+  attributes: {
+    hp: { max: number };
+    thac0: unknown;
+    ac: unknown;
+    encumbrance: unknown;
+    movement: unknown;
+  };
+  saves: Record<string, unknown>;
+  proficiencies: unknown;
+  languagesKnown: unknown;
+  spellcasting: { wizard: { slots: unknown }; priest: { slots: unknown } };
+}
+
 /**
- * Runs the character pipeline and writes the derived values onto `system.*`
- * (spec §5.1 paths). MINIMAL in Plan 1c.3b Batch A — only the ability-mods loop
- * (the 1c.3a behaviour); Task 5 fills the full write-through once `CharacterDerived`
- * carries the step 3-10 fields.
+ * Runs the character pipeline and writes every derived value onto `system.*`
+ * (spec §5.1 paths). Per Ruling PF-C, when a `derived.*` block is `null` (a
+ * 0-class actor has no THAC0 / saves / proficiencies) the schema-initialised
+ * defaults are left in place rather than overwritten.
  */
 export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void {
   const parent = (model as unknown as { parent: Actor.Implementation }).parent;
   const derived = deriveCharacter(snapshotActor(parent), getOptionalRules());
-  const sys = model as unknown as { abilities: Record<string, { mods?: unknown }> };
+  const sys = model as unknown as DerivedWriteSurface;
+
   for (const k of ABILITY_KEYS) sys.abilities[k].mods = derived.abilities[k];
+  sys.classes = derived.classes;
+  sys.multiclassPending = derived.multiclassPending;
+
+  sys.attributes.hp.max = derived.hpMax;
+  sys.attributes.ac = derived.ac;
+  if (derived.thac0) sys.attributes.thac0 = derived.thac0;
+
+  if (derived.saves) {
+    for (const k of ["ppd", "rsw", "pp", "bw", "spell"] as const) sys.saves[k] = derived.saves[k];
+  }
+
+  if (derived.proficiencies) {
+    sys.proficiencies = {
+      weapon: derived.proficiencies.weapon,
+      nonweapon: derived.proficiencies.nonweapon,
+    };
+    sys.languagesKnown = { max: derived.proficiencies.languagesMax };
+  }
+
+  sys.attributes.encumbrance = derived.encumbrance;
+  sys.attributes.movement = {
+    base: derived.encumbrance.baseMove,
+    current: derived.encumbrance.movementRate,
+    encumbranceCategory: derived.encumbrance.category,
+  };
+
+  if (derived.spellSlots.wizard) sys.spellcasting.wizard.slots = derived.spellSlots.wizard;
+  if (derived.spellSlots.priest) sys.spellcasting.priest.slots = derived.spellSlots.priest;
 }
 
 export abstract class Adnd2eActorModel<
