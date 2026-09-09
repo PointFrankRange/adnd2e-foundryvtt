@@ -29,13 +29,13 @@ function toRecord(perLevel: readonly number[], memorized: readonly MemorizedEntr
 
 /**
  * §5.6 step 8 — spell slots for the two full-caster progressions (Ruling CASTER1).
- * Wizard: `casterType === "wizard"`. Priest: `casterType === "priest"` AND the
- * class uses the full priest table (`spellProgressionId === "priest"`, i.e.
+ * Wizard: `casterType === "wizard"` AND `spellProgressionId === "wizard"`.
+ * Priest: `casterType === "priest"` AND `spellProgressionId === "priest"` (i.e.
  * Cleric / Druid). Paladin / Ranger / Bard return `{}`.
  */
 export function deriveSpellSlots(input: SpellSlotInput): { wizard?: SlotRecord; priest?: SlotRecord } {
   const chassis = getChassis(input.chassisId);
-  if (chassis.casterType === "wizard") {
+  if (chassis.casterType === "wizard" && chassis.spellProgressionId === "wizard") {
     const slots = wizardSpellSlots({
       wizardLevel: input.level,
       maxSpellLevelKnown: input.maxSpellLevelKnown ?? 1,
