@@ -1,0 +1,16 @@
+{
+  "_id": "i3IzKCnQ82hfyiOV",
+  "name": "Sleeping",
+  "type": "adnd2e",
+  "img": "icons/svg/sleep.svg",
+  "statuses": ["sleeping"],
+  "disabled": false,
+  "transfer": false,
+  "system": {
+    "changes": [],
+    "conditionId": "sleeping",
+    "isCondition": true,
+    "suppressWhenUnequipped": false,
+    "schoolTag": null
+  }
+}

@@ -1,5 +1,6 @@
 import "../styles/system.scss";
 import { buildAdnd2eConfig } from "./config";
+import { CONDITIONS } from "./conditions";
 import { SYSTEM_ID } from "./constants";
 import { ACTIVE_EFFECT_DATA_MODELS } from "./data/active-effect";
 import { ACTOR_DATA_MODELS } from "./data/actor";
@@ -20,6 +21,12 @@ Hooks.once("init", () => {
   Object.assign(CONFIG.ActiveEffect.dataModels, ACTIVE_EFFECT_DATA_MODELS);
   CONFIG.Actor.dataModels = ACTOR_DATA_MODELS;
   registerSettings();
+  // Register the shipped status conditions in the Token HUD. Appended in init;
+  // see plan 1c.4a. The Proxy's `set` trap (v14 config.mjs) turns each `push`
+  // into an array append + `statuses[id]` registration.
+  for (const c of CONDITIONS) {
+    CONFIG.statusEffects.push({ id: c.id, name: c.name, img: c.img });
+  }
 });
 
 Hooks.once("ready", () => {

@@ -1,0 +1,16 @@
+{
+  "_id": "nQ2S9otRrtojWYSz",
+  "name": "Frightened",
+  "type": "adnd2e",
+  "img": "icons/svg/terror.svg",
+  "statuses": ["frightened"],
+  "disabled": false,
+  "transfer": false,
+  "system": {
+    "changes": [],
+    "conditionId": "frightened",
+    "isCondition": true,
+    "suppressWhenUnequipped": false,
+    "schoolTag": null
+  }
+}

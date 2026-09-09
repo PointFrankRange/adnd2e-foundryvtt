@@ -1,0 +1,16 @@
+{
+  "_id": "awBq8fr6PrJm6gkP",
+  "name": "Poisoned",
+  "type": "adnd2e",
+  "img": "icons/svg/poison.svg",
+  "statuses": ["poisoned"],
+  "disabled": false,
+  "transfer": false,
+  "system": {
+    "changes": [],
+    "conditionId": "poisoned",
+    "isCondition": true,
+    "suppressWhenUnequipped": false,
+    "schoolTag": null
+  }
+}

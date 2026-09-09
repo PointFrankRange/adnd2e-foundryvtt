@@ -1,0 +1,16 @@
+{
+  "_id": "yCzpNhD4Mvdrgl0U",
+  "name": "Incapacitated",
+  "type": "adnd2e",
+  "img": "icons/svg/downgrade.svg",
+  "statuses": ["incapacitated"],
+  "disabled": false,
+  "transfer": false,
+  "system": {
+    "changes": [],
+    "conditionId": "incapacitated",
+    "isCondition": true,
+    "suppressWhenUnequipped": false,
+    "schoolTag": null
+  }
+}

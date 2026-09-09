@@ -1,0 +1,16 @@
+{
+  "_id": "0IvVwGs8fVP5O3JX",
+  "name": "Prone",
+  "type": "adnd2e",
+  "img": "icons/svg/falling.svg",
+  "statuses": ["prone"],
+  "disabled": false,
+  "transfer": false,
+  "system": {
+    "changes": [],
+    "conditionId": "prone",
+    "isCondition": true,
+    "suppressWhenUnequipped": false,
+    "schoolTag": null
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "FdrpMDqvgq4QwVlc",
+  "name": "Blinded",
+  "type": "adnd2e",
+  "img": "icons/svg/blind.svg",
+  "statuses": ["blinded"],
+  "disabled": false,
+  "transfer": false,
+  "system": {
+    "changes": [],
+    "conditionId": "blinded",
+    "isCondition": true,
+    "suppressWhenUnequipped": false,
+    "schoolTag": null
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "jU0aEd5RHenEBsNP",
+  "name": "Stunned",
+  "type": "adnd2e",
+  "img": "icons/svg/daze.svg",
+  "statuses": ["stunned"],
+  "disabled": false,
+  "transfer": false,
+  "system": {
+    "changes": [],
+    "conditionId": "stunned",
+    "isCondition": true,
+    "suppressWhenUnequipped": false,
+    "schoolTag": null
+  }
+}

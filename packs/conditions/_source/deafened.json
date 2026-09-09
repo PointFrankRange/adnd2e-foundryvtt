@@ -1,0 +1,16 @@
+{
+  "_id": "iV9C10C6yB1NpMeg",
+  "name": "Deafened",
+  "type": "adnd2e",
+  "img": "icons/svg/deaf.svg",
+  "statuses": ["deafened"],
+  "disabled": false,
+  "transfer": false,
+  "system": {
+    "changes": [],
+    "conditionId": "deafened",
+    "isCondition": true,
+    "suppressWhenUnequipped": false,
+    "schoolTag": null
+  }
+}

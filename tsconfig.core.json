@@ -10,5 +10,5 @@
   // graphs need types this project strips (`types: []`). ESLint's
   // no-restricted-globals block still fences those test dirs against Foundry
   // globals.
-  "include": ["src/core", "tests/core", "src/config.ts", "src/settings/registry.ts", "src/data/item/subtypes.ts", "src/data/item/choices.ts", "src/data/actor/subtypes.ts", "src/data/derive", "src/data/active-effect/subtypes.ts"]
+  "include": ["src/core", "tests/core", "src/config.ts", "src/settings/registry.ts", "src/data/item/subtypes.ts", "src/data/item/choices.ts", "src/data/actor/subtypes.ts", "src/data/derive", "src/data/active-effect/subtypes.ts", "src/conditions.ts"]
 }
