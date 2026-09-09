@@ -30,6 +30,9 @@ declare global {
       nonweaponProficiency: typeof import("../data/item/nonweapon-proficiency").NonweaponProficiencyItemModel;
       classFeature: typeof import("../data/item/class-feature").ClassFeatureItemModel;
     };
+    ActiveEffect: {
+      adnd2e: typeof import("../data/active-effect/adnd2e").Adnd2eActiveEffectModel;
+    };
   }
 
   interface SettingConfig {
