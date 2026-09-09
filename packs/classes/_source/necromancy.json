@@ -1,0 +1,16 @@
+{
+  "_id": "reSCqXsWka87x0jY",
+  "name": "Necromancer",
+  "type": "class",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "chassisId": "mage",
+    "specialistSchool": "necromancy",
+    "kit": null,
+    "grantedFeatures": [],
+    "xp": 0,
+    "hpRolls": [],
+    "dualClassState": null
+  }
+}

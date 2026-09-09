@@ -1,0 +1,16 @@
+{
+  "_id": "MZ2CMJDvOGPTrG6d",
+  "name": "Paladin",
+  "type": "class",
+  "img": "icons/svg/holy-shield.svg",
+  "system": {
+    "description": "",
+    "chassisId": "paladin",
+    "specialistSchool": null,
+    "kit": null,
+    "grantedFeatures": [],
+    "xp": 0,
+    "hpRolls": [],
+    "dualClassState": null
+  }
+}

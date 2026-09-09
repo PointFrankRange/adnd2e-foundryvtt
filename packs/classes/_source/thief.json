@@ -1,0 +1,16 @@
+{
+  "_id": "EeoIEOvezl8fGG10",
+  "name": "Thief",
+  "type": "class",
+  "img": "icons/svg/coins.svg",
+  "system": {
+    "description": "",
+    "chassisId": "thief",
+    "specialistSchool": null,
+    "kit": null,
+    "grantedFeatures": [],
+    "xp": 0,
+    "hpRolls": [],
+    "dualClassState": null
+  }
+}

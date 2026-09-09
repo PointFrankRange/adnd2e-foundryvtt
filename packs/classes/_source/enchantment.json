@@ -1,0 +1,16 @@
+{
+  "_id": "nEX8qJ8LxiwawGGh",
+  "name": "Enchanter",
+  "type": "class",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "chassisId": "mage",
+    "specialistSchool": "enchantment",
+    "kit": null,
+    "grantedFeatures": [],
+    "xp": 0,
+    "hpRolls": [],
+    "dualClassState": null
+  }
+}

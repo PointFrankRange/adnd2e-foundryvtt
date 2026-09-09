@@ -1,0 +1,16 @@
+{
+  "_id": "0r15Qtgo0pEF6aMt",
+  "name": "Fighter",
+  "type": "class",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "chassisId": "fighter",
+    "specialistSchool": null,
+    "kit": null,
+    "grantedFeatures": [],
+    "xp": 0,
+    "hpRolls": [],
+    "dualClassState": null
+  }
+}

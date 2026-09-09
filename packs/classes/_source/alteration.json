@@ -1,0 +1,16 @@
+{
+  "_id": "CIBfRgYj4GiVYj5k",
+  "name": "Transmuter",
+  "type": "class",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "chassisId": "mage",
+    "specialistSchool": "alteration",
+    "kit": null,
+    "grantedFeatures": [],
+    "xp": 0,
+    "hpRolls": [],
+    "dualClassState": null
+  }
+}
