@@ -2,6 +2,8 @@
 // TypeDataModel base for all three actor models. Foundry-layer; no logic.
 import { htmlField } from "../common/fields";
 import { ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, ENCUMBRANCE_CATEGORIES, WIZARD_SCHOOLS, SPHERE_NAMES } from "../item/choices";
+import { applyRacialDeltas } from "../../core/abilities";
+import type { AbilityScores, Race } from "../../core/types";
 import { deriveCharacter } from "../derive/character";
 import { getOptionalRules } from "../../settings";
 import { snapshotActor } from "./snapshot";
@@ -170,6 +172,24 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
       spellsAndMagic: new foundry.data.fields.ObjectField({ required: true, initial: {} }),
     }),
   };
+}
+
+/**
+ * `prepareBaseData` for `character` + `npc`: applies the embedded `race` item's
+ * racial ability deltas onto `system.abilities.<k>.score` in place, so every
+ * later consumer (`snapshotActor`, sheets) sees the adjusted scores. No-op when
+ * the actor carries no `race` item.
+ */
+export function applyRacialAdjustment(model: foundry.abstract.TypeDataModel.Any): void {
+  const sys = model as unknown as {
+    abilities: Record<string, { score: number }>;
+    parent: { items: Iterable<{ type: string; system: { raceId?: Race } }> };
+  };
+  const raceItem = [...sys.parent.items].find((i) => i.type === "race");
+  if (!raceItem) return;
+  const raw = Object.fromEntries(ABILITY_KEYS.map((k) => [k, sys.abilities[k].score])) as unknown as AbilityScores;
+  const adj = applyRacialDeltas(raw, raceItem.system.raceId as Race);
+  for (const k of ABILITY_KEYS) sys.abilities[k].score = adj[k];
 }
 
 /**
