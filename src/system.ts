@@ -6,6 +6,8 @@ import { ACTOR_DATA_MODELS } from "./data/actor";
 import { ITEM_DATA_MODELS } from "./data/item";
 import { Adnd2eActiveEffect, Adnd2eActor, Adnd2eItem } from "./documents";
 import { registerSettings } from "./settings";
+import { buildApi } from "./api";
+import { registerMigrationSettings, runMigrations } from "./migrations/run";
 
 Hooks.once("init", () => {
   console.log(`${SYSTEM_ID} | Initializing`);
@@ -20,8 +22,11 @@ Hooks.once("init", () => {
   Object.assign(CONFIG.ActiveEffect.dataModels, ACTIVE_EFFECT_DATA_MODELS);
   CONFIG.Actor.dataModels = ACTOR_DATA_MODELS;
   registerSettings();
+  registerMigrationSettings();
 });
 
-Hooks.once("ready", () => {
+Hooks.once("ready", async () => {
   console.log(`${SYSTEM_ID} | Ready`);
+  (game.system as unknown as { api: ReturnType<typeof buildApi> }).api = buildApi();
+  await runMigrations();
 });

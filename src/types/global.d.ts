@@ -36,6 +36,13 @@ declare global {
   }
 
   interface SettingConfig {
+    // migration framework (spec §8) — the version-store key, registered by
+    // src/migrations/run.ts. `string`-typed, so it is invisible to the
+    // boolean-only key-contract test in tests/config/settings-augmentation.test.ts;
+    // the sibling `migrationDryRun` boolean is cast against the existing union and
+    // is intentionally NOT augmented here (that test asserts the boolean keys are
+    // exactly the OptionalRules descriptors).
+    "adnd2e.systemMigrationVersion": string;
     // core — wired into OptionalRules
     "adnd2e.exceptionalStrength": boolean;
     "adnd2e.maxSpellsPerLevel": boolean;

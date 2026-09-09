@@ -72,3 +72,20 @@ describe("lang/en.json TYPES", () => {
     }
   });
 });
+
+describe("lang/en.json — migration + import strings", () => {
+  it("resolves every migration + import key the runtime references", () => {
+    for (const key of [
+      "ADND2E.migration.migrated",
+      "ADND2E.migration.dryRunComplete",
+      "ADND2E.migration.failed",
+      "ADND2E.migration.dryRunSetting.name",
+      "ADND2E.migration.dryRunSetting.hint",
+      "ADND2E.import.done",
+      "ADND2E.import.doneWithFailures",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

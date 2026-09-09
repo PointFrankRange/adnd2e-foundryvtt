@@ -134,6 +134,19 @@
       "sp": "Silver",
       "cp": "Copper"
     },
+    "migration": {
+      "migrated": "AD&D 2E: world migrated to {version}.",
+      "dryRunComplete": "AD&D 2E: migration dry run complete — see the console. No data was changed.",
+      "failed": "AD&D 2E: migration failed — see the console. Your world was not fully migrated.",
+      "dryRunSetting": {
+        "name": "Migration Dry Run",
+        "hint": "When on, data migrations run on load but only log what they would change — nothing is written and the migration version is not advanced. Turn off and reload to apply migrations for real."
+      }
+    },
+    "import": {
+      "done": "AD&D 2E: imported {created} of {total} document(s).",
+      "doneWithFailures": "AD&D 2E: imported {created} of {total} document(s); {failed} failed — see the console."
+    },
     "settings": {
       "exceptionalStrength": {
         "name": "Exceptional Strength",
