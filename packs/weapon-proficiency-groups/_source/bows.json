@@ -1,0 +1,15 @@
+{
+  "_id": "uCrULGOxNfpSsh1Z",
+  "name": "Bows",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Bows",
+    "isGroup": true,
+    "slotsInvested": 0,
+    "specialized": false,
+    "styleSpecialization": null,
+    "masteryTier": 0
+  }
+}

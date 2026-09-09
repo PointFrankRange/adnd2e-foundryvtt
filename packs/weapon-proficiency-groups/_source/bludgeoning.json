@@ -1,0 +1,15 @@
+{
+  "_id": "Cz2Qm4kj1EyINsFU",
+  "name": "Bludgeoning",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Bludgeoning",
+    "isGroup": true,
+    "slotsInvested": 0,
+    "specialized": false,
+    "styleSpecialization": null,
+    "masteryTier": 0
+  }
+}

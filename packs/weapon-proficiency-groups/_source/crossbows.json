@@ -1,0 +1,15 @@
+{
+  "_id": "KOzSSpUzyXAHHVXO",
+  "name": "Crossbows",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Crossbows",
+    "isGroup": true,
+    "slotsInvested": 0,
+    "specialized": false,
+    "styleSpecialization": null,
+    "masteryTier": 0
+  }
+}

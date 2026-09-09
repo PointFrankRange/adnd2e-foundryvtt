@@ -1,0 +1,15 @@
+{
+  "_id": "aKZfD5gNvdBAV57W",
+  "name": "Pole Arms",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Pole Arms",
+    "isGroup": true,
+    "slotsInvested": 0,
+    "specialized": false,
+    "styleSpecialization": null,
+    "masteryTier": 0
+  }
+}
