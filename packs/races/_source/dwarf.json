@@ -1,0 +1,18 @@
+{
+  "_id": "w5ari6U4IYYs6ktv",
+  "name": "Dwarf",
+  "type": "race",
+  "img": "icons/svg/mountain.svg",
+  "system": {
+    "description": "",
+    "raceId": "dwarf",
+    "size": "small",
+    "baseMovement": 6,
+    "infravision": 60,
+    "classLevelLimits": { "cleric": 10, "fighter": 15, "thief": 12 },
+    "allowedClasses": ["cleric", "fighter", "thief"],
+    "allowedMulticlass": [["fighter", "thief"], ["fighter", "cleric"]],
+    "bonusLanguages": ["gnome", "goblin", "kobold", "orc"],
+    "grantedFeatures": []
+  }
+}

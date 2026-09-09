@@ -1,0 +1,18 @@
+{
+  "_id": "Z7HafgcdUwef5CiN",
+  "name": "Human",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "",
+    "raceId": "human",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 0,
+    "classLevelLimits": {},
+    "allowedClasses": ["fighter", "paladin", "ranger", "mage", "cleric", "druid", "thief", "bard"],
+    "allowedMulticlass": [],
+    "bonusLanguages": [],
+    "grantedFeatures": []
+  }
+}

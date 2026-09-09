@@ -1,0 +1,18 @@
+{
+  "_id": "WqyycKbHkIZqwqVY",
+  "name": "Half-Elf",
+  "type": "race",
+  "img": "icons/svg/mystery-man-black.svg",
+  "system": {
+    "description": "",
+    "raceId": "half-elf",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 60,
+    "classLevelLimits": { "cleric": 14, "druid": 9, "fighter": 14, "ranger": 16, "mage": 12, "thief": 12, "bard": null },
+    "allowedClasses": ["cleric", "druid", "fighter", "ranger", "mage", "thief", "bard"],
+    "allowedMulticlass": [["fighter", "cleric"], ["fighter", "thief"], ["fighter", "druid"], ["fighter", "mage"], ["cleric", "ranger"], ["cleric", "mage"], ["thief", "mage"], ["fighter", "mage", "cleric"], ["fighter", "mage", "thief"]],
+    "bonusLanguages": ["elf", "gnome", "halfling", "goblin", "hobgoblin", "orc", "gnoll"],
+    "grantedFeatures": []
+  }
+}
