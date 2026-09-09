@@ -10,6 +10,7 @@ export default defineConfig({
       include: [
         "src/core/**/*.ts", "src/config.ts", "src/settings/registry.ts",
         "src/data/item/subtypes.ts", "src/data/item/choices.ts", "src/data/actor/subtypes.ts",
+        "src/data/active-effect/subtypes.ts",
         "src/data/derive/**/*.ts",
       ],
       // Only true barrels/type-only modules are excluded. src/core/abilities/index.ts
