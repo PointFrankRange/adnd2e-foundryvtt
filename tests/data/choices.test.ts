@@ -4,7 +4,7 @@ import {
   DAMAGE_TYPES, WEAPON_SIZES, WEAPON_CATEGORIES, NONWEAPON_GROUPS, CREATURE_SIZES,
   CASTER_CLASSES, SAVING_THROW_KINDS, DUAL_CLASS_STATES, FEATURE_SOURCE_TYPES, FEATURE_ACTIVATIONS,
   ALIGNMENTS, MOVEMENT_MODES, DISPOSITIONS, SAVE_MODES, ATTACK_TYPES, ENCUMBRANCE_CATEGORIES,
-  MULTICLASS_MODES,
+  MULTICLASS_MODES, CLASS_GROUPS,
 } from "../../src/data/item/choices";
 
 describe("item schema choice arrays match the engine unions", () => {
@@ -83,5 +83,8 @@ describe("actor schema choice arrays", () => {
   });
   it("MULTICLASS_MODES = the three ClassArrangement members", () => {
     expect([...MULTICLASS_MODES].sort()).toEqual(["dualclass", "multiclass", "single"]);
+  });
+  it("CLASS_GROUPS = the four core ClassGroup members", () => {
+    expect([...CLASS_GROUPS].sort()).toEqual(["priest", "rogue", "warrior", "wizard"]);
   });
 });

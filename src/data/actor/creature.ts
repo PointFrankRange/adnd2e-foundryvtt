@@ -1,6 +1,9 @@
 import { htmlField } from "../common/fields";
-import { ALIGNMENTS, ATTACK_TYPES, CREATURE_SIZES, SAVE_MODES } from "../item/choices";
+import { deriveCreature } from "../derive/creature";
+import type { CreatureSnapshot } from "../derive/creature";
+import { ALIGNMENTS, ATTACK_TYPES, CLASS_GROUPS, CREATURE_SIZES, SAVE_MODES } from "../item/choices";
 import { Adnd2eActorModel } from "./base-actor";
+import type { SaveCategory } from "../../core/types";
 
 const { StringField, NumberField, ArrayField, SchemaField } = foundry.data.fields;
 
@@ -53,8 +56,15 @@ export class CreatureModel extends Adnd2eActorModel {
           spell: new NumberField({ required: true, integer: true, initial: 20 }),
         }),
         asClass: new SchemaField({
-          group: new StringField({ required: true, blank: true, initial: "" }),
+          group: new StringField({ required: true, blank: true, initial: "", choices: ["", ...CLASS_GROUPS] }),
           level: new NumberField({ required: true, integer: true, min: 1, initial: 1 }),
+        }),
+        effective: new SchemaField({
+          ppd: new NumberField({ required: true, integer: true, initial: 20 }),
+          rsw: new NumberField({ required: true, integer: true, initial: 20 }),
+          pp: new NumberField({ required: true, integer: true, initial: 20 }),
+          bw: new NumberField({ required: true, integer: true, initial: 20 }),
+          spell: new NumberField({ required: true, integer: true, initial: 20 }),
         }),
       }),
       details: new SchemaField({
@@ -72,5 +82,44 @@ export class CreatureModel extends Adnd2eActorModel {
       }),
     };
   }
-  // NO prepareDerivedData — the creature derive path is Plan 1c.3d.
+  override prepareDerivedData(): void {
+    deriveAndCacheCreature(this);
+  }
+}
+
+const SAVE_KEYS: readonly SaveCategory[] = ["ppd", "rsw", "pp", "bw", "spell"];
+
+/** Ruling S2 shim — the creature model is loosely typed until the Schema-typing debt clears. */
+function snapshotCreature(model: foundry.abstract.TypeDataModel.Any): CreatureSnapshot {
+  const sys = (model as unknown as { parent: Actor.Implementation }).parent.system as unknown as {
+    hd: { count: number; dieType: number; bonus: number; fixedHp: number | null };
+    attributes: { thac0: { value: number; asFighterLevel: number | null } };
+    saves: {
+      mode: "explicit" | "asClass";
+      explicit: Record<SaveCategory, number>;
+      asClass: { group: string; level: number };
+    };
+  };
+  return {
+    hd: { ...sys.hd },
+    thac0AsFighterLevel: sys.attributes.thac0.asFighterLevel,
+    authoredThac0: sys.attributes.thac0.value,
+    saveMode: sys.saves.mode,
+    explicitSaves: { ...sys.saves.explicit },
+    asClassSave: { group: sys.saves.asClass.group, level: sys.saves.asClass.level },
+  };
+}
+
+interface CreatureWriteSurface {
+  attributes: { hp: { max: number }; thac0: { value: number } };
+  saves: { effective: Record<string, number> };
+}
+
+/** Runs deriveCreature and writes onto system.* (spec §5.3 derived paths). */
+function deriveAndCacheCreature(model: foundry.abstract.TypeDataModel.Any): void {
+  const derived = deriveCreature(snapshotCreature(model));
+  const sys = model as unknown as CreatureWriteSurface;
+  sys.attributes.hp.max = derived.hpMax;
+  sys.attributes.thac0.value = derived.thac0;
+  for (const k of SAVE_KEYS) sys.saves.effective[k] = derived.saves[k];
 }
