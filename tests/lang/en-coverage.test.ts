@@ -73,6 +73,20 @@ describe("lang/en.json TYPES", () => {
   });
 });
 
+describe("lang/en.json — sheet strings", () => {
+  it("resolves every sheet label + message the sheet layer references", () => {
+    for (const key of [
+      "ADND2E.sheets.rawActor",
+      "ADND2E.sheets.rawItem",
+      "ADND2E.sheets.rawEffect",
+      "ADND2E.sheets.badJson",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [

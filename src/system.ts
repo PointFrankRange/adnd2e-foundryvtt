@@ -6,6 +6,7 @@ import { ACTOR_DATA_MODELS } from "./data/actor";
 import { ITEM_DATA_MODELS } from "./data/item";
 import { Adnd2eActiveEffect, Adnd2eActor, Adnd2eItem } from "./documents";
 import { registerSettings } from "./settings";
+import { registerSheets } from "./sheets";
 import { buildApi } from "./api";
 import { registerMigrationSettings, runMigrations } from "./migrations/run";
 
@@ -23,6 +24,7 @@ Hooks.once("init", () => {
   CONFIG.Actor.dataModels = ACTOR_DATA_MODELS;
   registerSettings();
   registerMigrationSettings();
+  registerSheets();
 });
 
 Hooks.once("ready", async () => {
