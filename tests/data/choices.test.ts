@@ -3,7 +3,7 @@ import {
   CLASS_IDS, RACE_IDS, ABILITY_KEYS, SPHERE_NAMES, SPELL_SCHOOLS, WIZARD_SCHOOLS,
   DAMAGE_TYPES, WEAPON_SIZES, WEAPON_CATEGORIES, NONWEAPON_GROUPS, CREATURE_SIZES,
   CASTER_CLASSES, SAVING_THROW_KINDS, DUAL_CLASS_STATES, FEATURE_SOURCE_TYPES, FEATURE_ACTIVATIONS,
-  ALIGNMENTS, MOVEMENT_MODES, DISPOSITIONS, SAVE_MODES, ATTACK_TYPES,
+  ALIGNMENTS, MOVEMENT_MODES, DISPOSITIONS, SAVE_MODES, ATTACK_TYPES, ENCUMBRANCE_CATEGORIES,
 } from "../../src/data/item/choices";
 
 describe("item schema choice arrays match the engine unions", () => {
@@ -69,6 +69,11 @@ describe("actor schema choice arrays", () => {
   });
   it("MOVEMENT_MODES = land/burrow/climb/fly/swim", () => {
     expect(MOVEMENT_MODES).toEqual(["land", "burrow", "climb", "fly", "swim"]);
+  });
+  it("ENCUMBRANCE_CATEGORIES = the 6 core EncumbranceCategory members, lightest to heaviest", () => {
+    expect(ENCUMBRANCE_CATEGORIES).toEqual(
+      ["unencumbered", "light", "moderate", "heavy", "severe", "immobile"],
+    );
   });
   it("fixed lists", () => {
     expect([...DISPOSITIONS].sort()).toEqual(["friendly", "hostile", "neutral"]);

@@ -343,17 +343,20 @@ its own `xp` and `hpRolls`), proficiencies (`weaponProficiency` /
 
 - `abilities.<k>.mods`: full modifier record from `core/abilities` (e.g.
   `str.mods = { toHit, damage, weightAllowance, maxPress, openDoors, bendBars }`)
-- `classes` summary: `effectiveLevels: Record<classId, number>`,
-  `totalLevelLabel: string`, `primeRequisiteMet: Record<classId, boolean>`
+- `classes`: per-class array `{ chassisId, level, canLevelUp }[]` (one entry per
+  embedded `class` item), plus `multiclassPending: boolean`. The
+  multiclass/dual-class **aggregate** state (effective levels, prime-requisite
+  checks, XP split) lands under `system.multiclass.*` in sub-project 1c.3c —
+  `system.classes` is reserved for the per-class list.
 - `attributes.hp.max`
 - `attributes.thac0`: `{ melee, ranged, base }`
-- `attributes.ac`: `{ normal, rearAttack, surprised, byArmorType?, shieldless }`
-- `saves.<ppd|rsw|pp|bw|spell>`: `{ base, modified }`
+- `attributes.ac`: `{ normal, rearAttack, surprised, shieldless }`
+- `saves.<ppd|rsw|pp|bw|spell>`: `{ target, rollModifier, effectiveTarget }`
 - `attributes.movement`: `{ base, current, encumbranceCategory }`
-- `attributes.encumbrance`: `{ carried, allowance: {…}, category, penalty }`
+- `attributes.encumbrance`: `{ carried, category, movementRate, penalty: { attackRoll, armorClass }, baseMove }`
 - `spellcasting.wizard.slots` / `.priest.slots`: `Record<1..9, { max, used }>`
-- `proficiencies.weapon`: `{ slotsTotal, slotsSpent, slotsAvailable }`
-- `proficiencies.nonweapon`: `{ slotsTotal, slotsSpent, slotsAvailable }`
+- `proficiencies.weapon`: `{ total, spent, available }`
+- `proficiencies.nonweapon`: `{ total, spent, available }`
 - `languagesKnown.max`
 
 ### 5.2 Actor: `npc`

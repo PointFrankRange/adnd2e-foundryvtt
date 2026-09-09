@@ -1,7 +1,7 @@
 // The enumerations the Item and Actor DataModel schemas validate against. Kept here as
 // plain arrays (not in the schema files) so they are unit-testable against the
 // engine unions — defineSchema() imports these and stays logic-free.
-import type { AbilityKey, Alignment, ClassId, CreatureSize, MovementMode, NonweaponGroup, Race, SpellSchool, SphereName, WizardSchool } from "../../core/types";
+import type { AbilityKey, Alignment, ClassId, CreatureSize, EncumbranceCategory, MovementMode, NonweaponGroup, Race, SpellSchool, SphereName, WizardSchool } from "../../core/types";
 import type { DamageType, WeaponCategory, WeaponSize } from "../../core/weapons/data";
 
 export const CLASS_IDS: readonly ClassId[] = [
@@ -56,6 +56,11 @@ export const ALIGNMENTS: readonly Alignment[] = [
 ];
 
 export const MOVEMENT_MODES: readonly MovementMode[] = ["land", "burrow", "climb", "fly", "swim"];
+
+/** Encumbrance categories (= core `EncumbranceCategory`), lightest to heaviest. */
+export const ENCUMBRANCE_CATEGORIES: readonly EncumbranceCategory[] = [
+  "unencumbered", "light", "moderate", "heavy", "severe", "immobile",
+];
 
 export const DISPOSITIONS: readonly string[] = ["friendly", "neutral", "hostile"];
 export const SAVE_MODES: readonly string[] = ["explicit", "asClass"];
