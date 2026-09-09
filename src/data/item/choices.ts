@@ -46,7 +46,7 @@ export const CREATURE_SIZES: readonly CreatureSize[] = [
 
 export const CASTER_CLASSES: readonly string[] = ["wizard", "priest"];
 export const SAVING_THROW_KINDS: readonly string[] = ["none", "negates", "half", "special"];
-export const DUAL_CLASS_STATES: readonly string[] = ["primary", "suppressed", "active"];
+export const DUAL_CLASS_STATES: readonly string[] = ["primary", "active"];
 export const FEATURE_SOURCE_TYPES: readonly string[] = ["class", "kit", "race", "other"];
 export const FEATURE_ACTIVATIONS: readonly string[] = ["passive", "action", "daily"];
 

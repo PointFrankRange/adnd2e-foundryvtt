@@ -58,8 +58,9 @@ describe("resolveDualClass", () => {
     expect(r.activeChassisId).toBe("mage");
     expect(r.bestThac0).toEqual({ group: "wizard", level: 3 });
     expect(r.saveGroups).toEqual([{ group: "wizard", level: 3 }]);
-    expect(r.weaponProfSource).toEqual({ chassisId: "mage", level: 3 });
-    expect(r.nonweaponProfSource).toEqual({ chassisId: "mage", level: 3 });
+    // proficiencies are retained in dual-classing (PHB p.45) — best-of-both even while suppressed
+    expect(r.weaponProfSource).toEqual({ chassisId: "fighter", level: 6 });
+    expect(r.nonweaponProfSource).toEqual({ chassisId: "fighter", level: 6 });
     expect(r.casters.map((c) => c.chassisId)).toEqual(["mage"]);
     expect(r.hpMax).toBe(64);
   });

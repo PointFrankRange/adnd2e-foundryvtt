@@ -4,7 +4,7 @@
 // contract Plan 1c.3b fills.
 import type { AbilityScores, ClassId, Race, WizardSchool } from "../../../core/types";
 
-export type DualClassState = "primary" | "suppressed" | "active";
+export type DualClassState = "primary" | "active";
 
 export interface ClassEntry {
   chassisId: ClassId;

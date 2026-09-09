@@ -45,11 +45,9 @@ export interface CharacterDerived {
   };
 }
 
-const NO_DUAL_CLASS = Object.freeze({
-  dormantChassisId: null as ClassId | null,
-  activeChassisId: null as ClassId | null,
-  surpassed: false,
-});
+function noDualClass(): CharacterDerived["multiclass"]["dualClass"] {
+  return { dormantChassisId: null, activeChassisId: null, surpassed: false };
+}
 
 function spellInput(
   m: ClassMember,
@@ -81,6 +79,10 @@ function mergeCasterSlots(
 }
 
 export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules): CharacterDerived {
+  // NOTE: one flag for deriveAbilities, so abilities.con.mods.hpAdjustment shows
+  // the warrior column for any multiclass containing a warrior. The HP *math*
+  // (multiclass.ts) uses the correct per-class column; this only affects the
+  // cached display value. SP6 sheet should label it per-class if it matters.
   const isWarrior = snapshot.classes.some((c) => getChassis(c.chassisId).group === "warrior");
 
   // §5.6 step 2 — ability modifiers. Scores are already racially adjusted
@@ -150,7 +152,7 @@ export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules)
           )
         : null,
       encumbrance,
-      multiclass: { mode, dualClass: NO_DUAL_CLASS, hpAveraged: false },
+      multiclass: { mode, dualClass: noDualClass(), hpAveraged: false },
     };
   }
 
@@ -168,7 +170,7 @@ export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules)
           activeChassisId: (resolution as DualClassResolution).activeChassisId,
           surpassed: (resolution as DualClassResolution).surpassed,
         }
-      : NO_DUAL_CLASS;
+      : noDualClass();
 
   return {
     abilities,

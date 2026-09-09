@@ -49,6 +49,11 @@ export function resolveMulticlassArrangement(
   return resolveMulticlass(members, { perClassHp, averageHp });
 }
 
+/**
+ * Precondition: `classes` is exactly one `dualClassState:"primary"` + one
+ * `"active"` (i.e. `classifyArrangement(classes) === "dualclass"`). The
+ * `findIndex` lookups below assume both are present.
+ */
 export function resolveDualClassArrangement(
   classes: readonly ClassEntry[],
   levels: readonly number[],

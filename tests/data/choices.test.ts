@@ -52,7 +52,7 @@ describe("item schema choice arrays match the engine unions", () => {
   it("small fixed lists", () => {
     expect([...CASTER_CLASSES].sort()).toEqual(["priest", "wizard"]);
     expect([...SAVING_THROW_KINDS].sort()).toEqual(["half", "negates", "none", "special"]);
-    expect([...DUAL_CLASS_STATES].sort()).toEqual(["active", "primary", "suppressed"]);
+    expect([...DUAL_CLASS_STATES].sort()).toEqual(["active", "primary"]);
     expect([...FEATURE_SOURCE_TYPES].sort()).toEqual(["class", "kit", "other", "race"]);
     expect([...FEATURE_ACTIVATIONS].sort()).toEqual(["action", "daily", "passive"]);
   });

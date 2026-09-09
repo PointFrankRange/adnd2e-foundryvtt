@@ -234,8 +234,8 @@ src/
       weapon.ts          slot totals from progression; specialization effects
       nonweapon.ts       checkTarget(governingAbility, modifier, options)
     progression/
-      multiclass.ts      resolveMulticlass(classes[]) -> effective levels, HP rule
-      dualclass.ts       resolveDualClass(classes[]) -> active/suppressed abilities
+      multiclass.ts      resolveMulticlass(classes[]) -> effective levels, HP rule;
+                         resolveDualClass(classes[]) -> active/suppressed abilities
     encumbrance/
       weight-allowance.ts allowance(strengthMods) -> {unencumbered, …, max}
       movement.ts        movementRate(baseMove, carried, allowance, armor, options)

@@ -104,7 +104,11 @@ export function resolveDualClass(input: {
 }): DualClassResolution {
   const { primary, active } = input;
   const surpassed = active.level > primary.level;
+  // THAC0 / saves / casters: the abandoned class is suppressed until surpassed.
   const considered = surpassed ? [primary, active] : [active];
+  // Proficiencies are retained permanently in dual-classing (PHB p.45); only new
+  // slots accrue at the new class's rate. Best-of-both, always.
+  const profClasses = [primary, active];
   const saveGroups = considered.map(toGroupLevel);
   return {
     surpassed,
@@ -112,8 +116,8 @@ export function resolveDualClass(input: {
     activeChassisId: active.chassisId,
     bestThac0: bestThac0Of(saveGroups),
     saveGroups,
-    weaponProfSource: maxBy(considered, weaponSlotsOf),
-    nonweaponProfSource: maxBy(considered, nonweaponSlotsOf),
+    weaponProfSource: maxBy(profClasses, weaponSlotsOf),
+    nonweaponProfSource: maxBy(profClasses, nonweaponSlotsOf),
     casters: castersOf(considered),
     hpMax: input.primaryFrozenHp + (surpassed ? input.activeHpAbovePrimary : 0),
   };

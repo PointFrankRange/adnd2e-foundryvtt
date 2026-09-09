@@ -123,7 +123,7 @@ describe("deriveCharacter — full single-class pipeline (§5.6 steps 3-10)", ()
     const mage: ActorSnapshot = {
       ...fighter7,
       abilities: { str: 10, dex: 10, con: 10, int: 16, wis: 10, cha: 10 },
-      classes: [{ chassisId: "mage", specialistSchool: null, xp: 40000, hpRolls: [4, 3, 4, 2, 3], dualClassState: null, level: 5 }],
+      classes: [{ chassisId: "mage", specialistSchool: null, xp: 20000, hpRolls: [4, 3, 4, 2, 3], dualClassState: null, level: 5 }],
       equippedArmor: null, equippedShield: null,
     };
     const d = deriveCharacter(mage, DEFAULT_OPTIONAL_RULES);
@@ -169,6 +169,23 @@ describe("deriveCharacter — multiclass (§5.6 step 1)", () => {
     expect(d.spellSlots.wizard).toBeDefined();
     expect(d.spellSlots.priest).toBeUndefined();
     expect(d.multiclass.dualClass).toEqual({ dormantChassisId: null, activeChassisId: null, surpassed: false });
+  });
+
+  it("Fighter/Thief (no caster): spellSlots is empty", () => {
+    // exact levels are irrelevant here — both XP values are unambiguously >= level 2
+    // so classifyArrangement returns "multiclass"; the test only checks mode + spellSlots
+    const ft: ActorSnapshot = {
+      ...elfFM,
+      race: "half-elf",
+      abilities: { str: 13, dex: 15, con: 12, int: 12, wis: 10, cha: 10 },
+      classes: [
+        { chassisId: "fighter", specialistSchool: null, xp: 8000, hpRolls: [10, 8, 9], dualClassState: null, level: 3 },
+        { chassisId: "thief", specialistSchool: null, xp: 5000, hpRolls: [6, 4, 5], dualClassState: null, level: 4 },
+      ],
+    };
+    const d = deriveCharacter(ft, DEFAULT_OPTIONAL_RULES);
+    expect(d.multiclass.mode).toBe("multiclass");
+    expect(d.spellSlots).toEqual({});
   });
 
   it("multiclassHpAveraging off -> highest single class HP", () => {

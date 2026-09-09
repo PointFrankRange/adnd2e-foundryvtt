@@ -76,7 +76,7 @@ export function saveTargetBest(input: SaveTargetBestInput): SaveTargetResult {
 }
 
 /**
- * Single-class saving-throw target. A succeeds when
+ * Single-class saving-throw target. A save succeeds when
  * `d20Roll + result.rollModifier >= result.target`.
  */
 export function saveTarget(input: SaveTargetInput): SaveTargetResult {
