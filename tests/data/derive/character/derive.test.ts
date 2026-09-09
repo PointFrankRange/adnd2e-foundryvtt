@@ -8,6 +8,13 @@ const base: ActorSnapshot = {
   exceptionalStrengthPercentile: null,
   race: null,
   classes: [],
+  equippedArmor: null,
+  equippedShield: null,
+  carriedWeight: 0,
+  memorized: [],
+  spentWeaponSlots: 0,
+  spentNonweaponSlots: 0,
+  baseMovement: 12,
 };
 
 const fighterClass = {
@@ -16,6 +23,7 @@ const fighterClass = {
   xp: 0,
   hpRolls: [] as number[],
   dualClassState: null,
+  level: 1,
 };
 const mageClass = { ...fighterClass, chassisId: "mage" as const };
 
