@@ -950,6 +950,19 @@ whole-branch review of `feat/adnd2e-1c4a`; the fix wave landed C1 (`_key` on all
 110 pack docs) + I2 (empty-pack guards) + I3/I4 (reverted the premature
 `CONFIG.statusEffects` wiring in `src/system.ts`) + a 5-item Minor sweep.
 
+- **`conditions` compendium — REMOVED from `system.json` post-merge (hotfix
+  branch `fix/adnd2e-conditions-pack-type`).** v14.364's server-side
+  manifest installer (`dist/packages/*.mjs`, behind `SetupView.handlePost` →
+  `installPackage`) rejects a compendium `"type": "ActiveEffect"` with
+  "not a valid choice" — even though `CONST.COMPENDIUM_DOCUMENT_TYPES` in the
+  client/common layer lists it and `@foundryvtt/foundryvtt-cli` compiles it
+  fine. Declaring the pack broke install-from-manifest for everyone. The 15
+  condition docs (`packs/conditions/_source/`, `_key`-tagged, `_MANIFEST.md`)
+  and `src/conditions.ts` stay in the repo, drift-tested by
+  `tests/conditions.test.ts`. **SP3 ships the conditions compendium** — as an
+  `Item`-typed pack with a `condition` Item subtype, or whatever v14 supports
+  then — together with the `CONFIG.statusEffects` wiring below (they're the
+  same piece of work). 4 Item packs ship in 1c.4a.
 - **SP3 — wire `CONFIG.statusEffects` properly.** The reverted 1c.4a loop
   blind-appended `{id,name,img}` onto core's 34 built-ins (duplicate Token-HUD
   entries for blind/deaf/stun/sleep/paralysis/poison/fear, and it misaligned
