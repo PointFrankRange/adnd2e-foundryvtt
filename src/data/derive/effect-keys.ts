@@ -4,7 +4,7 @@
 // actor type. An unlisted derived field just means its effect is a visible no-op
 // in the dev world — safer than a base-path deny-list, where a miss double-applies.
 
-type ActorType = "character" | "npc" | "creature";
+export type ActorType = "character" | "npc" | "creature";
 
 const CHARACTER_DERIVED_PREFIXES: readonly string[] = [
   "system.abilities.str.mods",
