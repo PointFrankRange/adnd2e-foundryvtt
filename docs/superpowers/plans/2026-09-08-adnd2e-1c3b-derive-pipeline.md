@@ -712,8 +712,8 @@ describe("deriveSaves", () => {
       wisMagicalDefenseAdj: 0, dexDefensiveAdj: 0,
     });
     expect(Object.keys(s).sort()).toEqual(["bw", "pp", "ppd", "rsw", "spell"]);
-    // warrior L7 breath-weapon base save = 9 (PHB Table 60)
-    expect(s.bw.target).toBe(9);
+    // warrior L7 breath-weapon base save = 12 (SAVE_MATRICES warrior band minLevel 7)
+    expect(s.bw.target).toBe(12);
     expect(s.bw.effectiveTarget).toBe(s.bw.target - s.bw.rollModifier);
   });
   it("dwarf CON 16 gets the +3 racial bonus vs rod/staff/wand and spell", () => {
@@ -1053,8 +1053,8 @@ describe("deriveCharacter — full single-class pipeline (§5.6 steps 3-10)", ()
     expect(d.thac0).toEqual({ base: 14, melee: 13, ranged: 13 });
     // AC normal: chain 5 - shield 1 - DEX16 defensiveAdj 1 = 3
     expect(d.ac.normal).toBe(3);
-    // warrior L7 breath-weapon save target
-    expect(d.saves.bw.target).toBe(9);
+    // warrior L7 breath-weapon save target (SAVE_MATRICES warrior band minLevel 7)
+    expect(d.saves.bw.target).toBe(12);
     // weapon slots: 4 + floor(7/3) = 6; spent 3 -> available 3
     expect(d.proficiencies.weapon).toEqual({ total: 6, spent: 3, available: 3 });
     // 60 lb vs STR 17 allowance -> a category; movementRate <= 12
