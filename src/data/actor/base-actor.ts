@@ -197,7 +197,7 @@ export function applyRacialAdjustment(model: foundry.abstract.TypeDataModel.Any)
 interface DerivedWriteSurface {
   abilities: Record<string, { mods?: unknown }>;
   classes: unknown;
-  multiclassPending: boolean;
+  multiclass: unknown;
   attributes: {
     hp: { max: number };
     thac0: unknown;
@@ -224,7 +224,7 @@ export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void 
 
   for (const k of ABILITY_KEYS) sys.abilities[k].mods = derived.abilities[k];
   sys.classes = derived.classes;
-  sys.multiclassPending = derived.multiclassPending;
+  sys.multiclass = derived.multiclass;
 
   if (derived.classes.length) sys.attributes.hp.max = derived.hpMax;
   sys.attributes.ac = derived.ac;

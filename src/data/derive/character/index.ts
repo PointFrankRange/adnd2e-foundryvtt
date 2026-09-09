@@ -8,3 +8,4 @@ export * from "./saves";
 export * from "./slots";
 export * from "./proficiencies";
 export * from "./encumbrance";
+export * from "./multiclass";

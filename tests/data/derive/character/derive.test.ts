@@ -106,7 +106,7 @@ describe("deriveCharacter — full single-class pipeline (§5.6 steps 3-10)", ()
     expect(d.proficiencies!.weapon).toEqual({ total: 6, spent: 3, available: 3 });
     // 60 lb vs STR 17 allowance -> a category; movementRate <= 12
     expect(d.encumbrance.movementRate).toBeLessThanOrEqual(12);
-    expect(d.multiclassPending).toBe(false);
+    expect(d.multiclass.mode).toBe("single");
   });
 
   it("a 0-class actor: level-dependent blocks are null", () => {
@@ -116,7 +116,7 @@ describe("deriveCharacter — full single-class pipeline (§5.6 steps 3-10)", ()
     expect(d.saves).toBeNull();
     expect(d.spellSlots).toEqual({});
     expect(d.hpMax).toBe(0);
-    expect(d.multiclassPending).toBe(false);
+    expect(d.multiclass.mode).toBe("single");
   });
 
   it("mage L5 INT 16 -> wizard spell slots", () => {
@@ -130,16 +130,108 @@ describe("deriveCharacter — full single-class pipeline (§5.6 steps 3-10)", ()
     expect(d.spellSlots.wizard![1].max).toBe(4);
   });
 
-  it("two classes -> derives from the first + flags multiclassPending", () => {
-    const d = deriveCharacter({
-      ...fighter7,
+});
+
+describe("deriveCharacter — multiclass (§5.6 step 1)", () => {
+  const elfFM: ActorSnapshot = {
+    abilities: { str: 13, dex: 16, con: 15, int: 15, wis: 10, cha: 10 },
+    exceptionalStrengthPercentile: null,
+    race: "elf",
+    classes: [
+      // xp set so deriveClassLevels resolves fighter 5 / mage 6 (fixture `level` alone is not read)
+      { chassisId: "fighter", specialistSchool: null, xp: 16000, hpRolls: [10, 9, 8, 10, 7], dualClassState: null, level: 5 },
+      { chassisId: "mage", specialistSchool: null, xp: 40000, hpRolls: [4, 3, 4, 2, 3, 4], dualClassState: null, level: 6 },
+    ],
+    equippedArmor: null,
+    equippedShield: null,
+    carriedWeight: 0,
+    wizardMemorized: [],
+    priestMemorized: [],
+    spentWeaponSlots: 0,
+    spentNonweaponSlots: 0,
+    baseMovement: 12,
+  };
+
+  it("Fighter 5 / Mage 6: averaged HP, best THAC0, best-of saves, split prof classes", () => {
+    const d = deriveCharacter(elfFM, DEFAULT_OPTIONAL_RULES);
+    expect(d.multiclass.mode).toBe("multiclass");
+    expect(d.multiclass.hpAveraged).toBe(true);
+    expect(d.hpMax).toBe(37);
+    // best THAC0 = warrior L5 = 16 ; STR 13 hitProb 0 ; DEX 16 missile +1
+    expect(d.thac0).toEqual({ base: 16, melee: 16, ranged: 15 });
+    // saves: rsw wins from wizard (9), ppd from warrior (11)
+    expect(d.saves!.rsw.target).toBe(9);
+    expect(d.saves!.ppd.target).toBe(11);
+    // weapon from fighter (5), nonweapon from mage (6)
+    expect(d.proficiencies!.weapon.total).toBe(5);
+    expect(d.proficiencies!.nonweapon.total).toBe(6);
+    // only the mage casts
+    expect(d.spellSlots.wizard).toBeDefined();
+    expect(d.spellSlots.priest).toBeUndefined();
+    expect(d.multiclass.dualClass).toEqual({ dormantChassisId: null, activeChassisId: null, surpassed: false });
+  });
+
+  it("multiclassHpAveraging off -> highest single class HP", () => {
+    const d = deriveCharacter(elfFM, { ...DEFAULT_OPTIONAL_RULES, multiclassHpAveraging: false });
+    expect(d.hpMax).toBe(49); // characterHpMax(fighter,5,...,+1)
+    expect(d.multiclass.hpAveraged).toBe(false);
+  });
+
+  it("half-elf Fighter/Mage/Cleric: both spell records populated", () => {
+    const fmc: ActorSnapshot = {
+      ...elfFM,
+      race: "half-elf",
+      abilities: { str: 13, dex: 12, con: 15, int: 12, wis: 15, cha: 10 },
       classes: [
-        { chassisId: "fighter", specialistSchool: null, xp: 70000, hpRolls: [10], dualClassState: null, level: 7 },
-        { chassisId: "mage", specialistSchool: null, xp: 40000, hpRolls: [4], dualClassState: null, level: 5 },
+        { chassisId: "fighter", specialistSchool: null, xp: 8000, hpRolls: [10, 8, 9, 7], dualClassState: null, level: 4 },
+        { chassisId: "mage", specialistSchool: null, xp: 10000, hpRolls: [4, 3, 4, 2], dualClassState: null, level: 4 },
+        { chassisId: "cleric", specialistSchool: null, xp: 6000, hpRolls: [8, 6, 7, 8], dualClassState: null, level: 4 },
       ],
-    }, DEFAULT_OPTIONAL_RULES);
-    expect(d.multiclassPending).toBe(true);
-    expect(d.classes).toHaveLength(2);
-    expect(d.thac0!.base).toBe(14); // fighter (classes[0]) table
+    };
+    const d = deriveCharacter(fmc, DEFAULT_OPTIONAL_RULES);
+    expect(d.hpMax).toBe(29); // floor((38+17+33)/3)
+    expect(d.spellSlots.wizard).toBeDefined();
+    expect(d.spellSlots.priest).toBeDefined();
+    expect(d.thac0!.base).toBe(17); // warrior L4
+  });
+});
+
+describe("deriveCharacter — dual-class (§5.6 step 1)", () => {
+  const humanFtoM = (mageLevel: number, mageRolls: number[]): ActorSnapshot => ({
+    abilities: { str: 15, dex: 12, con: 16, int: 15, wis: 10, cha: 10 },
+    exceptionalStrengthPercentile: null,
+    race: "human",
+    classes: [
+      // xp set so deriveClassLevels resolves fighter 6 (primary) / mage `mageLevel` (active)
+      { chassisId: "fighter", specialistSchool: null, xp: 32000, hpRolls: [10, 8, 9, 10, 7, 8], dualClassState: "primary", level: 6 },
+      { chassisId: "mage", specialistSchool: null, xp: mageLevel >= 7 ? 60000 : 5000, hpRolls: mageRolls, dualClassState: "active", level: mageLevel },
+    ],
+    equippedArmor: null,
+    equippedShield: null,
+    carriedWeight: 0,
+    wizardMemorized: [],
+    priestMemorized: [],
+    spentWeaponSlots: 0,
+    spentNonweaponSlots: 0,
+    baseMovement: 12,
+  });
+
+  it("suppressed (mage 3 <= fighter 6): mage THAC0/saves, HP frozen, mage spells", () => {
+    const d = deriveCharacter(humanFtoM(3, [4, 3, 4]), DEFAULT_OPTIONAL_RULES);
+    expect(d.multiclass.mode).toBe("dualclass");
+    expect(d.multiclass.dualClass).toEqual({ dormantChassisId: "fighter", activeChassisId: "mage", surpassed: false });
+    expect(d.hpMax).toBe(64); // frozen fighter L6 total (CON 16 -> +2)
+    expect(d.thac0!.base).toBe(20); // thac0("wizard",3)
+    expect(d.saves!.spell.target).toBe(12); // wizard band minLevel 1
+    expect(d.spellSlots.wizard).toBeDefined();
+  });
+
+  it("surpassed (mage 7 > fighter 6): best-of THAC0 & saves, HP frozen + mage L7 die", () => {
+    const d = deriveCharacter(humanFtoM(7, [4, 3, 4, 2, 3, 4, 3]), DEFAULT_OPTIONAL_RULES);
+    expect(d.multiclass.dualClass.surpassed).toBe(true);
+    expect(d.hpMax).toBe(69);
+    expect(d.thac0!.base).toBe(15); // best of warrior L6 (15) vs wizard L7 (18)
+    expect(d.saves!.rsw.target).toBe(9); // wizard L7 band
+    expect(d.saves!.ppd.target).toBe(11); // warrior band minLevel 5
   });
 });
