@@ -1,9 +1,12 @@
 // Shared authored-schema fragment for `character` + `npc`, and the abstract
 // TypeDataModel base for all three actor models. Foundry-layer; no logic.
 import { htmlField } from "../common/fields";
-import { ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, SPHERE_NAMES } from "../item/choices";
+import { ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, ENCUMBRANCE_CATEGORIES, WIZARD_SCHOOLS, SPHERE_NAMES } from "../item/choices";
+import { deriveCharacter } from "../derive/character";
+import { getOptionalRules } from "../../settings";
+import { snapshotActor } from "./snapshot";
 
-const { StringField, NumberField, SchemaField, ArrayField } = foundry.data.fields;
+const { StringField, NumberField, BooleanField, SchemaField, ArrayField, ObjectField } = foundry.data.fields;
 
 function abilitiesSchema() {
   const entry = () =>
@@ -12,6 +15,77 @@ function abilitiesSchema() {
       exceptional: new NumberField({ required: true, nullable: true, integer: true, min: 1, max: 100, initial: null }),
     });
   return new SchemaField(Object.fromEntries(ABILITY_KEYS.map((k) => [k, entry()])));
+}
+
+/** One `memorized` sub-object: an embedded `spell` item id + the slot level it occupies. */
+function memorizedSchema() {
+  return new ArrayField(
+    new SchemaField({
+      spellItemId: new StringField({ required: true, blank: false }),
+      spellLevel: new NumberField({ required: true, integer: true, min: 1, max: 9 }),
+    }),
+    { required: true, initial: [] },
+  );
+}
+
+/** A derived save target sub-object; initials are safe pre-derive values. */
+function saveEntrySchema() {
+  return new SchemaField({
+    target: new NumberField({ required: true, integer: true, initial: 20 }),
+    rollModifier: new NumberField({ required: true, integer: true, initial: 0 }),
+    effectiveTarget: new NumberField({ required: true, integer: true, initial: 20 }),
+  });
+}
+
+/** A derived proficiency-slot tally; initials are safe pre-derive values. */
+function proficiencyBlockSchema() {
+  return new SchemaField({
+    total: new NumberField({ required: true, integer: true, initial: 0 }),
+    spent: new NumberField({ required: true, integer: true, initial: 0 }),
+    available: new NumberField({ required: true, integer: true, initial: 0 }),
+  });
+}
+
+/** Derived THAC0 by attack mode; initials are safe pre-derive values. */
+function thac0Schema() {
+  return new SchemaField({
+    base: new NumberField({ required: true, integer: true, initial: 20 }),
+    melee: new NumberField({ required: true, integer: true, initial: 20 }),
+    ranged: new NumberField({ required: true, integer: true, initial: 20 }),
+  });
+}
+
+/** Derived armor class by situation; initials are safe pre-derive values. */
+function acSchema() {
+  return new SchemaField({
+    normal: new NumberField({ required: true, integer: true, initial: 10 }),
+    rearAttack: new NumberField({ required: true, integer: true, initial: 10 }),
+    surprised: new NumberField({ required: true, integer: true, initial: 10 }),
+    shieldless: new NumberField({ required: true, integer: true, initial: 10 }),
+  });
+}
+
+/** Derived encumbrance state; initials are safe pre-derive values. */
+function encumbranceSchema() {
+  return new SchemaField({
+    carried: new NumberField({ required: true, initial: 0 }),
+    category: new StringField({ required: true, blank: false, initial: "unencumbered", choices: ENCUMBRANCE_CATEGORIES }),
+    penalty: new SchemaField({
+      attackRoll: new NumberField({ required: true, integer: true, initial: 0 }),
+      armorClass: new NumberField({ required: true, integer: true, initial: 0 }),
+    }),
+    baseMove: new NumberField({ required: true, integer: true, initial: 12 }),
+    movementRate: new NumberField({ required: true, integer: true, initial: 12 }),
+  });
+}
+
+/** Derived movement summary; initials are safe pre-derive values. */
+function movementSchema() {
+  return new SchemaField({
+    base: new NumberField({ required: true, integer: true, initial: 12 }),
+    current: new NumberField({ required: true, integer: true, initial: 12 }),
+    encumbranceCategory: new StringField({ required: true, blank: false, initial: "unencumbered", choices: ENCUMBRANCE_CATEGORIES }),
+  });
 }
 
 export function actorCommonSchema(): foundry.data.fields.DataSchema {
@@ -37,6 +111,31 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
         temp: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
         nonlethal: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       }),
+      thac0: thac0Schema(),
+      ac: acSchema(),
+      encumbrance: encumbranceSchema(),
+      movement: movementSchema(),
+    }),
+    saves: new SchemaField({
+      ppd: saveEntrySchema(),
+      rsw: saveEntrySchema(),
+      pp: saveEntrySchema(),
+      bw: saveEntrySchema(),
+      spell: saveEntrySchema(),
+    }),
+    classes: new ArrayField(
+      new SchemaField({
+        chassisId: new StringField({ required: true, blank: false, choices: CLASS_IDS }),
+        level: new NumberField({ required: true, integer: true, min: 1, initial: 1 }),
+        canLevelUp: new BooleanField({ required: true, initial: false }),
+      }),
+      { required: true, initial: [] },
+    ),
+    multiclassPending: new BooleanField({ required: true, initial: false }),
+    languagesKnown: new SchemaField({ max: new NumberField({ required: true, integer: true, min: 0, initial: 0 }) }),
+    proficiencies: new SchemaField({
+      weapon: proficiencyBlockSchema(),
+      nonweapon: proficiencyBlockSchema(),
     }),
     currency: new SchemaField({
       pp: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
@@ -55,9 +154,13 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
         specialistSchool: new StringField({ required: true, nullable: true, initial: null, choices: WIZARD_SCHOOLS }),
         opposedSchools: new ArrayField(new StringField({ required: true, blank: false, choices: WIZARD_SCHOOLS }), { required: true, initial: [] }),
         spellbookItemIds: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: [] }),
+        memorized: memorizedSchema(),
+        slots: new ObjectField({ required: true, initial: {} }),
       }),
       priest: new SchemaField({
         sphereAccessOverride: new ArrayField(new StringField({ required: true, blank: false, choices: SPHERE_NAMES }), { required: true, nullable: true, initial: null }),
+        memorized: memorizedSchema(),
+        slots: new ObjectField({ required: true, initial: {} }),
       }),
     }),
     biography: htmlField(),
@@ -67,6 +170,19 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
       spellsAndMagic: new foundry.data.fields.ObjectField({ required: true, initial: {} }),
     }),
   };
+}
+
+/**
+ * Runs the character pipeline and writes the derived values onto `system.*`
+ * (spec §5.1 paths). MINIMAL in Plan 1c.3b Batch A — only the ability-mods loop
+ * (the 1c.3a behaviour); Task 5 fills the full write-through once `CharacterDerived`
+ * carries the step 3-10 fields.
+ */
+export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void {
+  const parent = (model as unknown as { parent: Actor.Implementation }).parent;
+  const derived = deriveCharacter(snapshotActor(parent), getOptionalRules());
+  const sys = model as unknown as { abilities: Record<string, { mods?: unknown }> };
+  for (const k of ABILITY_KEYS) sys.abilities[k].mods = derived.abilities[k];
 }
 
 export abstract class Adnd2eActorModel<

@@ -27,15 +27,23 @@ describe("deriveCharacter", () => {
     expect(d.abilities.con.hpAdjustment).toBe(0); // CON 12 -> no hp adj
   });
 
-  it("no race item -> derives as human (no racial adjustment)", () => {
-    const dwarfLike = deriveCharacter({ ...base, race: null, abilities: { ...base.abilities, con: 14 } }, DEFAULT_OPTIONAL_RULES);
-    expect(dwarfLike.abilities.scores.con).toBe(14); // human: no delta
+  it("takes ability scores as-is — racial adjustment is prepareBaseData's job now (F3)", () => {
+    const d = deriveCharacter({ ...base, race: "dwarf", abilities: { ...base.abilities, con: 15, cha: 13 } }, DEFAULT_OPTIONAL_RULES);
+    expect(d.abilities.scores.con).toBe(15); // no further delta
+    expect(d.abilities.scores.cha).toBe(13);
   });
 
-  it("applies the racial delta when a race is present", () => {
-    const d = deriveCharacter({ ...base, race: "dwarf", abilities: { ...base.abilities, con: 14, cha: 14 } }, DEFAULT_OPTIONAL_RULES);
-    expect(d.abilities.scores.con).toBe(15); // dwarf +1 CON
-    expect(d.abilities.scores.cha).toBe(13); // dwarf -1 CHA
+  it("no race still derives cleanly", () => {
+    const d = deriveCharacter({ ...base, race: null }, DEFAULT_OPTIONAL_RULES);
+    expect(d.abilities.scores).toEqual(base.abilities);
+  });
+
+  it("halfling never gets exceptional Strength even at STR 18 / percentile 100 (F3 guard)", () => {
+    const d = deriveCharacter(
+      { ...base, race: "halfling", classes: [fighterClass], abilities: { ...base.abilities, str: 18 }, exceptionalStrengthPercentile: 100 },
+      DEFAULT_OPTIONAL_RULES,
+    );
+    expect(d.abilities.str.hitProb).toBe(1); // STR 18 row, not the exceptional 18/00 row's 3
   });
 
   it("a warrior class unlocks the full Constitution hp bonus band", () => {

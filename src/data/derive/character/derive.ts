@@ -16,11 +16,16 @@ export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules)
 
   // §5.6 step 1 — resolveMulticlass / resolveDualClass — Plan 1c.3c
   // §5.6 step 2 — ability modifiers
+  // Scores are already racially adjusted (CharacterModel.prepareBaseData). Pass
+  // race:"human" so deriveAbilities' own applyRacialDeltas is a no-op; halflings
+  // never get exceptional Strength (PHB p.19), enforced here since we drop the
+  // race hint the engine used for that check.
+  const percentile = snapshot.race === "halfling" ? null : snapshot.exceptionalStrengthPercentile;
   const abilities = deriveAbilities(snapshot.abilities, {
-    race: snapshot.race ?? "human",
+    race: "human",
     isWarrior,
     options,
-    exceptionalStrengthPercentile: snapshot.exceptionalStrengthPercentile,
+    exceptionalStrengthPercentile: percentile,
   });
   // §5.6 step 3 — levelForXp per class -> canLevelUp — Plan 1c.3b
   // §5.6 step 4 — HP max — Plan 1c.3b
