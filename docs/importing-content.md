@@ -66,7 +66,7 @@ A single object with a `documents` array:
 - `failed` — array of documents that could not be created, each with the input `index` (into the `documents` array), the attempted `name`, and an `error` message.
 - `folders` — IDs of the world folders created (or reused), keyed by document type. Only present for document types that were imported.
 
-Each document is created independently — one document with a bad `system` field lands in `failed` with the validation error, and the rest still import. A notification summarizes the run; failures are also logged to the console.
+Each document is created independently — one document with a bad `system` field lands in `failed` and the rest still import. For a schema-validation failure the `error` string is generic (`"document creation returned nothing (schema validation failed?)"`) and Foundry additionally shows its own red error notification; the field-level detail is in the browser console. A `console.warn` also lists every failure.
 
 ## Limitations (This Release)
 
