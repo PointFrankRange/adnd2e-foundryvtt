@@ -1,0 +1,16 @@
+{
+  "_id": "x60whNVCGDTWyxtb",
+  "name": "Herbalism",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "int",
+    "modifier": -2,
+    "slotCost": 2,
+    "group": "wizard",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

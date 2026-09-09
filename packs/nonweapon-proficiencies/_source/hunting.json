@@ -1,0 +1,16 @@
+{
+  "_id": "25vTaECPXYVOUCoW",
+  "name": "Hunting",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "wis",
+    "modifier": -1,
+    "slotCost": 1,
+    "group": "warrior",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

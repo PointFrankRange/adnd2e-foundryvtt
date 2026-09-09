@@ -1,0 +1,16 @@
+{
+  "_id": "HqZb6aZzKJeZENJm",
+  "name": "Local History",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "cha",
+    "modifier": 0,
+    "slotCost": 1,
+    "group": "priest",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

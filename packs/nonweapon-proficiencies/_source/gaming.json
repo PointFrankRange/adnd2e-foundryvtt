@@ -1,0 +1,16 @@
+{
+  "_id": "beWN7isb14jNck8Y",
+  "name": "Gaming",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "cha",
+    "modifier": 0,
+    "slotCost": 1,
+    "group": "warrior",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

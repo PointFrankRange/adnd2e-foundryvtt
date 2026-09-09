@@ -1,0 +1,16 @@
+{
+  "_id": "j7EfasLABzMZS7PB",
+  "name": "Spellcraft",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "int",
+    "modifier": -2,
+    "slotCost": 1,
+    "group": "wizard",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

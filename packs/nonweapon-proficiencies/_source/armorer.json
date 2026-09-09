@@ -1,0 +1,16 @@
+{
+  "_id": "4DgLpbuaMAuD4M9h",
+  "name": "Armorer",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "int",
+    "modifier": -2,
+    "slotCost": 2,
+    "group": "warrior",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

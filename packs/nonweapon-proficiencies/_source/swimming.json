@@ -1,0 +1,16 @@
+{
+  "_id": "roPD7Bq0qcXFFz6K",
+  "name": "Swimming",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "str",
+    "modifier": 0,
+    "slotCost": 1,
+    "group": "general",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}
