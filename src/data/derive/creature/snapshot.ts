@@ -1,7 +1,7 @@
 // The plain-data view of a creature the engine derives from. snapshotCreature
 // (src/data/actor/creature.ts) builds this from the Foundry Actor; deriveCreature
 // consumes only this.
-import type { ClassGroup, SaveCategory } from "../../../core/types";
+import type { SaveCategory } from "../../../core/types";
 
 export interface CreatureSnapshot {
   hd: { count: number; dieType: number; bonus: number; fixedHp: number | null };
@@ -11,8 +11,12 @@ export interface CreatureSnapshot {
   authoredThac0: number;
   saveMode: "explicit" | "asClass";
   explicitSaves: Record<SaveCategory, number>;
-  /** used only when saveMode === "asClass"; group "" means "not configured" */
-  asClassSave: { group: ClassGroup | ""; level: number };
+  /**
+   * used only when saveMode === "asClass"; group "" means "not configured".
+   * Typed `string` (not `ClassGroup`) because the value can reach here
+   * unvalidated (imported JSON, an old actor); deriveCreature guards it.
+   */
+  asClassSave: { group: string; level: number };
 }
 
 export interface CreatureDerived {

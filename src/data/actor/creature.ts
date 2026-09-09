@@ -1,9 +1,9 @@
 import { htmlField } from "../common/fields";
 import { deriveCreature } from "../derive/creature";
 import type { CreatureSnapshot } from "../derive/creature";
-import { ALIGNMENTS, ATTACK_TYPES, CREATURE_SIZES, SAVE_MODES } from "../item/choices";
+import { ALIGNMENTS, ATTACK_TYPES, CLASS_GROUPS, CREATURE_SIZES, SAVE_MODES } from "../item/choices";
 import { Adnd2eActorModel } from "./base-actor";
-import type { ClassGroup, SaveCategory } from "../../core/types";
+import type { SaveCategory } from "../../core/types";
 
 const { StringField, NumberField, ArrayField, SchemaField } = foundry.data.fields;
 
@@ -56,7 +56,7 @@ export class CreatureModel extends Adnd2eActorModel {
           spell: new NumberField({ required: true, integer: true, initial: 20 }),
         }),
         asClass: new SchemaField({
-          group: new StringField({ required: true, blank: true, initial: "" }),
+          group: new StringField({ required: true, blank: true, initial: "", choices: ["", ...CLASS_GROUPS] }),
           level: new NumberField({ required: true, integer: true, min: 1, initial: 1 }),
         }),
         effective: new SchemaField({
@@ -106,7 +106,7 @@ function snapshotCreature(model: foundry.abstract.TypeDataModel.Any): CreatureSn
     authoredThac0: sys.attributes.thac0.value,
     saveMode: sys.saves.mode,
     explicitSaves: { ...sys.saves.explicit },
-    asClassSave: { group: sys.saves.asClass.group as ClassGroup | "", level: sys.saves.asClass.level },
+    asClassSave: { group: sys.saves.asClass.group, level: sys.saves.asClass.level },
   };
 }
 

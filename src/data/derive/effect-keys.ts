@@ -39,6 +39,10 @@ const DERIVED_PREFIXES: Record<ActorType, readonly string[]> = {
   creature: CREATURE_DERIVED_PREFIXES,
 };
 
+// Matching is `key === prefix || key.startsWith(prefix)`. The leaf keys
+// ("system.attributes.hp.max", "system.classes") have no children today, so the
+// startsWith arm is inert for them; if a sibling like "system.classesKnown" is
+// ever added, tighten those two to exact-match.
 /**
  * True when an ActiveEffect change on `key` must be re-applied after
  * `prepareDerivedData` (it targets a value that step computes).

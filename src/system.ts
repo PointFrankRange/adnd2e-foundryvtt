@@ -14,7 +14,10 @@ Hooks.once("init", () => {
   CONFIG.Actor.documentClass = Adnd2eActor;
   CONFIG.Item.documentClass = Adnd2eItem;
   CONFIG.ActiveEffect.documentClass = Adnd2eActiveEffect;
-  CONFIG.ActiveEffect.dataModels = ACTIVE_EFFECT_DATA_MODELS;
+  // Merge — do NOT replace: unlike CONFIG.Actor/Item.dataModels (which default to
+  // `{}`), CONFIG.ActiveEffect.dataModels is pre-populated with Foundry's
+  // mandatory `base` entry, and dropping it breaks every core/base-typed effect.
+  Object.assign(CONFIG.ActiveEffect.dataModels, ACTIVE_EFFECT_DATA_MODELS);
   CONFIG.Actor.dataModels = ACTOR_DATA_MODELS;
   registerSettings();
 });

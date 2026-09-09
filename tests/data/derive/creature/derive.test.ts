@@ -57,4 +57,26 @@ describe("deriveCreature", () => {
     });
     expect(s.saves).toEqual({ ppd: 9, rsw: 9, pp: 9, bw: 9, spell: 9 });
   });
+
+  it("saves: asClass with a class id (not a group) falls back to the explicit numbers, no throw", () => {
+    const call = () =>
+      deriveCreature({
+        ...base,
+        saveMode: "asClass",
+        asClassSave: { group: "fighter", level: 5 },
+        explicitSaves: { ppd: 8, rsw: 8, pp: 8, bw: 8, spell: 8 },
+      });
+    expect(call).not.toThrow();
+    expect(call().saves).toEqual({ ppd: 8, rsw: 8, pp: 8, bw: 8, spell: 8 });
+  });
+
+  it("saves: asClass fallback returns a fresh object, not the snapshot's explicitSaves", () => {
+    const snap: CreatureSnapshot = {
+      ...base,
+      saveMode: "asClass",
+      asClassSave: { group: "", level: 1 },
+      explicitSaves: { ppd: 7, rsw: 7, pp: 7, bw: 7, spell: 7 },
+    };
+    expect(deriveCreature(snap).saves).not.toBe(snap.explicitSaves);
+  });
 });

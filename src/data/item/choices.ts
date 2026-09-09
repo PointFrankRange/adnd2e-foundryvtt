@@ -1,7 +1,7 @@
 // The enumerations the Item and Actor DataModel schemas validate against. Kept here as
 // plain arrays (not in the schema files) so they are unit-testable against the
 // engine unions — defineSchema() imports these and stays logic-free.
-import type { AbilityKey, Alignment, ClassId, CreatureSize, EncumbranceCategory, MovementMode, NonweaponGroup, Race, SpellSchool, SphereName, WizardSchool } from "../../core/types";
+import type { AbilityKey, Alignment, ClassGroup, ClassId, CreatureSize, EncumbranceCategory, MovementMode, NonweaponGroup, Race, SpellSchool, SphereName, WizardSchool } from "../../core/types";
 import type { DamageType, WeaponCategory, WeaponSize } from "../../core/weapons/data";
 import type { ClassArrangement } from "../derive/character/multiclass";
 
@@ -39,6 +39,9 @@ export const WEAPON_CATEGORIES: readonly WeaponCategory[] = ["melee", "thrown", 
 export const NONWEAPON_GROUPS: readonly NonweaponGroup[] = [
   "general", "warrior", "wizard", "priest", "rogue",
 ];
+
+/** The four class groups (= core `ClassGroup`). */
+export const CLASS_GROUPS: readonly ClassGroup[] = ["warrior", "wizard", "priest", "rogue"];
 
 export const CREATURE_SIZES: readonly CreatureSize[] = [
   "tiny", "small", "medium", "large", "huge", "gargantuan",

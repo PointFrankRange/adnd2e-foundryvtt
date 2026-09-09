@@ -455,15 +455,17 @@ Foundry's pipeline: `prepareData()` → `prepareBaseData()` →
   10. encumbrance — STR `weightAllowance` vs. Σ item weight → category → `movementRate`
 
 Anything an ActiveEffect must modify *after* these computations (a "+1 to all
-saves" item) is applied as a **second pass**. `Adnd2eActor.prepareDerivedData()`
-calls `super` (which runs the derive-and-cache), then re-applies every effect
-change whose `key` passes `isDeferredChangeKey(key, actorType)` — a static
-allow-list (`src/data/derive/effect-keys.ts`) of the `system.*` prefixes each
-actor type's derive step writes. The early (pre-derive) application of those
-changes is harmless: `prepareDerivedData` overwrites it and the second pass
-re-applies on the correct value. Separately, `Adnd2eActor.allApplicableEffects()`
-skips an `adnd2e` effect whose parent item is an unequipped weapon/armor/equipment
-(`system.suppressWhenUnequipped`).
+saves" item) is a **second-pass** change. On Foundry **v14+** this is native:
+the change carries `phase: "final"`, and `Actor#applyActiveEffects("final")` runs
+after `prepareDerivedData`. Pack-authored derived-targeting changes set
+`phase: "final"` (SP1c.4). On **v13** (no `phase`), `Adnd2eActor` runs a manual
+equivalent: after `super.prepareDerivedData()` it re-applies, in priority order,
+every effect change whose `key` passes `isDeferredChangeKey(key, actorType)` — a
+static allow-list (`src/data/derive/effect-keys.ts`) of the `system.*` prefixes
+each actor type's derive step writes — and its `applyActiveEffects` override
+skips those same keys in the pre-derive pass so they are not double-applied.
+`suppressWhenUnequipped` is enforced by `Adnd2eActiveEffectModel.isSuppressed`
+(the native model hook), on both versions.
 
 ---
 
