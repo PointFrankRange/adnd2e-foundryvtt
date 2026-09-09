@@ -53,3 +53,9 @@ describe("system.json packFolders", () => {
     expect(names).toEqual(["classes", "nonweapon-proficiencies", "races", "weapon-proficiency-groups"]);
   });
 });
+
+describe("system.json version", () => {
+  it("is 0.2.0 (the migration-framework release — anchors the first migration)", () => {
+    expect((manifest as unknown as { version: string }).version).toBe("0.2.0");
+  });
+});
