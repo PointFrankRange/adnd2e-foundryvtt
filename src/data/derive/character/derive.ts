@@ -78,8 +78,7 @@ export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules)
   // §5.6 step 7 — saves.
   const saves = primaryChassis
     ? deriveSaves({
-        group: primaryChassis.group,
-        level: classes[0].level,
+        groups: [{ group: primaryChassis.group, level: classes[0].level }],
         race: snapshot.race ?? "human",
         con: snapshot.abilities.con,
         wisMagicalDefenseAdj: abilities.wis.magicalDefenseAdj,
@@ -104,8 +103,8 @@ export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules)
   // §5.6 step 9 — proficiency slots.
   const proficiencies = primary
     ? deriveProficiencySlots(
-        primary.chassisId,
-        classes[0].level,
+        { chassisId: primary.chassisId, level: classes[0].level },
+        { chassisId: primary.chassisId, level: classes[0].level },
         abilities.int.bonusLanguages,
         snapshot.spentWeaponSlots,
         snapshot.spentNonweaponSlots,
