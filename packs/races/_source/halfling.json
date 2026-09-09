@@ -1,0 +1,19 @@
+{
+  "_id": "KhT7m7HtqcebtF2Z",
+  "_key": "!items!KhT7m7HtqcebtF2Z",
+  "name": "Halfling",
+  "type": "race",
+  "img": "icons/svg/house.svg",
+  "system": {
+    "description": "",
+    "raceId": "halfling",
+    "size": "small",
+    "baseMovement": 6,
+    "infravision": 60,
+    "classLevelLimits": { "cleric": 8, "fighter": 9, "thief": 15 },
+    "allowedClasses": ["cleric", "fighter", "thief"],
+    "allowedMulticlass": [["fighter", "thief"]],
+    "bonusLanguages": ["dwarf", "elf", "gnome", "goblin", "orc"],
+    "grantedFeatures": []
+  }
+}

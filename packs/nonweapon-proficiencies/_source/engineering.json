@@ -1,0 +1,17 @@
+{
+  "_id": "2ZqQb3VRSXo66pP5",
+  "_key": "!items!2ZqQb3VRSXo66pP5",
+  "name": "Engineering",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "int",
+    "modifier": -3,
+    "slotCost": 2,
+    "group": "wizard",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "_id": "R3gj9iA3yenV83Dw",
+  "_key": "!items!R3gj9iA3yenV83Dw",
+  "name": "Reading/Writing",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "int",
+    "modifier": 1,
+    "slotCost": 1,
+    "group": "wizard",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

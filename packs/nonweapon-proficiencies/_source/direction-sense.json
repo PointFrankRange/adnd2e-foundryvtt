@@ -1,0 +1,17 @@
+{
+  "_id": "KN4lk7P3MHCKXKrL",
+  "_key": "!items!KN4lk7P3MHCKXKrL",
+  "name": "Direction Sense",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "wis",
+    "modifier": 1,
+    "slotCost": 1,
+    "group": "general",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

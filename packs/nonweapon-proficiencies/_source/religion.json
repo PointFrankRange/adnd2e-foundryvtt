@@ -1,0 +1,17 @@
+{
+  "_id": "rcxW1eLvCqqu1BHd",
+  "_key": "!items!rcxW1eLvCqqu1BHd",
+  "name": "Religion",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "wis",
+    "modifier": 0,
+    "slotCost": 1,
+    "group": "wizard",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

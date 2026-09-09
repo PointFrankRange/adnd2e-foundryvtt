@@ -224,5 +224,26 @@
         "hint": "The channeler wizard variant (Spells & Magic). Requires Sub-project 9."
       }
     }
+  },
+  "TYPES": {
+    "Actor": {
+      "character": "Character",
+      "npc": "NPC",
+      "creature": "Creature"
+    },
+    "Item": {
+      "class": "Class",
+      "race": "Race",
+      "weapon": "Weapon",
+      "armor": "Armor",
+      "equipment": "Equipment",
+      "spell": "Spell",
+      "weaponProficiency": "Weapon Proficiency",
+      "nonweaponProficiency": "Non-Weapon Proficiency",
+      "classFeature": "Class Feature"
+    },
+    "ActiveEffect": {
+      "adnd2e": "AD&D 2E Effect"
+    }
   }
 }

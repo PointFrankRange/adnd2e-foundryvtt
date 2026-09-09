@@ -1,0 +1,17 @@
+{
+  "_id": "wCWvQ9WW3lc3JYfp",
+  "_key": "!items!wCWvQ9WW3lc3JYfp",
+  "name": "Ancient History",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "int",
+    "modifier": -1,
+    "slotCost": 1,
+    "group": "wizard",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

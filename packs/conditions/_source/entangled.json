@@ -1,0 +1,17 @@
+{
+  "_id": "oTbJmlYBdd6nmMsZ",
+  "_key": "!effects!oTbJmlYBdd6nmMsZ",
+  "name": "Entangled",
+  "type": "adnd2e",
+  "img": "icons/svg/net.svg",
+  "statuses": ["entangled"],
+  "disabled": false,
+  "transfer": false,
+  "system": {
+    "changes": [],
+    "conditionId": "entangled",
+    "isCondition": true,
+    "suppressWhenUnequipped": false,
+    "schoolTag": null
+  }
+}

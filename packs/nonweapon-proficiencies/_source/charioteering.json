@@ -1,0 +1,17 @@
+{
+  "_id": "2BKyGF5Nbz2kVssm",
+  "_key": "!items!2BKyGF5Nbz2kVssm",
+  "name": "Charioteering",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "dex",
+    "modifier": 2,
+    "slotCost": 1,
+    "group": "warrior",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

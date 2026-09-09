@@ -1,0 +1,17 @@
+{
+  "_id": "MJpKPKw2Kda5tNFV",
+  "_key": "!items!MJpKPKw2Kda5tNFV",
+  "name": "Tracking",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "wis",
+    "modifier": 0,
+    "slotCost": 2,
+    "group": "warrior",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

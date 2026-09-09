@@ -1,0 +1,17 @@
+{
+  "_id": "m7oQTPO72PfoHBdh",
+  "_key": "!items!m7oQTPO72PfoHBdh",
+  "name": "Running",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "con",
+    "modifier": -6,
+    "slotCost": 1,
+    "group": "warrior",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

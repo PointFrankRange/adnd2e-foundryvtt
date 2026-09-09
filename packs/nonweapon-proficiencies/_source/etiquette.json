@@ -1,0 +1,17 @@
+{
+  "_id": "ceko9uU3zVFgFZzN",
+  "_key": "!items!ceko9uU3zVFgFZzN",
+  "name": "Etiquette",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "cha",
+    "modifier": 0,
+    "slotCost": 1,
+    "group": "general",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

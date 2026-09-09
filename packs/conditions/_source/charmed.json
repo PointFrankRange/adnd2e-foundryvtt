@@ -1,0 +1,17 @@
+{
+  "_id": "5zoRrMN3z8QUj4v8",
+  "_key": "!effects!5zoRrMN3z8QUj4v8",
+  "name": "Charmed",
+  "type": "adnd2e",
+  "img": "icons/svg/terror.svg",
+  "statuses": ["charmed"],
+  "disabled": false,
+  "transfer": false,
+  "system": {
+    "changes": [],
+    "conditionId": "charmed",
+    "isCondition": true,
+    "suppressWhenUnequipped": false,
+    "schoolTag": null
+  }
+}

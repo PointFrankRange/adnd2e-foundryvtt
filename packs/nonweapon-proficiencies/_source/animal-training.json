@@ -1,0 +1,17 @@
+{
+  "_id": "hn1Bbs1ude5meyhk",
+  "_key": "!items!hn1Bbs1ude5meyhk",
+  "name": "Animal Training",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "wis",
+    "modifier": 0,
+    "slotCost": 1,
+    "group": "general",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

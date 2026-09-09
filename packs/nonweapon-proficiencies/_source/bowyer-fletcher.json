@@ -1,0 +1,17 @@
+{
+  "_id": "QpGkJ1QSWNODGZIH",
+  "_key": "!items!QpGkJ1QSWNODGZIH",
+  "name": "Bowyer/Fletcher",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "dex",
+    "modifier": -1,
+    "slotCost": 1,
+    "group": "warrior",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

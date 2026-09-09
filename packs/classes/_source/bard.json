@@ -1,0 +1,17 @@
+{
+  "_id": "Yr6nHw3pmVUPPkeC",
+  "_key": "!items!Yr6nHw3pmVUPPkeC",
+  "name": "Bard",
+  "type": "class",
+  "img": "icons/svg/sound.svg",
+  "system": {
+    "description": "",
+    "chassisId": "bard",
+    "specialistSchool": null,
+    "kit": null,
+    "grantedFeatures": [],
+    "xp": 0,
+    "hpRolls": [],
+    "dualClassState": null
+  }
+}

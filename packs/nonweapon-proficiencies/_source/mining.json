@@ -1,0 +1,17 @@
+{
+  "_id": "siOvkLROw32SGsIb",
+  "_key": "!items!siOvkLROw32SGsIb",
+  "name": "Mining",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "wis",
+    "modifier": -3,
+    "slotCost": 2,
+    "group": "general",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

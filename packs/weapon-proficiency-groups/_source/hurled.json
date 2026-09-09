@@ -1,0 +1,16 @@
+{
+  "_id": "mSs1qQiT2aUbgdXr",
+  "_key": "!items!mSs1qQiT2aUbgdXr",
+  "name": "Hurled",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Hurled",
+    "isGroup": true,
+    "slotsInvested": 0,
+    "specialized": false,
+    "styleSpecialization": null,
+    "masteryTier": 0
+  }
+}

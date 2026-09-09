@@ -1,0 +1,17 @@
+{
+  "_id": "uT6gVAZNZdOOHRBT",
+  "_key": "!effects!uT6gVAZNZdOOHRBT",
+  "name": "Dead",
+  "type": "adnd2e",
+  "img": "icons/svg/skull.svg",
+  "statuses": ["dead"],
+  "disabled": false,
+  "transfer": false,
+  "system": {
+    "changes": [],
+    "conditionId": "dead",
+    "isCondition": true,
+    "suppressWhenUnequipped": false,
+    "schoolTag": null
+  }
+}

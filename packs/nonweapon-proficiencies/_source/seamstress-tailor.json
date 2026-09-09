@@ -1,0 +1,17 @@
+{
+  "_id": "C77dKwch5qoFEU0U",
+  "_key": "!items!C77dKwch5qoFEU0U",
+  "name": "Seamstress/Tailor",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "dex",
+    "modifier": -1,
+    "slotCost": 1,
+    "group": "general",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

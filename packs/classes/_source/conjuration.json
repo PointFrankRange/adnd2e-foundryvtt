@@ -1,0 +1,17 @@
+{
+  "_id": "or08EcWiLfxTKr7L",
+  "_key": "!items!or08EcWiLfxTKr7L",
+  "name": "Conjurer",
+  "type": "class",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "chassisId": "mage",
+    "specialistSchool": "conjuration",
+    "kit": null,
+    "grantedFeatures": [],
+    "xp": 0,
+    "hpRolls": [],
+    "dualClassState": null
+  }
+}

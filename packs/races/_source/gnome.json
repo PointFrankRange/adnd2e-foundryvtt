@@ -1,0 +1,19 @@
+{
+  "_id": "dH1nGsobLGRy4le6",
+  "_key": "!items!dH1nGsobLGRy4le6",
+  "name": "Gnome",
+  "type": "race",
+  "img": "icons/svg/burrow.svg",
+  "system": {
+    "description": "",
+    "raceId": "gnome",
+    "size": "small",
+    "baseMovement": 6,
+    "infravision": 60,
+    "classLevelLimits": { "fighter": 11, "thief": 13, "cleric": 9, "mage": 15 },
+    "allowedClasses": ["fighter", "thief", "cleric", "mage"],
+    "allowedMulticlass": [["fighter", "cleric"], ["fighter", "mage"], ["fighter", "thief"], ["cleric", "mage"], ["cleric", "thief"], ["mage", "thief"]],
+    "bonusLanguages": ["dwarf", "halfling", "goblin", "kobold"],
+    "grantedFeatures": []
+  }
+}

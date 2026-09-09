@@ -1,0 +1,17 @@
+{
+  "_id": "qyJ3LmTV0AHZTac3",
+  "_key": "!items!qyJ3LmTV0AHZTac3",
+  "name": "Stonemasonry",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "str",
+    "modifier": -2,
+    "slotCost": 1,
+    "group": "general",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

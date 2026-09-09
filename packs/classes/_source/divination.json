@@ -1,0 +1,17 @@
+{
+  "_id": "9z5oReh42lDMq7QF",
+  "_key": "!items!9z5oReh42lDMq7QF",
+  "name": "Diviner",
+  "type": "class",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "chassisId": "mage",
+    "specialistSchool": "divination",
+    "kit": null,
+    "grantedFeatures": [],
+    "xp": 0,
+    "hpRolls": [],
+    "dualClassState": null
+  }
+}

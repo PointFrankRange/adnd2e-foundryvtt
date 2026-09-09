@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import enJson from "../../lang/en.json";
 import { buildAdnd2eConfig } from "../../src/config";
 import { SETTING_DESCRIPTORS } from "../../src/settings/registry";
+import { ACTOR_SUBTYPES } from "../../src/data/actor/subtypes";
+import { ITEM_SUBTYPES } from "../../src/data/item/subtypes";
+import { ACTIVE_EFFECT_SUBTYPES } from "../../src/data/active-effect/subtypes";
 
 const en = enJson as unknown as Record<string, unknown>;
 
@@ -45,5 +48,27 @@ describe("lang/en.json coverage", () => {
   it("no longer references the deleted example app", () => {
     expect(JSON.stringify(en)).not.toContain("exampleApp");
     expect(JSON.stringify(en)).not.toContain("exampleSetting");
+  });
+});
+
+describe("lang/en.json TYPES", () => {
+  const types = (en as { TYPES?: { Actor?: object; Item?: object; ActiveEffect?: object } }).TYPES ?? {};
+
+  it("TYPES.Actor keys == ACTOR_SUBTYPES", () => {
+    expect(Object.keys(types.Actor ?? {}).sort()).toEqual([...ACTOR_SUBTYPES].sort());
+  });
+  it("TYPES.Item keys == ITEM_SUBTYPES", () => {
+    expect(Object.keys(types.Item ?? {}).sort()).toEqual([...ITEM_SUBTYPES].sort());
+  });
+  it("TYPES.ActiveEffect keys == ACTIVE_EFFECT_SUBTYPES", () => {
+    expect(Object.keys(types.ActiveEffect ?? {}).sort()).toEqual([...ACTIVE_EFFECT_SUBTYPES].sort());
+  });
+  it("every TYPES value is a non-empty string", () => {
+    for (const group of Object.values(types)) {
+      for (const [k, v] of Object.entries(group as Record<string, unknown>)) {
+        expect(typeof v, k).toBe("string");
+        expect((v as string).length, k).toBeGreaterThan(0);
+      }
+    }
   });
 });

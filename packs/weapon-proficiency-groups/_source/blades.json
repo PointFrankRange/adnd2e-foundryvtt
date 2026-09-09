@@ -1,0 +1,16 @@
+{
+  "_id": "cuxlBLV2ksPiPqGj",
+  "_key": "!items!cuxlBLV2ksPiPqGj",
+  "name": "Blades",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Blades",
+    "isGroup": true,
+    "slotsInvested": 0,
+    "specialized": false,
+    "styleSpecialization": null,
+    "masteryTier": 0
+  }
+}

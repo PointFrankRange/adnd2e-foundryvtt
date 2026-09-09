@@ -1,0 +1,17 @@
+{
+  "_id": "g7sITZQA6DLmUgwl",
+  "_key": "!items!g7sITZQA6DLmUgwl",
+  "name": "Ranger",
+  "type": "class",
+  "img": "icons/svg/oak.svg",
+  "system": {
+    "description": "",
+    "chassisId": "ranger",
+    "specialistSchool": null,
+    "kit": null,
+    "grantedFeatures": [],
+    "xp": 0,
+    "hpRolls": [],
+    "dualClassState": null
+  }
+}

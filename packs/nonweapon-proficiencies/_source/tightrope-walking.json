@@ -1,0 +1,17 @@
+{
+  "_id": "CgD0496pd7VOLcQK",
+  "_key": "!items!CgD0496pd7VOLcQK",
+  "name": "Tightrope Walking",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "dex",
+    "modifier": 0,
+    "slotCost": 1,
+    "group": "rogue",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

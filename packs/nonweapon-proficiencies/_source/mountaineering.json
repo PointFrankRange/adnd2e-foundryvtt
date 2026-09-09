@@ -1,0 +1,17 @@
+{
+  "_id": "jkEMmggqdelRcq1d",
+  "_key": "!items!jkEMmggqdelRcq1d",
+  "name": "Mountaineering",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "str",
+    "modifier": 0,
+    "slotCost": 1,
+    "group": "warrior",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

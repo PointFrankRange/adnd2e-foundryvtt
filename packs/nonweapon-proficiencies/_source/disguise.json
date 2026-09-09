@@ -1,0 +1,17 @@
+{
+  "_id": "bj33geM0fFuiuP55",
+  "_key": "!items!bj33geM0fFuiuP55",
+  "name": "Disguise",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "cha",
+    "modifier": -1,
+    "slotCost": 1,
+    "group": "rogue",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

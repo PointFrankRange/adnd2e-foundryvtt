@@ -1,0 +1,16 @@
+{
+  "_id": "HJD0AYEWZlL6f6p0",
+  "_key": "!items!HJD0AYEWZlL6f6p0",
+  "name": "Hafted",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Hafted",
+    "isGroup": true,
+    "slotsInvested": 0,
+    "specialized": false,
+    "styleSpecialization": null,
+    "masteryTier": 0
+  }
+}

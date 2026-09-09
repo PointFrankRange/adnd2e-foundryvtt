@@ -1,0 +1,17 @@
+{
+  "_id": "T4FZ3MdGYgkV7mH1",
+  "_key": "!items!T4FZ3MdGYgkV7mH1",
+  "name": "Seamanship",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "dex",
+    "modifier": 1,
+    "slotCost": 1,
+    "group": "general",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

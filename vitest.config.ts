@@ -8,7 +8,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: [
-        "src/core/**/*.ts", "src/config.ts", "src/settings/registry.ts",
+        "src/core/**/*.ts", "src/config.ts", "src/conditions.ts", "src/settings/registry.ts",
         "src/data/item/subtypes.ts", "src/data/item/choices.ts", "src/data/actor/subtypes.ts",
         "src/data/active-effect/subtypes.ts",
         "src/data/derive/**/*.ts",

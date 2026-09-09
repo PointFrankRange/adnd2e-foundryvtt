@@ -32,7 +32,7 @@ describe("system.json documentTypes", () => {
 });
 
 describe("system.json packFolders", () => {
-  it("is an array of well-formed folder nodes with no packs yet", () => {
+  it("is an array of well-formed folder nodes (packs are assigned in 1c.4a)", () => {
     expect(Array.isArray(manifest.packFolders)).toBe(true);
     expect(manifest.packFolders.length).toBeGreaterThan(0);
     for (const f of manifest.packFolders) {
@@ -41,7 +41,9 @@ describe("system.json packFolders", () => {
     }
   });
 
-  it("ships no compendium packs in 1c.1", () => {
-    expect(manifest.packs ?? []).toEqual([]);
+  it("ships 5 compendium packs in 1c.4a", () => {
+    expect(manifest.packs ?? []).toHaveLength(5);
+    const names = (manifest.packs ?? []).map((p: unknown) => (p as Record<string, unknown>).name).sort();
+    expect(names).toEqual(["classes", "conditions", "nonweapon-proficiencies", "races", "weapon-proficiency-groups"]);
   });
 });

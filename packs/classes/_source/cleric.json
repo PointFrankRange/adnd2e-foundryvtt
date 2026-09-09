@@ -1,0 +1,17 @@
+{
+  "_id": "VtWGSkK0KtbUjtpz",
+  "_key": "!items!VtWGSkK0KtbUjtpz",
+  "name": "Cleric",
+  "type": "class",
+  "img": "icons/svg/angel.svg",
+  "system": {
+    "description": "",
+    "chassisId": "cleric",
+    "specialistSchool": null,
+    "kit": null,
+    "grantedFeatures": [],
+    "xp": 0,
+    "hpRolls": [],
+    "dualClassState": null
+  }
+}

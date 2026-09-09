@@ -1,0 +1,17 @@
+{
+  "_id": "GUbpyELVOEARqAm7",
+  "_key": "!items!GUbpyELVOEARqAm7",
+  "name": "Languages, Ancient",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "",
+    "governingAbility": "int",
+    "modifier": 0,
+    "slotCost": 1,
+    "group": "wizard",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}
