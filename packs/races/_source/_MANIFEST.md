@@ -18,7 +18,7 @@ Six PHB player-character races. Mechanical/factual values only; no rulebook pros
 ### Why the level caps come from the DMG
 
 The revised 2nd Edition **PHB has no numeric racial level-limit table** — Chapter 2 only
-says "Ask your DM for the level limits imposed on non-human characters" (PHB p.20), and
+defers non-human level limits to the DM (PHB p.20), and
 the PHB index entry "Level limits, racial ... 20" points at that prose. The numeric table
 (`Table 7: Racial Class and Level Limits`) lives in the **revised 2E DMG, p.15**. That is
 the transcription source for every `classLevelLimits` value below. `U` in the DMG table =
@@ -32,8 +32,7 @@ as "unlimited".
 
 ### `allowedMulticlass` for `human` = `[]`
 
-Humans dual-class; they do not multi-class (PHB p.44: "Only demihumans can be multi-class
-characters").
+Humans dual-class; they do not multi-class (PHB p.44: multi-classing is demihuman-only).
 
 ### `illusionist` → `mage`
 
@@ -84,11 +83,11 @@ Mage —, so gnome `mage` = 15 is really the illusionist cap.
 
 | race | value | PHB page | source phrase |
 |------|-------|----------|---------------|
-| human | (none) | 20 | "start the game knowing only their regional language" |
+| human | (none) | 20 | PHB p.20: humans begin with only their regional language, no bonus languages |
 | dwarf | gnome, goblin, kobold, orc | 21 | "common, dwarf, gnome, goblin, kobold, orc, and any others your DM allows" |
 | elf | gnome, halfling, goblin, hobgoblin, orc, gnoll | 21 | "common, elf, gnome, halfling, goblin, hobgoblin, orc, and gnoll" |
 | gnome | dwarf, halfling, goblin, kobold | 22 | "common, dwarf, gnome, halfling, goblin, kobold, and the simple common speech of burrowing mammals …" (the burrowing-mammal speech is not transcribed — not a discrete language word) |
-| half-elf | elf, gnome, halfling, goblin, hobgoblin, orc, gnoll | 22 | "common, elf, gnome, halfling, goblin, hobgoblin, orc, and gnoll" (half-elves "do not have a language of their own", so `elf` is a learnable bonus language, not the racial tongue) |
+| half-elf | elf, gnome, halfling, goblin, hobgoblin, orc, gnoll | 22 | "common, elf, gnome, halfling, goblin, hobgoblin, orc, and gnoll" (half-elves have no language of their own per PHB p.22, so `elf` is a learnable bonus language, not the racial tongue) |
 | halfling | dwarf, elf, gnome, goblin, orc | 23 | "common, halfling, dwarf, elf, gnome, goblin, and orc" |
 
 ### Known values (from brief — not re-derived)

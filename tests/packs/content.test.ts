@@ -62,9 +62,9 @@ describe("races pack content", () => {
 
 describe("nonweapon-proficiencies pack content", () => {
   const items = docs("nonweapon-proficiencies");
-  it("has 60–80 documents", () => {
-    expect(items.length).toBeGreaterThanOrEqual(60);
-    expect(items.length).toBeLessThanOrEqual(80);
+  it("has exactly 65 documents", () => {
+    // 82 PHB Table 37 rows − 17 cross-group duplicates (see packs/nonweapon-proficiencies/_source/_MANIFEST.md)
+    expect(items).toHaveLength(65);
   });
   it("every entry: valid ability + group, slotCost >= 1, integer modifier", () => {
     for (const d of items) {

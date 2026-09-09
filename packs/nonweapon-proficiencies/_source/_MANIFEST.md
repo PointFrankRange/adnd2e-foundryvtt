@@ -2,7 +2,7 @@
 
 Non-weapon proficiencies transcribed from the **AD&D 2nd Edition Player's Handbook (revised),
 Chapter 5 "Proficiencies", Table 37: Nonweapon Proficiency Groups** — printed pp. 54–55
-(PDF pages 54–55; this section has a 0-page print/PDF offset).
+(PDF sheets 55–56; this section has a +1 print/PDF offset).
 
 Mechanical/factual values only. No proficiency descriptions or rulebook prose are stored
 (`system.description` is `""`). The PHB PDF is git-ignored and is not part of this repo;
@@ -14,8 +14,8 @@ no page images were committed. Column-header fragments used below for mapping on
 
 | Book | Printed page | PDF page | What was read |
 |------|--------------|----------|---------------|
-| Player's Handbook (revised 2E) | 54 | 54 | Table 37 — GENERAL group (29 rows) and PRIEST group (12 rows) |
-| Player's Handbook (revised 2E) | 55 | 55 | Table 37 — ROGUE group (16 rows), WARRIOR group (15 rows), WIZARD group (10 rows); Table 38 (group crossovers, context only) |
+| Player's Handbook (revised 2E) | 54 | 55 | Table 37 — GENERAL group (29 rows) and PRIEST group (12 rows) |
+| Player's Handbook (revised 2E) | 55 | 56 | Table 37 — ROGUE group (16 rows), WARRIOR group (15 rows), WIZARD group (10 rows); Table 38 (group crossovers, context only) |
 
 ## Schema mapping
 

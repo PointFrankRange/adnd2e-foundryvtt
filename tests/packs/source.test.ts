@@ -23,13 +23,17 @@ describe("pack source structure", () => {
     }
   });
 
-  it("every _source document parses and has _id / name / type", () => {
+  it("every _source document parses and has _id / _key / name / type", () => {
     for (const p of PACKS) {
+      const collection = p.type === "ActiveEffect" ? "effects" : "items";
       for (const file of sourceFiles(p.name)) {
         const doc = JSON.parse(readFileSync(file, "utf8")) as Record<string, unknown>;
         expect(typeof doc._id, file).toBe("string");
         expect((doc._id as string).length, file).toBe(16);
         expect(/^[A-Za-z0-9]{16}$/.test(doc._id as string), `${file} _id charset`).toBe(true);
+        // `_key` is what the Foundry CLI keys the compiled LevelDB on; a doc
+        // without it is silently dropped and the pack ships empty.
+        expect(doc._key, `${file} _key`).toBe(`!${collection}!${doc._id as string}`);
         expect(typeof doc.name, file).toBe("string");
         expect((doc.name as string).length, file).toBeGreaterThan(0);
         expect(typeof doc.type, file).toBe("string");

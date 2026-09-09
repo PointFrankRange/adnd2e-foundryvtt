@@ -940,3 +940,44 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 **3. Type consistency.** `system.*` field names checked against the live schemas: `class` (`chassisId`, `specialistSchool`, `kit`, `grantedFeatures`, `xp`, `hpRolls`, `dualClassState`), `race` (`raceId`, `size`, `baseMovement`, `infravision`, `classLevelLimits`, `allowedClasses`, `allowedMulticlass`, `bonusLanguages`, `grantedFeatures`), `nonweaponProficiency` (`governingAbility`, `modifier`, `slotCost`, `group`, `slotsInvested`, `isRacial`, `checkPenalty`), `weaponProficiency` (`weaponOrGroup`, `isGroup`, `slotsInvested`, `specialized`, `styleSpecialization`, `masteryTier`), `adnd2e` AE (`conditionId`, `isCondition`, `suppressWhenUnequipped`, `schoolTag`, `changes`). `CONDITIONS` (T5) is consumed by `tests/conditions.test.ts` (T5) and `src/system.ts` (T5) with the `{ id, name, img }` shape throughout. `content.test.ts` imports the enum names that actually exist in `src/data/item/choices.ts` (`CLASS_IDS`, `RACE_IDS`, `ABILITY_KEYS`, `WIZARD_SCHOOLS`, `NONWEAPON_GROUPS`).
 
 **4. Ordering / gate-green between tasks.** T1 creates the pipeline with `system.json` still pack-less (tests vacuous, build a no-op) — green. T2–T6 add pack source; `source.test.ts` validates them but `system.json` doesn't list them until T7, so `npm run build` doesn't compile them mid-sequence (the per-task "compile check" uses a temporary revert-me `system.json` edit or is skipped — stated in the task). T7 turns them all on at once; T9's `content.test.ts` needs T2–T6 done. T5's gated-config edit for `src/conditions.ts` is safe (the file has zero imports). `noUnusedLocals` note: T8's test adds three imports it uses; T5's `src/system.ts` uses its `CONDITIONS` import.
+
+---
+
+## Post-1c.4a follow-ups (from the whole-branch review)
+
+Recorded here (not the gitignored ledger) so they survive. Raised by the opus
+whole-branch review of `feat/adnd2e-1c4a`; the fix wave landed C1 (`_key` on all
+110 pack docs) + I2 (empty-pack guards) + I3/I4 (reverted the premature
+`CONFIG.statusEffects` wiring in `src/system.ts`) + a 5-item Minor sweep.
+
+- **SP3 — wire `CONFIG.statusEffects` properly.** The reverted 1c.4a loop
+  blind-appended `{id,name,img}` onto core's 34 built-ins (duplicate Token-HUD
+  entries for blind/deaf/stun/sleep/paralysis/poison/fear, and it misaligned
+  `CONFIG.specialStatusEffects.BLIND`); a HUD toggle also created a `base`-type
+  ActiveEffect unlinked to the `conditions` pack. Do it right: curate condition
+  ids to adopt core's where the semantics match, set
+  `CONFIG.specialStatusEffects.BLIND` (and any other special slots), push full
+  `adnd2e` effect payloads (`_id` / `type` / `system`) so a HUD toggle
+  instantiates the subtype and links the pack, and use `ADND2E.Conditions.*`
+  i18n keys instead of literal English (opus review I3 + I4 + M7). `src/conditions.ts`
+  stays the drift-tested source of truth.
+- **`scripts/unpack.mjs` (`extractPack` round-trip).** Deferred from 1c.4a
+  design. Now that every source doc carries `_key` in the exact shape
+  `extractPack` writes back (`!items!<id>` / `!effects!<id>`), an
+  unpack → recompile round-trip is byte-consistent and safe to add.
+- **`npm run watch`.** `vite build --watch` with `emptyOutDir: true` wipes
+  `dist/packs/` on every incremental rebuild and nothing recompiles it — the
+  linked dev world loses its compendia mid-session (opus review M3). Fix
+  options: drop `emptyOutDir`, run a separate watcher that chases with
+  `build:packs`, or document the limitation.
+- **`tests/packs/source.test.ts` hardening** (opus review M4–M6): assert
+  `label` present, `type ∈ CONST.COMPENDIUM_DOCUMENT_TYPES`, `system: "adnd2e"`
+  present, `ownership` keys/values legal; flag an orphan `packs/<dir>/` not
+  declared in `system.json`; assert cross-pack `_id` uniqueness.
+- **NWP schema** (from Rulings D-1 / D-2): a "no ability check" representation
+  for Blind-fighting / Mountaineering (currently schema-forced `dex`/`0` and
+  `str`/`0` placeholders); multi-group membership (set/array, or derive from
+  PHB Table 38) so cross-group slot-cost crossovers are expressible.
+- **`npm audit`**: 9 vulns (3 moderate / 6 high), all in the dev-only
+  `@foundryvtt/foundryvtt-cli` tree (yargs / nedb / esm transitive) — not in the
+  shipped bundle. Revisit on a CLI bump.

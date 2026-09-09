@@ -4,8 +4,9 @@
     "types": [],
     "lib": ["ESNext"]
   },
-  // The two shipped pure modules join src/core here so `tsc` proves them
-  // Foundry-free. Their test dirs (tests/config, tests/settings, tests/lang,
+  // Pure modules outside src/core that must stay Foundry-free are listed
+  // explicitly in `include` below, so `tsc` proves them Foundry-free. Their
+  // test dirs (tests/config, tests/settings, tests/lang,
   // tests/data) stay out: they import JSON modules / node built-ins whose type
   // graphs need types this project strips (`types: []`). ESLint's
   // no-restricted-globals block still fences those test dirs against Foundry

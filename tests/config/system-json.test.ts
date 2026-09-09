@@ -32,7 +32,7 @@ describe("system.json documentTypes", () => {
 });
 
 describe("system.json packFolders", () => {
-  it("is an array of well-formed folder nodes with no packs yet", () => {
+  it("is an array of well-formed folder nodes (packs are assigned in 1c.4a)", () => {
     expect(Array.isArray(manifest.packFolders)).toBe(true);
     expect(manifest.packFolders.length).toBeGreaterThan(0);
     for (const f of manifest.packFolders) {
