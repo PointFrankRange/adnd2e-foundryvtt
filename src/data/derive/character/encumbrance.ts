@@ -1,4 +1,3 @@
-import { encumbranceCategory } from "../../../core/encumbrance/weight-allowance";
 import { encumbrancePenalty, modifiedMovementRate } from "../../../core/encumbrance/movement";
 import type { EncumbranceCategory } from "../../../core/types";
 
@@ -20,13 +19,7 @@ export function deriveEncumbrance(input: EncumbranceInput): {
   penalty: { attackRoll: number; armorClass: number };
   baseMove: number;
 } {
-  const category = encumbranceCategory({
-    carried: input.carried,
-    strengthScore: input.strengthScore,
-    weightAllowance: input.weightAllowance,
-    maxPress: input.maxPress,
-  });
-  const { rate } = modifiedMovementRate({
+  const { rate, category } = modifiedMovementRate({
     baseMove: input.baseMove,
     carried: input.carried,
     strengthScore: input.strengthScore,

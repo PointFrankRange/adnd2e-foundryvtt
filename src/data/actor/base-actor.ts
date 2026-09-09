@@ -109,6 +109,7 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
     attributes: new SchemaField({
       hp: new SchemaField({
         value: new NumberField({ required: true, integer: true, initial: 0 }),
+        max: new NumberField({ required: true, integer: true, initial: 0 }),
         rolls: new ArrayField(new NumberField({ required: true, integer: true, min: 0 }), { required: true, initial: [] }),
         temp: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
         nonlethal: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
@@ -189,7 +190,7 @@ export function applyRacialAdjustment(model: foundry.abstract.TypeDataModel.Any)
   if (!raceItem) return;
   const raw = Object.fromEntries(ABILITY_KEYS.map((k) => [k, sys.abilities[k].score])) as unknown as AbilityScores;
   const adj = applyRacialDeltas(raw, raceItem.system.raceId as Race);
-  for (const k of ABILITY_KEYS) sys.abilities[k].score = adj[k];
+  for (const k of ABILITY_KEYS) sys.abilities[k].score = Math.max(1, adj[k]);
 }
 
 /** The `system.*` write surface for `deriveAndCache` (spec §5.1 paths). */
@@ -225,7 +226,7 @@ export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void 
   sys.classes = derived.classes;
   sys.multiclassPending = derived.multiclassPending;
 
-  sys.attributes.hp.max = derived.hpMax;
+  if (derived.classes.length) sys.attributes.hp.max = derived.hpMax;
   sys.attributes.ac = derived.ac;
   if (derived.thac0) sys.attributes.thac0 = derived.thac0;
 

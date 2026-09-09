@@ -15,7 +15,15 @@ export interface SavesInput {
   dexDefensiveAdj: number;
 }
 
-/** §5.6 step 7 — all five saving throws with the racial / ability layers. */
+/**
+ * §5.6 step 7 — all five saving throws with the racial / ability layers.
+ *
+ * The cached `saves` block is the UNTAGGED baseline. `wisMagicalDefenseAdj` is
+ * forwarded to `saveTarget` but only changes the result for `mind-affecting`
+ * saves, which require a tag the cached call does not pass; the roll flow
+ * re-derives with tags at cast time. So the displayed spell-save number is the
+ * baseline, not necessarily what a mind-affecting save will roll against.
+ */
 export function deriveSaves(
   input: SavesInput,
 ): Record<SaveCategory, { target: number; rollModifier: number; effectiveTarget: number }> {
