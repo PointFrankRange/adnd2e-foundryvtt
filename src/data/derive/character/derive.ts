@@ -96,7 +96,8 @@ export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules)
         wisdomScore: snapshot.abilities.wis,
         wisdomBonusSpells: abilities.wis.bonusPriestSpells,
         specialist: primary.specialistSchool !== null,
-        memorized: snapshot.memorized,
+        wizardMemorized: snapshot.wizardMemorized,
+        priestMemorized: snapshot.priestMemorized,
       })
     : {};
 

@@ -46,7 +46,10 @@ export interface ActorSnapshot {
   equippedShield: EquippedShield | null;
   /** Σ totalWeight of every carried weapon/armor/equipment item, pounds */
   carriedWeight: number;
-  memorized: readonly MemorizedEntry[];
+  /** memorized wizard spells — an entry per filled slot */
+  wizardMemorized: readonly MemorizedEntry[];
+  /** memorized priest spells — an entry per filled slot */
+  priestMemorized: readonly MemorizedEntry[];
   spentWeaponSlots: number;
   spentNonweaponSlots: number;
   /** race item baseMovement, default 12 */

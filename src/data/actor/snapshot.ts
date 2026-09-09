@@ -85,10 +85,8 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
     .filter((i) => i.type === "nonweaponProficiency")
     .reduce((s, i) => s + (i.system as ProfItemSystem).slotsInvested, 0);
 
-  const memorized: MemorizedEntry[] = [
-    ...doc.system.spellcasting.wizard.memorized,
-    ...doc.system.spellcasting.priest.memorized,
-  ];
+  const wizardMemorized: MemorizedEntry[] = [...doc.system.spellcasting.wizard.memorized];
+  const priestMemorized: MemorizedEntry[] = [...doc.system.spellcasting.priest.memorized];
 
   const a = doc.system.abilities;
   return {
@@ -102,7 +100,8 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
     equippedArmor,
     equippedShield,
     carriedWeight,
-    memorized,
+    wizardMemorized,
+    priestMemorized,
     spentWeaponSlots,
     spentNonweaponSlots,
     baseMovement: raceItem ? ((raceItem.system as RaceItemSystem).baseMovement ?? 12) : 12,

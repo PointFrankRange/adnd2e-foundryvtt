@@ -15,7 +15,8 @@ export interface SpellSlotInput {
   /** wisdom(wis).bonusPriestSpells (length 7) */
   wisdomBonusSpells: readonly number[];
   specialist: boolean;
-  memorized: readonly MemorizedEntry[];
+  wizardMemorized: readonly MemorizedEntry[];
+  priestMemorized: readonly MemorizedEntry[];
 }
 
 function toRecord(perLevel: readonly number[], memorized: readonly MemorizedEntry[]): SlotRecord {
@@ -41,7 +42,7 @@ export function deriveSpellSlots(input: SpellSlotInput): { wizard?: SlotRecord; 
       maxSpellLevelKnown: input.maxSpellLevelKnown ?? 1,
       specialist: input.specialist,
     });
-    return { wizard: toRecord(slots.perLevel, input.memorized) };
+    return { wizard: toRecord(slots.perLevel, input.wizardMemorized) };
   }
   if (chassis.casterType === "priest" && chassis.spellProgressionId === "priest") {
     const slots = priestSpellSlots({
@@ -49,7 +50,7 @@ export function deriveSpellSlots(input: SpellSlotInput): { wizard?: SlotRecord; 
       wisdomScore: input.wisdomScore,
       wisdomBonusSpells: input.wisdomBonusSpells,
     });
-    return { priest: toRecord(slots.perLevel, input.memorized) };
+    return { priest: toRecord(slots.perLevel, input.priestMemorized) };
   }
   return {};
 }
