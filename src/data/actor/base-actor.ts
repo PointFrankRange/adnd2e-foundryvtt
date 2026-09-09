@@ -1,7 +1,7 @@
 // Shared authored-schema fragment for `character` + `npc`, and the abstract
 // TypeDataModel base for all three actor models. Foundry-layer; no logic.
 import { htmlField } from "../common/fields";
-import { ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, ENCUMBRANCE_CATEGORIES, WIZARD_SCHOOLS, SPHERE_NAMES } from "../item/choices";
+import { ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, ENCUMBRANCE_CATEGORIES, MULTICLASS_MODES, WIZARD_SCHOOLS, SPHERE_NAMES } from "../item/choices";
 import { applyRacialDeltas } from "../../core/abilities";
 import type { AbilityScores, Race } from "../../core/types";
 import { deriveCharacter } from "../derive/character";
@@ -90,6 +90,19 @@ function movementSchema() {
   });
 }
 
+/** Derived multi-class / dual-class summary; initials are safe pre-derive values. */
+function multiclassSchema() {
+  return new SchemaField({
+    mode: new StringField({ required: true, blank: false, initial: "single", choices: MULTICLASS_MODES }),
+    dualClass: new SchemaField({
+      dormantChassisId: new StringField({ required: true, nullable: true, initial: null, choices: CLASS_IDS }),
+      activeChassisId: new StringField({ required: true, nullable: true, initial: null, choices: CLASS_IDS }),
+      surpassed: new BooleanField({ required: true, initial: false }),
+    }),
+    hpAveraged: new BooleanField({ required: true, initial: false }),
+  });
+}
+
 export function actorCommonSchema(): foundry.data.fields.DataSchema {
   return {
     abilities: abilitiesSchema(),
@@ -134,7 +147,7 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
       }),
       { required: true, initial: [] },
     ),
-    multiclassPending: new BooleanField({ required: true, initial: false }),
+    multiclass: multiclassSchema(),
     languagesKnown: new SchemaField({ max: new NumberField({ required: true, integer: true, min: 0, initial: 0 }) }),
     proficiencies: new SchemaField({
       weapon: proficiencyBlockSchema(),
@@ -197,7 +210,7 @@ export function applyRacialAdjustment(model: foundry.abstract.TypeDataModel.Any)
 interface DerivedWriteSurface {
   abilities: Record<string, { mods?: unknown }>;
   classes: unknown;
-  multiclassPending: boolean;
+  multiclass: unknown;
   attributes: {
     hp: { max: number };
     thac0: unknown;
@@ -224,7 +237,7 @@ export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void 
 
   for (const k of ABILITY_KEYS) sys.abilities[k].mods = derived.abilities[k];
   sys.classes = derived.classes;
-  sys.multiclassPending = derived.multiclassPending;
+  sys.multiclass = derived.multiclass;
 
   if (derived.classes.length) sys.attributes.hp.max = derived.hpMax;
   sys.attributes.ac = derived.ac;

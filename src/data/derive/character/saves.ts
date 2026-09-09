@@ -1,11 +1,11 @@
-import { saveTarget } from "../../../core/saves/composer";
-import type { ClassGroup, Race, SaveCategory } from "../../../core/types";
+import { saveTargetBest } from "../../../core/saves/composer";
+import type { GroupLevel, Race, SaveCategory } from "../../../core/types";
 
 const CATEGORIES: readonly SaveCategory[] = ["ppd", "rsw", "pp", "bw", "spell"];
 
 export interface SavesInput {
-  group: ClassGroup;
-  level: number;
+  /** one entry for a single class; several for multi-class / dual-class best-of */
+  groups: readonly GroupLevel[];
   race: Race;
   /** adjusted CON score (for the racial Table 9 bonus) */
   con: number;
@@ -16,22 +16,17 @@ export interface SavesInput {
 }
 
 /**
- * §5.6 step 7 — all five saving throws with the racial / ability layers.
- *
- * The cached `saves` block is the UNTAGGED baseline. `wisMagicalDefenseAdj` is
- * forwarded to `saveTarget` but only changes the result for `mind-affecting`
- * saves, which require a tag the cached call does not pass; the roll flow
- * re-derives with tags at cast time. So the displayed spell-save number is the
- * baseline, not necessarily what a mind-affecting save will roll against.
+ * §5.6 step 7 — all five saving throws, taking the best base among `groups` per
+ * category. The cached block is the UNTAGGED baseline: `wisMagicalDefenseAdj`
+ * only moves `mind-affecting` saves, which need a tag the roll flow adds later.
  */
 export function deriveSaves(
   input: SavesInput,
 ): Record<SaveCategory, { target: number; rollModifier: number; effectiveTarget: number }> {
   const out = {} as Record<SaveCategory, { target: number; rollModifier: number; effectiveTarget: number }>;
   for (const category of CATEGORIES) {
-    const r = saveTarget({
-      group: input.group,
-      level: input.level,
+    const r = saveTargetBest({
+      groups: input.groups,
       category,
       race: input.race,
       con: input.con,

@@ -3,18 +3,21 @@ import { nonweaponProficiencySlots, weaponProficiencySlots } from "../../../core
 import type { ClassId } from "../../../core/types";
 
 export type SlotBlock = { total: number; spent: number; available: number };
+export interface ProfSource {
+  chassisId: ClassId;
+  level: number;
+}
 
 /** §5.6 step 9 — weapon + non-weapon proficiency slot totals and the language cap. */
 export function deriveProficiencySlots(
-  chassisId: ClassId,
-  level: number,
+  weaponSource: ProfSource,
+  nonweaponSource: ProfSource,
   intBonusLanguages: number,
   spentWeapon: number,
   spentNonweapon: number,
 ): { weapon: SlotBlock; nonweapon: SlotBlock; languagesMax: number } {
-  const chassis = getChassis(chassisId);
-  const wTotal = weaponProficiencySlots(chassis, level);
-  const nTotal = nonweaponProficiencySlots(chassis, level);
+  const wTotal = weaponProficiencySlots(getChassis(weaponSource.chassisId), weaponSource.level);
+  const nTotal = nonweaponProficiencySlots(getChassis(nonweaponSource.chassisId), nonweaponSource.level);
   return {
     weapon: { total: wTotal, spent: spentWeapon, available: wTotal - spentWeapon },
     nonweapon: { total: nTotal, spent: spentNonweapon, available: nTotal - spentNonweapon },

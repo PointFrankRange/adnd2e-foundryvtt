@@ -234,8 +234,8 @@ src/
       weapon.ts          slot totals from progression; specialization effects
       nonweapon.ts       checkTarget(governingAbility, modifier, options)
     progression/
-      multiclass.ts      resolveMulticlass(classes[]) -> effective levels, HP rule
-      dualclass.ts       resolveDualClass(classes[]) -> active/suppressed abilities
+      multiclass.ts      resolveMulticlass(classes[]) -> effective levels, HP rule;
+                         resolveDualClass(classes[]) -> active/suppressed abilities
     encumbrance/
       weight-allowance.ts allowance(strengthMods) -> {unencumbered, …, max}
       movement.ts        movementRate(baseMove, carried, allowance, armor, options)
@@ -343,18 +343,21 @@ its own `xp` and `hpRolls`), proficiencies (`weaponProficiency` /
 
 - `abilities.<k>.mods`: full modifier record from `core/abilities` (e.g.
   `str.mods = { toHit, damage, weightAllowance, maxPress, openDoors, bendBars }`)
-- `classes`: per-class array `{ chassisId, level, canLevelUp }[]` (one entry per
-  embedded `class` item), plus `multiclassPending: boolean`. The
-  multiclass/dual-class **aggregate** state (effective levels, prime-requisite
-  checks, XP split) lands under `system.multiclass.*` in sub-project 1c.3c —
-  `system.classes` is reserved for the per-class list.
-- `attributes.hp.max`
-- `attributes.thac0`: `{ melee, ranged, base }`
+- `classes`: per-class array `{ chassisId, level, canLevelUp }[]`, plus
+  `multiclass`: `{ mode: "single"|"multiclass"|"dualclass",
+  dualClass: { dormantChassisId: string|null, activeChassisId: string|null,
+  surpassed: boolean }, hpAveraged: boolean }` — the arrangement summary.
+- `attributes.hp.max` (best-of across classes for a multi-class / surpassed
+  dual-class character)
+- `attributes.thac0`: `{ melee, ranged, base }` (best-of across classes for a
+  multi-class / surpassed dual-class character)
 - `attributes.ac`: `{ normal, rearAttack, surprised, shieldless }`
 - `saves.<ppd|rsw|pp|bw|spell>`: `{ target, rollModifier, effectiveTarget }`
+  (best-of across classes for a multi-class / surpassed dual-class character)
 - `attributes.movement`: `{ base, current, encumbranceCategory }`
 - `attributes.encumbrance`: `{ carried, category, movementRate, penalty: { attackRoll, armorClass }, baseMove }`
-- `spellcasting.wizard.slots` / `.priest.slots`: `Record<1..9, { max, used }>`
+- `spellcasting.wizard.slots` / `.priest.slots`: `Record<1..9, { max, used }>` —
+  both are populated for a multi-class character with a wizard and a priest class.
 - `proficiencies.weapon`: `{ total, spent, available }`
 - `proficiencies.nonweapon`: `{ total, spent, available }`
 - `languagesKnown.max`
@@ -428,7 +431,16 @@ Foundry's pipeline: `prepareData()` → `prepareBaseData()` →
   scores, base movement).
 - *(Foundry applies ActiveEffects here — an effect can bump `system.abilities.str.score`)*
 - **`prepareDerivedData`** — everything in the §5.1 "Derived" list, in this order:
-  1. `resolveMulticlass` / `resolveDualClass` → `effectiveLevels`, HP averaging rule, active/suppressed abilities
+  1. **Arrangement** — classify the embedded `class` items as single / multi-class
+     / dual-class. Multi-class: each class keeps its own level; combat uses the
+     best THAC0 and best-of-five saves; HP is `characterHpMax` per class then
+     `floor(Σ / n)` (or `max` when the *Average Multi-Class Hit Points* rule is
+     off), with non-warrior classes capped at +2 CON hp/die; proficiency slots
+     come from the most favourable class per track; each full-caster class gets
+     its own progression. Dual-class: while the new class's level ≤ the old
+     class's, use the new class only and freeze HP at the old total; once it
+     exceeds, THAC0/saves become best-of-both and HP gains the new class's dice
+     for levels above the old level. Cached as `system.multiclass`.
   2. `deriveAbilities` (post-AE scores + exceptional STR) → `abilities.<k>.mods`
   3. `levelForXp` per class → `canLevelUp` flag
   4. HP max — Σ per-class(`hpRolls` + CON adjustment, honouring multiclass averaging and warrior CON cap)

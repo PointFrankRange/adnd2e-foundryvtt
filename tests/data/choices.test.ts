@@ -4,6 +4,7 @@ import {
   DAMAGE_TYPES, WEAPON_SIZES, WEAPON_CATEGORIES, NONWEAPON_GROUPS, CREATURE_SIZES,
   CASTER_CLASSES, SAVING_THROW_KINDS, DUAL_CLASS_STATES, FEATURE_SOURCE_TYPES, FEATURE_ACTIVATIONS,
   ALIGNMENTS, MOVEMENT_MODES, DISPOSITIONS, SAVE_MODES, ATTACK_TYPES, ENCUMBRANCE_CATEGORIES,
+  MULTICLASS_MODES,
 } from "../../src/data/item/choices";
 
 describe("item schema choice arrays match the engine unions", () => {
@@ -51,7 +52,7 @@ describe("item schema choice arrays match the engine unions", () => {
   it("small fixed lists", () => {
     expect([...CASTER_CLASSES].sort()).toEqual(["priest", "wizard"]);
     expect([...SAVING_THROW_KINDS].sort()).toEqual(["half", "negates", "none", "special"]);
-    expect([...DUAL_CLASS_STATES].sort()).toEqual(["active", "primary", "suppressed"]);
+    expect([...DUAL_CLASS_STATES].sort()).toEqual(["active", "primary"]);
     expect([...FEATURE_SOURCE_TYPES].sort()).toEqual(["class", "kit", "other", "race"]);
     expect([...FEATURE_ACTIVATIONS].sort()).toEqual(["action", "daily", "passive"]);
   });
@@ -79,5 +80,8 @@ describe("actor schema choice arrays", () => {
     expect([...DISPOSITIONS].sort()).toEqual(["friendly", "hostile", "neutral"]);
     expect([...SAVE_MODES].sort()).toEqual(["asClass", "explicit"]);
     expect([...ATTACK_TYPES].sort()).toEqual(["melee", "ranged"]);
+  });
+  it("MULTICLASS_MODES = the three ClassArrangement members", () => {
+    expect([...MULTICLASS_MODES].sort()).toEqual(["dualclass", "multiclass", "single"]);
   });
 });

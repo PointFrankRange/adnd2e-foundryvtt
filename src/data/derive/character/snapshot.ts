@@ -4,7 +4,7 @@
 // contract Plan 1c.3b fills.
 import type { AbilityScores, ClassId, Race, WizardSchool } from "../../../core/types";
 
-export type DualClassState = "primary" | "suppressed" | "active";
+export type DualClassState = "primary" | "active";
 
 export interface ClassEntry {
   chassisId: ClassId;
@@ -46,7 +46,10 @@ export interface ActorSnapshot {
   equippedShield: EquippedShield | null;
   /** Σ totalWeight of every carried weapon/armor/equipment item, pounds */
   carriedWeight: number;
-  memorized: readonly MemorizedEntry[];
+  /** memorized wizard spells — an entry per filled slot */
+  wizardMemorized: readonly MemorizedEntry[];
+  /** memorized priest spells — an entry per filled slot */
+  priestMemorized: readonly MemorizedEntry[];
   spentWeaponSlots: number;
   spentNonweaponSlots: number;
   /** race item baseMovement, default 12 */

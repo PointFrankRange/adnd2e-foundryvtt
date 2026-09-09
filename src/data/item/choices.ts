@@ -3,6 +3,7 @@
 // engine unions — defineSchema() imports these and stays logic-free.
 import type { AbilityKey, Alignment, ClassId, CreatureSize, EncumbranceCategory, MovementMode, NonweaponGroup, Race, SpellSchool, SphereName, WizardSchool } from "../../core/types";
 import type { DamageType, WeaponCategory, WeaponSize } from "../../core/weapons/data";
+import type { ClassArrangement } from "../derive/character/multiclass";
 
 export const CLASS_IDS: readonly ClassId[] = [
   "fighter", "mage", "cleric", "thief", "paladin", "ranger", "druid", "bard",
@@ -45,7 +46,7 @@ export const CREATURE_SIZES: readonly CreatureSize[] = [
 
 export const CASTER_CLASSES: readonly string[] = ["wizard", "priest"];
 export const SAVING_THROW_KINDS: readonly string[] = ["none", "negates", "half", "special"];
-export const DUAL_CLASS_STATES: readonly string[] = ["primary", "suppressed", "active"];
+export const DUAL_CLASS_STATES: readonly string[] = ["primary", "active"];
 export const FEATURE_SOURCE_TYPES: readonly string[] = ["class", "kit", "race", "other"];
 export const FEATURE_ACTIVATIONS: readonly string[] = ["passive", "action", "daily"];
 
@@ -56,6 +57,9 @@ export const ALIGNMENTS: readonly Alignment[] = [
 ];
 
 export const MOVEMENT_MODES: readonly MovementMode[] = ["land", "burrow", "climb", "fly", "swim"];
+
+/** Character advancement arrangement (= `ClassArrangement`). */
+export const MULTICLASS_MODES: readonly ClassArrangement[] = ["single", "multiclass", "dualclass"];
 
 /** Encumbrance categories (= core `EncumbranceCategory`), lightest to heaviest. */
 export const ENCUMBRANCE_CATEGORIES: readonly EncumbranceCategory[] = [
