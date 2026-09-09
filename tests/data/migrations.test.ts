@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   isVersionNewer,
   MIGRATIONS,
-  multiclassPendingCleanup,
   pendingMigrations,
   type Migration,
 } from "../../src/data/migrations";
@@ -38,28 +37,6 @@ describe("isVersionNewer", () => {
   });
 });
 
-describe("multiclassPendingCleanup", () => {
-  it("unsets the stale key on a character that still has it", () => {
-    expect(multiclassPendingCleanup({ multiclassPending: true, classes: [] }, "character")).toEqual({
-      "system.-=multiclassPending": null,
-    });
-  });
-
-  it("unsets it on an npc too", () => {
-    expect(multiclassPendingCleanup({ multiclassPending: false }, "npc")).toEqual({
-      "system.-=multiclassPending": null,
-    });
-  });
-
-  it("returns null when the key is absent", () => {
-    expect(multiclassPendingCleanup({ classes: [] }, "character")).toBeNull();
-  });
-
-  it("returns null for a creature (never had the field)", () => {
-    expect(multiclassPendingCleanup({ multiclassPending: true }, "creature")).toBeNull();
-  });
-});
-
 describe("pendingMigrations", () => {
   const a: Migration = { version: "0.2.0", actorUpdate: () => null };
   const b: Migration = { version: "0.3.0", actorUpdate: () => null };
@@ -77,8 +54,8 @@ describe("pendingMigrations", () => {
     expect(pendingMigrations("1.0.0", [a, b, c])).toEqual([]);
   });
 
-  it("defaults to the real MIGRATIONS list", () => {
-    expect(pendingMigrations("0.0.0")).toEqual([...MIGRATIONS]);
+  it("defaults to the real (empty) MIGRATIONS list", () => {
+    expect(pendingMigrations("0.0.0")).toEqual([]);
     expect(pendingMigrations("9.9.9")).toEqual([]);
   });
 
@@ -103,15 +80,7 @@ describe("pendingMigrations", () => {
 });
 
 describe("MIGRATIONS", () => {
-  it("is the 0.2.0 multiclassPending cleanup, and nothing else yet", () => {
-    expect(MIGRATIONS).toHaveLength(1);
-    expect(MIGRATIONS[0].version).toBe("0.2.0");
-    expect(MIGRATIONS[0].actorUpdate).toBe(multiclassPendingCleanup);
-  });
-
-  it("is sorted ascending by version", () => {
-    for (let i = 1; i < MIGRATIONS.length; i++) {
-      expect(isVersionNewer(MIGRATIONS[i].version, MIGRATIONS[i - 1].version)).toBe(true);
-    }
+  it("is empty for SP1 (spec §8)", () => {
+    expect(MIGRATIONS).toEqual([]);
   });
 });

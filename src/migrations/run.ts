@@ -3,7 +3,7 @@
 // and on `ready` (GM only) applies every pending migration to the world's actors.
 // Not unit-tested (spec §9) — verified in a linked dev world.
 import { SYSTEM_ID } from "../constants";
-import { MIGRATIONS, pendingMigrations } from "../data/migrations";
+import { isVersionNewer, MIGRATIONS, pendingMigrations } from "../data/migrations";
 
 type SettingKey = foundry.helpers.ClientSettings.KeyFor<typeof SYSTEM_ID>;
 
@@ -42,10 +42,12 @@ export async function runMigrations(): Promise<void> {
   const dryRun = game.settings!.get(SYSTEM_ID, DRY_RUN_KEY as SettingKey) as boolean;
 
   const pending = pendingMigrations(stored, MIGRATIONS);
-  if (pending.length === 0) return;
+  if (!isVersionNewer(current, stored)) return; // world already current
 
   console.log(
-    `${SYSTEM_ID} | migrating world ${stored} → ${current}${dryRun ? " (DRY RUN — no writes)" : ""}`,
+    `${SYSTEM_ID} | migration check ${stored} → ${current}` +
+      (dryRun ? " (DRY RUN — no writes)" : "") +
+      (pending.length === 0 ? " — no migrations to apply" : ""),
   );
 
   try {
@@ -73,10 +75,16 @@ export async function runMigrations(): Promise<void> {
     }
 
     if (dryRun) {
-      ui.notifications!.info(game.i18n!.localize("ADND2E.migration.dryRunComplete"));
+      if (pending.length > 0) {
+        ui.notifications!.info(game.i18n!.localize("ADND2E.migration.dryRunComplete"));
+      }
+      // dry run writes nothing and does not advance the version
     } else {
       await game.settings!.set(SYSTEM_ID, MIGRATION_VERSION_KEY as SettingKey, current);
-      ui.notifications!.info(game.i18n!.format("ADND2E.migration.migrated", { version: current }));
+      if (pending.length > 0) {
+        ui.notifications!.info(game.i18n!.format("ADND2E.migration.migrated", { version: current }));
+      }
+      // with 0 pending this is a silent version checkpoint (console.log above)
     }
   } catch (err) {
     console.error(`${SYSTEM_ID} | migration failed — version left at ${stored}`, err);

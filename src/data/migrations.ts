@@ -1,6 +1,23 @@
-// The system migration framework's pure core (spec §8). `src/migrations/run.ts`
-// is the Foundry glue that reads game.settings, iterates game.actors, and applies
-// what these functions decide. No Foundry import — pure, gated, 100% covered.
+// The system migration framework's pure core (spec §8). SP1 ships the framework
+// + a dry-run logger + an EMPTY migration list. `src/migrations/run.ts` is the
+// Foundry glue that reads game.settings / game.actors and applies what these
+// functions decide. No Foundry import — pure, gated, 100% covered.
+//
+// ADDING A MIGRATION (a future slice): append `{ version, actorUpdate }` to
+// MIGRATIONS in ascending version order — `version` is the system.json version
+// that introduced the schema change; a world whose stored migration version is
+// older runs it. `actorUpdate(sourceSystem, actorType)` returns a Foundry
+// `updateDocuments` payload for one actor, or `null` to skip it.
+//
+// v14 GOTCHA — you CANNOT drop a stale/unknown key with a
+// `{ "system.-=foo": null }` payload. Foundry v14 prunes unknown keys from
+// `_source` on every DataModel construction, so a key removed from the schema
+// is already gone from `actor._source.system` by `ready`; and even a visible
+// `-=` is pruned out of the update by `client-backend.mjs` cleanData before it
+// reaches the DB. Dead bytes in the stored row are harmless (Foundry ignores
+// them; they vanish on the actor's next full write). A migration that genuinely
+// must rewrite `system` shape has to do a non-recursive replacement, which
+// belongs in `run.ts` — the pure layer only decides *whether* an actor needs it.
 
 /**
  * One ordered schema migration. `version` is the `system.json` version that
@@ -10,10 +27,10 @@
 export interface Migration {
   readonly version: string;
   /**
-   * Given one actor's raw `_source.system` object and its document `type`, the
-   * update payload to apply to that actor document (dot-notation keys relative to
-   * the actor — e.g. `{ "system.-=multiclassPending": null }`), or `null` to
-   * leave the actor untouched.
+   * One actor's raw `_source.system` object + its document `type` → a Foundry
+   * `updateDocuments` payload for that actor (dot-notation keys relative to the
+   * actor document), or `null` to leave the actor untouched. See the v14 GOTCHA
+   * in this file's header before writing a key-removal migration.
    */
   actorUpdate(sourceSystem: Record<string, unknown>, actorType: string): Record<string, unknown> | null;
 }
@@ -42,26 +59,9 @@ export function isVersionNewer(a: string, b: string): boolean {
   return false;
 }
 
-/**
- * 1c.3c replaced the derived `system.multiclassPending` boolean (1c.3b) with the
- * `system.multiclass` SchemaField. Both are recomputed every prepare cycle, so
- * nothing needs computing — just drop the stale key from any actor whose stored
- * `_source.system` still carries it. Idempotent: a `-=` on a missing key is a
- * no-op, so re-running or running on a fresh world is harmless.
- */
-export function multiclassPendingCleanup(
-  sourceSystem: Record<string, unknown>,
-  actorType: string,
-): Record<string, unknown> | null {
-  if (actorType !== "character" && actorType !== "npc") return null;
-  if (!("multiclassPending" in sourceSystem)) return null;
-  return { "system.-=multiclassPending": null };
-}
-
-/** Every migration, ascending by version. Appended to by each later slice that changes schema. */
-export const MIGRATIONS: readonly Migration[] = [
-  { version: "0.2.0", actorUpdate: multiclassPendingCleanup },
-];
+/** Every migration, ascending by version. Empty for SP1 (spec §8) — the
+ *  framework's proving case is a future slice's real schema change. */
+export const MIGRATIONS: readonly Migration[] = [];
 
 /** The migrations a world on `storedVersion` still needs, oldest first. */
 export function pendingMigrations(
