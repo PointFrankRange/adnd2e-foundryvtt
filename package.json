@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && npm run build:packs",
+    "build:packs": "node scripts/build-packs.mjs",
     "watch": "vite build --watch",
     "link": "node scripts/link-system.mjs",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.core.json --noEmit",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@foundryvtt/foundryvtt-cli": "^3.0.4",
     "@vitest/coverage-v8": "^5.0.0",
     "eslint": "^10.6.0",
     "fvtt-types": "npm:@league-of-foundry-developers/foundry-vtt-types@^13.346.0-beta.20250812191140",
