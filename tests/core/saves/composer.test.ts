@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { saveTarget } from "../../../src/core/saves/composer";
+import { saveTarget, saveTargetBest } from "../../../src/core/saves/composer";
 import { saveBaseTarget } from "../../../src/core/saves";
 
 describe("saveTarget()", () => {
@@ -85,5 +85,50 @@ describe("saveTarget()", () => {
 
   it("rejects invalid CON even for a non-qualifying race (via racialSaveBonus)", () => {
     expect(() => saveTarget({ ...base, category: "spell", con: 999 })).toThrow(RangeError);
+  });
+});
+
+describe("saveTargetBest", () => {
+  it("takes the lowest (best) base target across the class groups, per category", () => {
+    // warrior L5 band = [ppd 11, rsw 13, pp 12, bw 13, spell 14]
+    // wizard  L6 band = [ppd 13, rsw  9, pp 11, bw 13, spell 10]
+    const rsw = saveTargetBest({
+      groups: [{ group: "warrior", level: 5 }, { group: "wizard", level: 6 }],
+      category: "rsw", race: "human", con: 12, wisMagicalDefenseAdj: 0, dexDefensiveAdj: 0,
+    });
+    expect(rsw.target).toBe(9); // wizard wins rsw
+    const ppd = saveTargetBest({
+      groups: [{ group: "warrior", level: 5 }, { group: "wizard", level: 6 }],
+      category: "ppd", race: "human", con: 12, wisMagicalDefenseAdj: 0, dexDefensiveAdj: 0,
+    });
+    expect(ppd.target).toBe(11); // warrior wins ppd
+  });
+
+  it("still layers the character-level modifiers onto the winning base", () => {
+    // dwarf CON 16 -> racial bonus on rsw; breath weapon gets the DEX defensive adj
+    const r = saveTargetBest({
+      groups: [{ group: "warrior", level: 3 }],
+      category: "rsw", race: "dwarf", con: 16, wisMagicalDefenseAdj: 0, dexDefensiveAdj: -2,
+    });
+    // engine: Table 9 CON 16 -> +4 (brief's hand-computed +3 corrected against racialSaveBonus)
+    expect(r.rollModifier).toBe(4);
+    expect(r.effectiveTarget).toBe(r.target - 4);
+    const bw = saveTargetBest({
+      groups: [{ group: "warrior", level: 3 }],
+      category: "bw", race: "human", con: 12, wisMagicalDefenseAdj: 0, dexDefensiveAdj: -2,
+    });
+    expect(bw.rollModifier).toBe(2); // -(-2)
+  });
+
+  it("saveTarget delegates to saveTargetBest with one group (identical result)", () => {
+    const viaTarget = saveTarget({
+      group: "priest", level: 9, category: "spell", race: "gnome", con: 15,
+      wisMagicalDefenseAdj: 1, dexDefensiveAdj: 0, tags: ["mind-affecting"],
+    });
+    const viaBest = saveTargetBest({
+      groups: [{ group: "priest", level: 9 }], category: "spell", race: "gnome", con: 15,
+      wisMagicalDefenseAdj: 1, dexDefensiveAdj: 0, tags: ["mind-affecting"],
+    });
+    expect(viaTarget).toEqual(viaBest);
   });
 });

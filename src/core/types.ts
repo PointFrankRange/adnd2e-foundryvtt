@@ -11,6 +11,12 @@ export interface AbilityScores {
 
 export type ClassGroup = "warrior" | "wizard" | "priest" | "rogue";
 
+/** A class group paired with a level — the unit of a best-of THAC0 / save lookup. */
+export interface GroupLevel {
+  group: ClassGroup;
+  level: number;
+}
+
 export type Race = "human" | "dwarf" | "elf" | "gnome" | "half-elf" | "halfling";
 
 /** Qualifiers on a saving throw that gate category-level modifiers. */
