@@ -45,11 +45,11 @@ export interface CharacterDerived {
   };
 }
 
-const NO_DUAL_CLASS = {
+const NO_DUAL_CLASS = Object.freeze({
   dormantChassisId: null as ClassId | null,
   activeChassisId: null as ClassId | null,
   surpassed: false,
-};
+});
 
 function spellInput(
   m: ClassMember,
