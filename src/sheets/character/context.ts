@@ -1,0 +1,342 @@
+import type { ClassId, DexterityModifiers } from "../../core/types";
+import type {
+  AbilityRow,
+  CharacterSheetContext,
+  CharacterSheetInput,
+  ClassRow,
+  EncumbranceGauge,
+  FeatureItemView,
+  NwpView,
+  PhysicalItemView,
+  SaveRow,
+  SlotRow,
+  SpellItemView,
+  TabDescriptor,
+} from "./context-types";
+import { groupInventory } from "./grouping";
+import { xpToNext } from "./xp";
+
+/* ---------------------------------------------------------------------------
+ * `buildCharacterSheetContext` — the pure PC-sheet render-context builder.
+ *
+ * Input: plain actor data (already read off the document by sheet.ts).
+ * Output: plain data the Handlebars templates print directly.
+ *
+ * No Foundry, no i18n resolution: the builder emits i18n *keys* and passes
+ * `config.*` label strings through untouched; templates call `{{localize}}`.
+ * ------------------------------------------------------------------------- */
+
+type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
+
+const ABILITY_KEYS: readonly AbilityKey[] = ["str", "dex", "con", "int", "wis", "cha"];
+const SAVE_KEYS = ["ppd", "rsw", "pp", "bw", "spell"] as const;
+const DETAIL_FIELDS: readonly string[] = [
+  "age",
+  "sex",
+  "height",
+  "weight",
+  "hairEyes",
+  "homeland",
+  "deity",
+  "kit",
+];
+
+const TABS_DEF: readonly TabDescriptor[] = [
+  { id: "main", label: "ADND2E.sheet.tabs.main", icon: "fa-solid fa-user" },
+  { id: "combat", label: "ADND2E.sheet.tabs.combat", icon: "fa-solid fa-shield-halved" },
+  { id: "inventory", label: "ADND2E.sheet.tabs.inventory", icon: "fa-solid fa-box-open" },
+  { id: "skills", label: "ADND2E.sheet.tabs.skills", icon: "fa-solid fa-hand-fist" },
+  { id: "spells", label: "ADND2E.sheet.tabs.spells", icon: "fa-solid fa-wand-sparkles" },
+  { id: "features", label: "ADND2E.sheet.tabs.features", icon: "fa-solid fa-star" },
+  { id: "biography", label: "ADND2E.sheet.tabs.biography", icon: "fa-solid fa-book" },
+];
+
+/** Shape of `input.source._source.system` that the builder actually touches. */
+interface SourceView {
+  system: {
+    abilities: Record<AbilityKey, { score: number; exceptional: number | null }>;
+    details: { alignment: string };
+    currency: { pp: number; gp: number; ep: number; sp: number; cp: number };
+    resources: { reputation: string; henchmen: string; followers: string };
+  };
+}
+
+/* ---------- local helpers (identical camelCase/snake/kebab → Title Case) ---------- */
+
+function titleCase(s: string): string {
+  return s
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .map((w) => (w.length > 0 ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
+function humanize(key: string): string {
+  return titleCase(key);
+}
+
+/* ---------- identity ---------- */
+
+function buildIdentity(input: CharacterSheetInput): CharacterSheetContext["identity"] {
+  const src = input.source as unknown as SourceView;
+  return {
+    name: input.name,
+    img: input.img,
+    raceName: input.raceItem?.name ?? null,
+    classLine: buildClassLine(input),
+    arrangementBadge: buildArrangementBadge(input),
+    alignmentValue: src.system.details.alignment,
+  };
+}
+
+function buildClassLine(input: CharacterSheetInput): string {
+  const mc = input.derived.multiclass;
+  if (mc.mode === "dualclass") {
+    const primary = input.classItems.find((c) => c.dualClassState === "primary");
+    const active = input.classItems.find((c) => c.dualClassState === "active");
+    return `${titleCase(primary!.chassisId)} ${primary!.level} → ${titleCase(active!.chassisId)} ${active!.level}`;
+  }
+  return input.classItems.map((c) => `${titleCase(c.chassisId)} ${c.level}`).join(" / ");
+}
+
+function buildArrangementBadge(input: CharacterSheetInput): string | null {
+  const mc = input.derived.multiclass;
+  if (mc.mode === "multiclass") return "multi-class";
+  if (mc.mode === "dualclass") {
+    const state = mc.dualClass.surpassed ? "surpassed" : "dormant";
+    return `dual-class · ${titleCase(mc.dualClass.dormantChassisId as string)} ${state}`;
+  }
+  return null;
+}
+
+/* ---------- abilities ---------- */
+
+function buildAbilities(input: CharacterSheetInput): AbilityRow[] {
+  const src = input.source as unknown as SourceView;
+  return ABILITY_KEYS.map((key) => {
+    const authored = src.system.abilities[key];
+    const derived = input.derived.abilities[key];
+    const score = authored.score;
+    const effectiveScore = derived.score;
+    const mods = Object.entries(derived.mods).map(([k, v]) => ({
+      label: humanize(k),
+      value: v == null ? "—" : String(v),
+    }));
+    return {
+      key,
+      label: input.config.abilities[key],
+      score,
+      racialDelta: effectiveScore - score,
+      effectiveScore,
+      exceptional: authored.exceptional,
+      showExceptional: key === "str" && Number(score) === 18,
+      mods,
+    };
+  });
+}
+
+/* ---------- vitals ---------- */
+
+function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"] {
+  const a = input.derived.attributes;
+  const saves: SaveRow[] = SAVE_KEYS.map((key) => {
+    const s = input.derived.saves[key];
+    return {
+      key,
+      label: input.config.saves[key],
+      target: s.target,
+      rollModifier: s.rollModifier,
+      effectiveTarget: s.effectiveTarget,
+    };
+  });
+  return {
+    hp: a.hp,
+    thac0: a.thac0,
+    ac: a.ac,
+    saves,
+    movement: {
+      base: a.movement.base,
+      current: a.movement.current,
+      encumbranceCategory: a.movement.encumbranceCategory,
+      encumbranceCategoryLabel: input.config.encumbranceCategories[a.movement.encumbranceCategory],
+    },
+  };
+}
+
+/* ---------- classes ---------- */
+
+function buildClasses(input: CharacterSheetInput): ClassRow[] {
+  return input.classItems.map((c) => {
+    const progress = xpToNext(c.chassisId as ClassId, c.xp);
+    return {
+      id: c.id,
+      name: c.name,
+      chassisId: c.chassisId,
+      level: c.level,
+      xp: c.xp,
+      xpToNextLevel: progress.toNextLevel,
+      xpPct: progress.pct,
+      nextThreshold: progress.next,
+      canLevelUp: c.canLevelUp,
+      hitDie: c.hitDie,
+      isDualPrimary: c.dualClassState === "primary",
+      isDualActive: c.dualClassState === "active",
+      specialistSchool: c.specialistSchool,
+    };
+  });
+}
+
+function buildDualClassToggle(input: CharacterSheetInput): { available: boolean; on: boolean } {
+  const items = input.classItems;
+  return {
+    available: items.length === 2 && items.every((c) => c.dualClassState === null),
+    on: items.some((c) => c.dualClassState !== null),
+  };
+}
+
+/* ---------- inventory ---------- */
+
+function buildInventory(input: CharacterSheetInput): CharacterSheetContext["inventory"] {
+  const src = input.source as unknown as SourceView;
+  const { containers, loose } = groupInventory(input.physicalItems);
+  const enc = input.derived.attributes.encumbrance;
+  const encumbrance: EncumbranceGauge = {
+    carried: enc.carried,
+    category: enc.category,
+    categoryLabel: input.config.encumbranceCategories[enc.category],
+    movementRate: enc.movementRate,
+    baseMove: enc.baseMove,
+    penalty: enc.penalty,
+  };
+  const locationOptions = [
+    { value: "", label: "ADND2E.sheet.inventory.noContainer" },
+    ...containers.map((c) => ({ value: c.item.id, label: c.item.name })),
+  ];
+  return { containers, loose, encumbrance, currency: src.system.currency, locationOptions };
+}
+
+/* ---------- combat ---------- */
+
+function buildCombat(input: CharacterSheetInput): CharacterSheetContext["combat"] {
+  const weapons = input.physicalItems
+    .filter((i) => i.type === "weapon")
+    .map((i) => {
+      const w = i.weapon as NonNullable<PhysicalItemView["weapon"]>;
+      return {
+        id: i.id,
+        name: i.name,
+        equipped: i.equipped,
+        toHitNote: "",
+        damageNote: [w.damageVsSM, w.damageVsL].filter(Boolean).join(" / "),
+        speedFactor: w.speedFactor,
+        range: w.range,
+      };
+    });
+
+  const armorItems = input.physicalItems.filter((i) => i.type === "armor");
+  const worn = armorItems.find((i) => i.equipped && !i.armor!.isShield);
+  const shield = armorItems.find((i) => i.equipped && i.armor!.isShield);
+  const dexMods = input.derived.abilities.dex.mods as DexterityModifiers;
+  const acBreakdown = [
+    { label: "Base", value: worn ? worn.armor!.baseAc : 10 },
+    { label: "Shield", value: shield ? shield.armor!.shieldAcBonus : 0 },
+    { label: "Magic", value: (worn ? worn.magicBonus : 0) + (shield ? shield.magicBonus : 0) },
+    { label: "Dex", value: dexMods.defensiveAdj },
+  ];
+
+  const armor = armorItems.map((i) => ({
+    id: i.id,
+    name: i.name,
+    equipped: i.equipped,
+    isShield: i.armor!.isShield,
+    baseAc: i.armor!.baseAc,
+  }));
+
+  return { weapons, acBreakdown, armor };
+}
+
+/* ---------- skills ---------- */
+
+function buildSkills(input: CharacterSheetInput): CharacterSheetContext["skills"] {
+  const p = input.derived.proficiencies;
+  return {
+    weapon: { ...p.weapon, items: input.proficiencyItems.weapon },
+    nonweapon: {
+      ...p.nonweapon,
+      items: input.proficiencyItems.nonweapon.map((n) => buildNwpRow(n, input)),
+    },
+  };
+}
+
+function buildNwpRow(n: NwpView, input: CharacterSheetInput): NwpView {
+  const ability = input.derived.abilities[n.governingAbility as AbilityKey];
+  return { ...n, checkTarget: ability.score + n.modifier };
+}
+
+/* ---------- spells ---------- */
+
+function buildSpells(input: CharacterSheetInput): CharacterSheetContext["spells"] {
+  const sc = input.derived.spellcasting;
+  const school = sc.wizard.specialistSchool;
+  const known: { level: number; items: SpellItemView[] }[] = [];
+  for (let level = 1; level <= 9; level += 1) {
+    const items = input.spellItems.filter((s) => s.level === level);
+    if (items.length > 0) known.push({ level, items });
+  }
+  return {
+    wizardSlots: toSlotRows(sc.wizard.slots),
+    priestSlots: toSlotRows(sc.priest.slots),
+    specialistSchoolLabel: school ? input.config.schools[school] : null,
+    known,
+  };
+}
+
+function toSlotRows(slots: Record<string, { max: number; used: number }>): SlotRow[] | null {
+  const entries = Object.entries(slots);
+  if (entries.length === 0) return null;
+  return entries
+    .map(([level, s]) => ({ level: Number(level), max: s.max, used: s.used }))
+    .sort((a, b) => a.level - b.level);
+}
+
+/* ---------- features ---------- */
+
+function buildFeatures(input: CharacterSheetInput): CharacterSheetContext["features"] {
+  const src = input.source as unknown as SourceView;
+  const groups: { sourceType: string; items: FeatureItemView[] }[] = [];
+  for (const f of input.featureItems) {
+    const existing = groups.find((g) => g.sourceType === f.sourceType);
+    if (existing) existing.items.push(f);
+    else groups.push({ sourceType: f.sourceType, items: [f] });
+  }
+  return {
+    groups,
+    racialAbilities: input.raceItem?.grantedFeatures ?? [],
+    languagesMax: input.derived.languagesKnown.max,
+    resources: src.system.resources,
+  };
+}
+
+/* ---------- entry point ---------- */
+
+export function buildCharacterSheetContext(input: CharacterSheetInput): CharacterSheetContext {
+  return {
+    identity: buildIdentity(input),
+    abilities: buildAbilities(input),
+    vitals: buildVitals(input),
+    classes: buildClasses(input),
+    dualClassToggle: buildDualClassToggle(input),
+    inventory: buildInventory(input),
+    combat: buildCombat(input),
+    skills: buildSkills(input),
+    spells: buildSpells(input),
+    features: buildFeatures(input),
+    biography: {
+      detailFields: [...DETAIL_FIELDS],
+      showGmNotes: input.perms.isGM,
+    },
+    tabs: [...TABS_DEF],
+  };
+}
