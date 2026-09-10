@@ -87,6 +87,35 @@ describe("lang/en.json — sheet strings", () => {
   });
 });
 
+describe("lang/en.json — SP2 sheet strings", () => {
+  it("resolves every ADND2E.sheet.* key the character sheet layer references", () => {
+    for (const key of [
+      "ADND2E.sheet.title",
+      "ADND2E.sheet.namePlaceholder",
+      "ADND2E.sheet.tabs.main",
+      "ADND2E.sheet.tabs.combat",
+      "ADND2E.sheet.tabs.inventory",
+      "ADND2E.sheet.tabs.skills",
+      "ADND2E.sheet.tabs.spells",
+      "ADND2E.sheet.tabs.features",
+      "ADND2E.sheet.tabs.biography",
+      "ADND2E.sheet.vitals.hp",
+      "ADND2E.sheet.vitals.ac",
+      "ADND2E.sheet.vitals.thac0",
+      "ADND2E.sheet.vitals.saves",
+      "ADND2E.sheet.vitals.movement",
+      "ADND2E.sheet.drop.duplicateRace",
+      "ADND2E.sheet.drop.duplicateClass",
+      "ADND2E.sheet.xp.rollHp",
+      "ADND2E.sheet.xp.award",
+      "ADND2E.sheet.dualClass.toggle",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [

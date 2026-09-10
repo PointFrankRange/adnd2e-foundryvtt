@@ -147,6 +147,76 @@
       "done": "AD&D 2E: imported {created} of {total} document(s).",
       "doneWithFailures": "AD&D 2E: imported {created} of {total} document(s); {failed} failed — see the console."
     },
+    "sheet": {
+      "title": "Character Sheet",
+      "namePlaceholder": "Character name",
+      "identity": {
+        "alignment": "Alignment"
+      },
+      "sections": {
+        "abilities": "Abilities",
+        "classes": "Classes",
+        "vitals": "Vitals"
+      },
+      "tabs": {
+        "main": "Main",
+        "combat": "Combat",
+        "inventory": "Inventory",
+        "skills": "Skills",
+        "spells": "Spells",
+        "features": "Features",
+        "biography": "Biography"
+      },
+      "vitals": {
+        "hp": "Hit Points",
+        "ac": "Armor Class",
+        "thac0": "THAC0",
+        "saves": "Saving Throws",
+        "movement": "Movement"
+      },
+      "drop": {
+        "duplicateRace": "This character already has a race.",
+        "duplicateClass": "This character already has that class."
+      },
+      "xp": {
+        "award": "Award XP",
+        "awardPrompt": "XP to award (split evenly across classes):",
+        "rollHp": "Roll HP",
+        "takeAverage": "Take Average"
+      },
+      "dualClass": {
+        "toggle": "Dual-class",
+        "hint": "Mark these two classes as a dual-class progression"
+      },
+      "inventory": {
+        "noContainer": "— (carried)",
+        "capacity": "Capacity",
+        "overCapacity": "Over capacity",
+        "currency": "Currency",
+        "encumbrance": "Encumbrance"
+      },
+      "spells": {
+        "wizardSlots": "Wizard Spell Slots",
+        "priestSlots": "Priest Spell Slots",
+        "specialist": "Specialist",
+        "known": "Known Spells",
+        "spellbook": "In spellbook"
+      },
+      "skills": {
+        "weapon": "Weapon Proficiencies",
+        "nonweapon": "Non-Weapon Proficiencies",
+        "slots": "{spent} / {total} slots",
+        "checkTarget": "Check target"
+      },
+      "features": {
+        "languages": "Languages Known",
+        "resources": "Resources",
+        "racial": "Racial Abilities"
+      },
+      "biography": {
+        "gmNotes": "GM Notes"
+      }
+    },
     "sheets": {
       "rawActor": "Raw Fields (Actor)",
       "rawItem": "Raw Fields (Item)",

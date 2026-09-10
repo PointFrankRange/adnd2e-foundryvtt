@@ -1,0 +1,69 @@
+<section class="tab main{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+
+  <div class="identity panel">
+    <label>
+      {{localize 'ADND2E.sheet.identity.alignment'}}
+      <select name="system.details.alignment">
+        {{selectOptions alignments selected=adnd2e.identity.alignmentValue localize=true}}
+      </select>
+    </label>
+  </div>
+
+  <div class="abilities panel">
+    <h3>{{localize 'ADND2E.sheet.sections.abilities'}}</h3>
+    {{#each adnd2e.abilities as |row|}}
+      {{> adnd2e.ability-row row=row}}
+    {{/each}}
+  </div>
+
+  <div class="classes panel">
+    <h3>{{localize 'ADND2E.sheet.sections.classes'}}</h3>
+    {{#each adnd2e.classes as |c|}}
+      {{> adnd2e.class-row c=c}}
+    {{else}}
+      <p class="placeholder">{{localize 'ADND2E.sheet.sections.classes'}}</p>
+    {{/each}}
+    {{#if adnd2e.dualClassToggle.available}}
+      <button type="button" data-action="toggleDualClass">
+        {{localize 'ADND2E.sheet.dualClass.toggle'}}
+      </button>
+    {{/if}}
+  </div>
+
+  <div class="vitals panel">
+    <h3>{{localize 'ADND2E.sheet.sections.vitals'}}</h3>
+    <div class="hp">
+      <label>{{localize 'ADND2E.sheet.vitals.hp'}}
+        <input type="number" name="system.attributes.hp.value" value="{{adnd2e.vitals.hp.value}}" />
+        / {{adnd2e.vitals.hp.max}}
+      </label>
+      <label>+
+        <input type="number" name="system.attributes.hp.temp" value="{{adnd2e.vitals.hp.temp}}" />
+      </label>
+    </div>
+    <ul class="derived">
+      <li>{{localize 'ADND2E.sheet.vitals.ac'}}: {{adnd2e.vitals.ac.normal}}</li>
+      <li>{{localize 'ADND2E.sheet.vitals.thac0'}}: {{adnd2e.vitals.thac0.melee}}</li>
+      <li>{{localize 'ADND2E.sheet.vitals.movement'}}: {{adnd2e.vitals.movement.current}}
+        ({{adnd2e.vitals.movement.encumbranceCategoryLabel}})</li>
+    </ul>
+
+    <table class="saves">
+      <caption>{{localize 'ADND2E.sheet.vitals.saves'}}</caption>
+      <thead>
+        <tr>
+          <th></th>
+          <th>{{localize 'ADND2E.sheet.vitals.saves'}}</th>
+          <th>+/-</th>
+          <th>=</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each adnd2e.vitals.saves as |row|}}
+          {{> adnd2e.save-row row=row}}
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+</section>

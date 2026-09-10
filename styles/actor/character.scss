@@ -1,0 +1,123 @@
+// AD&D 2E PC character sheet (SP2). Scaffold only — Tasks 6-8 flesh out the
+// per-tab layouts. Keeps the ApplicationV2 tab-part `.tab` show/hide contract
+// and the header grid.
+
+.adnd2e.sheet.actor.character {
+  .adnd2e-char-header {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    .portrait {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border: 1px solid var(--adnd2e-accent);
+      cursor: pointer;
+    }
+
+    .titles {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      input[name="name"] {
+        font-size: 1.25rem;
+        font-weight: 700;
+      }
+
+      .class-line {
+        font-size: 0.85rem;
+        opacity: 0.85;
+
+        .badge {
+          margin-left: 0.35rem;
+          padding: 0 0.35rem;
+          border: 1px solid var(--adnd2e-accent);
+          border-radius: 3px;
+          font-size: 0.75rem;
+        }
+      }
+    }
+
+    .quick-vitals {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.15rem;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+  }
+
+  // ApplicationV2 renders every tab part; only the active one is shown.
+  .tab {
+    display: none;
+
+    &.active {
+      display: block;
+    }
+  }
+
+  .panel {
+    margin-bottom: 0.75rem;
+  }
+
+  .ability-row {
+    display: grid;
+    grid-template-columns: 4rem 4rem 2.5rem 2.5rem auto;
+    gap: 0.35rem;
+    align-items: center;
+
+    input[type="number"] {
+      width: 100%;
+    }
+
+    .racial {
+      color: var(--adnd2e-accent);
+    }
+
+    .effective {
+      font-weight: 700;
+    }
+
+    .mods span + span {
+      margin-left: 0.35rem;
+    }
+  }
+
+  .class-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto auto;
+    gap: 0.35rem;
+    align-items: center;
+
+    .badge {
+      margin-left: 0.35rem;
+      font-size: 0.7rem;
+      opacity: 0.8;
+    }
+  }
+
+  table.saves {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: 0.15rem 0.35rem;
+      text-align: left;
+    }
+
+    .effective {
+      font-weight: 700;
+    }
+  }
+
+  .placeholder {
+    opacity: 0.6;
+    font-style: italic;
+  }
+}
