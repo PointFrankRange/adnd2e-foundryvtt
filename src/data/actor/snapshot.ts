@@ -5,6 +5,7 @@ import type {
   ActorSnapshot, ClassEntry, DualClassState, EquippedArmor, EquippedShield, MemorizedEntry,
 } from "../derive/character";
 import type { ClassId, Race, WizardSchool } from "../../core/types";
+import { containerAdjustedCarriedWeight } from "../derive/character/container-weight";
 
 interface ClassItemSystem {
   chassisId: ClassId;
@@ -25,10 +26,6 @@ interface ArmorItemSystem {
   shieldAcBonus: number;
   magicBonus: number;
 }
-interface PhysicalItemSystem {
-  totalWeight?: number;
-  equipped?: boolean;
-}
 interface ProfItemSystem {
   slotsInvested: number;
 }
@@ -45,7 +42,7 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
       abilities: Record<string, { score: number; exceptional: number | null }>;
       spellcasting: SpellcastingSystem;
     };
-    items: Iterable<{ type: string; system: unknown }>;
+    items: Iterable<{ id: string; type: string; system: unknown }>;
   };
   const items = [...doc.items];
   const raceItem = items.find((i) => i.type === "race");
@@ -74,9 +71,21 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
     ? { shieldBonus: shield.shieldAcBonus, magicBonus: shield.magicBonus }
     : null;
 
-  const carriedWeight = items
-    .filter((i) => i.type === "weapon" || i.type === "armor" || i.type === "equipment")
-    .reduce((sum, i) => sum + ((i.system as PhysicalItemSystem).totalWeight ?? 0), 0);
+  const carriedWeight = containerAdjustedCarriedWeight(
+    items.map((i) => {
+      const s = i.system as {
+        totalWeight?: number; location?: string; container?: boolean; contentsWeightMultiplier?: number;
+      };
+      return {
+        id: (i as { id: string }).id,
+        type: i.type,
+        totalWeight: s.totalWeight ?? 0,
+        location: s.location ?? "",
+        isContainer: s.container ?? false,
+        contentsWeightMultiplier: s.contentsWeightMultiplier ?? 1,
+      };
+    }),
+  );
 
   const spentWeaponSlots = items
     .filter((i) => i.type === "weaponProficiency")

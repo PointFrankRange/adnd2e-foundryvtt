@@ -20,6 +20,7 @@ export class EquipmentItemModel extends Adnd2eItemModel {
       consumable: new BooleanField({ required: true, initial: false }),
       container: new BooleanField({ required: true, initial: false }),
       capacity: new NumberField({ required: true, nullable: true, min: 0, initial: null }),
+      contentsWeightMultiplier: new NumberField({ required: true, min: 0, initial: 1 }),
     };
   }
 
