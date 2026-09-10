@@ -1,0 +1,44 @@
+<div class="adnd2e raw-field-sheet scrollable">
+  <div class="raw-field-list">
+    {{#each rows}}
+      {{#if this.header}}
+        <h3 class="raw-field-header" style="margin-left:{{this.indent}}px">{{this.label}}</h3>
+      {{else}}
+        <div class="form-group" style="margin-left:{{this.indent}}px">
+          <label>{{this.label}}</label>
+          <div class="form-fields">
+            {{#if (eq this.kind "checkbox")}}
+              <input type="checkbox" name="{{this.path}}" {{#if this.value}}checked{{/if}}
+                {{#unless @root.editable}}disabled{{/unless}}>
+            {{else if (eq this.kind "select")}}
+              <select name="{{this.path}}" {{#if this.nullable}}data-null="true"{{/if}}
+                {{#unless @root.editable}}disabled{{/unless}}>
+                {{#each this.choices}}
+                  <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+                {{/each}}
+              </select>
+            {{else if (eq this.kind "json")}}
+              <textarea name="{{this.path}}" data-json="true" rows="4"
+                {{#unless @root.editable}}readonly{{/unless}}>{{this.value}}</textarea>
+            {{else if (eq this.kind "number")}}
+              <input type="number" step="any" name="{{this.path}}" value="{{this.value}}"
+                {{#unless @root.editable}}readonly{{/unless}}>
+            {{else if (eq this.kind "textarea")}}
+              <textarea name="{{this.path}}" rows="3"
+                {{#unless @root.editable}}readonly{{/unless}}>{{this.value}}</textarea>
+            {{else}}
+              <input type="text" name="{{this.path}}" value="{{this.value}}"
+                {{#unless @root.editable}}readonly{{/unless}}>
+            {{/if}}
+          </div>
+        </div>
+      {{/if}}
+    {{/each}}
+  </div>
+
+  {{#if editable}}
+    <footer class="sheet-footer flexrow">
+      <button type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+    </footer>
+  {{/if}}
+</div>
