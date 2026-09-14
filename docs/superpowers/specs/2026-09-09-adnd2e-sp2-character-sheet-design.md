@@ -297,9 +297,15 @@ exists; everything else → allow. `sheet.ts`'s `_onDropItem` calls it, toasts
 `classItem.update({ "system.xp": xp + share })` for each `class` item.
 
 **`toggleDualClass` action** — available only when the actor has exactly 2
-`class` items and neither currently has a `dualClassState`. On:
-set the lower-level (older) class `dualClassState: "primary"`, the other
-`"active"`. Off: set both to `null`. The engine re-derives the arrangement.
+`class` items and neither currently has a `dualClassState`. On: set the
+**higher-level (abandoned)** class `dualClassState: "primary"`, the
+**lower-level (new)** class `"active"` — this matches
+`core/classes/multiclass.ts`'s `resolveDualClass` contract exactly:
+`primary` is "the abandoned class" (`dormantChassisId: primary.chassisId`)
+and `surpassed = active.level > primary.level`, so assigning `primary` to
+the lower-level class would make `surpassed` true immediately and resolve
+THAC0/saves/HP from the wrong class. Off: set both to `null`. The engine
+re-derives the arrangement.
 
 ### 4.3 Templates & styles
 
