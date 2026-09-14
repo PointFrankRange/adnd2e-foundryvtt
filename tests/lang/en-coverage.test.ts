@@ -151,6 +151,25 @@ describe("lang/en.json — SP2 Task 6 sheet strings (Combat/Inventory/Features/B
   });
 });
 
+describe("lang/en.json — SP2 Task 7 sheet strings (Skills/Spells)", () => {
+  it("resolves every ADND2E.sheet.* key the Skills/Spells tab shells reference", () => {
+    for (const key of [
+      "ADND2E.sheet.skills.group",
+      "ADND2E.sheet.skills.specialized",
+      "ADND2E.sheet.skills.racial",
+      "ADND2E.sheet.skills.none",
+      "ADND2E.sheet.spells.level",
+      "ADND2E.sheet.spells.slotLevel",
+      "ADND2E.sheet.spells.slotsMax",
+      "ADND2E.sheet.spells.slotsUsed",
+      "ADND2E.sheet.spells.none",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [

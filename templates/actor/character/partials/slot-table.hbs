@@ -1,0 +1,18 @@
+<table class="slot-table">
+  <thead>
+    <tr>
+      <th>{{localize 'ADND2E.sheet.spells.slotLevel'}}</th>
+      <th>{{localize 'ADND2E.sheet.spells.slotsMax'}}</th>
+      <th>{{localize 'ADND2E.sheet.spells.slotsUsed'}}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each rows as |r|}}
+      <tr>
+        <td>{{r.level}}</td>
+        <td>{{r.max}}</td>
+        <td>{{r.used}}</td>
+      </tr>
+    {{/each}}
+  </tbody>
+</table>

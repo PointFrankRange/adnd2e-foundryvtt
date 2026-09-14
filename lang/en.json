@@ -222,13 +222,22 @@
         "priestSlots": "Priest Spell Slots",
         "specialist": "Specialist",
         "known": "Known Spells",
-        "spellbook": "In spellbook"
+        "spellbook": "In spellbook",
+        "level": "Level {level}",
+        "slotLevel": "Level",
+        "slotsMax": "Max",
+        "slotsUsed": "Used",
+        "none": "No spells known."
       },
       "skills": {
         "weapon": "Weapon Proficiencies",
         "nonweapon": "Non-Weapon Proficiencies",
         "slots": "{spent} / {total} slots",
-        "checkTarget": "Check target"
+        "checkTarget": "Check target",
+        "group": "Group",
+        "specialized": "Specialized",
+        "racial": "(racial)",
+        "none": "None"
       },
       "features": {
         "languages": "Languages Known",
