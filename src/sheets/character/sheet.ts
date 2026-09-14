@@ -189,11 +189,12 @@ function toNwpView(it: RawItem): NwpView {
     slotCost: s.slotCost,
     slotsInvested: s.slotsInvested,
     isRacial: s.isRacial,
+    governingAbilityLabel: "", // buildNwpRow fills this from config.abilities
     checkTarget: null, // buildSkills recomputes from the governing ability score
   };
 }
 
-function toSpellView(it: RawItem): SpellItemView {
+function toSpellView(it: RawItem, spellbookIds: Set<string>): SpellItemView {
   const s = it.system as {
     casterClass: string;
     level: number;
@@ -214,7 +215,7 @@ function toSpellView(it: RawItem): SpellItemView {
     range: s.range,
     castingTime: s.castingTime,
     savingThrow: s.savingThrow,
-    inSpellbook: true,
+    inSpellbook: spellbookIds.has(it.id),
   };
 }
 
@@ -320,6 +321,10 @@ export class Adnd2eCharacterSheet extends Base {
     };
     const items = [...actor.items];
     const cfg = (CONFIG as unknown as { ADND2E: Record<string, Record<string, string>> }).ADND2E;
+    const spellbookIds = new Set(
+      (actor.system as { spellcasting?: { wizard?: { spellbookItemIds?: string[] } } }).spellcasting
+        ?.wizard?.spellbookItemIds ?? [],
+    );
 
     const classItems: ClassItemView[] = [];
     let raceItem: RaceItemView | null = null;
@@ -349,7 +354,7 @@ export class Adnd2eCharacterSheet extends Base {
           nonweaponProfs.push(toNwpView(it));
           break;
         case "spell":
-          spellItems.push(toSpellView(it));
+          spellItems.push(toSpellView(it, spellbookIds));
           break;
         case "classFeature":
           featureItems.push(toFeatureView(it));
@@ -495,11 +500,15 @@ export class Adnd2eCharacterSheet extends Base {
     if (anyDual) {
       await Promise.all(classItems.map((c) => c.update({ "system.dualClassState": null })));
     } else {
-      const [older, newer] = [...classItems].sort(
+      // Ascending by level: index 0 is the freshly-added (lower-level) class
+      // ("active"); index 1 is the abandoned, higher-level class ("primary") —
+      // see resolveDualClass in core/classes/multiclass.ts. Only ever runs with
+      // exactly 2 class items, per the length guard above.
+      const [active, primary] = [...classItems].sort(
         (a, b) => (Number(a.system.level) || 1) - (Number(b.system.level) || 1),
       );
-      await older.update({ "system.dualClassState": "primary" });
-      await newer.update({ "system.dualClassState": "active" });
+      await primary.update({ "system.dualClassState": "primary" });
+      await active.update({ "system.dualClassState": "active" });
     }
   }
 }

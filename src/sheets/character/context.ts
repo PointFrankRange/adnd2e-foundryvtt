@@ -240,10 +240,13 @@ function buildCombat(input: CharacterSheetInput): CharacterSheetContext["combat"
   const shield = armorItems.find((i) => i.equipped && i.armor!.isShield);
   const dexMods = input.derived.abilities.dex.mods as DexterityModifiers;
   const acBreakdown = [
-    { label: "Base", value: worn ? worn.armor!.baseAc : 10 },
-    { label: "Shield", value: shield ? shield.armor!.shieldAcBonus : 0 },
-    { label: "Magic", value: (worn ? worn.magicBonus : 0) + (shield ? shield.magicBonus : 0) },
-    { label: "Dex", value: dexMods.defensiveAdj },
+    { label: "ADND2E.sheet.combat.acBase", value: worn ? worn.armor!.baseAc : 10 },
+    { label: "ADND2E.sheet.combat.acShield", value: shield ? shield.armor!.shieldAcBonus : 0 },
+    {
+      label: "ADND2E.sheet.combat.acMagic",
+      value: (worn ? worn.magicBonus : 0) + (shield ? shield.magicBonus : 0),
+    },
+    { label: "ADND2E.sheet.combat.acDex", value: dexMods.defensiveAdj },
   ];
 
   const armor = armorItems.map((i) => ({
@@ -272,7 +275,11 @@ function buildSkills(input: CharacterSheetInput): CharacterSheetContext["skills"
 
 function buildNwpRow(n: NwpView, input: CharacterSheetInput): NwpView {
   const ability = input.derived.abilities[n.governingAbility as AbilityKey];
-  return { ...n, checkTarget: ability.score + n.modifier };
+  return {
+    ...n,
+    governingAbilityLabel: input.config.abilities[n.governingAbility] ?? n.governingAbility,
+    checkTarget: ability.score + n.modifier,
+  };
 }
 
 /* ---------- spells ---------- */
@@ -303,13 +310,25 @@ function toSlotRows(slots: Record<string, { max: number; used: number }>): SlotR
 
 /* ---------- features ---------- */
 
+const FEATURE_SOURCE_TYPE_LABELS: Record<string, string> = {
+  class: "ADND2E.sheet.features.sourceTypes.class",
+  kit: "ADND2E.sheet.features.sourceTypes.kit",
+  race: "ADND2E.sheet.features.sourceTypes.race",
+  other: "ADND2E.sheet.features.sourceTypes.other",
+};
+
 function buildFeatures(input: CharacterSheetInput): CharacterSheetContext["features"] {
   const src = input.source as unknown as SourceView;
-  const groups: { sourceType: string; items: FeatureItemView[] }[] = [];
+  const groups: { sourceType: string; sourceTypeLabel: string; items: FeatureItemView[] }[] = [];
   for (const f of input.featureItems) {
     const existing = groups.find((g) => g.sourceType === f.sourceType);
     if (existing) existing.items.push(f);
-    else groups.push({ sourceType: f.sourceType, items: [f] });
+    else
+      groups.push({
+        sourceType: f.sourceType,
+        sourceTypeLabel: FEATURE_SOURCE_TYPE_LABELS[f.sourceType] ?? f.sourceType,
+        items: [f],
+      });
   }
   return {
     groups,

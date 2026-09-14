@@ -36,7 +36,7 @@
             {{n.name}}
             {{#if n.isRacial}}<span class="racial-tag">{{localize 'ADND2E.sheet.skills.racial'}}</span>{{/if}}
           </span>
-          <span class="ability">{{n.governingAbility}}</span>
+          <span class="ability">{{localize n.governingAbilityLabel}}</span>
           <span class="modifier">{{adnd2eSigned n.modifier}}</span>
           <span class="target" title="{{localize 'ADND2E.sheet.skills.checkTarget'}}">{{n.checkTarget}}</span>
           {{! SP5 wires the check buttons here }}

@@ -213,6 +213,10 @@
         "weapons": "Weapons",
         "armor": "Armor",
         "acBreakdown": "AC Breakdown",
+        "acBase": "Base",
+        "acShield": "Shield",
+        "acMagic": "Magic",
+        "acDex": "Dex",
         "equipped": "Equipped",
         "notEquipped": "Not equipped",
         "shield": "Shield",
@@ -250,7 +254,13 @@
         "languagesHint": "The free-form list of specific languages known is recorded on the character's biography for now.",
         "reputation": "Reputation",
         "henchmen": "Henchmen",
-        "followers": "Followers"
+        "followers": "Followers",
+        "sourceTypes": {
+          "class": "Class",
+          "kit": "Kit",
+          "race": "Race",
+          "other": "Other"
+        }
       },
       "details": {
         "age": "Age",

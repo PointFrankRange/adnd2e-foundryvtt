@@ -23,7 +23,7 @@
     <h3>{{localize 'ADND2E.sheet.combat.acBreakdown'}}</h3>
     <ul class="derived">
       {{#each adnd2e.combat.acBreakdown as |row|}}
-        <li><span class="label">{{row.label}}</span> <span class="value">{{row.value}}</span></li>
+        <li><span class="label">{{localize row.label}}</span> <span class="value">{{row.value}}</span></li>
       {{/each}}
     </ul>
   </div>

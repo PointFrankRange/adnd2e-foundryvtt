@@ -200,10 +200,20 @@
 
     .container-header {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 0.5rem;
       font-weight: 600;
       margin-bottom: 0.25rem;
+
+      // The container's own item-row (quantity/location/equipped/identified
+      // controls) takes the full row; the used-weight/capacity/over-capacity
+      // bits specific to containers wrap onto the next line beside it.
+      .item-row {
+        flex: 1 1 100%;
+        border-bottom: none;
+        padding: 0;
+      }
     }
 
     .container-contents {

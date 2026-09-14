@@ -101,6 +101,8 @@ export interface WeaponProfView {
 export interface NwpView {
   id: string; name: string; governingAbility: string; modifier: number;
   slotCost: number; slotsInvested: number; isRacial: boolean;
+  /** i18n key for governingAbility — filled by buildNwpRow; "" until then */
+  governingAbilityLabel: string;
   /** governing ability score + modifier — display only (checks are SP5) */
   checkTarget: number | null;
 }
@@ -186,7 +188,7 @@ export interface CharacterSheetContext {
     known: { level: number; items: SpellItemView[] }[];
   };
   features: {
-    groups: { sourceType: string; items: FeatureItemView[] }[];
+    groups: { sourceType: string; sourceTypeLabel: string; items: FeatureItemView[] }[];
     racialAbilities: string[];
     languagesMax: number;
     resources: { reputation: string; henchmen: string; followers: string };

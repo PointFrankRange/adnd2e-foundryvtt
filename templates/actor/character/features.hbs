@@ -4,7 +4,7 @@
     <h3>{{localize 'ADND2E.sheet.tabs.features'}}</h3>
     {{#each adnd2e.features.groups as |grp|}}
       <div class="feature-group" data-source-type="{{grp.sourceType}}">
-        <h4>{{grp.sourceType}}</h4>
+        <h4>{{localize grp.sourceTypeLabel}}</h4>
         {{#each grp.items as |f|}}
           <div class="feature-row" data-item-id="{{f.id}}">
             <span class="name">{{f.name}}</span>

@@ -582,10 +582,10 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
   it("no armor → AC breakdown falls back to base 10 / no shield", () => {
     const c = buildCharacterSheetContext(input());
     expect(c.combat.acBreakdown).toEqual([
-      { label: "Base", value: 10 },
-      { label: "Shield", value: 0 },
-      { label: "Magic", value: 0 },
-      { label: "Dex", value: 0 },
+      { label: "ADND2E.sheet.combat.acBase", value: 10 },
+      { label: "ADND2E.sheet.combat.acShield", value: 0 },
+      { label: "ADND2E.sheet.combat.acMagic", value: 0 },
+      { label: "ADND2E.sheet.combat.acDex", value: 0 },
     ]);
     expect(c.combat.armor).toHaveLength(0);
   });
@@ -631,10 +631,10 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
       }),
     );
     expect(c.combat.acBreakdown).toEqual([
-      { label: "Base", value: 3 },
-      { label: "Shield", value: 1 },
-      { label: "Magic", value: 1 },
-      { label: "Dex", value: -2 },
+      { label: "ADND2E.sheet.combat.acBase", value: 3 },
+      { label: "ADND2E.sheet.combat.acShield", value: 1 },
+      { label: "ADND2E.sheet.combat.acMagic", value: 1 },
+      { label: "ADND2E.sheet.combat.acDex", value: -2 },
     ]);
     expect(c.combat.armor.map((a) => [a.id, a.isShield, a.baseAc])).toEqual([
       ["a1", false, 3],
@@ -653,6 +653,7 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
       slotCost: 1,
       slotsInvested: 1,
       isRacial: false,
+      governingAbilityLabel: "",
       checkTarget: null,
     };
     const c = buildCharacterSheetContext(
@@ -662,6 +663,29 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
     expect(c.skills.weapon.available).toBe(4);
     // str score 17 + modifier -1
     expect(c.skills.nonweapon.items[0].checkTarget).toBe(16);
+    // governingAbilityLabel resolved from config.abilities
+    expect(c.skills.nonweapon.items[0].governingAbilityLabel).toBe("ADND2E.abilities.str");
+  });
+
+  it("nwp governingAbilityLabel falls back to the raw key when unmapped in config", () => {
+    const nwp: NwpView = {
+      id: "n2",
+      name: "Swimming",
+      governingAbility: "str",
+      modifier: 0,
+      slotCost: 1,
+      slotsInvested: 1,
+      isRacial: false,
+      governingAbilityLabel: "",
+      checkTarget: null,
+    };
+    const c = buildCharacterSheetContext(
+      input({
+        proficiencyItems: { weapon: [], nonweapon: [nwp] },
+        config: { ...input().config, abilities: {} },
+      }),
+    );
+    expect(c.skills.nonweapon.items[0].governingAbilityLabel).toBe("str");
   });
 });
 
@@ -768,9 +792,30 @@ describe("buildCharacterSheetContext — spells / features / biography / tabs", 
       ["class", ["f1", "f2"]],
       ["kit", ["f3"]],
     ]);
+    expect(c.features.groups.map((g) => g.sourceTypeLabel)).toEqual([
+      "ADND2E.sheet.features.sourceTypes.class",
+      "ADND2E.sheet.features.sourceTypes.kit",
+    ]);
     expect(c.features.languagesMax).toBe(2);
     expect(c.features.resources).toEqual({ reputation: "", henchmen: "", followers: "" });
     expect(c.features.racialAbilities).toEqual([]);
+  });
+
+  it("an unmapped sourceType falls back to the raw string as its own label", () => {
+    const feat = (over: Partial<FeatureItemView>): FeatureItemView => ({
+      id: "f",
+      name: "Feat",
+      img: "",
+      sourceType: "class",
+      activation: "passive",
+      uses: null,
+      description: "",
+      ...over,
+    });
+    const c = buildCharacterSheetContext(
+      input({ featureItems: [feat({ id: "f1", sourceType: "homebrew" })] }),
+    );
+    expect(c.features.groups[0].sourceTypeLabel).toBe("homebrew");
   });
 
   it("biography detail fields are the fixed list; gm notes visible for a GM", () => {

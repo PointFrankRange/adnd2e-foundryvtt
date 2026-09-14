@@ -6,7 +6,7 @@
     {{#each adnd2e.inventory.containers as |grp|}}
       <div class="container-group{{#if grp.overCapacity}} over-capacity{{/if}}" data-item-id="{{grp.item.id}}">
         <div class="container-header">
-          <span class="name">{{grp.item.name}}</span>
+          {{> adnd2e.item-row item=grp.item locationOptions=adnd2e.inventory.locationOptions isGM=user.isGM}}
           <span class="weight">{{grp.usedWeight}}{{#if grp.capacity}} / {{grp.capacity}} {{localize 'ADND2E.sheet.inventory.capacity'}}{{/if}}</span>
           {{#if grp.overCapacity}}<span class="warning">{{localize 'ADND2E.sheet.inventory.overCapacity'}}</span>{{/if}}
         </div>
