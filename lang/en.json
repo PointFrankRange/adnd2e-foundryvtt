@@ -183,9 +183,8 @@
         "awardPrompt": "XP to award (split evenly across classes):",
         "rollHp": "Roll HP",
         "takeAverage": "Take Average",
-        "hpRollFlavor": "1d{die} hit points for {name}",
-        "hpAverageFlavor": "Took the average: {result} (d{die})",
-        "hpApplied": "Rolled {result} + {con} CON"
+        "hpRollFlavor": "1d{die} hit points for {name} ({con} CON)",
+        "hpAverageFlavor": "Took the average: {result} (d{die}), {con} CON"
       },
       "dualClass": {
         "toggle": "Dual-class",

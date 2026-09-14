@@ -112,7 +112,6 @@ describe("lang/en.json — SP2 sheet strings", () => {
       "ADND2E.sheet.xp.takeAverage",
       "ADND2E.sheet.xp.hpRollFlavor",
       "ADND2E.sheet.xp.hpAverageFlavor",
-      "ADND2E.sheet.xp.hpApplied",
       "ADND2E.sheet.dualClass.toggle",
       "ADND2E.sheet.dualClass.clear",
     ]) {

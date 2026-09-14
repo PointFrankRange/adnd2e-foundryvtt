@@ -16,6 +16,11 @@ interface ClassItemLike {
   update(data: Record<string, unknown>): Promise<unknown>;
 }
 
+/** `+1` / `-1` / `+0` — reads naturally for both positive and negative CON adjustments. */
+function signed(n: number): string {
+  return n >= 0 ? `+${n}` : `${n}`;
+}
+
 /** Roll (or take the average of) this class's hit die and append it to `system.hpRolls`. */
 export async function rollHitPoints(
   classItem: ClassItemLike,
@@ -23,28 +28,26 @@ export async function rollHitPoints(
 ): Promise<void> {
   if (!classItem.system.canLevelUp) return;
   const die = getChassis(classItem.system.chassisId).hitDie;
+  const conAdj = classItem.parent?.system.abilities.con.mods?.hpAdjustment ?? 0;
+  const con = signed(conAdj);
   let dieResult: number;
-  let flavor: string;
   if (average) {
     dieResult = Math.floor(die / 2) + 1;
-    flavor = game.i18n!.format("ADND2E.sheet.xp.hpAverageFlavor", {
+    const flavor = game.i18n!.format("ADND2E.sheet.xp.hpAverageFlavor", {
       die: String(die),
       result: String(dieResult),
+      con,
     });
+    await ChatMessage.create({ content: flavor });
   } else {
     const roll = await new Roll(`1d${die}`).evaluate();
     dieResult = roll.total ?? 0;
     await roll.toMessage({
-      flavor: game.i18n!.format("ADND2E.sheet.xp.hpRollFlavor", { die: String(die), name: classItem.name }),
-    });
-    flavor = "";
-  }
-  const conAdj = classItem.parent?.system.abilities.con.mods?.hpAdjustment ?? 0;
-  if (average || flavor) {
-    await ChatMessage.create({
-      content:
-        flavor ||
-        game.i18n!.format("ADND2E.sheet.xp.hpApplied", { result: String(dieResult), con: String(conAdj) }),
+      flavor: game.i18n!.format("ADND2E.sheet.xp.hpRollFlavor", {
+        die: String(die),
+        name: classItem.name,
+        con,
+      }),
     });
   }
   await classItem.update({ "system.hpRolls": [...classItem.system.hpRolls, dieResult] });
