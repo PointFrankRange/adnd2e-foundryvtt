@@ -1,3 +1,51 @@
 <section class="tab combat{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
-  <p class="placeholder">{{localize 'ADND2E.sheet.tabs.combat'}}</p>
+
+  <div class="weapons panel">
+    <h3>{{localize 'ADND2E.sheet.combat.weapons'}}</h3>
+    <div class="weapon-list">
+      {{#each adnd2e.combat.weapons as |w|}}
+        <div class="weapon-row{{#if w.equipped}} equipped{{/if}}" data-item-id="{{w.id}}">
+          <span class="name">{{w.name}}</span>
+          <span class="equipped-state">
+            {{#if w.equipped}}{{localize 'ADND2E.sheet.combat.equipped'}}{{else}}{{localize 'ADND2E.sheet.combat.notEquipped'}}{{/if}}
+          </span>
+          <span class="damage">{{w.damageNote}}</span>
+          <span class="speed" title="{{localize 'ADND2E.sheet.combat.speedFactor'}}">{{w.speedFactor}}</span>
+          {{#if w.range}}<span class="range">{{w.range}}</span>{{/if}}
+        </div>
+      {{else}}
+        <p class="placeholder">{{localize 'ADND2E.sheet.combat.noWeapons'}}</p>
+      {{/each}}
+    </div>
+  </div>
+
+  <div class="ac-breakdown panel">
+    <h3>{{localize 'ADND2E.sheet.combat.acBreakdown'}}</h3>
+    <ul class="derived">
+      {{#each adnd2e.combat.acBreakdown as |row|}}
+        <li><span class="label">{{row.label}}</span> <span class="value">{{row.value}}</span></li>
+      {{/each}}
+    </ul>
+  </div>
+
+  <div class="armor panel">
+    <h3>{{localize 'ADND2E.sheet.combat.armor'}}</h3>
+    <div class="armor-list">
+      {{#each adnd2e.combat.armor as |a|}}
+        <div class="armor-row{{#if a.equipped}} equipped{{/if}}" data-item-id="{{a.id}}">
+          <span class="name">
+            {{a.name}}
+            {{#if a.isShield}}<span class="badge">{{localize 'ADND2E.sheet.combat.shield'}}</span>{{/if}}
+          </span>
+          <span class="ac">{{a.baseAc}}</span>
+          <span class="equipped-state">
+            {{#if a.equipped}}{{localize 'ADND2E.sheet.combat.equipped'}}{{else}}{{localize 'ADND2E.sheet.combat.notEquipped'}}{{/if}}
+          </span>
+        </div>
+      {{else}}
+        <p class="placeholder">{{localize 'ADND2E.sheet.combat.noArmor'}}</p>
+      {{/each}}
+    </div>
+  </div>
+
 </section>

@@ -1,3 +1,56 @@
 <section class="tab features{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
-  <p class="placeholder">{{localize 'ADND2E.sheet.tabs.features'}}</p>
+
+  <div class="feature-groups panel">
+    <h3>{{localize 'ADND2E.sheet.tabs.features'}}</h3>
+    {{#each adnd2e.features.groups as |grp|}}
+      <div class="feature-group" data-source-type="{{grp.sourceType}}">
+        <h4>{{grp.sourceType}}</h4>
+        {{#each grp.items as |f|}}
+          <div class="feature-row" data-item-id="{{f.id}}">
+            <span class="name">{{f.name}}</span>
+            {{#if f.uses}}
+              <span class="uses">{{f.uses.value}} / {{f.uses.max}} ({{f.uses.per}})</span>
+            {{/if}}
+            <div class="description">{{{f.description}}}</div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <p class="placeholder">{{localize 'ADND2E.sheet.features.none'}}</p>
+    {{/each}}
+  </div>
+
+  <div class="racial-abilities panel">
+    <h3>{{localize 'ADND2E.sheet.features.racial'}}</h3>
+    <ul>
+      {{#each adnd2e.features.racialAbilities as |ability|}}
+        <li>{{ability}}</li>
+      {{else}}
+        <li class="placeholder">{{localize 'ADND2E.sheet.features.none'}}</li>
+      {{/each}}
+    </ul>
+  </div>
+
+  <div class="languages panel">
+    <h3>{{localize 'ADND2E.sheet.features.languages'}}</h3>
+    <p class="languages-max">{{adnd2e.features.languagesMax}}</p>
+    <p class="hint">{{localize 'ADND2E.sheet.features.languagesHint'}}</p>
+  </div>
+
+  <div class="resources panel">
+    <h3>{{localize 'ADND2E.sheet.features.resources'}}</h3>
+    <label>
+      {{localize 'ADND2E.sheet.features.reputation'}}
+      <input type="text" name="system.resources.reputation" value="{{adnd2e.features.resources.reputation}}" />
+    </label>
+    <label>
+      {{localize 'ADND2E.sheet.features.henchmen'}}
+      <input type="text" name="system.resources.henchmen" value="{{adnd2e.features.resources.henchmen}}" />
+    </label>
+    <label>
+      {{localize 'ADND2E.sheet.features.followers'}}
+      <input type="text" name="system.resources.followers" value="{{adnd2e.features.resources.followers}}" />
+    </label>
+  </div>
+
 </section>

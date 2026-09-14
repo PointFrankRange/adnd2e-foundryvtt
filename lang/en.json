@@ -193,7 +193,29 @@
         "capacity": "Capacity",
         "overCapacity": "Over capacity",
         "currency": "Currency",
-        "encumbrance": "Encumbrance"
+        "encumbrance": "Encumbrance",
+        "empty": "Nothing here",
+        "quantity": "Qty",
+        "weight": "Weight",
+        "location": "Location",
+        "equipped": "Equipped",
+        "identified": "Identified",
+        "magicBonus": "Magic bonus",
+        "carried": "Carried weight",
+        "category": "Encumbrance category",
+        "penaltyAttack": "Attack roll penalty",
+        "penaltyAc": "Armor Class penalty"
+      },
+      "combat": {
+        "weapons": "Weapons",
+        "armor": "Armor",
+        "acBreakdown": "AC Breakdown",
+        "equipped": "Equipped",
+        "notEquipped": "Not equipped",
+        "shield": "Shield",
+        "speedFactor": "Speed Factor",
+        "noWeapons": "No weapons carried.",
+        "noArmor": "No armor carried."
       },
       "spells": {
         "wizardSlots": "Wizard Spell Slots",
@@ -211,9 +233,26 @@
       "features": {
         "languages": "Languages Known",
         "resources": "Resources",
-        "racial": "Racial Abilities"
+        "racial": "Racial Abilities",
+        "none": "None",
+        "languagesHint": "The free-form list of specific languages known is recorded on the character's biography for now.",
+        "reputation": "Reputation",
+        "henchmen": "Henchmen",
+        "followers": "Followers"
+      },
+      "details": {
+        "age": "Age",
+        "sex": "Sex",
+        "height": "Height",
+        "weight": "Weight",
+        "hairEyes": "Hair/Eyes",
+        "homeland": "Homeland",
+        "deity": "Deity",
+        "kit": "Kit"
       },
       "biography": {
+        "notes": "Biography",
+        "campaignNotes": "Campaign Notes",
         "gmNotes": "GM Notes"
       }
     },

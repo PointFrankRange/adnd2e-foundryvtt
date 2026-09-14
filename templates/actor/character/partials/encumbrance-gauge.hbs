@@ -1,0 +1,13 @@
+<div class="encumbrance-gauge panel">
+  <h3>{{localize 'ADND2E.sheet.inventory.encumbrance'}}</h3>
+  <ul class="derived">
+    <li><span class="label">{{localize 'ADND2E.sheet.inventory.carried'}}</span> <span class="value">{{gauge.carried}}</span></li>
+    <li><span class="label">{{localize 'ADND2E.sheet.inventory.category'}}</span> <span class="value">{{gauge.categoryLabel}}</span></li>
+    <li><span class="label">{{localize 'ADND2E.sheet.vitals.movement'}}</span>
+      <span class="value">{{gauge.movementRate}} / {{gauge.baseMove}}</span></li>
+    <li><span class="label">{{localize 'ADND2E.sheet.inventory.penaltyAttack'}}</span>
+      <span class="value">{{adnd2eSigned gauge.penalty.attackRoll}}</span></li>
+    <li><span class="label">{{localize 'ADND2E.sheet.inventory.penaltyAc'}}</span>
+      <span class="value">{{adnd2eSigned gauge.penalty.armorClass}}</span></li>
+  </ul>
+</div>

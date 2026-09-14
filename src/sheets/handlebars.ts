@@ -1,12 +1,14 @@
 import { TEMPLATE_PATH } from "../constants";
 
 // Sheet partials shipped with SP2. Registered under short `adnd2e.<name>` ids so
-// templates can `{{> adnd2e.ability-row row=row}}`. Tasks 6-7 add item-row,
-// slot-table and encumbrance-gauge here as they fill the remaining tabs.
+// templates can `{{> adnd2e.ability-row row=row}}`. Task 7 adds slot-table here
+// as it fills in the Skills/Spells tabs.
 const PARTIALS = [
   "actor/character/partials/ability-row.hbs",
   "actor/character/partials/save-row.hbs",
   "actor/character/partials/class-row.hbs",
+  "actor/character/partials/item-row.hbs",
+  "actor/character/partials/encumbrance-gauge.hbs",
 ];
 
 /**

@@ -120,4 +120,221 @@
     opacity: 0.6;
     font-style: italic;
   }
+
+  // Shared across Combat/Inventory/Skills/Spells/Features — a label:value list
+  // (AC breakdown, the encumbrance gauge) that isn't a full <table>.
+  ul.derived {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.1rem 0;
+
+      .value {
+        font-weight: 700;
+      }
+    }
+  }
+
+  // Shared small pill used for the shield/magic/weapon-group tags.
+  .badge {
+    margin-left: 0.35rem;
+    padding: 0 0.35rem;
+    border: 1px solid var(--adnd2e-accent);
+    border-radius: 3px;
+    font-size: 0.75rem;
+  }
+
+  /* ---------- Combat ---------- */
+
+  .weapon-list,
+  .armor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .weapon-row,
+  .armor-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.2rem 0.35rem;
+    border: 1px solid transparent;
+    border-radius: 3px;
+
+    &.equipped {
+      border-color: var(--adnd2e-accent);
+    }
+
+    .name {
+      flex: 1 1 auto;
+      font-weight: 600;
+    }
+
+    .equipped-state {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+  }
+
+  /* ---------- Inventory ---------- */
+
+  .container-group {
+    margin-bottom: 0.5rem;
+    padding: 0.35rem;
+    border: 1px solid var(--adnd2e-accent);
+    border-radius: 4px;
+
+    &.over-capacity {
+      .warning {
+        color: var(--adnd2e-accent);
+        font-weight: 700;
+      }
+    }
+
+    .container-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .container-contents {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding-left: 0.5rem;
+    }
+  }
+
+  .loose-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    h4 {
+      margin: 0.5rem 0 0.25rem;
+      opacity: 0.8;
+    }
+  }
+
+  .item-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.2rem 0.35rem;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+
+    &.is-container {
+      font-weight: 600;
+    }
+
+    .name {
+      flex: 1 1 8rem;
+    }
+
+    .quantity input {
+      width: 3rem;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.8rem;
+      opacity: 0.85;
+    }
+  }
+
+  .encumbrance-gauge {
+    margin: 0.75rem 0;
+  }
+
+  .currency-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    input {
+      width: 4rem;
+    }
+  }
+
+  /* ---------- Features ---------- */
+
+  .feature-group {
+    margin-bottom: 0.5rem;
+
+    h4 {
+      margin: 0 0 0.25rem;
+      text-transform: capitalize;
+      opacity: 0.8;
+    }
+  }
+
+  .feature-row {
+    padding: 0.2rem 0;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+
+    .name {
+      font-weight: 600;
+    }
+
+    .uses {
+      margin-left: 0.5rem;
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    .description {
+      font-size: 0.9rem;
+    }
+  }
+
+  .languages-max {
+    font-weight: 700;
+  }
+
+  .resources label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-bottom: 0.35rem;
+  }
+
+  /* ---------- Biography ---------- */
+
+  .detail-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+    gap: 0.5rem;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+  }
+
+  .biography-text,
+  .campaign-notes,
+  .gm-notes {
+    .editor {
+      min-height: 10rem;
+    }
+  }
 }
