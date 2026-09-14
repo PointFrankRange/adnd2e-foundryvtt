@@ -13,6 +13,8 @@ import type {
   WeaponProfView,
 } from "./context-types";
 import { validateItemDrop } from "./drop-rules";
+import { rollHitPoints } from "./hp-roll";
+import { awardXpSplit } from "./xp";
 
 /* ---------------------------------------------------------------------------
  * Adnd2eCharacterSheet — the ApplicationV2 PC sheet shell (SP2 Task 5).
@@ -36,6 +38,7 @@ const Base = HandlebarsApplicationMixin(ActorSheetV2 as never) as unknown as new
 ) => {
   actor: Actor.Implementation;
   document: Actor.Implementation;
+  element: HTMLElement;
   isEditable: boolean;
   _prepareContext(options: unknown): Promise<Record<string, unknown>>;
   _preparePartContext(
@@ -44,6 +47,7 @@ const Base = HandlebarsApplicationMixin(ActorSheetV2 as never) as unknown as new
     options: unknown,
   ): Promise<Record<string, unknown>>;
   _onDropItem(event: DragEvent, item: Item.Implementation): Promise<unknown>;
+  _onRender(context: unknown, options: unknown): Promise<void>;
 };
 
 const T = (p: string): string => TEMPLATE_PATH("actor/character", p);
@@ -56,6 +60,11 @@ interface RawItem {
   img: string;
   type: string;
   system: Record<string, unknown>;
+}
+
+/** `RawItem` plus the mutator the Task 8 interaction handlers need. */
+interface RawItemHandle extends RawItem {
+  update(data: Record<string, unknown>): Promise<unknown>;
 }
 
 function toClassView(it: RawItem): ClassItemView {
@@ -400,21 +409,98 @@ export class Adnd2eCharacterSheet extends Base {
     return super._onDropItem(event, item);
   }
 
-  // Interaction handlers land in Task 8 (hp-roll.ts + Award XP + dual-class).
-  static async #onRollHp(this: Adnd2eCharacterSheet): Promise<void> {
-    /* Task 8 */
+  override async _onRender(context: unknown, options: unknown): Promise<void> {
+    await super._onRender(context, options);
+    const fields = Array.from(
+      this.element.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-item-id][data-field]"),
+    );
+    for (const el of fields) {
+      el.addEventListener("change", () => {
+        void this.#onItemFieldChange(el);
+      });
+    }
   }
 
-  static async #onTakeAverageHp(this: Adnd2eCharacterSheet): Promise<void> {
-    /* Task 8 */
+  async #onItemFieldChange(el: HTMLInputElement | HTMLSelectElement): Promise<void> {
+    const item = this.#getClassOrItem(el.dataset.itemId);
+    if (!item) return;
+    const field = el.dataset.field;
+    if (!field) return;
+    const value =
+      el instanceof HTMLInputElement && el.type === "checkbox"
+        ? el.checked
+        : el instanceof HTMLInputElement && el.type === "number"
+          ? Number(el.value)
+          : el.value;
+    await item.update({ [`system.${field}`]: value });
+  }
+
+  #getClassOrItem(id: string | undefined): RawItemHandle | undefined {
+    if (!id) return undefined;
+    return (this.document as unknown as { items: { get(id: string): RawItemHandle | undefined } }).items.get(
+      id,
+    );
+  }
+
+  #classItems(): RawItemHandle[] {
+    return [...(this.document as unknown as { items: Iterable<RawItemHandle> }).items].filter(
+      (i) => i.type === "class",
+    );
+  }
+
+  // Interaction handlers — SP2 Task 8.
+  static async #onRollHp(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const item = this.#getClassOrItem(target.dataset.classId);
+    if (item) await rollHitPoints(item as never, { average: false });
+  }
+
+  static async #onTakeAverageHp(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const item = this.#getClassOrItem(target.dataset.classId);
+    if (item) await rollHitPoints(item as never, { average: true });
   }
 
   static async #onAwardXp(this: Adnd2eCharacterSheet): Promise<void> {
-    /* Task 8 */
+    const amount = await foundry.applications.api.DialogV2.prompt({
+      window: { title: game.i18n!.localize("ADND2E.sheet.xp.award") },
+      content: `<p>${game.i18n!.localize("ADND2E.sheet.xp.awardPrompt")}</p>
+        <input type="number" name="amount" value="0" step="1" autofocus>`,
+      ok: {
+        label: game.i18n!.localize("ADND2E.sheet.xp.award"),
+        callback: (_event: PointerEvent | SubmitEvent, button: HTMLButtonElement) => {
+          const input = button.form?.elements.namedItem("amount");
+          return input instanceof HTMLInputElement ? input.valueAsNumber : NaN;
+        },
+      },
+    });
+    if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) return;
+    const classItems = this.#classItems();
+    const share = awardXpSplit(amount, classItems.length);
+    await Promise.all(
+      classItems.map((c) => c.update({ "system.xp": (Number(c.system.xp) || 0) + share })),
+    );
   }
 
   static async #onToggleDualClass(this: Adnd2eCharacterSheet): Promise<void> {
-    /* Task 8 */
+    const classItems = this.#classItems();
+    if (classItems.length !== 2) return;
+    const anyDual = classItems.some((c) => c.system.dualClassState !== null);
+    if (anyDual) {
+      await Promise.all(classItems.map((c) => c.update({ "system.dualClassState": null })));
+    } else {
+      const [older, newer] = [...classItems].sort(
+        (a, b) => (Number(a.system.level) || 1) - (Number(b.system.level) || 1),
+      );
+      await older.update({ "system.dualClassState": "primary" });
+      await newer.update({ "system.dualClassState": "active" });
+    }
   }
 }
 

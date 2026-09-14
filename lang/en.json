@@ -182,11 +182,15 @@
         "award": "Award XP",
         "awardPrompt": "XP to award (split evenly across classes):",
         "rollHp": "Roll HP",
-        "takeAverage": "Take Average"
+        "takeAverage": "Take Average",
+        "hpRollFlavor": "1d{die} hit points for {name}",
+        "hpAverageFlavor": "Took the average: {result} (d{die})",
+        "hpApplied": "Rolled {result} + {con} CON"
       },
       "dualClass": {
         "toggle": "Dual-class",
-        "hint": "Mark these two classes as a dual-class progression"
+        "hint": "Mark these two classes as a dual-class progression",
+        "clear": "Clear dual-class"
       },
       "inventory": {
         "noContainer": "— (carried)",

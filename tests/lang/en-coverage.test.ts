@@ -108,7 +108,13 @@ describe("lang/en.json — SP2 sheet strings", () => {
       "ADND2E.sheet.drop.duplicateClass",
       "ADND2E.sheet.xp.rollHp",
       "ADND2E.sheet.xp.award",
+      "ADND2E.sheet.xp.awardPrompt",
+      "ADND2E.sheet.xp.takeAverage",
+      "ADND2E.sheet.xp.hpRollFlavor",
+      "ADND2E.sheet.xp.hpAverageFlavor",
+      "ADND2E.sheet.xp.hpApplied",
       "ADND2E.sheet.dualClass.toggle",
+      "ADND2E.sheet.dualClass.clear",
     ]) {
       expect(typeof resolve(key), key).toBe("string");
       expect((resolve(key) as string).length, key).toBeGreaterThan(0);

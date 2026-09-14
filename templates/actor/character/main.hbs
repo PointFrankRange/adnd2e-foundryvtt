@@ -7,6 +7,9 @@
         {{selectOptions alignments selected=adnd2e.identity.alignmentValue localize=true}}
       </select>
     </label>
+    <button type="button" data-action="awardXp">
+      {{localize 'ADND2E.sheet.xp.award'}}
+    </button>
   </div>
 
   <div class="abilities panel">
@@ -26,6 +29,10 @@
     {{#if adnd2e.dualClassToggle.available}}
       <button type="button" data-action="toggleDualClass">
         {{localize 'ADND2E.sheet.dualClass.toggle'}}
+      </button>
+    {{else if adnd2e.dualClassToggle.on}}
+      <button type="button" data-action="toggleDualClass">
+        {{localize 'ADND2E.sheet.dualClass.clear'}}
       </button>
     {{/if}}
   </div>
