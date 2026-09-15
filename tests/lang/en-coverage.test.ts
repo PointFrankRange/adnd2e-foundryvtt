@@ -226,6 +226,27 @@ describe("lang/en.json — SP3 chat/combat strings", () => {
   });
 });
 
+describe("lang/en.json — SP4a spell memorize/cast strings", () => {
+  it("resolves every ADND2E.sheet.spells.{memorize,forget,cast,rest,expended} + ADND2E.chat.cast.* key the spell-actions layer references", () => {
+    for (const key of [
+      "ADND2E.sheet.spells.memorize",
+      "ADND2E.sheet.spells.forget",
+      "ADND2E.sheet.spells.cast",
+      "ADND2E.sheet.spells.rest",
+      "ADND2E.sheet.spells.expended",
+      "ADND2E.chat.cast.range",
+      "ADND2E.chat.cast.duration",
+      "ADND2E.chat.cast.castingTime",
+      "ADND2E.chat.cast.savingThrow",
+      "ADND2E.chat.cast.damageRoll",
+      "ADND2E.chat.cast.healingRoll",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [

@@ -308,6 +308,14 @@
       },
       "save": {
         "success": "Success", "failure": "Failure"
+      },
+      "cast": {
+        "range": "Range",
+        "duration": "Duration",
+        "castingTime": "Casting Time",
+        "savingThrow": "Saving Throw",
+        "damageRoll": "Damage",
+        "healingRoll": "Healing"
       }
     },
     "sheets": {
