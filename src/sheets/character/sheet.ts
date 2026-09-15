@@ -293,6 +293,18 @@ export class Adnd2eCharacterSheet extends Base {
     const context = await super._prepareContext(options);
     context.adnd2e = buildCharacterSheetContext(this.#buildInput());
     context.editable = this.isEditable;
+    context.notEditable = !this.isEditable;
+    // The SYSTEM DataModel's own schema — distinct from `context.fields`,
+    // which DocumentSheetV2._prepareContext already exposes as the actor's
+    // top-level (name/img/system/…) schema. Needed so biography.hbs can
+    // render the rich-text fields via the real `{{formInput}}` field helper
+    // (a genuine self-activating <prose-mirror> element) instead of the
+    // standalone `{{editor}}` helper, whose "edit" button is only ever wired
+    // up by the legacy appv1 FormApplication/DocumentSheet API and is inert
+    // under ApplicationV2.
+    context.systemFields = (this.document as unknown as {
+      system: { schema: { fields: Record<string, unknown> } };
+    }).system.schema.fields;
     context.alignments = (
       CONFIG as unknown as { ADND2E: { alignments: Record<string, string> } }
     ).ADND2E.alignments;

@@ -14,18 +14,18 @@
 
   <div class="biography-text panel">
     <h3>{{localize 'ADND2E.sheet.biography.notes'}}</h3>
-    {{editor source.system.biography target="system.biography" button=true editable=editable engine="prosemirror"}}
+    {{formInput systemFields.biography value=source.system.biography name="system.biography" disabled=notEditable}}
   </div>
 
   <div class="campaign-notes panel">
     <h3>{{localize 'ADND2E.sheet.biography.campaignNotes'}}</h3>
-    {{editor source.system.details.campaignNotes target="system.details.campaignNotes" button=true editable=editable engine="prosemirror"}}
+    {{formInput systemFields.details.fields.campaignNotes value=source.system.details.campaignNotes name="system.details.campaignNotes" disabled=notEditable}}
   </div>
 
   {{#if adnd2e.biography.showGmNotes}}
     <div class="gm-notes panel">
       <h3>{{localize 'ADND2E.sheet.biography.gmNotes'}}</h3>
-      {{editor source.system.details.gmNotes target="system.details.gmNotes" button=true editable=editable engine="prosemirror"}}
+      {{formInput systemFields.details.fields.gmNotes value=source.system.details.gmNotes name="system.details.gmNotes" disabled=notEditable}}
     </div>
   {{/if}}
 

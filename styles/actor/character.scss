@@ -343,8 +343,12 @@
   .biography-text,
   .campaign-notes,
   .gm-notes {
-    .editor {
-      min-height: 10rem;
+    // Core's <prose-mirror> element sizes itself off the --min-height custom
+    // property (see foundry2.css's `.active-effect-config prose-mirror`
+    // convention) — it carries no `.editor` class, so that selector was dead
+    // CSS from the start.
+    prose-mirror {
+      --min-height: 10rem;
     }
   }
 
