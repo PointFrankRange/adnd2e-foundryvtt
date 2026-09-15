@@ -241,7 +241,10 @@
         "forget": "Forget",
         "cast": "Cast",
         "rest": "Rest",
-        "expended": "Cast today — expended until Rest"
+        "expended": "Cast today — expended until Rest",
+        "memorizeBlockedWarning": "That spell can no longer be memorized — refresh the sheet.",
+        "castBlockedWarning": "That spell can't be cast right now — refresh the sheet.",
+        "castRollFailedWarning": "This spell's damage/healing formula couldn't be rolled — check the item's Automation fields."
       },
       "skills": {
         "weapon": "Weapon Proficiencies",
