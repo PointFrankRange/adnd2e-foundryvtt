@@ -8,6 +8,7 @@ import type {
   EncumbranceGauge,
   FeatureItemView,
   NwpView,
+  OrphanedSpellRow,
   PhysicalItemView,
   SaveRow,
   SlotRow,
@@ -307,7 +308,32 @@ function buildSpells(input: CharacterSheetInput): CharacterSheetContext["spells"
     priestSlots: toSlotRows(sc.priest.slots),
     specialistSchoolLabel: school ? input.config.schools[school] : null,
     known,
+    orphaned: buildOrphanedSpells(input, sc),
   };
+}
+
+/** Memorized entries whose backing spell Item no longer exists on the actor
+ *  (e.g. it was deleted while still memorized). These can never appear in a
+ *  normal `known` row (built by iterating `input.spellItems`), so they get
+ *  their own minimal Forget-only list instead — otherwise the memorized
+ *  entry is permanently stuck consuming a slot with no UI path to remove it. */
+function buildOrphanedSpells(
+  input: CharacterSheetInput,
+  sc: CharacterDerivedView["spellcasting"],
+): OrphanedSpellRow[] {
+  const knownIds = new Set(input.spellItems.map((s) => s.id));
+  const orphaned: OrphanedSpellRow[] = [];
+  for (const m of sc.wizard.memorized) {
+    if (!knownIds.has(m.spellItemId)) {
+      orphaned.push({ spellItemId: m.spellItemId, casterClass: "wizard", spellLevel: m.spellLevel });
+    }
+  }
+  for (const m of sc.priest.memorized) {
+    if (!knownIds.has(m.spellItemId)) {
+      orphaned.push({ spellItemId: m.spellItemId, casterClass: "priest", spellLevel: m.spellLevel });
+    }
+  }
+  return orphaned;
 }
 
 /** Enriches a raw SpellItemView with memorize/cast eligibility, computed from

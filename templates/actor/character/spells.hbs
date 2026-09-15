@@ -68,4 +68,18 @@
     {{/each}}
   </div>
 
+  {{#if adnd2e.spells.orphaned.length}}
+    <div class="orphaned-spells panel">
+      <h3>{{localize 'ADND2E.sheet.spells.orphaned'}}</h3>
+      {{#each adnd2e.spells.orphaned as |o|}}
+        <div class="spell-row orphaned">
+          <span class="name">{{localize 'ADND2E.sheet.spells.orphanedEntry' level=o.spellLevel}}</span>
+          <button type="button" data-action="forgetSpell" data-item-id="{{o.spellItemId}}">
+            {{localize 'ADND2E.sheet.spells.forget'}}
+          </button>
+        </div>
+      {{/each}}
+    </div>
+  {{/if}}
+
 </section>

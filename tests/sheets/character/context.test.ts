@@ -776,6 +776,76 @@ describe("buildCharacterSheetContext — spells / features / biography / tabs", 
     ]);
   });
 
+  it("orphaned: a memorized entry with no matching spell item appears in spells.orphaned", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: {
+              specialistSchool: null,
+              slots: { "1": { max: 1, used: 1 } },
+              memorized: [{ spellItemId: "deleted-spell", spellLevel: 1, expended: false }],
+            },
+            priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+          },
+        },
+        spellItems: [], // the spell item is gone — this is the whole point
+      }),
+    );
+    expect(c.spells.orphaned).toEqual([
+      { spellItemId: "deleted-spell", casterClass: "wizard", spellLevel: 1 },
+    ]);
+  });
+
+  it("orphaned: a priest memorized entry with no matching spell item also appears", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: { specialistSchool: null, slots: {}, memorized: [] },
+            priest: {
+              slots: { "2": { max: 1, used: 1 } },
+              memorized: [{ spellItemId: "deleted-priest-spell", spellLevel: 2, expended: false }],
+              sphereAccessOverride: null,
+            },
+          },
+        },
+        spellItems: [],
+      }),
+    );
+    expect(c.spells.orphaned).toEqual([
+      { spellItemId: "deleted-priest-spell", casterClass: "priest", spellLevel: 2 },
+    ]);
+  });
+
+  it("orphaned: a memorized entry WITH a matching spell item is NOT orphaned", () => {
+    const spell = (over: Partial<SpellItemView>): SpellItemView => ({
+      id: "s", name: "Spell", img: "", casterClass: "wizard", level: 1,
+      schools: [], spheres: [], range: "", castingTime: "", savingThrow: "",
+      inSpellbook: true, memorized: false, expended: false, canMemorize: false, canCast: false,
+      ...over,
+    });
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: {
+              specialistSchool: null,
+              slots: { "1": { max: 1, used: 1 } },
+              memorized: [{ spellItemId: "s", spellLevel: 1, expended: false }],
+            },
+            priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+          },
+        },
+        spellItems: [spell({ id: "s" })],
+      }),
+    );
+    expect(c.spells.orphaned).toEqual([]);
+  });
+
   it("features group by sourceType; resources + languages pass through", () => {
     const feat = (over: Partial<FeatureItemView>): FeatureItemView => ({
       id: "f",

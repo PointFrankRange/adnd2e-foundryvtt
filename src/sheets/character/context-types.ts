@@ -150,6 +150,7 @@ export interface ClassRow {
   isDualPrimary: boolean; isDualActive: boolean; specialistSchool: string | null;
 }
 export interface SlotRow { level: number; max: number; used: number }
+export interface OrphanedSpellRow { spellItemId: string; casterClass: "wizard" | "priest"; spellLevel: number }
 export interface ContainerGroup {
   item: PhysicalItemView; contents: PhysicalItemView[];
   usedWeight: number; capacity: number | null; overCapacity: boolean;
@@ -200,6 +201,7 @@ export interface CharacterSheetContext {
     priestSlots: SlotRow[] | null;
     specialistSchoolLabel: string | null;
     known: { level: number; items: SpellItemView[] }[];
+    orphaned: OrphanedSpellRow[];
   };
   features: {
     groups: { sourceType: string; sourceTypeLabel: string; items: FeatureItemView[] }[];
