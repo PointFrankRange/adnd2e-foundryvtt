@@ -237,6 +237,8 @@ describe("lang/en.json — SP4a spell memorize/cast strings", () => {
       "ADND2E.sheet.spells.memorizeBlockedWarning",
       "ADND2E.sheet.spells.castBlockedWarning",
       "ADND2E.sheet.spells.castRollFailedWarning",
+      "ADND2E.sheet.spells.orphaned",
+      "ADND2E.sheet.spells.orphanedEntry",
       "ADND2E.chat.cast.range",
       "ADND2E.chat.cast.duration",
       "ADND2E.chat.cast.castingTime",
