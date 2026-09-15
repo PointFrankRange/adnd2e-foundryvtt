@@ -6,13 +6,13 @@
     {{#each adnd2e.inventory.containers as |grp|}}
       <div class="container-group{{#if grp.overCapacity}} over-capacity{{/if}}" data-item-id="{{grp.item.id}}">
         <div class="container-header">
-          {{> adnd2e.item-row item=grp.item locationOptions=adnd2e.inventory.locationOptions isGM=user.isGM}}
+          {{> adnd2e.item-row item=grp.item locationOptions=@root.adnd2e.inventory.locationOptions isGM=@root.user.isGM}}
           <span class="weight">{{grp.usedWeight}}{{#if grp.capacity}} / {{grp.capacity}} {{localize 'ADND2E.sheet.inventory.capacity'}}{{/if}}</span>
           {{#if grp.overCapacity}}<span class="warning">{{localize 'ADND2E.sheet.inventory.overCapacity'}}</span>{{/if}}
         </div>
         <div class="container-contents">
           {{#each grp.contents as |item|}}
-            {{> adnd2e.item-row item=item locationOptions=adnd2e.inventory.locationOptions isGM=user.isGM}}
+            {{> adnd2e.item-row item=item locationOptions=@root.adnd2e.inventory.locationOptions isGM=@root.user.isGM}}
           {{else}}
             <p class="placeholder">{{localize 'ADND2E.sheet.inventory.empty'}}</p>
           {{/each}}
@@ -23,7 +23,7 @@
     <div class="loose-items">
       <h4>{{localize 'ADND2E.sheet.inventory.noContainer'}}</h4>
       {{#each adnd2e.inventory.loose as |item|}}
-        {{> adnd2e.item-row item=item locationOptions=adnd2e.inventory.locationOptions isGM=user.isGM}}
+        {{> adnd2e.item-row item=item locationOptions=@root.adnd2e.inventory.locationOptions isGM=@root.user.isGM}}
       {{else}}
         <p class="placeholder">{{localize 'ADND2E.sheet.inventory.empty'}}</p>
       {{/each}}

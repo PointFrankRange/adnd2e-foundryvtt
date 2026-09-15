@@ -5,7 +5,7 @@
       <h3>{{localize 'ADND2E.sheet.spells.wizardSlots'}}</h3>
       {{#if adnd2e.spells.specialistSchoolLabel}}
         <p class="specialist">
-          {{localize 'ADND2E.sheet.spells.specialist'}}: {{adnd2e.spells.specialistSchoolLabel}}
+          {{localize 'ADND2E.sheet.spells.specialist'}}: {{localize adnd2e.spells.specialistSchoolLabel}}
         </p>
       {{/if}}
       {{> adnd2e.slot-table rows=adnd2e.spells.wizardSlots}}
