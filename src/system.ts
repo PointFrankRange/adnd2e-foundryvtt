@@ -10,6 +10,7 @@ import { registerSheets } from "./sheets";
 import { registerSheetPartials } from "./sheets/handlebars";
 import { buildApi } from "./api";
 import { registerMigrationSettings, runMigrations } from "./migrations/run";
+import { registerChatListeners } from "./chat/chat-listeners";
 
 Hooks.once("init", () => {
   console.log(`${SYSTEM_ID} | Initializing`);
@@ -38,4 +39,5 @@ Hooks.once("ready", async () => {
   console.log(`${SYSTEM_ID} | Ready`);
   (game.system as unknown as { api: ReturnType<typeof buildApi> }).api = buildApi();
   await runMigrations();
+  registerChatListeners();
 });
