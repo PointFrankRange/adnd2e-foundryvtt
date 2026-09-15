@@ -16,3 +16,8 @@ export function attackFormula(attackBonus: number): string {
 export function damageFormula(baseDice: string, damageBonus: number): string {
   return `${baseDice}${signedTerm(damageBonus)}`;
 }
+
+/** A 1d10 initiative roll with its total modifier. 2E is ascending: lower total acts first. */
+export function initiativeFormula(modifier: number): string {
+  return `1d10${signedTerm(modifier)}`;
+}

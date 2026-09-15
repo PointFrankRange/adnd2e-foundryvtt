@@ -15,6 +15,7 @@ export default defineConfig({
         "src/sheets/character/context-types.ts", "src/sheets/character/xp.ts",
         "src/sheets/character/drop-rules.ts", "src/sheets/character/grouping.ts",
         "src/sheets/character/context.ts",
+        "src/combat/**/*.ts",
       ],
       // Only true barrels/type-only modules are excluded. src/core/abilities/index.ts
       // is NOT a barrel — it holds deriveAbilities()/primeRequisiteXpBonus() — so it stays included.
