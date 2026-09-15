@@ -45,14 +45,15 @@ The system follows a two-layer contract:
 
 - **`src/core/`** — a framework-free rules engine (pure functions, lookup tables, no Foundry imports, deterministic). Returns plain data or formula strings; exhaustively unit-tested.
 - **`src/data/derive/`** — pure snapshot-to-derived-values layer.
-- **Foundry layer** — `src/data/` DataModels (schema + `prepareDerivedData` delegating to `core`), `src/documents/` (thin Document subclasses), `src/sheets/` (Sub-project 1 raw-field editor only; designed sheets are Sub-project 2 and later), `src/api/` (`importContent`), `src/migrations/` (version-gated world migrations), `src/config.ts` / `src/settings/`.
+- **Foundry layer** — `src/data/` DataModels (schema + `prepareDerivedData` delegating to `core`), `src/documents/` (thin Document subclasses), `src/sheets/` (the PC character sheet from Sub-project 2, plus the Sub-project 1 raw-field editor for the remaining document types), `src/combat/` + `src/chat/` (combat chat-card content builders and listeners from Sub-project 3), `src/api/` (`importContent`), `src/migrations/` (version-gated world migrations), `src/config.ts` / `src/settings/`.
 
 ### Source directory map
 
 - `src/core/` — pure rules engine
 - `src/data/` — DataModels + `derive/**` layer
 - `src/documents/` — Foundry Document subclasses
-- `src/sheets/` — raw-field editor (sheets designed in later sub-projects)
+- `src/sheets/` — PC character sheet (Sub-project 2) + raw-field editor for remaining document types
+- `src/combat/`, `src/chat/` — combat chat-card content builders + listeners (Sub-project 3)
 - `src/api/` — `importContent`
 - `src/migrations/` — version-gated world migrations
 - `src/config.ts` — `CONFIG.ADND2E` registry
@@ -76,8 +77,8 @@ Pack sources are JSON files under `packs/<name>/_source/`, one document per file
 | Sub-project | Status | Scope |
 |-------------|--------|-------|
 | **1. Foundation & data architecture** | ✅ Complete | Core rules engine + all DataModels + `deriveCharacter` / `deriveCreature` + ActiveEffect two-pass + 4 compendium packs + `build:packs` + `importContent` + migration framework + stub sheets |
-| **2. PC character sheet** | 🔜 Planned | ApplicationV2 sheet, tabs, editable fields, class/race as droppable items, multi-/dual-class handling, XP→level, HP rolling |
-| **3. Core combat** | 🔜 Planned | THAC0 attack rolls vs AC, damage, the 5 saving-throw categories, initiative (individual + weapon speed + casting time), combat-tracker override |
+| **2. PC character sheet** | ✅ Complete | ApplicationV2 sheet, tabs, editable fields, class/race as droppable items, multi-/dual-class handling, XP→level, HP rolling |
+| **3. Core combat** | ✅ Complete | THAC0 attack rolls vs AC, damage, the 5 saving-throw categories, initiative (individual + weapon speed + casting time), combat-tracker override |
 | **4. Magic** | 🔜 Planned | Spell items, schools/spheres, wizard spellbook + priest sphere access, memorization slot tables, cast-from-chat with slot tracking |
 | **5. Proficiencies & skills** | 🔜 Planned | Weapon proficiency slots + specialization, non-weapon proficiency checks |
 | **6. NPC / monster sheet + bestiary scaffolding** | 🔜 Planned | Streamlined stat-block sheet, item templates for user-owned content |
