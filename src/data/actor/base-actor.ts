@@ -25,6 +25,10 @@ function memorizedSchema() {
     new SchemaField({
       spellItemId: new StringField({ required: true, blank: false }),
       spellLevel: new NumberField({ required: true, integer: true, min: 1, max: 9 }),
+      /** true once this memorized spell has been cast today — the slot stays
+       *  occupied (see slots.ts's toRecord, which counts memorized.length
+       *  regardless of expended) until a "Rest" action clears it. */
+      expended: new BooleanField({ required: true, initial: false }),
     }),
     { required: true, initial: [] },
   );

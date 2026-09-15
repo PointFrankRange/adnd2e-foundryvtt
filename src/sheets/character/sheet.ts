@@ -217,6 +217,12 @@ function toSpellView(it: RawItem, spellbookIds: Set<string>): SpellItemView {
     castingTime: s.castingTime,
     savingThrow: s.savingThrow,
     inSpellbook: spellbookIds.has(it.id),
+    // Placeholders — buildSpells (context.ts) recomputes all four from the
+    // actor's memorized list + slot state + spellbook/sphere-access eligibility.
+    memorized: false,
+    expended: false,
+    canMemorize: false,
+    canCast: false,
   };
 }
 
