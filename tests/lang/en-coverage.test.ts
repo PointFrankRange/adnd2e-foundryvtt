@@ -216,6 +216,7 @@ describe("lang/en.json — SP3 chat/combat strings", () => {
       "ADND2E.chat.damage.applyToTargets",
       "ADND2E.chat.damage.noTargetsWarning",
       "ADND2E.chat.damage.notOwnerWarning",
+      "ADND2E.chat.damage.sourceNotFoundWarning",
       "ADND2E.chat.save.success",
       "ADND2E.chat.save.failure",
     ]) {

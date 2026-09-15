@@ -298,7 +298,8 @@
       "damage": {
         "applyToTargets": "Apply to Targeted Token(s)",
         "noTargetsWarning": "No token is targeted — nothing to apply damage to.",
-        "notOwnerWarning": "You don't have permission to apply damage to one or more targeted tokens."
+        "notOwnerWarning": "You don't have permission to apply damage to one or more targeted tokens.",
+        "sourceNotFoundWarning": "The attacker or weapon for this roll no longer exists — nothing to roll damage from."
       },
       "save": {
         "success": "Success", "failure": "Failure"

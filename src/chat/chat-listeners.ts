@@ -37,7 +37,7 @@ async function onRollDamage(button: HTMLButtonElement): Promise<void> {
   ).actors.get(actorId ?? "");
   const weapon = actor?.items.get(weaponItemId ?? "");
   if (!actor || !weapon) {
-    ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.damage.noTargetsWarning"));
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.damage.sourceNotFoundWarning"));
     return;
   }
   const dice = pickDamageDice(
