@@ -222,7 +222,9 @@
         "shield": "Shield",
         "speedFactor": "Speed Factor",
         "noWeapons": "No weapons carried.",
-        "noArmor": "No armor carried."
+        "noArmor": "No armor carried.",
+        "rollAttack": "Attack",
+        "rollSave": "Save"
       },
       "spells": {
         "wizardSlots": "Wizard Spell Slots",
@@ -276,6 +278,30 @@
         "notes": "Biography",
         "campaignNotes": "Campaign Notes",
         "gmNotes": "GM Notes"
+      }
+    },
+    "chat": {
+      "attack": {
+        "rollAttack": "Roll Attack",
+        "manualAcTitle": "Target Armor Class",
+        "noTargetHint": "No token is targeted. Enter the target's Armor Class:",
+        "multiTargetHint": "More than one token is targeted. Enter the intended target's Armor Class:",
+        "hit": "Hit",
+        "miss": "Miss",
+        "autoHit": "Natural 20 — automatic hit",
+        "autoMiss": "Natural 1 — automatic miss",
+        "modStrength": "Strength", "modDexMissile": "Dexterity (missile)",
+        "modWeaponMagic": "Weapon magic", "modProficiency": "Proficiency",
+        "modRange": "Range", "modSituational": "Situational",
+        "rollDamage": "Roll Damage"
+      },
+      "damage": {
+        "applyToTargets": "Apply to Targeted Token(s)",
+        "noTargetsWarning": "No token is targeted — nothing to apply damage to.",
+        "notOwnerWarning": "You don't have permission to apply damage to one or more targeted tokens."
+      },
+      "save": {
+        "success": "Success", "failure": "Failure"
       }
     },
     "sheets": {

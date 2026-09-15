@@ -193,6 +193,38 @@ describe("lang/en.json — SP2 Task 7 sheet strings (Skills/Spells)", () => {
   });
 });
 
+describe("lang/en.json — SP3 chat/combat strings", () => {
+  it("resolves every ADND2E.sheet.combat.{rollAttack,rollSave} + ADND2E.chat.* key the combat-roll layer references", () => {
+    for (const key of [
+      "ADND2E.sheet.combat.rollAttack",
+      "ADND2E.sheet.combat.rollSave",
+      "ADND2E.chat.attack.rollAttack",
+      "ADND2E.chat.attack.manualAcTitle",
+      "ADND2E.chat.attack.noTargetHint",
+      "ADND2E.chat.attack.multiTargetHint",
+      "ADND2E.chat.attack.hit",
+      "ADND2E.chat.attack.miss",
+      "ADND2E.chat.attack.autoHit",
+      "ADND2E.chat.attack.autoMiss",
+      "ADND2E.chat.attack.modStrength",
+      "ADND2E.chat.attack.modDexMissile",
+      "ADND2E.chat.attack.modWeaponMagic",
+      "ADND2E.chat.attack.modProficiency",
+      "ADND2E.chat.attack.modRange",
+      "ADND2E.chat.attack.modSituational",
+      "ADND2E.chat.attack.rollDamage",
+      "ADND2E.chat.damage.applyToTargets",
+      "ADND2E.chat.damage.noTargetsWarning",
+      "ADND2E.chat.damage.notOwnerWarning",
+      "ADND2E.chat.save.success",
+      "ADND2E.chat.save.failure",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [
