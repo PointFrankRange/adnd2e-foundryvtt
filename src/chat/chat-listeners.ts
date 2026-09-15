@@ -15,26 +15,20 @@ import { TEMPLATE_PATH } from "../constants";
  * ------------------------------------------------------------------------- */
 
 async function onRollDamage(button: HTMLButtonElement): Promise<void> {
-  const { actorId, weaponItemId, targetSize } = button.dataset as {
-    actorId?: string;
+  const { actorUuid, weaponItemId, targetSize } = button.dataset as {
+    actorUuid?: string;
     weaponItemId?: string;
     targetSize?: string;
   };
-  const actor = (
-    game as unknown as {
-      actors: {
-        get(id: string): {
-          name: string;
-          img: string;
-          items: {
-            get(id: string):
-              | { name: string; system: { damageVsSM: string | null; damageVsL: string | null; magicBonus: number } }
-              | undefined;
-          };
-        } | undefined;
-      };
-    }
-  ).actors.get(actorId ?? "");
+  const actor = (fromUuidSync as (uuid: string) => unknown)(actorUuid ?? "") as {
+    name: string;
+    img: string;
+    items: {
+      get(id: string):
+        | { name: string; system: { damageVsSM: string | null; damageVsL: string | null; magicBonus: number } }
+        | undefined;
+    };
+  } | null;
   const weapon = actor?.items.get(weaponItemId ?? "");
   if (!actor || !weapon) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.damage.sourceNotFoundWarning"));

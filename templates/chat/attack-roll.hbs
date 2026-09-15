@@ -18,7 +18,7 @@
   {{/if}}
   {{#if (and hit damageContext)}}
     <button type="button" data-action="rollDamage"
-      data-actor-id="{{damageContext.actorId}}" data-weapon-item-id="{{damageContext.weaponItemId}}"
+      data-actor-uuid="{{damageContext.actorUuid}}" data-weapon-item-id="{{damageContext.weaponItemId}}"
       data-target-size="{{damageContext.targetSize}}">
       {{localize 'ADND2E.chat.attack.rollDamage'}}
     </button>

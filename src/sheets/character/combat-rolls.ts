@@ -31,7 +31,7 @@ export function resolveTargetCombatInfo(
 }
 
 interface AttackerActor {
-  name: string; img: string;
+  name: string; img: string; uuid: string;
   system: { attributes?: { thac0?: { melee?: number; ranged?: number } } };
   items: { get(id: string): WeaponItemHandle | undefined };
 }
@@ -96,7 +96,7 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string): Pr
     actorName: actor.name, actorImg: actor.img,
     weaponName: weapon.name, targetName,
     formula, naturalD20, hit, modifierBreakdown: breakdown,
-    damageContext: hit.hit ? { weaponItemId, actorId: (actor as unknown as { id: string }).id, targetSize } : null,
+    damageContext: hit.hit ? { weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize } : null,
   });
 
   const content = await foundry.applications.handlebars.renderTemplate(
