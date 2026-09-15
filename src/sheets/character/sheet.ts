@@ -15,6 +15,7 @@ import type {
 } from "./context-types";
 import { validateItemDrop } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
+import { castSpell, forgetSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
 import { awardXpSplit } from "./xp";
 
 /* ---------------------------------------------------------------------------
@@ -259,6 +260,10 @@ export class Adnd2eCharacterSheet extends Base {
       toggleDualClass: Adnd2eCharacterSheet.#onToggleDualClass,
       rollAttack: Adnd2eCharacterSheet.#onRollAttack,
       rollSave: Adnd2eCharacterSheet.#onRollSave,
+      memorizeSpell: Adnd2eCharacterSheet.#onMemorizeSpell,
+      forgetSpell: Adnd2eCharacterSheet.#onForgetSpell,
+      castSpell: Adnd2eCharacterSheet.#onCastSpell,
+      restSpellcasting: Adnd2eCharacterSheet.#onRestSpellcasting,
     },
   };
 
@@ -550,6 +555,38 @@ export class Adnd2eCharacterSheet extends Base {
   ): Promise<void> {
     const category = target.dataset.save as SaveCategory | undefined;
     if (category) await rollSave(this.document as never, category);
+  }
+
+  // Interaction handlers — SP4a.
+  static async #onMemorizeSpell(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const spellItemId = target.dataset.itemId;
+    if (spellItemId) await memorizeSpell(this.document as never, spellItemId);
+  }
+
+  static async #onForgetSpell(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const spellItemId = target.dataset.itemId;
+    if (spellItemId) await forgetSpell(this.document as never, spellItemId);
+  }
+
+  static async #onCastSpell(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const spellItemId = target.dataset.itemId;
+    if (spellItemId) await castSpell(this.document as never, spellItemId);
+  }
+
+  static async #onRestSpellcasting(this: Adnd2eCharacterSheet): Promise<void> {
+    await restSpellcasting(this.document as never);
   }
 }
 

@@ -236,7 +236,12 @@
         "slotLevel": "Level",
         "slotsMax": "Max",
         "slotsUsed": "Used",
-        "none": "No spells known."
+        "none": "No spells known.",
+        "memorize": "Memorize",
+        "forget": "Forget",
+        "cast": "Cast",
+        "rest": "Rest",
+        "expended": "Cast today — expended until Rest"
       },
       "skills": {
         "weapon": "Weapon Proficiencies",

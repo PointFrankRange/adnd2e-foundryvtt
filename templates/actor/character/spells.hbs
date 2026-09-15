@@ -20,16 +20,24 @@
   {{/if}}
 
   <div class="known-spells panel">
-    <h3>{{localize 'ADND2E.sheet.spells.known'}}</h3>
+    <div class="panel-header">
+      <h3>{{localize 'ADND2E.sheet.spells.known'}}</h3>
+      <button type="button" data-action="restSpellcasting">
+        {{localize 'ADND2E.sheet.spells.rest'}}
+      </button>
+    </div>
     {{#each adnd2e.spells.known as |grp|}}
       <div class="spell-level-group">
         <h4>{{localize 'ADND2E.sheet.spells.level' level=grp.level}}</h4>
         {{#each grp.items as |s|}}
-          <div class="spell-row" data-item-id="{{s.id}}">
+          <div class="spell-row{{#if s.expended}} expended{{/if}}" data-item-id="{{s.id}}">
             <span class="name">
               {{s.name}}
               {{#if s.inSpellbook}}
                 <span class="badge" title="{{localize 'ADND2E.sheet.spells.spellbook'}}">📖</span>
+              {{/if}}
+              {{#if s.expended}}
+                <span class="badge expended-badge" title="{{localize 'ADND2E.sheet.spells.expended'}}">✓</span>
               {{/if}}
             </span>
             {{#if s.schools.length}}
@@ -37,6 +45,21 @@
             {{/if}}
             <span class="casting-time">{{s.castingTime}}</span>
             <span class="saving-throw">{{s.savingThrow}}</span>
+            {{#if s.canMemorize}}
+              <button type="button" data-action="memorizeSpell" data-item-id="{{s.id}}">
+                {{localize 'ADND2E.sheet.spells.memorize'}}
+              </button>
+            {{/if}}
+            {{#if s.memorized}}
+              <button type="button" data-action="forgetSpell" data-item-id="{{s.id}}">
+                {{localize 'ADND2E.sheet.spells.forget'}}
+              </button>
+            {{/if}}
+            {{#if s.canCast}}
+              <button type="button" data-action="castSpell" data-item-id="{{s.id}}">
+                {{localize 'ADND2E.sheet.spells.cast'}}
+              </button>
+            {{/if}}
           </div>
         {{/each}}
       </div>
@@ -44,7 +67,5 @@
       <p class="placeholder">{{localize 'ADND2E.sheet.spells.none'}}</p>
     {{/each}}
   </div>
-
-  {{! SP4 wires memorization + casting here }}
 
 </section>
