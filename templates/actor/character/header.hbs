@@ -1,0 +1,20 @@
+<header class="adnd2e-char-header">
+  <img class="portrait" src="{{adnd2e.identity.img}}" data-action="editImage" data-edit="img"
+    alt="{{adnd2e.identity.name}}" />
+  <div class="titles">
+    <input type="text" name="name" value="{{adnd2e.identity.name}}"
+      placeholder="{{localize 'ADND2E.sheet.namePlaceholder'}}" />
+    <div class="class-line">
+      {{#if adnd2e.identity.raceName}}<span class="race">{{adnd2e.identity.raceName}}</span>{{/if}}
+      <span class="classes">{{adnd2e.identity.classLine}}</span>
+      {{#if adnd2e.identity.arrangementBadge}}
+        <span class="badge">{{adnd2e.identity.arrangementBadge}}</span>
+      {{/if}}
+    </div>
+  </div>
+  <div class="quick-vitals">
+    <span title="{{localize 'ADND2E.sheet.vitals.hp'}}">HP {{adnd2e.vitals.hp.value}}/{{adnd2e.vitals.hp.max}}</span>
+    <span title="{{localize 'ADND2E.sheet.vitals.ac'}}">AC {{adnd2e.vitals.ac.normal}}</span>
+    <span title="{{localize 'ADND2E.sheet.vitals.thac0'}}">THAC0 {{adnd2e.vitals.thac0.melee}}</span>
+  </div>
+</header>

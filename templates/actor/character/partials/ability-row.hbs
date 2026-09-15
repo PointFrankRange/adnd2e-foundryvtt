@@ -1,0 +1,12 @@
+<div class="ability-row" data-ability="{{row.key}}">
+  <label>{{localize row.label}}</label>
+  <input type="number" name="system.abilities.{{row.key}}.score" value="{{row.score}}" />
+  {{#if row.racialDelta}}<span class="racial">{{adnd2eSigned row.racialDelta}}</span>{{/if}}
+  <span class="effective">{{row.effectiveScore}}</span>
+  {{#if row.showExceptional}}
+    <input type="number" name="system.abilities.str.exceptional" value="{{row.exceptional}}" placeholder="%" />
+  {{/if}}
+  <span class="mods">
+    {{#each row.mods as |m|}}<span title="{{m.label}}">{{m.value}}</span>{{/each}}
+  </span>
+</div>

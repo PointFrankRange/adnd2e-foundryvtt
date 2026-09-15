@@ -1,0 +1,33 @@
+<div class="item-row{{#if item.isContainer}} is-container{{/if}}" data-item-id="{{item.id}}">
+  <span class="name">
+    {{item.name}}
+    {{#if item.magicBonus}}
+      <span class="badge magic" title="{{localize 'ADND2E.sheet.inventory.magicBonus'}}">{{adnd2eSigned item.magicBonus}}</span>
+    {{/if}}
+  </span>
+  <label class="quantity">
+    {{localize 'ADND2E.sheet.inventory.quantity'}}
+    <input type="number" min="0" value="{{item.quantity}}" data-item-id="{{item.id}}" data-field="quantity" />
+  </label>
+  <span class="weight" title="{{localize 'ADND2E.sheet.inventory.weight'}}">{{item.totalWeight}}</span>
+  <label class="location">
+    {{localize 'ADND2E.sheet.inventory.location'}}
+    <select data-item-id="{{item.id}}" data-field="location">
+      {{#each locationOptions as |opt|}}
+        <option value="{{opt.value}}" {{#if (eq opt.value item.location)}}selected{{/if}}>
+          {{#if opt.value}}{{opt.label}}{{else}}{{localize opt.label}}{{/if}}
+        </option>
+      {{/each}}
+    </select>
+  </label>
+  <label class="equipped">
+    <input type="checkbox" data-item-id="{{item.id}}" data-field="equipped" {{checked item.equipped}} />
+    {{localize 'ADND2E.sheet.inventory.equipped'}}
+  </label>
+  {{#if isGM}}
+    <label class="identified">
+      <input type="checkbox" data-item-id="{{item.id}}" data-field="identified" {{checked item.identified}} />
+      {{localize 'ADND2E.sheet.inventory.identified'}}
+    </label>
+  {{/if}}
+</div>

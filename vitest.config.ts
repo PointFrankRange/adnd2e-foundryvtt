@@ -12,6 +12,9 @@ export default defineConfig({
         "src/data/item/subtypes.ts", "src/data/item/choices.ts", "src/data/actor/subtypes.ts",
         "src/data/active-effect/subtypes.ts", "src/data/migrations.ts", "src/data/import/**/*.ts",
         "src/data/derive/**/*.ts",
+        "src/sheets/character/context-types.ts", "src/sheets/character/xp.ts",
+        "src/sheets/character/drop-rules.ts", "src/sheets/character/grouping.ts",
+        "src/sheets/character/context.ts",
       ],
       // Only true barrels/type-only modules are excluded. src/core/abilities/index.ts
       // is NOT a barrel — it holds deriveAbilities()/primeRequisiteXpBonus() — so it stays included.

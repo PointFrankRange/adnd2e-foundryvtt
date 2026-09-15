@@ -8,4 +8,5 @@ export * from "./saves";
 export * from "./slots";
 export * from "./proficiencies";
 export * from "./encumbrance";
+export * from "./container-weight";
 export * from "./multiclass";

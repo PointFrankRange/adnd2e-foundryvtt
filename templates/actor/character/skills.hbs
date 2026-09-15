@@ -1,0 +1,50 @@
+<section class="tab skills{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+
+  <div class="weapon-profs panel">
+    <h3>{{localize 'ADND2E.sheet.skills.weapon'}}</h3>
+    <p class="totals">
+      {{localize 'ADND2E.sheet.skills.slots' spent=adnd2e.skills.weapon.spent total=adnd2e.skills.weapon.total}}
+    </p>
+    <div class="prof-list">
+      {{#each adnd2e.skills.weapon.items as |w|}}
+        <div class="prof-row" data-item-id="{{w.id}}">
+          <span class="name">
+            {{w.weaponOrGroup}}
+            {{#if w.isGroup}}<span class="badge">{{localize 'ADND2E.sheet.skills.group'}}</span>{{/if}}
+          </span>
+          <span class="slots">{{w.slotsInvested}}</span>
+          {{#if w.specialized}}
+            <span class="specialized" title="{{localize 'ADND2E.sheet.skills.specialized'}}">★</span>
+          {{/if}}
+          {{! SP5 wires the check buttons here }}
+        </div>
+      {{else}}
+        <p class="placeholder">{{localize 'ADND2E.sheet.skills.none'}}</p>
+      {{/each}}
+    </div>
+  </div>
+
+  <div class="nonweapon-profs panel">
+    <h3>{{localize 'ADND2E.sheet.skills.nonweapon'}}</h3>
+    <p class="totals">
+      {{localize 'ADND2E.sheet.skills.slots' spent=adnd2e.skills.nonweapon.spent total=adnd2e.skills.nonweapon.total}}
+    </p>
+    <div class="prof-list">
+      {{#each adnd2e.skills.nonweapon.items as |n|}}
+        <div class="prof-row" data-item-id="{{n.id}}">
+          <span class="name">
+            {{n.name}}
+            {{#if n.isRacial}}<span class="racial-tag">{{localize 'ADND2E.sheet.skills.racial'}}</span>{{/if}}
+          </span>
+          <span class="ability">{{localize n.governingAbilityLabel}}</span>
+          <span class="modifier">{{adnd2eSigned n.modifier}}</span>
+          <span class="target" title="{{localize 'ADND2E.sheet.skills.checkTarget'}}">{{n.checkTarget}}</span>
+          {{! SP5 wires the check buttons here }}
+        </div>
+      {{else}}
+        <p class="placeholder">{{localize 'ADND2E.sheet.skills.none'}}</p>
+      {{/each}}
+    </div>
+  </div>
+
+</section>

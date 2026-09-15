@@ -1,0 +1,46 @@
+<section class="tab inventory{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+
+  <div class="containers panel">
+    <h3>{{localize 'ADND2E.sheet.tabs.inventory'}}</h3>
+
+    {{#each adnd2e.inventory.containers as |grp|}}
+      <div class="container-group{{#if grp.overCapacity}} over-capacity{{/if}}" data-item-id="{{grp.item.id}}">
+        <div class="container-header">
+          {{> adnd2e.item-row item=grp.item locationOptions=@root.adnd2e.inventory.locationOptions isGM=@root.user.isGM}}
+          <span class="weight">{{grp.usedWeight}}{{#if grp.capacity}} / {{grp.capacity}} {{localize 'ADND2E.sheet.inventory.capacity'}}{{/if}}</span>
+          {{#if grp.overCapacity}}<span class="warning">{{localize 'ADND2E.sheet.inventory.overCapacity'}}</span>{{/if}}
+        </div>
+        <div class="container-contents">
+          {{#each grp.contents as |item|}}
+            {{> adnd2e.item-row item=item locationOptions=@root.adnd2e.inventory.locationOptions isGM=@root.user.isGM}}
+          {{else}}
+            <p class="placeholder">{{localize 'ADND2E.sheet.inventory.empty'}}</p>
+          {{/each}}
+        </div>
+      </div>
+    {{/each}}
+
+    <div class="loose-items">
+      <h4>{{localize 'ADND2E.sheet.inventory.noContainer'}}</h4>
+      {{#each adnd2e.inventory.loose as |item|}}
+        {{> adnd2e.item-row item=item locationOptions=@root.adnd2e.inventory.locationOptions isGM=@root.user.isGM}}
+      {{else}}
+        <p class="placeholder">{{localize 'ADND2E.sheet.inventory.empty'}}</p>
+      {{/each}}
+    </div>
+  </div>
+
+  {{> adnd2e.encumbrance-gauge gauge=adnd2e.inventory.encumbrance}}
+
+  <div class="currency panel">
+    <h3>{{localize 'ADND2E.sheet.inventory.currency'}}</h3>
+    <div class="currency-inputs">
+      <label>PP <input type="number" min="0" name="system.currency.pp" value="{{adnd2e.inventory.currency.pp}}" /></label>
+      <label>GP <input type="number" min="0" name="system.currency.gp" value="{{adnd2e.inventory.currency.gp}}" /></label>
+      <label>EP <input type="number" min="0" name="system.currency.ep" value="{{adnd2e.inventory.currency.ep}}" /></label>
+      <label>SP <input type="number" min="0" name="system.currency.sp" value="{{adnd2e.inventory.currency.sp}}" /></label>
+      <label>CP <input type="number" min="0" name="system.currency.cp" value="{{adnd2e.inventory.currency.cp}}" /></label>
+    </div>
+  </div>
+
+</section>

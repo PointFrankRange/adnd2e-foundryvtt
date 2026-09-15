@@ -1,0 +1,50 @@
+<section class="tab spells{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+
+  {{#if adnd2e.spells.wizardSlots}}
+    <div class="spell-slots wizard panel">
+      <h3>{{localize 'ADND2E.sheet.spells.wizardSlots'}}</h3>
+      {{#if adnd2e.spells.specialistSchoolLabel}}
+        <p class="specialist">
+          {{localize 'ADND2E.sheet.spells.specialist'}}: {{localize adnd2e.spells.specialistSchoolLabel}}
+        </p>
+      {{/if}}
+      {{> adnd2e.slot-table rows=adnd2e.spells.wizardSlots}}
+    </div>
+  {{/if}}
+
+  {{#if adnd2e.spells.priestSlots}}
+    <div class="spell-slots priest panel">
+      <h3>{{localize 'ADND2E.sheet.spells.priestSlots'}}</h3>
+      {{> adnd2e.slot-table rows=adnd2e.spells.priestSlots}}
+    </div>
+  {{/if}}
+
+  <div class="known-spells panel">
+    <h3>{{localize 'ADND2E.sheet.spells.known'}}</h3>
+    {{#each adnd2e.spells.known as |grp|}}
+      <div class="spell-level-group">
+        <h4>{{localize 'ADND2E.sheet.spells.level' level=grp.level}}</h4>
+        {{#each grp.items as |s|}}
+          <div class="spell-row" data-item-id="{{s.id}}">
+            <span class="name">
+              {{s.name}}
+              {{#if s.inSpellbook}}
+                <span class="badge" title="{{localize 'ADND2E.sheet.spells.spellbook'}}">📖</span>
+              {{/if}}
+            </span>
+            {{#if s.schools.length}}
+              <span class="schools">{{#each s.schools}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</span>
+            {{/if}}
+            <span class="casting-time">{{s.castingTime}}</span>
+            <span class="saving-throw">{{s.savingThrow}}</span>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <p class="placeholder">{{localize 'ADND2E.sheet.spells.none'}}</p>
+    {{/each}}
+  </div>
+
+  {{! SP4 wires memorization + casting here }}
+
+</section>

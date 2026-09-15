@@ -87,6 +87,112 @@ describe("lang/en.json — sheet strings", () => {
   });
 });
 
+describe("lang/en.json — SP2 sheet strings", () => {
+  it("resolves every ADND2E.sheet.* key the character sheet layer references", () => {
+    for (const key of [
+      "ADND2E.sheet.title",
+      "ADND2E.sheet.namePlaceholder",
+      "ADND2E.sheet.tabs.main",
+      "ADND2E.sheet.tabs.combat",
+      "ADND2E.sheet.tabs.inventory",
+      "ADND2E.sheet.tabs.skills",
+      "ADND2E.sheet.tabs.spells",
+      "ADND2E.sheet.tabs.features",
+      "ADND2E.sheet.tabs.biography",
+      "ADND2E.sheet.vitals.hp",
+      "ADND2E.sheet.vitals.ac",
+      "ADND2E.sheet.vitals.thac0",
+      "ADND2E.sheet.vitals.saves",
+      "ADND2E.sheet.vitals.movement",
+      "ADND2E.sheet.drop.duplicateRace",
+      "ADND2E.sheet.drop.duplicateClass",
+      "ADND2E.sheet.xp.rollHp",
+      "ADND2E.sheet.xp.award",
+      "ADND2E.sheet.xp.awardPrompt",
+      "ADND2E.sheet.xp.takeAverage",
+      "ADND2E.sheet.xp.hpRollFlavor",
+      "ADND2E.sheet.xp.hpAverageFlavor",
+      "ADND2E.sheet.dualClass.toggle",
+      "ADND2E.sheet.dualClass.clear",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("lang/en.json — SP2 Task 6 sheet strings (Combat/Inventory/Features/Biography)", () => {
+  it("resolves every ADND2E.sheet.* key the Combat/Inventory/Features/Biography tabs reference", () => {
+    for (const key of [
+      "ADND2E.sheet.combat.weapons",
+      "ADND2E.sheet.combat.armor",
+      "ADND2E.sheet.combat.acBreakdown",
+      "ADND2E.sheet.combat.acBase",
+      "ADND2E.sheet.combat.acShield",
+      "ADND2E.sheet.combat.acMagic",
+      "ADND2E.sheet.combat.acDex",
+      "ADND2E.sheet.combat.equipped",
+      "ADND2E.sheet.combat.notEquipped",
+      "ADND2E.sheet.combat.shield",
+      "ADND2E.sheet.combat.noWeapons",
+      "ADND2E.sheet.combat.noArmor",
+      "ADND2E.sheet.combat.speedFactor",
+      "ADND2E.sheet.details.age",
+      "ADND2E.sheet.details.sex",
+      "ADND2E.sheet.details.height",
+      "ADND2E.sheet.details.weight",
+      "ADND2E.sheet.details.hairEyes",
+      "ADND2E.sheet.details.homeland",
+      "ADND2E.sheet.details.deity",
+      "ADND2E.sheet.details.kit",
+      "ADND2E.sheet.inventory.empty",
+      "ADND2E.sheet.inventory.equipped",
+      "ADND2E.sheet.inventory.identified",
+      "ADND2E.sheet.inventory.quantity",
+      "ADND2E.sheet.inventory.weight",
+      "ADND2E.sheet.inventory.location",
+      "ADND2E.sheet.inventory.magicBonus",
+      "ADND2E.sheet.inventory.carried",
+      "ADND2E.sheet.inventory.category",
+      "ADND2E.sheet.inventory.penaltyAttack",
+      "ADND2E.sheet.inventory.penaltyAc",
+      "ADND2E.sheet.features.none",
+      "ADND2E.sheet.features.sourceTypes.class",
+      "ADND2E.sheet.features.sourceTypes.kit",
+      "ADND2E.sheet.features.sourceTypes.race",
+      "ADND2E.sheet.features.sourceTypes.other",
+      "ADND2E.sheet.features.reputation",
+      "ADND2E.sheet.features.henchmen",
+      "ADND2E.sheet.features.followers",
+      "ADND2E.sheet.features.languagesHint",
+      "ADND2E.sheet.biography.notes",
+      "ADND2E.sheet.biography.campaignNotes",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("lang/en.json — SP2 Task 7 sheet strings (Skills/Spells)", () => {
+  it("resolves every ADND2E.sheet.* key the Skills/Spells tab shells reference", () => {
+    for (const key of [
+      "ADND2E.sheet.skills.group",
+      "ADND2E.sheet.skills.specialized",
+      "ADND2E.sheet.skills.racial",
+      "ADND2E.sheet.skills.none",
+      "ADND2E.sheet.spells.level",
+      "ADND2E.sheet.spells.slotLevel",
+      "ADND2E.sheet.spells.slotsMax",
+      "ADND2E.sheet.spells.slotsUsed",
+      "ADND2E.sheet.spells.none",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [

@@ -7,6 +7,7 @@ import { ITEM_DATA_MODELS } from "./data/item";
 import { Adnd2eActiveEffect, Adnd2eActor, Adnd2eItem } from "./documents";
 import { registerSettings } from "./settings";
 import { registerSheets } from "./sheets";
+import { registerSheetPartials } from "./sheets/handlebars";
 import { buildApi } from "./api";
 import { registerMigrationSettings, runMigrations } from "./migrations/run";
 
@@ -25,6 +26,10 @@ Hooks.once("init", () => {
   registerSettings();
   registerMigrationSettings();
   registerSheets();
+});
+
+Hooks.once("setup", () => {
+  void registerSheetPartials();
 });
 
 Hooks.once("ready", async () => {

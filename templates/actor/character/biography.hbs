@@ -1,0 +1,32 @@
+<section class="tab biography{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+
+  <div class="details panel">
+    <h3>{{localize 'ADND2E.sheet.tabs.biography'}}</h3>
+    <div class="detail-fields">
+      {{#each adnd2e.biography.detailFields as |field|}}
+        <label>
+          {{localize (concat 'ADND2E.sheet.details.' field)}}
+          <input type="text" name="system.details.{{field}}" value="{{lookup @root.source.system.details field}}" />
+        </label>
+      {{/each}}
+    </div>
+  </div>
+
+  <div class="biography-text panel">
+    <h3>{{localize 'ADND2E.sheet.biography.notes'}}</h3>
+    {{formInput systemFields.biography value=source.system.biography name="system.biography" disabled=notEditable}}
+  </div>
+
+  <div class="campaign-notes panel">
+    <h3>{{localize 'ADND2E.sheet.biography.campaignNotes'}}</h3>
+    {{formInput systemFields.details.fields.campaignNotes value=source.system.details.campaignNotes name="system.details.campaignNotes" disabled=notEditable}}
+  </div>
+
+  {{#if adnd2e.biography.showGmNotes}}
+    <div class="gm-notes panel">
+      <h3>{{localize 'ADND2E.sheet.biography.gmNotes'}}</h3>
+      {{formInput systemFields.details.fields.gmNotes value=source.system.details.gmNotes name="system.details.gmNotes" disabled=notEditable}}
+    </div>
+  {{/if}}
+
+</section>
