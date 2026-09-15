@@ -1,4 +1,4 @@
-<section class="tab combat{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+<section class="tab combat scrollable{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
 
   <div class="weapons panel">
     <h3>{{localize 'ADND2E.sheet.combat.weapons'}}</h3>
@@ -12,6 +12,11 @@
           <span class="damage">{{w.damageNote}}</span>
           <span class="speed" title="{{localize 'ADND2E.sheet.combat.speedFactor'}}">{{w.speedFactor}}</span>
           {{#if w.range}}<span class="range">{{w.range}}</span>{{/if}}
+          {{#if w.equipped}}
+            <button type="button" data-action="rollAttack" data-item-id="{{w.id}}">
+              {{localize 'ADND2E.sheet.combat.rollAttack'}}
+            </button>
+          {{/if}}
         </div>
       {{else}}
         <p class="placeholder">{{localize 'ADND2E.sheet.combat.noWeapons'}}</p>

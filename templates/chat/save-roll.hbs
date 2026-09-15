@@ -1,0 +1,9 @@
+<div class="adnd2e chat-card save-roll">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} — {{localize categoryLabel}}</h3>
+  </header>
+  <p class="formula">{{formula}} = <strong>{{total}}</strong> ({{localize 'ADND2E.chat.attack.hit'}}/{{localize 'ADND2E.chat.attack.miss'}}: {{target}})</p>
+  {{#if success}}<p class="result hit">{{localize 'ADND2E.chat.save.success'}}</p>
+  {{else}}<p class="result miss">{{localize 'ADND2E.chat.save.failure'}}</p>{{/if}}
+</div>

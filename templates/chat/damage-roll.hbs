@@ -1,0 +1,10 @@
+<div class="adnd2e chat-card damage-roll">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} — {{weaponName}}</h3>
+  </header>
+  <p class="formula">{{formula}} = <strong>{{total}}</strong></p>
+  <button type="button" data-action="applyDamage" data-amount="{{total}}">
+    {{localize 'ADND2E.chat.damage.applyToTargets'}}
+  </button>
+</div>

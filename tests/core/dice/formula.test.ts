@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { signedTerm, attackFormula, damageFormula } from "../../../src/core/dice/formula";
+import { signedTerm, attackFormula, damageFormula, initiativeFormula } from "../../../src/core/dice/formula";
 
 describe("signedTerm", () => {
   it("formats a modifier as a formula suffix", () => {
@@ -25,5 +25,17 @@ describe("damageFormula", () => {
     expect(damageFormula("1d8", 3)).toBe("1d8 + 3");
     expect(damageFormula("2d4", -1)).toBe("2d4 - 1");
     expect(damageFormula("1d6+1", 2)).toBe("1d6+1 + 2"); // baseDice passed through verbatim
+  });
+});
+
+describe("initiativeFormula", () => {
+  it("bare 1d10 with no modifier", () => {
+    expect(initiativeFormula(0)).toBe("1d10");
+  });
+  it("adds a positive modifier", () => {
+    expect(initiativeFormula(5)).toBe("1d10 + 5");
+  });
+  it("adds a negative modifier", () => {
+    expect(initiativeFormula(-2)).toBe("1d10 - 2");
   });
 });

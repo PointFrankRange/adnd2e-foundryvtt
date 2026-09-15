@@ -3,4 +3,9 @@
   <td class="target">{{row.target}}</td>
   <td class="mod">{{adnd2eSigned row.rollModifier}}</td>
   <td class="effective">{{row.effectiveTarget}}</td>
+  <td class="roll">
+    <button type="button" data-action="rollSave" data-save="{{row.key}}">
+      {{localize 'ADND2E.sheet.combat.rollSave'}}
+    </button>
+  </td>
 </tr>

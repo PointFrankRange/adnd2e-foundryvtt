@@ -11,6 +11,8 @@ declare global {
     Actor: typeof import("../documents/actor").Adnd2eActor;
     Item: typeof import("../documents/item").Adnd2eItem;
     ActiveEffect: typeof import("../documents/active-effect").Adnd2eActiveEffect;
+    Combatant: typeof import("../documents/combatant").Adnd2eCombatant;
+    Combat: typeof import("../documents/combat").Adnd2eCombat;
   }
 
   interface DataModelConfig {

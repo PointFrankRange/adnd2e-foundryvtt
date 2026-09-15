@@ -1,6 +1,7 @@
 import { TEMPLATE_PATH } from "../../constants";
 import { getChassis } from "../../core/classes/chassis";
-import type { ClassId } from "../../core/types";
+import type { ClassId, SaveCategory } from "../../core/types";
+import { rollAttack, rollSave } from "./combat-rolls";
 import { buildCharacterSheetContext } from "./context";
 import type {
   ClassItemView,
@@ -250,6 +251,8 @@ export class Adnd2eCharacterSheet extends Base {
       takeAverageHp: Adnd2eCharacterSheet.#onTakeAverageHp,
       awardXp: Adnd2eCharacterSheet.#onAwardXp,
       toggleDualClass: Adnd2eCharacterSheet.#onToggleDualClass,
+      rollAttack: Adnd2eCharacterSheet.#onRollAttack,
+      rollSave: Adnd2eCharacterSheet.#onRollSave,
     },
   };
 
@@ -522,6 +525,25 @@ export class Adnd2eCharacterSheet extends Base {
       await primary.update({ "system.dualClassState": "primary" });
       await active.update({ "system.dualClassState": "active" });
     }
+  }
+
+  // Interaction handlers — SP3 Task 5.
+  static async #onRollAttack(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const weaponItemId = target.dataset.itemId;
+    if (weaponItemId) await rollAttack(this.document as never, weaponItemId);
+  }
+
+  static async #onRollSave(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const category = target.dataset.save as SaveCategory | undefined;
+    if (category) await rollSave(this.document as never, category);
   }
 }
 

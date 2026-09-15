@@ -1,0 +1,132 @@
+import { buildAttackCardContext } from "../../combat/attack-card";
+import { buildSaveCardContext } from "../../combat/save-card";
+import { attackModifiers, hitResult } from "../../core/combat/attack";
+import { attackFormula } from "../../core/dice/formula";
+import { TEMPLATE_PATH } from "../../constants";
+import type { SaveCategory } from "../../core/types";
+
+/* ---------------------------------------------------------------------------
+ * combat-rolls — SP3 Task 5.
+ *
+ * Foundry-coupled Roll Attack / Roll Save glue for the character sheet — not
+ * unit-tested (spec §9), verified in a linked dev world. All math and chat-
+ * card shaping is delegated to the pure `core/combat`, `core/dice`, and
+ * `combat/*-card` modules from Tasks 1-4; this file only reads documents,
+ * rolls dice, and posts chat messages.
+ * ------------------------------------------------------------------------- */
+
+/** Resolve an ANY-type target actor's AC (context-appropriate) and creature
+ *  size — character/npc and creature store both under different paths and
+ *  shapes (§4.1's "Reference facts" — confirmed by reading both DataModels). */
+export function resolveTargetCombatInfo(
+  targetActor: { type: string; system: Record<string, unknown>; items: Iterable<{ type: string; system: { size?: string } }> },
+): { ac: number; size: string | null } {
+  if (targetActor.type === "creature") {
+    const sys = targetActor.system as { attributes?: { ac?: { value?: number } }; details?: { size?: string } };
+    return { ac: sys.attributes?.ac?.value ?? 10, size: sys.details?.size ?? "medium" };
+  }
+  const sys = targetActor.system as { attributes?: { ac?: { normal?: number } } };
+  const raceItem = [...targetActor.items].find((i) => i.type === "race");
+  return { ac: sys.attributes?.ac?.normal ?? 10, size: raceItem?.system.size ?? "medium" };
+}
+
+interface AttackerActor {
+  name: string; img: string; uuid: string;
+  system: { attributes?: { thac0?: { melee?: number; ranged?: number } } };
+  items: { get(id: string): WeaponItemHandle | undefined };
+}
+interface WeaponItemHandle {
+  id: string; name: string;
+  system: {
+    category: string; proficiencyGroup: string; materialToHit: number; magicBonus: number;
+  };
+}
+
+/** Roll one attack for `weaponItemId` against the current token target(s) (or
+ *  a manually-entered AC, via DialogV2, when zero or more than one is
+ *  targeted). Posts an attack-roll chat card; a hit exposes a "Roll Damage"
+ *  button (chat/chat-listeners.ts). */
+export async function rollAttack(actor: AttackerActor, weaponItemId: string): Promise<void> {
+  const weapon = actor.items.get(weaponItemId);
+  if (!weapon) return;
+
+  const targets = [...(game as unknown as { user: { targets: Iterable<{ name: string; actor: unknown }> } }).user.targets];
+  let targetName: string | null = null;
+  let targetAc: number;
+  let targetSize: string | null = null;
+
+  if (targets.length === 1) {
+    const t = targets[0]!;
+    targetName = t.name;
+    const info = resolveTargetCombatInfo(t.actor as Parameters<typeof resolveTargetCombatInfo>[0]);
+    targetAc = info.ac;
+    targetSize = info.size;
+  } else {
+    const manualAc = await foundry.applications.api.DialogV2.prompt({
+      window: { title: game.i18n!.localize("ADND2E.chat.attack.manualAcTitle") },
+      content: `<p>${game.i18n!.localize(
+        targets.length === 0 ? "ADND2E.chat.attack.noTargetHint" : "ADND2E.chat.attack.multiTargetHint",
+      )}</p><input type="number" name="ac" value="10" step="1" autofocus>`,
+      ok: {
+        label: game.i18n!.localize("ADND2E.chat.attack.rollAttack"),
+        callback: (_e: PointerEvent | SubmitEvent, button: HTMLButtonElement) => {
+          const input = button.form?.elements.namedItem("ac");
+          return input instanceof HTMLInputElement ? input.valueAsNumber : NaN;
+        },
+      },
+    });
+    if (typeof manualAc !== "number" || !Number.isFinite(manualAc)) return;
+    targetAc = manualAc;
+  }
+
+  const isRanged = weapon.system.category !== "melee";
+  const thac0 = isRanged ? (actor.system.attributes?.thac0?.ranged ?? 20) : (actor.system.attributes?.thac0?.melee ?? 20);
+  const { total: attackBonus, breakdown } = attackModifiers({
+    weaponMagicBonus: weapon.system.magicBonus,
+    // Proficiency/STR/DEX modifiers are intentionally NOT wired in SP3 — they
+    // require the weaponProficiency-item lookup and ability-mod plumbing SP5
+    // owns; a bare weapon-magic-only bonus is the honest v1 (spec §7 boundary).
+  });
+  const formula = attackFormula(attackBonus);
+  const roll = await new Roll(formula).evaluate();
+  const naturalD20 = roll.dice[0]?.total ?? 0;
+  const hit = hitResult({ naturalD20, attackBonus, thac0, targetAc });
+
+  const context = buildAttackCardContext({
+    actorName: actor.name, actorImg: actor.img,
+    weaponName: weapon.name, targetName,
+    formula, naturalD20, hit, modifierBreakdown: breakdown,
+    damageContext: hit.hit ? { weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize } : null,
+  });
+
+  const content = await foundry.applications.handlebars.renderTemplate(
+    TEMPLATE_PATH("chat/attack-roll.hbs"), context as unknown as Record<string, unknown>,
+  );
+  await roll.toMessage(
+    {
+      speaker: ChatMessage.getSpeaker({ actor: actor as never }),
+      content,
+      flags: { adnd2e: { card: "attack", ...context.damageContext } },
+    } as unknown as Roll.MessageData,
+  );
+}
+
+/** Roll one of the 5 saving-throw categories using the actor's already-cached
+ *  system.saves.<category>. */
+export async function rollSave(
+  actor: { name: string; img: string; system: { saves: Record<SaveCategory, { target: number; rollModifier: number }> } },
+  category: SaveCategory,
+): Promise<void> {
+  const save = actor.system.saves[category];
+  const roll = await new Roll(`1d20${save.rollModifier ? (save.rollModifier > 0 ? ` + ${save.rollModifier}` : ` - ${Math.abs(save.rollModifier)}`) : ""}`).evaluate();
+  const naturalD20 = roll.dice[0]?.total ?? 0;
+  const context = buildSaveCardContext({
+    actorName: actor.name, actorImg: actor.img,
+    categoryLabel: `ADND2E.saves.${category}`,
+    formula: roll.formula, naturalD20, rollModifier: save.rollModifier, target: save.target,
+  });
+  const content = await foundry.applications.handlebars.renderTemplate(
+    TEMPLATE_PATH("chat/save-roll.hbs"), context as unknown as Record<string, unknown>,
+  );
+  await roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor: actor as never }), content });
+}
