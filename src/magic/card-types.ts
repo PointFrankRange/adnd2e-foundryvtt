@@ -1,3 +1,5 @@
+import type { CanLearnResult } from "../core/magic/spellbook";
+
 export interface CastCardInput {
   actorName: string;
   actorImg: string;
@@ -29,4 +31,26 @@ export interface CastCardContext {
   rollResult: { kind: "damage" | "healing"; label: string; formula: string; total: number } | null;
   /** carried into the Apply button's dataset; null when rollResult is null (nothing to apply) */
   applyContext: { amount: number; kind: "damage" | "healing" } | null;
+}
+
+export interface LearnSpellCardInput {
+  actorName: string;
+  actorImg: string;
+  spellName: string;
+  spellLevel: number;
+  result: CanLearnResult;
+  /** null when result.allowed is false — a rejected attempt never rolls */
+  roll: { d100: number; success: boolean } | null;
+}
+
+export interface LearnSpellCardContext {
+  actorName: string;
+  actorImg: string;
+  spellName: string;
+  spellLevel: number;
+  allowed: boolean;
+  chance: number;
+  /** i18n key for the rejection reason; null when allowed is true */
+  reasonLabel: string | null;
+  roll: { d100: number; success: boolean } | null;
 }
