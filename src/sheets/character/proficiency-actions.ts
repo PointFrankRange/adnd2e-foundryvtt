@@ -108,7 +108,7 @@ export async function specializeWeapon(actor: ProficiencyActor, weaponProfItemId
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.specializeBlockedWarning"));
     return;
   }
-  const cost = weaponSpecializationSlotCost(category);
+  const cost = Math.max(0, weaponSpecializationSlotCost(category) - prof.system.slotsInvested);
   if (actor.system.proficiencies.weapon.available < cost) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.specializeBlockedWarning"));
     return;
@@ -135,14 +135,20 @@ export async function rollNonweaponCheck(actor: ProficiencyActor, nwpItemId: str
   const abilityScore = actor.system.abilities[ability]?.score ?? 0;
   const roll = await new Roll("1d20").evaluate();
   const naturalD20 = roll.dice[0]?.total ?? 0;
-  const result = nonweaponCheck({
-    ability,
-    abilityScore,
-    checkModifier: nwp.system.modifier,
-    slotsInvested: nwp.system.slotsInvested,
-    situationalModifier: 0,
-    roll: naturalD20,
-  });
+  let result: ReturnType<typeof nonweaponCheck>;
+  try {
+    result = nonweaponCheck({
+      ability,
+      abilityScore,
+      checkModifier: nwp.system.modifier,
+      slotsInvested: nwp.system.slotsInvested,
+      situationalModifier: 0,
+      roll: naturalD20,
+    });
+  } catch {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.checkBlockedWarning"));
+    return;
+  }
   const context = buildNonweaponCheckCardContext({
     actorName: actor.name,
     actorImg: actor.img,

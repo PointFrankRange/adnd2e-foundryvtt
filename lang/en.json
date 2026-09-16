@@ -375,11 +375,11 @@
       },
       "nonweaponProficienciesUsed": {
         "name": "Use Non-Weapon Proficiencies",
-        "hint": "Enable the non-weapon proficiency system (PHB p.51). (not yet enforced)"
+        "hint": "Enable the non-weapon proficiency system (PHB p.51). (this setting is not yet consulted — proficiency checks are always available once a proficiency is taken)"
       },
       "weaponProficienciesUsed": {
         "name": "Use Weapon Proficiencies",
-        "hint": "Enable the weapon proficiency system and non-proficiency penalties (PHB p.51). (not yet enforced)"
+        "hint": "Enable the weapon proficiency system and non-proficiency penalties (PHB p.51). (this setting is not yet consulted — proficiency penalties always apply)"
       },
       "multiclassHpAveraging": {
         "name": "Average Multi-Class Hit Points",

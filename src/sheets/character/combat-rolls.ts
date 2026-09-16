@@ -64,17 +64,23 @@ interface GenericAttackerItem {
 function resolveProficiencyModifier(actor: AttackerActor, weapon: WeaponItemHandle): number {
   let isProficient = false;
   let specialized = false;
+  let groupMatch: { specialized?: boolean } | null = null;
   for (const item of actor.items) {
     if (item.type !== "weaponProficiency") continue;
     const s = item.system as { weaponOrGroup?: string; isGroup?: boolean; specialized?: boolean };
-    const matches = s.isGroup
-      ? s.weaponOrGroup === weapon.system.proficiencyGroup
-      : s.weaponOrGroup === weapon.name;
-    if (matches) {
+    if (s.isGroup !== true && s.weaponOrGroup === weapon.name) {
       isProficient = true;
       specialized = Boolean(s.specialized);
+      groupMatch = null;
       break;
     }
+    if (s.isGroup === true && s.weaponOrGroup === weapon.system.proficiencyGroup && !groupMatch) {
+      groupMatch = s;
+    }
+  }
+  if (!isProficient && groupMatch) {
+    isProficient = true;
+    specialized = Boolean(groupMatch.specialized);
   }
 
   let nonProficiencyPenalty = 0;

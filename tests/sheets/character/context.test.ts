@@ -1250,6 +1250,9 @@ describe("buildCharacterSheetContext — weapon specialization eligibility + rea
   });
 
   it("not enough available slots → canSpecialize false", () => {
+    // weaponProf() has slotsInvested: 1; melee specialization costs 2 slots total,
+    // so the marginal cost to specialize now is 2 - 1 = 1. With 0 available, that
+    // marginal cost can't be afforded.
     const c = buildCharacterSheetContext(
       input({
         classItems: [fighterClass],
@@ -1257,7 +1260,7 @@ describe("buildCharacterSheetContext — weapon specialization eligibility + rea
         proficiencyItems: { weapon: [weaponProf()], nonweapon: [] },
         derived: {
           ...input().derived,
-          proficiencies: { weapon: { total: 4, spent: 3, available: 1 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+          proficiencies: { weapon: { total: 4, spent: 4, available: 0 }, nonweapon: { total: 3, spent: 0, available: 3 } },
         },
       }),
     );

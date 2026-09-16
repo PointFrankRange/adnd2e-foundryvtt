@@ -325,7 +325,7 @@ function buildWeaponProfRow(
     category !== null &&
     primaryChassis !== null &&
     canWeaponSpecialize({ specializationAllowed: primaryChassis.weaponSpecializationAllowed, isSingleClass }) &&
-    weaponSlotsAvailable >= weaponSpecializationSlotCost(category);
+    weaponSlotsAvailable >= Math.max(0, weaponSpecializationSlotCost(category) - prof.slotsInvested);
   return { ...prof, category, canSpecialize: eligible };
 }
 
