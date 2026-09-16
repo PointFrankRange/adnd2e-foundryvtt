@@ -304,7 +304,10 @@ function buildSpells(input: CharacterSheetInput): CharacterSheetContext["spells"
   for (let level = 1; level <= 9; level += 1) {
     const levelItems = input.spellItems.filter((s) => s.level === level);
     const knownAtThisLevel = levelItems.filter((s) => s.casterClass === "wizard" && s.inSpellbook).length;
-    const learnCtx: LearnEligibilityContext = { int, specialistSchool, knownAtThisLevel, optionalRules: input.optionalRules };
+    const castableAtThisLevel = (sc.wizard.slots[level]?.max ?? 0) > 0;
+    const learnCtx: LearnEligibilityContext = {
+      int, specialistSchool, knownAtThisLevel, castableAtThisLevel, optionalRules: input.optionalRules,
+    };
     const items = levelItems.map((s) => buildSpellRow(s, sc, priestChassisId, sphereAccessOverride, learnCtx));
     if (items.length > 0) known.push({ level, items });
   }
@@ -326,6 +329,11 @@ interface LearnEligibilityContext {
   int: IntelligenceModifiers;
   specialistSchool: WizardSchool | null;
   knownAtThisLevel: number;
+  /** true when the actor's cached wizard slot table has a non-zero max at
+   *  this spell's level — canLearnSpell's own doc comment requires the
+   *  caller to confirm this before calling it; it does not check class
+   *  level itself. */
+  castableAtThisLevel: boolean;
   optionalRules: CharacterSheetInput["optionalRules"];
 }
 
@@ -396,6 +404,7 @@ function buildSpellRow(
  *  such school (e.g. tagged only "lesser-divination"/"wild") can never be
  *  Learn-attempted. */
 function canLearnForRow(item: SpellItemView, ctx: LearnEligibilityContext): boolean {
+  if (!ctx.castableAtThisLevel) return false;
   const wizardSchool = item.schools.find((s): s is WizardSchool =>
     (WIZARD_SCHOOLS as readonly string[]).includes(s),
   );

@@ -258,7 +258,8 @@ export async function learnSpell(actor: SpellcasterActor, spellItemId: string): 
   if (
     !spell ||
     spell.system.casterClass !== "wizard" ||
-    actor.system.spellcasting.wizard.spellbookItemIds.includes(spellItemId)
+    actor.system.spellcasting.wizard.spellbookItemIds.includes(spellItemId) ||
+    (actor.system.spellcasting.wizard.slots[spell.system.level]?.max ?? 0) === 0
   ) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.learnBlockedWarning"));
     return;

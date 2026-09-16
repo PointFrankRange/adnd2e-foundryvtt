@@ -1138,11 +1138,33 @@ describe("buildCharacterSheetContext — spell learn eligibility", () => {
         derived: {
           ...input().derived,
           abilities: { ...input().derived.abilities, int: { score: 15, mods: fullInt as never } },
+          spellcasting: {
+            wizard: { specialistSchool: null, slots: { "1": { max: 1, used: 0 } }, memorized: [] },
+            priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+          },
         },
         spellItems: [wizardSpell({ inSpellbook: false })],
       }),
     );
     expect(c.spells.known[0]!.items[0]!.canLearn).toBe(true);
+  });
+
+  it("wizard spell not in spellbook, but the actor can't yet cast this spell level at all → canLearn false", () => {
+    // spellcasting.wizard.slots defaults to {} (no entry at this spell's
+    // level) — e.g. a level-1 mage looking at a spell whose level exceeds
+    // what their wizard slot table grants. canLearnSpell's own doc comment
+    // requires the caller to confirm castability before calling it; this is
+    // that gate, and INT alone must not be enough to bypass it.
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          abilities: { ...input().derived.abilities, int: { score: 15, mods: fullInt as never } },
+        },
+        spellItems: [wizardSpell({ inSpellbook: false })],
+      }),
+    );
+    expect(c.spells.known[0]!.items[0]!.canLearn).toBe(false);
   });
 
   it("wizard spell already in spellbook → canLearn false (nothing to learn)", () => {
@@ -1165,7 +1187,7 @@ describe("buildCharacterSheetContext — spell learn eligibility", () => {
           ...input().derived,
           abilities: { ...input().derived.abilities, int: { score: 15, mods: fullInt as never } },
           spellcasting: {
-            wizard: { specialistSchool: "abjuration", slots: {}, memorized: [] },
+            wizard: { specialistSchool: "abjuration", slots: { "1": { max: 1, used: 0 } }, memorized: [] },
             priest: { slots: {}, memorized: [], sphereAccessOverride: null },
           },
         },
