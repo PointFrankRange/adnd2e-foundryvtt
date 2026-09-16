@@ -45,6 +45,11 @@
             {{/if}}
             <span class="casting-time">{{s.castingTime}}</span>
             <span class="saving-throw">{{s.savingThrow}}</span>
+            {{#if s.canLearn}}
+              <button type="button" data-action="learnSpell" data-item-id="{{s.id}}">
+                {{localize 'ADND2E.sheet.spells.learn'}}
+              </button>
+            {{/if}}
             {{#if s.canMemorize}}
               <button type="button" data-action="memorizeSpell" data-item-id="{{s.id}}">
                 {{localize 'ADND2E.sheet.spells.memorize'}}

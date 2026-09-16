@@ -16,7 +16,7 @@ import type {
 } from "./context-types";
 import { validateItemDrop } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
-import { castSpell, forgetSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
+import { castSpell, forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
 import { awardXpSplit } from "./xp";
 
 /* ---------------------------------------------------------------------------
@@ -266,6 +266,7 @@ export class Adnd2eCharacterSheet extends Base {
       forgetSpell: Adnd2eCharacterSheet.#onForgetSpell,
       castSpell: Adnd2eCharacterSheet.#onCastSpell,
       restSpellcasting: Adnd2eCharacterSheet.#onRestSpellcasting,
+      learnSpell: Adnd2eCharacterSheet.#onLearnSpell,
     },
   };
 
@@ -590,6 +591,15 @@ export class Adnd2eCharacterSheet extends Base {
 
   static async #onRestSpellcasting(this: Adnd2eCharacterSheet): Promise<void> {
     await restSpellcasting(this.document as never);
+  }
+
+  static async #onLearnSpell(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const spellItemId = target.dataset.itemId;
+    if (spellItemId) await learnSpell(this.document as never, spellItemId);
   }
 }
 

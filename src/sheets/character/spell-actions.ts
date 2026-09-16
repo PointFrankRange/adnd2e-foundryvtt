@@ -1,8 +1,12 @@
 import { getChassis } from "../../core/classes/chassis";
-import type { ClassId, SphereName } from "../../core/types";
+import { canLearnSpell, learnSpellRoll } from "../../core/magic/spellbook";
+import type { ClassId, IntelligenceModifiers, SphereName, WizardSchool } from "../../core/types";
+import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { buildCastCardContext } from "../../magic/cast-card";
+import { buildLearnSpellCardContext } from "../../magic/learn-spell-card";
 import { canMemorizePriestSpell } from "../../magic/priest-sphere-access";
 import { TEMPLATE_PATH } from "../../constants";
+import { getOptionalRules } from "../../settings";
 
 /* ---------------------------------------------------------------------------
  * spell-actions — SP4a.
@@ -26,6 +30,7 @@ interface SpellItemHandle {
   system: {
     casterClass: string;
     level: number;
+    schools: string[];
     spheres: string[];
     range: string;
     duration: string;
@@ -36,10 +41,12 @@ interface SpellItemHandle {
   };
 }
 
-/** Minimal shape spell-actions needs from a non-spell embedded item — just
- *  enough to find the priest-progression class item (see
- *  `findPriestChassisId`). */
+/** Minimal shape spell-actions needs from any embedded item — enough to find
+ *  the priest-progression class item (see `findPriestChassisId`) and to
+ *  count spellbook-member wizard spells at a level (see `learnSpell`'s
+ *  `knownAtThisLevel`). */
 interface GenericItemHandle {
+  id: string;
   type: string;
   system: Record<string, unknown>;
 }
@@ -48,8 +55,10 @@ interface SpellcasterActor {
   name: string;
   img: string;
   system: {
+    abilities: { int: { mods: IntelligenceModifiers } };
     spellcasting: {
       wizard: {
+        specialistSchool: string | null;
         memorized: MemorizedEntry[];
         slots: Record<string, { max: number; used: number }>;
         spellbookItemIds: string[];
@@ -233,4 +242,81 @@ export async function castSpell(actor: SpellcasterActor, spellItemId: string): P
   } else {
     await ChatMessage.create({ speaker, content } as unknown as ChatMessage.CreateData);
   }
+}
+
+/** Attempts to learn a wizard spell not yet in the spellbook: re-derives the
+ *  same eligibility context.ts's `buildSpellRow` used to decide whether to
+ *  show the Learn Spell button (not a priest spell, not already in the
+ *  spellbook, has a recognizable WizardSchool tag among its `schools`,
+ *  `canLearnSpell` allows it), then rolls 1d100 against the computed chance.
+ *  Always posts a chat card — showing the rejection reason when
+ *  `canLearnSpell` disallows it, or the roll and pass/fail outcome
+ *  otherwise. On success, adds the item id to `spellbookItemIds`. No
+ *  cooldown/retry-limit is tracked (spec §2's Learn Spell decision row). */
+export async function learnSpell(actor: SpellcasterActor, spellItemId: string): Promise<void> {
+  const spell = actor.items.get(spellItemId);
+  if (
+    !spell ||
+    spell.system.casterClass !== "wizard" ||
+    actor.system.spellcasting.wizard.spellbookItemIds.includes(spellItemId)
+  ) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.learnBlockedWarning"));
+    return;
+  }
+
+  const wizardSchool = spell.system.schools.find((s): s is WizardSchool =>
+    (WIZARD_SCHOOLS as readonly string[]).includes(s),
+  );
+  if (!wizardSchool) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.learnBlockedWarning"));
+    return;
+  }
+
+  const knownAtThisLevel = [...actor.items].filter((i) => {
+    if (i.type !== "spell") return false;
+    const s = i.system as { casterClass?: string; level?: number };
+    return (
+      s.casterClass === "wizard" &&
+      s.level === spell.system.level &&
+      actor.system.spellcasting.wizard.spellbookItemIds.includes(i.id)
+    );
+  }).length;
+
+  const result = canLearnSpell({
+    int: actor.system.abilities.int.mods,
+    spellLevel: spell.system.level,
+    spellSchool: wizardSchool,
+    specialistSchool: actor.system.spellcasting.wizard.specialistSchool as WizardSchool | null,
+    knownAtThisLevel,
+    options: getOptionalRules(),
+  });
+
+  let roll: { d100: number; success: boolean } | null = null;
+  if (result.allowed) {
+    const d100Roll = await new Roll("1d100").evaluate();
+    const d100 = d100Roll.total ?? 0;
+    const success = learnSpellRoll(d100, result.chance);
+    roll = { d100, success };
+    if (success) {
+      const updated = [...actor.system.spellcasting.wizard.spellbookItemIds, spellItemId];
+      await actor.update({ "system.spellcasting.wizard.spellbookItemIds": updated });
+    }
+  }
+
+  const context = buildLearnSpellCardContext({
+    actorName: actor.name,
+    actorImg: actor.img,
+    spellName: spell.name,
+    spellLevel: spell.system.level,
+    result,
+    roll,
+  });
+  const content = await foundry.applications.handlebars.renderTemplate(
+    TEMPLATE_PATH("chat/learn-spell-roll.hbs"),
+    context as unknown as Record<string, unknown>,
+  );
+  await ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor: actor as never }),
+    content,
+  } as unknown as ChatMessage.CreateData);
 }

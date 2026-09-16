@@ -246,7 +246,9 @@
         "orphanedEntry": "Level {level} spell (item no longer exists)",
         "memorizeBlockedWarning": "That spell can no longer be memorized — refresh the sheet.",
         "castBlockedWarning": "That spell can't be cast right now — refresh the sheet.",
-        "castRollFailedWarning": "This spell's damage/healing formula couldn't be rolled — check the item's Automation fields."
+        "castRollFailedWarning": "This spell's damage/healing formula couldn't be rolled — check the item's Automation fields.",
+        "learn": "Learn Spell",
+        "learnBlockedWarning": "That spell can no longer be learned — refresh the sheet."
       },
       "skills": {
         "weapon": "Weapon Proficiencies",
