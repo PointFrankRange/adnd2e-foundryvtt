@@ -16,7 +16,11 @@
           {{#if w.specialized}}
             <span class="specialized" title="{{localize 'ADND2E.sheet.skills.specialized'}}">★</span>
           {{/if}}
-          {{! SP5 wires the check buttons here }}
+          {{#if w.canSpecialize}}
+            <button type="button" data-action="specializeWeapon" data-item-id="{{w.id}}">
+              {{localize 'ADND2E.sheet.skills.specialize'}}
+            </button>
+          {{/if}}
         </div>
       {{else}}
         <p class="placeholder">{{localize 'ADND2E.sheet.skills.none'}}</p>
@@ -39,7 +43,9 @@
           <span class="ability">{{localize n.governingAbilityLabel}}</span>
           <span class="modifier">{{adnd2eSigned n.modifier}}</span>
           <span class="target" title="{{localize 'ADND2E.sheet.skills.checkTarget'}}">{{n.checkTarget}}</span>
-          {{! SP5 wires the check buttons here }}
+          <button type="button" data-action="rollNonweaponCheck" data-item-id="{{n.id}}">
+            {{localize 'ADND2E.sheet.skills.check'}}
+          </button>
         </div>
       {{else}}
         <p class="placeholder">{{localize 'ADND2E.sheet.skills.none'}}</p>

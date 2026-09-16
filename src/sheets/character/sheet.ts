@@ -1,6 +1,7 @@
 import { TEMPLATE_PATH } from "../../constants";
 import { getChassis } from "../../core/classes/chassis";
-import type { ClassId, SaveCategory } from "../../core/types";
+import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
+import type { ClassId, NonweaponGroup, SaveCategory } from "../../core/types";
 import { getOptionalRules } from "../../settings";
 import { rollAttack, rollSave } from "./combat-rolls";
 import { buildCharacterSheetContext } from "./context";
@@ -16,6 +17,7 @@ import type {
 } from "./context-types";
 import { validateItemDrop } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
+import { rollNonweaponCheck, specializeWeapon } from "./proficiency-actions";
 import { castSpell, forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
 import { awardXpSplit } from "./xp";
 
@@ -272,6 +274,8 @@ export class Adnd2eCharacterSheet extends Base {
       castSpell: Adnd2eCharacterSheet.#onCastSpell,
       restSpellcasting: Adnd2eCharacterSheet.#onRestSpellcasting,
       learnSpell: Adnd2eCharacterSheet.#onLearnSpell,
+      specializeWeapon: Adnd2eCharacterSheet.#onSpecializeWeapon,
+      rollNonweaponCheck: Adnd2eCharacterSheet.#onRollNonweaponCheck,
     },
   };
 
@@ -428,11 +432,32 @@ export class Adnd2eCharacterSheet extends Base {
   }
 
   override async _onDropItem(event: DragEvent, item: Item.Implementation): Promise<unknown> {
-    const existing = [
-      ...(this.document as unknown as { items: Iterable<{ type: string; system: { chassisId?: string | null } }> })
-        .items,
-    ];
-    const dropped = item as unknown as { type: string; system: { chassisId?: string | null } };
+    const actor = this.document as unknown as {
+      system: { proficiencies: { weapon: { available: number }; nonweapon: { available: number } } };
+      items: Iterable<{
+        type: string;
+        system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup };
+      }>;
+    };
+    const existing = [...actor.items];
+    const dropped = item as unknown as {
+      type: string;
+      system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup };
+    };
+
+    let dropSlotCost: number | undefined;
+    let availableSlots: number | undefined;
+    if (dropped.type === "weaponProficiency") {
+      dropSlotCost = 1;
+      availableSlots = actor.system.proficiencies.weapon.available;
+    } else if (dropped.type === "nonweaponProficiency") {
+      const firstClassId = existing.find((i) => i.type === "class")?.system.chassisId ?? null;
+      dropSlotCost = firstClassId
+        ? nonweaponSlotCost(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", firstClassId as never)
+        : (dropped.system.slotCost ?? 1);
+      availableSlots = actor.system.proficiencies.nonweapon.available;
+    }
+
     const verdict = validateItemDrop({
       dropType: dropped.type,
       dropChassisId: dropped.system?.chassisId ?? null,
@@ -441,6 +466,8 @@ export class Adnd2eCharacterSheet extends Base {
         .filter((i) => i.type === "class")
         .map((i) => i.system.chassisId ?? "")
         .filter(Boolean),
+      dropSlotCost,
+      availableSlots,
     });
     if (!verdict.ok) {
       ui.notifications?.warn(game.i18n!.localize(verdict.reason!));
@@ -605,6 +632,25 @@ export class Adnd2eCharacterSheet extends Base {
   ): Promise<void> {
     const spellItemId = target.dataset.itemId;
     if (spellItemId) await learnSpell(this.document as never, spellItemId);
+  }
+
+  // Interaction handlers — SP5a.
+  static async #onSpecializeWeapon(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const weaponProfItemId = target.dataset.itemId;
+    if (weaponProfItemId) await specializeWeapon(this.document as never, weaponProfItemId);
+  }
+
+  static async #onRollNonweaponCheck(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const nwpItemId = target.dataset.itemId;
+    if (nwpItemId) await rollNonweaponCheck(this.document as never, nwpItemId);
   }
 }
 

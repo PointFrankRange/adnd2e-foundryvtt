@@ -259,7 +259,11 @@
         "group": "Group",
         "specialized": "Specialized",
         "racial": "(racial)",
-        "none": "None"
+        "none": "None",
+        "specialize": "Specialize",
+        "check": "Check",
+        "specializeBlockedWarning": "That weapon can no longer be specialized — refresh the sheet.",
+        "checkBlockedWarning": "That proficiency can't be checked right now — refresh the sheet."
       },
       "features": {
         "languages": "Languages Known",
@@ -335,6 +339,11 @@
           "oppositionSchool": "This spell belongs to a school opposed to your specialty — it can never be learned.",
           "perLevelCapReached": "You already know the maximum number of spells allowed at this level."
         }
+      },
+      "nwpCheck": {
+        "success": "Success",
+        "failure": "Failure",
+        "autoFail": "Natural 20 — automatic failure"
       }
     },
     "sheets": {
