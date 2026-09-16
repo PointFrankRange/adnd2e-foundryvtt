@@ -81,7 +81,11 @@ Pack sources are JSON files under `packs/<name>/_source/`, one document per file
 | **3. Core combat** | ✅ Complete | THAC0 attack rolls vs AC, damage, the 5 saving-throw categories, initiative (individual + weapon speed + casting time), combat-tracker override |
 | **4. Magic** | ✅ Complete | Spell items, schools/spheres, wizard spellbook + priest sphere access, memorization slot tables, cast-from-chat with slot tracking |
 | **5. Proficiencies & skills** | ✅ Complete | Weapon proficiency slots + specialization, non-weapon proficiency checks, thief/bard skill points + rolls, backstab |
-| **6. NPC / monster sheet + bestiary scaffolding** | 🔜 Planned | Streamlined stat-block sheet, item templates for user-owned content |
+| **6. NPC / monster sheet + bestiary scaffolding** | ✅ Complete | Single-page creature stat-block sheet (fully editable), streamlined 3-tab NPC sheet, empty Bestiary compendium folder + authoring docs |
 | **7. Player's Option: Combat & Tactics** | 🔜 Planned | Maneuvers, critical-hit tables, called shots, expanded initiative |
 | **8. Player's Option: Skills & Powers** | 🔜 Planned | Trait/sub-ability character-point buy, expanded proficiencies |
 | **9. Player's Option: Spells & Magic** | 🔜 Planned | Spell points, expanded casting rules |
+
+### Known backlog items
+
+- **Creature damage auto-apply.** A creature's damage roll (Sub-project 6) posts via Foundry's plain default chat card and has no "Apply Damage" button, unlike PC weapon attacks — a deliberate v1 scoping decision (the existing button resolves the weapon by item id, which a creature's array-indexed attacks don't have). Revisiting this to give creature attacks an equivalent one-click apply-to-target affordance is a candidate for a future sub-project.
