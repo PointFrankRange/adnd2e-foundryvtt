@@ -252,6 +252,25 @@ describe("lang/en.json — SP4a spell memorize/cast strings", () => {
   });
 });
 
+describe("lang/en.json — SP4b learn-spell strings", () => {
+  it("resolves every ADND2E.sheet.spells.{learn,learnBlockedWarning} + ADND2E.chat.learnSpell.* key the learn-spell layer references", () => {
+    for (const key of [
+      "ADND2E.sheet.spells.learn",
+      "ADND2E.sheet.spells.learnBlockedWarning",
+      "ADND2E.chat.learnSpell.chance",
+      "ADND2E.chat.learnSpell.success",
+      "ADND2E.chat.learnSpell.failure",
+      "ADND2E.chat.learnSpell.rejection.intTooLow",
+      "ADND2E.chat.learnSpell.rejection.spellLevelExceedsInt",
+      "ADND2E.chat.learnSpell.rejection.oppositionSchool",
+      "ADND2E.chat.learnSpell.rejection.perLevelCapReached",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [

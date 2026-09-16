@@ -323,6 +323,17 @@
         "savingThrow": "Saving Throw",
         "damageRoll": "Damage",
         "healingRoll": "Healing"
+      },
+      "learnSpell": {
+        "chance": "Chance to learn",
+        "success": "Learned!",
+        "failure": "Not learned",
+        "rejection": {
+          "intTooLow": "Intelligence too low to learn any wizard spells.",
+          "spellLevelExceedsInt": "This spell's level exceeds what your Intelligence allows.",
+          "oppositionSchool": "This spell belongs to a school opposed to your specialty — it can never be learned.",
+          "perLevelCapReached": "You already know the maximum number of spells allowed at this level."
+        }
       }
     },
     "sheets": {
