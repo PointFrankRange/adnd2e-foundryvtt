@@ -15,6 +15,9 @@ import {
   BARD_SKILL_POINT_RULES,
   bardSkillPointsAvailable,
   bardSkillBaseScore,
+  classifyThiefArmor,
+  thiefSkillPerSkillCap,
+  thiefSkillCheck,
 } from "../../../src/core/proficiencies/thief-skills";
 
 describe("thief-skill tables", () => {
@@ -378,5 +381,64 @@ describe("bard thieving skills (PHB Table 33)", () => {
   });
   it("rejects a bad level", () => {
     expect(() => bardSkillPointsAvailable(0)).toThrow(RangeError);
+  });
+});
+
+describe("classifyThiefArmor", () => {
+  it("maps the four Table 29 categories to disabled:false", () => {
+    expect(classifyThiefArmor("none")).toEqual({ disabled: false, category: "none" });
+    expect(classifyThiefArmor("leather")).toEqual({ disabled: false, category: "leather" });
+    expect(classifyThiefArmor("elven-chain")).toEqual({ disabled: false, category: "elven-chain" });
+  });
+
+  it("maps both padded and studded-leather to the combined padded-studded row", () => {
+    expect(classifyThiefArmor("padded")).toEqual({ disabled: false, category: "padded-studded" });
+    expect(classifyThiefArmor("studded-leather")).toEqual({ disabled: false, category: "padded-studded" });
+  });
+
+  it("disables thief skills entirely for every armor heavier than padded/studded/elven-chain", () => {
+    for (const heavy of [
+      "ring-mail", "scale-mail", "chain-mail", "splint-mail",
+      "banded-mail", "plate-mail", "field-plate", "full-plate",
+    ] as const) {
+      expect(classifyThiefArmor(heavy)).toEqual({ disabled: true });
+    }
+  });
+});
+
+describe("thiefSkillPerSkillCap", () => {
+  it("is 30 at level 1", () => {
+    expect(thiefSkillPerSkillCap(1)).toBe(30);
+  });
+
+  it("adds 15 per level after 1st, cumulatively", () => {
+    expect(thiefSkillPerSkillCap(2)).toBe(45);
+    expect(thiefSkillPerSkillCap(5)).toBe(90);
+  });
+
+  it("rejects level 0", () => {
+    expect(() => thiefSkillPerSkillCap(0)).toThrow();
+  });
+});
+
+describe("thiefSkillCheck", () => {
+  const ctx = { race: "human", dexterity: 12, armor: "leather" } as const;
+
+  it("succeeds when the roll is at or under the effective skill percentage", () => {
+    // pick-pockets base 15 (Table 26) + 0 racial (human) + 0 dex (12) + 0 armor (leather) = 15; +40 allocated = 55
+    const r = thiefSkillCheck("pick-pockets", { ...ctx, allocatedPoints: 40, roll: 55 });
+    expect(r).toEqual({ success: true, target: 55, roll: 55 });
+  });
+
+  it("fails when the roll exceeds the effective skill percentage", () => {
+    const r = thiefSkillCheck("pick-pockets", { ...ctx, allocatedPoints: 40, roll: 56 });
+    expect(r).toEqual({ success: false, target: 55, roll: 56 });
+  });
+
+  it("caps the effective percentage at 95 even with excess allocated points", () => {
+    // climb-walls base 60 + 200 allocated would be 260 uncapped, but resolveThiefSkill caps at 95
+    const r = thiefSkillCheck("climb-walls", { ...ctx, allocatedPoints: 200, roll: 95 });
+    expect(r.target).toBe(95);
+    expect(r.success).toBe(true);
   });
 });
