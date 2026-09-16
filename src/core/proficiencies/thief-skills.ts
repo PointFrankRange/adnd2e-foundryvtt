@@ -2,7 +2,7 @@
 // Dexterity (Table 28) and armor (Table 29) adjustments; the point budget;
 // backstab multipliers (Table 30); and the pick-pockets detection threshold.
 import { assertAbilityScore, assertLevel } from "../errors";
-import type { BardSkill, Race, ThiefArmor, ThiefSkill } from "../types";
+import type { ArmorType, BardSkill, Race, ThiefArmor, ThiefArmorClassification, ThiefSkill } from "../types";
 
 export const THIEF_SKILLS: readonly ThiefSkill[] = [
   "pick-pockets",
@@ -140,6 +140,19 @@ export function resolveThiefSkill(
   );
 }
 
+/** The bard's effective skill percentage: base score + allocated points,
+ *  capped at 95. Mirrors `resolveThiefSkill` but uses the Table 33 base
+ *  (`bardSkillBaseScore`) instead of Table 26. */
+export function resolveBardSkill(
+  skill: BardSkill,
+  input: ThiefSkillContext & { allocatedPoints: number },
+): number {
+  return Math.min(
+    THIEF_SKILL_POINT_RULES.hardCap,
+    bardSkillBaseScore(skill, input) + input.allocatedPoints,
+  );
+}
+
 /** PHB Table 30: BACKSTAB DAMAGE MULTIPLIERS (p.40). */
 export function backstabMultiplier(thiefLevel: number): number {
   assertLevel(thiefLevel, "thief level");
@@ -209,4 +222,72 @@ export function bardSkillBaseScore(skill: BardSkill, input: ThiefSkillContext): 
     dexAdj +
     THIEF_ARMOR_ADJUSTMENTS[input.armor][skill]
   );
+}
+
+/** PHB Table 29 armor categories, keyed by the full `ArmorType` list — `null`
+ *  means thief skills are unusable entirely in that armor (heavier than
+ *  leather/elven-chain/padded/studded, PHB p.38). */
+const ARMOR_TYPE_TO_THIEF_ARMOR: Readonly<Record<ArmorType, ThiefArmor | null>> = {
+  none: "none",
+  padded: "padded-studded",
+  leather: "leather",
+  "studded-leather": "padded-studded",
+  "ring-mail": null,
+  "scale-mail": null,
+  "chain-mail": null,
+  "elven-chain": "elven-chain",
+  "splint-mail": null,
+  "banded-mail": null,
+  "plate-mail": null,
+  "field-plate": null,
+  "full-plate": null,
+};
+
+/** Maps a worn armor type to its Table 29 category, or flags that thief
+ *  skills are unusable in it entirely (PHB p.38: a thief in armor heavier
+ *  than leather/elven chain/padded/studded loses all thieving abilities). */
+export function classifyThiefArmor(armorType: ArmorType): ThiefArmorClassification {
+  const category = ARMOR_TYPE_TO_THIEF_ARMOR[armorType];
+  return category === null ? { disabled: true } : { disabled: false, category };
+}
+
+/** The cumulative cap on points allocated to ONE thief skill by `level`
+ *  (30 at level 1, +15/level after — PHB p.39, not enforced by
+ *  `resolveThiefSkill` itself — the allocation action is the caller). */
+export function thiefSkillPerSkillCap(level: number): number {
+  assertLevel(level, "thief level");
+  return (
+    THIEF_SKILL_POINT_RULES.level1PerSkillCap +
+    (level - 1) * THIEF_SKILL_POINT_RULES.perLevelPerSkillCap
+  );
+}
+
+export interface ThiefSkillCheckResult {
+  success: boolean;
+  /** the resolved skill percentage the roll needed to be at or under */
+  target: number;
+  roll: number;
+}
+
+/** Resolves a d100 thief/bard-skill check: success if `roll` is at or under
+ *  the character's effective skill percentage (`resolveThiefSkill`). No
+ *  natural-roll special case (unlike `nonweaponCheck`'s natural-20 auto-fail)
+ *  — 2E PHB thief-skill checks have no such rule. */
+export function thiefSkillCheck(
+  skill: ThiefSkill,
+  input: ThiefSkillContext & { allocatedPoints: number; roll: number },
+): ThiefSkillCheckResult {
+  const target = resolveThiefSkill(skill, input);
+  return { success: input.roll <= target, target, roll: input.roll };
+}
+
+/** Resolves a d100 BARD-skill check — identical shape to `thiefSkillCheck`
+ *  but built on `resolveBardSkill` (Table 33), not `resolveThiefSkill`
+ *  (Table 26). */
+export function bardSkillCheck(
+  skill: BardSkill,
+  input: ThiefSkillContext & { allocatedPoints: number; roll: number },
+): ThiefSkillCheckResult {
+  const target = resolveBardSkill(skill, input);
+  return { success: input.roll <= target, target, roll: input.roll };
 }

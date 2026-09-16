@@ -1,6 +1,6 @@
 import type {
-  CharismaModifiers, ConstitutionModifiers, DexterityModifiers, IntelligenceModifiers,
-  StrengthModifiers, WisdomModifiers,
+  ArmorType, CharismaModifiers, ConstitutionModifiers, DexterityModifiers, IntelligenceModifiers,
+  StrengthModifiers, ThiefSkill, WisdomModifiers,
 } from "../../core/types";
 import type { OptionalRules } from "../../core/options";
 
@@ -17,6 +17,10 @@ export interface CharacterSheetInput {
   raceItem: RaceItemView | null;
   physicalItems: PhysicalItemView[];
   proficiencyItems: { weapon: WeaponProfView[]; nonweapon: NwpView[] };
+  /** raw allocation entries read straight off the actor — not item-backed,
+   *  unlike weapon/nonweapon proficiencies (thief skills are percentage
+   *  allocations, not owned Items). */
+  thiefSkillAllocations: { skill: ThiefSkill; allocatedPoints: number }[];
   spellItems: SpellItemView[];
   featureItems: FeatureItemView[];
   /** CONFIG.ADND2E — label maps only */
@@ -77,6 +81,7 @@ export interface CharacterDerivedView {
     weapon: { total: number; spent: number; available: number };
     nonweapon: { total: number; spent: number; available: number };
   };
+  thiefSkills: { total: number; spent: number; available: number };
   languagesKnown: { max: number };
 }
 
@@ -104,9 +109,10 @@ export interface PhysicalItemView {
   weapon?: {
     damageVsSM: string | null; damageVsL: string | null; speedFactor: number; range: string | null;
     category: "melee" | "thrown" | "bow" | "crossbow";
+    damageType: "slashing" | "piercing" | "bludgeoning" | "piercing-slashing" | "piercing-bludgeoning" | null;
   };
   /** armor only */
-  armor?: { baseAc: number; isShield: boolean; shieldAcBonus: number };
+  armor?: { baseAc: number; isShield: boolean; shieldAcBonus: number; armorType: ArmorType };
 }
 
 export interface WeaponProfView {
@@ -134,6 +140,24 @@ export interface NwpView {
    *  target (situational modifier isn't known until Roll time, so it's
    *  never part of this display value). */
   checkTarget: number | null;
+}
+
+export interface ThiefSkillRow {
+  skill: ThiefSkill;
+  /** i18n key, e.g. "ADND2E.chat.thiefSkill.skills.pickPockets" */
+  label: string;
+  /** thiefSkillBaseScore/bardSkillBaseScore — before allocated points */
+  base: number;
+  allocated: number;
+  /** resolveThiefSkill's result — base + allocated, capped at 95 */
+  effective: number;
+  /** available pool > 0 AND (thief only) per-skill cap not yet reached */
+  canAllocate: boolean;
+  canDeallocate: boolean;
+  /** false only for "read-languages" on a thief below level 4 (PHB p.40) —
+   *  the skill is computable at any level but not usable yet. Bards have no
+   *  such prerequisite. Always true for every other skill. */
+  usable: boolean;
 }
 export interface SpellItemView {
   id: string; name: string; img: string; casterClass: string; level: number;
@@ -212,13 +236,25 @@ export interface CharacterSheetContext {
     locationOptions: { value: string; label: string }[];
   };
   combat: {
-    weapons: { id: string; name: string; equipped: boolean; toHitNote: string; damageNote: string; speedFactor: number; range: string | null }[];
+    weapons: { id: string; name: string; equipped: boolean; toHitNote: string; damageNote: string; speedFactor: number; range: string | null; canBackstab: boolean }[];
     acBreakdown: { label: string; value: number }[];
     armor: { id: string; name: string; equipped: boolean; isShield: boolean; baseAc: number }[];
   };
   skills: {
     weapon: { total: number; spent: number; available: number; items: WeaponProfView[] };
     nonweapon: { total: number; spent: number; available: number; items: NwpView[] };
+    /** null when the actor's class has no thief-skill access at all
+     *  (`ClassChassis.thiefSkillAccess` is null) — the whole section is
+     *  hidden/shows a placeholder in that case. */
+    thief: {
+      total: number; spent: number; available: number;
+      /** true when the actor's worn armor disables thief skills entirely
+       *  (classifyThiefArmor) — the whole section still renders (so the
+       *  explanatory message has somewhere to live) but every roll/allocate
+       *  button is hidden. */
+      armorDisabled: boolean;
+      items: ThiefSkillRow[];
+    } | null;
   };
   spells: {
     wizardSlots: SlotRow[] | null;

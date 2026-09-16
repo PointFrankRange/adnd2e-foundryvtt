@@ -104,6 +104,7 @@ function input(over: Partial<CharacterSheetInput> = {}): CharacterSheetInput {
         weapon: { total: 4, spent: 0, available: 4 },
         nonweapon: { total: 3, spent: 0, available: 3 },
       },
+      thiefSkills: { total: 0, spent: 0, available: 0 },
       languagesKnown: { max: 2 },
     },
     classItems: [
@@ -123,6 +124,7 @@ function input(over: Partial<CharacterSheetInput> = {}): CharacterSheetInput {
     raceItem: null,
     physicalItems: [],
     proficiencyItems: { weapon: [], nonweapon: [] },
+    thiefSkillAllocations: [],
     spellItems: [],
     featureItems: [],
     config: {
@@ -552,13 +554,13 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
             name: "Long Sword",
             type: "weapon",
             equipped: true,
-            weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee" },
+            weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee", damageType: "slashing" },
           }),
           physItem({
             id: "w2",
             name: "Dagger",
             type: "weapon",
-            weapon: { damageVsSM: "1d4", damageVsL: null, speedFactor: 2, range: "10/20/30", category: "melee" },
+            weapon: { damageVsSM: "1d4", damageVsL: null, speedFactor: 2, range: "10/20/30", category: "melee", damageType: "piercing" },
           }),
         ],
       }),
@@ -572,6 +574,7 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
         damageNote: "1d8 / 1d12",
         speedFactor: 5,
         range: null,
+        canBackstab: false,
       },
       {
         id: "w2",
@@ -581,6 +584,7 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
         damageNote: "1d4",
         speedFactor: 2,
         range: "10/20/30",
+        canBackstab: false,
       },
     ]);
   });
@@ -616,7 +620,7 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
             type: "armor",
             equipped: true,
             magicBonus: 1,
-            armor: { baseAc: 3, isShield: false, shieldAcBonus: 0 },
+            armor: { baseAc: 3, isShield: false, shieldAcBonus: 0, armorType: "leather" },
           }),
           physItem({
             id: "s1",
@@ -624,14 +628,14 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
             type: "armor",
             equipped: true,
             magicBonus: 0,
-            armor: { baseAc: 10, isShield: true, shieldAcBonus: 1 },
+            armor: { baseAc: 10, isShield: true, shieldAcBonus: 1, armorType: "leather" },
           }),
           physItem({
             id: "a2",
             name: "Spare Leather",
             type: "armor",
             equipped: false,
-            armor: { baseAc: 8, isShield: false, shieldAcBonus: 0 },
+            armor: { baseAc: 8, isShield: false, shieldAcBonus: 0, armorType: "leather" },
           }),
         ],
       }),
@@ -1219,7 +1223,7 @@ describe("buildCharacterSheetContext — weapon specialization eligibility + rea
     id: "w1", name: "Long Sword", img: "", type: "weapon",
     quantity: 1, weight: 4, totalWeight: 4, location: "", equipped: true, identified: true, magicBonus: 0,
     isContainer: false, capacity: null, contentsWeightMultiplier: 1,
-    weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee" },
+    weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee", damageType: "slashing" },
     ...over,
   });
   const weaponProf = (over: Partial<WeaponProfView> = {}): WeaponProfView => ({
@@ -1321,7 +1325,7 @@ describe("buildCharacterSheetContext — weapon specialization eligibility + rea
         physicalItems: [
           weaponItem({
             id: "w2", name: "Long Bow",
-            weapon: { damageVsSM: "1d6", damageVsL: "1d6", speedFactor: 7, range: "70/140/210", category: "bow" },
+            weapon: { damageVsSM: "1d6", damageVsL: "1d6", speedFactor: 7, range: "70/140/210", category: "bow", damageType: "piercing" },
           }),
         ],
         proficiencyItems: {
@@ -1344,7 +1348,7 @@ describe("buildCharacterSheetContext — weapon specialization eligibility + rea
         physicalItems: [
           weaponItem({
             id: "w3", name: "Light Crossbow",
-            weapon: { damageVsSM: "1d4", damageVsL: "1d4", speedFactor: 8, range: "60/120/180", category: "crossbow" },
+            weapon: { damageVsSM: "1d4", damageVsL: "1d4", speedFactor: 8, range: "60/120/180", category: "crossbow", damageType: "piercing" },
           }),
         ],
         proficiencyItems: {
@@ -1374,5 +1378,206 @@ describe("buildCharacterSheetContext — weapon specialization eligibility + rea
     );
     // base fixture's INT score is 10 (see the base input() helper) — target = 10 + 0 + (3-1) = 12
     expect(c.skills.nonweapon.items[0]!.checkTarget).toBe(12);
+  });
+});
+
+describe("buildCharacterSheetContext — thief/bard skills + backstab eligibility", () => {
+  const thiefClass = {
+    id: "c1", name: "Thief", img: "", chassisId: "thief", hitDie: 6,
+    xp: 0, level: 1, canLevelUp: false, dualClassState: null, specialistSchool: null,
+  };
+  const bardClass = { ...thiefClass, name: "Bard", chassisId: "bard" };
+  const fighterClass = { ...thiefClass, name: "Fighter", chassisId: "fighter" };
+
+  it("thief with no armor gets all 8 skills, unallocated, armor not disabled", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [thiefClass],
+        derived: {
+          ...input().derived,
+          abilities: { ...input().derived.abilities, dex: { score: 12, mods: input().derived.abilities.dex.mods } },
+          thiefSkills: { total: 60, spent: 0, available: 60 },
+        },
+      }),
+    );
+    expect(c.skills.thief).not.toBeNull();
+    expect(c.skills.thief!.items).toHaveLength(8);
+    expect(c.skills.thief!.armorDisabled).toBe(false);
+    // pick-pockets base 15, DEX 12 gives 0 adjustment (Table 28); no armor
+    // equipped resolves to the "none" (unarmored) Table 29 category, which
+    // gives pick-pockets a +5 bonus (NOT leather's baseline 0) — base 20.
+    const pp = c.skills.thief!.items.find((r) => r.skill === "pick-pockets")!;
+    expect(pp.base).toBe(20);
+    expect(pp.allocated).toBe(0);
+    expect(pp.effective).toBe(20);
+  });
+
+  it("bard gets exactly the 4-skill subset, and no per-skill cap blocks a large single allocation", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [bardClass],
+        thiefSkillAllocations: [{ skill: "climb-walls", allocatedPoints: 40 }],
+        derived: {
+          ...input().derived,
+          thiefSkills: { total: 35, spent: 40, available: -5 },
+        },
+      }),
+    );
+    expect(c.skills.thief!.items).toHaveLength(4);
+    expect(c.skills.thief!.items.map((r) => r.skill).sort()).toEqual(
+      ["climb-walls", "detect-noise", "pick-pockets", "read-languages"].sort(),
+    );
+    const cw = c.skills.thief!.items.find((r) => r.skill === "climb-walls")!;
+    // no per-skill cap for bards — canAllocate is false here only because available (-5) is not > 0
+    expect(cw.canAllocate).toBe(false);
+    expect(cw.canDeallocate).toBe(true);
+  });
+
+  it("a class with no thief-skill access gets a null thief section", () => {
+    const c = buildCharacterSheetContext(input({ classItems: [fighterClass] }));
+    expect(c.skills.thief).toBeNull();
+  });
+
+  it("heavy armor (e.g. chain mail) disables the whole thief-skills section", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [thiefClass],
+        physicalItems: [{
+          id: "a1", name: "Chain Mail", img: "", type: "armor",
+          quantity: 1, weight: 40, totalWeight: 40, location: "", equipped: true, identified: true, magicBonus: 0,
+          isContainer: false, capacity: null, contentsWeightMultiplier: 1,
+          armor: { baseAc: 5, isShield: false, shieldAcBonus: 0, armorType: "chain-mail" },
+        }],
+      }),
+    );
+    expect(c.skills.thief!.armorDisabled).toBe(true);
+  });
+
+  it("canAllocate respects the thief per-skill cap even with plenty of pool available", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [thiefClass],
+        thiefSkillAllocations: [{ skill: "pick-pockets", allocatedPoints: 30 }],
+        derived: {
+          ...input().derived,
+          thiefSkills: { total: 60, spent: 30, available: 30 },
+        },
+      }),
+    );
+    // thiefSkillPerSkillCap(1) = 30 — already at the cap, so canAllocate is false despite 30 available
+    const pp = c.skills.thief!.items.find((r) => r.skill === "pick-pockets")!;
+    expect(pp.canAllocate).toBe(false);
+  });
+
+  it("a thief with a backstab-eligible weapon gets canBackstab true on that weapon's combat row", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [thiefClass],
+        physicalItems: [{
+          id: "w1", name: "Dagger", img: "", type: "weapon",
+          quantity: 1, weight: 1, totalWeight: 1, location: "", equipped: true, identified: true, magicBonus: 0,
+          isContainer: false, capacity: null, contentsWeightMultiplier: 1,
+          weapon: { damageVsSM: "1d4", damageVsL: "1d3", speedFactor: 2, range: null, category: "melee", damageType: "piercing" },
+        }],
+      }),
+    );
+    expect(c.combat.weapons[0]!.canBackstab).toBe(true);
+  });
+
+  it("a fighter (not a thief) with the SAME eligible weapon gets canBackstab false", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [fighterClass],
+        physicalItems: [{
+          id: "w1", name: "Dagger", img: "", type: "weapon",
+          quantity: 1, weight: 1, totalWeight: 1, location: "", equipped: true, identified: true, magicBonus: 0,
+          isContainer: false, capacity: null, contentsWeightMultiplier: 1,
+          weapon: { damageVsSM: "1d4", damageVsL: "1d3", speedFactor: 2, range: null, category: "melee", damageType: "piercing" },
+        }],
+      }),
+    );
+    expect(c.combat.weapons[0]!.canBackstab).toBe(false);
+  });
+
+  it("a thief with a non-eligible weapon (bludgeoning) gets canBackstab false", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [thiefClass],
+        physicalItems: [{
+          id: "w1", name: "Mace", img: "", type: "weapon",
+          quantity: 1, weight: 6, totalWeight: 6, location: "", equipped: true, identified: true, magicBonus: 0,
+          isContainer: false, capacity: null, contentsWeightMultiplier: 1,
+          weapon: { damageVsSM: "1d6", damageVsL: "1d6", speedFactor: 7, range: null, category: "melee", damageType: "bludgeoning" },
+        }],
+      }),
+    );
+    expect(c.combat.weapons[0]!.canBackstab).toBe(false);
+  });
+
+  it("a bard's effective score uses Table 33 (bard base), not Table 26 (thief base) — pick-pockets differs by exactly the old bug's margin", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [bardClass],
+        thiefSkillAllocations: [{ skill: "pick-pockets", allocatedPoints: 10 }],
+        derived: {
+          ...input().derived,
+          abilities: { ...input().derived.abilities, dex: { score: 12, mods: input().derived.abilities.dex.mods } },
+          thiefSkills: { total: 20, spent: 10, available: 10 },
+        },
+      }),
+    );
+    const pp = c.skills.thief!.items.find((r) => r.skill === "pick-pockets")!;
+    // Table 33 base 10 + 0 racial (human) + 0 dex (12) + 5 armor ("none" category, nothing
+    // equipped) = 15 — this was already correct pre-fix (buildThiefSkills always used
+    // bardSkillBaseScore for `base`).
+    expect(pp.base).toBe(15);
+    expect(pp.allocated).toBe(10);
+    // effective = base + allocated = 25. The pre-fix bug called resolveThiefSkill
+    // (Table 26 base 15 -> 20 with the same armor bonus) and would have shown 30 here —
+    // 5 too high, exactly the Table 26 vs Table 33 base difference for pick-pockets.
+    expect(pp.effective).toBe(25);
+  });
+
+  it("fighter-then-thief (thief is NOT classItems[0]) still gets a non-null thief section and canBackstab true", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [{ ...fighterClass, id: "c1" }, { ...thiefClass, id: "c2" }],
+        physicalItems: [{
+          id: "w1", name: "Dagger", img: "", type: "weapon",
+          quantity: 1, weight: 1, totalWeight: 1, location: "", equipped: true, identified: true, magicBonus: 0,
+          isContainer: false, capacity: null, contentsWeightMultiplier: 1,
+          weapon: { damageVsSM: "1d4", damageVsL: "1d3", speedFactor: 2, range: null, category: "melee", damageType: "piercing" },
+        }],
+      }),
+    );
+    expect(c.skills.thief).not.toBeNull();
+    expect(c.combat.weapons[0]!.canBackstab).toBe(true);
+  });
+
+  it("a level-1 thief's read-languages row is not usable (PHB p.40: requires thief level 4)", () => {
+    const c = buildCharacterSheetContext(input({ classItems: [thiefClass] }));
+    const rl = c.skills.thief!.items.find((r) => r.skill === "read-languages")!;
+    expect(rl.usable).toBe(false);
+  });
+
+  it("a level-4+ thief's read-languages row is usable", () => {
+    const c = buildCharacterSheetContext(input({ classItems: [{ ...thiefClass, level: 4 }] }));
+    const rl = c.skills.thief!.items.find((r) => r.skill === "read-languages")!;
+    expect(rl.usable).toBe(true);
+  });
+
+  it("a bard's read-languages row is always usable regardless of level (no such gate for bards)", () => {
+    const c1 = buildCharacterSheetContext(input({ classItems: [{ ...bardClass, level: 1 }] }));
+    expect(c1.skills.thief!.items.find((r) => r.skill === "read-languages")!.usable).toBe(true);
+    const c2 = buildCharacterSheetContext(input({ classItems: [{ ...bardClass, level: 20 }] }));
+    expect(c2.skills.thief!.items.find((r) => r.skill === "read-languages")!.usable).toBe(true);
+  });
+
+  it("every skill other than read-languages is always usable regardless of level", () => {
+    const c = buildCharacterSheetContext(input({ classItems: [{ ...thiefClass, level: 1 }] }));
+    for (const row of c.skills.thief!.items) {
+      if (row.skill === "read-languages") continue;
+      expect(row.usable).toBe(true);
+    }
   });
 });

@@ -13,6 +13,12 @@
           <span class="speed" title="{{localize 'ADND2E.sheet.combat.speedFactor'}}">{{w.speedFactor}}</span>
           {{#if w.range}}<span class="range">{{w.range}}</span>{{/if}}
           {{#if w.equipped}}
+            {{#if w.canBackstab}}
+              <label class="backstab-label">
+                <input type="checkbox" class="backstab-toggle" data-item-id="{{w.id}}">
+                {{localize 'ADND2E.sheet.combat.backstab'}}
+              </label>
+            {{/if}}
             <button type="button" data-action="rollAttack" data-item-id="{{w.id}}">
               {{localize 'ADND2E.sheet.combat.rollAttack'}}
             </button>

@@ -275,6 +275,21 @@ export type BardSkill = Extract<
  */
 export type ThiefArmor = "none" | "leather" | "elven-chain" | "padded-studded";
 
+/**
+ * The full 2E PHB armor-type list (mechanical names only — armor Item's
+ * `armorType` field). A superset of `ThiefArmor`: several of these map to
+ * "thief skills disabled entirely" rather than to a Table 29 category.
+ */
+export type ArmorType =
+  | "none" | "padded" | "leather" | "studded-leather" | "ring-mail" | "scale-mail"
+  | "chain-mail" | "elven-chain" | "splint-mail" | "banded-mail" | "plate-mail"
+  | "field-plate" | "full-plate";
+
+/** The result of classifying an `ArmorType` for thief-skill purposes. */
+export type ThiefArmorClassification =
+  | { disabled: false; category: ThiefArmor }
+  | { disabled: true };
+
 /** Encumbrance category from carried weight vs. Strength (PHB Table 47). */
 export type EncumbranceCategory =
   | "unencumbered"

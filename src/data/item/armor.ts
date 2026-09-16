@@ -1,3 +1,4 @@
+import { ARMOR_TYPES } from "./choices";
 import { physicalItemSchema } from "../common/physical-item";
 import { armorAcContribution } from "../derive/armor";
 import { totalWeight } from "../derive/physical-item";
@@ -11,7 +12,7 @@ export class ArmorItemModel extends Adnd2eItemModel {
       ...super.defineSchema(),
       ...physicalItemSchema(),
       baseAc: new NumberField({ required: true, integer: true, initial: 10 }),
-      armorType: new StringField({ required: true, blank: true, initial: "" }),
+      armorType: new StringField({ required: true, blank: false, initial: "none", choices: ARMOR_TYPES }),
       isShield: new BooleanField({ required: true, initial: false }),
       shieldAcBonus: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       movementPenalty: new NumberField({ required: true, integer: true, initial: 0 }),

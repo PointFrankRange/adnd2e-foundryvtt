@@ -1,7 +1,7 @@
 // The enumerations the Item and Actor DataModel schemas validate against. Kept here as
 // plain arrays (not in the schema files) so they are unit-testable against the
 // engine unions — defineSchema() imports these and stays logic-free.
-import type { AbilityKey, Alignment, ClassGroup, ClassId, CreatureSize, EncumbranceCategory, MovementMode, NonweaponGroup, Race, SpellSchool, SphereName, WizardSchool } from "../../core/types";
+import type { AbilityKey, Alignment, ArmorType, ClassGroup, ClassId, CreatureSize, EncumbranceCategory, MovementMode, NonweaponGroup, Race, SpellSchool, SphereName, WizardSchool } from "../../core/types";
 import type { DamageType, WeaponCategory, WeaponSize } from "../../core/weapons/data";
 import type { ClassArrangement } from "../derive/character/multiclass";
 
@@ -35,6 +35,13 @@ export const DAMAGE_TYPES: readonly DamageType[] = [
 export const WEAPON_SIZES: readonly WeaponSize[] = ["S", "M", "L"];
 
 export const WEAPON_CATEGORIES: readonly WeaponCategory[] = ["melee", "thrown", "bow", "crossbow"];
+
+/** The full 2E PHB armor-type list (mechanical names only). */
+export const ARMOR_TYPES: readonly ArmorType[] = [
+  "none", "padded", "leather", "studded-leather", "ring-mail", "scale-mail",
+  "chain-mail", "elven-chain", "splint-mail", "banded-mail", "plate-mail",
+  "field-plate", "full-plate",
+];
 
 export const NONWEAPON_GROUPS: readonly NonweaponGroup[] = [
   "general", "warrior", "wizard", "priest", "rogue",

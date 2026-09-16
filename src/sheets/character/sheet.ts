@@ -1,7 +1,7 @@
 import { TEMPLATE_PATH } from "../../constants";
 import { getChassis } from "../../core/classes/chassis";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
-import type { ClassId, NonweaponGroup, SaveCategory } from "../../core/types";
+import type { ArmorType, ClassId, NonweaponGroup, SaveCategory, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
 import { rollAttack, rollSave } from "./combat-rolls";
 import { buildCharacterSheetContext } from "./context";
@@ -17,7 +17,7 @@ import type {
 } from "./context-types";
 import { validateItemDrop } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
-import { rollNonweaponCheck, specializeWeapon } from "./proficiency-actions";
+import { allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill, specializeWeapon } from "./proficiency-actions";
 import { castSpell, forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
 import { awardXpSplit } from "./xp";
 
@@ -150,6 +150,7 @@ function toPhysicalView(it: RawItem): PhysicalItemView {
       speedFactor: Number(s.speedFactor ?? 0),
       range: rangeToString(s.range),
       category: (s.category as "melee" | "thrown" | "bow" | "crossbow" | undefined) ?? "melee",
+      damageType: (s.damageType as PhysicalItemView["weapon"] extends undefined ? never : NonNullable<PhysicalItemView["weapon"]>["damageType"]) ?? null,
     };
   }
   if (type === "armor") {
@@ -157,6 +158,7 @@ function toPhysicalView(it: RawItem): PhysicalItemView {
       baseAc: Number(s.baseAc ?? 10),
       isShield: Boolean(s.isShield),
       shieldAcBonus: Number(s.shieldAcBonus ?? 0),
+      armorType: (s.armorType as ArmorType | undefined) ?? "none",
     };
   }
   return view;
@@ -276,6 +278,9 @@ export class Adnd2eCharacterSheet extends Base {
       learnSpell: Adnd2eCharacterSheet.#onLearnSpell,
       specializeWeapon: Adnd2eCharacterSheet.#onSpecializeWeapon,
       rollNonweaponCheck: Adnd2eCharacterSheet.#onRollNonweaponCheck,
+      allocateThiefSkillPoint: Adnd2eCharacterSheet.#onAllocateThiefSkillPoint,
+      deallocateThiefSkillPoint: Adnd2eCharacterSheet.#onDeallocateThiefSkillPoint,
+      rollThiefSkill: Adnd2eCharacterSheet.#onRollThiefSkill,
     },
   };
 
@@ -411,6 +416,10 @@ export class Adnd2eCharacterSheet extends Base {
       raceItem,
       physicalItems,
       proficiencyItems: { weapon: weaponProfs, nonweapon: nonweaponProfs },
+      thiefSkillAllocations: [
+        ...(actor.system as { thiefSkills: { allocations: { skill: ThiefSkill; allocatedPoints: number }[] } })
+          .thiefSkills.allocations,
+      ],
       spellItems,
       featureItems,
       config: {
@@ -596,7 +605,9 @@ export class Adnd2eCharacterSheet extends Base {
     target: HTMLElement,
   ): Promise<void> {
     const weaponItemId = target.dataset.itemId;
-    if (weaponItemId) await rollAttack(this.document as never, weaponItemId);
+    if (!weaponItemId) return;
+    const backstabCheckbox = target.closest(".weapon-row")?.querySelector<HTMLInputElement>(".backstab-toggle");
+    await rollAttack(this.document as never, weaponItemId, backstabCheckbox?.checked ?? false);
   }
 
   static async #onRollSave(
@@ -666,6 +677,33 @@ export class Adnd2eCharacterSheet extends Base {
   ): Promise<void> {
     const nwpItemId = target.dataset.itemId;
     if (nwpItemId) await rollNonweaponCheck(this.document as never, nwpItemId);
+  }
+
+  static async #onAllocateThiefSkillPoint(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const skill = target.dataset.skill;
+    if (skill) await allocateThiefSkillPoint(this.document as never, skill as never);
+  }
+
+  static async #onDeallocateThiefSkillPoint(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const skill = target.dataset.skill;
+    if (skill) await deallocateThiefSkillPoint(this.document as never, skill as never);
+  }
+
+  static async #onRollThiefSkill(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const skill = target.dataset.skill;
+    if (skill) await rollThiefSkill(this.document as never, skill as never);
   }
 }
 

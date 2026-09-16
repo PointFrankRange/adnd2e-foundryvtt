@@ -2,7 +2,7 @@
 // (src/data/actor/snapshot.ts) builds this from the Foundry Actor; deriveCharacter
 // consumes only this. Fields beyond what 1c.3a uses (`classes`) are the forward
 // contract Plan 1c.3b fills.
-import type { AbilityScores, ClassId, Race, WizardSchool } from "../../../core/types";
+import type { AbilityScores, ClassId, Race, ThiefSkill, WizardSchool } from "../../../core/types";
 
 export type DualClassState = "primary" | "active";
 
@@ -54,4 +54,6 @@ export interface ActorSnapshot {
   spentNonweaponSlots: number;
   /** race item baseMovement, default 12 */
   baseMovement: number;
+  /** authored thief/bard skill-point allocations — `system.thiefSkills.allocations` */
+  thiefSkillAllocations: readonly { skill: ThiefSkill; allocatedPoints: number }[];
 }

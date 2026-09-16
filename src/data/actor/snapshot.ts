@@ -4,7 +4,7 @@
 import type {
   ActorSnapshot, ClassEntry, DualClassState, EquippedArmor, EquippedShield, MemorizedEntry,
 } from "../derive/character";
-import type { ClassId, Race, WizardSchool } from "../../core/types";
+import type { ClassId, Race, ThiefSkill, WizardSchool } from "../../core/types";
 import { containerAdjustedCarriedWeight } from "../derive/character/container-weight";
 
 interface ClassItemSystem {
@@ -33,6 +33,9 @@ interface SpellcastingSystem {
   wizard: { memorized: readonly MemorizedEntry[] };
   priest: { memorized: readonly MemorizedEntry[] };
 }
+interface ThiefSkillsSystem {
+  allocations: readonly { skill: ThiefSkill; allocatedPoints: number }[];
+}
 
 export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
   // Ruling S2 shim — named actor Schema types land in Plan 1c.3b; until then the
@@ -41,6 +44,7 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
     system: {
       abilities: Record<string, { score: number; exceptional: number | null }>;
       spellcasting: SpellcastingSystem;
+      thiefSkills: ThiefSkillsSystem;
     };
     items: Iterable<{ id: string; type: string; system: unknown }>;
   };
@@ -96,6 +100,7 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
 
   const wizardMemorized: MemorizedEntry[] = [...doc.system.spellcasting.wizard.memorized];
   const priestMemorized: MemorizedEntry[] = [...doc.system.spellcasting.priest.memorized];
+  const thiefSkillAllocations = [...doc.system.thiefSkills.allocations];
 
   const a = doc.system.abilities;
   return {
@@ -114,5 +119,6 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
     spentWeaponSlots,
     spentNonweaponSlots,
     baseMovement: raceItem ? ((raceItem.system as RaceItemSystem).baseMovement ?? 12) : 12,
+    thiefSkillAllocations,
   };
 }

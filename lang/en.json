@@ -225,7 +225,9 @@
         "noWeapons": "No weapons carried.",
         "noArmor": "No armor carried.",
         "rollAttack": "Attack",
-        "rollSave": "Save"
+        "rollSave": "Save",
+        "backstab": "Backstab",
+        "backstabApplied": "×{multiplier} backstab!"
       },
       "spells": {
         "wizardSlots": "Wizard Spell Slots",
@@ -263,7 +265,13 @@
         "specialize": "Specialize",
         "check": "Check",
         "specializeBlockedWarning": "That weapon can no longer be specialized — refresh the sheet.",
-        "checkBlockedWarning": "That proficiency can't be checked right now — refresh the sheet."
+        "checkBlockedWarning": "That proficiency can't be checked right now — refresh the sheet.",
+        "thief": "Thieving Skills",
+        "thiefArmorDisabled": "Thieving skills are unusable in this armor.",
+        "thiefAllocateBlockedWarning": "That skill point allocation isn't available right now — refresh the sheet.",
+        "thiefArmorDisabledWarning": "Thieving skills can't be used in this armor.",
+        "thiefSkillNotUsableWarning": "That skill can't be used yet — refresh the sheet.",
+        "notUsableYet": "Usable at level 4+"
       },
       "features": {
         "languages": "Languages Known",
@@ -307,6 +315,7 @@
         "miss": "Miss",
         "autoHit": "Natural 20 — automatic hit",
         "autoMiss": "Natural 1 — automatic miss",
+        "backstabHit": "Backstab — automatic hit!",
         "modStrength": "Strength", "modDexMissile": "Dexterity (missile)",
         "modWeaponMagic": "Weapon magic", "modProficiency": "Proficiency",
         "modRange": "Range", "modSituational": "Situational",
@@ -344,6 +353,20 @@
         "success": "Success",
         "failure": "Failure",
         "autoFail": "Natural 20 — automatic failure"
+      },
+      "thiefSkill": {
+        "success": "Success",
+        "failure": "Failure",
+        "skills": {
+          "pick-pockets": "Pick Pockets",
+          "open-locks": "Open Locks",
+          "find-remove-traps": "Find/Remove Traps",
+          "move-silently": "Move Silently",
+          "hide-in-shadows": "Hide in Shadows",
+          "detect-noise": "Detect Noise",
+          "climb-walls": "Climb Walls",
+          "read-languages": "Read Languages"
+        }
       }
     },
     "sheets": {

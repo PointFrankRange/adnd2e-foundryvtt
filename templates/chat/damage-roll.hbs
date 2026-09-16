@@ -4,6 +4,9 @@
     <h3>{{actorName}} — {{weaponName}}</h3>
   </header>
   <p class="formula">{{formula}} = <strong>{{total}}</strong></p>
+  {{#if backstabMultiplier}}
+    <p class="backstab">{{localize 'ADND2E.sheet.combat.backstabApplied' multiplier=backstabMultiplier}}</p>
+  {{/if}}
   <button type="button" data-action="applyDamage" data-amount="{{total}}">
     {{localize 'ADND2E.chat.damage.applyToTargets'}}
   </button>

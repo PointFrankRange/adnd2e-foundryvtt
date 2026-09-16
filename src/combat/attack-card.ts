@@ -31,6 +31,7 @@ export function buildAttackCardContext(input: AttackCardInput): AttackCardContex
     hit: input.hit.hit,
     autoHit: input.hit.autoHit,
     autoMiss: input.hit.autoMiss,
+    backstab: input.backstab,
     modifierBreakdown,
     damageContext: input.damageContext,
   };
