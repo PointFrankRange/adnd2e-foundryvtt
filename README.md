@@ -80,7 +80,7 @@ Pack sources are JSON files under `packs/<name>/_source/`, one document per file
 | **2. PC character sheet** | ✅ Complete | ApplicationV2 sheet, tabs, editable fields, class/race as droppable items, multi-/dual-class handling, XP→level, HP rolling |
 | **3. Core combat** | ✅ Complete | THAC0 attack rolls vs AC, damage, the 5 saving-throw categories, initiative (individual + weapon speed + casting time), combat-tracker override |
 | **4. Magic** | ✅ Complete | Spell items, schools/spheres, wizard spellbook + priest sphere access, memorization slot tables, cast-from-chat with slot tracking |
-| **5. Proficiencies & skills** | 🚧 In Progress | Weapon proficiency slots + specialization + non-weapon proficiency checks ✅; thief/bard skill points + rolls, backstab still to come |
+| **5. Proficiencies & skills** | ✅ Complete | Weapon proficiency slots + specialization, non-weapon proficiency checks, thief/bard skill points + rolls, backstab |
 | **6. NPC / monster sheet + bestiary scaffolding** | 🔜 Planned | Streamlined stat-block sheet, item templates for user-owned content |
 | **7. Player's Option: Combat & Tactics** | 🔜 Planned | Maneuvers, critical-hit tables, called shots, expanded initiative |
 | **8. Player's Option: Skills & Powers** | 🔜 Planned | Trait/sub-ability character-point buy, expanded proficiencies |
