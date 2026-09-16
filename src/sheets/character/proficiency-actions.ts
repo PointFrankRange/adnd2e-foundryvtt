@@ -1,8 +1,11 @@
 import { getChassis } from "../../core/classes/chassis";
 import { nonweaponCheck } from "../../core/proficiencies/nonweapon";
 import { canWeaponSpecialize, weaponSpecializationSlotCost } from "../../core/proficiencies/weapon";
-import type { AbilityKey, ClassId } from "../../core/types";
+import { classifyThiefArmor, thiefSkillCheck, thiefSkillPerSkillCap } from "../../core/proficiencies/thief-skills";
+import type { AbilityKey, ArmorType, ClassId, Race, ThiefSkill } from "../../core/types";
 import { buildNonweaponCheckCardContext } from "../../combat/nonweapon-check-card";
+import { buildThiefSkillCardContext } from "../../combat/thief-skill-card";
+import { classItemLevel } from "../../data/derive/class-item";
 import { TEMPLATE_PATH } from "../../constants";
 
 /* ---------------------------------------------------------------------------
@@ -160,6 +163,153 @@ export async function rollNonweaponCheck(actor: ProficiencyActor, nwpItemId: str
   });
   const content = await foundry.applications.handlebars.renderTemplate(
     TEMPLATE_PATH("chat/nonweapon-check-roll.hbs"),
+    context as unknown as Record<string, unknown>,
+  );
+  await roll.toMessage({
+    speaker: ChatMessage.getSpeaker({ actor: actor as never }),
+    content,
+  } as unknown as Roll.MessageData);
+}
+
+/** Points added/removed per click of the +/− allocation buttons. Not a PHB
+ *  rule (the book has no fixed increment) — a locked plan decision for a
+ *  usable UI. A click near either boundary (the remaining pool, or a
+ *  thief's per-skill cap) adds/removes only the amount that still fits,
+ *  rather than jumping past it or being blocked entirely. */
+const THIEF_SKILL_ALLOCATION_STEP = 5;
+
+interface ThiefSkillAllocation { skill: ThiefSkill; allocatedPoints: number }
+interface ThiefSkillsActor extends ProficiencyActor {
+  system: ProficiencyActor["system"] & {
+    thiefSkills: { total: number; spent: number; available: number; allocations: ThiefSkillAllocation[] };
+    abilities: ProficiencyActor["system"]["abilities"] & { dex: { score: number } };
+  };
+}
+
+/** Resolves whether `actor`'s primary class is "thief" or "bard" and, if so,
+ *  its `thiefSkillAccess` list — null for any other class (no access at
+ *  all). Mirrors `firstClassChassisId`'s first-class-wins simplification. */
+function thiefOrBardAccess(actor: ThiefSkillsActor): { isThief: boolean; access: readonly ThiefSkill[] } | null {
+  const chassisId = firstClassChassisId(actor);
+  if (chassisId !== "thief" && chassisId !== "bard") return null;
+  const access = getChassis(chassisId).thiefSkillAccess;
+  return access ? { isThief: chassisId === "thief", access } : null;
+}
+
+/** Resolves the actor's currently worn (non-shield) armor's `armorType`. */
+function resolveWornArmorType(actor: ThiefSkillsActor): ArmorType {
+  for (const item of actor.items) {
+    if (item.type !== "armor") continue;
+    const s = item.system as { equipped?: boolean; isShield?: boolean; armorType?: ArmorType };
+    if (s.equipped && !s.isShield) return s.armorType ?? "none";
+  }
+  return "none";
+}
+
+/** Resolves the actor's race for the thief-skill racial adjustment table —
+ *  mirrors context.ts's `buildThiefSkills` (`input.raceItem?.raceId ?? "human"`),
+ *  which reads it off the actor's embedded `race`-type Item, not a plain
+ *  actor field. This is a defensive re-derivation, so it must reach the
+ *  SAME value the display layer used. */
+function resolveActorRace(actor: ThiefSkillsActor): Race {
+  for (const item of actor.items) {
+    if (item.type !== "race") continue;
+    const raceId = (item.system as { raceId?: string }).raceId;
+    if (raceId) return raceId as Race;
+  }
+  return "human";
+}
+
+/** Resolves the actor's level in its primary thief/bard class, for the
+ *  per-skill cap and (thief only) backstab multiplier. */
+function primaryClassLevel(actor: ThiefSkillsActor): number {
+  for (const item of actor.items) {
+    if (item.type !== "class") continue;
+    const s = item.system as { chassisId?: string; xp?: number };
+    if (s.chassisId === "thief" || s.chassisId === "bard") {
+      return classItemLevel(s.chassisId as ClassId, s.xp ?? 0);
+    }
+  }
+  return 0;
+}
+
+/** Adds up to `THIEF_SKILL_ALLOCATION_STEP` points to `skill`, clamped to
+ *  whatever still fits in the remaining pool and (thief only) the
+ *  per-skill cap. Re-derives the SAME eligibility `context.ts`'s
+ *  `buildThiefSkills` used to decide whether to show the "+" button — a
+ *  defensive re-check against a stale button click, not the primary gate.
+ *  No-ops with a toast when nothing can be added. */
+export async function allocateThiefSkillPoint(actor: ThiefSkillsActor, skill: ThiefSkill): Promise<void> {
+  const info = thiefOrBardAccess(actor);
+  if (!info || !info.access.includes(skill)) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.thiefAllocateBlockedWarning"));
+    return;
+  }
+  const allocations = actor.system.thiefSkills.allocations;
+  const current = allocations.find((a) => a.skill === skill)?.allocatedPoints ?? 0;
+  const poolRoom = actor.system.thiefSkills.available;
+  const capRoom = info.isThief ? thiefSkillPerSkillCap(primaryClassLevel(actor)) - current : Infinity;
+  const amount = Math.min(THIEF_SKILL_ALLOCATION_STEP, poolRoom, capRoom);
+  if (amount <= 0) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.thiefAllocateBlockedWarning"));
+    return;
+  }
+  const updated = allocations.some((a) => a.skill === skill)
+    ? allocations.map((a) => (a.skill === skill ? { ...a, allocatedPoints: a.allocatedPoints + amount } : a))
+    : [...allocations, { skill, allocatedPoints: amount }];
+  await actor.update({ "system.thiefSkills.allocations": updated });
+}
+
+/** Removes up to `THIEF_SKILL_ALLOCATION_STEP` points from `skill`, floored
+ *  at 0. No-ops with a toast when nothing is allocated to remove. */
+export async function deallocateThiefSkillPoint(actor: ThiefSkillsActor, skill: ThiefSkill): Promise<void> {
+  const allocations = actor.system.thiefSkills.allocations;
+  const entry = allocations.find((a) => a.skill === skill);
+  if (!entry || entry.allocatedPoints <= 0) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.thiefAllocateBlockedWarning"));
+    return;
+  }
+  const amount = Math.min(THIEF_SKILL_ALLOCATION_STEP, entry.allocatedPoints);
+  const updated = allocations.map((a) =>
+    a.skill === skill ? { ...a, allocatedPoints: a.allocatedPoints - amount } : a,
+  );
+  await actor.update({ "system.thiefSkills.allocations": updated });
+}
+
+/** Rolls a d100 thief/bard-skill check for `skill` and posts a chat card.
+ *  No-ops with a toast if the actor has no access to `skill` or thief
+ *  skills are disabled by worn armor (`classifyThiefArmor`). */
+export async function rollThiefSkill(actor: ThiefSkillsActor, skill: ThiefSkill): Promise<void> {
+  const info = thiefOrBardAccess(actor);
+  if (!info || !info.access.includes(skill)) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.thiefAllocateBlockedWarning"));
+    return;
+  }
+  const classification = classifyThiefArmor(resolveWornArmorType(actor));
+  if (classification.disabled) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.thiefArmorDisabledWarning"));
+    return;
+  }
+  const allocated = actor.system.thiefSkills.allocations.find((a) => a.skill === skill)?.allocatedPoints ?? 0;
+  const roll = await new Roll("1d100").evaluate();
+  const naturalD100 = roll.dice[0]?.total ?? 0;
+  const result = thiefSkillCheck(skill, {
+    race: resolveActorRace(actor),
+    dexterity: actor.system.abilities.dex.score,
+    armor: classification.category,
+    allocatedPoints: allocated,
+    roll: naturalD100,
+  });
+  const context = buildThiefSkillCardContext({
+    actorName: actor.name,
+    actorImg: actor.img,
+    skillLabel: `ADND2E.chat.thiefSkill.skills.${skill}`,
+    formula: "1d100",
+    roll: naturalD100,
+    result,
+  });
+  const content = await foundry.applications.handlebars.renderTemplate(
+    TEMPLATE_PATH("chat/thief-skill-roll.hbs"),
     context as unknown as Record<string, unknown>,
   );
   await roll.toMessage({

@@ -4,6 +4,9 @@ import { getChassis } from "../../core/classes/chassis";
 import { attackModifiers, hitResult } from "../../core/combat/attack";
 import { attackFormula } from "../../core/dice/formula";
 import { weaponAttackPenalty, weaponSpecializationEffect } from "../../core/proficiencies/weapon";
+import { canBackstab } from "../../core/weapons/backstab";
+import { backstabMultiplier } from "../../core/proficiencies/thief-skills";
+import { classItemLevel } from "../../data/derive/class-item";
 import { TEMPLATE_PATH } from "../../constants";
 import type { ClassId, SaveCategory } from "../../core/types";
 
@@ -41,6 +44,7 @@ interface WeaponItemHandle {
   id: string; name: string;
   system: {
     category: string; proficiencyGroup: string; materialToHit: number; magicBonus: number;
+    damageType: string | null;
   };
 }
 /** Minimal shape needed to find the actor's class chassis and weapon-proficiency
@@ -100,11 +104,26 @@ function resolveProficiencyModifier(actor: AttackerActor, weapon: WeaponItemHand
   return base + weaponSpecializationEffect(category).toHit;
 }
 
+/** Resolves whether `actor` is a thief and, if so, its thief-class level
+ *  (for `backstabMultiplier`) — mirrors `proficiency-actions.ts`'s
+ *  `primaryClassLevel`, kept as an independent re-derivation per this
+ *  plan's established duplicate-re-validation pattern. */
+function resolveThiefBackstabInfo(actor: AttackerActor): { isThief: boolean; thiefLevel: number } {
+  for (const item of actor.items) {
+    if (item.type !== "class") continue;
+    const s = item.system as { chassisId?: string; xp?: number };
+    if (s.chassisId === "thief") {
+      return { isThief: true, thiefLevel: classItemLevel("thief", s.xp ?? 0) };
+    }
+  }
+  return { isThief: false, thiefLevel: 0 };
+}
+
 /** Roll one attack for `weaponItemId` against the current token target(s) (or
  *  a manually-entered AC, via DialogV2, when zero or more than one is
  *  targeted). Posts an attack-roll chat card; a hit exposes a "Roll Damage"
  *  button (chat/chat-listeners.ts). */
-export async function rollAttack(actor: AttackerActor, weaponItemId: string): Promise<void> {
+export async function rollAttack(actor: AttackerActor, weaponItemId: string, backstab = false): Promise<void> {
   const weapon = actor.items.get(weaponItemId);
   if (!weapon) return;
 
@@ -148,13 +167,23 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string): Pr
   const formula = attackFormula(attackBonus);
   const roll = await new Roll(formula).evaluate();
   const naturalD20 = roll.dice[0]?.total ?? 0;
-  const hit = hitResult({ naturalD20, attackBonus, thac0, targetAc });
+  const { isThief, thiefLevel } = resolveThiefBackstabInfo(actor);
+  const backstabEligible = isThief && canBackstab({ category: weapon.system.category as never, damageType: weapon.system.damageType as never });
+  const backstabActive = backstab && backstabEligible;
+
+  const baseHit = hitResult({ naturalD20, attackBonus, thac0, targetAc });
+  const hit = backstabActive ? { ...baseHit, hit: true, autoHit: true, autoMiss: false } : baseHit;
 
   const context = buildAttackCardContext({
     actorName: actor.name, actorImg: actor.img,
     weaponName: weapon.name, targetName,
     formula, naturalD20, hit, modifierBreakdown: breakdown,
-    damageContext: hit.hit ? { weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize } : null,
+    damageContext: hit.hit
+      ? {
+          weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize,
+          backstabMultiplier: backstabActive ? backstabMultiplier(thiefLevel) : null,
+        }
+      : null,
   });
 
   const content = await foundry.applications.handlebars.renderTemplate(

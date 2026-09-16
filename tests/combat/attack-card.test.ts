@@ -9,7 +9,7 @@ function input(over: Partial<AttackCardInput> = {}): AttackCardInput {
     formula: "1d20 + 3", naturalD20: 15,
     hit: { hit: true, autoHit: false, autoMiss: false, needed: 12, total: 18, margin: 6 },
     modifierBreakdown: { strength: 1, dexterityMissile: 0, weaponMagic: 0, proficiency: 0, range: 0, situational: 0 },
-    damageContext: { weaponItemId: "w1", actorUuid: "Actor.a1", targetSize: "small" },
+    damageContext: { weaponItemId: "w1", actorUuid: "Actor.a1", targetSize: "small", backstabMultiplier: null },
     ...over,
   };
 }
