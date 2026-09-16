@@ -45,6 +45,8 @@ export class Adnd2eCreatureSheet extends Base {
     actions: {
       rollAttack: Adnd2eCreatureSheet.#onRollAttack,
       rollSave: Adnd2eCreatureSheet.#onRollSave,
+      addAttack: Adnd2eCreatureSheet.#onAddAttack,
+      deleteAttack: Adnd2eCreatureSheet.#onDeleteAttack,
     },
   };
 
@@ -64,6 +66,16 @@ export class Adnd2eCreatureSheet extends Base {
     context.systemFields = (this.document as unknown as {
       system: { schema: { fields: Record<string, unknown> } };
     }).system.schema.fields;
+    // Exposed the same way Adnd2eNpcSheet exposes `alignments` — these are
+    // read-only CONFIG.ADND2E label maps consumed by {{selectOptions}} in the
+    // template; they need not flow through the pure buildCreatureSheetContext
+    // builder (whole-branch-review C1 fix).
+    const cfg = (CONFIG as unknown as { ADND2E: Record<string, Record<string, string>> }).ADND2E;
+    context.sizes = cfg.sizes;
+    context.alignments = cfg.alignments;
+    context.classGroups = cfg.classGroups;
+    context.attackTypes = cfg.attackTypes;
+    context.saveModes = cfg.saveModes;
     return context;
   }
 
@@ -104,6 +116,30 @@ export class Adnd2eCreatureSheet extends Base {
   static async #onRollSave(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
     const category = target.dataset.save as SaveCategory | undefined;
     if (category) await rollSave(this.document as never, category);
+  }
+
+  // No existing precedent in this codebase for an editable ArrayField list —
+  // add/delete are plain actor.update() calls on the whole `system.attacks`
+  // array, matching every other action on this sheet's "read the document,
+  // call update()" style (whole-branch-review C1 fix).
+  static async #onAddAttack(this: Adnd2eCreatureSheet): Promise<void> {
+    const actor = this.document as unknown as {
+      system: { attacks: CreatureSheetInput["attacks"] };
+      update(data: Record<string, unknown>): Promise<unknown>;
+    };
+    const blank = { name: "", count: 1, damage: "", thac0Override: null, type: "melee" as const, special: "" };
+    await actor.update({ "system.attacks": [...actor.system.attacks, blank] });
+  }
+
+  static async #onDeleteAttack(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const index = target.dataset.attackIndex;
+    if (index === undefined) return;
+    const actor = this.document as unknown as {
+      system: { attacks: CreatureSheetInput["attacks"] };
+      update(data: Record<string, unknown>): Promise<unknown>;
+    };
+    const spliced = actor.system.attacks.filter((_, i) => i !== Number(index));
+    await actor.update({ "system.attacks": spliced });
   }
 }
 

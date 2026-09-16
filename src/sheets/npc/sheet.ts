@@ -1,5 +1,6 @@
 import { TEMPLATE_PATH } from "../../constants";
-import type { ThiefSkill } from "../../core/types";
+import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
+import type { NonweaponGroup, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
 import {
   toClassView,
@@ -14,13 +15,7 @@ import { rollAttack, rollSave } from "../character/combat-rolls";
 import { buildCharacterSheetContext } from "../character/context";
 import type { CharacterSheetInput } from "../character/context-types";
 import { rollHitPoints } from "../character/hp-roll";
-import {
-  allocateThiefSkillPoint,
-  deallocateThiefSkillPoint,
-  rollNonweaponCheck,
-  rollThiefSkill,
-  specializeWeapon,
-} from "../character/proficiency-actions";
+import { rollNonweaponCheck, rollThiefSkill, specializeWeapon } from "../character/proficiency-actions";
 import { castSpell, forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "../character/spell-actions";
 
 /* ---------------------------------------------------------------------------
@@ -49,8 +44,10 @@ const { HandlebarsApplicationMixin } = foundry.applications.api;
 // ActorSheetV2 extends DocumentSheetV2 directly (no HandlebarsApplicationMixin
 // baked in under v14.364), so the mixin is applied here and the intersection is
 // collapsed to a single constructor describing only the members this class
-// touches. `_onDropItem` is NOT included — see this class's doc comment on the
-// v1 drop-validation scoping decision.
+// touches. `_onDropItem` IS included (whole-branch-review I2 fix) — the
+// duplicate-race/class and slot-overflow validation half PC sheet does stays
+// intentionally out of scope on npc (v1 ruling), but the slotsInvested write
+// does not: see this class's `_onDropItem` override below.
 const Base = HandlebarsApplicationMixin(ActorSheetV2 as never) as unknown as new (
   ...args: never[]
 ) => {
@@ -64,6 +61,7 @@ const Base = HandlebarsApplicationMixin(ActorSheetV2 as never) as unknown as new
     options: unknown,
   ): Promise<Record<string, unknown>>;
   _onRender(context: unknown, options: unknown): Promise<void>;
+  _onDropItem(event: DragEvent, item: Item.Implementation): Promise<unknown>;
 };
 
 const T = (p: string): string => TEMPLATE_PATH("actor/npc", p);
@@ -97,8 +95,6 @@ export class Adnd2eNpcSheet extends Base {
       learnSpell: Adnd2eNpcSheet.#onLearnSpell,
       specializeWeapon: Adnd2eNpcSheet.#onSpecializeWeapon,
       rollNonweaponCheck: Adnd2eNpcSheet.#onRollNonweaponCheck,
-      allocateThiefSkillPoint: Adnd2eNpcSheet.#onAllocateThiefSkillPoint,
-      deallocateThiefSkillPoint: Adnd2eNpcSheet.#onDeallocateThiefSkillPoint,
       rollThiefSkill: Adnd2eNpcSheet.#onRollThiefSkill,
     },
   };
@@ -112,7 +108,10 @@ export class Adnd2eNpcSheet extends Base {
     header: { template: TEMPLATE_PATH("actor/character", "header.hbs") },
     tabs: { template: "templates/generic/tab-navigation.hbs" },
     main: { template: T("main.hbs"), scrollable: [""] },
-    spells: { template: T("spells.hbs"), scrollable: [""] },
+    // Reuses the PC sheet's spells.hbs by path (byte-identical, no npc-specific
+    // markup needed) — same "reuse, don't duplicate" pattern the header PART
+    // above already follows (whole-branch-review I4 fix; was a duplicated file).
+    spells: { template: TEMPLATE_PATH("actor/character", "spells.hbs"), scrollable: [""] },
     details: { template: T("details.hbs"), scrollable: [""] },
   };
 
@@ -143,6 +142,11 @@ export class Adnd2eNpcSheet extends Base {
     context.alignments = (
       CONFIG as unknown as { ADND2E: { alignments: Record<string, string> } }
     ).ADND2E.alignments;
+    // whole-branch-review I3 fix — system.npc.disposition's <select> needs the
+    // CONFIG.ADND2E.dispositions label map, exposed the same way as `alignments`.
+    context.dispositions = (
+      CONFIG as unknown as { ADND2E: { dispositions: Record<string, string> } }
+    ).ADND2E.dispositions;
     return context;
   }
 
@@ -242,6 +246,51 @@ export class Adnd2eNpcSheet extends Base {
       },
       optionalRules: getOptionalRules(),
     };
+  }
+
+  // Job (b) of Adnd2eCharacterSheet._onDropItem, and ONLY job (b) (whole-branch-
+  // review I2 fix): write the class-adjusted `slotsInvested` onto a newly
+  // dropped weapon/nonweapon proficiency item. The validation half (duplicate
+  // race/class guard, slot-overflow guard — job (a)) is intentionally NOT
+  // reproduced here per the earlier v1 scoping ruling for this sheet. Without
+  // this override the item silently kept its schema default of `1` instead of
+  // the class-adjusted cost, which is worse than "skips a warning dialog" —
+  // it's data that silently differs from what the same drop produces on a PC
+  // sheet (checkTarget / spent-slot totals read wrong forever).
+  override async _onDropItem(event: DragEvent, item: Item.Implementation): Promise<unknown> {
+    const actor = this.document as unknown as {
+      items: Iterable<{ type: string; system: { chassisId?: string | null } }>;
+    };
+    const dropped = item as unknown as {
+      type: string;
+      system: { slotCost?: number; group?: NonweaponGroup };
+    };
+
+    let dropSlotCost: number | undefined;
+    if (dropped.type === "weaponProficiency") {
+      dropSlotCost = 1;
+    } else if (dropped.type === "nonweaponProficiency") {
+      const firstClassId = [...actor.items].find((i) => i.type === "class")?.system.chassisId ?? null;
+      dropSlotCost = firstClassId
+        ? nonweaponSlotCost(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", firstClassId as never)
+        : (dropped.system.slotCost ?? 1);
+    }
+
+    const result = await super._onDropItem(event, item);
+    const isNewDrop =
+      (item as unknown as { parent?: { uuid?: string } }).parent?.uuid !==
+      (this.document as unknown as { uuid: string }).uuid;
+    if (
+      result &&
+      isNewDrop &&
+      dropSlotCost !== undefined &&
+      (dropped.type === "weaponProficiency" || dropped.type === "nonweaponProficiency")
+    ) {
+      await (result as unknown as { update(data: Record<string, unknown>): Promise<unknown> }).update({
+        "system.slotsInvested": dropSlotCost,
+      });
+    }
+    return result;
   }
 
   // Wires the `[data-item-id][data-field]` inputs the reused `item-row.hbs`
@@ -344,16 +393,6 @@ export class Adnd2eNpcSheet extends Base {
   static async #onRollNonweaponCheck(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {
     const id = target.dataset.itemId;
     if (id) await rollNonweaponCheck(this.document as never, id);
-  }
-
-  static async #onAllocateThiefSkillPoint(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {
-    const skill = target.dataset.skill;
-    if (skill) await allocateThiefSkillPoint(this.document as never, skill as never);
-  }
-
-  static async #onDeallocateThiefSkillPoint(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {
-    const skill = target.dataset.skill;
-    if (skill) await deallocateThiefSkillPoint(this.document as never, skill as never);
   }
 
   static async #onRollThiefSkill(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {

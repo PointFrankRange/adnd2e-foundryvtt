@@ -331,8 +331,25 @@ describe("lang/en.json — SP6 creature sheet strings", () => {
     for (const key of [
       "ADND2E.sheet.creatureTitle",
       "ADND2E.sheet.creature.hd",
+      "ADND2E.sheet.creature.hdBonus",
+      "ADND2E.sheet.creature.fixedHp",
+      "ADND2E.sheet.creature.thac0AsFighterLevel",
+      "ADND2E.sheet.creature.intelligence",
       "ADND2E.sheet.creature.attacks",
       "ADND2E.sheet.creature.noAttacks",
+      "ADND2E.sheet.creature.attackName",
+      "ADND2E.sheet.creature.attackCount",
+      "ADND2E.sheet.creature.attackDamage",
+      "ADND2E.sheet.creature.attackType",
+      "ADND2E.sheet.creature.attackSpecial",
+      "ADND2E.sheet.creature.attackThac0Override",
+      "ADND2E.sheet.creature.addAttack",
+      "ADND2E.sheet.creature.deleteAttack",
+      "ADND2E.sheet.creature.savesAuthoring",
+      "ADND2E.sheet.creature.saveMode",
+      "ADND2E.sheet.creature.saveClassGroup",
+      "ADND2E.sheet.creature.saveClassLevel",
+      "ADND2E.sheet.creature.flyManeuverability",
       "ADND2E.sheet.creature.morale",
       "ADND2E.sheet.creature.magicResistance",
       "ADND2E.sheet.creature.treasureType",
@@ -353,6 +370,19 @@ describe("lang/en.json — SP6 NPC sheet title", () => {
     const resolved = resolve("ADND2E.sheet.npcTitle");
     expect(typeof resolved).toBe("string");
     expect((resolved as string).length).toBeGreaterThan(0);
+  });
+});
+
+describe("lang/en.json — SP6 NPC panel fields (whole-branch fix I3)", () => {
+  it("resolves every ADND2E.sheet.npc.* key", () => {
+    for (const key of [
+      "ADND2E.sheet.npc.morale",
+      "ADND2E.sheet.npc.xpValue",
+      "ADND2E.sheet.npc.disposition",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
   });
 });
 

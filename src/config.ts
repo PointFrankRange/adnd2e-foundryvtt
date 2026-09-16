@@ -76,6 +76,9 @@ export interface Adnd2eConfig {
   readonly creatureIntelligence: LabelMap<CreatureIntelligenceBand>;
   readonly treasureTypes: LabelMap<TreasureType>;
   readonly weaponStyleGroups: LabelMap<WeaponStyleGroup>;
+  readonly attackTypes: LabelMap<"melee" | "ranged">;
+  readonly dispositions: LabelMap<"friendly" | "neutral" | "hostile">;
+  readonly saveModes: LabelMap<"explicit" | "asClass">;
   /** Reserved for the Combat & Tactics weapon-group rules (Sub-project 7). PHB core has no named groups. */
   readonly weaponProficiencyGroups: Readonly<Record<string, string>>;
   readonly currency: Readonly<Record<CurrencyKey, CurrencyDef>>;
@@ -215,6 +218,19 @@ export function buildAdnd2eConfig(): Adnd2eConfig {
       "two-weapon": "ADND2E.weaponStyleGroups.two-weapon",
       "weapon-and-shield": "ADND2E.weaponStyleGroups.weapon-and-shield",
       "two-handed-weapon": "ADND2E.weaponStyleGroups.two-handed-weapon",
+    },
+    attackTypes: {
+      melee: "ADND2E.attackTypes.melee",
+      ranged: "ADND2E.attackTypes.ranged",
+    },
+    dispositions: {
+      friendly: "ADND2E.dispositions.friendly",
+      neutral: "ADND2E.dispositions.neutral",
+      hostile: "ADND2E.dispositions.hostile",
+    },
+    saveModes: {
+      explicit: "ADND2E.saveModes.explicit",
+      asClass: "ADND2E.saveModes.asClass",
     },
     weaponProficiencyGroups: {},
     currency: {

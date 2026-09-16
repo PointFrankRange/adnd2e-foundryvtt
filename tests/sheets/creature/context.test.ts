@@ -59,6 +59,18 @@ describe("buildCreatureSheetContext", () => {
     expect(c.vitals.movementSummary).toBe("6, climb 3, fly 18 (C)");
   });
 
+  it("omits the parenthetical when fly > 0 but flyManeuverability is blank (M7)", () => {
+    const c = buildCreatureSheetContext(
+      input({
+        attributes: {
+          ...input().attributes,
+          movement: { land: 12, burrow: 0, climb: 0, fly: 18, swim: 0, flyManeuverability: "" },
+        },
+      }),
+    );
+    expect(c.vitals.movementSummary).toBe("12, fly 18");
+  });
+
   it("maps each attacks[] entry to a row with the array index as id", () => {
     const c = buildCreatureSheetContext(input());
     expect(c.attacks).toHaveLength(2);

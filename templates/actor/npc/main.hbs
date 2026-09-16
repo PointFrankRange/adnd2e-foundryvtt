@@ -9,6 +9,23 @@
     </label>
   </div>
 
+  <div class="npc panel">
+    <label>
+      {{localize 'ADND2E.sheet.npc.morale'}}
+      <input type="number" name="system.npc.morale" value="{{source.system.npc.morale}}">
+    </label>
+    <label>
+      {{localize 'ADND2E.sheet.npc.xpValue'}}
+      <input type="number" name="system.npc.xpValue" value="{{source.system.npc.xpValue}}">
+    </label>
+    <label>
+      {{localize 'ADND2E.sheet.npc.disposition'}}
+      <select name="system.npc.disposition">
+        {{selectOptions dispositions selected=source.system.npc.disposition localize=true}}
+      </select>
+    </label>
+  </div>
+
   <div class="abilities panel">
     <h3>{{localize 'ADND2E.sheet.sections.abilities'}}</h3>
     {{#each adnd2e.abilities as |row|}}

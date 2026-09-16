@@ -1,37 +1,80 @@
 <div class="adnd2e sheet creature">
 
   <header class="creature-header">
-    <img src="{{adnd2e.identity.img}}" alt="{{adnd2e.identity.name}}">
+    <img src="{{adnd2e.identity.img}}" alt="{{adnd2e.identity.name}}" data-action="editImage" data-edit="img">
     <div>
       <h1><input type="text" name="name" value="{{adnd2e.identity.name}}"></h1>
-      <p class="subtitle">{{adnd2e.details.size}} — {{adnd2e.details.alignment}}</p>
+      <p class="subtitle">
+        <select name="system.details.size">
+          {{selectOptions sizes selected=source.system.details.size localize=true}}
+        </select>
+        —
+        <select name="system.details.alignment">
+          {{selectOptions alignments selected=source.system.details.alignment localize=true}}
+        </select>
+      </p>
     </div>
   </header>
 
   <div class="vitals panel">
-    <span>{{localize 'ADND2E.sheet.vitals.ac'}}: {{adnd2e.vitals.ac}}</span>
+    <span>{{localize 'ADND2E.sheet.vitals.ac'}}: <input type="number" name="system.attributes.ac.value" value="{{source.system.attributes.ac.value}}"></span>
     <span>{{localize 'ADND2E.sheet.vitals.movement'}}: {{adnd2e.vitals.movementSummary}}</span>
-    <span>{{localize 'ADND2E.sheet.creature.hd'}}: <input type="number" name="system.hd.count" value="{{source.system.hd.count}}"> d<input type="number" name="system.hd.dieType" value="{{source.system.hd.dieType}}"></span>
-    <span>{{localize 'ADND2E.sheet.vitals.hp'}}: <input type="number" name="system.attributes.hp.value" value="{{adnd2e.vitals.hp.value}}"> / {{adnd2e.vitals.hp.max}}</span>
-    <span>{{localize 'ADND2E.sheet.vitals.thac0'}}: {{adnd2e.vitals.thac0}}</span>
+    <span>
+      {{localize 'ADND2E.sheet.creature.hd'}}:
+      <input type="number" name="system.hd.count" value="{{source.system.hd.count}}"> d<input type="number" name="system.hd.dieType" value="{{source.system.hd.dieType}}">
+      + <input type="number" name="system.hd.bonus" value="{{source.system.hd.bonus}}">
+    </span>
+    <span>{{localize 'ADND2E.sheet.creature.fixedHp'}}: <input type="number" name="system.hd.fixedHp" value="{{source.system.hd.fixedHp}}"></span>
+    <span>{{localize 'ADND2E.sheet.vitals.hp'}}: <input type="number" name="system.attributes.hp.value" value="{{source.system.attributes.hp.value}}"> / {{adnd2e.vitals.hp.max}}</span>
+    <span>{{localize 'ADND2E.sheet.vitals.thac0'}}: <input type="number" name="system.attributes.thac0.value" value="{{source.system.attributes.thac0.value}}"></span>
+    <span>{{localize 'ADND2E.sheet.creature.thac0AsFighterLevel'}}: <input type="number" name="system.attributes.thac0.asFighterLevel" value="{{source.system.attributes.thac0.asFighterLevel}}"></span>
+  </div>
+
+  <div class="movement panel">
+    <h3>{{localize 'ADND2E.sheet.vitals.movement'}}</h3>
+    <label>{{localize 'ADND2E.movementModes.land'}} <input type="number" name="system.attributes.movement.land" value="{{source.system.attributes.movement.land}}"></label>
+    <label>{{localize 'ADND2E.movementModes.burrow'}} <input type="number" name="system.attributes.movement.burrow" value="{{source.system.attributes.movement.burrow}}"></label>
+    <label>{{localize 'ADND2E.movementModes.climb'}} <input type="number" name="system.attributes.movement.climb" value="{{source.system.attributes.movement.climb}}"></label>
+    <label>{{localize 'ADND2E.movementModes.fly'}} <input type="number" name="system.attributes.movement.fly" value="{{source.system.attributes.movement.fly}}"></label>
+    <label>{{localize 'ADND2E.movementModes.swim'}} <input type="number" name="system.attributes.movement.swim" value="{{source.system.attributes.movement.swim}}"></label>
+    <label>{{localize 'ADND2E.sheet.creature.flyManeuverability'}} <input type="text" name="system.attributes.movement.flyManeuverability" value="{{source.system.attributes.movement.flyManeuverability}}"></label>
   </div>
 
   <div class="attacks panel">
     <h3>{{localize 'ADND2E.sheet.creature.attacks'}}</h3>
     <div class="attack-list">
-      {{#each adnd2e.attacks as |a|}}
+      <div class="attack-row attack-row-header">
+        <span>{{localize 'ADND2E.sheet.creature.attackName'}}</span>
+        <span>{{localize 'ADND2E.sheet.creature.attackCount'}}</span>
+        <span>{{localize 'ADND2E.sheet.creature.attackDamage'}}</span>
+        <span>{{localize 'ADND2E.sheet.creature.attackType'}}</span>
+        <span>{{localize 'ADND2E.sheet.creature.attackSpecial'}}</span>
+        <span>{{localize 'ADND2E.sheet.creature.attackThac0Override'}}</span>
+      </div>
+      {{#each source.system.attacks as |a|}}
         <div class="attack-row">
-          <span class="name">{{a.name}}{{#if (gt a.count 1)}} ×{{a.count}}{{/if}}</span>
-          <span class="damage">{{a.damage}}</span>
-          {{#if a.special}}<span class="special">{{a.special}}</span>{{/if}}
-          <button type="button" data-action="rollAttack" data-attack-index="{{a.index}}">
+          <input type="text" name="system.attacks.{{@index}}.name" value="{{a.name}}">
+          <input type="number" name="system.attacks.{{@index}}.count" value="{{a.count}}" min="1">
+          <input type="text" name="system.attacks.{{@index}}.damage" value="{{a.damage}}">
+          <select name="system.attacks.{{@index}}.type">
+            {{selectOptions @root.attackTypes selected=a.type localize=true}}
+          </select>
+          <input type="text" name="system.attacks.{{@index}}.special" value="{{a.special}}">
+          <input type="number" name="system.attacks.{{@index}}.thac0Override" value="{{a.thac0Override}}">
+          <button type="button" data-action="rollAttack" data-attack-index="{{@index}}">
             {{localize 'ADND2E.sheet.combat.rollAttack'}}
+          </button>
+          <button type="button" data-action="deleteAttack" data-attack-index="{{@index}}">
+            {{localize 'ADND2E.sheet.creature.deleteAttack'}}
           </button>
         </div>
       {{else}}
         <p class="placeholder">{{localize 'ADND2E.sheet.creature.noAttacks'}}</p>
       {{/each}}
     </div>
+    <button type="button" data-action="addAttack">
+      {{localize 'ADND2E.sheet.creature.addAttack'}}
+    </button>
   </div>
 
   <table class="saves panel">
@@ -51,12 +94,44 @@
     </tbody>
   </table>
 
+  <div class="saves-authoring panel">
+    <h3>{{localize 'ADND2E.sheet.creature.savesAuthoring'}}</h3>
+    <label>
+      {{localize 'ADND2E.sheet.creature.saveMode'}}
+      <select name="system.saves.mode">
+        {{selectOptions saveModes selected=source.system.saves.mode localize=true}}
+      </select>
+    </label>
+    <div class="saves-explicit">
+      {{#each adnd2e.saves as |row|}}
+        <label>
+          {{localize row.label}}
+          <input type="number" name="system.saves.explicit.{{row.category}}"
+            value="{{lookup @root.source.system.saves.explicit row.category}}">
+        </label>
+      {{/each}}
+    </div>
+    <div class="saves-as-class">
+      <label>
+        {{localize 'ADND2E.sheet.creature.saveClassGroup'}}
+        <select name="system.saves.asClass.group">
+          {{selectOptions classGroups selected=source.system.saves.asClass.group localize=true blank=""}}
+        </select>
+      </label>
+      <label>
+        {{localize 'ADND2E.sheet.creature.saveClassLevel'}}
+        <input type="number" name="system.saves.asClass.level" value="{{source.system.saves.asClass.level}}" min="1">
+      </label>
+    </div>
+  </div>
+
   <div class="details panel">
-    <span>{{localize 'ADND2E.sheet.creature.morale'}}: <input type="number" name="system.details.morale" value="{{adnd2e.details.morale}}"></span>
-    <span>{{localize 'ADND2E.sheet.creature.magicResistance'}}: <input type="number" name="system.details.magicResistance" value="{{adnd2e.details.magicResistance}}">%</span>
-    <span>{{localize 'ADND2E.sheet.creature.treasureType'}}: <input type="text" name="system.details.treasureType" value="{{adnd2e.details.treasureType}}"></span>
-    <span>{{localize 'ADND2E.sheet.creature.numberAppearing'}}: <input type="text" name="system.details.numberAppearing" value="{{adnd2e.details.numberAppearing}}"></span>
-    <span>{{localize 'ADND2E.sheet.creature.xpValue'}}: <input type="number" name="system.details.xpValue" value="{{adnd2e.details.xpValue}}"></span>
+    <span>{{localize 'ADND2E.sheet.creature.intelligence'}}: <input type="text" name="system.details.intelligence" value="{{source.system.details.intelligence}}"></span>
+    <span>{{localize 'ADND2E.sheet.creature.morale'}}: <input type="number" name="system.details.morale" value="{{source.system.details.morale}}"></span>
+    <span>{{localize 'ADND2E.sheet.creature.magicResistance'}}: <input type="number" name="system.details.magicResistance" value="{{source.system.details.magicResistance}}">%</span>
+    <span>{{localize 'ADND2E.sheet.creature.treasureType'}}: <input type="text" name="system.details.treasureType" value="{{source.system.details.treasureType}}"></span>
+    <span>{{localize 'ADND2E.sheet.creature.numberAppearing'}}: <input type="text" name="system.details.numberAppearing" value="{{source.system.details.numberAppearing}}"></span>
+    <span>{{localize 'ADND2E.sheet.creature.xpValue'}}: <input type="number" name="system.details.xpValue" value="{{source.system.details.xpValue}}"></span>
   </div>
 
   <div class="text-fields panel">
