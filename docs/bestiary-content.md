@@ -21,6 +21,11 @@ your own creature compendium:
    See `docs/importing-content.md` for the exact JSON envelope format
    (Sub-project 1c.4b).
 
-The empty "Bestiary" folder in this system's own compendium sidebar is where
-a GM's own creature packs are expected to live, mirroring the existing
-"Equipment"/"Spells" folders — it ships empty and stays that way.
+This system's manifest reserves a "Bestiary" folder in its own compendium
+sidebar for a GM's own creature packs, mirroring the existing
+"Equipment"/"Spells" folders — but Foundry does not display a compendium
+folder in the sidebar until at least one pack is assigned to it. The
+"Bestiary" folder itself won't be visible until you create your own
+compendium (step 3 above) and assign it to that folder — when creating a
+Compendium, use the "Folder" dropdown in Foundry's own creation dialog to
+place it under "Bestiary".
