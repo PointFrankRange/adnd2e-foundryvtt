@@ -473,7 +473,22 @@ export class Adnd2eCharacterSheet extends Base {
       ui.notifications?.warn(game.i18n!.localize(verdict.reason!));
       return null;
     }
-    return super._onDropItem(event, item);
+
+    const result = await super._onDropItem(event, item);
+    const isNewDrop =
+      (item as unknown as { parent?: { uuid?: string } }).parent?.uuid !==
+      (this.document as unknown as { uuid: string }).uuid;
+    if (
+      result &&
+      isNewDrop &&
+      dropSlotCost !== undefined &&
+      (dropped.type === "weaponProficiency" || dropped.type === "nonweaponProficiency")
+    ) {
+      await (result as unknown as { update(data: Record<string, unknown>): Promise<unknown> }).update({
+        "system.slotsInvested": dropSlotCost,
+      });
+    }
+    return result;
   }
 
   override async _onRender(context: unknown, options: unknown): Promise<void> {
