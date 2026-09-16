@@ -79,7 +79,7 @@ Pack sources are JSON files under `packs/<name>/_source/`, one document per file
 | **1. Foundation & data architecture** | ✅ Complete | Core rules engine + all DataModels + `deriveCharacter` / `deriveCreature` + ActiveEffect two-pass + 4 compendium packs + `build:packs` + `importContent` + migration framework + stub sheets |
 | **2. PC character sheet** | ✅ Complete | ApplicationV2 sheet, tabs, editable fields, class/race as droppable items, multi-/dual-class handling, XP→level, HP rolling |
 | **3. Core combat** | ✅ Complete | THAC0 attack rolls vs AC, damage, the 5 saving-throw categories, initiative (individual + weapon speed + casting time), combat-tracker override |
-| **4. Magic** | 🔜 Planned | Spell items, schools/spheres, wizard spellbook + priest sphere access, memorization slot tables, cast-from-chat with slot tracking |
+| **4. Magic** | ✅ Complete | Spell items, schools/spheres, wizard spellbook + priest sphere access, memorization slot tables, cast-from-chat with slot tracking |
 | **5. Proficiencies & skills** | 🔜 Planned | Weapon proficiency slots + specialization, non-weapon proficiency checks |
 | **6. NPC / monster sheet + bestiary scaffolding** | 🔜 Planned | Streamlined stat-block sheet, item templates for user-owned content |
 | **7. Player's Option: Combat & Tactics** | 🔜 Planned | Maneuvers, critical-hit tables, called shots, expanded initiative |
