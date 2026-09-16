@@ -1,0 +1,13 @@
+// AD&D 2E creature/monster stat-block sheet (SP6 Task 3). Intentionally
+// minimal — just making the sheet's content scrollable inside Foundry core's
+// `.window-content` (which clips overflow: public/css/foundry2.css's
+// `.application .window-content { overflow: hidden; }`). A full styling pass
+// is out of scope (matches the whole-branch review's I1 boundary, which
+// scoped only .character/.npc).
+.adnd2e.sheet.creature {
+  // A flex child's default min-height: auto refuses to shrink below its
+  // content size, which silently defeats overflow-y until this is set.
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}

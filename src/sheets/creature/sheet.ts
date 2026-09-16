@@ -39,7 +39,13 @@ const T = (p: string): string => TEMPLATE_PATH("actor/creature", p);
 export class Adnd2eCreatureSheet extends Base {
   static DEFAULT_OPTIONS = {
     classes: ["adnd2e", "sheet", "actor", "creature"],
-    position: { width: 560, height: 640 },
+    // Bumped from the original 640 — the C1 whole-branch-review fix added
+    // several new panels (movement, an editable attacks table, a saves
+    // authoring panel) and 640 left only the header/vitals visible before
+    // scrolling. 760 shows meaningfully more content on a typical screen
+    // while still fitting comfortably; the sheet is scrollable regardless
+    // (see styles/actor/creature.scss) so this is a convenience, not a fix.
+    position: { width: 560, height: 760 },
     window: { resizable: true },
     form: { submitOnChange: true, closeOnSubmit: false },
     actions: {
