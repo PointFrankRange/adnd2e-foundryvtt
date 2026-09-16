@@ -176,7 +176,8 @@
       },
       "drop": {
         "duplicateRace": "This character already has a race.",
-        "duplicateClass": "This character already has that class."
+        "duplicateClass": "This character already has that class.",
+        "insufficientSlots": "Not enough proficiency slots available for that."
       },
       "xp": {
         "award": "Award XP",
