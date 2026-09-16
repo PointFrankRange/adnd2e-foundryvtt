@@ -18,6 +18,8 @@ import {
   classifyThiefArmor,
   thiefSkillPerSkillCap,
   thiefSkillCheck,
+  resolveBardSkill,
+  bardSkillCheck,
 } from "../../../src/core/proficiencies/thief-skills";
 
 describe("thief-skill tables", () => {
@@ -440,5 +442,43 @@ describe("thiefSkillCheck", () => {
     const r = thiefSkillCheck("climb-walls", { ...ctx, allocatedPoints: 200, roll: 95 });
     expect(r.target).toBe(95);
     expect(r.success).toBe(true);
+  });
+});
+
+describe("resolveBardSkill()", () => {
+  it("uses Table 33 (bard), not Table 26 (thief) — differs from resolveThiefSkill for the same inputs", () => {
+    // pick-pockets, human, dex 12, leather, 0 allocated:
+    // thief (Table 26) base 15 -> resolveThiefSkill = 15
+    // bard (Table 33) base 10 -> resolveBardSkill = 10
+    const ctx = { race: "human", dexterity: 12, armor: "leather", allocatedPoints: 0 } as const;
+    const thiefResult = resolveThiefSkill("pick-pockets", ctx);
+    const bardResult = resolveBardSkill("pick-pockets", ctx);
+    expect(thiefResult).toBe(15);
+    expect(bardResult).toBe(10);
+    expect(bardResult).not.toBe(thiefResult);
+  });
+
+  it("adds allocated points and caps at 95", () => {
+    expect(
+      resolveBardSkill("climb-walls", { race: "human", dexterity: 15, armor: "leather", allocatedPoints: 20 }),
+    ).toBe(70); // 50 + 20
+    expect(
+      resolveBardSkill("climb-walls", { race: "human", dexterity: 15, armor: "leather", allocatedPoints: 50 }),
+    ).toBe(95); // 50 + 50 = 100 -> cap 95
+  });
+});
+
+describe("bardSkillCheck", () => {
+  const ctx = { race: "human", dexterity: 12, armor: "leather" } as const;
+
+  it("succeeds when the roll is at or under the effective skill percentage", () => {
+    // pick-pockets bard base 10 (Table 33) + 0 racial (human) + 0 dex (12) + 0 armor (leather) = 10; +40 allocated = 50
+    const r = bardSkillCheck("pick-pockets", { ...ctx, allocatedPoints: 40, roll: 50 });
+    expect(r).toEqual({ success: true, target: 50, roll: 50 });
+  });
+
+  it("fails when the roll exceeds the effective skill percentage", () => {
+    const r = bardSkillCheck("pick-pockets", { ...ctx, allocatedPoints: 40, roll: 51 });
+    expect(r).toEqual({ success: false, target: 50, roll: 51 });
   });
 });

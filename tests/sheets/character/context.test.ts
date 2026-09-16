@@ -620,7 +620,7 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
             type: "armor",
             equipped: true,
             magicBonus: 1,
-            armor: { baseAc: 3, isShield: false, shieldAcBonus: 0 },
+            armor: { baseAc: 3, isShield: false, shieldAcBonus: 0, armorType: "leather" },
           }),
           physItem({
             id: "s1",
@@ -628,14 +628,14 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
             type: "armor",
             equipped: true,
             magicBonus: 0,
-            armor: { baseAc: 10, isShield: true, shieldAcBonus: 1 },
+            armor: { baseAc: 10, isShield: true, shieldAcBonus: 1, armorType: "leather" },
           }),
           physItem({
             id: "a2",
             name: "Spare Leather",
             type: "armor",
             equipped: false,
-            armor: { baseAc: 8, isShield: false, shieldAcBonus: 0 },
+            armor: { baseAc: 8, isShield: false, shieldAcBonus: 0, armorType: "leather" },
           }),
         ],
       }),
@@ -1446,7 +1446,7 @@ describe("buildCharacterSheetContext — thief/bard skills + backstab eligibilit
           id: "a1", name: "Chain Mail", img: "", type: "armor",
           quantity: 1, weight: 40, totalWeight: 40, location: "", equipped: true, identified: true, magicBonus: 0,
           isContainer: false, capacity: null, contentsWeightMultiplier: 1,
-          armor: { baseAc: 5, isShield: false, shieldAcBonus: 0, armorType: "chain-mail" } as never,
+          armor: { baseAc: 5, isShield: false, shieldAcBonus: 0, armorType: "chain-mail" },
         }],
       }),
     );
@@ -1512,5 +1512,72 @@ describe("buildCharacterSheetContext — thief/bard skills + backstab eligibilit
       }),
     );
     expect(c.combat.weapons[0]!.canBackstab).toBe(false);
+  });
+
+  it("a bard's effective score uses Table 33 (bard base), not Table 26 (thief base) — pick-pockets differs by exactly the old bug's margin", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [bardClass],
+        thiefSkillAllocations: [{ skill: "pick-pockets", allocatedPoints: 10 }],
+        derived: {
+          ...input().derived,
+          abilities: { ...input().derived.abilities, dex: { score: 12, mods: input().derived.abilities.dex.mods } },
+          thiefSkills: { total: 20, spent: 10, available: 10 },
+        },
+      }),
+    );
+    const pp = c.skills.thief!.items.find((r) => r.skill === "pick-pockets")!;
+    // Table 33 base 10 + 0 racial (human) + 0 dex (12) + 5 armor ("none" category, nothing
+    // equipped) = 15 — this was already correct pre-fix (buildThiefSkills always used
+    // bardSkillBaseScore for `base`).
+    expect(pp.base).toBe(15);
+    expect(pp.allocated).toBe(10);
+    // effective = base + allocated = 25. The pre-fix bug called resolveThiefSkill
+    // (Table 26 base 15 -> 20 with the same armor bonus) and would have shown 30 here —
+    // 5 too high, exactly the Table 26 vs Table 33 base difference for pick-pockets.
+    expect(pp.effective).toBe(25);
+  });
+
+  it("fighter-then-thief (thief is NOT classItems[0]) still gets a non-null thief section and canBackstab true", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [{ ...fighterClass, id: "c1" }, { ...thiefClass, id: "c2" }],
+        physicalItems: [{
+          id: "w1", name: "Dagger", img: "", type: "weapon",
+          quantity: 1, weight: 1, totalWeight: 1, location: "", equipped: true, identified: true, magicBonus: 0,
+          isContainer: false, capacity: null, contentsWeightMultiplier: 1,
+          weapon: { damageVsSM: "1d4", damageVsL: "1d3", speedFactor: 2, range: null, category: "melee", damageType: "piercing" },
+        }],
+      }),
+    );
+    expect(c.skills.thief).not.toBeNull();
+    expect(c.combat.weapons[0]!.canBackstab).toBe(true);
+  });
+
+  it("a level-1 thief's read-languages row is not usable (PHB p.40: requires thief level 4)", () => {
+    const c = buildCharacterSheetContext(input({ classItems: [thiefClass] }));
+    const rl = c.skills.thief!.items.find((r) => r.skill === "read-languages")!;
+    expect(rl.usable).toBe(false);
+  });
+
+  it("a level-4+ thief's read-languages row is usable", () => {
+    const c = buildCharacterSheetContext(input({ classItems: [{ ...thiefClass, level: 4 }] }));
+    const rl = c.skills.thief!.items.find((r) => r.skill === "read-languages")!;
+    expect(rl.usable).toBe(true);
+  });
+
+  it("a bard's read-languages row is always usable regardless of level (no such gate for bards)", () => {
+    const c1 = buildCharacterSheetContext(input({ classItems: [{ ...bardClass, level: 1 }] }));
+    expect(c1.skills.thief!.items.find((r) => r.skill === "read-languages")!.usable).toBe(true);
+    const c2 = buildCharacterSheetContext(input({ classItems: [{ ...bardClass, level: 20 }] }));
+    expect(c2.skills.thief!.items.find((r) => r.skill === "read-languages")!.usable).toBe(true);
+  });
+
+  it("every skill other than read-languages is always usable regardless of level", () => {
+    const c = buildCharacterSheetContext(input({ classItems: [{ ...thiefClass, level: 1 }] }));
+    for (const row of c.skills.thief!.items) {
+      if (row.skill === "read-languages") continue;
+      expect(row.usable).toBe(true);
+    }
   });
 });

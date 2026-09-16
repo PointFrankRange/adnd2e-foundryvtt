@@ -10,6 +10,7 @@ function input(over: Partial<AttackCardInput> = {}): AttackCardInput {
     hit: { hit: true, autoHit: false, autoMiss: false, needed: 12, total: 18, margin: 6 },
     modifierBreakdown: { strength: 1, dexterityMissile: 0, weaponMagic: 0, proficiency: 0, range: 0, situational: 0 },
     damageContext: { weaponItemId: "w1", actorUuid: "Actor.a1", targetSize: "small", backstabMultiplier: null },
+    backstab: false,
     ...over,
   };
 }
@@ -67,5 +68,12 @@ describe("buildAttackCardContext", () => {
     const c2 = buildAttackCardContext(input({ hit: { hit: false, autoHit: false, autoMiss: true, needed: 12, total: 1, margin: -11 } }));
     expect(c2.autoMiss).toBe(true);
     expect(c2.hit).toBe(false);
+  });
+
+  it("carries backstab through unchanged", () => {
+    const c1 = buildAttackCardContext(input({ backstab: true }));
+    expect(c1.backstab).toBe(true);
+    const c2 = buildAttackCardContext(input({ backstab: false }));
+    expect(c2.backstab).toBe(false);
   });
 });

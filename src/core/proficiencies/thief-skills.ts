@@ -140,6 +140,19 @@ export function resolveThiefSkill(
   );
 }
 
+/** The bard's effective skill percentage: base score + allocated points,
+ *  capped at 95. Mirrors `resolveThiefSkill` but uses the Table 33 base
+ *  (`bardSkillBaseScore`) instead of Table 26. */
+export function resolveBardSkill(
+  skill: BardSkill,
+  input: ThiefSkillContext & { allocatedPoints: number },
+): number {
+  return Math.min(
+    THIEF_SKILL_POINT_RULES.hardCap,
+    bardSkillBaseScore(skill, input) + input.allocatedPoints,
+  );
+}
+
 /** PHB Table 30: BACKSTAB DAMAGE MULTIPLIERS (p.40). */
 export function backstabMultiplier(thiefLevel: number): number {
   assertLevel(thiefLevel, "thief level");
@@ -265,5 +278,16 @@ export function thiefSkillCheck(
   input: ThiefSkillContext & { allocatedPoints: number; roll: number },
 ): ThiefSkillCheckResult {
   const target = resolveThiefSkill(skill, input);
+  return { success: input.roll <= target, target, roll: input.roll };
+}
+
+/** Resolves a d100 BARD-skill check — identical shape to `thiefSkillCheck`
+ *  but built on `resolveBardSkill` (Table 33), not `resolveThiefSkill`
+ *  (Table 26). */
+export function bardSkillCheck(
+  skill: BardSkill,
+  input: ThiefSkillContext & { allocatedPoints: number; roll: number },
+): ThiefSkillCheckResult {
+  const target = resolveBardSkill(skill, input);
   return { success: input.roll <= target, target, roll: input.roll };
 }

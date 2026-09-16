@@ -1,8 +1,8 @@
 import { getChassis } from "../../core/classes/chassis";
 import { nonweaponCheck } from "../../core/proficiencies/nonweapon";
 import { canWeaponSpecialize, weaponSpecializationSlotCost } from "../../core/proficiencies/weapon";
-import { classifyThiefArmor, thiefSkillCheck, thiefSkillPerSkillCap } from "../../core/proficiencies/thief-skills";
-import type { AbilityKey, ArmorType, ClassId, Race, ThiefSkill } from "../../core/types";
+import { bardSkillCheck, classifyThiefArmor, thiefSkillCheck, thiefSkillPerSkillCap } from "../../core/proficiencies/thief-skills";
+import type { AbilityKey, ArmorType, BardSkill, ClassId, Race, ThiefSkill } from "../../core/types";
 import { buildNonweaponCheckCardContext } from "../../combat/nonweapon-check-card";
 import { buildThiefSkillCardContext } from "../../combat/thief-skill-card";
 import { classItemLevel } from "../../data/derive/class-item";
@@ -186,12 +186,28 @@ interface ThiefSkillsActor extends ProficiencyActor {
   };
 }
 
-/** Resolves whether `actor`'s primary class is "thief" or "bard" and, if so,
- *  its `thiefSkillAccess` list — null for any other class (no access at
- *  all). Mirrors `firstClassChassisId`'s first-class-wins simplification. */
+/** Scans ALL of the actor's class items for a thief-or-bard match, thief
+ *  always taking priority over bard regardless of array order — mirrors
+ *  `deriveThiefSkillPoints`'s exact priority rule (data/derive/character/
+ *  thief-skills.ts), NOT `firstClassChassisId`'s "literal first class,
+ *  any class" rule (which `specializeWeapon` still needs unchanged). */
+function firstThiefOrBardChassisId(actor: ThiefSkillsActor): "thief" | "bard" | null {
+  let bardFallback: "bard" | null = null;
+  for (const item of actor.items) {
+    if (item.type !== "class") continue;
+    const chassisId = (item.system as { chassisId?: string }).chassisId;
+    if (chassisId === "thief") return "thief";
+    if (chassisId === "bard" && !bardFallback) bardFallback = "bard";
+  }
+  return bardFallback;
+}
+
+/** Resolves whether `actor`'s thief-or-bard class (by `firstThiefOrBardChassisId`'s
+ *  priority rule) has thief-skill access and, if so, its `thiefSkillAccess`
+ *  list — null for any other class (no access at all). */
 function thiefOrBardAccess(actor: ThiefSkillsActor): { isThief: boolean; access: readonly ThiefSkill[] } | null {
-  const chassisId = firstClassChassisId(actor);
-  if (chassisId !== "thief" && chassisId !== "bard") return null;
+  const chassisId = firstThiefOrBardChassisId(actor);
+  if (!chassisId) return null;
   const access = getChassis(chassisId).thiefSkillAccess;
   return access ? { isThief: chassisId === "thief", access } : null;
 }
@@ -290,16 +306,23 @@ export async function rollThiefSkill(actor: ThiefSkillsActor, skill: ThiefSkill)
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.thiefArmorDisabledWarning"));
     return;
   }
+  if (skill === "read-languages" && info.isThief && primaryClassLevel(actor) < 4) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.thiefSkillNotUsableWarning"));
+    return;
+  }
   const allocated = actor.system.thiefSkills.allocations.find((a) => a.skill === skill)?.allocatedPoints ?? 0;
   const roll = await new Roll("1d100").evaluate();
   const naturalD100 = roll.dice[0]?.total ?? 0;
-  const result = thiefSkillCheck(skill, {
+  const checkInput = {
     race: resolveActorRace(actor),
     dexterity: actor.system.abilities.dex.score,
     armor: classification.category,
     allocatedPoints: allocated,
     roll: naturalD100,
-  });
+  };
+  const result = info.isThief
+    ? thiefSkillCheck(skill, checkInput)
+    : bardSkillCheck(skill as BardSkill, checkInput);
   const context = buildThiefSkillCardContext({
     actorName: actor.name,
     actorImg: actor.img,

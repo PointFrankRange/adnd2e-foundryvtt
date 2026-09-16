@@ -20,7 +20,7 @@ import type {
 import { getChassis } from "../../core/classes/chassis";
 import { canLearnSpell } from "../../core/magic/spellbook";
 import { canWeaponSpecialize, weaponSpecializationSlotCost } from "../../core/proficiencies/weapon";
-import { bardSkillBaseScore, classifyThiefArmor, resolveThiefSkill, thiefSkillBaseScore, thiefSkillPerSkillCap } from "../../core/proficiencies/thief-skills";
+import { bardSkillBaseScore, classifyThiefArmor, resolveBardSkill, resolveThiefSkill, thiefSkillBaseScore, thiefSkillPerSkillCap } from "../../core/proficiencies/thief-skills";
 import { canBackstab } from "../../core/weapons/backstab";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { canMemorizePriestSpell } from "../../magic/priest-sphere-access";
@@ -231,7 +231,7 @@ function buildInventory(input: CharacterSheetInput): CharacterSheetContext["inve
 /* ---------- combat ---------- */
 
 function buildCombat(input: CharacterSheetInput): CharacterSheetContext["combat"] {
-  const isThief = input.classItems[0]?.chassisId === "thief";
+  const isThief = input.classItems.some((c) => c.chassisId === "thief");
   const weapons = input.physicalItems
     .filter((i) => i.type === "weapon")
     .map((i) => {
@@ -295,7 +295,7 @@ function buildSkills(input: CharacterSheetInput): CharacterSheetContext["skills"
  *  scan `buildCombat` already does for the AC breakdown. */
 function resolveWornArmorType(physicalItems: PhysicalItemView[]): ArmorType {
   const worn = physicalItems.find((i) => i.type === "armor" && i.equipped && !i.armor!.isShield);
-  return (worn?.armor as { armorType?: ArmorType } | undefined)?.armorType ?? "none";
+  return worn?.armor?.armorType ?? "none";
 }
 
 /** Builds the thief/bard skills section — null when the actor's (first)
@@ -305,7 +305,11 @@ function resolveWornArmorType(physicalItems: PhysicalItemView[]): ArmorType {
  *  eligibility `proficiency-actions.ts`'s allocate/deallocate actions
  *  independently re-check (the established duplicate-re-validation pattern). */
 function buildThiefSkills(input: CharacterSheetInput): CharacterSheetContext["skills"]["thief"] {
-  const primaryChassis = input.classItems[0] ? getChassis(input.classItems[0].chassisId as ClassId) : null;
+  const thiefOrBardClass =
+    input.classItems.find((c) => c.chassisId === "thief") ??
+    input.classItems.find((c) => c.chassisId === "bard") ??
+    null;
+  const primaryChassis = thiefOrBardClass ? getChassis(thiefOrBardClass.chassisId as ClassId) : null;
   const access = primaryChassis?.thiefSkillAccess ?? null;
   if (!access) return null;
 
@@ -315,17 +319,19 @@ function buildThiefSkills(input: CharacterSheetInput): CharacterSheetContext["sk
   const armorDisabled = classification.disabled;
   const armorCategory = classification.disabled ? "none" : classification.category;
 
-  const isThiefClass = input.classItems[0]?.chassisId === "thief";
+  const isThiefClass = thiefOrBardClass?.chassisId === "thief";
   const race = (input.raceItem?.raceId ?? "human") as Race;
   const dexScore = input.derived.abilities.dex.score;
-  const perSkillCap = isThiefClass ? thiefSkillPerSkillCap(input.classItems[0]!.level) : Infinity;
+  const perSkillCap = isThiefClass ? thiefSkillPerSkillCap(thiefOrBardClass!.level) : Infinity;
 
   const items: ThiefSkillRow[] = access.map((skill) => {
     const allocation = input.thiefSkillAllocations.find((a) => a.skill === skill);
     const allocated = allocation?.allocatedPoints ?? 0;
     const ctx = { race, dexterity: dexScore, armor: armorCategory as never };
     const base = isThiefClass ? thiefSkillBaseScore(skill, ctx) : bardSkillBaseScore(skill as BardSkill, ctx);
-    const effective = resolveThiefSkill(skill, { ...ctx, allocatedPoints: allocated });
+    const effective = isThiefClass
+      ? resolveThiefSkill(skill, { ...ctx, allocatedPoints: allocated })
+      : resolveBardSkill(skill as BardSkill, { ...ctx, allocatedPoints: allocated });
     return {
       skill,
       label: `ADND2E.chat.thiefSkill.skills.${skill}`,
@@ -334,6 +340,7 @@ function buildThiefSkills(input: CharacterSheetInput): CharacterSheetContext["sk
       effective,
       canAllocate: t.available > 0 && (!isThiefClass || allocated < perSkillCap),
       canDeallocate: allocated > 0,
+      usable: !(skill === "read-languages" && isThiefClass && thiefOrBardClass!.level < 4),
     };
   });
 

@@ -178,6 +178,7 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
     actorName: actor.name, actorImg: actor.img,
     weaponName: weapon.name, targetName,
     formula, naturalD20, hit, modifierBreakdown: breakdown,
+    backstab: backstabActive,
     damageContext: hit.hit
       ? {
           weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize,

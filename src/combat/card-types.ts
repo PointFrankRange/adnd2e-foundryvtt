@@ -12,6 +12,13 @@ export interface AttackCardInput {
   naturalD20: number;
   /** from core/combat/attack.ts hitResult() */
   hit: { hit: boolean; autoHit: boolean; autoMiss: boolean; needed: number; total: number; margin: number };
+  /** true only for an ACTIVE backstab (the request was honored after
+   *  re-checking thief-class + weapon eligibility) — distinct from
+   *  `hit.autoHit`, which `rollAttack` also sets true for a backstab so the
+   *  existing auto-hit numeric/logic path is reused, but whose display
+   *  COPY ("Natural 20...") is wrong for a backstab rolled on any other
+   *  number. Templates must check `backstab` before `autoHit`. */
+  backstab: boolean;
   /** from core/combat/attack.ts attackModifiers().breakdown */
   modifierBreakdown: {
     strength: number; dexterityMissile: number; weaponMagic: number;
@@ -28,7 +35,7 @@ export interface AttackCardContext {
   weaponName: string; targetName: string | null;
   formula: string; naturalD20: number; total: number;
   needed: number; margin: number;
-  hit: boolean; autoHit: boolean; autoMiss: boolean;
+  hit: boolean; autoHit: boolean; autoMiss: boolean; backstab: boolean;
   /** zero-value modifiers are omitted — a clean card, not a wall of "+0" lines */
   modifierBreakdown: ModifierLine[];
   damageContext: { weaponItemId: string; actorUuid: string; targetSize: string | null; backstabMultiplier: number | null } | null;

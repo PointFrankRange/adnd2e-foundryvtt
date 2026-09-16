@@ -1,5 +1,5 @@
 import type {
-  CharismaModifiers, ConstitutionModifiers, DexterityModifiers, IntelligenceModifiers,
+  ArmorType, CharismaModifiers, ConstitutionModifiers, DexterityModifiers, IntelligenceModifiers,
   StrengthModifiers, ThiefSkill, WisdomModifiers,
 } from "../../core/types";
 import type { OptionalRules } from "../../core/options";
@@ -112,7 +112,7 @@ export interface PhysicalItemView {
     damageType: "slashing" | "piercing" | "bludgeoning" | "piercing-slashing" | "piercing-bludgeoning" | null;
   };
   /** armor only */
-  armor?: { baseAc: number; isShield: boolean; shieldAcBonus: number };
+  armor?: { baseAc: number; isShield: boolean; shieldAcBonus: number; armorType: ArmorType };
 }
 
 export interface WeaponProfView {
@@ -154,6 +154,10 @@ export interface ThiefSkillRow {
   /** available pool > 0 AND (thief only) per-skill cap not yet reached */
   canAllocate: boolean;
   canDeallocate: boolean;
+  /** false only for "read-languages" on a thief below level 4 (PHB p.40) —
+   *  the skill is computable at any level but not usable yet. Bards have no
+   *  such prerequisite. Always true for every other skill. */
+  usable: boolean;
 }
 export interface SpellItemView {
   id: string; name: string; img: string; casterClass: string; level: number;

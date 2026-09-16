@@ -1,7 +1,7 @@
 import { TEMPLATE_PATH } from "../../constants";
 import { getChassis } from "../../core/classes/chassis";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
-import type { ClassId, NonweaponGroup, SaveCategory, ThiefSkill } from "../../core/types";
+import type { ArmorType, ClassId, NonweaponGroup, SaveCategory, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
 import { rollAttack, rollSave } from "./combat-rolls";
 import { buildCharacterSheetContext } from "./context";
@@ -158,6 +158,7 @@ function toPhysicalView(it: RawItem): PhysicalItemView {
       baseAc: Number(s.baseAc ?? 10),
       isShield: Boolean(s.isShield),
       shieldAcBonus: Number(s.shieldAcBonus ?? 0),
+      armorType: (s.armorType as ArmorType | undefined) ?? "none",
     };
   }
   return view;
