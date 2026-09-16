@@ -52,6 +52,7 @@ async function onRollDamage(button: HTMLButtonElement): Promise<void> {
     formula,
     rolledBaseDamage,
     damageBonus,
+    backstabMultiplier: null,
   });
   const content = await foundry.applications.handlebars.renderTemplate(
     TEMPLATE_PATH("chat/damage-roll.hbs"),

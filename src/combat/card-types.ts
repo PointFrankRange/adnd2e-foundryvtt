@@ -43,12 +43,19 @@ export interface DamageCardInput {
   rolledBaseDamage: number;
   /** from core/combat/damage.ts damageModifiers().total */
   damageBonus: number;
+  /** set only for a backstab attack — the pre-floor total (rolled + bonus,
+   *  floored at 1 by damageResult) is multiplied by this before display.
+   *  null for a normal (non-backstab) damage roll. */
+  backstabMultiplier: number | null;
 }
 
 export interface DamageCardContext {
   actorName: string; actorImg: string;
   weaponName: string;
   formula: string; rolled: number; bonus: number; total: number;
+  /** null for a normal roll — the template shows a "×N backstab!" line only
+   *  when this is non-null. */
+  backstabMultiplier: number | null;
 }
 
 /* ---------- save ---------- */
@@ -97,4 +104,27 @@ export interface NonweaponCheckCardContext {
    *  instead of the plain failure line when this is true (PHB p.55: a
    *  natural 20 always fails regardless of how high the target is) */
   autoFail: boolean;
+}
+
+/* ---------- thief/bard skill check ---------- */
+
+export interface ThiefSkillCardInput {
+  actorName: string;
+  actorImg: string;
+  /** i18n key, e.g. "ADND2E.chat.thiefSkill.skills.pickPockets" */
+  skillLabel: string;
+  formula: string;
+  /** the d100 result actually rolled */
+  roll: number;
+  result: { success: boolean; target: number };
+}
+
+export interface ThiefSkillCardContext {
+  actorName: string;
+  actorImg: string;
+  skillLabel: string;
+  formula: string;
+  roll: number;
+  target: number;
+  success: boolean;
 }

@@ -7,6 +7,7 @@ function input(over: Partial<DamageCardInput> = {}): DamageCardInput {
     actorName: "Aldric", actorImg: "icons/svg/mystery-man.svg",
     weaponName: "Long Sword", formula: "1d8 + 2",
     rolledBaseDamage: 5, damageBonus: 2,
+    backstabMultiplier: null,
     ...over,
   };
 }
@@ -29,5 +30,24 @@ describe("buildDamageCardContext", () => {
     expect(c.actorName).toBe("Aldric");
     expect(c.weaponName).toBe("Long Sword");
     expect(c.formula).toBe("1d8 + 2");
+  });
+
+  it("multiplies the floored total by backstabMultiplier when set", () => {
+    // rolled 4 + bonus 2 = 6 (already >= 1, no floor kicks in), ×3 backstab = 18
+    const c = buildDamageCardContext({
+      actorName: "Sly", actorImg: "img.webp", weaponName: "Dagger",
+      formula: "1d4 + 2", rolledBaseDamage: 4, damageBonus: 2, backstabMultiplier: 3,
+    });
+    expect(c.total).toBe(18);
+    expect(c.backstabMultiplier).toBe(3);
+  });
+
+  it("applies the damageResult floor-at-1 rule BEFORE multiplying", () => {
+    // rolled 0 + bonus -5 = -5, floored to 1 by damageResult, THEN ×2 backstab = 2
+    const c = buildDamageCardContext({
+      actorName: "Sly", actorImg: "img.webp", weaponName: "Dagger",
+      formula: "1d4 - 5", rolledBaseDamage: 0, damageBonus: -5, backstabMultiplier: 2,
+    });
+    expect(c.total).toBe(2);
   });
 });
