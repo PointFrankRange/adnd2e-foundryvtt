@@ -69,3 +69,32 @@ export interface SaveCardContext {
   formula: string; naturalD20: number; total: number;
   target: number; success: boolean;
 }
+
+/* ---------- non-weapon proficiency check ---------- */
+
+export interface NonweaponCheckCardInput {
+  actorName: string;
+  actorImg: string;
+  proficiencyName: string;
+  /** i18n key, e.g. config.abilities["dex"] */
+  abilityLabel: string;
+  formula: string;
+  /** the 1d20 result actually rolled */
+  roll: number;
+  result: { success: boolean; autoFail: boolean; target: number };
+}
+
+export interface NonweaponCheckCardContext {
+  actorName: string;
+  actorImg: string;
+  proficiencyName: string;
+  abilityLabel: string;
+  formula: string;
+  roll: number;
+  target: number;
+  success: boolean;
+  /** true only on a natural 20 — the card shows a distinct "fumble" line
+   *  instead of the plain failure line when this is true (PHB p.55: a
+   *  natural 20 always fails regardless of how high the target is) */
+  autoFail: boolean;
+}
