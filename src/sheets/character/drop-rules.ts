@@ -7,6 +7,15 @@ export interface DropCheckInput {
   hasRace: boolean;
   /** `system.chassisId` of every `class` item already on the actor */
   existingChassisIds: readonly string[];
+  /** slots the dropped item would cost, when `dropType` is `weaponProficiency`/
+   *  `nonweaponProficiency` — defaults to 1 if omitted (a fresh weapon
+   *  proficiency always costs exactly 1 slot at drop time; specialization is
+   *  a separate later purchase). */
+  dropSlotCost?: number;
+  /** slots currently available in the matching category (weapon or
+   *  nonweapon) — defaults to 0 if omitted, so an un-supplied value rejects
+   *  rather than silently allowing an unbounded drop. */
+  availableSlots?: number;
 }
 
 export interface DropVerdict {
@@ -23,6 +32,11 @@ export function validateItemDrop(input: DropCheckInput): DropVerdict {
   if (input.dropType === "class") {
     const dup = input.dropChassisId != null && input.existingChassisIds.includes(input.dropChassisId);
     return dup ? { ok: false, reason: "ADND2E.sheet.drop.duplicateClass" } : { ok: true };
+  }
+  if (input.dropType === "weaponProficiency" || input.dropType === "nonweaponProficiency") {
+    const cost = input.dropSlotCost ?? 1;
+    const available = input.availableSlots ?? 0;
+    return cost > available ? { ok: false, reason: "ADND2E.sheet.drop.insufficientSlots" } : { ok: true };
   }
   return { ok: true };
 }

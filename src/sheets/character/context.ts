@@ -14,9 +14,11 @@ import type {
   SlotRow,
   SpellItemView,
   TabDescriptor,
+  WeaponProfView,
 } from "./context-types";
 import { getChassis } from "../../core/classes/chassis";
 import { canLearnSpell } from "../../core/magic/spellbook";
+import { canWeaponSpecialize, weaponSpecializationSlotCost } from "../../core/proficiencies/weapon";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { canMemorizePriestSpell } from "../../magic/priest-sphere-access";
 import { groupInventory } from "./grouping";
@@ -271,7 +273,10 @@ function buildCombat(input: CharacterSheetInput): CharacterSheetContext["combat"
 function buildSkills(input: CharacterSheetInput): CharacterSheetContext["skills"] {
   const p = input.derived.proficiencies;
   return {
-    weapon: { ...p.weapon, items: input.proficiencyItems.weapon },
+    weapon: {
+      ...p.weapon,
+      items: input.proficiencyItems.weapon.map((w) => buildWeaponProfRow(w, input, p.weapon.available)),
+    },
     nonweapon: {
       ...p.nonweapon,
       items: input.proficiencyItems.nonweapon.map((n) => buildNwpRow(n, input)),
@@ -284,8 +289,44 @@ function buildNwpRow(n: NwpView, input: CharacterSheetInput): NwpView {
   return {
     ...n,
     governingAbilityLabel: input.config.abilities[n.governingAbility] ?? n.governingAbility,
-    checkTarget: ability.score + n.modifier,
+    checkTarget: ability.score + n.modifier + (n.slotsInvested - 1),
   };
+}
+
+/** Resolves a weapon proficiency's specialization category by matching its
+ *  `weaponOrGroup` name against the actor's owned weapon Items — null for a
+ *  group proficiency (never specialization-eligible) or when no matching
+ *  weapon Item is found. Thrown weapons map to "melee" (a locked
+ *  brainstorming decision — PHB treats thrown-weapon specialization under
+ *  the melee rule). */
+function resolveWeaponCategory(prof: WeaponProfView, physicalItems: PhysicalItemView[]): "melee" | "crossbow" | "bow" | null {
+  if (prof.isGroup) return null;
+  const weapon = physicalItems.find((p) => p.type === "weapon" && p.name === prof.weaponOrGroup);
+  if (!weapon?.weapon) return null;
+  if (weapon.weapon.category === "bow") return "bow";
+  if (weapon.weapon.category === "crossbow") return "crossbow";
+  return "melee";
+}
+
+/** Enriches a raw WeaponProfView with its resolved specialization category
+ *  and whether Specialize can be purchased right now. Mirrors the
+ *  established "buildXRow re-derives eligibility for both display AND the
+ *  action's own re-check" pattern (e.g. SP4a's buildSpellRow/canReMemorize). */
+function buildWeaponProfRow(
+  prof: WeaponProfView,
+  input: CharacterSheetInput,
+  weaponSlotsAvailable: number,
+): WeaponProfView {
+  const category = resolveWeaponCategory(prof, input.physicalItems);
+  const primaryChassis = input.classItems[0] ? getChassis(input.classItems[0].chassisId as ClassId) : null;
+  const isSingleClass = input.classItems.length === 1;
+  const eligible =
+    !prof.specialized &&
+    category !== null &&
+    primaryChassis !== null &&
+    canWeaponSpecialize({ specializationAllowed: primaryChassis.weaponSpecializationAllowed, isSingleClass }) &&
+    weaponSlotsAvailable >= Math.max(0, weaponSpecializationSlotCost(category) - prof.slotsInvested);
+  return { ...prof, category, canSpecialize: eligible };
 }
 
 /* ---------- spells ---------- */

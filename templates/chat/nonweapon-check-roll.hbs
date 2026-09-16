@@ -1,0 +1,14 @@
+<div class="adnd2e chat-card nonweapon-check-roll">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} — {{proficiencyName}} ({{localize abilityLabel}})</h3>
+  </header>
+  <p class="formula">{{formula}} = <strong>{{roll}}</strong> ({{localize 'ADND2E.sheet.skills.checkTarget'}}: {{target}})</p>
+  {{#if autoFail}}
+    <p class="result fail">{{localize 'ADND2E.chat.nwpCheck.autoFail'}}</p>
+  {{else if success}}
+    <p class="result success">{{localize 'ADND2E.chat.nwpCheck.success'}}</p>
+  {{else}}
+    <p class="result fail">{{localize 'ADND2E.chat.nwpCheck.failure'}}</p>
+  {{/if}}
+</div>

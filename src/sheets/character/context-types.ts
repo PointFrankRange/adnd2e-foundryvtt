@@ -101,7 +101,10 @@ export interface PhysicalItemView {
   /** equipment only */
   isContainer: boolean; capacity: number | null; contentsWeightMultiplier: number;
   /** weapon only — pre-derived display strings */
-  weapon?: { damageVsSM: string | null; damageVsL: string | null; speedFactor: number; range: string | null };
+  weapon?: {
+    damageVsSM: string | null; damageVsL: string | null; speedFactor: number; range: string | null;
+    category: "melee" | "thrown" | "bow" | "crossbow";
+  };
   /** armor only */
   armor?: { baseAc: number; isShield: boolean; shieldAcBonus: number };
 }
@@ -109,13 +112,27 @@ export interface PhysicalItemView {
 export interface WeaponProfView {
   id: string; name: string; weaponOrGroup: string; isGroup: boolean;
   slotsInvested: number; specialized: boolean;
+  /** filled by context.ts's buildWeaponProfRow — sheet.ts's toWeaponProfView
+   *  placeholder is null/false until then, same pattern as NwpView's
+   *  governingAbilityLabel/checkTarget. The weapon-category this proficiency
+   *  resolves to (by matching `weaponOrGroup` against the actor's owned
+   *  weapon Items by name) — null when it's a group proficiency (groups are
+   *  never specialization-eligible) or no matching weapon Item is found. */
+  category: "melee" | "crossbow" | "bow" | null;
+  /** true when this proficiency can be specialized right now: not a group,
+   *  a resolved category exists, the actor's (first) class allows
+   *  specialization, the actor is single-classed, it isn't already
+   *  specialized, and enough weapon slots are available. */
+  canSpecialize: boolean;
 }
 export interface NwpView {
   id: string; name: string; governingAbility: string; modifier: number;
   slotCost: number; slotsInvested: number; isRacial: boolean;
   /** i18n key for governingAbility — filled by buildNwpRow; "" until then */
   governingAbilityLabel: string;
-  /** governing ability score + modifier — display only (checks are SP5) */
+  /** ability score + modifier + (slotsInvested-1) — the real pre-roll
+   *  target (situational modifier isn't known until Roll time, so it's
+   *  never part of this display value). */
   checkTarget: number | null;
 }
 export interface SpellItemView {

@@ -271,6 +271,24 @@ describe("lang/en.json — SP4b learn-spell strings", () => {
   });
 });
 
+describe("lang/en.json — SP5a proficiency strings", () => {
+  it("resolves every ADND2E.sheet.skills.{specialize,check,specializeBlockedWarning,checkBlockedWarning} + ADND2E.sheet.drop.insufficientSlots + ADND2E.chat.nwpCheck.* key the proficiency-actions layer references", () => {
+    for (const key of [
+      "ADND2E.sheet.skills.specialize",
+      "ADND2E.sheet.skills.check",
+      "ADND2E.sheet.skills.specializeBlockedWarning",
+      "ADND2E.sheet.skills.checkBlockedWarning",
+      "ADND2E.sheet.drop.insufficientSlots",
+      "ADND2E.chat.nwpCheck.success",
+      "ADND2E.chat.nwpCheck.failure",
+      "ADND2E.chat.nwpCheck.autoFail",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [

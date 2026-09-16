@@ -7,6 +7,7 @@ import type {
   NwpView,
   PhysicalItemView,
   SpellItemView,
+  WeaponProfView,
 } from "../../../src/sheets/character/context-types";
 
 // fixture factory — a single-class L7 fighter, human, no items
@@ -551,13 +552,13 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
             name: "Long Sword",
             type: "weapon",
             equipped: true,
-            weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null },
+            weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee" },
           }),
           physItem({
             id: "w2",
             name: "Dagger",
             type: "weapon",
-            weapon: { damageVsSM: "1d4", damageVsL: null, speedFactor: 2, range: "10/20/30" },
+            weapon: { damageVsSM: "1d4", damageVsL: null, speedFactor: 2, range: "10/20/30", category: "melee" },
           }),
         ],
       }),
@@ -649,7 +650,7 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
   });
 
   it("weapon proficiencies pass straight; nwp check targets are computed", () => {
-    const weapon = { id: "wp1", name: "Sword", weaponOrGroup: "long-sword", isGroup: false, slotsInvested: 1, specialized: false };
+    const weapon = { id: "wp1", name: "Sword", weaponOrGroup: "long-sword", isGroup: false, slotsInvested: 1, specialized: false, category: null, canSpecialize: false };
     const nwp: NwpView = {
       id: "n1",
       name: "Swimming",
@@ -1210,5 +1211,168 @@ describe("buildCharacterSheetContext — spell learn eligibility", () => {
       }),
     );
     expect(c.spells.known[0]!.items[0]!.canLearn).toBe(false);
+  });
+});
+
+describe("buildCharacterSheetContext — weapon specialization eligibility + real checkTarget", () => {
+  const weaponItem = (over: Partial<PhysicalItemView> = {}): PhysicalItemView => ({
+    id: "w1", name: "Long Sword", img: "", type: "weapon",
+    quantity: 1, weight: 4, totalWeight: 4, location: "", equipped: true, identified: true, magicBonus: 0,
+    isContainer: false, capacity: null, contentsWeightMultiplier: 1,
+    weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee" },
+    ...over,
+  });
+  const weaponProf = (over: Partial<WeaponProfView> = {}): WeaponProfView => ({
+    id: "wp1", name: "Long Sword Proficiency", weaponOrGroup: "Long Sword", isGroup: false,
+    slotsInvested: 1, specialized: false, category: null, canSpecialize: false,
+    ...over,
+  });
+  const fighterClass = {
+    id: "c1", name: "Fighter", img: "", chassisId: "fighter", hitDie: 10,
+    xp: 0, level: 1, canLevelUp: false, dualClassState: null, specialistSchool: null,
+  };
+
+  it("single-classed fighter, matching owned weapon, enough slots → canSpecialize true, category resolved", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [fighterClass],
+        physicalItems: [weaponItem()],
+        proficiencyItems: { weapon: [weaponProf()], nonweapon: [] },
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 4, spent: 1, available: 3 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      }),
+    );
+    const row = c.skills.weapon.items[0]!;
+    expect(row.category).toBe("melee");
+    expect(row.canSpecialize).toBe(true);
+  });
+
+  it("not enough available slots → canSpecialize false", () => {
+    // weaponProf() has slotsInvested: 1; melee specialization costs 2 slots total,
+    // so the marginal cost to specialize now is 2 - 1 = 1. With 0 available, that
+    // marginal cost can't be afforded.
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [fighterClass],
+        physicalItems: [weaponItem()],
+        proficiencyItems: { weapon: [weaponProf()], nonweapon: [] },
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 4, spent: 4, available: 0 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      }),
+    );
+    expect(c.skills.weapon.items[0]!.canSpecialize).toBe(false);
+  });
+
+  it("already specialized → canSpecialize false", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [fighterClass],
+        physicalItems: [weaponItem()],
+        proficiencyItems: { weapon: [weaponProf({ specialized: true })], nonweapon: [] },
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 4, spent: 1, available: 3 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      }),
+    );
+    expect(c.skills.weapon.items[0]!.canSpecialize).toBe(false);
+  });
+
+  it("a group proficiency is never specialization-eligible (category null)", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [fighterClass],
+        physicalItems: [weaponItem()],
+        proficiencyItems: { weapon: [weaponProf({ isGroup: true, weaponOrGroup: "Blades" })], nonweapon: [] },
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 4, spent: 1, available: 3 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      }),
+    );
+    const row = c.skills.weapon.items[0]!;
+    expect(row.category).toBeNull();
+    expect(row.canSpecialize).toBe(false);
+  });
+
+  it("a non-fighter class (specializationAllowed false) → canSpecialize false even with slots to spare", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [{ ...fighterClass, chassisId: "mage" }],
+        physicalItems: [weaponItem()],
+        proficiencyItems: { weapon: [weaponProf()], nonweapon: [] },
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 4, spent: 1, available: 3 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      }),
+    );
+    expect(c.skills.weapon.items[0]!.canSpecialize).toBe(false);
+  });
+
+  it("resolves category 'bow' for a bow-type weapon", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [fighterClass],
+        physicalItems: [
+          weaponItem({
+            id: "w2", name: "Long Bow",
+            weapon: { damageVsSM: "1d6", damageVsL: "1d6", speedFactor: 7, range: "70/140/210", category: "bow" },
+          }),
+        ],
+        proficiencyItems: {
+          weapon: [weaponProf({ weaponOrGroup: "Long Bow" })],
+          nonweapon: [],
+        },
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 4, spent: 1, available: 3 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      }),
+    );
+    expect(c.skills.weapon.items[0]!.category).toBe("bow");
+  });
+
+  it("resolves category 'crossbow' for a crossbow-type weapon", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [fighterClass],
+        physicalItems: [
+          weaponItem({
+            id: "w3", name: "Light Crossbow",
+            weapon: { damageVsSM: "1d4", damageVsL: "1d4", speedFactor: 8, range: "60/120/180", category: "crossbow" },
+          }),
+        ],
+        proficiencyItems: {
+          weapon: [weaponProf({ weaponOrGroup: "Light Crossbow" })],
+          nonweapon: [],
+        },
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 4, spent: 1, available: 3 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      }),
+    );
+    expect(c.skills.weapon.items[0]!.category).toBe("crossbow");
+  });
+
+  it("checkTarget includes the (slotsInvested-1) bonus", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        proficiencyItems: {
+          weapon: [],
+          nonweapon: [{
+            id: "n1", name: "Herbalism", governingAbility: "int", modifier: 0,
+            slotCost: 1, slotsInvested: 3, isRacial: false, governingAbilityLabel: "", checkTarget: null,
+          }],
+        },
+      }),
+    );
+    // base fixture's INT score is 10 (see the base input() helper) — target = 10 + 0 + (3-1) = 12
+    expect(c.skills.nonweapon.items[0]!.checkTarget).toBe(12);
   });
 });
