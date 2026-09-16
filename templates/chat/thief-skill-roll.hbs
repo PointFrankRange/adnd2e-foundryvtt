@@ -1,0 +1,12 @@
+<div class="adnd2e chat-card thief-skill-roll">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} — {{localize skillLabel}}</h3>
+  </header>
+  <p class="formula">{{formula}} = <strong>{{roll}}</strong> ({{localize 'ADND2E.sheet.skills.checkTarget'}}: {{target}})</p>
+  {{#if success}}
+    <p class="result success">{{localize 'ADND2E.chat.thiefSkill.success'}}</p>
+  {{else}}
+    <p class="result fail">{{localize 'ADND2E.chat.thiefSkill.failure'}}</p>
+  {{/if}}
+</div>

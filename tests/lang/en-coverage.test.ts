@@ -289,6 +289,35 @@ describe("lang/en.json — SP5a proficiency strings", () => {
   });
 });
 
+describe("lang/en.json — SP5b thief/bard-skill + backstab strings", () => {
+  it("resolves every ADND2E.sheet.skills.thief* + ADND2E.sheet.combat.backstab* + ADND2E.chat.thiefSkill.* + ADND2E.chat.attack.backstabHit key the proficiency-actions/combat-rolls layer references", () => {
+    for (const key of [
+      "ADND2E.sheet.skills.thief",
+      "ADND2E.sheet.skills.thiefArmorDisabled",
+      "ADND2E.sheet.skills.thiefAllocateBlockedWarning",
+      "ADND2E.sheet.skills.thiefArmorDisabledWarning",
+      "ADND2E.sheet.skills.thiefSkillNotUsableWarning",
+      "ADND2E.sheet.skills.notUsableYet",
+      "ADND2E.sheet.combat.backstab",
+      "ADND2E.sheet.combat.backstabApplied",
+      "ADND2E.chat.attack.backstabHit",
+      "ADND2E.chat.thiefSkill.success",
+      "ADND2E.chat.thiefSkill.failure",
+      "ADND2E.chat.thiefSkill.skills.pick-pockets",
+      "ADND2E.chat.thiefSkill.skills.open-locks",
+      "ADND2E.chat.thiefSkill.skills.find-remove-traps",
+      "ADND2E.chat.thiefSkill.skills.move-silently",
+      "ADND2E.chat.thiefSkill.skills.hide-in-shadows",
+      "ADND2E.chat.thiefSkill.skills.detect-noise",
+      "ADND2E.chat.thiefSkill.skills.climb-walls",
+      "ADND2E.chat.thiefSkill.skills.read-languages",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [

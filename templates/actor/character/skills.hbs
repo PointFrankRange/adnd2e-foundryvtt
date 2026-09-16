@@ -53,4 +53,40 @@
     </div>
   </div>
 
+  {{#if adnd2e.skills.thief}}
+  <div class="thief-skills panel">
+    <h3>{{localize 'ADND2E.sheet.skills.thief'}}</h3>
+    <p class="totals">
+      {{localize 'ADND2E.sheet.skills.slots' spent=adnd2e.skills.thief.spent total=adnd2e.skills.thief.total}}
+    </p>
+    {{#if adnd2e.skills.thief.armorDisabled}}
+      <p class="placeholder">{{localize 'ADND2E.sheet.skills.thiefArmorDisabled'}}</p>
+    {{else}}
+      <div class="prof-list">
+        {{#each adnd2e.skills.thief.items as |t|}}
+          <div class="prof-row" data-skill="{{t.skill}}">
+            <span class="name">{{localize t.label}}</span>
+            <span class="base">{{t.base}}</span>
+            <span class="allocated">{{t.allocated}}</span>
+            <span class="effective">{{t.effective}}%</span>
+            {{#if t.canDeallocate}}
+              <button type="button" data-action="deallocateThiefSkillPoint" data-skill="{{t.skill}}">−</button>
+            {{/if}}
+            {{#if t.canAllocate}}
+              <button type="button" data-action="allocateThiefSkillPoint" data-skill="{{t.skill}}">+</button>
+            {{/if}}
+            {{#if t.usable}}
+              <button type="button" data-action="rollThiefSkill" data-skill="{{t.skill}}">
+                {{localize 'ADND2E.sheet.skills.check'}}
+              </button>
+            {{else}}
+              <span class="not-usable">{{localize 'ADND2E.sheet.skills.notUsableYet'}}</span>
+            {{/if}}
+          </div>
+        {{/each}}
+      </div>
+    {{/if}}
+  </div>
+  {{/if}}
+
 </section>
