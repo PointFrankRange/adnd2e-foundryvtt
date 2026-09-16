@@ -10,4 +10,27 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+
+  // Scoped to the attacks table only (live dev-world testing gap) — the rest
+  // of this sheet (vitals/movement/saves/details) is still deliberately
+  // unstyled, matching the standing I1 boundary. Without a shared grid
+  // template, .attack-row-header's labels didn't line up above the
+  // corresponding input/select/button in every .attack-row data row below
+  // it, and the header row read as just another data row.
+  .attack-row {
+    display: grid;
+    // name / count / damage / type / special / thac0Override / roll button /
+    // delete button — the header row only fills the first 6 of these 8
+    // tracks (it has no roll/delete cells), which grid leaves empty rather
+    // than misaligning, so header labels still land above their column.
+    grid-template-columns: 2fr 3.5rem 1.5fr 6rem 2fr 5rem auto auto;
+    gap: 0.25rem;
+    align-items: center;
+  }
+
+  .attack-row-header {
+    font-weight: 700;
+    border-bottom: 1px solid var(--adnd2e-accent);
+    padding-bottom: 0.25rem;
+  }
 }
