@@ -1,7 +1,7 @@
 import { TEMPLATE_PATH } from "../../constants";
 import { getChassis } from "../../core/classes/chassis";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
-import type { ClassId, NonweaponGroup, SaveCategory } from "../../core/types";
+import type { ClassId, NonweaponGroup, SaveCategory, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
 import { rollAttack, rollSave } from "./combat-rolls";
 import { buildCharacterSheetContext } from "./context";
@@ -150,6 +150,7 @@ function toPhysicalView(it: RawItem): PhysicalItemView {
       speedFactor: Number(s.speedFactor ?? 0),
       range: rangeToString(s.range),
       category: (s.category as "melee" | "thrown" | "bow" | "crossbow" | undefined) ?? "melee",
+      damageType: (s.damageType as PhysicalItemView["weapon"] extends undefined ? never : NonNullable<PhysicalItemView["weapon"]>["damageType"]) ?? null,
     };
   }
   if (type === "armor") {
@@ -411,6 +412,10 @@ export class Adnd2eCharacterSheet extends Base {
       raceItem,
       physicalItems,
       proficiencyItems: { weapon: weaponProfs, nonweapon: nonweaponProfs },
+      thiefSkillAllocations: [
+        ...(actor.system as { thiefSkills: { allocations: { skill: ThiefSkill; allocatedPoints: number }[] } })
+          .thiefSkills.allocations,
+      ],
       spellItems,
       featureItems,
       config: {
