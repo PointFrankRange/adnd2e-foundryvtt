@@ -150,6 +150,7 @@
     "sheet": {
       "title": "Character Sheet",
       "creatureTitle": "Creature",
+      "npcTitle": "NPC",
       "namePlaceholder": "Character name",
       "identity": {
         "alignment": "Alignment"

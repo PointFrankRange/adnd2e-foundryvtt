@@ -4,6 +4,7 @@ import { Adnd2eActorSheet } from "./actor-sheet";
 import { Adnd2eCharacterSheet } from "./character/sheet";
 import { Adnd2eCreatureSheet } from "./creature/sheet";
 import { Adnd2eItemSheet } from "./item-sheet";
+import { Adnd2eNpcSheet } from "./npc/sheet";
 
 /** Register the SP1 raw-field editor as the default sheet for document types that
  *  don't yet have a real one. Call on `init`. */
@@ -16,12 +17,19 @@ export function registerSheets(): void {
       options: { label?: string; types?: string[]; makeDefault?: boolean },
     ): void;
   };
-  // The real PC sheet (SP2) — default for character + npc. Register it before the
-  // raw fallback so it wins the default slot for those two subtypes.
+  // The real PC sheet (SP2) — default for character only (SP6 Task 4 moved npc
+  // to its own streamlined sheet below). Register it before the raw fallback so
+  // it wins the default slot for character.
   DSC.registerSheet(Actor, SYSTEM_ID, Adnd2eCharacterSheet, {
     makeDefault: true,
-    types: ["character", "npc"],
+    types: ["character"],
     label: "ADND2E.sheet.title",
+  });
+  // The real NPC sheet (SP6 Task 4) — default for npc.
+  DSC.registerSheet(Actor, SYSTEM_ID, Adnd2eNpcSheet, {
+    makeDefault: true,
+    types: ["npc"],
+    label: "ADND2E.sheet.npcTitle",
   });
   // The real creature sheet (SP6) — default for creature.
   DSC.registerSheet(Actor, SYSTEM_ID, Adnd2eCreatureSheet, {

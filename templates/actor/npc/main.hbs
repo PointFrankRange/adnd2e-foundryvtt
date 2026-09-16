@@ -1,0 +1,211 @@
+<section class="tab main scrollable{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+
+  <div class="identity panel">
+    <label>
+      {{localize 'ADND2E.sheet.identity.alignment'}}
+      <select name="system.details.alignment">
+        {{selectOptions alignments selected=adnd2e.identity.alignmentValue localize=true}}
+      </select>
+    </label>
+  </div>
+
+  <div class="abilities panel">
+    <h3>{{localize 'ADND2E.sheet.sections.abilities'}}</h3>
+    {{#each adnd2e.abilities as |row|}}
+      {{> adnd2e.ability-row row=row}}
+    {{/each}}
+  </div>
+
+  <div class="classes panel">
+    <h3>{{localize 'ADND2E.sheet.sections.classes'}}</h3>
+    {{#each adnd2e.classes as |c|}}
+      {{> adnd2e.class-row c=c}}
+    {{else}}
+      <p class="placeholder">{{localize 'ADND2E.sheet.sections.classes'}}</p>
+    {{/each}}
+  </div>
+
+  <div class="vitals panel">
+    <h3>{{localize 'ADND2E.sheet.sections.vitals'}}</h3>
+    <div class="hp">
+      <label>{{localize 'ADND2E.sheet.vitals.hp'}}
+        <input type="number" name="system.attributes.hp.value" value="{{adnd2e.vitals.hp.value}}" />
+        / {{adnd2e.vitals.hp.max}}
+      </label>
+      <label>+
+        <input type="number" name="system.attributes.hp.temp" value="{{adnd2e.vitals.hp.temp}}" />
+      </label>
+    </div>
+    <ul class="derived">
+      <li>{{localize 'ADND2E.sheet.vitals.ac'}}: {{adnd2e.vitals.ac.normal}}</li>
+      <li>{{localize 'ADND2E.sheet.vitals.thac0'}}: {{adnd2e.vitals.thac0.melee}}</li>
+      <li>{{localize 'ADND2E.sheet.vitals.movement'}}: {{adnd2e.vitals.movement.current}}
+        ({{localize adnd2e.vitals.movement.encumbranceCategoryLabel}})</li>
+    </ul>
+
+    <table class="saves">
+      <caption>{{localize 'ADND2E.sheet.vitals.saves'}}</caption>
+      <thead>
+        <tr>
+          <th></th>
+          <th>{{localize 'ADND2E.sheet.vitals.saves'}}</th>
+          <th>+/-</th>
+          <th>=</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each adnd2e.vitals.saves as |row|}}
+          {{> adnd2e.save-row row=row}}
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="weapons panel">
+    <h3>{{localize 'ADND2E.sheet.combat.weapons'}}</h3>
+    <div class="weapon-list">
+      {{#each adnd2e.combat.weapons as |w|}}
+        <div class="weapon-row{{#if w.equipped}} equipped{{/if}}" data-item-id="{{w.id}}">
+          <span class="name">{{w.name}}</span>
+          <span class="equipped-state">
+            {{#if w.equipped}}{{localize 'ADND2E.sheet.combat.equipped'}}{{else}}{{localize 'ADND2E.sheet.combat.notEquipped'}}{{/if}}
+          </span>
+          <span class="damage">{{w.damageNote}}</span>
+          <span class="speed" title="{{localize 'ADND2E.sheet.combat.speedFactor'}}">{{w.speedFactor}}</span>
+          {{#if w.range}}<span class="range">{{w.range}}</span>{{/if}}
+          {{#if w.equipped}}
+            {{#if w.canBackstab}}
+              <label class="backstab-label">
+                <input type="checkbox" class="backstab-toggle" data-item-id="{{w.id}}">
+                {{localize 'ADND2E.sheet.combat.backstab'}}
+              </label>
+            {{/if}}
+            <button type="button" data-action="rollAttack" data-item-id="{{w.id}}">
+              {{localize 'ADND2E.sheet.combat.rollAttack'}}
+            </button>
+          {{/if}}
+        </div>
+      {{else}}
+        <p class="placeholder">{{localize 'ADND2E.sheet.combat.noWeapons'}}</p>
+      {{/each}}
+    </div>
+  </div>
+
+  <div class="ac-breakdown panel">
+    <h3>{{localize 'ADND2E.sheet.combat.acBreakdown'}}</h3>
+    <ul class="derived">
+      {{#each adnd2e.combat.acBreakdown as |row|}}
+        <li><span class="label">{{localize row.label}}</span> <span class="value">{{row.value}}</span></li>
+      {{/each}}
+    </ul>
+  </div>
+
+  <div class="armor panel">
+    <h3>{{localize 'ADND2E.sheet.combat.armor'}}</h3>
+    <div class="armor-list">
+      {{#each adnd2e.combat.armor as |a|}}
+        <div class="armor-row{{#if a.equipped}} equipped{{/if}}" data-item-id="{{a.id}}">
+          <span class="name">
+            {{a.name}}
+            {{#if a.isShield}}<span class="badge">{{localize 'ADND2E.sheet.combat.shield'}}</span>{{/if}}
+          </span>
+          <span class="ac">{{a.baseAc}}</span>
+          <span class="equipped-state">
+            {{#if a.equipped}}{{localize 'ADND2E.sheet.combat.equipped'}}{{else}}{{localize 'ADND2E.sheet.combat.notEquipped'}}{{/if}}
+          </span>
+        </div>
+      {{else}}
+        <p class="placeholder">{{localize 'ADND2E.sheet.combat.noArmor'}}</p>
+      {{/each}}
+    </div>
+  </div>
+
+  <div class="skills-summary panel">
+    <h3>{{localize 'ADND2E.sheet.tabs.skills'}}</h3>
+
+    <div class="weapon-profs">
+      <h4>{{localize 'ADND2E.sheet.skills.weapon'}}</h4>
+      <p class="totals">
+        {{localize 'ADND2E.sheet.skills.slots' spent=adnd2e.skills.weapon.spent total=adnd2e.skills.weapon.total}}
+      </p>
+      <div class="prof-list">
+        {{#each adnd2e.skills.weapon.items as |w|}}
+          <div class="prof-row" data-item-id="{{w.id}}">
+            <span class="name">
+              {{w.weaponOrGroup}}
+              {{#if w.isGroup}}<span class="badge">{{localize 'ADND2E.sheet.skills.group'}}</span>{{/if}}
+            </span>
+            <span class="slots">{{w.slotsInvested}}</span>
+            {{#if w.specialized}}
+              <span class="specialized" title="{{localize 'ADND2E.sheet.skills.specialized'}}">★</span>
+            {{/if}}
+            {{#if w.canSpecialize}}
+              <button type="button" data-action="specializeWeapon" data-item-id="{{w.id}}">
+                {{localize 'ADND2E.sheet.skills.specialize'}}
+              </button>
+            {{/if}}
+          </div>
+        {{else}}
+          <p class="placeholder">{{localize 'ADND2E.sheet.skills.none'}}</p>
+        {{/each}}
+      </div>
+    </div>
+
+    <div class="nonweapon-profs">
+      <h4>{{localize 'ADND2E.sheet.skills.nonweapon'}}</h4>
+      <p class="totals">
+        {{localize 'ADND2E.sheet.skills.slots' spent=adnd2e.skills.nonweapon.spent total=adnd2e.skills.nonweapon.total}}
+      </p>
+      <div class="prof-list">
+        {{#each adnd2e.skills.nonweapon.items as |n|}}
+          <div class="prof-row" data-item-id="{{n.id}}">
+            <span class="name">
+              {{n.name}}
+              {{#if n.isRacial}}<span class="racial-tag">{{localize 'ADND2E.sheet.skills.racial'}}</span>{{/if}}
+            </span>
+            <span class="ability">{{localize n.governingAbilityLabel}}</span>
+            <span class="modifier">{{adnd2eSigned n.modifier}}</span>
+            <span class="target" title="{{localize 'ADND2E.sheet.skills.checkTarget'}}">{{n.checkTarget}}</span>
+            <button type="button" data-action="rollNonweaponCheck" data-item-id="{{n.id}}">
+              {{localize 'ADND2E.sheet.skills.check'}}
+            </button>
+          </div>
+        {{else}}
+          <p class="placeholder">{{localize 'ADND2E.sheet.skills.none'}}</p>
+        {{/each}}
+      </div>
+    </div>
+
+    {{#if adnd2e.skills.thief}}
+    <div class="thief-skills">
+      <h4>{{localize 'ADND2E.sheet.skills.thief'}}</h4>
+      <p class="totals">
+        {{localize 'ADND2E.sheet.skills.slots' spent=adnd2e.skills.thief.spent total=adnd2e.skills.thief.total}}
+      </p>
+      {{#if adnd2e.skills.thief.armorDisabled}}
+        <p class="placeholder">{{localize 'ADND2E.sheet.skills.thiefArmorDisabled'}}</p>
+      {{else}}
+        <div class="prof-list">
+          {{#each adnd2e.skills.thief.items as |t|}}
+            <div class="prof-row" data-skill="{{t.skill}}">
+              <span class="name">{{localize t.label}}</span>
+              <span class="base">{{t.base}}</span>
+              <span class="allocated">{{t.allocated}}</span>
+              <span class="effective">{{t.effective}}%</span>
+              {{#if t.usable}}
+                <button type="button" data-action="rollThiefSkill" data-skill="{{t.skill}}">
+                  {{localize 'ADND2E.sheet.skills.check'}}
+                </button>
+              {{else}}
+                <span class="not-usable">{{localize 'ADND2E.sheet.skills.notUsableYet'}}</span>
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
+      {{/if}}
+    </div>
+    {{/if}}
+  </div>
+
+</section>

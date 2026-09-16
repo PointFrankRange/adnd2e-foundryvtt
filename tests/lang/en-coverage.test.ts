@@ -348,6 +348,14 @@ describe("lang/en.json — SP6 creature sheet strings", () => {
   });
 });
 
+describe("lang/en.json — SP6 NPC sheet title", () => {
+  it("resolves ADND2E.sheet.npcTitle", () => {
+    const resolved = resolve("ADND2E.sheet.npcTitle");
+    expect(typeof resolved).toBe("string");
+    expect((resolved as string).length).toBeGreaterThan(0);
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [
