@@ -58,8 +58,16 @@ export interface CharacterDerivedView {
   saves: Record<"ppd" | "rsw" | "pp" | "bw" | "spell",
     { target: number; rollModifier: number; effectiveTarget: number }>;
   spellcasting: {
-    wizard: { specialistSchool: string | null; slots: Record<string, { max: number; used: number }> };
-    priest: { slots: Record<string, { max: number; used: number }> };
+    wizard: {
+      specialistSchool: string | null;
+      slots: Record<string, { max: number; used: number }>;
+      memorized: { spellItemId: string; spellLevel: number; expended: boolean }[];
+    };
+    priest: {
+      slots: Record<string, { max: number; used: number }>;
+      memorized: { spellItemId: string; spellLevel: number; expended: boolean }[];
+      sphereAccessOverride: string[] | null;
+    };
   };
   proficiencies: {
     weapon: { total: number; spent: number; available: number };
@@ -110,6 +118,12 @@ export interface SpellItemView {
   id: string; name: string; img: string; casterClass: string; level: number;
   schools: string[]; spheres: string[]; range: string; castingTime: string; savingThrow: string;
   inSpellbook: boolean;
+  /** filled by buildSpells (context.ts) — sheet.ts's toSpellView sets placeholders,
+   *  same pattern as NwpView's governingAbilityLabel/checkTarget. */
+  memorized: boolean;
+  expended: boolean;
+  canMemorize: boolean;
+  canCast: boolean;
 }
 export interface FeatureItemView {
   id: string; name: string; img: string;
@@ -136,6 +150,7 @@ export interface ClassRow {
   isDualPrimary: boolean; isDualActive: boolean; specialistSchool: string | null;
 }
 export interface SlotRow { level: number; max: number; used: number }
+export interface OrphanedSpellRow { spellItemId: string; casterClass: "wizard" | "priest"; spellLevel: number }
 export interface ContainerGroup {
   item: PhysicalItemView; contents: PhysicalItemView[];
   usedWeight: number; capacity: number | null; overCapacity: boolean;
@@ -186,6 +201,7 @@ export interface CharacterSheetContext {
     priestSlots: SlotRow[] | null;
     specialistSchoolLabel: string | null;
     known: { level: number; items: SpellItemView[] }[];
+    orphaned: OrphanedSpellRow[];
   };
   features: {
     groups: { sourceType: string; sourceTypeLabel: string; items: FeatureItemView[] }[];

@@ -1,0 +1,20 @@
+<div class="adnd2e chat-card cast-roll">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} — {{spellName}} ({{localize 'ADND2E.sheet.spells.level' level=spellLevel}})</h3>
+  </header>
+  <ul class="spell-details">
+    {{#if range}}<li>{{localize 'ADND2E.chat.cast.range'}}: {{range}}</li>{{/if}}
+    {{#if duration}}<li>{{localize 'ADND2E.chat.cast.duration'}}: {{duration}}</li>{{/if}}
+    {{#if castingTime}}<li>{{localize 'ADND2E.chat.cast.castingTime'}}: {{castingTime}}</li>{{/if}}
+    {{#if hasSavingThrow}}<li>{{localize 'ADND2E.chat.cast.savingThrow'}}: {{savingThrow}}</li>{{/if}}
+  </ul>
+  {{#if rollResult}}
+    <p class="formula">
+      {{localize rollResult.label}}: {{rollResult.formula}} = <strong>{{rollResult.total}}</strong>
+    </p>
+    <button type="button" data-action="applyCastEffect" data-amount="{{applyContext.amount}}" data-kind="{{applyContext.kind}}">
+      {{localize 'ADND2E.chat.damage.applyToTargets'}}
+    </button>
+  {{/if}}
+</div>

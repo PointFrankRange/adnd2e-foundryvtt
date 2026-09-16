@@ -89,6 +89,45 @@ async function onApplyDamage(button: HTMLButtonElement): Promise<void> {
   }
 }
 
+/** Applies a cast spell's rolled damage or healing to every currently
+ *  targeted token. A NEW, separate action from SP3's applyDamage (which
+ *  always subtracts an unsigned amount and MUST NOT change behavior for
+ *  chat cards already posted before this plan) — this handler branches on
+ *  an explicit data-kind attribute instead of a signed amount. */
+async function onApplyCastEffect(button: HTMLButtonElement): Promise<void> {
+  const { amount, kind } = button.dataset as { amount?: string; kind?: string };
+  const signedAmount = Number(amount ?? 0);
+  const targets = [...(game as unknown as { user: { targets: Iterable<{ actor: unknown }> } }).user.targets];
+  if (targets.length === 0) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.damage.noTargetsWarning"));
+    return;
+  }
+  const isGM = (game as unknown as { user: { isGM: boolean } }).user.isGM;
+  for (const t of targets) {
+    const actor = t.actor as {
+      isOwner: boolean;
+      system: { attributes: { hp: { value: number; max: number; temp?: number } } };
+      update(data: Record<string, unknown>): Promise<unknown>;
+    } | null;
+    if (!actor) continue;
+    if (!isGM && !actor.isOwner) {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.damage.notOwnerWarning"));
+      continue;
+    }
+    const hp = actor.system.attributes.hp;
+    if (kind === "healing") {
+      await actor.update({ "system.attributes.hp.value": Math.min(hp.max, hp.value + signedAmount) });
+      continue;
+    }
+    const temp = hp.temp ?? 0;
+    const fromTemp = Math.min(temp, signedAmount);
+    const fromValue = signedAmount - fromTemp;
+    const update: Record<string, unknown> = { "system.attributes.hp.value": hp.value - fromValue };
+    if ("temp" in hp) update["system.attributes.hp.temp"] = temp - fromTemp;
+    await actor.update(update);
+  }
+}
+
 /** Wires the "Roll Damage" / "Apply Damage" buttons on SP3's chat cards. Call
  *  once from the `ready` hook. */
 export function registerChatListeners(): void {
@@ -98,6 +137,9 @@ export function registerChatListeners(): void {
     });
     html.querySelector<HTMLButtonElement>('[data-action="applyDamage"]')?.addEventListener("click", (ev) => {
       void onApplyDamage(ev.currentTarget as HTMLButtonElement);
+    });
+    html.querySelector<HTMLButtonElement>('[data-action="applyCastEffect"]')?.addEventListener("click", (ev) => {
+      void onApplyCastEffect(ev.currentTarget as HTMLButtonElement);
     });
   });
 }

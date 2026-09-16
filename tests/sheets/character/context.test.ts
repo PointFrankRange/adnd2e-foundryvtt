@@ -94,7 +94,10 @@ function input(over: Partial<CharacterSheetInput> = {}): CharacterSheetInput {
         bw: { target: 15, rollModifier: 0, effectiveTarget: 15 },
         spell: { target: 16, rollModifier: 0, effectiveTarget: 16 },
       },
-      spellcasting: { wizard: { specialistSchool: null, slots: {} }, priest: { slots: {} } },
+      spellcasting: {
+        wizard: { specialistSchool: null, slots: {}, memorized: [] },
+        priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+      },
       proficiencies: {
         weapon: { total: 4, spent: 0, available: 4 },
         nonweapon: { total: 3, spent: 0, available: 3 },
@@ -709,8 +712,9 @@ describe("buildCharacterSheetContext — spells / features / biography / tabs", 
             wizard: {
               specialistSchool: "evocation",
               slots: { "2": { max: 1, used: 1 }, "1": { max: 2, used: 0 } },
+              memorized: [],
             },
-            priest: { slots: {} },
+            priest: { slots: {}, memorized: [], sphereAccessOverride: null },
           },
         },
         config: { ...input().config, schools: { evocation: "ADND2E.schools.evocation" } },
@@ -729,8 +733,8 @@ describe("buildCharacterSheetContext — spells / features / biography / tabs", 
         derived: {
           ...input().derived,
           spellcasting: {
-            wizard: { specialistSchool: null, slots: {} },
-            priest: { slots: { "1": { max: 3, used: 1 } } },
+            wizard: { specialistSchool: null, slots: {}, memorized: [] },
+            priest: { slots: { "1": { max: 3, used: 1 } }, memorized: [], sphereAccessOverride: null },
           },
         },
       }),
@@ -751,6 +755,10 @@ describe("buildCharacterSheetContext — spells / features / biography / tabs", 
       castingTime: "",
       savingThrow: "",
       inSpellbook: true,
+      memorized: false,
+      expended: false,
+      canMemorize: false,
+      canCast: false,
       ...over,
     });
     const c = buildCharacterSheetContext(
@@ -766,6 +774,76 @@ describe("buildCharacterSheetContext — spells / features / biography / tabs", 
       [1, ["mm", "sh"]],
       [3, ["fb"]],
     ]);
+  });
+
+  it("orphaned: a memorized entry with no matching spell item appears in spells.orphaned", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: {
+              specialistSchool: null,
+              slots: { "1": { max: 1, used: 1 } },
+              memorized: [{ spellItemId: "deleted-spell", spellLevel: 1, expended: false }],
+            },
+            priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+          },
+        },
+        spellItems: [], // the spell item is gone — this is the whole point
+      }),
+    );
+    expect(c.spells.orphaned).toEqual([
+      { spellItemId: "deleted-spell", casterClass: "wizard", spellLevel: 1 },
+    ]);
+  });
+
+  it("orphaned: a priest memorized entry with no matching spell item also appears", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: { specialistSchool: null, slots: {}, memorized: [] },
+            priest: {
+              slots: { "2": { max: 1, used: 1 } },
+              memorized: [{ spellItemId: "deleted-priest-spell", spellLevel: 2, expended: false }],
+              sphereAccessOverride: null,
+            },
+          },
+        },
+        spellItems: [],
+      }),
+    );
+    expect(c.spells.orphaned).toEqual([
+      { spellItemId: "deleted-priest-spell", casterClass: "priest", spellLevel: 2 },
+    ]);
+  });
+
+  it("orphaned: a memorized entry WITH a matching spell item is NOT orphaned", () => {
+    const spell = (over: Partial<SpellItemView>): SpellItemView => ({
+      id: "s", name: "Spell", img: "", casterClass: "wizard", level: 1,
+      schools: [], spheres: [], range: "", castingTime: "", savingThrow: "",
+      inSpellbook: true, memorized: false, expended: false, canMemorize: false, canCast: false,
+      ...over,
+    });
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: {
+              specialistSchool: null,
+              slots: { "1": { max: 1, used: 1 } },
+              memorized: [{ spellItemId: "s", spellLevel: 1, expended: false }],
+            },
+            priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+          },
+        },
+        spellItems: [spell({ id: "s" })],
+      }),
+    );
+    expect(c.spells.orphaned).toEqual([]);
   });
 
   it("features group by sourceType; resources + languages pass through", () => {
@@ -850,5 +928,174 @@ describe("buildCharacterSheetContext — spells / features / biography / tabs", 
       "features",
       "biography",
     ]);
+  });
+});
+
+describe("buildCharacterSheetContext — spell memorize/cast eligibility", () => {
+  const wizardSpell = (over: Partial<SpellItemView>): SpellItemView => ({
+    id: "mm",
+    name: "Magic Missile",
+    img: "",
+    casterClass: "wizard",
+    level: 1,
+    schools: ["evocation"],
+    spheres: [],
+    range: "",
+    castingTime: "",
+    savingThrow: "none",
+    inSpellbook: false,
+    memorized: false,
+    expended: false,
+    canMemorize: false,
+    canCast: false,
+    ...over,
+  });
+
+  it("wizard spell not in spellbook, slot free → cannot memorize", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: { specialistSchool: null, slots: { "1": { max: 2, used: 0 } }, memorized: [] },
+            priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+          },
+        },
+        spellItems: [wizardSpell({ inSpellbook: false })],
+      }),
+    );
+    expect(c.spells.known[0]!.items[0]!.canMemorize).toBe(false);
+  });
+
+  it("wizard spell in spellbook, slot free → can memorize", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: { specialistSchool: null, slots: { "1": { max: 2, used: 0 } }, memorized: [] },
+            priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+          },
+        },
+        spellItems: [wizardSpell({ inSpellbook: true })],
+      }),
+    );
+    expect(c.spells.known[0]!.items[0]!.canMemorize).toBe(true);
+  });
+
+  it("wizard spell in spellbook, no free slot (used === max) → cannot memorize", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: { specialistSchool: null, slots: { "1": { max: 1, used: 1 } }, memorized: [] },
+            priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+          },
+        },
+        spellItems: [wizardSpell({ inSpellbook: true })],
+      }),
+    );
+    expect(c.spells.known[0]!.items[0]!.canMemorize).toBe(false);
+  });
+
+  it("memorized, not expended → canCast true, canMemorize false", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: {
+              specialistSchool: null,
+              slots: { "1": { max: 1, used: 1 } },
+              memorized: [{ spellItemId: "mm", spellLevel: 1, expended: false }],
+            },
+            priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+          },
+        },
+        spellItems: [wizardSpell({ inSpellbook: true })],
+      }),
+    );
+    const row = c.spells.known[0]!.items[0]!;
+    expect(row.memorized).toBe(true);
+    expect(row.expended).toBe(false);
+    expect(row.canCast).toBe(true);
+    expect(row.canMemorize).toBe(false);
+  });
+
+  it("memorized AND expended → canCast false", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: {
+              specialistSchool: null,
+              slots: { "1": { max: 1, used: 1 } },
+              memorized: [{ spellItemId: "mm", spellLevel: 1, expended: true }],
+            },
+            priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+          },
+        },
+        spellItems: [wizardSpell({ inSpellbook: true })],
+      }),
+    );
+    const row = c.spells.known[0]!.items[0]!;
+    expect(row.expended).toBe(true);
+    expect(row.canCast).toBe(false);
+  });
+
+  it("priest spell within sphere access + level cap, slot free → can memorize", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [
+          {
+            id: "c1", name: "Cleric", img: "", chassisId: "cleric", hitDie: 8,
+            xp: 0, level: 5, canLevelUp: false, dualClassState: null, specialistSchool: null,
+          },
+        ],
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: { specialistSchool: null, slots: {}, memorized: [] },
+            priest: { slots: { "1": { max: 2, used: 0 } }, memorized: [], sphereAccessOverride: null },
+          },
+        },
+        spellItems: [
+          wizardSpell({
+            id: "cure", name: "Cure Light Wounds", casterClass: "priest",
+            level: 1, schools: [], spheres: ["healing"], inSpellbook: false,
+          }),
+        ],
+      }),
+    );
+    expect(c.spells.known[0]!.items[0]!.canMemorize).toBe(true);
+  });
+
+  it("priest spell in a sphere the cleric table has no access to → cannot memorize", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [
+          {
+            id: "c1", name: "Cleric", img: "", chassisId: "cleric", hitDie: 8,
+            xp: 0, level: 5, canLevelUp: false, dualClassState: null, specialistSchool: null,
+          },
+        ],
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: { specialistSchool: null, slots: {}, memorized: [] },
+            priest: { slots: { "1": { max: 2, used: 0 } }, memorized: [], sphereAccessOverride: null },
+          },
+        },
+        spellItems: [
+          wizardSpell({
+            id: "speak", name: "Speak With Animals", casterClass: "priest",
+            level: 1, schools: [], spheres: ["animal"], inSpellbook: false,
+          }),
+        ],
+      }),
+    );
+    expect(c.spells.known[0]!.items[0]!.canMemorize).toBe(false);
   });
 });

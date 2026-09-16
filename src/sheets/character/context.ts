@@ -1,18 +1,22 @@
-import type { ClassId, DexterityModifiers } from "../../core/types";
+import type { ClassId, DexterityModifiers, SphereName } from "../../core/types";
 import type {
   AbilityRow,
+  CharacterDerivedView,
   CharacterSheetContext,
   CharacterSheetInput,
   ClassRow,
   EncumbranceGauge,
   FeatureItemView,
   NwpView,
+  OrphanedSpellRow,
   PhysicalItemView,
   SaveRow,
   SlotRow,
   SpellItemView,
   TabDescriptor,
 } from "./context-types";
+import { getChassis } from "../../core/classes/chassis";
+import { canMemorizePriestSpell } from "../../magic/priest-sphere-access";
 import { groupInventory } from "./grouping";
 import { xpToNext } from "./xp";
 
@@ -287,9 +291,16 @@ function buildNwpRow(n: NwpView, input: CharacterSheetInput): NwpView {
 function buildSpells(input: CharacterSheetInput): CharacterSheetContext["spells"] {
   const sc = input.derived.spellcasting;
   const school = sc.wizard.specialistSchool;
+  const priestChassisId =
+    input.classItems.find((c) => getChassis(c.chassisId as ClassId).spellProgressionId === "priest")
+      ?.chassisId ?? null;
+  const sphereAccessOverride = sc.priest.sphereAccessOverride as SphereName[] | null;
+
   const known: { level: number; items: SpellItemView[] }[] = [];
   for (let level = 1; level <= 9; level += 1) {
-    const items = input.spellItems.filter((s) => s.level === level);
+    const items = input.spellItems
+      .filter((s) => s.level === level)
+      .map((s) => buildSpellRow(s, sc, priestChassisId, sphereAccessOverride));
     if (items.length > 0) known.push({ level, items });
   }
   return {
@@ -297,6 +308,63 @@ function buildSpells(input: CharacterSheetInput): CharacterSheetContext["spells"
     priestSlots: toSlotRows(sc.priest.slots),
     specialistSchoolLabel: school ? input.config.schools[school] : null,
     known,
+    orphaned: buildOrphanedSpells(input, sc),
+  };
+}
+
+/** Memorized entries whose backing spell Item no longer exists on the actor
+ *  (e.g. it was deleted while still memorized). These can never appear in a
+ *  normal `known` row (built by iterating `input.spellItems`), so they get
+ *  their own minimal Forget-only list instead — otherwise the memorized
+ *  entry is permanently stuck consuming a slot with no UI path to remove it. */
+function buildOrphanedSpells(
+  input: CharacterSheetInput,
+  sc: CharacterDerivedView["spellcasting"],
+): OrphanedSpellRow[] {
+  const knownIds = new Set(input.spellItems.map((s) => s.id));
+  const orphaned: OrphanedSpellRow[] = [];
+  for (const m of sc.wizard.memorized) {
+    if (!knownIds.has(m.spellItemId)) {
+      orphaned.push({ spellItemId: m.spellItemId, casterClass: "wizard", spellLevel: m.spellLevel });
+    }
+  }
+  for (const m of sc.priest.memorized) {
+    if (!knownIds.has(m.spellItemId)) {
+      orphaned.push({ spellItemId: m.spellItemId, casterClass: "priest", spellLevel: m.spellLevel });
+    }
+  }
+  return orphaned;
+}
+
+/** Enriches a raw SpellItemView with memorize/cast eligibility, computed from
+ *  the actor's memorized list, its slot state, and (for a priest spell) sphere
+ *  access. sheet.ts's toSpellView leaves these four fields as placeholders. */
+function buildSpellRow(
+  item: SpellItemView,
+  sc: CharacterDerivedView["spellcasting"],
+  priestChassisId: string | null,
+  sphereAccessOverride: SphereName[] | null,
+): SpellItemView {
+  const isWizard = item.casterClass === "wizard";
+  const memorizedList = isWizard ? sc.wizard.memorized : sc.priest.memorized;
+  const entry = memorizedList.find((m) => m.spellItemId === item.id);
+  const memorized = Boolean(entry);
+  const expended = entry?.expended ?? false;
+
+  const slots = isWizard ? sc.wizard.slots : sc.priest.slots;
+  const slotRow = slots[item.level];
+  const hasFreeSlot = Boolean(slotRow) && slotRow.used < slotRow.max;
+
+  const eligible = isWizard
+    ? item.inSpellbook
+    : canMemorizePriestSpell(priestChassisId, sphereAccessOverride, item.spheres as SphereName[], item.level);
+
+  return {
+    ...item,
+    memorized,
+    expended,
+    canMemorize: !memorized && hasFreeSlot && eligible,
+    canCast: memorized && !expended,
   };
 }
 

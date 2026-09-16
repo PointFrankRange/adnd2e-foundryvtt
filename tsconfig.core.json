@@ -11,5 +11,5 @@
   // graphs need types this project strips (`types: []`). ESLint's
   // no-restricted-globals block still fences those test dirs against Foundry
   // globals.
-  "include": ["src/core", "tests/core", "src/config.ts", "src/settings/registry.ts", "src/data/item/subtypes.ts", "src/data/item/choices.ts", "src/data/actor/subtypes.ts", "src/data/derive", "src/data/active-effect/subtypes.ts", "src/data/migrations.ts", "src/data/import/envelope.ts", "src/conditions.ts", "src/sheets/character/context-types.ts", "src/sheets/character/xp.ts", "src/sheets/character/drop-rules.ts", "src/sheets/character/grouping.ts", "src/sheets/character/context.ts", "tests/sheets", "src/combat", "tests/combat"]
+  "include": ["src/core", "tests/core", "src/config.ts", "src/settings/registry.ts", "src/data/item/subtypes.ts", "src/data/item/choices.ts", "src/data/actor/subtypes.ts", "src/data/derive", "src/data/active-effect/subtypes.ts", "src/data/migrations.ts", "src/data/import/envelope.ts", "src/conditions.ts", "src/sheets/character/context-types.ts", "src/sheets/character/xp.ts", "src/sheets/character/drop-rules.ts", "src/sheets/character/grouping.ts", "src/sheets/character/context.ts", "tests/sheets", "src/combat", "tests/combat", "src/magic", "tests/magic"]
 }

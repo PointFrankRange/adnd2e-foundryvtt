@@ -236,7 +236,17 @@
         "slotLevel": "Level",
         "slotsMax": "Max",
         "slotsUsed": "Used",
-        "none": "No spells known."
+        "none": "No spells known.",
+        "memorize": "Memorize",
+        "forget": "Forget",
+        "cast": "Cast",
+        "rest": "Rest",
+        "expended": "Cast today — expended until Rest",
+        "orphaned": "Orphaned Memorized Spells",
+        "orphanedEntry": "Level {level} spell (item no longer exists)",
+        "memorizeBlockedWarning": "That spell can no longer be memorized — refresh the sheet.",
+        "castBlockedWarning": "That spell can't be cast right now — refresh the sheet.",
+        "castRollFailedWarning": "This spell's damage/healing formula couldn't be rolled — check the item's Automation fields."
       },
       "skills": {
         "weapon": "Weapon Proficiencies",
@@ -303,6 +313,14 @@
       },
       "save": {
         "success": "Success", "failure": "Failure"
+      },
+      "cast": {
+        "range": "Range",
+        "duration": "Duration",
+        "castingTime": "Casting Time",
+        "savingThrow": "Saving Throw",
+        "damageRoll": "Damage",
+        "healingRoll": "Healing"
       }
     },
     "sheets": {
