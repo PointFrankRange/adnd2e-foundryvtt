@@ -318,6 +318,75 @@ describe("lang/en.json — SP5b thief/bard-skill + backstab strings", () => {
   });
 });
 
+describe("lang/en.json — SP6 creature damage-roll flavor", () => {
+  it("resolves ADND2E.chat.creature.damageFlavor", () => {
+    const resolved = resolve("ADND2E.chat.creature.damageFlavor");
+    expect(typeof resolved).toBe("string");
+    expect((resolved as string).length).toBeGreaterThan(0);
+  });
+});
+
+describe("lang/en.json — SP6 creature sheet strings", () => {
+  it("resolves ADND2E.sheet.creatureTitle and every ADND2E.sheet.creature.* key", () => {
+    for (const key of [
+      "ADND2E.sheet.creatureTitle",
+      "ADND2E.sheet.vitals.effective",
+      "ADND2E.sheet.creature.hd",
+      "ADND2E.sheet.creature.hdBonus",
+      "ADND2E.sheet.creature.fixedHp",
+      "ADND2E.sheet.creature.thac0AsFighterLevel",
+      "ADND2E.sheet.creature.intelligence",
+      "ADND2E.sheet.creature.attacks",
+      "ADND2E.sheet.creature.noAttacks",
+      "ADND2E.sheet.creature.attackName",
+      "ADND2E.sheet.creature.attackCount",
+      "ADND2E.sheet.creature.attackDamage",
+      "ADND2E.sheet.creature.attackType",
+      "ADND2E.sheet.creature.attackSpecial",
+      "ADND2E.sheet.creature.attackThac0Override",
+      "ADND2E.sheet.creature.addAttack",
+      "ADND2E.sheet.creature.deleteAttack",
+      "ADND2E.sheet.creature.savesAuthoring",
+      "ADND2E.sheet.creature.saveMode",
+      "ADND2E.sheet.creature.saveClassGroup",
+      "ADND2E.sheet.creature.saveClassLevel",
+      "ADND2E.sheet.creature.flyManeuverability",
+      "ADND2E.sheet.creature.morale",
+      "ADND2E.sheet.creature.magicResistance",
+      "ADND2E.sheet.creature.treasureType",
+      "ADND2E.sheet.creature.numberAppearing",
+      "ADND2E.sheet.creature.xpValue",
+      "ADND2E.sheet.creature.specialAttacks",
+      "ADND2E.sheet.creature.specialDefenses",
+      "ADND2E.sheet.creature.description",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("lang/en.json — SP6 NPC sheet title", () => {
+  it("resolves ADND2E.sheet.npcTitle", () => {
+    const resolved = resolve("ADND2E.sheet.npcTitle");
+    expect(typeof resolved).toBe("string");
+    expect((resolved as string).length).toBeGreaterThan(0);
+  });
+});
+
+describe("lang/en.json — SP6 NPC panel fields (whole-branch fix I3)", () => {
+  it("resolves every ADND2E.sheet.npc.* key", () => {
+    for (const key of [
+      "ADND2E.sheet.npc.morale",
+      "ADND2E.sheet.npc.xpValue",
+      "ADND2E.sheet.npc.disposition",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [

@@ -72,7 +72,7 @@ interface RawItemHandle extends RawItem {
   update(data: Record<string, unknown>): Promise<unknown>;
 }
 
-function toClassView(it: RawItem): ClassItemView {
+export function toClassView(it: RawItem): ClassItemView {
   const s = it.system as {
     chassisId: string;
     xp: number;
@@ -95,7 +95,7 @@ function toClassView(it: RawItem): ClassItemView {
   };
 }
 
-function toRaceView(it: RawItem): RaceItemView {
+export function toRaceView(it: RawItem): RaceItemView {
   const s = it.system as {
     raceId: string;
     size: string;
@@ -117,13 +117,13 @@ function toRaceView(it: RawItem): RaceItemView {
   };
 }
 
-function rangeToString(range: unknown): string | null {
+export function rangeToString(range: unknown): string | null {
   if (!range || typeof range !== "object") return null;
   const r = range as { short: number; medium: number; long: number };
   return `${r.short}/${r.medium}/${r.long}`;
 }
 
-function toPhysicalView(it: RawItem): PhysicalItemView {
+export function toPhysicalView(it: RawItem): PhysicalItemView {
   const s = it.system as Record<string, unknown>;
   const type = it.type as PhysicalItemView["type"];
   const view: PhysicalItemView = {
@@ -164,7 +164,7 @@ function toPhysicalView(it: RawItem): PhysicalItemView {
   return view;
 }
 
-function toWeaponProfView(it: RawItem): WeaponProfView {
+export function toWeaponProfView(it: RawItem): WeaponProfView {
   const s = it.system as {
     weaponOrGroup: string;
     isGroup: boolean;
@@ -185,7 +185,7 @@ function toWeaponProfView(it: RawItem): WeaponProfView {
   };
 }
 
-function toNwpView(it: RawItem): NwpView {
+export function toNwpView(it: RawItem): NwpView {
   const s = it.system as {
     governingAbility: string;
     modifier: number;
@@ -206,7 +206,7 @@ function toNwpView(it: RawItem): NwpView {
   };
 }
 
-function toSpellView(it: RawItem, spellbookIds: Set<string>): SpellItemView {
+export function toSpellView(it: RawItem, spellbookIds: Set<string>): SpellItemView {
   const s = it.system as {
     casterClass: string;
     level: number;
@@ -238,7 +238,7 @@ function toSpellView(it: RawItem, spellbookIds: Set<string>): SpellItemView {
   };
 }
 
-function toFeatureView(it: RawItem): FeatureItemView {
+export function toFeatureView(it: RawItem): FeatureItemView {
   const s = it.system as {
     sourceType: string;
     activation: string;

@@ -2,7 +2,7 @@
 // per-tab layouts. Keeps the ApplicationV2 tab-part `.tab` show/hide contract
 // and the header grid.
 
-.adnd2e.sheet.actor.character {
+.adnd2e.sheet.actor:is(.character, .npc) {
   .adnd2e-char-header {
     display: grid;
     grid-template-columns: 64px 1fr auto;

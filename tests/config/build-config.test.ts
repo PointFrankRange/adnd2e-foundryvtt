@@ -12,9 +12,9 @@ describe("buildAdnd2eConfig()", () => {
   it("has every documented top-level entry", () => {
     expect(Object.keys(cfg).sort()).toEqual(
       [
-        "abilities", "alignments", "classGroups", "creatureIntelligence",
-        "currency", "damageTypes", "encumbranceCategories", "movementModes",
-        "saves", "schools", "sizes", "spheres", "treasureTypes",
+        "abilities", "alignments", "attackTypes", "classGroups", "creatureIntelligence",
+        "currency", "damageTypes", "dispositions", "encumbranceCategories", "movementModes",
+        "saveModes", "saves", "schools", "sizes", "spheres", "treasureTypes",
         "weaponProficiencyGroups", "weaponStyleGroups",
       ].sort(),
     );

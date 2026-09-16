@@ -127,6 +127,19 @@
       "weapon-and-shield": "Weapon-and-Shield Style",
       "two-handed-weapon": "Two-Handed-Weapon Style"
     },
+    "attackTypes": {
+      "melee": "Melee",
+      "ranged": "Ranged"
+    },
+    "dispositions": {
+      "friendly": "Friendly",
+      "neutral": "Neutral",
+      "hostile": "Hostile"
+    },
+    "saveModes": {
+      "explicit": "Explicit",
+      "asClass": "As Class"
+    },
     "currency": {
       "pp": "Platinum",
       "gp": "Gold",
@@ -149,6 +162,8 @@
     },
     "sheet": {
       "title": "Character Sheet",
+      "creatureTitle": "Creature",
+      "npcTitle": "NPC",
       "namePlaceholder": "Character name",
       "identity": {
         "alignment": "Alignment"
@@ -172,7 +187,8 @@
         "ac": "Armor Class",
         "thac0": "THAC0",
         "saves": "Saving Throws",
-        "movement": "Movement"
+        "movement": "Movement",
+        "effective": "Effective"
       },
       "drop": {
         "duplicateRace": "This character already has a race.",
@@ -303,6 +319,41 @@
         "notes": "Biography",
         "campaignNotes": "Campaign Notes",
         "gmNotes": "GM Notes"
+      },
+      "npc": {
+        "morale": "Morale",
+        "xpValue": "XP Value",
+        "disposition": "Disposition"
+      },
+      "creature": {
+        "hd": "Hit Dice",
+        "hdBonus": "HD Bonus",
+        "fixedHp": "Fixed HP",
+        "thac0AsFighterLevel": "THAC0 as Fighter Level",
+        "intelligence": "Intelligence",
+        "attacks": "Attacks",
+        "noAttacks": "No attacks defined",
+        "attackName": "Name",
+        "attackCount": "Count",
+        "attackDamage": "Damage",
+        "attackType": "Type",
+        "attackSpecial": "Special",
+        "attackThac0Override": "THAC0 Override",
+        "addAttack": "Add Attack",
+        "deleteAttack": "Remove",
+        "savesAuthoring": "Saving Throws (Authoring)",
+        "saveMode": "Save Mode",
+        "saveClassGroup": "Class Group",
+        "saveClassLevel": "Class Level",
+        "flyManeuverability": "Fly Maneuverability",
+        "morale": "Morale",
+        "magicResistance": "Magic Resistance",
+        "treasureType": "Treasure Type",
+        "numberAppearing": "Number Appearing",
+        "xpValue": "XP Value",
+        "specialAttacks": "Special Attacks",
+        "specialDefenses": "Special Defenses",
+        "description": "Description"
       }
     },
     "chat": {
@@ -367,6 +418,9 @@
           "climb-walls": "Climb Walls",
           "read-languages": "Read Languages"
         }
+      },
+      "creature": {
+        "damageFlavor": "{name} damage"
       }
     },
     "sheets": {

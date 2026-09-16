@@ -55,7 +55,8 @@
         { "name": "Classes & Races", "sorting": "a", "packs": ["classes", "races"] },
         { "name": "Proficiencies", "sorting": "a", "packs": ["weapon-proficiency-groups", "nonweapon-proficiencies"] },
         { "name": "Equipment", "sorting": "a", "packs": [] },
-        { "name": "Spells", "sorting": "a", "packs": [] }
+        { "name": "Spells", "sorting": "a", "packs": [] },
+        { "name": "Bestiary", "sorting": "a", "packs": [] }
       ],
       "packs": []
     }

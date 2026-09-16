@@ -15,6 +15,7 @@ export default defineConfig({
         "src/sheets/character/context-types.ts", "src/sheets/character/xp.ts",
         "src/sheets/character/drop-rules.ts", "src/sheets/character/grouping.ts",
         "src/sheets/character/context.ts",
+        "src/sheets/creature/context-types.ts", "src/sheets/creature/context.ts",
         "src/combat/**/*.ts",
         "src/magic/**/*.ts",
       ],
