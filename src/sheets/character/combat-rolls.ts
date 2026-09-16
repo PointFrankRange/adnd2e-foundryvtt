@@ -1,9 +1,11 @@
 import { buildAttackCardContext } from "../../combat/attack-card";
 import { buildSaveCardContext } from "../../combat/save-card";
+import { getChassis } from "../../core/classes/chassis";
 import { attackModifiers, hitResult } from "../../core/combat/attack";
 import { attackFormula } from "../../core/dice/formula";
+import { weaponAttackPenalty, weaponSpecializationEffect } from "../../core/proficiencies/weapon";
 import { TEMPLATE_PATH } from "../../constants";
-import type { SaveCategory } from "../../core/types";
+import type { ClassId, SaveCategory } from "../../core/types";
 
 /* ---------------------------------------------------------------------------
  * combat-rolls — SP3 Task 5.
@@ -33,13 +35,63 @@ export function resolveTargetCombatInfo(
 interface AttackerActor {
   name: string; img: string; uuid: string;
   system: { attributes?: { thac0?: { melee?: number; ranged?: number } } };
-  items: { get(id: string): WeaponItemHandle | undefined };
+  items: { get(id: string): WeaponItemHandle | undefined } & Iterable<GenericAttackerItem>;
 }
 interface WeaponItemHandle {
   id: string; name: string;
   system: {
     category: string; proficiencyGroup: string; materialToHit: number; magicBonus: number;
   };
+}
+/** Minimal shape needed to find the actor's class chassis and weapon-proficiency
+ *  items without a dedicated Item subtype per iteration entry. */
+interface GenericAttackerItem {
+  type: string;
+  system: Record<string, unknown>;
+}
+
+/** Resolves the attack-roll `proficiencyModifier` (per core/combat/attack.ts's
+ *  AttackModifierInput doc comment: "0 if proficient; class non-proficiency
+ *  penalty if not; +1 if specialized") by matching `weapon` against the
+ *  actor's weaponProficiency items — by exact name for a specific-weapon
+ *  proficiency, or by `weaponOrGroup === weapon.system.proficiencyGroup` for
+ *  a group proficiency. Uses the FIRST class item's chassis for the
+ *  non-proficiency penalty and the specialization category-to-bonus lookup
+ *  (a documented v1 simplification for multi-classed actors — see this
+ *  plan's Global Constraints). Only "proficient"/"non-proficient" are ever
+ *  resolved; "related" weapon proficiency isn't modeled anywhere in this
+ *  codebase. */
+function resolveProficiencyModifier(actor: AttackerActor, weapon: WeaponItemHandle): number {
+  let isProficient = false;
+  let specialized = false;
+  for (const item of actor.items) {
+    if (item.type !== "weaponProficiency") continue;
+    const s = item.system as { weaponOrGroup?: string; isGroup?: boolean; specialized?: boolean };
+    const matches = s.isGroup
+      ? s.weaponOrGroup === weapon.system.proficiencyGroup
+      : s.weaponOrGroup === weapon.name;
+    if (matches) {
+      isProficient = true;
+      specialized = Boolean(s.specialized);
+      break;
+    }
+  }
+
+  let nonProficiencyPenalty = 0;
+  for (const item of actor.items) {
+    if (item.type !== "class") continue;
+    const chassisId = (item.system as { chassisId?: string }).chassisId;
+    if (chassisId) {
+      nonProficiencyPenalty = getChassis(chassisId as ClassId).nonProficiencyPenalty;
+      break;
+    }
+  }
+
+  const base = weaponAttackPenalty(nonProficiencyPenalty, isProficient ? "proficient" : "non-proficient");
+  if (!isProficient || !specialized) return base;
+
+  const category = weapon.system.category === "bow" ? "bow" : weapon.system.category === "crossbow" ? "crossbow" : "melee";
+  return base + weaponSpecializationEffect(category).toHit;
 }
 
 /** Roll one attack for `weaponItemId` against the current token target(s) (or
@@ -83,9 +135,9 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string): Pr
   const thac0 = isRanged ? (actor.system.attributes?.thac0?.ranged ?? 20) : (actor.system.attributes?.thac0?.melee ?? 20);
   const { total: attackBonus, breakdown } = attackModifiers({
     weaponMagicBonus: weapon.system.magicBonus,
-    // Proficiency/STR/DEX modifiers are intentionally NOT wired in SP3 — they
-    // require the weaponProficiency-item lookup and ability-mod plumbing SP5
-    // owns; a bare weapon-magic-only bonus is the honest v1 (spec §7 boundary).
+    proficiencyModifier: resolveProficiencyModifier(actor, weapon),
+    // STR/DEX modifiers remain out of scope (parent spec §7 boundary,
+    // unchanged by this sub-project).
   });
   const formula = attackFormula(attackBonus);
   const roll = await new Roll(formula).evaluate();
