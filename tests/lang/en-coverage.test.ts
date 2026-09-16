@@ -318,6 +318,14 @@ describe("lang/en.json — SP5b thief/bard-skill + backstab strings", () => {
   });
 });
 
+describe("lang/en.json — SP6 creature damage-roll flavor", () => {
+  it("resolves ADND2E.chat.creature.damageFlavor", () => {
+    const resolved = resolve("ADND2E.chat.creature.damageFlavor");
+    expect(typeof resolved).toBe("string");
+    expect((resolved as string).length).toBeGreaterThan(0);
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [

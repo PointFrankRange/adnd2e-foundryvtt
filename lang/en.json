@@ -367,6 +367,9 @@
           "climb-walls": "Climb Walls",
           "read-languages": "Read Languages"
         }
+      },
+      "creature": {
+        "damageFlavor": "{name} damage"
       }
     },
     "sheets": {
