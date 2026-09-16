@@ -2,6 +2,7 @@ import type {
   CharismaModifiers, ConstitutionModifiers, DexterityModifiers, IntelligenceModifiers,
   StrengthModifiers, WisdomModifiers,
 } from "../../core/types";
+import type { OptionalRules } from "../../core/options";
 
 /* ---------- input (assembled by sheet.ts from plain data) ---------- */
 
@@ -21,6 +22,9 @@ export interface CharacterSheetInput {
   /** CONFIG.ADND2E — label maps only */
   config: Adnd2eConfigView;
   perms: { isGM: boolean; isOwner: boolean; editable: boolean };
+  /** the 8-key core optional-rules bag (game.settings, read once by sheet.ts) —
+   *  only `maxSpellsPerLevel` is consumed so far (Learn Spell's per-level cap) */
+  optionalRules: OptionalRules;
 }
 
 export interface Adnd2eConfigView {
@@ -124,6 +128,9 @@ export interface SpellItemView {
   expended: boolean;
   canMemorize: boolean;
   canCast: boolean;
+  /** wizard-only: true when this spell is NOT yet in the spellbook and
+   *  core/magic/spellbook.ts's canLearnSpell allows attempting to learn it */
+  canLearn: boolean;
 }
 export interface FeatureItemView {
   id: string; name: string; img: string;

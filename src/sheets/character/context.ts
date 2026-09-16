@@ -1,4 +1,4 @@
-import type { ClassId, DexterityModifiers, SphereName } from "../../core/types";
+import type { ClassId, DexterityModifiers, IntelligenceModifiers, SphereName, WizardSchool } from "../../core/types";
 import type {
   AbilityRow,
   CharacterDerivedView,
@@ -16,6 +16,8 @@ import type {
   TabDescriptor,
 } from "./context-types";
 import { getChassis } from "../../core/classes/chassis";
+import { canLearnSpell } from "../../core/magic/spellbook";
+import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { canMemorizePriestSpell } from "../../magic/priest-sphere-access";
 import { groupInventory } from "./grouping";
 import { xpToNext } from "./xp";
@@ -295,12 +297,15 @@ function buildSpells(input: CharacterSheetInput): CharacterSheetContext["spells"
     input.classItems.find((c) => getChassis(c.chassisId as ClassId).spellProgressionId === "priest")
       ?.chassisId ?? null;
   const sphereAccessOverride = sc.priest.sphereAccessOverride as SphereName[] | null;
+  const int = input.derived.abilities.int.mods as IntelligenceModifiers;
+  const specialistSchool = school as WizardSchool | null;
 
   const known: { level: number; items: SpellItemView[] }[] = [];
   for (let level = 1; level <= 9; level += 1) {
-    const items = input.spellItems
-      .filter((s) => s.level === level)
-      .map((s) => buildSpellRow(s, sc, priestChassisId, sphereAccessOverride));
+    const levelItems = input.spellItems.filter((s) => s.level === level);
+    const knownAtThisLevel = levelItems.filter((s) => s.casterClass === "wizard" && s.inSpellbook).length;
+    const learnCtx: LearnEligibilityContext = { int, specialistSchool, knownAtThisLevel, optionalRules: input.optionalRules };
+    const items = levelItems.map((s) => buildSpellRow(s, sc, priestChassisId, sphereAccessOverride, learnCtx));
     if (items.length > 0) known.push({ level, items });
   }
   return {
@@ -310,6 +315,18 @@ function buildSpells(input: CharacterSheetInput): CharacterSheetContext["spells"
     known,
     orphaned: buildOrphanedSpells(input, sc),
   };
+}
+
+/** The wizard-specific inputs `canLearnForRow` needs, bundled so `buildSpellRow`
+ *  doesn't grow an unwieldy positional-parameter list. `knownAtThisLevel` is
+ *  computed once per level by `buildSpells` (counting spellbook-member wizard
+ *  spells at that level), not per-row, since it's the same for every spell at
+ *  a given level. */
+interface LearnEligibilityContext {
+  int: IntelligenceModifiers;
+  specialistSchool: WizardSchool | null;
+  knownAtThisLevel: number;
+  optionalRules: CharacterSheetInput["optionalRules"];
 }
 
 /** Memorized entries whose backing spell Item no longer exists on the actor
@@ -336,14 +353,17 @@ function buildOrphanedSpells(
   return orphaned;
 }
 
-/** Enriches a raw SpellItemView with memorize/cast eligibility, computed from
- *  the actor's memorized list, its slot state, and (for a priest spell) sphere
- *  access. sheet.ts's toSpellView leaves these four fields as placeholders. */
+/** Enriches a raw SpellItemView with memorize/cast/learn eligibility, computed
+ *  from the actor's memorized list, its slot state, (for a priest spell)
+ *  sphere access, and (for a wizard spell not yet in the spellbook) whether
+ *  it can be Learn-attempted. sheet.ts's toSpellView leaves these five fields
+ *  as placeholders. */
 function buildSpellRow(
   item: SpellItemView,
   sc: CharacterDerivedView["spellcasting"],
   priestChassisId: string | null,
   sphereAccessOverride: SphereName[] | null,
+  learnCtx: LearnEligibilityContext,
 ): SpellItemView {
   const isWizard = item.casterClass === "wizard";
   const memorizedList = isWizard ? sc.wizard.memorized : sc.priest.memorized;
@@ -365,7 +385,29 @@ function buildSpellRow(
     expended,
     canMemorize: !memorized && hasFreeSlot && eligible,
     canCast: memorized && !expended,
+    canLearn: isWizard && !item.inSpellbook && canLearnForRow(item, learnCtx),
   };
+}
+
+/** Whether a wizard spell not yet in the spellbook can be Learn-attempted.
+ *  Only the FIRST school in the item's `schools` array that is a recognized
+ *  `WizardSchool` is consulted — see this plan's Global Constraints for why
+ *  (canLearnSpell takes a single WizardSchool, not an array). A spell with no
+ *  such school (e.g. tagged only "lesser-divination"/"wild") can never be
+ *  Learn-attempted. */
+function canLearnForRow(item: SpellItemView, ctx: LearnEligibilityContext): boolean {
+  const wizardSchool = item.schools.find((s): s is WizardSchool =>
+    (WIZARD_SCHOOLS as readonly string[]).includes(s),
+  );
+  if (!wizardSchool) return false;
+  return canLearnSpell({
+    int: ctx.int,
+    spellLevel: item.level,
+    spellSchool: wizardSchool,
+    specialistSchool: ctx.specialistSchool,
+    knownAtThisLevel: ctx.knownAtThisLevel,
+    options: ctx.optionalRules,
+  }).allowed;
 }
 
 function toSlotRows(slots: Record<string, { max: number; used: number }>): SlotRow[] | null {

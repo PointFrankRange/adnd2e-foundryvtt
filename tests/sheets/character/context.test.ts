@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_OPTIONAL_RULES } from "../../../src/core/options";
 import { buildCharacterSheetContext } from "../../../src/sheets/character/context";
 import type {
   CharacterSheetInput,
@@ -146,6 +147,7 @@ function input(over: Partial<CharacterSheetInput> = {}): CharacterSheetInput {
       spheres: {},
     },
     perms: { isGM: true, isOwner: true, editable: true },
+    optionalRules: DEFAULT_OPTIONAL_RULES,
   };
   return { ...base, ...over };
 }
@@ -759,6 +761,7 @@ describe("buildCharacterSheetContext — spells / features / biography / tabs", 
       expended: false,
       canMemorize: false,
       canCast: false,
+      canLearn: false,
       ...over,
     });
     const c = buildCharacterSheetContext(
@@ -825,6 +828,7 @@ describe("buildCharacterSheetContext — spells / features / biography / tabs", 
       id: "s", name: "Spell", img: "", casterClass: "wizard", level: 1,
       schools: [], spheres: [], range: "", castingTime: "", savingThrow: "",
       inSpellbook: true, memorized: false, expended: false, canMemorize: false, canCast: false,
+      canLearn: false,
       ...over,
     });
     const c = buildCharacterSheetContext(
@@ -948,6 +952,7 @@ describe("buildCharacterSheetContext — spell memorize/cast eligibility", () =>
     expended: false,
     canMemorize: false,
     canCast: false,
+    canLearn: false,
     ...over,
   });
 
@@ -1097,5 +1102,91 @@ describe("buildCharacterSheetContext — spell memorize/cast eligibility", () =>
       }),
     );
     expect(c.spells.known[0]!.items[0]!.canMemorize).toBe(false);
+  });
+});
+
+describe("buildCharacterSheetContext — spell learn eligibility", () => {
+  const wizardSpell = (over: Partial<SpellItemView>): SpellItemView => ({
+    id: "mm",
+    name: "Magic Missile",
+    img: "",
+    casterClass: "wizard",
+    level: 1,
+    // "invocation" = PHB Invocation/Evocation (this codebase's WizardSchool has
+    // no separate "evocation" value — see core/types.ts's WizardSchool doc comment).
+    schools: ["invocation"],
+    spheres: [],
+    range: "",
+    castingTime: "",
+    savingThrow: "none",
+    inSpellbook: false,
+    memorized: false,
+    expended: false,
+    canMemorize: false,
+    canCast: false,
+    canLearn: false,
+    ...over,
+  });
+  const fullInt = {
+    bonusLanguages: 0, maxSpellLevel: 9, learnSpellChance: 70,
+    maxSpellsPerLevel: null, illusionImmunityLevel: null,
+  };
+
+  it("wizard spell not in spellbook, INT allows it → canLearn true", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          abilities: { ...input().derived.abilities, int: { score: 15, mods: fullInt as never } },
+        },
+        spellItems: [wizardSpell({ inSpellbook: false })],
+      }),
+    );
+    expect(c.spells.known[0]!.items[0]!.canLearn).toBe(true);
+  });
+
+  it("wizard spell already in spellbook → canLearn false (nothing to learn)", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          abilities: { ...input().derived.abilities, int: { score: 15, mods: fullInt as never } },
+        },
+        spellItems: [wizardSpell({ inSpellbook: true })],
+      }),
+    );
+    expect(c.spells.known[0]!.items[0]!.canLearn).toBe(false);
+  });
+
+  it("wizard spell in the specialist's own opposition school → canLearn false", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          abilities: { ...input().derived.abilities, int: { score: 15, mods: fullInt as never } },
+          spellcasting: {
+            wizard: { specialistSchool: "abjuration", slots: {}, memorized: [] },
+            priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+          },
+        },
+        spellItems: [wizardSpell({ schools: ["illusion"], inSpellbook: false })],
+      }),
+    );
+    expect(c.spells.known[0]!.items[0]!.canLearn).toBe(false);
+  });
+
+  it("priest spell → canLearn always false regardless of INT", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          abilities: { ...input().derived.abilities, int: { score: 18, mods: fullInt as never } },
+        },
+        spellItems: [
+          wizardSpell({ casterClass: "priest", schools: [], spheres: ["healing"], inSpellbook: false }),
+        ],
+      }),
+    );
+    expect(c.spells.known[0]!.items[0]!.canLearn).toBe(false);
   });
 });

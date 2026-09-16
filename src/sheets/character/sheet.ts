@@ -1,6 +1,7 @@
 import { TEMPLATE_PATH } from "../../constants";
 import { getChassis } from "../../core/classes/chassis";
 import type { ClassId, SaveCategory } from "../../core/types";
+import { getOptionalRules } from "../../settings";
 import { rollAttack, rollSave } from "./combat-rolls";
 import { buildCharacterSheetContext } from "./context";
 import type {
@@ -218,12 +219,13 @@ function toSpellView(it: RawItem, spellbookIds: Set<string>): SpellItemView {
     castingTime: s.castingTime,
     savingThrow: s.savingThrow,
     inSpellbook: spellbookIds.has(it.id),
-    // Placeholders — buildSpells (context.ts) recomputes all four from the
-    // actor's memorized list + slot state + spellbook/sphere-access eligibility.
+    // Placeholders — buildSpells (context.ts) recomputes all five from the
+    // actor's memorized list + slot state + spellbook/sphere-access/learn eligibility.
     memorized: false,
     expended: false,
     canMemorize: false,
     canCast: false,
+    canLearn: false,
   };
 }
 
@@ -415,6 +417,7 @@ export class Adnd2eCharacterSheet extends Base {
         isOwner: actor.isOwner,
         editable: this.isEditable,
       },
+      optionalRules: getOptionalRules(),
     };
   }
 
