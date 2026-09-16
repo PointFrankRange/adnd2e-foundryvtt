@@ -330,6 +330,7 @@ describe("lang/en.json — SP6 creature sheet strings", () => {
   it("resolves ADND2E.sheet.creatureTitle and every ADND2E.sheet.creature.* key", () => {
     for (const key of [
       "ADND2E.sheet.creatureTitle",
+      "ADND2E.sheet.vitals.effective",
       "ADND2E.sheet.creature.hd",
       "ADND2E.sheet.creature.hdBonus",
       "ADND2E.sheet.creature.fixedHp",

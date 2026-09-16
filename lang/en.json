@@ -187,7 +187,8 @@
         "ac": "Armor Class",
         "thac0": "THAC0",
         "saves": "Saving Throws",
-        "movement": "Movement"
+        "movement": "Movement",
+        "effective": "Effective"
       },
       "drop": {
         "duplicateRace": "This character already has a race.",

@@ -22,11 +22,11 @@
     <span>
       {{localize 'ADND2E.sheet.creature.hd'}}:
       <input type="number" name="system.hd.count" value="{{source.system.hd.count}}"> d<input type="number" name="system.hd.dieType" value="{{source.system.hd.dieType}}">
-      + <input type="number" name="system.hd.bonus" value="{{source.system.hd.bonus}}">
+      {{localize 'ADND2E.sheet.creature.hdBonus'}} <input type="number" name="system.hd.bonus" value="{{source.system.hd.bonus}}">
     </span>
     <span>{{localize 'ADND2E.sheet.creature.fixedHp'}}: <input type="number" name="system.hd.fixedHp" value="{{source.system.hd.fixedHp}}"></span>
     <span>{{localize 'ADND2E.sheet.vitals.hp'}}: <input type="number" name="system.attributes.hp.value" value="{{source.system.attributes.hp.value}}"> / {{adnd2e.vitals.hp.max}}</span>
-    <span>{{localize 'ADND2E.sheet.vitals.thac0'}}: <input type="number" name="system.attributes.thac0.value" value="{{source.system.attributes.thac0.value}}"></span>
+    <span>{{localize 'ADND2E.sheet.vitals.thac0'}}: <input type="number" name="system.attributes.thac0.value" value="{{source.system.attributes.thac0.value}}"> ({{localize 'ADND2E.sheet.vitals.effective'}}: {{adnd2e.vitals.thac0}})</span>
     <span>{{localize 'ADND2E.sheet.creature.thac0AsFighterLevel'}}: <input type="number" name="system.attributes.thac0.asFighterLevel" value="{{source.system.attributes.thac0.asFighterLevel}}"></span>
   </div>
 
