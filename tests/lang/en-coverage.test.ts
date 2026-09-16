@@ -326,6 +326,28 @@ describe("lang/en.json — SP6 creature damage-roll flavor", () => {
   });
 });
 
+describe("lang/en.json — SP6 creature sheet strings", () => {
+  it("resolves ADND2E.sheet.creatureTitle and every ADND2E.sheet.creature.* key", () => {
+    for (const key of [
+      "ADND2E.sheet.creatureTitle",
+      "ADND2E.sheet.creature.hd",
+      "ADND2E.sheet.creature.attacks",
+      "ADND2E.sheet.creature.noAttacks",
+      "ADND2E.sheet.creature.morale",
+      "ADND2E.sheet.creature.magicResistance",
+      "ADND2E.sheet.creature.treasureType",
+      "ADND2E.sheet.creature.numberAppearing",
+      "ADND2E.sheet.creature.xpValue",
+      "ADND2E.sheet.creature.specialAttacks",
+      "ADND2E.sheet.creature.specialDefenses",
+      "ADND2E.sheet.creature.description",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [

@@ -149,6 +149,7 @@
     },
     "sheet": {
       "title": "Character Sheet",
+      "creatureTitle": "Creature",
       "namePlaceholder": "Character name",
       "identity": {
         "alignment": "Alignment"
@@ -303,6 +304,19 @@
         "notes": "Biography",
         "campaignNotes": "Campaign Notes",
         "gmNotes": "GM Notes"
+      },
+      "creature": {
+        "hd": "Hit Dice",
+        "attacks": "Attacks",
+        "noAttacks": "No attacks defined",
+        "morale": "Morale",
+        "magicResistance": "Magic Resistance",
+        "treasureType": "Treasure Type",
+        "numberAppearing": "Number Appearing",
+        "xpValue": "XP Value",
+        "specialAttacks": "Special Attacks",
+        "specialDefenses": "Special Defenses",
+        "description": "Description"
       }
     },
     "chat": {

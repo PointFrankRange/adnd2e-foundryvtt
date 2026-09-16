@@ -2,9 +2,11 @@ import { SYSTEM_ID } from "../constants";
 import { Adnd2eActiveEffectConfig } from "./active-effect-sheet";
 import { Adnd2eActorSheet } from "./actor-sheet";
 import { Adnd2eCharacterSheet } from "./character/sheet";
+import { Adnd2eCreatureSheet } from "./creature/sheet";
 import { Adnd2eItemSheet } from "./item-sheet";
 
-/** Register the SP1 raw-field editor as the default sheet for every document type. Call on `init`. */
+/** Register the SP1 raw-field editor as the default sheet for document types that
+ *  don't yet have a real one. Call on `init`. */
 export function registerSheets(): void {
   const DSC = foundry.applications.apps.DocumentSheetConfig as unknown as {
     registerSheet(
@@ -15,12 +17,17 @@ export function registerSheets(): void {
     ): void;
   };
   // The real PC sheet (SP2) — default for character + npc. Register it before the
-  // raw fallback so it wins the default slot for those two subtypes; `creature`
-  // has no `types` entry here so it keeps the raw sheet (SP6 gives it a real one).
+  // raw fallback so it wins the default slot for those two subtypes.
   DSC.registerSheet(Actor, SYSTEM_ID, Adnd2eCharacterSheet, {
     makeDefault: true,
     types: ["character", "npc"],
     label: "ADND2E.sheet.title",
+  });
+  // The real creature sheet (SP6) — default for creature.
+  DSC.registerSheet(Actor, SYSTEM_ID, Adnd2eCreatureSheet, {
+    makeDefault: true,
+    types: ["creature"],
+    label: "ADND2E.sheet.creatureTitle",
   });
   DSC.registerSheet(Actor, SYSTEM_ID, Adnd2eActorSheet, {
     makeDefault: false,

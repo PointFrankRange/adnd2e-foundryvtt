@@ -1,0 +1,71 @@
+<div class="adnd2e sheet creature">
+
+  <header class="creature-header">
+    <img src="{{adnd2e.identity.img}}" alt="{{adnd2e.identity.name}}">
+    <div>
+      <h1><input type="text" name="name" value="{{adnd2e.identity.name}}"></h1>
+      <p class="subtitle">{{adnd2e.details.size}} — {{adnd2e.details.alignment}}</p>
+    </div>
+  </header>
+
+  <div class="vitals panel">
+    <span>{{localize 'ADND2E.sheet.vitals.ac'}}: {{adnd2e.vitals.ac}}</span>
+    <span>{{localize 'ADND2E.sheet.vitals.movement'}}: {{adnd2e.vitals.movementSummary}}</span>
+    <span>{{localize 'ADND2E.sheet.creature.hd'}}: <input type="number" name="system.hd.count" value="{{source.system.hd.count}}"> d<input type="number" name="system.hd.dieType" value="{{source.system.hd.dieType}}"></span>
+    <span>{{localize 'ADND2E.sheet.vitals.hp'}}: <input type="number" name="system.attributes.hp.value" value="{{adnd2e.vitals.hp.value}}"> / {{adnd2e.vitals.hp.max}}</span>
+    <span>{{localize 'ADND2E.sheet.vitals.thac0'}}: {{adnd2e.vitals.thac0}}</span>
+  </div>
+
+  <div class="attacks panel">
+    <h3>{{localize 'ADND2E.sheet.creature.attacks'}}</h3>
+    <div class="attack-list">
+      {{#each adnd2e.attacks as |a|}}
+        <div class="attack-row">
+          <span class="name">{{a.name}}{{#if (gt a.count 1)}} ×{{a.count}}{{/if}}</span>
+          <span class="damage">{{a.damage}}</span>
+          {{#if a.special}}<span class="special">{{a.special}}</span>{{/if}}
+          <button type="button" data-action="rollAttack" data-attack-index="{{a.index}}">
+            {{localize 'ADND2E.sheet.combat.rollAttack'}}
+          </button>
+        </div>
+      {{else}}
+        <p class="placeholder">{{localize 'ADND2E.sheet.creature.noAttacks'}}</p>
+      {{/each}}
+    </div>
+  </div>
+
+  <table class="saves panel">
+    <caption>{{localize 'ADND2E.sheet.vitals.saves'}}</caption>
+    <tbody>
+      {{#each adnd2e.saves as |row|}}
+        <tr>
+          <th scope="row">{{localize row.label}}</th>
+          <td>{{row.target}}</td>
+          <td>
+            <button type="button" data-action="rollSave" data-save="{{row.category}}">
+              {{localize 'ADND2E.sheet.combat.rollSave'}}
+            </button>
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <div class="details panel">
+    <span>{{localize 'ADND2E.sheet.creature.morale'}}: <input type="number" name="system.details.morale" value="{{adnd2e.details.morale}}"></span>
+    <span>{{localize 'ADND2E.sheet.creature.magicResistance'}}: <input type="number" name="system.details.magicResistance" value="{{adnd2e.details.magicResistance}}">%</span>
+    <span>{{localize 'ADND2E.sheet.creature.treasureType'}}: <input type="text" name="system.details.treasureType" value="{{adnd2e.details.treasureType}}"></span>
+    <span>{{localize 'ADND2E.sheet.creature.numberAppearing'}}: <input type="text" name="system.details.numberAppearing" value="{{adnd2e.details.numberAppearing}}"></span>
+    <span>{{localize 'ADND2E.sheet.creature.xpValue'}}: <input type="number" name="system.details.xpValue" value="{{adnd2e.details.xpValue}}"></span>
+  </div>
+
+  <div class="text-fields panel">
+    <h3>{{localize 'ADND2E.sheet.creature.specialAttacks'}}</h3>
+    {{formInput systemFields.details.fields.specialAttacks value=source.system.details.specialAttacks name="system.details.specialAttacks" disabled=notEditable}}
+    <h3>{{localize 'ADND2E.sheet.creature.specialDefenses'}}</h3>
+    {{formInput systemFields.details.fields.specialDefenses value=source.system.details.specialDefenses name="system.details.specialDefenses" disabled=notEditable}}
+    <h3>{{localize 'ADND2E.sheet.creature.description'}}</h3>
+    {{formInput systemFields.details.fields.description value=source.system.details.description name="system.details.description" disabled=notEditable}}
+  </div>
+
+</div>
