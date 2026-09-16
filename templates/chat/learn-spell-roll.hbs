@@ -1,0 +1,17 @@
+<div class="adnd2e chat-card learn-spell-roll">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} — {{spellName}} ({{localize 'ADND2E.sheet.spells.level' level=spellLevel}})</h3>
+  </header>
+  {{#if allowed}}
+    <p class="chance">{{localize 'ADND2E.chat.learnSpell.chance'}}: {{chance}}%</p>
+    <p class="formula">1d100 = <strong>{{roll.d100}}</strong></p>
+    {{#if roll.success}}
+      <p class="result success">{{localize 'ADND2E.chat.learnSpell.success'}}</p>
+    {{else}}
+      <p class="result failure">{{localize 'ADND2E.chat.learnSpell.failure'}}</p>
+    {{/if}}
+  {{else}}
+    <p class="result rejected">{{localize reasonLabel}}</p>
+  {{/if}}
+</div>

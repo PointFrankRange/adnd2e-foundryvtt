@@ -1,6 +1,7 @@
 import { TEMPLATE_PATH } from "../../constants";
 import { getChassis } from "../../core/classes/chassis";
 import type { ClassId, SaveCategory } from "../../core/types";
+import { getOptionalRules } from "../../settings";
 import { rollAttack, rollSave } from "./combat-rolls";
 import { buildCharacterSheetContext } from "./context";
 import type {
@@ -15,7 +16,7 @@ import type {
 } from "./context-types";
 import { validateItemDrop } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
-import { castSpell, forgetSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
+import { castSpell, forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
 import { awardXpSplit } from "./xp";
 
 /* ---------------------------------------------------------------------------
@@ -218,12 +219,13 @@ function toSpellView(it: RawItem, spellbookIds: Set<string>): SpellItemView {
     castingTime: s.castingTime,
     savingThrow: s.savingThrow,
     inSpellbook: spellbookIds.has(it.id),
-    // Placeholders — buildSpells (context.ts) recomputes all four from the
-    // actor's memorized list + slot state + spellbook/sphere-access eligibility.
+    // Placeholders — buildSpells (context.ts) recomputes all five from the
+    // actor's memorized list + slot state + spellbook/sphere-access/learn eligibility.
     memorized: false,
     expended: false,
     canMemorize: false,
     canCast: false,
+    canLearn: false,
   };
 }
 
@@ -264,6 +266,7 @@ export class Adnd2eCharacterSheet extends Base {
       forgetSpell: Adnd2eCharacterSheet.#onForgetSpell,
       castSpell: Adnd2eCharacterSheet.#onCastSpell,
       restSpellcasting: Adnd2eCharacterSheet.#onRestSpellcasting,
+      learnSpell: Adnd2eCharacterSheet.#onLearnSpell,
     },
   };
 
@@ -415,6 +418,7 @@ export class Adnd2eCharacterSheet extends Base {
         isOwner: actor.isOwner,
         editable: this.isEditable,
       },
+      optionalRules: getOptionalRules(),
     };
   }
 
@@ -587,6 +591,15 @@ export class Adnd2eCharacterSheet extends Base {
 
   static async #onRestSpellcasting(this: Adnd2eCharacterSheet): Promise<void> {
     await restSpellcasting(this.document as never);
+  }
+
+  static async #onLearnSpell(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const spellItemId = target.dataset.itemId;
+    if (spellItemId) await learnSpell(this.document as never, spellItemId);
   }
 }
 

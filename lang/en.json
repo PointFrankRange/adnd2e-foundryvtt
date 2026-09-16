@@ -246,7 +246,9 @@
         "orphanedEntry": "Level {level} spell (item no longer exists)",
         "memorizeBlockedWarning": "That spell can no longer be memorized — refresh the sheet.",
         "castBlockedWarning": "That spell can't be cast right now — refresh the sheet.",
-        "castRollFailedWarning": "This spell's damage/healing formula couldn't be rolled — check the item's Automation fields."
+        "castRollFailedWarning": "This spell's damage/healing formula couldn't be rolled — check the item's Automation fields.",
+        "learn": "Learn Spell",
+        "learnBlockedWarning": "That spell can no longer be learned — refresh the sheet."
       },
       "skills": {
         "weapon": "Weapon Proficiencies",
@@ -321,6 +323,17 @@
         "savingThrow": "Saving Throw",
         "damageRoll": "Damage",
         "healingRoll": "Healing"
+      },
+      "learnSpell": {
+        "chance": "Chance to learn",
+        "success": "Learned!",
+        "failure": "Not learned",
+        "rejection": {
+          "intTooLow": "Intelligence too low to learn any wizard spells.",
+          "spellLevelExceedsInt": "This spell's level exceeds what your Intelligence allows.",
+          "oppositionSchool": "This spell belongs to a school opposed to your specialty — it can never be learned.",
+          "perLevelCapReached": "You already know the maximum number of spells allowed at this level."
+        }
       }
     },
     "sheets": {
