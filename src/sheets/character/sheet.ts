@@ -147,6 +147,7 @@ function toPhysicalView(it: RawItem): PhysicalItemView {
       damageVsL: (s.damageVsL as string | null) ?? null,
       speedFactor: Number(s.speedFactor ?? 0),
       range: rangeToString(s.range),
+      category: (s.category as "melee" | "thrown" | "bow" | "crossbow" | undefined) ?? "melee",
     };
   }
   if (type === "armor") {
@@ -173,6 +174,10 @@ function toWeaponProfView(it: RawItem): WeaponProfView {
     isGroup: s.isGroup,
     slotsInvested: s.slotsInvested,
     specialized: s.specialized,
+    // Placeholders — buildWeaponProfRow (context.ts) recomputes both from
+    // the actor's owned weapon Items + class chassis + available slots.
+    category: null,
+    canSpecialize: false,
   };
 }
 
