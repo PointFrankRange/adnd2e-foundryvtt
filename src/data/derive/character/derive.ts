@@ -17,6 +17,7 @@ import { deriveAc } from "./ac";
 import { deriveSaves } from "./saves";
 import { deriveSpellSlots, type SlotRecord } from "./slots";
 import { deriveProficiencySlots, type SlotBlock } from "./proficiencies";
+import { deriveThiefSkillPoints, type ThiefSkillPointBlock } from "./thief-skills";
 import { deriveEncumbrance } from "./encumbrance";
 import {
   classifyArrangement, resolveDualClassArrangement, resolveMulticlassArrangement,
@@ -31,6 +32,7 @@ export interface CharacterDerived {
   saves: Record<SaveCategory, { target: number; rollModifier: number; effectiveTarget: number }> | null;
   spellSlots: { wizard?: SlotRecord; priest?: SlotRecord };
   proficiencies: { weapon: SlotBlock; nonweapon: SlotBlock; languagesMax: number } | null;
+  thiefSkills: ThiefSkillPointBlock;
   encumbrance: {
     carried: number;
     category: EncumbranceCategory;
@@ -95,6 +97,7 @@ export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules)
   });
 
   const classLevels = deriveClassLevels(snapshot.classes);
+  const thiefSkills = deriveThiefSkillPoints(snapshot.classes, snapshot.thiefSkillAllocations);
   const levels = classLevels.map((c) => c.level);
   const mode = classifyArrangement(snapshot.classes);
   const race = snapshot.race ?? "human";
@@ -151,6 +154,7 @@ export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules)
             snapshot.spentNonweaponSlots,
           )
         : null,
+      thiefSkills,
       encumbrance,
       multiclass: { mode, dualClass: noDualClass(), hpAveraged: false },
     };
@@ -198,6 +202,7 @@ export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules)
       snapshot.spentWeaponSlots,
       snapshot.spentNonweaponSlots,
     ),
+    thiefSkills,
     encumbrance,
     multiclass: {
       mode,

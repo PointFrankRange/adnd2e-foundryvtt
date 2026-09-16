@@ -3,6 +3,7 @@
 import { htmlField } from "../common/fields";
 import { ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, ENCUMBRANCE_CATEGORIES, MULTICLASS_MODES, WIZARD_SCHOOLS, SPHERE_NAMES } from "../item/choices";
 import { applyRacialDeltas } from "../../core/abilities";
+import { THIEF_SKILLS } from "../../core/proficiencies/thief-skills";
 import type { AbilityScores, Race } from "../../core/types";
 import { deriveCharacter } from "../derive/character";
 import { getOptionalRules } from "../../settings";
@@ -157,6 +158,21 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
       weapon: proficiencyBlockSchema(),
       nonweapon: proficiencyBlockSchema(),
     }),
+    thiefSkills: new SchemaField({
+      total: new NumberField({ required: true, integer: true, initial: 0 }),
+      spent: new NumberField({ required: true, integer: true, initial: 0 }),
+      available: new NumberField({ required: true, integer: true, initial: 0 }),
+      /** one entry per skill the player has put points into — thief skills
+       *  are percentage-based, not slot-based, so this is an allocation
+       *  ledger, not an owned-item list like weapon/nonweapon proficiencies. */
+      allocations: new ArrayField(
+        new SchemaField({
+          skill: new StringField({ required: true, blank: false, choices: THIEF_SKILLS }),
+          allocatedPoints: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+        }),
+        { required: true, initial: [] },
+      ),
+    }),
     currency: new SchemaField({
       pp: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       gp: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
@@ -224,6 +240,7 @@ interface DerivedWriteSurface {
   };
   saves: Record<string, unknown>;
   proficiencies: unknown;
+  thiefSkills: { total: number; spent: number; available: number; allocations: unknown };
   languagesKnown: unknown;
   spellcasting: { wizard: { slots: unknown }; priest: { slots: unknown } };
 }
@@ -258,6 +275,13 @@ export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void 
     };
     sys.languagesKnown = { max: derived.proficiencies.languagesMax };
   }
+
+  sys.thiefSkills = {
+    total: derived.thiefSkills.total,
+    spent: derived.thiefSkills.spent,
+    available: derived.thiefSkills.available,
+    allocations: sys.thiefSkills.allocations,
+  };
 
   sys.attributes.encumbrance = derived.encumbrance;
   sys.attributes.movement = {
