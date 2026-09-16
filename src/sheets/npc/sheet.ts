@@ -13,6 +13,7 @@ import {
 import { rollAttack, rollSave } from "../character/combat-rolls";
 import { buildCharacterSheetContext } from "../character/context";
 import type { CharacterSheetInput } from "../character/context-types";
+import { rollHitPoints } from "../character/hp-roll";
 import {
   allocateThiefSkillPoint,
   deallocateThiefSkillPoint,
@@ -33,8 +34,8 @@ import { castSpell, forgetSpell, learnSpell, memorizeSpell, restSpellcasting } f
  * SAME action-function glue (combat-rolls / spell-actions / proficiency-
  * actions) the PC sheet already uses — zero new pure logic. Only the
  * template set (3 tabs instead of 7) and a couple of PC-only affordances
- * (XP award, dual-class toggle, HP roll-up, drag-drop item validation — see
- * this task's report for the explicit scoping rulings) differ.
+ * (XP award, dual-class toggle, drag-drop item validation — see this task's
+ * report for the explicit scoping rulings) differ.
  *
  * Foundry-coupled, no unit tests (matches src/sheets/character/sheet.ts's
  * and src/sheets/creature/sheet.ts's established convention) — verified in a
@@ -85,6 +86,8 @@ export class Adnd2eNpcSheet extends Base {
     window: { resizable: true },
     form: { submitOnChange: true, closeOnSubmit: false },
     actions: {
+      rollHp: Adnd2eNpcSheet.#onRollHp,
+      takeAverageHp: Adnd2eNpcSheet.#onTakeAverageHp,
       rollAttack: Adnd2eNpcSheet.#onRollAttack,
       rollSave: Adnd2eNpcSheet.#onRollSave,
       memorizeSpell: Adnd2eNpcSheet.#onMemorizeSpell,
@@ -275,6 +278,21 @@ export class Adnd2eNpcSheet extends Base {
   #getItem(id: string | undefined): RawItemHandle | undefined {
     if (!id) return undefined;
     return (this.document as unknown as { items: { get(id: string): RawItemHandle | undefined } }).items.get(id);
+  }
+
+  // Wires class-row.hbs's rollHp/takeAverageHp buttons — that partial is
+  // reused verbatim from the PC sheet (see main.hbs) and renders these
+  // buttons whenever a class item has canLevelUp:true, so they must stay
+  // wired here too or clicking them on an npc actor is a silent no-op.
+  // Mirrors Adnd2eCharacterSheet's own #onRollHp/#onTakeAverageHp exactly.
+  static async #onRollHp(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const item = this.#getItem(target.dataset.classId);
+    if (item) await rollHitPoints(item as never, { average: false });
+  }
+
+  static async #onTakeAverageHp(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const item = this.#getItem(target.dataset.classId);
+    if (item) await rollHitPoints(item as never, { average: true });
   }
 
   // rollAttack reads the optional per-weapon-row backstab toggle exactly like

@@ -31,6 +31,15 @@ export function registerSheets(): void {
     types: ["npc"],
     label: "ADND2E.sheet.npcTitle",
   });
+  // Keep the full PC sheet manually selectable for npc too (not default) —
+  // registering Adnd2eCharacterSheet with types:["character"] only would
+  // otherwise remove it entirely from the npc sheet-picker's options, breaking
+  // the spec's "GM can still switch a major NPC to the full PC sheet" intent.
+  DSC.registerSheet(Actor, SYSTEM_ID, Adnd2eCharacterSheet, {
+    makeDefault: false,
+    types: ["npc"],
+    label: "ADND2E.sheet.title",
+  });
   // The real creature sheet (SP6) — default for creature.
   DSC.registerSheet(Actor, SYSTEM_ID, Adnd2eCreatureSheet, {
     makeDefault: true,
