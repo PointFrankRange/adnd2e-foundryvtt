@@ -27,13 +27,19 @@ Hooks.once("init", () => {
   // mandatory `base` entry, and dropping it breaks every core/base-typed effect.
   Object.assign(CONFIG.ActiveEffect.dataModels, ACTIVE_EFFECT_DATA_MODELS);
   CONFIG.Actor.dataModels = ACTOR_DATA_MODELS;
-  // CONFIG.statusEffects is a Proxy with built-in id-based dedup (real v14.364
-  // source, client/config.mjs) — .push() is safe even if a later Foundry
-  // version adds a core default with the same id. specialStatusEffects.BLIND
-  // is reassigned so core's own vision/detection code (which checks for the
-  // literal id "blind") recognizes this system's "blinded" condition instead.
+  // CONFIG.statusEffects is a Proxy (real v14.364 source, client/config.mjs)
+  // whose dedup-by-id logic only fires on id-keyed writes — the same path
+  // core itself uses for its own defaults — NOT on array-index writes like
+  // .push() would produce. Four of this system's ids (dead/unconscious/
+  // invisible/prone) collide with core defaults; pushing them would create
+  // real duplicate array elements and make the Proxy's `ownKeys` trap throw
+  // on the very next iteration (e.g. Token HUD render). Id-keyed assignment
+  // correctly replaces the colliding core defaults with our adnd2e-typed
+  // entries and adds the rest. specialStatusEffects.BLIND is reassigned so
+  // core's own vision/detection code (which checks for the literal id
+  // "blind") recognizes this system's "blinded" condition instead.
   for (const effect of buildStatusEffects()) {
-    (CONFIG.statusEffects as unknown as { push(e: unknown): void }).push(effect);
+    (CONFIG.statusEffects as unknown as Record<string, unknown>)[effect.id] = effect;
   }
   CONFIG.specialStatusEffects.BLIND = "blinded";
   registerSettings();
