@@ -42,21 +42,36 @@ Hooks.once("init", () => {
   for (const effect of buildStatusEffects()) {
     (CONFIG.statusEffects as unknown as Record<string, unknown>)[effect.id] = effect;
   }
+  // Nine core defaults are near-synonyms of this system's own conditions
+  // (same or near-identical icon art, different id) and would otherwise sit
+  // beside our entries in the Token HUD as silent no-ops: toggling core's
+  // "stun"/"blind"/etc. puts that literal id into actor.statuses, which
+  // this system's condition-effects.ts never checks for. The Proxy's
+  // deleteProperty trap (client/config.mjs:1718-1729, verified against real
+  // v14.364 source) correctly removes both the array slot (via
+  // statuses.findSplice) and the id-keyed property for a string-key delete,
+  // so this is a clean removal, not a leftover array hole. Core's other ~21
+  // defaults (fly/burrow/hover/target/bless/etc.) have no equivalent among
+  // this system's 15 conditions and are left untouched — deleting them would
+  // regress real core vision/movement behaviour this system doesn't model.
+  const REDUNDANT_CORE_STATUS_IDS = [
+    "blind",
+    "deaf",
+    "stun",
+    "paralysis",
+    "poison",
+    "restrain",
+    "sleep",
+    "fear",
+    "downgrade",
+  ] as const;
+  for (const id of REDUNDANT_CORE_STATUS_IDS) {
+    delete (CONFIG.statusEffects as unknown as Record<string, unknown>)[id];
+  }
   CONFIG.specialStatusEffects.BLIND = "blinded";
   registerSettings();
   registerMigrationSettings();
   registerSheets();
-});
-
-Hooks.once("setup", () => {
-  void registerSheetPartials();
-});
-
-Hooks.once("ready", async () => {
-  console.log(`${SYSTEM_ID} | Ready`);
-  (game.system as unknown as { api: ReturnType<typeof buildApi> }).api = buildApi();
-  await runMigrations();
-  registerChatListeners();
   // Real hook name mechanically confirmed by reading v14.364 source (NOT the
   // stale "getCombatantContextOptions" the JSDoc above the call site claims):
   // CombatTracker's own _getEntryContextOptions() context menu is created via
@@ -83,6 +98,17 @@ Hooks.once("ready", async () => {
   // pre-v14 shape ({name, callback, condition}), so the real-shape object
   // literal below is cast past it rather than rewritten to match a shape
   // core no longer reads at runtime.
+  //
+  // This registration is placed here in `init`, not in `ready`, because the
+  // sidebar Combat Tracker builds its context menu EAGERLY during its own
+  // _onFirstRender (client/applications/sidebar/tabs/combat-tracker.mjs),
+  // which happens during Game#setupGame's initializeUI() — well before
+  // `ready` fires (ready is gated behind DocumentSheetConfig.initializeSheets,
+  // documentIndex.index, and a full canvas draw; client/game.mjs). Hooks.on
+  // only registers a listener — the callback body itself (game.user?.isGM,
+  // app.viewed.combatants, etc.) is only evaluated later, at actual
+  // menu-build/right-click time, so there is no init-time dependency on
+  // anything not yet ready.
   Hooks.on("getCombatTrackerContextOptions", (app: unknown, options: unknown[]) => {
     const getCombatant = (li: HTMLElement) => {
       const tracker = app as { viewed?: { combatants: { get(id: string): unknown } } };
@@ -99,4 +125,15 @@ Hooks.once("ready", async () => {
       },
     } as never);
   });
+});
+
+Hooks.once("setup", () => {
+  void registerSheetPartials();
+});
+
+Hooks.once("ready", async () => {
+  console.log(`${SYSTEM_ID} | Ready`);
+  (game.system as unknown as { api: ReturnType<typeof buildApi> }).api = buildApi();
+  await runMigrations();
+  registerChatListeners();
 });
