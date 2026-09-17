@@ -12,7 +12,10 @@ export const MANAGED_CONDITIONS: readonly ManagedConditionId[] = ["prone", "blin
 type StatusSet = ReadonlySet<string> | readonly string[];
 
 function has(statuses: StatusSet, id: string): boolean {
-  return statuses instanceof Set ? statuses.has(id) : statuses.includes(id);
+  if (Array.isArray(statuses)) {
+    return statuses.includes(id);
+  }
+  return (statuses as ReadonlySet<string>).has(id);
 }
 
 /** Blinded: the blinded actor's OWN attack rolls suffer a flat penalty. */
