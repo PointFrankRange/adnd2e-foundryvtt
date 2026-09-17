@@ -1,5 +1,6 @@
 import { buildAttackCardContext } from "../../combat/attack-card";
 import { buildSaveCardContext } from "../../combat/save-card";
+import { blindedAttackPenalty, canAct, heldAttackBonus, proneArmorClassPenalty } from "../../combat/condition-effects";
 import { getChassis } from "../../core/classes/chassis";
 import { attackModifiers, hitResult } from "../../core/combat/attack";
 import { attackFormula } from "../../core/dice/formula";
@@ -37,6 +38,7 @@ export function resolveTargetCombatInfo(
 
 interface AttackerActor {
   name: string; img: string; uuid: string;
+  statuses: ReadonlySet<string>;
   system: { attributes?: { thac0?: { melee?: number; ranged?: number } } };
   items: { get(id: string): WeaponItemHandle | undefined } & Iterable<GenericAttackerItem>;
 }
@@ -127,17 +129,24 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
   const weapon = actor.items.get(weaponItemId);
   if (!weapon) return;
 
+  if (!canAct(actor.statuses)) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.attack.cannotActWarning"));
+    return;
+  }
+
   const targets = [...(game as unknown as { user: { targets: Iterable<{ name: string; actor: unknown }> } }).user.targets];
   let targetName: string | null = null;
   let targetAc: number;
   let targetSize: string | null = null;
+  let targetStatuses: ReadonlySet<string> = new Set<string>();
 
   if (targets.length === 1) {
     const t = targets[0]!;
     targetName = t.name;
     const info = resolveTargetCombatInfo(t.actor as Parameters<typeof resolveTargetCombatInfo>[0]);
-    targetAc = info.ac;
+    targetAc = info.ac + proneArmorClassPenalty((t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>());
     targetSize = info.size;
+    targetStatuses = (t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>();
   } else {
     const manualAc = await foundry.applications.api.DialogV2.prompt({
       window: { title: game.i18n!.localize("ADND2E.chat.attack.manualAcTitle") },
@@ -163,6 +172,7 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
     proficiencyModifier: resolveProficiencyModifier(actor, weapon),
     // STR/DEX modifiers remain out of scope (parent spec §7 boundary,
     // unchanged by this sub-project).
+    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses),
   });
   const formula = attackFormula(attackBonus);
   const roll = await new Roll(formula).evaluate();

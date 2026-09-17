@@ -370,7 +370,8 @@
         "modStrength": "Strength", "modDexMissile": "Dexterity (missile)",
         "modWeaponMagic": "Weapon magic", "modProficiency": "Proficiency",
         "modRange": "Range", "modSituational": "Situational",
-        "rollDamage": "Roll Damage"
+        "rollDamage": "Roll Damage",
+        "cannotActWarning": "This actor is stunned or held and cannot attack this round."
       },
       "damage": {
         "applyToTargets": "Apply to Targeted Token(s)",

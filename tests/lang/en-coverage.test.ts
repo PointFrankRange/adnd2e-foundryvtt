@@ -213,6 +213,7 @@ describe("lang/en.json — SP3 chat/combat strings", () => {
       "ADND2E.chat.attack.modRange",
       "ADND2E.chat.attack.modSituational",
       "ADND2E.chat.attack.rollDamage",
+      "ADND2E.chat.attack.cannotActWarning",
       "ADND2E.chat.damage.applyToTargets",
       "ADND2E.chat.damage.noTargetsWarning",
       "ADND2E.chat.damage.notOwnerWarning",

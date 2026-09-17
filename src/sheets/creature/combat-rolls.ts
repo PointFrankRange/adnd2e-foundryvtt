@@ -1,6 +1,7 @@
 import { resolveTargetCombatInfo } from "../character/combat-rolls";
 import { buildAttackCardContext } from "../../combat/attack-card";
 import { buildSaveCardContext } from "../../combat/save-card";
+import { blindedAttackPenalty, canAct, heldAttackBonus, proneArmorClassPenalty } from "../../combat/condition-effects";
 import { attackModifiers, hitResult } from "../../core/combat/attack";
 import { attackFormula } from "../../core/dice/formula";
 import { TEMPLATE_PATH } from "../../constants";
@@ -29,6 +30,7 @@ interface CreatureAttack {
 
 interface CreatureActor {
   name: string; img: string; uuid: string;
+  statuses: ReadonlySet<string>;
   system: {
     attributes: { thac0: { value: number } };
     attacks: CreatureAttack[];
@@ -47,14 +49,22 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
   const attack = actor.system.attacks[attackIndex];
   if (!attack) return;
 
+  if (!canAct(actor.statuses)) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.attack.cannotActWarning"));
+    return;
+  }
+
   const targets = [...(game as unknown as { user: { targets: Iterable<{ name: string; actor: unknown }> } }).user.targets];
   let targetName: string | null = null;
   let targetAc: number;
+  let targetStatuses: ReadonlySet<string> = new Set<string>();
 
   if (targets.length === 1) {
     const t = targets[0]!;
     targetName = t.name;
-    targetAc = resolveTargetCombatInfo(t.actor as Parameters<typeof resolveTargetCombatInfo>[0]).ac;
+    targetStatuses = (t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>();
+    targetAc = resolveTargetCombatInfo(t.actor as Parameters<typeof resolveTargetCombatInfo>[0]).ac
+      + proneArmorClassPenalty(targetStatuses);
   } else {
     const manualAc = await foundry.applications.api.DialogV2.prompt({
       window: { title: game.i18n!.localize("ADND2E.chat.attack.manualAcTitle") },
@@ -77,7 +87,9 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
   // A monster's THAC0 already bakes in every modifier PHB combat tables would
   // otherwise apply separately — no strength/proficiency/range term is
   // modeled here, matching how a 2E stat block is authored (spec §7).
-  const { total: attackBonus, breakdown } = attackModifiers({});
+  const { total: attackBonus, breakdown } = attackModifiers({
+    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses),
+  });
   const formula = attackFormula(attackBonus);
   const roll = await new Roll(formula).evaluate();
   const naturalD20 = roll.dice[0]?.total ?? 0;
