@@ -26,15 +26,15 @@ describe("SETTING_DESCRIPTORS", () => {
     for (const d of SETTING_DESCRIPTORS) expect(typeof d.default).toBe("boolean");
   });
 
-  it("core settings bind 1:1 to OptionalRules fields; reserved groups bind to null", () => {
+  it("core and combatAndTactics settings bind 1:1 to OptionalRules fields; skillsAndPowers/spellsAndMagic bind to null", () => {
     const bound = SETTING_DESCRIPTORS.filter((d) => d.optionalRulesKey !== null);
-    expect(bound).toHaveLength(8);
-    for (const d of bound) expect(d.group).toBe("core");
+    expect(bound).toHaveLength(14);
+    for (const d of bound) expect(["core", "combatAndTactics"]).toContain(d.group);
 
     const boundKeys = bound.map((d) => d.optionalRulesKey).sort();
     expect(boundKeys).toEqual(Object.keys(DEFAULT_OPTIONAL_RULES).sort());
 
-    for (const d of SETTING_DESCRIPTORS.filter((x) => x.group !== "core")) {
+    for (const d of SETTING_DESCRIPTORS.filter((x) => x.group === "skillsAndPowers" || x.group === "spellsAndMagic")) {
       expect(d.optionalRulesKey).toBeNull();
     }
   });
@@ -63,9 +63,13 @@ describe("readOptionalRules()", () => {
     expect(bag).toEqual(DEFAULT_OPTIONAL_RULES);
   });
 
-  it("ignores reserved-group keys — they never appear in the bag", () => {
+  it("reads a combatAndTactics key through, same as a core key", () => {
     const bag = readOptionalRules((key) => (key === "criticalHits" ? true : undefined));
-    expect(bag).not.toHaveProperty("criticalHits");
-    expect(bag).toEqual(DEFAULT_OPTIONAL_RULES);
+    expect(bag.criticalHits).toBe(true);
+  });
+
+  it("ignores skillsAndPowers/spellsAndMagic keys — they never appear in the bag", () => {
+    const bag = readOptionalRules((key) => (key === "subAbilityScores" ? true : undefined));
+    expect(bag).not.toHaveProperty("subAbilityScores");
   });
 });

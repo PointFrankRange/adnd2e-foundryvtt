@@ -472,27 +472,27 @@
       },
       "combatAndTacticsEnabled": {
         "name": "Combat & Tactics: Enabled",
-        "hint": "Master switch for the Combat & Tactics option group. Individual rules below have no effect until this is on. Requires Sub-project 7."
+        "hint": "Master switch for the Combat & Tactics option group. Individual rules below have no effect until this is on."
       },
       "criticalHits": {
         "name": "Combat & Tactics: Critical Hits",
-        "hint": "Natural 20 confirms for extra damage (Combat & Tactics). Requires Sub-project 7."
+        "hint": "Natural 20 confirms for extra damage (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
       },
       "calledShots": {
         "name": "Combat & Tactics: Called Shots",
-        "hint": "Target specific body locations at an attack penalty (Combat & Tactics). Requires Sub-project 7."
+        "hint": "Target specific body locations at an attack penalty (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
       },
       "combatManeuvers": {
         "name": "Combat & Tactics: Combat Maneuvers",
-        "hint": "Disarm, trip, overbear, and similar maneuvers (Combat & Tactics). Requires Sub-project 7."
+        "hint": "Disarm, trip, overbear, and similar maneuvers (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
       },
       "armorTypeVsWeaponType": {
         "name": "Combat & Tactics: Armor vs. Weapon Type",
-        "hint": "Weapon-type modifiers versus armor type (Combat & Tactics). Requires Sub-project 7."
+        "hint": "Weapon-type modifiers versus armor type (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
       },
       "weaponMastery": {
         "name": "Combat & Tactics: Weapon Mastery",
-        "hint": "Mastery and high-mastery weapon tiers beyond specialization (Combat & Tactics). Requires Sub-project 7."
+        "hint": "Mastery and grand-mastery weapon tiers beyond specialization (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
       },
       "skillsAndPowersEnabled": {
         "name": "Skills & Powers: Enabled",

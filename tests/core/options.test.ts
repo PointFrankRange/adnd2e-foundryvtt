@@ -3,15 +3,21 @@ import { DEFAULT_OPTIONAL_RULES } from "../../src/core/options";
 import type { OptionalRules } from "../../src/core/options";
 
 describe("DEFAULT_OPTIONAL_RULES", () => {
-  it("has exactly the eight core-rule toggles", () => {
+  it("has exactly the fourteen core and combatAndTactics toggles", () => {
     expect(Object.keys(DEFAULT_OPTIONAL_RULES).sort()).toEqual(
       [
+        "armorTypeVsWeaponType",
+        "calledShots",
+        "combatAndTacticsEnabled",
+        "combatManeuvers",
+        "criticalHits",
         "exceptionalStrength",
         "maxSpellsPerLevel",
         "multiclassHpAveraging",
         "nonweaponProficienciesUsed",
         "spellFailureFromWisdom",
         "trainingRequiredToLevel",
+        "weaponMastery",
         "weaponProficienciesUsed",
         "weaponSpeedInitiative",
       ].sort(),
@@ -28,6 +34,12 @@ describe("DEFAULT_OPTIONAL_RULES", () => {
       nonweaponProficienciesUsed: true,
       weaponProficienciesUsed: true,
       multiclassHpAveraging: true,
+      combatAndTacticsEnabled: false,
+      criticalHits: false,
+      calledShots: false,
+      combatManeuvers: false,
+      armorTypeVsWeaponType: false,
+      weaponMastery: false,
     };
     expect(DEFAULT_OPTIONAL_RULES).toEqual(expected);
   });

@@ -3,9 +3,10 @@
  * a rule switch can change. `data/` builds this from `game.settings`
  * (`getOptionalRules()`); `core/` only ever receives it as a parameter.
  *
- * Only the `core`-group toggles live here. `combatAndTactics.*` /
- * `skillsAndPowers.*` / `spellsAndMagic.*` settings are registered but are not
- * part of this bag until their sub-project wires the branches (spec §6.2).
+ * `core` and `combatAndTactics` group toggles both live here (Sub-project 7
+ * wired the latter). `skillsAndPowers.*` / `spellsAndMagic.*` settings are
+ * registered but are not part of this bag until their sub-project wires the
+ * branches (spec §6.2).
  */
 export interface OptionalRules {
   /** PHB p.18: warriors roll d100 for exceptional Strength at STR 18. */
@@ -24,6 +25,19 @@ export interface OptionalRules {
   weaponProficienciesUsed: boolean;
   /** PHB p.44: a multi-class character's hit points are the averaged roll. */
   multiclassHpAveraging: boolean;
+  /** Sub-project 7 master switch — every other combatAndTactics.* key is a
+   *  no-op unless this is also true. */
+  combatAndTacticsEnabled: boolean;
+  /** Sub-project 7 Plan 7b: critical-hit/fumble severity tables. */
+  criticalHits: boolean;
+  /** Sub-project 7 Plan 7d: called shots. */
+  calledShots: boolean;
+  /** Sub-project 7 Plan 7d: the curated combat-maneuver set. */
+  combatManeuvers: boolean;
+  /** Sub-project 7 Plan 7b: weapon-damageType vs armor-type modifiers. */
+  armorTypeVsWeaponType: boolean;
+  /** Sub-project 7 Plan 7c: the weapon-mastery tier system. */
+  weaponMastery: boolean;
 }
 
 export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
@@ -35,4 +49,10 @@ export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
   nonweaponProficienciesUsed: true,
   weaponProficienciesUsed: true,
   multiclassHpAveraging: true,
+  combatAndTacticsEnabled: false,
+  criticalHits: false,
+  calledShots: false,
+  combatManeuvers: false,
+  armorTypeVsWeaponType: false,
+  weaponMastery: false,
 };
