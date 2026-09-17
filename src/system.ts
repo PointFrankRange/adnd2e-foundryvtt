@@ -1,5 +1,6 @@
 import "../styles/system.scss";
 import { buildAdnd2eConfig } from "./config";
+import { buildStatusEffects } from "./conditions";
 import { SYSTEM_ID } from "./constants";
 import { ACTIVE_EFFECT_DATA_MODELS } from "./data/active-effect";
 import { ACTOR_DATA_MODELS } from "./data/actor";
@@ -26,6 +27,15 @@ Hooks.once("init", () => {
   // mandatory `base` entry, and dropping it breaks every core/base-typed effect.
   Object.assign(CONFIG.ActiveEffect.dataModels, ACTIVE_EFFECT_DATA_MODELS);
   CONFIG.Actor.dataModels = ACTOR_DATA_MODELS;
+  // CONFIG.statusEffects is a Proxy with built-in id-based dedup (real v14.364
+  // source, client/config.mjs) — .push() is safe even if a later Foundry
+  // version adds a core default with the same id. specialStatusEffects.BLIND
+  // is reassigned so core's own vision/detection code (which checks for the
+  // literal id "blind") recognizes this system's "blinded" condition instead.
+  for (const effect of buildStatusEffects()) {
+    (CONFIG.statusEffects as unknown as { push(e: unknown): void }).push(effect);
+  }
+  CONFIG.specialStatusEffects.BLIND = "blinded";
   registerSettings();
   registerMigrationSettings();
   registerSheets();

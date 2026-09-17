@@ -26,3 +26,28 @@ export const CONDITIONS: readonly Condition[] = [
   { id: "incapacitated", name: "Incapacitated", img: "icons/svg/downgrade.svg" },
   { id: "dead", name: "Dead", img: "icons/svg/skull.svg" },
 ];
+
+/** The exact shape a CONFIG.statusEffects entry needs (real v14.364 fields:
+ *  id/name/img/hud always read; `type` is a legal ActiveEffectData field that
+ *  Actor#toggleStatusEffect/ActiveEffect.fromStatusEffect deep-clone through,
+ *  so setting it here makes a Token HUD toggle create a real `adnd2e`-subtype
+ *  ActiveEffect with these `system` defaults — no extra wiring needed). */
+export interface StatusEffectConfig {
+  id: string;
+  name: string;
+  img: string;
+  type: "adnd2e";
+  hud: boolean;
+  system: { conditionId: string; isCondition: true; suppressWhenUnequipped: false; schoolTag: null };
+}
+
+export function buildStatusEffects(): readonly StatusEffectConfig[] {
+  return CONDITIONS.map((c) => ({
+    id: c.id,
+    name: c.name,
+    img: c.img,
+    type: "adnd2e" as const,
+    hud: true,
+    system: { conditionId: c.id, isCondition: true as const, suppressWhenUnequipped: false as const, schoolTag: null },
+  }));
+}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { CONDITIONS } from "../src/conditions";
+import { buildStatusEffects, CONDITIONS } from "../src/conditions";
 
 const SRC = path.resolve(__dirname, "..", "packs", "conditions", "_source");
 
@@ -29,5 +29,21 @@ describe("CONDITIONS ↔ conditions pack", () => {
       expect(doc.img).toBe(c!.img);
     }
     expect(new Set(docs.map((d) => d.system.conditionId)).size).toBe(CONDITIONS.length);
+  });
+});
+
+describe("buildStatusEffects", () => {
+  it("produces one entry per CONDITIONS row, id/name/img matching exactly", () => {
+    const effects = buildStatusEffects();
+    expect(effects).toHaveLength(CONDITIONS.length);
+    for (let i = 0; i < CONDITIONS.length; i++) {
+      expect(effects[i]!.id).toBe(CONDITIONS[i]!.id);
+      expect(effects[i]!.name).toBe(CONDITIONS[i]!.name);
+      expect(effects[i]!.img).toBe(CONDITIONS[i]!.img);
+      expect(effects[i]!.type).toBe("adnd2e");
+      expect(effects[i]!.hud).toBe(true);
+      expect(effects[i]!.system.conditionId).toBe(CONDITIONS[i]!.id);
+      expect(effects[i]!.system.isCondition).toBe(true);
+    }
   });
 });
