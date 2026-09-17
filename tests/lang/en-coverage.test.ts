@@ -213,6 +213,7 @@ describe("lang/en.json — SP3 chat/combat strings", () => {
       "ADND2E.chat.attack.modRange",
       "ADND2E.chat.attack.modSituational",
       "ADND2E.chat.attack.rollDamage",
+      "ADND2E.chat.attack.cannotActWarning",
       "ADND2E.chat.damage.applyToTargets",
       "ADND2E.chat.damage.noTargetsWarning",
       "ADND2E.chat.damage.notOwnerWarning",
@@ -380,6 +381,19 @@ describe("lang/en.json — SP6 NPC panel fields (whole-branch fix I3)", () => {
       "ADND2E.sheet.npc.morale",
       "ADND2E.sheet.npc.xpValue",
       "ADND2E.sheet.npc.disposition",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("lang/en.json — SP7a initiative-modifier Combat Tracker UI strings", () => {
+  it("resolves every ADND2E.combat.initiativeModifier.* key", () => {
+    for (const key of [
+      "ADND2E.combat.initiativeModifier.title",
+      "ADND2E.combat.initiativeModifier.hint",
+      "ADND2E.combat.initiativeModifier.set",
     ]) {
       expect(typeof resolve(key), key).toBe("string");
       expect((resolve(key) as string).length, key).toBeGreaterThan(0);

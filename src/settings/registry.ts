@@ -28,13 +28,13 @@ export const SETTING_DESCRIPTORS: readonly SettingDescriptor[] = [
   { key: "nonweaponProficienciesUsed", group: "core", default: true, config: true, optionalRulesKey: "nonweaponProficienciesUsed" },
   { key: "weaponProficienciesUsed", group: "core", default: true, config: true, optionalRulesKey: "weaponProficienciesUsed" },
   { key: "multiclassHpAveraging", group: "core", default: true, config: true, optionalRulesKey: "multiclassHpAveraging" },
-  // --- combatAndTactics: reserved for Sub-project 7 ---
-  { key: "combatAndTacticsEnabled", group: "combatAndTactics", default: false, config: true, optionalRulesKey: null },
-  { key: "criticalHits", group: "combatAndTactics", default: false, config: true, optionalRulesKey: null },
-  { key: "calledShots", group: "combatAndTactics", default: false, config: true, optionalRulesKey: null },
-  { key: "combatManeuvers", group: "combatAndTactics", default: false, config: true, optionalRulesKey: null },
-  { key: "armorTypeVsWeaponType", group: "combatAndTactics", default: false, config: true, optionalRulesKey: null },
-  { key: "weaponMastery", group: "combatAndTactics", default: false, config: true, optionalRulesKey: null },
+  // --- combatAndTactics: Sub-project 7 ---
+  { key: "combatAndTacticsEnabled", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "combatAndTacticsEnabled" },
+  { key: "criticalHits", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "criticalHits" },
+  { key: "calledShots", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "calledShots" },
+  { key: "combatManeuvers", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "combatManeuvers" },
+  { key: "armorTypeVsWeaponType", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "armorTypeVsWeaponType" },
+  { key: "weaponMastery", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "weaponMastery" },
   // --- skillsAndPowers: reserved for Sub-project 8 ---
   { key: "skillsAndPowersEnabled", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: null },
   { key: "subAbilityScores", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: null },

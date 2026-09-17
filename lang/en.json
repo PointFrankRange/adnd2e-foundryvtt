@@ -370,7 +370,8 @@
         "modStrength": "Strength", "modDexMissile": "Dexterity (missile)",
         "modWeaponMagic": "Weapon magic", "modProficiency": "Proficiency",
         "modRange": "Range", "modSituational": "Situational",
-        "rollDamage": "Roll Damage"
+        "rollDamage": "Roll Damage",
+        "cannotActWarning": "This actor is stunned or held and cannot attack this round."
       },
       "damage": {
         "applyToTargets": "Apply to Targeted Token(s)",
@@ -423,6 +424,13 @@
         "damageFlavor": "{name} damage"
       }
     },
+    "combat": {
+      "initiativeModifier": {
+        "title": "Set Initiative Modifier",
+        "hint": "A one-off situational adjustment for this combatant's initiative this round (e.g. a spell's casting time). Lower is better.",
+        "set": "Set"
+      }
+    },
     "sheets": {
       "rawActor": "Raw Fields (Actor)",
       "rawItem": "Raw Fields (Item)",
@@ -464,27 +472,27 @@
       },
       "combatAndTacticsEnabled": {
         "name": "Combat & Tactics: Enabled",
-        "hint": "Master switch for the Combat & Tactics option group. Individual rules below have no effect until this is on. Requires Sub-project 7."
+        "hint": "Master switch for the Combat & Tactics option group. Individual rules below have no effect until this is on."
       },
       "criticalHits": {
         "name": "Combat & Tactics: Critical Hits",
-        "hint": "Natural 20 confirms for extra damage (Combat & Tactics). Requires Sub-project 7."
+        "hint": "Natural 20 confirms for extra damage (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
       },
       "calledShots": {
         "name": "Combat & Tactics: Called Shots",
-        "hint": "Target specific body locations at an attack penalty (Combat & Tactics). Requires Sub-project 7."
+        "hint": "Target specific body locations at an attack penalty (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
       },
       "combatManeuvers": {
         "name": "Combat & Tactics: Combat Maneuvers",
-        "hint": "Disarm, trip, overbear, and similar maneuvers (Combat & Tactics). Requires Sub-project 7."
+        "hint": "Disarm, trip, overbear, and similar maneuvers (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
       },
       "armorTypeVsWeaponType": {
         "name": "Combat & Tactics: Armor vs. Weapon Type",
-        "hint": "Weapon-type modifiers versus armor type (Combat & Tactics). Requires Sub-project 7."
+        "hint": "Weapon-type modifiers versus armor type (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
       },
       "weaponMastery": {
         "name": "Combat & Tactics: Weapon Mastery",
-        "hint": "Mastery and high-mastery weapon tiers beyond specialization (Combat & Tactics). Requires Sub-project 7."
+        "hint": "Mastery and grand-mastery weapon tiers beyond specialization (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
       },
       "skillsAndPowersEnabled": {
         "name": "Skills & Powers: Enabled",
@@ -535,7 +543,8 @@
       "spell": "Spell",
       "weaponProficiency": "Weapon Proficiency",
       "nonweaponProficiency": "Non-Weapon Proficiency",
-      "classFeature": "Class Feature"
+      "classFeature": "Class Feature",
+      "condition": "Condition"
     },
     "ActiveEffect": {
       "adnd2e": "AD&D 2E Effect"
