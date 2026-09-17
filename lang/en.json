@@ -500,7 +500,7 @@
       },
       "armorTypeVsWeaponType": {
         "name": "Combat & Tactics: Armor vs. Weapon Type",
-        "hint": "Weapon-type modifiers versus armor type (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
+        "hint": "Weapon-type modifiers versus armor type (Combat & Tactics)."
       },
       "weaponMastery": {
         "name": "Combat & Tactics: Weapon Mastery",

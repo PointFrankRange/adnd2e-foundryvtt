@@ -9,9 +9,10 @@ import { canBackstab } from "../../core/weapons/backstab";
 import { backstabMultiplier } from "../../core/proficiencies/thief-skills";
 import { classItemLevel } from "../../data/derive/class-item";
 import { criticalSeverity, fumbleSeverity } from "../../combat/critical";
+import { toArmorGroup, weaponVsArmorModifier } from "../../combat/weapon-vs-armor";
 import { getOptionalRules } from "../../settings";
 import { TEMPLATE_PATH } from "../../constants";
-import type { ClassId, SaveCategory } from "../../core/types";
+import type { ArmorType, ClassId, SaveCategory } from "../../core/types";
 
 /* ---------------------------------------------------------------------------
  * combat-rolls — SP3 Task 5.
@@ -36,6 +37,19 @@ export function resolveTargetCombatInfo(
   const sys = targetActor.system as { attributes?: { ac?: { normal?: number } } };
   const raceItem = [...targetActor.items].find((i) => i.type === "race");
   return { ac: sys.attributes?.ac?.normal ?? 10, size: raceItem?.system.size ?? "medium" };
+}
+
+/** Finds the target's equipped `armor`-type item and reads its armorType,
+ *  defaulting to "none" (the unarmored group) when the target has no
+ *  equipped armor item at all — including every `creature`-type target,
+ *  which has no armor Item concept (a safe no-op, since this plan's
+ *  weaponVsArmorModifier table returns 0 for "unarmored" on every
+ *  damage type). */
+function resolveTargetArmorType(
+  targetActor: { items: Iterable<{ type: string; system: { armorType?: string; equipped?: boolean } }> },
+): ArmorType {
+  const armorItem = [...targetActor.items].find((i) => i.type === "armor" && i.system.equipped);
+  return (armorItem?.system.armorType as ArmorType | undefined) ?? "none";
 }
 
 interface AttackerActor {
@@ -141,6 +155,7 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
   let targetAc: number;
   let targetSize: string | null = null;
   let targetStatuses: ReadonlySet<string> = new Set<string>();
+  let armorVsWeaponModifier = 0;
 
   if (targets.length === 1) {
     const t = targets[0]!;
@@ -149,6 +164,11 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
     targetAc = info.ac + proneArmorClassPenalty((t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>());
     targetSize = info.size;
     targetStatuses = (t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>();
+    const rules = getOptionalRules();
+    if (rules.combatAndTacticsEnabled && rules.armorTypeVsWeaponType && weapon.system.damageType) {
+      const targetArmorType = resolveTargetArmorType(t.actor as Parameters<typeof resolveTargetArmorType>[0]);
+      armorVsWeaponModifier = weaponVsArmorModifier(weapon.system.damageType as never, toArmorGroup(targetArmorType));
+    }
   } else {
     const manualAc = await foundry.applications.api.DialogV2.prompt({
       window: { title: game.i18n!.localize("ADND2E.chat.attack.manualAcTitle") },
@@ -174,7 +194,7 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
     proficiencyModifier: resolveProficiencyModifier(actor, weapon),
     // STR/DEX modifiers remain out of scope (parent spec §7 boundary,
     // unchanged by this sub-project).
-    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses),
+    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses) + armorVsWeaponModifier,
   });
   const formula = attackFormula(attackBonus);
   const roll = await new Roll(formula).evaluate();
