@@ -4,6 +4,8 @@ import { buildSaveCardContext } from "../../combat/save-card";
 import { blindedAttackPenalty, canAct, heldAttackBonus, proneArmorClassPenalty } from "../../combat/condition-effects";
 import { attackModifiers, hitResult } from "../../core/combat/attack";
 import { attackFormula } from "../../core/dice/formula";
+import { criticalSeverity, fumbleSeverity } from "../../combat/critical";
+import { getOptionalRules } from "../../settings";
 import { TEMPLATE_PATH } from "../../constants";
 import type { SaveCategory } from "../../core/types";
 
@@ -95,10 +97,27 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
   const naturalD20 = roll.dice[0]?.total ?? 0;
   const hit = hitResult({ naturalD20, attackBonus, thac0, targetAc });
 
+  const critEnabled = getOptionalRules().combatAndTacticsEnabled && getOptionalRules().criticalHits;
+  const crit = critEnabled && hit.autoHit ? criticalSeverity(Math.ceil(Math.random() * 10)) : null;
+  const fumble = critEnabled && hit.autoMiss ? fumbleSeverity(Math.ceil(Math.random() * 10)) : null;
+
+  if (fumble?.effect === "selfInjury" && fumble.selfInjuryDice) {
+    const selfRoll = await new Roll(fumble.selfInjuryDice).evaluate();
+    await selfRoll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: actor as never }),
+      flavor: game.i18n!.localize("ADND2E.chat.attack.fumbleSelfInjury"),
+    } as unknown as Roll.MessageData);
+  }
+  // Creature attacks have no weapon Item to unequip on a "weapon drops"
+  // fumble (attacks[] is a flat array, not an embedded Item) — this outcome
+  // is a no-op for a creature attacker, a deliberate v1 scope boundary.
+
   const context = buildAttackCardContext({
     actorName: actor.name, actorImg: actor.img,
     weaponName: attack.name, targetName,
     formula, naturalD20, hit, backstab: false, modifierBreakdown: breakdown,
+    critLabel: crit ? `ADND2E.chat.attack.crit.${crit.tier}` : null,
+    fumbleLabel: fumble ? `ADND2E.chat.attack.fumble.${fumble.tier}` : null,
     damageContext: null,
   });
   const content = await foundry.applications.handlebars.renderTemplate(
@@ -110,10 +129,30 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
 
   if (hit.hit) {
     const damageRoll = await new Roll(attack.damage).evaluate();
-    await damageRoll.toMessage({
-      speaker: ChatMessage.getSpeaker({ actor: actor as never }),
-      flavor: game.i18n!.format("ADND2E.chat.creature.damageFlavor", { name: attack.name }),
-    } as unknown as Roll.MessageData);
+    if (!crit) {
+      await damageRoll.toMessage({
+        speaker: ChatMessage.getSpeaker({ actor: actor as never }),
+        flavor: game.i18n!.format("ADND2E.chat.creature.damageFlavor", { name: attack.name }),
+      } as unknown as Roll.MessageData);
+    } else {
+      // A crit multiplies/boosts the total, which Roll#toMessage() cannot
+      // display while keeping the real evaluated roll attached (it always
+      // shows the roll's own unmodified total) — this branch ONLY runs for
+      // an active crit, never for a normal hit. Verified against real
+      // v14.364 source (client/dice/roll.mjs Roll#toMessage,
+      // client/documents/chat-message.mjs #renderRollContent): this mirrors
+      // exactly what Roll#toMessage() itself does internally
+      // (`messageData.rolls = [this]; ChatMessage.create(...)`), and a
+      // custom `content` containing at least one HTML element is preserved
+      // rather than overwritten by the default roll card.
+      const finalDamageTotal = (damageRoll.total ?? 0) * crit.damageMultiplier + crit.flatBonus;
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: actor as never }),
+        content: `${damageRoll.formula} = <strong>${finalDamageTotal}</strong>`,
+        flavor: game.i18n!.format("ADND2E.chat.creature.damageFlavor", { name: attack.name }),
+        rolls: [damageRoll],
+      } as unknown as Record<string, unknown>);
+    }
   }
 }
 

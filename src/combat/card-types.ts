@@ -27,7 +27,13 @@ export interface AttackCardInput {
   /** carried into the chat message's flags so the "Roll Damage" button knows
    *  what to roll; null when there is no weapon item to roll damage from
    *  (should not normally happen — a "Roll Attack" always originates from a weapon row) */
-  damageContext: { weaponItemId: string; actorUuid: string; targetSize: string | null; backstabMultiplier: number | null } | null;
+  damageContext: { weaponItemId: string; actorUuid: string; targetSize: string | null; backstabMultiplier: number | null; critMultiplier: number | null; critFlatBonus: number } | null;
+  /** an i18n key naming the crit tier ("solid"/"devastating"/"brutal"), or
+   *  null when this hit was not a (non-backstab) natural 20. */
+  critLabel: string | null;
+  /** an i18n key naming the fumble tier ("miss"/"weaponDrops"/"selfInjury"),
+   *  or null when this attack was not a natural 1. */
+  fumbleLabel: string | null;
 }
 
 export interface AttackCardContext {
@@ -38,7 +44,9 @@ export interface AttackCardContext {
   hit: boolean; autoHit: boolean; autoMiss: boolean; backstab: boolean;
   /** zero-value modifiers are omitted — a clean card, not a wall of "+0" lines */
   modifierBreakdown: ModifierLine[];
-  damageContext: { weaponItemId: string; actorUuid: string; targetSize: string | null; backstabMultiplier: number | null } | null;
+  damageContext: { weaponItemId: string; actorUuid: string; targetSize: string | null; backstabMultiplier: number | null; critMultiplier: number | null; critFlatBonus: number } | null;
+  critLabel: string | null;
+  fumbleLabel: string | null;
 }
 
 /* ---------- damage ---------- */
@@ -54,6 +62,13 @@ export interface DamageCardInput {
    *  floored at 1 by damageResult) is multiplied by this before display.
    *  null for a normal (non-backstab) damage roll. */
   backstabMultiplier: number | null;
+  /** set only for a critical hit (never together with backstabMultiplier —
+   *  backstab and crits do not stack, see this plan's Global Constraints).
+   *  Multiplies the floored total the same way backstabMultiplier does. */
+  critMultiplier: number | null;
+  /** a crit's flat bonus, added AFTER the multiplier (brutal-tier crits
+   *  only; 0 for every other case). */
+  critFlatBonus: number;
 }
 
 export interface DamageCardContext {
@@ -63,6 +78,7 @@ export interface DamageCardContext {
   /** null for a normal roll — the template shows a "×N backstab!" line only
    *  when this is non-null. */
   backstabMultiplier: number | null;
+  critMultiplier: number | null;
 }
 
 /* ---------- save ---------- */

@@ -8,6 +8,8 @@ import { weaponAttackPenalty, weaponSpecializationEffect } from "../../core/prof
 import { canBackstab } from "../../core/weapons/backstab";
 import { backstabMultiplier } from "../../core/proficiencies/thief-skills";
 import { classItemLevel } from "../../data/derive/class-item";
+import { criticalSeverity, fumbleSeverity } from "../../combat/critical";
+import { getOptionalRules } from "../../settings";
 import { TEMPLATE_PATH } from "../../constants";
 import type { ClassId, SaveCategory } from "../../core/types";
 
@@ -184,15 +186,38 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
   const baseHit = hitResult({ naturalD20, attackBonus, thac0, targetAc });
   const hit = backstabActive ? { ...baseHit, hit: true, autoHit: true, autoMiss: false } : baseHit;
 
+  const critEnabled = getOptionalRules().combatAndTacticsEnabled && getOptionalRules().criticalHits;
+  const crit = critEnabled && baseHit.autoHit && !backstabActive ? criticalSeverity(Math.ceil(Math.random() * 10)) : null;
+  const fumble = critEnabled && baseHit.autoMiss ? fumbleSeverity(Math.ceil(Math.random() * 10)) : null;
+
+  if (fumble?.effect === "weaponDrops") {
+    // Inline for now — a future plan (SP7 Plan 7d, combat maneuvers) will
+    // need the identical "unequip a weapon Item" operation for its own
+    // disarm-maneuver outcome; extract this into a shared helper THEN, when
+    // there are genuinely two call sites, not preemptively for one.
+    await (weapon as unknown as { update(d: Record<string, unknown>): Promise<unknown> }).update({ "system.equipped": false });
+  }
+  if (fumble?.effect === "selfInjury" && fumble.selfInjuryDice) {
+    const selfRoll = await new Roll(fumble.selfInjuryDice).evaluate();
+    await selfRoll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: actor as never }),
+      flavor: game.i18n!.localize("ADND2E.chat.attack.fumbleSelfInjury"),
+    } as unknown as Roll.MessageData);
+  }
+
   const context = buildAttackCardContext({
     actorName: actor.name, actorImg: actor.img,
     weaponName: weapon.name, targetName,
     formula, naturalD20, hit, modifierBreakdown: breakdown,
     backstab: backstabActive,
+    critLabel: crit ? `ADND2E.chat.attack.crit.${crit.tier}` : null,
+    fumbleLabel: fumble ? `ADND2E.chat.attack.fumble.${fumble.tier}` : null,
     damageContext: hit.hit
       ? {
           weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize,
           backstabMultiplier: backstabActive ? backstabMultiplier(thiefLevel) : null,
+          critMultiplier: crit?.damageMultiplier ?? null,
+          critFlatBonus: crit?.flatBonus ?? 0,
         }
       : null,
   });

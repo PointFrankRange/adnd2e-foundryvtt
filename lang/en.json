@@ -371,7 +371,19 @@
         "modWeaponMagic": "Weapon magic", "modProficiency": "Proficiency",
         "modRange": "Range", "modSituational": "Situational",
         "rollDamage": "Roll Damage",
-        "cannotActWarning": "This actor is stunned or held and cannot attack this round."
+        "cannotActWarning": "This actor is stunned or held and cannot attack this round.",
+        "crit": {
+          "solid": "Critical hit!",
+          "devastating": "Devastating critical hit!",
+          "brutal": "Brutal critical hit!"
+        },
+        "fumble": {
+          "miss": "Fumble!",
+          "weaponDrops": "Fumble — weapon drops!",
+          "selfInjury": "Fumble — minor self-injury!"
+        },
+        "fumbleSelfInjury": "Self-injury from a fumble",
+        "critApplied": "×{multiplier} critical hit!"
       },
       "damage": {
         "applyToTargets": "Apply to Targeted Token(s)",
@@ -476,7 +488,7 @@
       },
       "criticalHits": {
         "name": "Combat & Tactics: Critical Hits",
-        "hint": "Natural 20 confirms for extra damage (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
+        "hint": "Natural 20 confirms for extra damage (Combat & Tactics)."
       },
       "calledShots": {
         "name": "Combat & Tactics: Called Shots",
