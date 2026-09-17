@@ -1,17 +1,11 @@
 {
   "_id": "S8UTxyyxoxgTnbyi",
-  "_key": "!effects!S8UTxyyxoxgTnbyi",
+  "_key": "!items!S8UTxyyxoxgTnbyi",
   "name": "Paralyzed",
-  "type": "adnd2e",
+  "type": "condition",
   "img": "icons/svg/paralysis.svg",
-  "statuses": ["paralyzed"],
-  "disabled": false,
-  "transfer": false,
   "system": {
-    "changes": [],
     "conditionId": "paralyzed",
-    "isCondition": true,
-    "suppressWhenUnequipped": false,
-    "schoolTag": null
+    "description": ""
   }
 }

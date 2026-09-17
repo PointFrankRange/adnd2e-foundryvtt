@@ -14,10 +14,10 @@ describe("system.json documentTypes", () => {
     );
   });
 
-  it("declares the nine Item subtypes (camelCase, no hyphens)", () => {
+  it("declares the ten Item subtypes (camelCase, no hyphens)", () => {
     expect(Object.keys(manifest.documentTypes.Item).sort()).toEqual(
       [
-        "armor", "class", "classFeature", "equipment", "nonweaponProficiency",
+        "armor", "class", "classFeature", "condition", "equipment", "nonweaponProficiency",
         "race", "spell", "weapon", "weaponProficiency",
       ].sort(),
     );
@@ -41,16 +41,10 @@ describe("system.json packFolders", () => {
     }
   });
 
-  it("ships the 4 Item compendium packs (conditions deferred — see below)", () => {
-    // The `conditions` pack's docs are ActiveEffect-typed. v14.364's server-side
-    // manifest installer rejects `"type": "ActiveEffect"` on a compendium
-    // ("not a valid choice") even though CONST.COMPENDIUM_DOCUMENT_TYPES lists it,
-    // so declaring it breaks install-from-manifest. The 15 condition docs +
-    // src/conditions.ts stay in the repo (drift-tested) for SP3 to ship properly
-    // alongside the CONFIG.statusEffects wiring.
-    expect(manifest.packs ?? []).toHaveLength(4);
+  it("ships the 5 Item compendium packs", () => {
+    expect(manifest.packs ?? []).toHaveLength(5);
     const names = (manifest.packs ?? []).map((p: unknown) => (p as Record<string, unknown>).name).sort();
-    expect(names).toEqual(["classes", "nonweapon-proficiencies", "races", "weapon-proficiency-groups"]);
+    expect(names).toEqual(["classes", "conditions", "nonweapon-proficiencies", "races", "weapon-proficiency-groups"]);
   });
 });
 

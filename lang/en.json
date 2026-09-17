@@ -535,7 +535,8 @@
       "spell": "Spell",
       "weaponProficiency": "Weapon Proficiency",
       "nonweaponProficiency": "Non-Weapon Proficiency",
-      "classFeature": "Class Feature"
+      "classFeature": "Class Feature",
+      "condition": "Condition"
     },
     "ActiveEffect": {
       "adnd2e": "AD&D 2E Effect"

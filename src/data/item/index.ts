@@ -8,6 +8,7 @@ import { SpellItemModel } from "./spell";
 import { WeaponProficiencyItemModel } from "./weapon-proficiency";
 import { NonweaponProficiencyItemModel } from "./nonweapon-proficiency";
 import { ClassFeatureItemModel } from "./class-feature";
+import { ConditionItemModel } from "./condition";
 
 export {
   ClassItemModel,
@@ -19,6 +20,7 @@ export {
   WeaponProficiencyItemModel,
   NonweaponProficiencyItemModel,
   ClassFeatureItemModel,
+  ConditionItemModel,
 };
 
 /** Registered on `CONFIG.Item.dataModels` in the init hook. Keys ≡ `ITEM_SUBTYPES`. */
@@ -35,4 +37,5 @@ export const ITEM_DATA_MODELS: Record<
   weaponProficiency: WeaponProficiencyItemModel,
   nonweaponProficiency: NonweaponProficiencyItemModel,
   classFeature: ClassFeatureItemModel,
+  condition: ConditionItemModel,
 };

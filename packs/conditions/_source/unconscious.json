@@ -1,17 +1,11 @@
 {
   "_id": "gc4ntqmMNhAAqkLS",
-  "_key": "!effects!gc4ntqmMNhAAqkLS",
+  "_key": "!items!gc4ntqmMNhAAqkLS",
   "name": "Unconscious",
-  "type": "adnd2e",
+  "type": "condition",
   "img": "icons/svg/unconscious.svg",
-  "statuses": ["unconscious"],
-  "disabled": false,
-  "transfer": false,
   "system": {
-    "changes": [],
     "conditionId": "unconscious",
-    "isCondition": true,
-    "suppressWhenUnequipped": false,
-    "schoolTag": null
+    "description": ""
   }
 }

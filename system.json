@@ -32,7 +32,8 @@
       "spell": {},
       "weaponProficiency": {},
       "nonweaponProficiency": {},
-      "classFeature": {}
+      "classFeature": {},
+      "condition": {}
     },
     "ActiveEffect": {
       "adnd2e": {}
@@ -43,7 +44,8 @@
     { "name": "classes", "label": "Classes", "path": "packs/classes", "type": "Item", "system": "adnd2e", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
     { "name": "races", "label": "Races", "path": "packs/races", "type": "Item", "system": "adnd2e", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
     { "name": "nonweapon-proficiencies", "label": "Non-Weapon Proficiencies", "path": "packs/nonweapon-proficiencies", "type": "Item", "system": "adnd2e", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
-    { "name": "weapon-proficiency-groups", "label": "Weapon-Proficiency Groups", "path": "packs/weapon-proficiency-groups", "type": "Item", "system": "adnd2e", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } }
+    { "name": "weapon-proficiency-groups", "label": "Weapon-Proficiency Groups", "path": "packs/weapon-proficiency-groups", "type": "Item", "system": "adnd2e", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
+    { "name": "conditions", "label": "Conditions", "path": "packs/conditions", "type": "Item", "system": "adnd2e", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } }
   ],
 
   "packFolders": [
@@ -56,7 +58,8 @@
         { "name": "Proficiencies", "sorting": "a", "packs": ["weapon-proficiency-groups", "nonweapon-proficiencies"] },
         { "name": "Equipment", "sorting": "a", "packs": [] },
         { "name": "Spells", "sorting": "a", "packs": [] },
-        { "name": "Bestiary", "sorting": "a", "packs": [] }
+        { "name": "Bestiary", "sorting": "a", "packs": [] },
+        { "name": "Conditions", "sorting": "a", "packs": ["conditions"] }
       ],
       "packs": []
     }
