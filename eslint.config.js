@@ -25,7 +25,13 @@ export default tseslint.config(
   },
   {
     // The engine must stay pure — no Foundry globals under core/.
+    // initiative-modifier-dialog.ts is Foundry-shell glue (DialogV2 dialog),
+    // same category as the sheets/character combat-rolls.ts files that never
+    // appear in this list — it's carved out of src/combat/**'s directory-level
+    // match rather than added file-by-file like those siblings (mirrors the
+    // equivalent tsconfig.core.json exclude).
     files: ["src/core/**/*.ts", "tests/core/**/*.ts", "src/config.ts", "src/conditions.ts", "src/settings/registry.ts", "tests/config/**/*.ts", "tests/settings/**/*.ts", "tests/lang/**/*.ts", "src/data/derive/**/*.ts", "src/data/item/subtypes.ts", "src/data/item/choices.ts", "src/data/actor/subtypes.ts", "src/data/active-effect/subtypes.ts", "src/data/migrations.ts", "src/data/import/envelope.ts", "tests/conditions.test.ts", "tests/data/**/*.ts", "tests/packs/**/*.ts", "src/sheets/character/context-types.ts", "src/sheets/character/xp.ts", "src/sheets/character/drop-rules.ts", "src/sheets/character/grouping.ts", "src/sheets/character/context.ts", "src/sheets/creature/context-types.ts", "src/sheets/creature/context.ts", "tests/sheets/**/*.ts", "src/combat/**/*.ts", "tests/combat/**/*.ts", "src/magic/**/*.ts", "tests/magic/**/*.ts"],
+    ignores: ["src/combat/initiative-modifier-dialog.ts"],
     rules: {
       "no-restricted-globals": [
         "error",

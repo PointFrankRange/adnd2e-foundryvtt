@@ -424,6 +424,13 @@
         "damageFlavor": "{name} damage"
       }
     },
+    "combat": {
+      "initiativeModifier": {
+        "title": "Set Initiative Modifier",
+        "hint": "A one-off situational adjustment for this combatant's initiative this round (e.g. a spell's casting time). Lower is better.",
+        "set": "Set"
+      }
+    },
     "sheets": {
       "rawActor": "Raw Fields (Actor)",
       "rawItem": "Raw Fields (Item)",

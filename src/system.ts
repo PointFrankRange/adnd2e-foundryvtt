@@ -12,6 +12,7 @@ import { registerSheetPartials } from "./sheets/handlebars";
 import { buildApi } from "./api";
 import { registerMigrationSettings, runMigrations } from "./migrations/run";
 import { registerChatListeners } from "./chat/chat-listeners";
+import { promptInitiativeModifier } from "./combat/initiative-modifier-dialog";
 
 Hooks.once("init", () => {
   console.log(`${SYSTEM_ID} | Initializing`);
@@ -56,4 +57,46 @@ Hooks.once("ready", async () => {
   (game.system as unknown as { api: ReturnType<typeof buildApi> }).api = buildApi();
   await runMigrations();
   registerChatListeners();
+  // Real hook name mechanically confirmed by reading v14.364 source (NOT the
+  // stale "getCombatantContextOptions" the JSDoc above the call site claims):
+  // CombatTracker's own _getEntryContextOptions() context menu is created via
+  // _createContextMenu(this._getEntryContextOptions, ".combatant", {fixed: true})
+  // (client/applications/sidebar/tabs/combat-tracker.mjs) with no hookName
+  // override, so _createContextMenu's default "get{}ContextOptions" applies
+  // (client/applications/api/application.mjs #_createContextMenu). #callHooks
+  // does `Hooks.callAll(hookName.replace("{}", cls.name), ...)` for each class
+  // in inheritanceChain(), which yields `this.constructor` (CombatTracker)
+  // first — so "getCombatTrackerContextOptions" is the first (and for this
+  // unsubclassed core app, only relevant) hook actually fired.
+  //
+  // Entry shape also confirmed against combat-tracker.mjs's own
+  // _getEntryContextOptions() (the real "Reroll" entry etc.) and
+  // ContextMenuEntry's JSDoc typedef in client/applications/ux/context-menu.mjs:
+  // {label, icon, visible, onClick} — NOT {name, icon, condition, callback}.
+  // Combatant rows (the `li` passed to visible/onClick) carry the combatant id
+  // directly on `li.dataset.combatantId`, matching core's own
+  // `li => this.viewed.combatants.get(li.dataset.combatantId)` helper — no
+  // `.closest()` needed since `li` IS the `.combatant` row element.
+  //
+  // fvtt-types (pinned to a v13-beta snapshot — see memory:
+  // foundry-v14-vs-fvtt-types) still types ContextMenu.Entry with the OLD
+  // pre-v14 shape ({name, callback, condition}), so the real-shape object
+  // literal below is cast past it rather than rewritten to match a shape
+  // core no longer reads at runtime.
+  Hooks.on("getCombatTrackerContextOptions", (app: unknown, options: unknown[]) => {
+    const getCombatant = (li: HTMLElement) => {
+      const tracker = app as { viewed?: { combatants: { get(id: string): unknown } } };
+      const id = li.dataset.combatantId;
+      return id ? tracker.viewed?.combatants.get(id) : undefined;
+    };
+    options.push({
+      label: "ADND2E.combat.initiativeModifier.title",
+      icon: "fa-solid fa-dice-d10",
+      visible: () => Boolean(game.user?.isGM),
+      onClick: (_event: PointerEvent, li: HTMLElement) => {
+        const combatant = getCombatant(li);
+        if (combatant) void promptInitiativeModifier(combatant as never);
+      },
+    } as never);
+  });
 });

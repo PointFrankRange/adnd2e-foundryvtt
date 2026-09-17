@@ -388,6 +388,19 @@ describe("lang/en.json — SP6 NPC panel fields (whole-branch fix I3)", () => {
   });
 });
 
+describe("lang/en.json — SP7a initiative-modifier Combat Tracker UI strings", () => {
+  it("resolves every ADND2E.combat.initiativeModifier.* key", () => {
+    for (const key of [
+      "ADND2E.combat.initiativeModifier.title",
+      "ADND2E.combat.initiativeModifier.hint",
+      "ADND2E.combat.initiativeModifier.set",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — migration + import strings", () => {
   it("resolves every migration + import key the runtime references", () => {
     for (const key of [
