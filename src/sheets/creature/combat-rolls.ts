@@ -40,6 +40,32 @@ interface CreatureActor {
   };
 }
 
+/** Applies the world's current chat-message visibility mode (Public/Private
+ *  GM Roll/Blind Roll/Self Roll) to a chat-message data object, the same way
+ *  `Roll#toMessage()` does internally before creating its ChatMessage.
+ *  Verified against real v14.364 source: `client/dice/roll.mjs`'s
+ *  `Roll#toMessage` does `messageMode ||= game.settings.get("core",
+ *  "messageMode"); ... msg.applyMode(messageMode)`, and
+ *  `client/documents/chat-message.mjs`'s INSTANCE `applyMode(mode)` is a
+ *  thin wrapper (`this.constructor.applyMode(this.toObject(), mode)`) around
+ *  the STATIC `ChatMessage.applyMode(chatData, mode)` used here directly
+ *  (the shape this file already has — a plain data object, not yet a
+ *  ChatMessage instance). The OLDER `ChatMessage.applyRollMode`/
+ *  `"core.rollMode"` pair (still what fvtt-types' pinned v13-beta snapshot
+ *  types, hence the casts below) now only exist as a one-time-warning
+ *  compatibility shim that delegates to these same two v14 real APIs. */
+function applyMessageMode(chatData: Record<string, unknown>): Record<string, unknown> {
+  const mode = (game as unknown as { settings: { get(namespace: string, key: string): string } }).settings.get(
+    "core",
+    "messageMode",
+  );
+  return (
+    ChatMessage as unknown as {
+      applyMode(data: Record<string, unknown>, mode: string): Record<string, unknown>;
+    }
+  ).applyMode(chatData, mode);
+}
+
 /** Roll one attack from `attacks[attackIndex]` against the current token
  *  target(s) (or a manually-entered AC, via DialogV2, when zero or more than
  *  one is targeted — mirrors the PC sheet's rollAttack exactly). On a hit,
@@ -144,14 +170,19 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
       // exactly what Roll#toMessage() itself does internally
       // (`messageData.rolls = [this]; ChatMessage.create(...)`), and a
       // custom `content` containing at least one HTML element is preserved
-      // rather than overwritten by the default roll card.
+      // rather than overwritten by the default roll card. Also mirrors
+      // Roll#toMessage()'s OWN roll-mode application step, via
+      // `applyMessageMode` below, so a crit doesn't bypass the world's
+      // Private GM Roll / Blind Roll / Self Roll setting the way a bare
+      // ChatMessage.create() call would.
       const finalDamageTotal = (damageRoll.total ?? 0) * crit.damageMultiplier + crit.flatBonus;
-      await ChatMessage.create({
+      const messageData = applyMessageMode({
         speaker: ChatMessage.getSpeaker({ actor: actor as never }),
         content: `${damageRoll.formula} = <strong>${finalDamageTotal}</strong>`,
         flavor: game.i18n!.format("ADND2E.chat.creature.damageFlavor", { name: attack.name }),
         rolls: [damageRoll],
-      } as unknown as Record<string, unknown>);
+      });
+      await ChatMessage.create(messageData as unknown as Record<string, unknown>);
     }
   }
 }

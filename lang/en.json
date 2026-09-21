@@ -488,7 +488,7 @@
       },
       "criticalHits": {
         "name": "Combat & Tactics: Critical Hits",
-        "hint": "Natural 20 confirms for extra damage (Combat & Tactics)."
+        "hint": "Natural 20s roll a critical-hit severity table for extra damage; natural 1s roll a fumble severity table (may drop a weapon or cause minor self-injury)."
       },
       "calledShots": {
         "name": "Combat & Tactics: Called Shots",

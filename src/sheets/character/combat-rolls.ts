@@ -39,16 +39,25 @@ export function resolveTargetCombatInfo(
   return { ac: sys.attributes?.ac?.normal ?? 10, size: raceItem?.system.size ?? "medium" };
 }
 
-/** Finds the target's equipped `armor`-type item and reads its armorType,
- *  defaulting to "none" (the unarmored group) when the target has no
- *  equipped armor item at all — including every `creature`-type target,
- *  which has no armor Item concept (a safe no-op, since this plan's
+/** Finds the target's equipped, non-shield `armor`-type item and reads its
+ *  armorType, defaulting to "none" (the unarmored group) when the target has
+ *  no equipped body-armor item at all — including every `creature`-type
+ *  target, which has no armor Item concept (a safe no-op, since this plan's
  *  weaponVsArmorModifier table returns 0 for "unarmored" on every
- *  damage type). */
+ *  damage type). Shields are ALSO `armor`-type Items in this schema (see
+ *  data/item/armor.ts's `isShield` field) with their own armorType (usually
+ *  "none"), so they must be excluded here or an equipped shield found before
+ *  the target's equipped body armor would silently zero this modifier —
+ *  mirrors proficiency-actions.ts's `resolveWornArmorType`, which already
+ *  solves this exact problem for the thief-skill-armor feature. */
 function resolveTargetArmorType(
-  targetActor: { items: Iterable<{ type: string; system: { armorType?: string; equipped?: boolean } }> },
+  targetActor: {
+    items: Iterable<{ type: string; system: { armorType?: string; equipped?: boolean; isShield?: boolean } }>;
+  },
 ): ArmorType {
-  const armorItem = [...targetActor.items].find((i) => i.type === "armor" && i.system.equipped);
+  const armorItem = [...targetActor.items].find(
+    (i) => i.type === "armor" && i.system.equipped && !i.system.isShield,
+  );
   return (armorItem?.system.armorType as ArmorType | undefined) ?? "none";
 }
 
@@ -208,7 +217,14 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
 
   const critEnabled = getOptionalRules().combatAndTacticsEnabled && getOptionalRules().criticalHits;
   const crit = critEnabled && baseHit.autoHit && !backstabActive ? criticalSeverity(Math.ceil(Math.random() * 10)) : null;
-  const fumble = critEnabled && baseHit.autoMiss ? fumbleSeverity(Math.ceil(Math.random() * 10)) : null;
+  // A backstab's own forced-hit outcome (hit:true/autoHit:true, applied to
+  // `hit` above) and its own backstabMultiplier mechanic are a complete,
+  // self-contained resolution — fumble severity must never be checked for an
+  // active backstab attempt, matching crit's existing non-stacking rule
+  // above, or a natural-1 backstab roll would produce an incoherent chat
+  // card claiming both "automatic hit" and "weapon drops" and genuinely
+  // unequip the weapon on an attack just declared a guaranteed hit.
+  const fumble = critEnabled && baseHit.autoMiss && !backstabActive ? fumbleSeverity(Math.ceil(Math.random() * 10)) : null;
 
   if (fumble?.effect === "weaponDrops") {
     // Inline for now — a future plan (SP7 Plan 7d, combat maneuvers) will
