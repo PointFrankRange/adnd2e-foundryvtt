@@ -75,6 +75,12 @@ export async function runMigrations(): Promise<void> {
             type: string;
             _source: { system: Record<string, unknown> };
           }>) {
+            // Defense-in-depth: for a field RENAME this usually no-ops, because
+            // the model's own `migrateData` has already converted the data by
+            // the time any document reaches `game.actors` (and the old key is
+            // pruned from `_source` before we get here). It exists for storage
+            // paths that bypass normal document construction — see the
+            // "v14 GOTCHA, PART 2" note in src/data/migrations.ts.
             const itemPayload = migration.itemUpdate(item._source.system, item.type);
             if (!itemPayload) continue;
             if (dryRun) {

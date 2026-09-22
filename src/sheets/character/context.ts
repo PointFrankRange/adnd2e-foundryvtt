@@ -395,8 +395,14 @@ function buildWeaponProfRow(
   const isSingleClass = input.classItems.length === 1;
   const masteryEnabled = input.optionalRules.combatAndTacticsEnabled && input.optionalRules.weaponMastery;
   const nextTier = (prof.masteryTier + 1) as 1 | 2 | 3;
+  // Tier 1 (plain Specialization) is a base PHB mechanic that predates Combat &
+  // Tactics and must stay purchasable with the optional rule off; only tiers
+  // 2-3 (Mastery / Grand Mastery) are gated. Matches combat-rolls.ts's
+  // resolveProficiencyModifier, which already lets tier 1's bonus through
+  // unconditionally and only caps tiers 2-3 behind the toggle.
+  const tierAllowed = nextTier === 1 || masteryEnabled;
   const eligible =
-    masteryEnabled &&
+    tierAllowed &&
     prof.masteryTier < 3 &&
     category !== null &&
     primaryChassis !== null &&

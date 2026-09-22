@@ -1235,9 +1235,10 @@ describe("buildCharacterSheetContext — weapon specialization eligibility + rea
     id: "c1", name: "Fighter", img: "", chassisId: "fighter", hitDie: 10,
     xp: 0, level: 1, canLevelUp: false, dualClassState: null, specialistSchool: null,
   };
-  // weaponMastery is gated behind combatAndTacticsEnabled + weaponMastery both being on;
-  // this block's default fixture (`input()`) has both off, so every eligibility test here
-  // opts them in explicitly.
+  // Tiers 2-3 are gated behind combatAndTacticsEnabled + weaponMastery both being on
+  // (tier 1, plain PHB Specialization, is NOT — see the gate block near the end of this
+  // describe). This block's default fixture (`input()`) has both off, so the tests that
+  // exercise tiers 2-3 opt them in explicitly via `masteryOptionalRules`.
   const masteryOptionalRules = { ...DEFAULT_OPTIONAL_RULES, combatAndTacticsEnabled: true, weaponMastery: true };
 
   it("single-classed fighter, matching owned weapon, enough slots → canAdvanceMastery true, category resolved", () => {
@@ -1384,7 +1385,15 @@ describe("buildCharacterSheetContext — weapon specialization eligibility + rea
     expect(c.skills.weapon.items[0]!.canAdvanceMastery).toBe(false);
   });
 
-  it("weaponMastery optional rule off → canAdvanceMastery false even when otherwise eligible", () => {
+  /* --- the optional-rule gate applies ONLY above tier 1 ---------------------
+   * Tier 0 → 1 is plain PHB weapon Specialization: a base-rules mechanic that
+   * predates Combat & Tactics, so it must stay purchasable with the toggles
+   * off (both default to false). Tiers 2-3 (Mastery / Grand Mastery) are the
+   * C&T-only additions and ARE gated. This mirrors combat-rolls.ts's
+   * resolveProficiencyModifier, which lets tier 1's bonus through
+   * unconditionally and caps tiers 2-3 back to 1 when the rule is off. */
+
+  it("tier 0 → 1 (plain Specialization) is NOT gated: canAdvanceMastery true with weaponMastery off", () => {
     const c = buildCharacterSheetContext(
       input({
         classItems: [fighterClass],
@@ -1397,23 +1406,75 @@ describe("buildCharacterSheetContext — weapon specialization eligibility + rea
         },
       }),
     );
-    expect(c.skills.weapon.items[0]!.canAdvanceMastery).toBe(false);
+    expect(c.skills.weapon.items[0]!.canAdvanceMastery).toBe(true);
   });
 
-  it("combatAndTacticsEnabled off (master switch) → canAdvanceMastery false even with weaponMastery on", () => {
+  it("tier 0 → 1 is NOT gated by combatAndTacticsEnabled either (both defaults off)", () => {
     const c = buildCharacterSheetContext(
       input({
         classItems: [fighterClass],
         physicalItems: [weaponItem()],
         proficiencyItems: { weapon: [weaponProf()], nonweapon: [] },
-        optionalRules: { ...DEFAULT_OPTIONAL_RULES, combatAndTacticsEnabled: false, weaponMastery: true },
+        optionalRules: { ...DEFAULT_OPTIONAL_RULES, combatAndTacticsEnabled: false, weaponMastery: false },
         derived: {
           ...input().derived,
           proficiencies: { weapon: { total: 4, spent: 1, available: 3 }, nonweapon: { total: 3, spent: 0, available: 3 } },
         },
       }),
     );
-    expect(c.skills.weapon.items[0]!.canAdvanceMastery).toBe(false);
+    expect(c.skills.weapon.items[0]!.canAdvanceMastery).toBe(true);
+  });
+
+  it("tier 1 → 2 IS gated: weaponMastery off → canAdvanceMastery false, on → true", () => {
+    // melee tier 2 costs 4 slots total; slotsInvested 2 → marginal cost 2, affordable with 3 available.
+    const profInput = (optionalRules: CharacterSheetInput["optionalRules"]) =>
+      input({
+        classItems: [fighterClass],
+        physicalItems: [weaponItem()],
+        proficiencyItems: { weapon: [weaponProf({ masteryTier: 1, slotsInvested: 2 })], nonweapon: [] },
+        optionalRules,
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 5, spent: 2, available: 3 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      });
+    expect(
+      buildCharacterSheetContext(profInput({ ...DEFAULT_OPTIONAL_RULES, combatAndTacticsEnabled: true, weaponMastery: false }))
+        .skills.weapon.items[0]!.canAdvanceMastery,
+    ).toBe(false);
+    expect(
+      buildCharacterSheetContext(profInput({ ...DEFAULT_OPTIONAL_RULES, combatAndTacticsEnabled: false, weaponMastery: true }))
+        .skills.weapon.items[0]!.canAdvanceMastery,
+    ).toBe(false);
+    expect(
+      buildCharacterSheetContext(profInput(masteryOptionalRules)).skills.weapon.items[0]!.canAdvanceMastery,
+    ).toBe(true);
+  });
+
+  it("tier 2 → 3 IS gated too (the gate applies at every tier above 1, not just once)", () => {
+    // melee tier 3 costs 7 slots total; slotsInvested 4 → marginal cost 3, affordable with 3 available.
+    const profInput = (optionalRules: CharacterSheetInput["optionalRules"]) =>
+      input({
+        classItems: [fighterClass],
+        physicalItems: [weaponItem()],
+        proficiencyItems: { weapon: [weaponProf({ masteryTier: 2, slotsInvested: 4 })], nonweapon: [] },
+        optionalRules,
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 7, spent: 4, available: 3 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      });
+    expect(
+      buildCharacterSheetContext(profInput({ ...DEFAULT_OPTIONAL_RULES, combatAndTacticsEnabled: true, weaponMastery: false }))
+        .skills.weapon.items[0]!.canAdvanceMastery,
+    ).toBe(false);
+    expect(
+      buildCharacterSheetContext(profInput({ ...DEFAULT_OPTIONAL_RULES, combatAndTacticsEnabled: false, weaponMastery: true }))
+        .skills.weapon.items[0]!.canAdvanceMastery,
+    ).toBe(false);
+    expect(
+      buildCharacterSheetContext(profInput(masteryOptionalRules)).skills.weapon.items[0]!.canAdvanceMastery,
+    ).toBe(true);
   });
 
   it("resolves category 'bow' for a bow-type weapon", () => {

@@ -18,6 +18,21 @@
 // them; they vanish on the actor's next full write). A migration that genuinely
 // must rewrite `system` shape has to do a non-recursive replacement, which
 // belongs in `run.ts` — the pure layer only decides *whether* an actor needs it.
+//
+// v14 GOTCHA, PART 2 — a schema field RENAME cannot be done by this framework
+// ALONE. The same pruning bites harder here: by the time `itemUpdate` /
+// `actorUpdate` are handed an `_source.system`, the OLD key has already been
+// deleted, so the migration function literally cannot see the data it is meant
+// to convert. A rename therefore needs a `static migrateData(source)` shim on
+// the DataModel itself (Foundry's canonical hook: `DataField#clean` runs
+// `_migrate` — which calls the model's `migrateData` — BEFORE `_cleanType`
+// prunes unknown keys). That shim is where the conversion actually happens; it
+// also runs everywhere a document is constructed (world actors AND their
+// embedded items, world Items, compendium Items, importContent), not just the
+// `game.actors` walk `run.ts` does. See
+// `WeaponProficiencyItemModel.migrateData` in src/data/item/weapon-proficiency.ts
+// for this system's first one. The entry below is kept as defense-in-depth for
+// data that reaches storage without normal document construction.
 
 /**
  * One ordered schema migration. `version` is the `system.json` version that
@@ -74,7 +89,14 @@ export function isVersionNewer(a: string, b: string): boolean {
  *  retired `specialized: boolean` weapon-proficiency flag into tier 1 of the
  *  new `masteryTier` scale. `specialized` itself needs no explicit unset: once
  *  it's gone from the schema (this plan's own Step 1), Foundry v14 prunes it
- *  from `_source` automatically (see this file's v14 GOTCHA comment above). */
+ *  from `_source` automatically (see this file's v14 GOTCHA comment above).
+ *
+ *  DEFENSE-IN-DEPTH ONLY: the conversion that actually fires in ordinary play
+ *  is `WeaponProficiencyItemModel.migrateData`, which runs before that pruning
+ *  (see "v14 GOTCHA, PART 2" above). This entry can only ever see `specialized`
+ *  on raw source that bypassed normal document construction, so in practice it
+ *  finds nothing to do — it is kept so a storage path that DOES surface the
+ *  old key still gets a durable DB-level write rather than a load-time-only fix. */
 export const MIGRATIONS: readonly Migration[] = [
   {
     version: "0.3.0",

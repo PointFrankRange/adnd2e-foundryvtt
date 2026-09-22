@@ -7,6 +7,7 @@ import type { AbilityKey, ArmorType, BardSkill, ClassId, Race, ThiefSkill } from
 import { buildNonweaponCheckCardContext } from "../../combat/nonweapon-check-card";
 import { buildThiefSkillCardContext } from "../../combat/thief-skill-card";
 import { classItemLevel } from "../../data/derive/class-item";
+import { getOptionalRules } from "../../settings";
 import { TEMPLATE_PATH } from "../../constants";
 
 /* ---------------------------------------------------------------------------
@@ -93,13 +94,24 @@ function resolveCategory(actor: ProficiencyActor, prof: WeaponProfItemHandle): "
  *  button click, not the primary gate. Eligibility re-checks
  *  `canWeaponSpecialize` at EVERY tier advance, not just the first (spec §2's
  *  "Weapon mastery tier model": "no new class-eligibility rule" — the same
- *  gate governs every step of the ladder). */
+ *  gate governs every step of the ladder). Tier 1 (plain Specialization) is a
+ *  base PHB mechanic and is never gated by the `weaponMastery` optional rule;
+ *  tiers 2-3 require it — the SAME split `context.ts`'s `buildWeaponProfRow`
+ *  applies to the button and `combat-rolls.ts`'s `resolveProficiencyModifier`
+ *  applies at roll time. */
 export async function advanceWeaponMastery(actor: ProficiencyActor, weaponProfItemId: string): Promise<void> {
   const item = actor.items.get(weaponProfItemId);
   const prof = item as (WeaponProfItemHandle & GenericProficiencyActorItem) | undefined;
   if (!prof || prof.type !== "weaponProficiency" || prof.system.masteryTier >= 3) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.advanceMasteryBlockedWarning"));
     return;
+  }
+  if (prof.system.masteryTier >= 1) {
+    const rules = getOptionalRules();
+    if (!rules.combatAndTacticsEnabled || !rules.weaponMastery) {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.advanceMasteryBlockedWarning"));
+      return;
+    }
   }
   const category = resolveCategory(actor, prof);
   const chassisId = firstClassChassisId(actor);
