@@ -12,6 +12,8 @@
   {{else if autoMiss}}<p class="result miss">{{localize 'ADND2E.chat.attack.autoMiss'}}</p>
   {{else if hit}}<p class="result hit">{{localize 'ADND2E.chat.attack.hit'}} ({{margin}})</p>
   {{else}}<p class="result miss">{{localize 'ADND2E.chat.attack.miss'}} ({{margin}})</p>{{/if}}
+  {{#if critLabel}}<p class="result crit">{{localize critLabel}}</p>{{/if}}
+  {{#if fumbleLabel}}<p class="result fumble">{{localize fumbleLabel}}</p>{{/if}}
   {{#if modifierBreakdown.length}}
     <ul class="modifiers">
       {{#each modifierBreakdown as |m|}}<li>{{localize m.label}}: {{adnd2eSigned m.value}}</li>{{/each}}
@@ -20,7 +22,8 @@
   {{#if (and hit damageContext)}}
     <button type="button" data-action="rollDamage"
       data-actor-uuid="{{damageContext.actorUuid}}" data-weapon-item-id="{{damageContext.weaponItemId}}"
-      data-target-size="{{damageContext.targetSize}}" data-backstab-multiplier="{{damageContext.backstabMultiplier}}">
+      data-target-size="{{damageContext.targetSize}}" data-backstab-multiplier="{{damageContext.backstabMultiplier}}"
+      data-crit-multiplier="{{damageContext.critMultiplier}}" data-crit-flat-bonus="{{damageContext.critFlatBonus}}">
       {{localize 'ADND2E.chat.attack.rollDamage'}}
     </button>
   {{/if}}

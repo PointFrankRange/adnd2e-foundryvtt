@@ -7,6 +7,9 @@
   {{#if backstabMultiplier}}
     <p class="backstab">{{localize 'ADND2E.sheet.combat.backstabApplied' multiplier=backstabMultiplier}}</p>
   {{/if}}
+  {{#if critMultiplier}}
+    <p class="crit">{{localize 'ADND2E.chat.attack.critApplied' multiplier=critMultiplier}}</p>
+  {{/if}}
   <button type="button" data-action="applyDamage" data-amount="{{total}}">
     {{localize 'ADND2E.chat.damage.applyToTargets'}}
   </button>

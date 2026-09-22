@@ -371,7 +371,19 @@
         "modWeaponMagic": "Weapon magic", "modProficiency": "Proficiency",
         "modRange": "Range", "modSituational": "Situational",
         "rollDamage": "Roll Damage",
-        "cannotActWarning": "This actor is stunned or held and cannot attack this round."
+        "cannotActWarning": "This actor is stunned or held and cannot attack this round.",
+        "crit": {
+          "solid": "Critical hit!",
+          "devastating": "Devastating critical hit!",
+          "brutal": "Brutal critical hit!"
+        },
+        "fumble": {
+          "miss": "Fumble!",
+          "weaponDrops": "Fumble — weapon drops!",
+          "selfInjury": "Fumble — minor self-injury!"
+        },
+        "fumbleSelfInjury": "Self-injury from a fumble",
+        "critApplied": "×{multiplier} critical hit!"
       },
       "damage": {
         "applyToTargets": "Apply to Targeted Token(s)",
@@ -476,7 +488,7 @@
       },
       "criticalHits": {
         "name": "Combat & Tactics: Critical Hits",
-        "hint": "Natural 20 confirms for extra damage (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
+        "hint": "Natural 20s roll a critical-hit severity table for extra damage; natural 1s roll a fumble severity table (may drop a weapon or cause minor self-injury)."
       },
       "calledShots": {
         "name": "Combat & Tactics: Called Shots",
@@ -488,7 +500,7 @@
       },
       "armorTypeVsWeaponType": {
         "name": "Combat & Tactics: Armor vs. Weapon Type",
-        "hint": "Weapon-type modifiers versus armor type (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
+        "hint": "Weapon-type modifiers versus armor type (Combat & Tactics)."
       },
       "weaponMastery": {
         "name": "Combat & Tactics: Weapon Mastery",

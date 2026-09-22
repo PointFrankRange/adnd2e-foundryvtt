@@ -8,8 +8,11 @@ import { weaponAttackPenalty, weaponSpecializationEffect } from "../../core/prof
 import { canBackstab } from "../../core/weapons/backstab";
 import { backstabMultiplier } from "../../core/proficiencies/thief-skills";
 import { classItemLevel } from "../../data/derive/class-item";
+import { criticalSeverity, fumbleSeverity } from "../../combat/critical";
+import { toArmorGroup, weaponVsArmorModifier } from "../../combat/weapon-vs-armor";
+import { getOptionalRules } from "../../settings";
 import { TEMPLATE_PATH } from "../../constants";
-import type { ClassId, SaveCategory } from "../../core/types";
+import type { ArmorType, ClassId, SaveCategory } from "../../core/types";
 
 /* ---------------------------------------------------------------------------
  * combat-rolls — SP3 Task 5.
@@ -34,6 +37,28 @@ export function resolveTargetCombatInfo(
   const sys = targetActor.system as { attributes?: { ac?: { normal?: number } } };
   const raceItem = [...targetActor.items].find((i) => i.type === "race");
   return { ac: sys.attributes?.ac?.normal ?? 10, size: raceItem?.system.size ?? "medium" };
+}
+
+/** Finds the target's equipped, non-shield `armor`-type item and reads its
+ *  armorType, defaulting to "none" (the unarmored group) when the target has
+ *  no equipped body-armor item at all — including every `creature`-type
+ *  target, which has no armor Item concept (a safe no-op, since this plan's
+ *  weaponVsArmorModifier table returns 0 for "unarmored" on every
+ *  damage type). Shields are ALSO `armor`-type Items in this schema (see
+ *  data/item/armor.ts's `isShield` field) with their own armorType (usually
+ *  "none"), so they must be excluded here or an equipped shield found before
+ *  the target's equipped body armor would silently zero this modifier —
+ *  mirrors proficiency-actions.ts's `resolveWornArmorType`, which already
+ *  solves this exact problem for the thief-skill-armor feature. */
+function resolveTargetArmorType(
+  targetActor: {
+    items: Iterable<{ type: string; system: { armorType?: string; equipped?: boolean; isShield?: boolean } }>;
+  },
+): ArmorType {
+  const armorItem = [...targetActor.items].find(
+    (i) => i.type === "armor" && i.system.equipped && !i.system.isShield,
+  );
+  return (armorItem?.system.armorType as ArmorType | undefined) ?? "none";
 }
 
 interface AttackerActor {
@@ -139,6 +164,7 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
   let targetAc: number;
   let targetSize: string | null = null;
   let targetStatuses: ReadonlySet<string> = new Set<string>();
+  let armorVsWeaponModifier = 0;
 
   if (targets.length === 1) {
     const t = targets[0]!;
@@ -147,6 +173,11 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
     targetAc = info.ac + proneArmorClassPenalty((t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>());
     targetSize = info.size;
     targetStatuses = (t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>();
+    const rules = getOptionalRules();
+    if (rules.combatAndTacticsEnabled && rules.armorTypeVsWeaponType && weapon.system.damageType) {
+      const targetArmorType = resolveTargetArmorType(t.actor as Parameters<typeof resolveTargetArmorType>[0]);
+      armorVsWeaponModifier = weaponVsArmorModifier(weapon.system.damageType as never, toArmorGroup(targetArmorType));
+    }
   } else {
     const manualAc = await foundry.applications.api.DialogV2.prompt({
       window: { title: game.i18n!.localize("ADND2E.chat.attack.manualAcTitle") },
@@ -172,7 +203,7 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
     proficiencyModifier: resolveProficiencyModifier(actor, weapon),
     // STR/DEX modifiers remain out of scope (parent spec §7 boundary,
     // unchanged by this sub-project).
-    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses),
+    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses) + armorVsWeaponModifier,
   });
   const formula = attackFormula(attackBonus);
   const roll = await new Roll(formula).evaluate();
@@ -184,15 +215,45 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
   const baseHit = hitResult({ naturalD20, attackBonus, thac0, targetAc });
   const hit = backstabActive ? { ...baseHit, hit: true, autoHit: true, autoMiss: false } : baseHit;
 
+  const critEnabled = getOptionalRules().combatAndTacticsEnabled && getOptionalRules().criticalHits;
+  const crit = critEnabled && baseHit.autoHit && !backstabActive ? criticalSeverity(Math.ceil(Math.random() * 10)) : null;
+  // A backstab's own forced-hit outcome (hit:true/autoHit:true, applied to
+  // `hit` above) and its own backstabMultiplier mechanic are a complete,
+  // self-contained resolution — fumble severity must never be checked for an
+  // active backstab attempt, matching crit's existing non-stacking rule
+  // above, or a natural-1 backstab roll would produce an incoherent chat
+  // card claiming both "automatic hit" and "weapon drops" and genuinely
+  // unequip the weapon on an attack just declared a guaranteed hit.
+  const fumble = critEnabled && baseHit.autoMiss && !backstabActive ? fumbleSeverity(Math.ceil(Math.random() * 10)) : null;
+
+  if (fumble?.effect === "weaponDrops") {
+    // Inline for now — a future plan (SP7 Plan 7d, combat maneuvers) will
+    // need the identical "unequip a weapon Item" operation for its own
+    // disarm-maneuver outcome; extract this into a shared helper THEN, when
+    // there are genuinely two call sites, not preemptively for one.
+    await (weapon as unknown as { update(d: Record<string, unknown>): Promise<unknown> }).update({ "system.equipped": false });
+  }
+  if (fumble?.effect === "selfInjury" && fumble.selfInjuryDice) {
+    const selfRoll = await new Roll(fumble.selfInjuryDice).evaluate();
+    await selfRoll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: actor as never }),
+      flavor: game.i18n!.localize("ADND2E.chat.attack.fumbleSelfInjury"),
+    } as unknown as Roll.MessageData);
+  }
+
   const context = buildAttackCardContext({
     actorName: actor.name, actorImg: actor.img,
     weaponName: weapon.name, targetName,
     formula, naturalD20, hit, modifierBreakdown: breakdown,
     backstab: backstabActive,
+    critLabel: crit ? `ADND2E.chat.attack.crit.${crit.tier}` : null,
+    fumbleLabel: fumble ? `ADND2E.chat.attack.fumble.${fumble.tier}` : null,
     damageContext: hit.hit
       ? {
           weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize,
           backstabMultiplier: backstabActive ? backstabMultiplier(thiefLevel) : null,
+          critMultiplier: crit?.damageMultiplier ?? null,
+          critFlatBonus: crit?.flatBonus ?? 0,
         }
       : null,
   });

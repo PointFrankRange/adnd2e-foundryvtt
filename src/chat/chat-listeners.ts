@@ -15,11 +15,13 @@ import { TEMPLATE_PATH } from "../constants";
  * ------------------------------------------------------------------------- */
 
 async function onRollDamage(button: HTMLButtonElement): Promise<void> {
-  const { actorUuid, weaponItemId, targetSize, backstabMultiplier } = button.dataset as {
+  const { actorUuid, weaponItemId, targetSize, backstabMultiplier, critMultiplier, critFlatBonus } = button.dataset as {
     actorUuid?: string;
     weaponItemId?: string;
     targetSize?: string;
     backstabMultiplier?: string;
+    critMultiplier?: string;
+    critFlatBonus?: string;
   };
   const actor = (fromUuidSync as (uuid: string) => unknown)(actorUuid ?? "") as {
     name: string;
@@ -54,6 +56,8 @@ async function onRollDamage(button: HTMLButtonElement): Promise<void> {
     rolledBaseDamage,
     damageBonus,
     backstabMultiplier: backstabMultiplier ? Number(backstabMultiplier) : null,
+    critMultiplier: critMultiplier ? Number(critMultiplier) : null,
+    critFlatBonus: critFlatBonus ? Number(critFlatBonus) : 0,
   });
   const content = await foundry.applications.handlebars.renderTemplate(
     TEMPLATE_PATH("chat/damage-roll.hbs"),
