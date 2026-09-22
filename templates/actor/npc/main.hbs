@@ -155,7 +155,7 @@
             </span>
             <span class="slots">{{w.slotsInvested}}</span>
             {{#if w.masteryTierLabelKey}}
-              <span class="specialized" title="{{localize w.masteryTierLabelKey}}">{{w.masteryTier}}</span>
+              <span class="specialized" title="{{localize w.masteryTierLabelKey}}">{{localize w.masteryTierLabelKey}}</span>
             {{/if}}
             {{#if w.canAdvanceMastery}}
               <button type="button" data-action="advanceWeaponMastery" data-item-id="{{w.id}}">
