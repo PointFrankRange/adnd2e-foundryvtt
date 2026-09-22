@@ -17,7 +17,7 @@ import type {
 } from "./context-types";
 import { validateItemDrop } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
-import { allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill, specializeWeapon } from "./proficiency-actions";
+import { advanceWeaponMastery, allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill } from "./proficiency-actions";
 import { castSpell, forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
 import { awardXpSplit } from "./xp";
 
@@ -169,7 +169,7 @@ export function toWeaponProfView(it: RawItem): WeaponProfView {
     weaponOrGroup: string;
     isGroup: boolean;
     slotsInvested: number;
-    specialized: boolean;
+    masteryTier: 0 | 1 | 2 | 3;
   };
   return {
     id: it.id,
@@ -177,11 +177,12 @@ export function toWeaponProfView(it: RawItem): WeaponProfView {
     weaponOrGroup: s.weaponOrGroup,
     isGroup: s.isGroup,
     slotsInvested: s.slotsInvested,
-    specialized: s.specialized,
+    masteryTier: s.masteryTier,
     // Placeholders — buildWeaponProfRow (context.ts) recomputes both from
     // the actor's owned weapon Items + class chassis + available slots.
     category: null,
-    canSpecialize: false,
+    masteryTierLabelKey: null,
+    canAdvanceMastery: false,
   };
 }
 
@@ -276,7 +277,7 @@ export class Adnd2eCharacterSheet extends Base {
       castSpell: Adnd2eCharacterSheet.#onCastSpell,
       restSpellcasting: Adnd2eCharacterSheet.#onRestSpellcasting,
       learnSpell: Adnd2eCharacterSheet.#onLearnSpell,
-      specializeWeapon: Adnd2eCharacterSheet.#onSpecializeWeapon,
+      advanceWeaponMastery: Adnd2eCharacterSheet.#onAdvanceWeaponMastery,
       rollNonweaponCheck: Adnd2eCharacterSheet.#onRollNonweaponCheck,
       allocateThiefSkillPoint: Adnd2eCharacterSheet.#onAllocateThiefSkillPoint,
       deallocateThiefSkillPoint: Adnd2eCharacterSheet.#onDeallocateThiefSkillPoint,
@@ -661,13 +662,13 @@ export class Adnd2eCharacterSheet extends Base {
   }
 
   // Interaction handlers — SP5a.
-  static async #onSpecializeWeapon(
+  static async #onAdvanceWeaponMastery(
     this: Adnd2eCharacterSheet,
     _event: PointerEvent,
     target: HTMLElement,
   ): Promise<void> {
     const weaponProfItemId = target.dataset.itemId;
-    if (weaponProfItemId) await specializeWeapon(this.document as never, weaponProfItemId);
+    if (weaponProfItemId) await advanceWeaponMastery(this.document as never, weaponProfItemId);
   }
 
   static async #onRollNonweaponCheck(

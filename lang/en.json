@@ -275,12 +275,16 @@
         "slots": "{spent} / {total} slots",
         "checkTarget": "Check target",
         "group": "Group",
-        "specialized": "Specialized",
         "racial": "(racial)",
         "none": "None",
-        "specialize": "Specialize",
         "check": "Check",
-        "specializeBlockedWarning": "That weapon can no longer be specialized — refresh the sheet.",
+        "masteryTier": {
+          "1": "Specialized",
+          "2": "Mastery",
+          "3": "Grand Mastery"
+        },
+        "advanceMastery": "Advance Mastery",
+        "advanceMasteryBlockedWarning": "That weapon's mastery can no longer be advanced — refresh the sheet.",
         "checkBlockedWarning": "That proficiency can't be checked right now — refresh the sheet.",
         "thief": "Thieving Skills",
         "thiefArmorDisabled": "Thieving skills are unusable in this armor.",
@@ -504,7 +508,7 @@
       },
       "weaponMastery": {
         "name": "Combat & Tactics: Weapon Mastery",
-        "hint": "Mastery and grand-mastery weapon tiers beyond specialization (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
+        "hint": "Mastery and grand-mastery weapon tiers beyond specialization (Combat & Tactics)."
       },
       "skillsAndPowersEnabled": {
         "name": "Skills & Powers: Enabled",
