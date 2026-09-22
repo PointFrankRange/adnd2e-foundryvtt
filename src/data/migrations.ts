@@ -22,7 +22,11 @@
 /**
  * One ordered schema migration. `version` is the `system.json` version that
  * introduced the schema change; a world whose stored migration version is older
- * runs it. `actorUpdate` is called once per world Actor.
+ * runs it. `actorUpdate` is called once per world Actor; `itemUpdate` is called
+ * once per Item embedded on that Actor (weapon proficiencies, weapons, etc. —
+ * anything `masteryTier`-shaped lives on an embedded Item, not the actor's own
+ * `system`, which `actorUpdate` alone cannot reach). A migration may define
+ * either, both, or (meaninglessly) neither.
  */
 export interface Migration {
   readonly version: string;
@@ -32,7 +36,13 @@ export interface Migration {
    * actor document), or `null` to leave the actor untouched. See the v14 GOTCHA
    * in this file's header before writing a key-removal migration.
    */
-  actorUpdate(sourceSystem: Record<string, unknown>, actorType: string): Record<string, unknown> | null;
+  actorUpdate?(sourceSystem: Record<string, unknown>, actorType: string): Record<string, unknown> | null;
+  /**
+   * One embedded Item's raw `_source.system` object + its `type` → an
+   * `updateEmbeddedDocuments("Item", ...)` payload for that item (dot-notation
+   * keys relative to the item document), or `null` to leave it untouched.
+   */
+  itemUpdate?(sourceSystem: Record<string, unknown>, itemType: string): Record<string, unknown> | null;
 }
 
 /**
@@ -59,9 +69,22 @@ export function isVersionNewer(a: string, b: string): boolean {
   return false;
 }
 
-/** Every migration, ascending by version. Empty for SP1 (spec §8) — the
- *  framework's proving case is a future slice's real schema change. */
-export const MIGRATIONS: readonly Migration[] = [];
+/** Every migration, ascending by version. SP1 shipped this framework with an
+ *  empty list; this is its first real entry (SP7 Plan 7c) — collapses the
+ *  retired `specialized: boolean` weapon-proficiency flag into tier 1 of the
+ *  new `masteryTier` scale. `specialized` itself needs no explicit unset: once
+ *  it's gone from the schema (this plan's own Step 1), Foundry v14 prunes it
+ *  from `_source` automatically (see this file's v14 GOTCHA comment above). */
+export const MIGRATIONS: readonly Migration[] = [
+  {
+    version: "0.3.0",
+    itemUpdate(sourceSystem, itemType) {
+      if (itemType !== "weaponProficiency") return null;
+      if (sourceSystem.specialized !== true) return null;
+      return { "system.masteryTier": 1 };
+    },
+  },
+];
 
 /** The migrations a world on `storedVersion` still needs, oldest first. */
 export function pendingMigrations(

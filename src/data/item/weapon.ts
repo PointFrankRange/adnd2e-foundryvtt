@@ -5,7 +5,7 @@ import { totalWeight } from "../derive/physical-item";
 import { Adnd2eItemModel } from "./base-item";
 import type { DamageType, WeaponCategory, WeaponData, WeaponRange, WeaponSize } from "../../core/weapons/data";
 
-const { StringField, NumberField, BooleanField, SchemaField } = foundry.data.fields;
+const { StringField, NumberField, SchemaField } = foundry.data.fields;
 
 export class WeaponItemModel extends Adnd2eItemModel {
   static override defineSchema(): foundry.data.fields.DataSchema {
@@ -31,11 +31,6 @@ export class WeaponItemModel extends Adnd2eItemModel {
       handsRequired: new NumberField({ required: true, integer: true, choices: [1, 2], initial: 1 }),
       materialToHit: new NumberField({ required: true, integer: true, initial: 0 }),
       styleGroup: new StringField({ required: true, blank: true, initial: "" }),
-      specialization: new SchemaField({
-        profSlotsInvested: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
-        isSpecialized: new BooleanField({ required: true, initial: false }),
-        isMastery: new BooleanField({ required: true, initial: false }),
-      }),
     };
   }
 

@@ -54,8 +54,8 @@ describe("pendingMigrations", () => {
     expect(pendingMigrations("1.0.0", [a, b, c])).toEqual([]);
   });
 
-  it("defaults to the real (empty) MIGRATIONS list", () => {
-    expect(pendingMigrations("0.0.0")).toEqual([]);
+  it("defaults to the real MIGRATIONS list", () => {
+    expect(pendingMigrations("0.0.0")).toEqual(MIGRATIONS);
     expect(pendingMigrations("9.9.9")).toEqual([]);
   });
 
@@ -80,7 +80,30 @@ describe("pendingMigrations", () => {
 });
 
 describe("MIGRATIONS", () => {
-  it("is empty for SP1 (spec §8)", () => {
-    expect(MIGRATIONS).toEqual([]);
+  it("SP1 shipped this framework with an empty list; SP7c Plan 7c adds the first real entry", () => {
+    expect(MIGRATIONS).toHaveLength(1);
+    expect(MIGRATIONS[0].version).toBe("0.3.0");
+  });
+});
+
+describe("SP7c weapon-mastery migration (0.3.0)", () => {
+  const migration = MIGRATIONS.find((m) => m.version === "0.3.0")!;
+
+  it("sets masteryTier: 1 for a specialized weaponProficiency item", () => {
+    expect(migration.itemUpdate?.({ specialized: true }, "weaponProficiency")).toEqual({
+      "system.masteryTier": 1,
+    });
+  });
+
+  it("is a no-op for a non-specialized weaponProficiency item", () => {
+    expect(migration.itemUpdate?.({ specialized: false }, "weaponProficiency")).toBeNull();
+  });
+
+  it("is a no-op for a specialized: true field on any other item type", () => {
+    expect(migration.itemUpdate?.({ specialized: true }, "weapon")).toBeNull();
+  });
+
+  it("has no actorUpdate hook — this migration is item-only", () => {
+    expect(migration.actorUpdate).toBeUndefined();
   });
 });

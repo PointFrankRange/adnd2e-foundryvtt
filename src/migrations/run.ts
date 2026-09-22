@@ -52,24 +52,56 @@ export async function runMigrations(): Promise<void> {
 
   try {
     for (const migration of pending) {
-      const updates: Record<string, unknown>[] = [];
+      const actorUpdates: Record<string, unknown>[] = [];
       for (const actor of game.actors!) {
         const source = (actor as unknown as { _source: { system: Record<string, unknown> } })._source;
-        const payload = migration.actorUpdate(source.system, actor.type);
-        if (!payload) continue;
-        if (dryRun) {
-          console.log(
-            `${SYSTEM_ID} | migration ${migration.version} would update "${actor.name}":`,
-            payload,
-          );
-        } else {
-          updates.push({ _id: actor.id, ...payload });
+        const payload = migration.actorUpdate?.(source.system, actor.type) ?? null;
+        if (payload) {
+          if (dryRun) {
+            console.log(
+              `${SYSTEM_ID} | migration ${migration.version} would update actor "${actor.name}":`,
+              payload,
+            );
+          } else {
+            actorUpdates.push({ _id: actor.id, ...payload });
+          }
+        }
+
+        if (migration.itemUpdate) {
+          const itemUpdates: Record<string, unknown>[] = [];
+          for (const item of actor.items as Iterable<{
+            id: string;
+            name: string;
+            type: string;
+            _source: { system: Record<string, unknown> };
+          }>) {
+            const itemPayload = migration.itemUpdate(item._source.system, item.type);
+            if (!itemPayload) continue;
+            if (dryRun) {
+              console.log(
+                `${SYSTEM_ID} | migration ${migration.version} would update item "${item.name}" on actor "${actor.name}":`,
+                itemPayload,
+              );
+            } else {
+              itemUpdates.push({ _id: item.id, ...itemPayload });
+            }
+          }
+          if (!dryRun && itemUpdates.length > 0) {
+            await (
+              actor as unknown as {
+                updateEmbeddedDocuments(type: string, data: Record<string, unknown>[]): Promise<unknown>;
+              }
+            ).updateEmbeddedDocuments("Item", itemUpdates);
+            console.log(
+              `${SYSTEM_ID} | migration ${migration.version}: updated ${itemUpdates.length} item(s) on "${actor.name}"`,
+            );
+          }
         }
       }
-      if (!dryRun && updates.length > 0) {
-        await CONFIG.Actor.documentClass.updateDocuments(updates);
+      if (!dryRun && actorUpdates.length > 0) {
+        await CONFIG.Actor.documentClass.updateDocuments(actorUpdates);
         console.log(
-          `${SYSTEM_ID} | migration ${migration.version}: updated ${updates.length} actor(s)`,
+          `${SYSTEM_ID} | migration ${migration.version}: updated ${actorUpdates.length} actor(s)`,
         );
       }
     }
