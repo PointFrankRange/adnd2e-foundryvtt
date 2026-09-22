@@ -1,6 +1,7 @@
 import { getChassis } from "../../core/classes/chassis";
 import { nonweaponCheck } from "../../core/proficiencies/nonweapon";
-import { canWeaponSpecialize, weaponSpecializationSlotCost } from "../../core/proficiencies/weapon";
+import { canWeaponSpecialize } from "../../core/proficiencies/weapon";
+import { weaponMasteryTierCost } from "../../core/proficiencies/weapon-mastery";
 import { bardSkillCheck, classifyThiefArmor, thiefSkillCheck, thiefSkillPerSkillCap } from "../../core/proficiencies/thief-skills";
 import type { AbilityKey, ArmorType, BardSkill, ClassId, Race, ThiefSkill } from "../../core/types";
 import { buildNonweaponCheckCardContext } from "../../combat/nonweapon-check-card";
@@ -21,7 +22,7 @@ import { TEMPLATE_PATH } from "../../constants";
 
 interface WeaponProfItemHandle {
   id: string;
-  system: { weaponOrGroup: string; isGroup: boolean; slotsInvested: number; specialized: boolean };
+  system: { weaponOrGroup: string; isGroup: boolean; slotsInvested: number; masteryTier: 0 | 1 | 2 | 3 };
 }
 interface NwpItemHandle {
   id: string; name: string;
@@ -82,19 +83,22 @@ function resolveCategory(actor: ProficiencyActor, prof: WeaponProfItemHandle): "
   return null;
 }
 
-/** Purchases specialization on a weapon proficiency: re-derives the same
- *  eligibility context.ts's `buildWeaponProfRow` used to decide whether to
- *  show the Specialize button (not a group, a resolved category, the
- *  actor's first-class chassis allows it, single-classed, not already
- *  specialized, enough available slots), spends the category's slot cost,
- *  and sets `specialized: true`. No-ops with a toast on any failed
- *  re-check — a defensive guard against a stale button click, not the
- *  primary gate. */
-export async function specializeWeapon(actor: ProficiencyActor, weaponProfItemId: string): Promise<void> {
+/** Advances a weapon proficiency's mastery tier by exactly 1 (never jumping
+ *  tiers): re-derives the SAME eligibility context.ts's `buildWeaponProfRow`
+ *  used to decide whether to show the Advance Mastery button (not a group, a
+ *  resolved category, the actor's first-class chassis allows specialization,
+ *  single-classed, below tier 3, enough available slots for the NEXT tier),
+ *  spends that tier's slot-cost delta, and increments `masteryTier`. No-ops
+ *  with a toast on any failed re-check — a defensive guard against a stale
+ *  button click, not the primary gate. Eligibility re-checks
+ *  `canWeaponSpecialize` at EVERY tier advance, not just the first (spec §2's
+ *  "Weapon mastery tier model": "no new class-eligibility rule" — the same
+ *  gate governs every step of the ladder). */
+export async function advanceWeaponMastery(actor: ProficiencyActor, weaponProfItemId: string): Promise<void> {
   const item = actor.items.get(weaponProfItemId);
   const prof = item as (WeaponProfItemHandle & GenericProficiencyActorItem) | undefined;
-  if (!prof || prof.type !== "weaponProficiency" || prof.system.specialized) {
-    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.specializeBlockedWarning"));
+  if (!prof || prof.type !== "weaponProficiency" || prof.system.masteryTier >= 3) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.advanceMasteryBlockedWarning"));
     return;
   }
   const category = resolveCategory(actor, prof);
@@ -108,16 +112,17 @@ export async function specializeWeapon(actor: ProficiencyActor, weaponProfItemId
       isSingleClass: classCount === 1,
     })
   ) {
-    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.specializeBlockedWarning"));
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.advanceMasteryBlockedWarning"));
     return;
   }
-  const cost = Math.max(0, weaponSpecializationSlotCost(category) - prof.system.slotsInvested);
+  const nextTier = (prof.system.masteryTier + 1) as 1 | 2 | 3;
+  const cost = Math.max(0, weaponMasteryTierCost(nextTier, category) - prof.system.slotsInvested);
   if (actor.system.proficiencies.weapon.available < cost) {
-    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.specializeBlockedWarning"));
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.advanceMasteryBlockedWarning"));
     return;
   }
   await prof.update({
-    "system.specialized": true,
+    "system.masteryTier": nextTier,
     "system.slotsInvested": prof.system.slotsInvested + cost,
   });
 }
@@ -190,7 +195,7 @@ interface ThiefSkillsActor extends ProficiencyActor {
  *  always taking priority over bard regardless of array order — mirrors
  *  `deriveThiefSkillPoints`'s exact priority rule (data/derive/character/
  *  thief-skills.ts), NOT `firstClassChassisId`'s "literal first class,
- *  any class" rule (which `specializeWeapon` still needs unchanged). */
+ *  any class" rule (which `advanceWeaponMastery` still needs unchanged). */
 function firstThiefOrBardChassisId(actor: ThiefSkillsActor): "thief" | "bard" | null {
   let bardFallback: "bard" | null = null;
   for (const item of actor.items) {
