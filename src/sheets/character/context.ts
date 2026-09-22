@@ -19,7 +19,8 @@ import type {
 } from "./context-types";
 import { getChassis } from "../../core/classes/chassis";
 import { canLearnSpell } from "../../core/magic/spellbook";
-import { canWeaponSpecialize, weaponSpecializationSlotCost } from "../../core/proficiencies/weapon";
+import { canWeaponSpecialize } from "../../core/proficiencies/weapon";
+import { weaponMasteryTierCost } from "../../core/proficiencies/weapon-mastery";
 import { bardSkillBaseScore, classifyThiefArmor, resolveBardSkill, resolveThiefSkill, thiefSkillBaseScore, thiefSkillPerSkillCap } from "../../core/proficiencies/thief-skills";
 import { canBackstab } from "../../core/weapons/backstab";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
@@ -371,10 +372,19 @@ function resolveWeaponCategory(prof: WeaponProfView, physicalItems: PhysicalItem
   return "melee";
 }
 
+/** i18n keys for each mastery tier's badge — index 0 (proficient only) has
+ *  no badge. */
+const MASTERY_TIER_LABEL_KEYS: readonly (string | null)[] = [
+  null,
+  "ADND2E.sheet.skills.masteryTier.1",
+  "ADND2E.sheet.skills.masteryTier.2",
+  "ADND2E.sheet.skills.masteryTier.3",
+];
+
 /** Enriches a raw WeaponProfView with its resolved specialization category
- *  and whether Specialize can be purchased right now. Mirrors the
- *  established "buildXRow re-derives eligibility for both display AND the
- *  action's own re-check" pattern (e.g. SP4a's buildSpellRow/canReMemorize). */
+ *  and whether it can advance to the next mastery tier right now. Mirrors
+ *  the established "buildXRow re-derives eligibility for both display AND
+ *  the action's own re-check" pattern (e.g. SP4a's buildSpellRow/canReMemorize). */
 function buildWeaponProfRow(
   prof: WeaponProfView,
   input: CharacterSheetInput,
@@ -383,13 +393,21 @@ function buildWeaponProfRow(
   const category = resolveWeaponCategory(prof, input.physicalItems);
   const primaryChassis = input.classItems[0] ? getChassis(input.classItems[0].chassisId as ClassId) : null;
   const isSingleClass = input.classItems.length === 1;
+  const masteryEnabled = input.optionalRules.combatAndTacticsEnabled && input.optionalRules.weaponMastery;
+  const nextTier = (prof.masteryTier + 1) as 1 | 2 | 3;
   const eligible =
-    !prof.specialized &&
+    masteryEnabled &&
+    prof.masteryTier < 3 &&
     category !== null &&
     primaryChassis !== null &&
     canWeaponSpecialize({ specializationAllowed: primaryChassis.weaponSpecializationAllowed, isSingleClass }) &&
-    weaponSlotsAvailable >= Math.max(0, weaponSpecializationSlotCost(category) - prof.slotsInvested);
-  return { ...prof, category, canSpecialize: eligible };
+    weaponSlotsAvailable >= Math.max(0, weaponMasteryTierCost(nextTier, category) - prof.slotsInvested);
+  return {
+    ...prof,
+    category,
+    masteryTierLabelKey: MASTERY_TIER_LABEL_KEYS[prof.masteryTier] ?? null,
+    canAdvanceMastery: eligible,
+  };
 }
 
 /* ---------- spells ---------- */

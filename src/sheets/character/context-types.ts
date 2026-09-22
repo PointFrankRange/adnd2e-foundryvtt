@@ -117,7 +117,7 @@ export interface PhysicalItemView {
 
 export interface WeaponProfView {
   id: string; name: string; weaponOrGroup: string; isGroup: boolean;
-  slotsInvested: number; specialized: boolean;
+  slotsInvested: number; masteryTier: 0 | 1 | 2 | 3;
   /** filled by context.ts's buildWeaponProfRow — sheet.ts's toWeaponProfView
    *  placeholder is null/false until then, same pattern as NwpView's
    *  governingAbilityLabel/checkTarget. The weapon-category this proficiency
@@ -125,11 +125,16 @@ export interface WeaponProfView {
    *  weapon Items by name) — null when it's a group proficiency (groups are
    *  never specialization-eligible) or no matching weapon Item is found. */
   category: "melee" | "crossbow" | "bow" | null;
-  /** true when this proficiency can be specialized right now: not a group,
-   *  a resolved category exists, the actor's (first) class allows
-   *  specialization, the actor is single-classed, it isn't already
-   *  specialized, and enough weapon slots are available. */
-  canSpecialize: boolean;
+  /** i18n key for the current masteryTier (null at tier 0 — "proficient
+   *  only" has no badge). */
+  masteryTierLabelKey: string | null;
+  /** true when this proficiency can advance to the next mastery tier right
+   *  now: not a group, a resolved category exists, the actor's (first)
+   *  class allows specialization, the actor is single-classed, it isn't
+   *  already at tier 3 (Grand Mastery), enough weapon slots are available
+   *  for the next tier, and the weaponMastery optional rule (gated by the
+   *  combatAndTacticsEnabled master switch) is on. */
+  canAdvanceMastery: boolean;
 }
 export interface NwpView {
   id: string; name: string; governingAbility: string; modifier: number;
