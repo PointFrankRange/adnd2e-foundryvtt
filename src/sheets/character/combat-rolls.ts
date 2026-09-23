@@ -12,7 +12,9 @@ import { classItemLevel } from "../../data/derive/class-item";
 import { criticalSeverity, fumbleSeverity } from "../../combat/critical";
 import { toArmorGroup, weaponVsArmorModifier } from "../../combat/weapon-vs-armor";
 import { getOptionalRules } from "../../settings";
-import { TEMPLATE_PATH } from "../../constants";
+import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
+import { MANEUVERS, resolveManeuverOutcome } from "../../core/combat/maneuvers";
+import type { ManeuverId } from "../../core/combat/maneuvers";
 import type { ArmorType, ClassId, SaveCategory } from "../../core/types";
 
 /* ---------------------------------------------------------------------------
@@ -162,11 +164,39 @@ function resolveThiefBackstabInfo(actor: AttackerActor): { isThief: boolean; thi
   return { isThief: false, thiefLevel: 0 };
 }
 
+/** Sets a weapon Item to unequipped — the "weapon knocked away" operation
+ *  shared by a fumble's weaponDrops outcome (on the ATTACKER's own weapon)
+ *  and a disarm maneuver/called-shot's unequip outcome (on the TARGET's
+ *  weapon, resolved by `resolveTargetEquippedWeapon`) — same operation,
+ *  different whose-weapon the caller decides. */
+async function unequipWeapon(weaponItem: { update(d: Record<string, unknown>): Promise<unknown> }): Promise<void> {
+  await weaponItem.update({ "system.equipped": false });
+}
+
+/** Finds the target actor's FIRST equipped weapon Item (first-member-wins,
+ *  matching this codebase's established multi-match tie-break convention —
+ *  see e.g. proficiency-actions.ts's `firstClassChassisId`). Returns `null`
+ *  for an unarmed target — a maneuver's `unequip` outcome is then correctly
+ *  a no-op (spec §5), not an error. */
+function resolveTargetEquippedWeapon(
+  targetActor: { items: Iterable<{ id: string; type: string; system: { equipped?: boolean }; update(d: Record<string, unknown>): Promise<unknown> }> },
+): { update(d: Record<string, unknown>): Promise<unknown> } | null {
+  for (const item of targetActor.items) {
+    if (item.type === "weapon" && item.system.equipped) return item;
+  }
+  return null;
+}
+
 /** Roll one attack for `weaponItemId` against the current token target(s) (or
  *  a manually-entered AC, via DialogV2, when zero or more than one is
  *  targeted). Posts an attack-roll chat card; a hit exposes a "Roll Damage"
  *  button (chat/chat-listeners.ts). */
-export async function rollAttack(actor: AttackerActor, weaponItemId: string, backstab = false): Promise<void> {
+export async function rollAttack(
+  actor: AttackerActor,
+  weaponItemId: string,
+  backstab = false,
+  maneuverId: ManeuverId | null = null,
+): Promise<void> {
   const weapon = actor.items.get(weaponItemId);
   if (!weapon) return;
 
@@ -214,12 +244,26 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
 
   const isRanged = weapon.system.category !== "melee";
   const thac0 = isRanged ? (actor.system.attributes?.thac0?.ranged ?? 20) : (actor.system.attributes?.thac0?.melee ?? 20);
+  const rules = getOptionalRules();
+  // `maneuverId` reaches us from a DOM <select>'s value, cast with
+  // `as ManeuverId | null` in the sheet-layer caller — a compile-time
+  // assertion, not a runtime guarantee. Look the descriptor up first and treat
+  // an unknown id exactly like "no maneuver selected", so the plan's
+  // never-trust-the-dropdown, always-re-validate-server-side rule is total and
+  // an out-of-range id can't throw a TypeError mid-attack.
+  const maneuverDescriptor = maneuverId ? MANEUVERS[maneuverId] : undefined;
+  const maneuverAllowed =
+    maneuverDescriptor !== undefined &&
+    rules.combatAndTacticsEnabled &&
+    (maneuverDescriptor.category === "calledShot" ? rules.calledShots : rules.combatManeuvers);
+  const effectiveManeuverId = maneuverAllowed ? maneuverId : null;
+  const maneuverPenalty = maneuverAllowed ? (maneuverDescriptor?.attackPenalty ?? 0) : 0;
   const { total: attackBonus, breakdown } = attackModifiers({
     weaponMagicBonus: weapon.system.magicBonus,
     proficiencyModifier: resolveProficiencyModifier(actor, weapon),
     // STR/DEX modifiers remain out of scope (parent spec §7 boundary,
     // unchanged by this sub-project).
-    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses) + armorVsWeaponModifier,
+    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses) + armorVsWeaponModifier + maneuverPenalty,
   });
   const formula = attackFormula(attackBonus);
   const roll = await new Roll(formula).evaluate();
@@ -243,11 +287,7 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
   const fumble = critEnabled && baseHit.autoMiss && !backstabActive ? fumbleSeverity(Math.ceil(Math.random() * 10)) : null;
 
   if (fumble?.effect === "weaponDrops") {
-    // Inline for now — a future plan (SP7 Plan 7d, combat maneuvers) will
-    // need the identical "unequip a weapon Item" operation for its own
-    // disarm-maneuver outcome; extract this into a shared helper THEN, when
-    // there are genuinely two call sites, not preemptively for one.
-    await (weapon as unknown as { update(d: Record<string, unknown>): Promise<unknown> }).update({ "system.equipped": false });
+    await unequipWeapon(weapon as unknown as { update(d: Record<string, unknown>): Promise<unknown> });
   }
   if (fumble?.effect === "selfInjury" && fumble.selfInjuryDice) {
     const selfRoll = await new Roll(fumble.selfInjuryDice).evaluate();
@@ -257,6 +297,17 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
     } as unknown as Roll.MessageData);
   }
 
+  // Resolved against `baseHit`, NOT the backstab-overridden `hit`: a backstab's
+  // forced hit is its own complete, self-contained resolution (see the fumble
+  // comment above), so it must not also hand a piggy-backed maneuver a
+  // guaranteed stun/disarm on a roll that genuinely missed. A roll that hits on
+  // its own merits still applies its maneuver effect whether or not backstab is
+  // also active — backstab's damage multiplier is just a separate bonus on top.
+  // Pure lookup, no side effects: safe to compute here, since the card's
+  // maneuverLabel depends on it. The actual target mutation happens after the
+  // chat card has posted (below).
+  const maneuverEffect = resolveManeuverOutcome(effectiveManeuverId, baseHit.hit);
+
   const context = buildAttackCardContext({
     actorName: actor.name, actorImg: actor.img,
     weaponName: weapon.name, targetName,
@@ -264,6 +315,7 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
     backstab: backstabActive,
     critLabel: crit ? `ADND2E.chat.attack.crit.${crit.tier}` : null,
     fumbleLabel: fumble ? `ADND2E.chat.attack.fumble.${fumble.tier}` : null,
+    maneuverLabel: effectiveManeuverId && maneuverEffect ? `ADND2E.chat.attack.maneuverLabel.${effectiveManeuverId}` : null,
     damageContext: hit.hit
       ? {
           weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize,
@@ -284,6 +336,48 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
       flags: { adnd2e: { card: "attack", ...context.damageContext } },
     } as unknown as Roll.MessageData,
   );
+
+  // A maneuver's effect MUTATES THE TARGET actor — `toggleStatusEffect` writes
+  // an ActiveEffect on it, `unequipWeapon` updates an Item embedded in it —
+  // and both need OWNER permission on that actor, which a player attacking a
+  // GM-owned monster does not have. So this deliberately runs AFTER
+  // `roll.toMessage()` and never rethrows: whatever goes wrong here (a
+  // rejected write, a since-deleted actor, a future Foundry API change), the
+  // dice the player already rolled must always reach chat. A "push" (bull
+  // rush) outcome is narrative-only — no persisted state change at all; the
+  // card's maneuverLabel line alone communicates it.
+  if (maneuverEffect && maneuverEffect.kind !== "push") {
+    const maneuverTarget = (targets.length === 1 ? targets[0]!.actor : null) as {
+      isOwner: boolean;
+      toggleStatusEffect(id: string, opts: { active: boolean }): Promise<unknown>;
+      items: Iterable<{ id: string; type: string; system: { equipped?: boolean }; update(d: Record<string, unknown>): Promise<unknown> }>;
+    } | null;
+    // A targeted token whose actor was deleted yields a null `.actor` — treat
+    // it as "no real target" and skip, the same way chat-listeners.ts's
+    // apply-damage handlers do (`if (!actor) continue`).
+    if (maneuverTarget) {
+      const isGM = (game as unknown as { user: { isGM: boolean } }).user.isGM;
+      if (!isGM && !maneuverTarget.isOwner) {
+        // Same guard chat-listeners.ts's applyDamage/applyCastEffect use. The
+        // card keeps its maneuverLabel line (the outcome is still narrated);
+        // this toast tells the acting player the mechanical effect wasn't
+        // auto-applied and the GM needs to apply it by hand.
+        ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.attack.maneuverNotOwnerWarning"));
+      } else {
+        try {
+          if (maneuverEffect.kind === "condition") {
+            await maneuverTarget.toggleStatusEffect(maneuverEffect.conditionId, { active: true });
+          } else {
+            const targetWeapon = resolveTargetEquippedWeapon(maneuverTarget);
+            if (targetWeapon) await unequipWeapon(targetWeapon);
+          }
+        } catch (err) {
+          console.error(`${SYSTEM_ID} | failed to apply maneuver effect to the target`, err);
+          ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.attack.maneuverEffectFailedWarning"));
+        }
+      }
+    }
+  }
 }
 
 /** Roll one of the 5 saving-throw categories using the actor's already-cached

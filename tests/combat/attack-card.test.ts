@@ -13,6 +13,7 @@ function input(over: Partial<AttackCardInput> = {}): AttackCardInput {
     backstab: false,
     critLabel: null,
     fumbleLabel: null,
+    maneuverLabel: null,
     ...over,
   };
 }

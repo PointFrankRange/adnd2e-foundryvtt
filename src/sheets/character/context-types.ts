@@ -244,6 +244,7 @@ export interface CharacterSheetContext {
     weapons: { id: string; name: string; equipped: boolean; toHitNote: string; damageNote: string; speedFactor: number; range: string | null; canBackstab: boolean }[];
     acBreakdown: { label: string; value: number }[];
     armor: { id: string; name: string; equipped: boolean; isShield: boolean; baseAc: number }[];
+    maneuverOptions: { value: string; label: string }[];
   };
   skills: {
     weapon: { total: number; spent: number; available: number; items: WeaponProfView[] };

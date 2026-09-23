@@ -34,6 +34,9 @@ export interface AttackCardInput {
   /** an i18n key naming the fumble tier ("miss"/"weaponDrops"/"selfInjury"),
    *  or null when this attack was not a natural 1. */
   fumbleLabel: string | null;
+  /** an i18n key naming the called-shot/maneuver outcome, or null when no
+   *  maneuver was selected or it missed. */
+  maneuverLabel: string | null;
 }
 
 export interface AttackCardContext {
@@ -47,6 +50,7 @@ export interface AttackCardContext {
   damageContext: { weaponItemId: string; actorUuid: string; targetSize: string | null; backstabMultiplier: number | null; critMultiplier: number | null; critFlatBonus: number } | null;
   critLabel: string | null;
   fumbleLabel: string | null;
+  maneuverLabel: string | null;
 }
 
 /* ---------- damage ---------- */

@@ -1,5 +1,6 @@
 import { TEMPLATE_PATH } from "../../constants";
 import { getChassis } from "../../core/classes/chassis";
+import type { ManeuverId } from "../../core/combat/maneuvers";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
 import type { ArmorType, ClassId, NonweaponGroup, SaveCategory, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
@@ -607,8 +608,11 @@ export class Adnd2eCharacterSheet extends Base {
   ): Promise<void> {
     const weaponItemId = target.dataset.itemId;
     if (!weaponItemId) return;
-    const backstabCheckbox = target.closest(".weapon-row")?.querySelector<HTMLInputElement>(".backstab-toggle");
-    await rollAttack(this.document as never, weaponItemId, backstabCheckbox?.checked ?? false);
+    const weaponRow = target.closest(".weapon-row");
+    const backstabCheckbox = weaponRow?.querySelector<HTMLInputElement>(".backstab-toggle");
+    const maneuverSelect = weaponRow?.querySelector<HTMLSelectElement>(".maneuver-select");
+    const maneuverId = (maneuverSelect?.value || null) as ManeuverId | null;
+    await rollAttack(this.document as never, weaponItemId, backstabCheckbox?.checked ?? false, maneuverId);
   }
 
   static async #onRollSave(

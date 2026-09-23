@@ -243,7 +243,17 @@
         "rollAttack": "Attack",
         "rollSave": "Save",
         "backstab": "Backstab",
-        "backstabApplied": "×{multiplier} backstab!"
+        "backstabApplied": "×{multiplier} backstab!",
+        "maneuverNone": "None",
+        "maneuver": {
+          "calledShotHead": "Called Shot: Head",
+          "calledShotHand": "Called Shot: Weapon Hand",
+          "calledShotLeg": "Called Shot: Leg",
+          "disarm": "Disarm",
+          "tripKnockDown": "Knock Down / Trip",
+          "grapple": "Grapple",
+          "bullRush": "Bull Rush"
+        }
       },
       "spells": {
         "wizardSlots": "Wizard Spell Slots",
@@ -387,7 +397,18 @@
           "selfInjury": "Fumble — minor self-injury!"
         },
         "fumbleSelfInjury": "Self-injury from a fumble",
-        "critApplied": "×{multiplier} critical hit!"
+        "critApplied": "×{multiplier} critical hit!",
+        "maneuverLabel": {
+          "calledShotHead": "Called shot to the head — target is stunned!",
+          "calledShotHand": "Called shot to the weapon hand — target's weapon is knocked away!",
+          "calledShotLeg": "Called shot to the leg — target is knocked prone!",
+          "disarm": "Disarm succeeds — target's weapon is knocked away!",
+          "tripKnockDown": "Trip succeeds — target is knocked prone!",
+          "grapple": "Grapple succeeds — target is held!",
+          "bullRush": "Bull rush succeeds — target is pushed back!"
+        },
+        "maneuverNotOwnerWarning": "You don't have permission to change the targeted token — the GM must apply this maneuver's effect manually.",
+        "maneuverEffectFailedWarning": "This maneuver's effect could not be applied to the target."
       },
       "damage": {
         "applyToTargets": "Apply to Targeted Token(s)",
@@ -496,11 +517,11 @@
       },
       "calledShots": {
         "name": "Combat & Tactics: Called Shots",
-        "hint": "Target specific body locations at an attack penalty (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
+        "hint": "Target the head, weapon hand, or leg at an attack penalty for a location-specific effect (Combat & Tactics). A head shot's stun and a leg shot's prone have no automatic expiry — clear them manually from the target's Token HUD when appropriate."
       },
       "combatManeuvers": {
         "name": "Combat & Tactics: Combat Maneuvers",
-        "hint": "Disarm, trip, overbear, and similar maneuvers (Combat & Tactics). (not yet enforced — lands in a later Combat & Tactics plan)"
+        "hint": "Disarm, knock down/trip, grapple, and bull rush at an attack penalty (Combat & Tactics). Grapple's held condition has no automatic expiry — clear it manually from the target's Token HUD when appropriate."
       },
       "armorTypeVsWeaponType": {
         "name": "Combat & Tactics: Armor vs. Weapon Type",

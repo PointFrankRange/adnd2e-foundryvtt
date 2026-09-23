@@ -144,6 +144,7 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
     formula, naturalD20, hit, backstab: false, modifierBreakdown: breakdown,
     critLabel: crit ? `ADND2E.chat.attack.crit.${crit.tier}` : null,
     fumbleLabel: fumble ? `ADND2E.chat.attack.fumble.${fumble.tier}` : null,
+    maneuverLabel: null,
     damageContext: null,
   });
   const content = await foundry.applications.handlebars.renderTemplate(
