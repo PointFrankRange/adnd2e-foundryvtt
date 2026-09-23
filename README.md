@@ -83,7 +83,7 @@ Pack sources are JSON files under `packs/<name>/_source/`, one document per file
 | **5. Proficiencies & skills** | ✅ Complete | Weapon proficiency slots + specialization, non-weapon proficiency checks, thief/bard skill points + rolls, backstab |
 | **6. NPC / monster sheet + bestiary scaffolding** | ✅ Complete | Single-page creature stat-block sheet (fully editable), streamlined 3-tab NPC sheet, empty Bestiary compendium folder + authoring docs |
 | **7. Player's Option: Combat & Tactics** | ✅ Complete | Real `CONFIG.statusEffects` wiring (prone/blinded/stunned/held mechanics, the other 11 conditions as flavor markers), a Combat Tracker initiative-modifier UI, critical-hit/fumble severity tables, armor-vs-weapon-type attack modifiers, a 4-tier weapon mastery system (Specialized/Mastery/Grand Mastery, with a real world-data migration), and called shots (head/weapon hand/leg) + 4 curated combat maneuvers (disarm, knock down/trip, grapple, bull rush) via a per-weapon-row dropdown |
-| **8. Player's Option: Skills & Powers** | 🔜 Planned | Trait/sub-ability character-point buy, expanded proficiencies |
+| **8. Player's Option: Skills & Powers** | 🚧 In progress (Plan 8a/3 done) | The four Skills & Powers toggles are wired into `OptionalRules`, and sub-ability scores (12 authored sub-scores averaging into the six main scores, with a PC-sheet seed action) — expanded proficiencies and the character-point build still to come (Plans 8b-8c) |
 | **9. Player's Option: Spells & Magic** | 🔜 Planned | Spell points, expanded casting rules |
 
 ### Known backlog items

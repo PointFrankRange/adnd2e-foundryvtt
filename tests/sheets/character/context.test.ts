@@ -1800,3 +1800,73 @@ describe("buildCharacterSheetContext — thief/bard skills + backstab eligibilit
     }
   });
 });
+
+describe("sub-ability rows (SP8a)", () => {
+  type AbilitySource = { score: number; exceptional: number | null; sub?: { a: number | null; b: number | null } };
+  function withSubs(subs: Record<string, { a: number | null; b: number | null }>): CharacterSheetInput["source"] {
+    const src = JSON.parse(JSON.stringify(input().source)) as { system: { abilities: Record<string, AbilitySource> } };
+    for (const [k, sub] of Object.entries(subs)) src.system.abilities[k]!.sub = sub;
+    return src as unknown as CharacterSheetInput["source"];
+  }
+  const allSet = { a: 10, b: 10 };
+  const everyAbility = { str: allSet, dex: allSet, con: allSet, int: allSet, wis: allSet, cha: allSet };
+
+  it("rule off (subAbilityUi absent): no sub cells, main score unlocked and authored, nothing to seed", () => {
+    const c = buildCharacterSheetContext(input());
+    for (const row of c.abilities) {
+      expect(row.subs).toBeNull();
+      expect(row.scoreLocked).toBe(false);
+    }
+    expect(c.abilities.find((a) => a.key === "str")!.score).toBe(17);
+    expect(c.subAbilities).toEqual({ enabled: false, canSeed: false });
+  });
+
+  it("rule on, no sub keys in the source: cells are empty with the authored score as placeholder; main falls back to authored", () => {
+    const c = buildCharacterSheetContext(input({ subAbilityUi: true }));
+    const str = c.abilities.find((a) => a.key === "str")!;
+    expect(str.scoreLocked).toBe(true);
+    expect(str.score).toBe(17);
+    expect(str.subs).toEqual([
+      { id: "muscle", label: "ADND2E.sheet.subAbilities.muscle", name: "system.abilities.str.sub.a", value: null, placeholder: 17 },
+      { id: "stamina", label: "ADND2E.sheet.subAbilities.stamina", name: "system.abilities.str.sub.b", value: null, placeholder: 17 },
+    ]);
+    expect(c.subAbilities).toEqual({ enabled: true, canSeed: true });
+  });
+
+  it("rule on, authored sub-scores: displayed main score is their average; racialDelta is measured from it", () => {
+    const c = buildCharacterSheetContext(
+      input({ subAbilityUi: true, source: withSubs({ str: { a: 18, b: 14 } }) }),
+    );
+    const str = c.abilities.find((a) => a.key === "str")!;
+    expect(str.score).toBe(16); // (18 + 14) / 2
+    expect(str.effectiveScore).toBe(17); // derived fixture value
+    expect(str.racialDelta).toBe(1); // 17 - 16, NOT 17 - authored 17
+    expect(str.subs!.map((s) => s.value)).toEqual([18, 14]);
+  });
+
+  it("exceptional Strength keys off the displayed (averaged) main score", () => {
+    const c = buildCharacterSheetContext(
+      input({ subAbilityUi: true, source: withSubs({ str: { a: 18, b: 18 } }) }),
+    );
+    expect(c.abilities.find((a) => a.key === "str")!.showExceptional).toBe(true); // authored 17, averaged 18
+  });
+
+  it("canSeed is false once every sub-score of every ability is authored", () => {
+    const c = buildCharacterSheetContext(input({ subAbilityUi: true, source: withSubs(everyAbility) }));
+    expect(c.subAbilities).toEqual({ enabled: true, canSeed: false });
+  });
+
+  it("canSeed is true while any single sub-score is still null", () => {
+    const c = buildCharacterSheetContext(
+      input({ subAbilityUi: true, source: withSubs({ ...everyAbility, cha: { a: 10, b: null } }) }),
+    );
+    expect(c.subAbilities.canSeed).toBe(true);
+  });
+
+  it("canSeed is false for a viewer who cannot edit, even with unset sub-scores", () => {
+    const c = buildCharacterSheetContext(
+      input({ subAbilityUi: true, perms: { isGM: false, isOwner: false, editable: false } }),
+    );
+    expect(c.subAbilities).toEqual({ enabled: true, canSeed: false });
+  });
+});

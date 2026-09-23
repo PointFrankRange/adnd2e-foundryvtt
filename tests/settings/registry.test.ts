@@ -26,16 +26,28 @@ describe("SETTING_DESCRIPTORS", () => {
     for (const d of SETTING_DESCRIPTORS) expect(typeof d.default).toBe("boolean");
   });
 
-  it("core and combatAndTactics settings bind 1:1 to OptionalRules fields; skillsAndPowers/spellsAndMagic bind to null", () => {
+  it("core, combatAndTactics and skillsAndPowers settings bind 1:1 to OptionalRules fields; spellsAndMagic binds to null", () => {
     const bound = SETTING_DESCRIPTORS.filter((d) => d.optionalRulesKey !== null);
-    expect(bound).toHaveLength(14);
-    for (const d of bound) expect(["core", "combatAndTactics"]).toContain(d.group);
+    expect(bound).toHaveLength(18);
+    for (const d of bound) expect(["core", "combatAndTactics", "skillsAndPowers"]).toContain(d.group);
 
     const boundKeys = bound.map((d) => d.optionalRulesKey).sort();
     expect(boundKeys).toEqual(Object.keys(DEFAULT_OPTIONAL_RULES).sort());
 
-    for (const d of SETTING_DESCRIPTORS.filter((x) => x.group === "skillsAndPowers" || x.group === "spellsAndMagic")) {
+    for (const d of SETTING_DESCRIPTORS.filter((x) => x.group === "spellsAndMagic")) {
       expect(d.optionalRulesKey).toBeNull();
+    }
+  });
+
+  it("exactly skillsAndPowersEnabled and subAbilityScores require a world reload", () => {
+    const keys = SETTING_DESCRIPTORS.filter((d) => d.requiresReload === true).map((d) => d.key);
+    expect(keys.sort()).toEqual(["skillsAndPowersEnabled", "subAbilityScores"]);
+    for (const d of SETTING_DESCRIPTORS) {
+      if (d.key === "skillsAndPowersEnabled" || d.key === "subAbilityScores") {
+        expect(d.requiresReload).toBe(true);
+      } else {
+        expect(d.requiresReload).not.toBe(true);
+      }
     }
   });
 
@@ -68,8 +80,14 @@ describe("readOptionalRules()", () => {
     expect(bag.criticalHits).toBe(true);
   });
 
-  it("ignores skillsAndPowers/spellsAndMagic keys — they never appear in the bag", () => {
+  it("reads a skillsAndPowers key through, same as a core key", () => {
     const bag = readOptionalRules((key) => (key === "subAbilityScores" ? true : undefined));
-    expect(bag).not.toHaveProperty("subAbilityScores");
+    expect(bag.subAbilityScores).toBe(true);
+    expect(bag.skillsAndPowersEnabled).toBe(false); // untouched default
+  });
+
+  it("ignores spellsAndMagic keys — they never appear in the bag", () => {
+    const bag = readOptionalRules((key) => (key === "spellPoints" ? true : undefined));
+    expect(bag).not.toHaveProperty("spellPoints");
   });
 });

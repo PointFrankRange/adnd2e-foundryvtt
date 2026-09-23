@@ -15,6 +15,8 @@ export interface SettingDescriptor {
   readonly config: boolean;
   /** the `OptionalRules` field this key populates (core group only); `null` for a reserved key */
   readonly optionalRulesKey: keyof OptionalRules | null;
+  /** prepare-time-derivation rules need a world reload to take effect (Foundry prompts the GM to reload every client) */
+  readonly requiresReload?: boolean;
 }
 
 /** Every setting is `scope: "world"`, `type: Boolean` — constants, not per-row fields. */
@@ -35,11 +37,11 @@ export const SETTING_DESCRIPTORS: readonly SettingDescriptor[] = [
   { key: "combatManeuvers", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "combatManeuvers" },
   { key: "armorTypeVsWeaponType", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "armorTypeVsWeaponType" },
   { key: "weaponMastery", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "weaponMastery" },
-  // --- skillsAndPowers: reserved for Sub-project 8 ---
-  { key: "skillsAndPowersEnabled", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: null },
-  { key: "subAbilityScores", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: null },
-  { key: "characterPointBuild", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: null },
-  { key: "expandedProficiencies", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: null },
+  // --- skillsAndPowers: Sub-project 8 ---
+  { key: "skillsAndPowersEnabled", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "skillsAndPowersEnabled", requiresReload: true },
+  { key: "subAbilityScores", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "subAbilityScores", requiresReload: true },
+  { key: "characterPointBuild", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "characterPointBuild" },
+  { key: "expandedProficiencies", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "expandedProficiencies" },
   // --- spellsAndMagic: reserved for Sub-project 9 ---
   { key: "spellsAndMagicEnabled", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: null },
   { key: "spellPoints", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: null },

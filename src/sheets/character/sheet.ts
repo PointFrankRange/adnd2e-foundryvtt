@@ -1,4 +1,5 @@
 import { TEMPLATE_PATH } from "../../constants";
+import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
 import { getChassis } from "../../core/classes/chassis";
 import type { ManeuverId } from "../../core/combat/maneuvers";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
@@ -20,6 +21,7 @@ import { validateItemDrop } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
 import { advanceWeaponMastery, allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill } from "./proficiency-actions";
 import { castSpell, forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
+import { seedSubAbilities } from "./sub-ability-actions";
 import { awardXpSplit } from "./xp";
 
 /* ---------------------------------------------------------------------------
@@ -269,6 +271,7 @@ export class Adnd2eCharacterSheet extends Base {
     actions: {
       rollHp: Adnd2eCharacterSheet.#onRollHp,
       takeAverageHp: Adnd2eCharacterSheet.#onTakeAverageHp,
+      seedSubAbilities: Adnd2eCharacterSheet.#onSeedSubAbilities,
       awardXp: Adnd2eCharacterSheet.#onAwardXp,
       toggleDualClass: Adnd2eCharacterSheet.#onToggleDualClass,
       rollAttack: Adnd2eCharacterSheet.#onRollAttack,
@@ -409,6 +412,7 @@ export class Adnd2eCharacterSheet extends Base {
       }
     }
 
+    const rules = getOptionalRules();
     return {
       name: actor.name,
       img: actor.img,
@@ -438,7 +442,8 @@ export class Adnd2eCharacterSheet extends Base {
         isOwner: actor.isOwner,
         editable: this.isEditable,
       },
-      optionalRules: getOptionalRules(),
+      optionalRules: rules,
+      subAbilityUi: subAbilitiesEnabled(rules),
     };
   }
 
@@ -558,6 +563,14 @@ export class Adnd2eCharacterSheet extends Base {
   ): Promise<void> {
     const item = this.#getClassOrItem(target.dataset.classId);
     if (item) await rollHitPoints(item as never, { average: true });
+  }
+
+  static async #onSeedSubAbilities(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    _target: HTMLElement,
+  ): Promise<void> {
+    await seedSubAbilities(this.document as never);
   }
 
   static async #onAwardXp(this: Adnd2eCharacterSheet): Promise<void> {

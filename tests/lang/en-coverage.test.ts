@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import enJson from "../../lang/en.json";
 import { buildAdnd2eConfig } from "../../src/config";
+import { SUB_ABILITIES } from "../../src/core/abilities/sub-abilities";
 import { SETTING_DESCRIPTORS } from "../../src/settings/registry";
 import { ACTOR_SUBTYPES } from "../../src/data/actor/subtypes";
 import { ITEM_SUBTYPES } from "../../src/data/item/subtypes";
@@ -437,6 +438,26 @@ describe("lang/en.json — migration + import strings", () => {
       "ADND2E.import.done",
       "ADND2E.import.doneWithFailures",
     ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("lang/en.json — SP8a sub-ability strings", () => {
+  it("has a non-empty label for every sub-ability in SUB_ABILITIES", () => {
+    for (const ids of Object.values(SUB_ABILITIES)) {
+      for (const id of ids) {
+        const key = `ADND2E.sheet.subAbilities.${id}`;
+        expect(typeof resolve(key), key).toBe("string");
+        expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("has the seed / main-locked / blocked strings", () => {
+    for (const leaf of ["seed", "mainLocked", "seedBlockedWarning"]) {
+      const key = `ADND2E.sheet.subAbilities.${leaf}`;
       expect(typeof resolve(key), key).toBe("string");
       expect((resolve(key) as string).length, key).toBeGreaterThan(0);
     }

@@ -1,5 +1,5 @@
 import { DISPOSITIONS } from "../item/choices";
-import { actorCommonSchema, Adnd2eActorModel, applyRacialAdjustment, deriveAndCache } from "./base-actor";
+import { actorCommonSchema, Adnd2eActorModel, applyRacialAdjustment, applySubAbilityScores, deriveAndCache } from "./base-actor";
 
 const { StringField, NumberField, SchemaField } = foundry.data.fields;
 
@@ -16,6 +16,7 @@ export class NpcModel extends Adnd2eActorModel {
   }
 
   override prepareBaseData(): void {
+    applySubAbilityScores(this);
     applyRacialAdjustment(this);
   }
 

@@ -17,6 +17,7 @@ import type {
   ThiefSkillRow,
   WeaponProfView,
 } from "./context-types";
+import { mainScoreFromSubs, SUB_ABILITIES } from "../../core/abilities/sub-abilities";
 import { getChassis } from "../../core/classes/chassis";
 import { MANEUVERS } from "../../core/combat/maneuvers";
 import { canLearnSpell } from "../../core/magic/spellbook";
@@ -67,7 +68,10 @@ const TABS_DEF: readonly TabDescriptor[] = [
 /** Shape of `input.source._source.system` that the builder actually touches. */
 interface SourceView {
   system: {
-    abilities: Record<AbilityKey, { score: number; exceptional: number | null }>;
+    abilities: Record<
+      AbilityKey,
+      { score: number; exceptional: number | null; sub?: { a: number | null; b: number | null } | null }
+    >;
     details: { alignment: string };
     currency: { pp: number; gp: number; ep: number; sp: number; cp: number };
     resources: { reputation: string; henchmen: string; followers: string };
@@ -128,15 +132,21 @@ function buildArrangementBadge(input: CharacterSheetInput): string | null {
 
 function buildAbilities(input: CharacterSheetInput): AbilityRow[] {
   const src = input.source as unknown as SourceView;
+  const subsOn = input.subAbilityUi === true;
   return ABILITY_KEYS.map((key) => {
     const authored = src.system.abilities[key];
     const derived = input.derived.abilities[key];
-    const score = authored.score;
+    const sub = authored.sub ?? { a: null, b: null };
+    // While the rule is on, the displayed main score is the averaged (pre-racial)
+    // value — the same pure function prepareBaseData uses — so racialDelta below
+    // is only the racial part. Off: the authored score, exactly as before.
+    const score = subsOn ? mainScoreFromSubs(sub.a, sub.b, authored.score) : authored.score;
     const effectiveScore = derived.score;
     const mods = Object.entries(derived.mods).map(([k, v]) => ({
       label: humanize(k),
       value: v == null ? "—" : String(v),
     }));
+    const [idA, idB] = SUB_ABILITIES[key];
     return {
       key,
       label: input.config.abilities[key],
@@ -146,8 +156,28 @@ function buildAbilities(input: CharacterSheetInput): AbilityRow[] {
       exceptional: authored.exceptional,
       showExceptional: key === "str" && Number(score) === 18,
       mods,
+      scoreLocked: subsOn,
+      subs: subsOn
+        ? [
+            { id: idA, label: `ADND2E.sheet.subAbilities.${idA}`, name: `system.abilities.${key}.sub.a`, value: sub.a, placeholder: authored.score },
+            { id: idB, label: `ADND2E.sheet.subAbilities.${idB}`, name: `system.abilities.${key}.sub.b`, value: sub.b, placeholder: authored.score },
+          ]
+        : null,
     };
   });
+}
+
+function buildSubAbilities(input: CharacterSheetInput): CharacterSheetContext["subAbilities"] {
+  const enabled = input.subAbilityUi === true;
+  const src = input.source as unknown as SourceView;
+  const canSeed =
+    enabled &&
+    input.perms.editable &&
+    ABILITY_KEYS.some((k) => {
+      const sub = src.system.abilities[k].sub;
+      return sub == null || sub.a === null || sub.b === null;
+    });
+  return { enabled, canSeed };
 }
 
 /* ---------- vitals ---------- */
@@ -600,6 +630,7 @@ export function buildCharacterSheetContext(input: CharacterSheetInput): Characte
   return {
     identity: buildIdentity(input),
     abilities: buildAbilities(input),
+    subAbilities: buildSubAbilities(input),
     vitals: buildVitals(input),
     classes: buildClasses(input),
     dualClassToggle: buildDualClassToggle(input),
