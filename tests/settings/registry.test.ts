@@ -39,6 +39,18 @@ describe("SETTING_DESCRIPTORS", () => {
     }
   });
 
+  it("exactly skillsAndPowersEnabled and subAbilityScores require a world reload", () => {
+    const keys = SETTING_DESCRIPTORS.filter((d) => d.requiresReload === true).map((d) => d.key);
+    expect(keys.sort()).toEqual(["skillsAndPowersEnabled", "subAbilityScores"]);
+    for (const d of SETTING_DESCRIPTORS) {
+      if (d.key === "skillsAndPowersEnabled" || d.key === "subAbilityScores") {
+        expect(d.requiresReload).toBe(true);
+      } else {
+        expect(d.requiresReload).not.toBe(true);
+      }
+    }
+  });
+
   it("a bound descriptor's default matches the OptionalRules default", () => {
     for (const d of SETTING_DESCRIPTORS) {
       if (d.optionalRulesKey === null) continue;

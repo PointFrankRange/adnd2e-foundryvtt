@@ -1862,4 +1862,11 @@ describe("sub-ability rows (SP8a)", () => {
     );
     expect(c.subAbilities.canSeed).toBe(true);
   });
+
+  it("canSeed is false for a viewer who cannot edit, even with unset sub-scores", () => {
+    const c = buildCharacterSheetContext(
+      input({ subAbilityUi: true, perms: { isGM: false, isOwner: false, editable: false } }),
+    );
+    expect(c.subAbilities).toEqual({ enabled: true, canSeed: false });
+  });
 });

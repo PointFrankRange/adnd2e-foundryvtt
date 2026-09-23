@@ -3,6 +3,7 @@ import type {
   StrengthModifiers, ThiefSkill, WisdomModifiers,
 } from "../../core/types";
 import type { OptionalRules } from "../../core/options";
+import type { SubAbilityId } from "../../core/abilities/sub-abilities";
 
 /* ---------- input (assembled by sheet.ts from plain data) ---------- */
 
@@ -26,8 +27,9 @@ export interface CharacterSheetInput {
   /** CONFIG.ADND2E — label maps only */
   config: Adnd2eConfigView;
   perms: { isGM: boolean; isOwner: boolean; editable: boolean };
-  /** the 8-key core optional-rules bag (game.settings, read once by sheet.ts) —
-   *  only `maxSpellsPerLevel` is consumed so far (Learn Spell's per-level cap) */
+  /** the full `OptionalRules` bag (game.settings, read once by sheet.ts) —
+   *  consumed by several builders (Learn Spell's per-level cap, combat maneuver
+   *  and weapon-mastery gating, ...) */
   optionalRules: OptionalRules;
   /** Sub-project 8 Plan 8a: true ONLY when this sheet renders the sub-score
    *  inputs (the PC sheet, with `subAbilitiesEnabled(rules)` true). Optional so
@@ -194,7 +196,7 @@ export interface FeatureItemView {
 
 export interface SubScoreCell {
   /** the sub-ability id, e.g. "muscle" */
-  id: string;
+  id: SubAbilityId;
   /** i18n key — templates wrap it in `{{localize}}` */
   label: string;
   /** the form field name, e.g. "system.abilities.str.sub.a" */

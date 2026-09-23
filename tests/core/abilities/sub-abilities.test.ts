@@ -53,11 +53,16 @@ describe("mainScoreFromSubs", () => {
     expect(mainScoreFromSubs(12, null, 14)).toBe(13);
     expect(mainScoreFromSubs(null, 13, 14)).toBe(14); // (14 + 13) / 2 = 13.5 -> 14
   });
+  it("both null returns the authored main score unchanged, even outside [1, 25]", () => {
+    expect(mainScoreFromSubs(null, null, 30)).toBe(30);
+    expect(mainScoreFromSubs(null, null, 0)).toBe(0);
+    expect(mainScoreFromSubs(null, null, 14)).toBe(14);
+  });
   it("clamps the result to [1, 25]", () => {
     expect(mainScoreFromSubs(25, 25, 10)).toBe(25);
-    expect(mainScoreFromSubs(null, null, 30)).toBe(25);
+    expect(mainScoreFromSubs(25, null, 30)).toBe(25);
     expect(mainScoreFromSubs(1, 1, 10)).toBe(1);
-    expect(mainScoreFromSubs(null, null, 0)).toBe(1);
+    expect(mainScoreFromSubs(1, null, 0)).toBe(1);
   });
 });
 

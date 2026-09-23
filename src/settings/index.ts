@@ -20,6 +20,7 @@ export function registerSettings(): void {
       config: d.config,
       type: Boolean,
       default: d.default,
+      requiresReload: d.requiresReload ?? false,
     });
   }
 }

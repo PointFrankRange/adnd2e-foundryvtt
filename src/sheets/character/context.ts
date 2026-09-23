@@ -172,6 +172,7 @@ function buildSubAbilities(input: CharacterSheetInput): CharacterSheetContext["s
   const src = input.source as unknown as SourceView;
   const canSeed =
     enabled &&
+    input.perms.editable &&
     ABILITY_KEYS.some((k) => {
       const sub = src.system.abilities[k].sub;
       return sub == null || sub.a === null || sub.b === null;

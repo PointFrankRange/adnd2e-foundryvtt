@@ -51,9 +51,12 @@ export function effectiveSubScore(sub: number | null, mainScore: number): number
 /**
  * The main score the rule derives: the rounded average of the two effective
  * sub-scores, clamped to [1, 25]. `Math.round` rounds a .5 average UP
- * (e.g. 14 and 15 -> 15).
+ * (e.g. 14 and 15 -> 15). When BOTH sub-scores are null the authored main score
+ * is returned UNCHANGED (not clamped), so enabling the rule never alters an
+ * existing character, even one authored outside [1, 25].
  */
 export function mainScoreFromSubs(a: number | null, b: number | null, mainScore: number): number {
+  if (a === null && b === null) return mainScore;
   return clampScore(Math.round((effectiveSubScore(a, mainScore) + effectiveSubScore(b, mainScore)) / 2));
 }
 

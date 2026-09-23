@@ -19,7 +19,7 @@ interface SubAbilityActor {
 }
 
 /** Writes each null sub-score's ability's authored main score into it. Re-derives
- *  eligibility server-side (rule on, something to seed) — never trusts the button
+ *  eligibility at click time (rule on, something to seed) — never trusts the button
  *  having been rendered — and no-ops with a toast otherwise. */
 export async function seedSubAbilities(actor: SubAbilityActor): Promise<void> {
   const update = subAbilitiesEnabled(getOptionalRules()) ? subScoreSeedUpdate(actor._source.system.abilities) : {};
