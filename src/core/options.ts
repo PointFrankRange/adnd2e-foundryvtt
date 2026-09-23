@@ -3,9 +3,9 @@
  * a rule switch can change. `data/` builds this from `game.settings`
  * (`getOptionalRules()`); `core/` only ever receives it as a parameter.
  *
- * `core` and `combatAndTactics` group toggles both live here (Sub-project 7
- * wired the latter). `skillsAndPowers.*` / `spellsAndMagic.*` settings are
- * registered but are not part of this bag until their sub-project wires the
+ * `core`, `combatAndTactics` and `skillsAndPowers` group toggles all live here
+ * (Sub-projects 7 and 8 wired the latter two). `spellsAndMagic.*` settings are
+ * registered but are not part of this bag until Sub-project 9 wires the
  * branches (spec §6.2).
  */
 export interface OptionalRules {
@@ -38,6 +38,15 @@ export interface OptionalRules {
   armorTypeVsWeaponType: boolean;
   /** Sub-project 7 Plan 7c: the weapon-mastery tier system. */
   weaponMastery: boolean;
+  /** Sub-project 8 master switch — every other skillsAndPowers.* key is a
+   *  no-op unless this is also true. */
+  skillsAndPowersEnabled: boolean;
+  /** Sub-project 8 Plan 8a: sub-ability scores (12 sub-scores average into the 6 main scores). */
+  subAbilityScores: boolean;
+  /** Sub-project 8 Plan 8c: the character-point build (sub-scores + traits). */
+  characterPointBuild: boolean;
+  /** Sub-project 8 Plan 8b: related-weapon proficiency penalty + specific-weapon proficiencies. */
+  expandedProficiencies: boolean;
 }
 
 export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
@@ -55,4 +64,8 @@ export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
   combatManeuvers: false,
   armorTypeVsWeaponType: false,
   weaponMastery: false,
+  skillsAndPowersEnabled: false,
+  subAbilityScores: false,
+  characterPointBuild: false,
+  expandedProficiencies: false,
 };

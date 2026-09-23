@@ -533,19 +533,19 @@
       },
       "skillsAndPowersEnabled": {
         "name": "Skills & Powers: Enabled",
-        "hint": "Master switch for the Skills & Powers option group. Requires Sub-project 8."
+        "hint": "Master switch for the Skills & Powers option group — every other Skills & Powers rule is a no-op unless this is also on."
       },
       "subAbilityScores": {
         "name": "Skills & Powers: Sub-Ability Scores",
-        "hint": "Split each ability into two sub-scores (Skills & Powers). Requires Sub-project 8."
+        "hint": "Split each ability into two sub-scores; the main score becomes their rounded average (Skills & Powers)."
       },
       "characterPointBuild": {
         "name": "Skills & Powers: Character Point Build",
-        "hint": "Buy class and race features with character points (Skills & Powers). Requires Sub-project 8."
+        "hint": "Buy sub-scores and traits with character points (Skills & Powers). (not yet enforced — lands in a later Skills & Powers plan)"
       },
       "expandedProficiencies": {
         "name": "Skills & Powers: Expanded Proficiencies",
-        "hint": "The expanded proficiency list and rules (Skills & Powers). Requires Sub-project 8."
+        "hint": "Related-weapon proficiency penalties and the specific-weapon proficiency list (Skills & Powers). (not yet enforced — lands in a later Skills & Powers plan)"
       },
       "spellsAndMagicEnabled": {
         "name": "Spells & Magic: Enabled",
