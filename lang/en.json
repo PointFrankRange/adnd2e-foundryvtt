@@ -406,7 +406,9 @@
           "tripKnockDown": "Trip succeeds — target is knocked prone!",
           "grapple": "Grapple succeeds — target is held!",
           "bullRush": "Bull rush succeeds — target is pushed back!"
-        }
+        },
+        "maneuverNotOwnerWarning": "You don't have permission to change the targeted token — the GM must apply this maneuver's effect manually.",
+        "maneuverEffectFailedWarning": "This maneuver's effect could not be applied to the target."
       },
       "damage": {
         "applyToTargets": "Apply to Targeted Token(s)",
