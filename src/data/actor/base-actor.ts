@@ -2,7 +2,7 @@
 // TypeDataModel base for all three actor models. Foundry-layer; no logic.
 import { htmlField } from "../common/fields";
 import { ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, ENCUMBRANCE_CATEGORIES, MULTICLASS_MODES, WIZARD_SCHOOLS, SPHERE_NAMES } from "../item/choices";
-import { applyRacialDeltas } from "../../core/abilities";
+import { applyRacialDeltas, mainScoreFromSubs, subAbilitiesEnabled } from "../../core/abilities";
 import { THIEF_SKILLS } from "../../core/proficiencies/thief-skills";
 import type { AbilityScores, Race } from "../../core/types";
 import { deriveCharacter } from "../derive/character";
@@ -12,10 +12,15 @@ import { snapshotActor } from "./snapshot";
 const { StringField, NumberField, BooleanField, SchemaField, ArrayField, ObjectField } = foundry.data.fields;
 
 function abilitiesSchema() {
+  const subScore = () =>
+    new NumberField({ required: true, nullable: true, integer: true, min: 1, max: 25, initial: null });
   const entry = () =>
     new SchemaField({
       score: new NumberField({ required: true, integer: true, min: 1, initial: 10 }),
       exceptional: new NumberField({ required: true, nullable: true, integer: true, min: 1, max: 100, initial: null }),
+      /** Sub-project 8 Plan 8a: the two authored sub-scores. Null = "not set" —
+       *  the derivation falls back to `score`. Read only when the rule is on. */
+      sub: new SchemaField({ a: subScore(), b: subScore() }),
     });
   return new SchemaField(Object.fromEntries(ABILITY_KEYS.map((k) => [k, entry()])));
 }
@@ -206,6 +211,34 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
       spellsAndMagic: new foundry.data.fields.ObjectField({ required: true, initial: {} }),
     }),
   };
+}
+
+/**
+ * Sub-project 8 Plan 8a: when the sub-ability rule is on, sets every PREPARED
+ * `system.abilities.<k>.score` to the rounded average of the two sub-scores
+ * (null sub-score -> the authored main score). MUST run before
+ * `applyRacialAdjustment` — racial deltas apply to the averaged score.
+ *
+ * Idempotent, no ratchet: the authored main score is read from the model's own
+ * `_source` (never from the prepared score this function overwrites), and the
+ * result is written to the prepared score only — never to `_source`. Foundry
+ * also re-reads every prepared field from `_source` before each prepare cycle
+ * (`reset()` -> `_initialize()`), so no cycle depends on an earlier one.
+ * Rule off -> `sub` is never read and nothing changes.
+ */
+export function applySubAbilityScores(model: foundry.abstract.TypeDataModel.Any): void {
+  if (!subAbilitiesEnabled(getOptionalRules())) return;
+  const sys = model as unknown as {
+    abilities: Record<string, { score: number; sub: { a: number | null; b: number | null } }>;
+    _source: { abilities: Record<string, { score: number }> };
+  };
+  for (const k of ABILITY_KEYS) {
+    sys.abilities[k].score = mainScoreFromSubs(
+      sys.abilities[k].sub.a,
+      sys.abilities[k].sub.b,
+      sys._source.abilities[k].score,
+    );
+  }
 }
 
 /**
