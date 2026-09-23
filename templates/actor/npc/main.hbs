@@ -98,6 +98,14 @@
                 {{localize 'ADND2E.sheet.combat.backstab'}}
               </label>
             {{/if}}
+            {{#if @root.adnd2e.combat.maneuverOptions.length}}
+              <select class="maneuver-select" data-item-id="{{w.id}}">
+                <option value="">{{localize 'ADND2E.sheet.combat.maneuverNone'}}</option>
+                {{#each @root.adnd2e.combat.maneuverOptions as |opt|}}
+                  <option value="{{opt.value}}">{{localize opt.label}}</option>
+                {{/each}}
+              </select>
+            {{/if}}
             <button type="button" data-action="rollAttack" data-item-id="{{w.id}}">
               {{localize 'ADND2E.sheet.combat.rollAttack'}}
             </button>
