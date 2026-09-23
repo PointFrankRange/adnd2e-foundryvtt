@@ -11,6 +11,7 @@ import { applyRacialAdjustments, applyRacialDeltas } from "./racial-adjustments"
 import { assertAbilityScore } from "../errors";
 
 export * from "./racial-adjustments";
+export * from "./sub-abilities";
 export { strength, dexterity, constitution, intelligence, wisdom, charisma };
 
 export interface DeriveAbilitiesOptions {
