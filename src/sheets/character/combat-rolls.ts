@@ -13,6 +13,8 @@ import { criticalSeverity, fumbleSeverity } from "../../combat/critical";
 import { toArmorGroup, weaponVsArmorModifier } from "../../combat/weapon-vs-armor";
 import { getOptionalRules } from "../../settings";
 import { TEMPLATE_PATH } from "../../constants";
+import { MANEUVERS, resolveManeuverOutcome } from "../../core/combat/maneuvers";
+import type { ManeuverId } from "../../core/combat/maneuvers";
 import type { ArmorType, ClassId, SaveCategory } from "../../core/types";
 
 /* ---------------------------------------------------------------------------
@@ -162,11 +164,39 @@ function resolveThiefBackstabInfo(actor: AttackerActor): { isThief: boolean; thi
   return { isThief: false, thiefLevel: 0 };
 }
 
+/** Sets a weapon Item to unequipped — the "weapon knocked away" operation
+ *  shared by a fumble's weaponDrops outcome (on the ATTACKER's own weapon)
+ *  and a disarm maneuver/called-shot's unequip outcome (on the TARGET's
+ *  weapon, resolved by `resolveTargetEquippedWeapon`) — same operation,
+ *  different whose-weapon the caller decides. */
+async function unequipWeapon(weaponItem: { update(d: Record<string, unknown>): Promise<unknown> }): Promise<void> {
+  await weaponItem.update({ "system.equipped": false });
+}
+
+/** Finds the target actor's FIRST equipped weapon Item (first-member-wins,
+ *  matching this codebase's established multi-match tie-break convention —
+ *  see e.g. proficiency-actions.ts's `firstClassChassisId`). Returns `null`
+ *  for an unarmed target — a maneuver's `unequip` outcome is then correctly
+ *  a no-op (spec §5), not an error. */
+function resolveTargetEquippedWeapon(
+  targetActor: { items: Iterable<{ id: string; type: string; system: { equipped?: boolean }; update(d: Record<string, unknown>): Promise<unknown> }> },
+): { update(d: Record<string, unknown>): Promise<unknown> } | null {
+  for (const item of targetActor.items) {
+    if (item.type === "weapon" && item.system.equipped) return item;
+  }
+  return null;
+}
+
 /** Roll one attack for `weaponItemId` against the current token target(s) (or
  *  a manually-entered AC, via DialogV2, when zero or more than one is
  *  targeted). Posts an attack-roll chat card; a hit exposes a "Roll Damage"
  *  button (chat/chat-listeners.ts). */
-export async function rollAttack(actor: AttackerActor, weaponItemId: string, backstab = false): Promise<void> {
+export async function rollAttack(
+  actor: AttackerActor,
+  weaponItemId: string,
+  backstab = false,
+  maneuverId: ManeuverId | null = null,
+): Promise<void> {
   const weapon = actor.items.get(weaponItemId);
   if (!weapon) return;
 
@@ -214,12 +244,19 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
 
   const isRanged = weapon.system.category !== "melee";
   const thac0 = isRanged ? (actor.system.attributes?.thac0?.ranged ?? 20) : (actor.system.attributes?.thac0?.melee ?? 20);
+  const rules = getOptionalRules();
+  const maneuverAllowed =
+    maneuverId !== null &&
+    rules.combatAndTacticsEnabled &&
+    (MANEUVERS[maneuverId].category === "calledShot" ? rules.calledShots : rules.combatManeuvers);
+  const effectiveManeuverId = maneuverAllowed ? maneuverId : null;
+  const maneuverPenalty = effectiveManeuverId ? MANEUVERS[effectiveManeuverId].attackPenalty : 0;
   const { total: attackBonus, breakdown } = attackModifiers({
     weaponMagicBonus: weapon.system.magicBonus,
     proficiencyModifier: resolveProficiencyModifier(actor, weapon),
     // STR/DEX modifiers remain out of scope (parent spec §7 boundary,
     // unchanged by this sub-project).
-    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses) + armorVsWeaponModifier,
+    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses) + armorVsWeaponModifier + maneuverPenalty,
   });
   const formula = attackFormula(attackBonus);
   const roll = await new Roll(formula).evaluate();
@@ -243,11 +280,7 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
   const fumble = critEnabled && baseHit.autoMiss && !backstabActive ? fumbleSeverity(Math.ceil(Math.random() * 10)) : null;
 
   if (fumble?.effect === "weaponDrops") {
-    // Inline for now — a future plan (SP7 Plan 7d, combat maneuvers) will
-    // need the identical "unequip a weapon Item" operation for its own
-    // disarm-maneuver outcome; extract this into a shared helper THEN, when
-    // there are genuinely two call sites, not preemptively for one.
-    await (weapon as unknown as { update(d: Record<string, unknown>): Promise<unknown> }).update({ "system.equipped": false });
+    await unequipWeapon(weapon as unknown as { update(d: Record<string, unknown>): Promise<unknown> });
   }
   if (fumble?.effect === "selfInjury" && fumble.selfInjuryDice) {
     const selfRoll = await new Roll(fumble.selfInjuryDice).evaluate();
@@ -257,6 +290,22 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
     } as unknown as Roll.MessageData);
   }
 
+  const maneuverEffect = resolveManeuverOutcome(effectiveManeuverId, hit.hit);
+  if (maneuverEffect && targets.length === 1) {
+    const targetActor = targets[0]!.actor as {
+      toggleStatusEffect(id: string, opts: { active: boolean }): Promise<unknown>;
+      items: Iterable<{ id: string; type: string; system: { equipped?: boolean }; update(d: Record<string, unknown>): Promise<unknown> }>;
+    };
+    if (maneuverEffect.kind === "condition") {
+      await targetActor.toggleStatusEffect(maneuverEffect.conditionId, { active: true });
+    } else if (maneuverEffect.kind === "unequip") {
+      const targetWeapon = resolveTargetEquippedWeapon(targetActor);
+      if (targetWeapon) await unequipWeapon(targetWeapon);
+    }
+    // "push" (bull rush): narrative-only — no persisted state change. The
+    // card's maneuverLabel line below already communicates the outcome.
+  }
+
   const context = buildAttackCardContext({
     actorName: actor.name, actorImg: actor.img,
     weaponName: weapon.name, targetName,
@@ -264,6 +313,7 @@ export async function rollAttack(actor: AttackerActor, weaponItemId: string, bac
     backstab: backstabActive,
     critLabel: crit ? `ADND2E.chat.attack.crit.${crit.tier}` : null,
     fumbleLabel: fumble ? `ADND2E.chat.attack.fumble.${fumble.tier}` : null,
+    maneuverLabel: effectiveManeuverId && maneuverEffect ? `ADND2E.chat.attack.maneuverLabel.${effectiveManeuverId}` : null,
     damageContext: hit.hit
       ? {
           weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize,

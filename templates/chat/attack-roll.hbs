@@ -14,6 +14,7 @@
   {{else}}<p class="result miss">{{localize 'ADND2E.chat.attack.miss'}} ({{margin}})</p>{{/if}}
   {{#if critLabel}}<p class="result crit">{{localize critLabel}}</p>{{/if}}
   {{#if fumbleLabel}}<p class="result fumble">{{localize fumbleLabel}}</p>{{/if}}
+  {{#if maneuverLabel}}<p class="result maneuver">{{localize maneuverLabel}}</p>{{/if}}
   {{#if modifierBreakdown.length}}
     <ul class="modifiers">
       {{#each modifierBreakdown as |m|}}<li>{{localize m.label}}: {{adnd2eSigned m.value}}</li>{{/each}}
