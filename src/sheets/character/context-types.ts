@@ -29,6 +29,11 @@ export interface CharacterSheetInput {
   /** the 8-key core optional-rules bag (game.settings, read once by sheet.ts) —
    *  only `maxSpellsPerLevel` is consumed so far (Learn Spell's per-level cap) */
   optionalRules: OptionalRules;
+  /** Sub-project 8 Plan 8a: true ONLY when this sheet renders the sub-score
+   *  inputs (the PC sheet, with `subAbilitiesEnabled(rules)` true). Optional so
+   *  every other consumer of this builder — notably the NPC sheet, which shares
+   *  the ability-row partial — is off by default. */
+  subAbilityUi?: boolean;
 }
 
 export interface Adnd2eConfigView {
@@ -187,11 +192,28 @@ export interface FeatureItemView {
 
 /* ---------- output (consumed by the templates) ---------- */
 
+export interface SubScoreCell {
+  /** the sub-ability id, e.g. "muscle" */
+  id: string;
+  /** i18n key — templates wrap it in `{{localize}}` */
+  label: string;
+  /** the form field name, e.g. "system.abilities.str.sub.a" */
+  name: string;
+  /** the AUTHORED sub-score, null when unset */
+  value: number | null;
+  /** the authored main score the derivation falls back to while `value` is null */
+  placeholder: number;
+}
+
 export interface AbilityRow {
   key: string; label: string;
   score: number; racialDelta: number; effectiveScore: number;
   exceptional: number | null; showExceptional: boolean;
   mods: { label: string; value: string }[];
+  /** true while sub-scores derive the main score — the main input renders `disabled` */
+  scoreLocked: boolean;
+  /** the two sub-score cells, or null when the sub-score UI is off */
+  subs: SubScoreCell[] | null;
 }
 export interface SaveRow {
   key: string; label: string; target: number; rollModifier: number; effectiveTarget: number;
@@ -224,6 +246,7 @@ export interface CharacterSheetContext {
     alignmentValue: string;
   };
   abilities: AbilityRow[];
+  subAbilities: { enabled: boolean; canSeed: boolean };
   vitals: {
     hp: { value: number; max: number; temp: number; nonlethal: number };
     thac0: { base: number; melee: number; ranged: number };
