@@ -18,11 +18,30 @@
 // them; they vanish on the actor's next full write). A migration that genuinely
 // must rewrite `system` shape has to do a non-recursive replacement, which
 // belongs in `run.ts` — the pure layer only decides *whether* an actor needs it.
+//
+// v14 GOTCHA, PART 2 — a schema field RENAME cannot be done by this framework
+// ALONE. The same pruning bites harder here: by the time `itemUpdate` /
+// `actorUpdate` are handed an `_source.system`, the OLD key has already been
+// deleted, so the migration function literally cannot see the data it is meant
+// to convert. A rename therefore needs a `static migrateData(source)` shim on
+// the DataModel itself (Foundry's canonical hook: `DataField#clean` runs
+// `_migrate` — which calls the model's `migrateData` — BEFORE `_cleanType`
+// prunes unknown keys). That shim is where the conversion actually happens; it
+// also runs everywhere a document is constructed (world actors AND their
+// embedded items, world Items, compendium Items, importContent), not just the
+// `game.actors` walk `run.ts` does. See
+// `WeaponProficiencyItemModel.migrateData` in src/data/item/weapon-proficiency.ts
+// for this system's first one. The entry below is kept as defense-in-depth for
+// data that reaches storage without normal document construction.
 
 /**
  * One ordered schema migration. `version` is the `system.json` version that
  * introduced the schema change; a world whose stored migration version is older
- * runs it. `actorUpdate` is called once per world Actor.
+ * runs it. `actorUpdate` is called once per world Actor; `itemUpdate` is called
+ * once per Item embedded on that Actor (weapon proficiencies, weapons, etc. —
+ * anything `masteryTier`-shaped lives on an embedded Item, not the actor's own
+ * `system`, which `actorUpdate` alone cannot reach). A migration may define
+ * either, both, or (meaninglessly) neither.
  */
 export interface Migration {
   readonly version: string;
@@ -32,7 +51,13 @@ export interface Migration {
    * actor document), or `null` to leave the actor untouched. See the v14 GOTCHA
    * in this file's header before writing a key-removal migration.
    */
-  actorUpdate(sourceSystem: Record<string, unknown>, actorType: string): Record<string, unknown> | null;
+  actorUpdate?(sourceSystem: Record<string, unknown>, actorType: string): Record<string, unknown> | null;
+  /**
+   * One embedded Item's raw `_source.system` object + its `type` → an
+   * `updateEmbeddedDocuments("Item", ...)` payload for that item (dot-notation
+   * keys relative to the item document), or `null` to leave it untouched.
+   */
+  itemUpdate?(sourceSystem: Record<string, unknown>, itemType: string): Record<string, unknown> | null;
 }
 
 /**
@@ -59,9 +84,29 @@ export function isVersionNewer(a: string, b: string): boolean {
   return false;
 }
 
-/** Every migration, ascending by version. Empty for SP1 (spec §8) — the
- *  framework's proving case is a future slice's real schema change. */
-export const MIGRATIONS: readonly Migration[] = [];
+/** Every migration, ascending by version. SP1 shipped this framework with an
+ *  empty list; this is its first real entry (SP7 Plan 7c) — collapses the
+ *  retired `specialized: boolean` weapon-proficiency flag into tier 1 of the
+ *  new `masteryTier` scale. `specialized` itself needs no explicit unset: once
+ *  it's gone from the schema (this plan's own Step 1), Foundry v14 prunes it
+ *  from `_source` automatically (see this file's v14 GOTCHA comment above).
+ *
+ *  DEFENSE-IN-DEPTH ONLY: the conversion that actually fires in ordinary play
+ *  is `WeaponProficiencyItemModel.migrateData`, which runs before that pruning
+ *  (see "v14 GOTCHA, PART 2" above). This entry can only ever see `specialized`
+ *  on raw source that bypassed normal document construction, so in practice it
+ *  finds nothing to do — it is kept so a storage path that DOES surface the
+ *  old key still gets a durable DB-level write rather than a load-time-only fix. */
+export const MIGRATIONS: readonly Migration[] = [
+  {
+    version: "0.3.0",
+    itemUpdate(sourceSystem, itemType) {
+      if (itemType !== "weaponProficiency") return null;
+      if (sourceSystem.specialized !== true) return null;
+      return { "system.masteryTier": 1 };
+    },
+  },
+];
 
 /** The migrations a world on `storedVersion` still needs, oldest first. */
 export function pendingMigrations(

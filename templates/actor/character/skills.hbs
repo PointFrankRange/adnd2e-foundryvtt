@@ -13,12 +13,12 @@
             {{#if w.isGroup}}<span class="badge">{{localize 'ADND2E.sheet.skills.group'}}</span>{{/if}}
           </span>
           <span class="slots">{{w.slotsInvested}}</span>
-          {{#if w.specialized}}
-            <span class="specialized" title="{{localize 'ADND2E.sheet.skills.specialized'}}">★</span>
+          {{#if w.masteryTierLabelKey}}
+            <span class="specialized" title="{{localize w.masteryTierLabelKey}}">{{localize w.masteryTierLabelKey}}</span>
           {{/if}}
-          {{#if w.canSpecialize}}
-            <button type="button" data-action="specializeWeapon" data-item-id="{{w.id}}">
-              {{localize 'ADND2E.sheet.skills.specialize'}}
+          {{#if w.canAdvanceMastery}}
+            <button type="button" data-action="advanceWeaponMastery" data-item-id="{{w.id}}">
+              {{localize 'ADND2E.sheet.skills.advanceMastery'}}
             </button>
           {{/if}}
         </div>

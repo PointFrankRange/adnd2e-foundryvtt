@@ -49,7 +49,7 @@ describe("system.json packFolders", () => {
 });
 
 describe("system.json version", () => {
-  it("is 0.2.0 (the migration-framework release — anchors the first migration)", () => {
-    expect((manifest as unknown as { version: string }).version).toBe("0.2.0");
+  it("is 0.3.0 (SP7c weapon-mastery migration release — anchors the first real migration entry)", () => {
+    expect((manifest as unknown as { version: string }).version).toBe("0.3.0");
   });
 });

@@ -178,7 +178,9 @@ describe("lang/en.json — SP2 Task 7 sheet strings (Skills/Spells)", () => {
   it("resolves every ADND2E.sheet.* key the Skills/Spells tab shells reference", () => {
     for (const key of [
       "ADND2E.sheet.skills.group",
-      "ADND2E.sheet.skills.specialized",
+      "ADND2E.sheet.skills.masteryTier.1",
+      "ADND2E.sheet.skills.masteryTier.2",
+      "ADND2E.sheet.skills.masteryTier.3",
       "ADND2E.sheet.skills.racial",
       "ADND2E.sheet.skills.none",
       "ADND2E.sheet.spells.level",
@@ -281,11 +283,11 @@ describe("lang/en.json — SP4b learn-spell strings", () => {
 });
 
 describe("lang/en.json — SP5a proficiency strings", () => {
-  it("resolves every ADND2E.sheet.skills.{specialize,check,specializeBlockedWarning,checkBlockedWarning} + ADND2E.sheet.drop.insufficientSlots + ADND2E.chat.nwpCheck.* key the proficiency-actions layer references", () => {
+  it("resolves every ADND2E.sheet.skills.{advanceMastery,check,advanceMasteryBlockedWarning,checkBlockedWarning} + ADND2E.sheet.drop.insufficientSlots + ADND2E.chat.nwpCheck.* key the proficiency-actions layer references", () => {
     for (const key of [
-      "ADND2E.sheet.skills.specialize",
+      "ADND2E.sheet.skills.advanceMastery",
       "ADND2E.sheet.skills.check",
-      "ADND2E.sheet.skills.specializeBlockedWarning",
+      "ADND2E.sheet.skills.advanceMasteryBlockedWarning",
       "ADND2E.sheet.skills.checkBlockedWarning",
       "ADND2E.sheet.drop.insufficientSlots",
       "ADND2E.chat.nwpCheck.success",

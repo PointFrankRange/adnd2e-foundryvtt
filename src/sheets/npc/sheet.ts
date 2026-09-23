@@ -15,7 +15,7 @@ import { rollAttack, rollSave } from "../character/combat-rolls";
 import { buildCharacterSheetContext } from "../character/context";
 import type { CharacterSheetInput } from "../character/context-types";
 import { rollHitPoints } from "../character/hp-roll";
-import { rollNonweaponCheck, rollThiefSkill, specializeWeapon } from "../character/proficiency-actions";
+import { advanceWeaponMastery, rollNonweaponCheck, rollThiefSkill } from "../character/proficiency-actions";
 import { castSpell, forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "../character/spell-actions";
 
 /* ---------------------------------------------------------------------------
@@ -93,7 +93,7 @@ export class Adnd2eNpcSheet extends Base {
       castSpell: Adnd2eNpcSheet.#onCastSpell,
       restSpellcasting: Adnd2eNpcSheet.#onRestSpellcasting,
       learnSpell: Adnd2eNpcSheet.#onLearnSpell,
-      specializeWeapon: Adnd2eNpcSheet.#onSpecializeWeapon,
+      advanceWeaponMastery: Adnd2eNpcSheet.#onAdvanceWeaponMastery,
       rollNonweaponCheck: Adnd2eNpcSheet.#onRollNonweaponCheck,
       rollThiefSkill: Adnd2eNpcSheet.#onRollThiefSkill,
     },
@@ -385,9 +385,9 @@ export class Adnd2eNpcSheet extends Base {
     if (id) await learnSpell(this.document as never, id);
   }
 
-  static async #onSpecializeWeapon(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {
+  static async #onAdvanceWeaponMastery(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {
     const id = target.dataset.itemId;
-    if (id) await specializeWeapon(this.document as never, id);
+    if (id) await advanceWeaponMastery(this.document as never, id);
   }
 
   static async #onRollNonweaponCheck(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {
