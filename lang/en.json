@@ -562,7 +562,7 @@
       },
       "expandedProficiencies": {
         "name": "Skills & Powers: Expanded Proficiencies",
-        "hint": "Related-weapon proficiency penalties and the specific-weapon proficiency list (Skills & Powers). (not yet enforced — lands in a later Skills & Powers plan)"
+        "hint": "A weapon in the same group as a specific-weapon proficiency you hold counts as \"related\": half the non-proficiency attack penalty (Skills & Powers)."
       },
       "spellsAndMagicEnabled": {
         "name": "Spells & Magic: Enabled",

@@ -9,8 +9,10 @@ export interface AttackModifierInput {
   /** weapon magic bonus (+1 sword -> +1) */
   weaponMagicBonus?: number;
   /**
-   * 0 if proficient; class non-proficiency penalty if not; tiered mastery
-   * bonus if specialized/mastered. Tier 1 (Specialized) is the pre-existing,
+   * 0 if proficient; the class non-proficiency penalty if not (half of it,
+   * rounded up, for a "related" weapon when the Skills & Powers
+   * expanded-proficiencies rule is on); tiered mastery bonus if
+   * specialized/mastered. Tier 1 (Specialized) is the pre-existing,
    * always-on mechanic; tiers 2-3 (Mastery / Grand Mastery) are gated behind
    * the `weaponMastery` optional rule and capped back down to tier 1 when it's
    * off. Resolved by sheets/character/combat-rolls.ts's
