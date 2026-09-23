@@ -18,6 +18,7 @@ import type {
   WeaponProfView,
 } from "./context-types";
 import { getChassis } from "../../core/classes/chassis";
+import { MANEUVERS } from "../../core/combat/maneuvers";
 import { canLearnSpell } from "../../core/magic/spellbook";
 import { canWeaponSpecialize } from "../../core/proficiencies/weapon";
 import { weaponMasteryTierCost } from "../../core/proficiencies/weapon-mastery";
@@ -271,7 +272,15 @@ function buildCombat(input: CharacterSheetInput): CharacterSheetContext["combat"
     baseAc: i.armor!.baseAc,
   }));
 
-  return { weapons, acBreakdown, armor };
+  const rules = input.optionalRules;
+  const maneuverOptions = Object.entries(MANEUVERS)
+    .filter(
+      ([, m]) =>
+        rules.combatAndTacticsEnabled && (m.category === "calledShot" ? rules.calledShots : rules.combatManeuvers),
+    )
+    .map(([id]) => ({ value: id, label: `ADND2E.sheet.combat.maneuver.${id}` }));
+
+  return { weapons, acBreakdown, armor, maneuverOptions };
 }
 
 /* ---------- skills ---------- */

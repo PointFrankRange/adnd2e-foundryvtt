@@ -653,6 +653,64 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
     ]);
   });
 
+  it("maneuverOptions is empty when combatAndTacticsEnabled is off, even with calledShots/combatManeuvers on", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        optionalRules: {
+          ...DEFAULT_OPTIONAL_RULES,
+          combatAndTacticsEnabled: false,
+          calledShots: true,
+          combatManeuvers: true,
+        },
+      }),
+    );
+    expect(c.combat.maneuverOptions).toEqual([]);
+  });
+
+  it("maneuverOptions includes only the 3 called-shot locations when calledShots is on and combatManeuvers is off", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        optionalRules: {
+          ...DEFAULT_OPTIONAL_RULES,
+          combatAndTacticsEnabled: true,
+          calledShots: true,
+          combatManeuvers: false,
+        },
+      }),
+    );
+    const values = c.combat.maneuverOptions.map((o) => o.value);
+    expect(values).toEqual(["calledShotHead", "calledShotHand", "calledShotLeg"]);
+  });
+
+  it("maneuverOptions includes only the 4 curated maneuvers when combatManeuvers is on and calledShots is off", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        optionalRules: {
+          ...DEFAULT_OPTIONAL_RULES,
+          combatAndTacticsEnabled: true,
+          calledShots: false,
+          combatManeuvers: true,
+        },
+      }),
+    );
+    const values = c.combat.maneuverOptions.map((o) => o.value);
+    expect(values).toEqual(["disarm", "tripKnockDown", "grapple", "bullRush"]);
+  });
+
+  it("maneuverOptions includes all 7 when both toggles are on", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        optionalRules: {
+          ...DEFAULT_OPTIONAL_RULES,
+          combatAndTacticsEnabled: true,
+          calledShots: true,
+          combatManeuvers: true,
+        },
+      }),
+    );
+    expect(c.combat.maneuverOptions).toHaveLength(7);
+  });
+
   it("weapon proficiencies pass straight; nwp check targets are computed", () => {
     const weapon: WeaponProfView = { id: "wp1", name: "Sword", weaponOrGroup: "long-sword", isGroup: false, slotsInvested: 1, masteryTier: 0, category: null, masteryTierLabelKey: null, canAdvanceMastery: false };
     const nwp: NwpView = {
