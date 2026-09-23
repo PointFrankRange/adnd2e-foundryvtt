@@ -517,11 +517,11 @@
       },
       "calledShots": {
         "name": "Combat & Tactics: Called Shots",
-        "hint": "Target the head, weapon hand, or leg at an attack penalty for a location-specific effect (Combat & Tactics)."
+        "hint": "Target the head, weapon hand, or leg at an attack penalty for a location-specific effect (Combat & Tactics). A head shot's stun and a leg shot's prone have no automatic expiry — clear them manually from the target's Token HUD when appropriate."
       },
       "combatManeuvers": {
         "name": "Combat & Tactics: Combat Maneuvers",
-        "hint": "Disarm, knock down/trip, grapple, and bull rush at an attack penalty (Combat & Tactics)."
+        "hint": "Disarm, knock down/trip, grapple, and bull rush at an attack penalty (Combat & Tactics). Grapple's held condition has no automatic expiry — clear it manually from the target's Token HUD when appropriate."
       },
       "armorTypeVsWeaponType": {
         "name": "Combat & Tactics: Armor vs. Weapon Type",
