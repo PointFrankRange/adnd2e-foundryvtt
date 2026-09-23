@@ -1,6 +1,6 @@
 <div class="ability-row" data-ability="{{row.key}}">
   <label>{{localize row.label}}</label>
-  <input type="number" name="system.abilities.{{row.key}}.score" value="{{row.score}}" />
+  <input type="number" name="system.abilities.{{row.key}}.score" value="{{row.score}}"{{#if row.scoreLocked}} disabled title="{{localize 'ADND2E.sheet.subAbilities.mainLocked'}}"{{/if}} />
   {{#if row.racialDelta}}<span class="racial">{{adnd2eSigned row.racialDelta}}</span>{{/if}}
   <span class="effective">{{row.effectiveScore}}</span>
   {{#if row.showExceptional}}
@@ -9,4 +9,14 @@
   <span class="mods">
     {{#each row.mods as |m|}}<span title="{{m.label}}">{{m.value}}</span>{{/each}}
   </span>
+  {{#if row.subs}}
+    <div class="sub-scores">
+      {{#each row.subs as |sub|}}
+        <label class="sub-score">
+          {{localize sub.label}}
+          <input type="number" min="1" max="25" name="{{sub.name}}" value="{{sub.value}}" placeholder="{{sub.placeholder}}" />
+        </label>
+      {{/each}}
+    </div>
+  {{/if}}
 </div>

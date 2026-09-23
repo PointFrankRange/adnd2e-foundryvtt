@@ -14,6 +14,11 @@
 
   <div class="abilities panel">
     <h3>{{localize 'ADND2E.sheet.sections.abilities'}}</h3>
+    {{#if adnd2e.subAbilities.canSeed}}
+      <button type="button" data-action="seedSubAbilities">
+        {{localize 'ADND2E.sheet.subAbilities.seed'}}
+      </button>
+    {{/if}}
     {{#each adnd2e.abilities as |row|}}
       {{> adnd2e.ability-row row=row}}
     {{/each}}

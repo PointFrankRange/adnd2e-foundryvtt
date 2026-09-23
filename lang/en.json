@@ -173,6 +173,23 @@
         "classes": "Classes",
         "vitals": "Vitals"
       },
+      "subAbilities": {
+        "muscle": "Muscle",
+        "stamina": "Stamina",
+        "aim": "Aim",
+        "balance": "Balance",
+        "health": "Health",
+        "fitness": "Fitness",
+        "reason": "Reason",
+        "knowledge": "Knowledge",
+        "intuition": "Intuition",
+        "willpower": "Willpower",
+        "leadership": "Leadership",
+        "appearance": "Appearance",
+        "seed": "Seed Sub-Scores From Main",
+        "mainLocked": "Derived from the two sub-scores below",
+        "seedBlockedWarning": "Sub-scores can't be seeded right now — refresh the sheet."
+      },
       "tabs": {
         "main": "Main",
         "combat": "Combat",
