@@ -1,0 +1,16 @@
+{
+  "_id": "b7d55596b51ddb0b",
+  "_key": "!items!b7d55596b51ddb0b",
+  "name": "Dagger",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Dagger",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Blades"
+  }
+}

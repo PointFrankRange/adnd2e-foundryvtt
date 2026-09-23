@@ -1,0 +1,16 @@
+{
+  "_id": "14ddd655c72f64c9",
+  "_key": "!items!14ddd655c72f64c9",
+  "name": "Bolas",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Bolas",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Hurled"
+  }
+}

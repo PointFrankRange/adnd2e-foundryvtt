@@ -1,0 +1,16 @@
+{
+  "_id": "bbfbace06242348f",
+  "_key": "!items!bbfbace06242348f",
+  "name": "Sling",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Sling",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Slings"
+  }
+}

@@ -11,6 +11,11 @@ export class WeaponProficiencyItemModel extends Adnd2eItemModel {
       slotsInvested: new NumberField({ required: true, integer: true, min: 0, initial: 1 }),
       styleSpecialization: new StringField({ required: true, nullable: true, initial: null }),
       masteryTier: new NumberField({ required: true, integer: true, min: 0, max: 3, initial: 0 }),
+      /** Sub-project 8 Plan 8b: the weapon group a SPECIFIC-weapon proficiency
+       *  belongs to (e.g. "Blades") — read only when the expandedProficiencies
+       *  rule is on, to resolve the "related weapon" penalty. Empty on group
+       *  proficiencies and hand-made items (they never count as related). */
+      proficiencyGroup: new StringField({ required: true, blank: true, initial: "" }),
     };
   }
 

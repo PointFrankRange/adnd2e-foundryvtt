@@ -1,0 +1,16 @@
+{
+  "_id": "d7457001c7973f31",
+  "_key": "!items!d7457001c7973f31",
+  "name": "Long Sword",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Long Sword",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Blades"
+  }
+}

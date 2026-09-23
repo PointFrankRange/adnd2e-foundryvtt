@@ -1,0 +1,16 @@
+{
+  "_id": "f65f90e4418b0966",
+  "_key": "!items!f65f90e4418b0966",
+  "name": "Spear",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Spear",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

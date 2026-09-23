@@ -1,0 +1,16 @@
+{
+  "_id": "932fbb9fcb785816",
+  "_key": "!items!932fbb9fcb785816",
+  "name": "Guisarme-Voulge",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Guisarme-Voulge",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

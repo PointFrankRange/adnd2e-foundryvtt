@@ -1,0 +1,16 @@
+{
+  "_id": "65d0be7a272cf815",
+  "_key": "!items!65d0be7a272cf815",
+  "name": "Javelin",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Javelin",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Hurled"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "db82a88cba181f85",
+  "_key": "!items!db82a88cba181f85",
+  "name": "Heavy Crossbow",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Heavy Crossbow",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Crossbows"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_id": "8eab0bb72a56f586",
+  "_key": "!items!8eab0bb72a56f586",
+  "name": "Hand Axe",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Hand Axe",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Hafted"
+  }
+}

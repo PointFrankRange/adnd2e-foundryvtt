@@ -89,3 +89,48 @@ describe("weapon-proficiency-groups pack content", () => {
     }
   });
 });
+
+describe("weapon-proficiencies pack content", () => {
+  const items = docs("weapon-proficiencies");
+  const groupNames = docs("weapon-proficiency-groups").map((d) => d.name as string);
+  const EXPECTED_PER_GROUP: Record<string, number> = {
+    Blades: 8,
+    Bludgeoning: 6,
+    Hafted: 6,
+    "Pole Arms": 19,
+    Hurled: 4,
+    Bows: 4,
+    Crossbows: 3,
+    Slings: 1,
+  };
+
+  it("has exactly 51 documents (names + group assignment only)", () => {
+    expect(items).toHaveLength(51);
+  });
+
+  it("every entry is a specific (non-group) weaponProficiency named after its weapon, with no slots or mastery yet", () => {
+    for (const d of items) {
+      expect(d.type, String(d.name)).toBe("weaponProficiency");
+      expect(sys(d).isGroup, String(d.name)).toBe(false);
+      expect(sys(d).weaponOrGroup, String(d.name)).toBe(d.name);
+      expect(sys(d).slotsInvested, String(d.name)).toBe(0);
+      expect(sys(d).masteryTier, String(d.name)).toBe(0);
+      expect(sys(d).description, String(d.name)).toBe("");
+    }
+  });
+
+  it("every proficiencyGroup names a real group in the weapon-proficiency-groups pack", () => {
+    for (const d of items) expect(groupNames, String(d.name)).toContain(sys(d).proficiencyGroup);
+  });
+
+  it("names are unique", () => {
+    expect(new Set(items.map((d) => d.name)).size).toBe(items.length);
+  });
+
+  it("per-group counts match the enumerated list, and the 8 real groups are all represented", () => {
+    const counts: Record<string, number> = {};
+    for (const d of items) counts[sys(d).proficiencyGroup as string] = (counts[sys(d).proficiencyGroup as string] ?? 0) + 1;
+    expect(counts).toEqual(EXPECTED_PER_GROUP);
+    expect(new Set(Object.keys(counts))).toEqual(new Set(groupNames));
+  });
+});

@@ -1,0 +1,16 @@
+{
+  "_id": "173537963636b3cc",
+  "_key": "!items!173537963636b3cc",
+  "name": "Glaive-Guisarme",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Glaive-Guisarme",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

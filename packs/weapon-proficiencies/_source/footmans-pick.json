@@ -1,0 +1,16 @@
+{
+  "_id": "d0c6d88652f64429",
+  "_key": "!items!d0c6d88652f64429",
+  "name": "Footman's Pick",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Footman's Pick",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Hafted"
+  }
+}

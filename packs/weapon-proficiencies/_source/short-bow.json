@@ -1,0 +1,16 @@
+{
+  "_id": "0299d422411765f8",
+  "_key": "!items!0299d422411765f8",
+  "name": "Short Bow",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Short Bow",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Bows"
+  }
+}

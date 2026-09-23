@@ -1,0 +1,16 @@
+{
+  "_id": "92c40395e67ffb79",
+  "_key": "!items!92c40395e67ffb79",
+  "name": "Partisan",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Partisan",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

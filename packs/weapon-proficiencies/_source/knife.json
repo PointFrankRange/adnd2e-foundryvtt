@@ -1,0 +1,16 @@
+{
+  "_id": "970a26519455417c",
+  "_key": "!items!970a26519455417c",
+  "name": "Knife",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Knife",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Blades"
+  }
+}

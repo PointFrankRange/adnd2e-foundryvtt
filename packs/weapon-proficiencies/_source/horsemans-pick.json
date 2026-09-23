@@ -1,0 +1,16 @@
+{
+  "_id": "af3c11a0c93d3e24",
+  "_key": "!items!af3c11a0c93d3e24",
+  "name": "Horseman's Pick",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Horseman's Pick",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Hafted"
+  }
+}

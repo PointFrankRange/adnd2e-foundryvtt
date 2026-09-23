@@ -1,0 +1,16 @@
+{
+  "_id": "559e73546995a613",
+  "_key": "!items!559e73546995a613",
+  "name": "Guisarme",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Guisarme",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

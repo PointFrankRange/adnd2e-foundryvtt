@@ -1,0 +1,16 @@
+{
+  "_id": "0807a8e4f531f80d",
+  "_key": "!items!0807a8e4f531f80d",
+  "name": "Two-Handed Sword",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Two-Handed Sword",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Blades"
+  }
+}

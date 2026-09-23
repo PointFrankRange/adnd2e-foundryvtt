@@ -1,0 +1,16 @@
+{
+  "_id": "c90daff6d83d5009",
+  "_key": "!items!c90daff6d83d5009",
+  "name": "Composite Short Bow",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Composite Short Bow",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Bows"
+  }
+}

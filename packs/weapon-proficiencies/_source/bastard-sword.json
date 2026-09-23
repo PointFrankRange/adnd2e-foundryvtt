@@ -1,0 +1,16 @@
+{
+  "_id": "e4703c3f8daf654d",
+  "_key": "!items!e4703c3f8daf654d",
+  "name": "Bastard Sword",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Bastard Sword",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Blades"
+  }
+}

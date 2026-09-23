@@ -1,0 +1,16 @@
+{
+  "_id": "5f587286be9327f4",
+  "_key": "!items!5f587286be9327f4",
+  "name": "Military Fork",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Military Fork",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

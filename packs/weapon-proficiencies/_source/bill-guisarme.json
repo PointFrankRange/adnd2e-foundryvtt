@@ -1,0 +1,16 @@
+{
+  "_id": "f42e11d0951c467b",
+  "_key": "!items!f42e11d0951c467b",
+  "name": "Bill-Guisarme",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Bill-Guisarme",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

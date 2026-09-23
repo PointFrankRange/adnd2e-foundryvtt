@@ -1,0 +1,16 @@
+{
+  "_id": "950e4e9064e5c3b7",
+  "_key": "!items!950e4e9064e5c3b7",
+  "name": "Bardiche",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Bardiche",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

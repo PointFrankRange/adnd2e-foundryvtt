@@ -1,0 +1,16 @@
+{
+  "_id": "039426291086cef7",
+  "_key": "!items!039426291086cef7",
+  "name": "Spetum",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Spetum",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

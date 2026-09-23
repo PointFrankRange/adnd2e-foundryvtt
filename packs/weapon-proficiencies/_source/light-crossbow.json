@@ -1,0 +1,16 @@
+{
+  "_id": "30a3b8e4552b415a",
+  "_key": "!items!30a3b8e4552b415a",
+  "name": "Light Crossbow",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Light Crossbow",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Crossbows"
+  }
+}

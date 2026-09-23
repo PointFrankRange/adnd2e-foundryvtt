@@ -1,0 +1,16 @@
+{
+  "_id": "07f0723a153e1317",
+  "_key": "!items!07f0723a153e1317",
+  "name": "Scimitar",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Scimitar",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Blades"
+  }
+}

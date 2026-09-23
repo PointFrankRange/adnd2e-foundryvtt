@@ -1,0 +1,16 @@
+{
+  "_id": "62ffcbddd90bb4b7",
+  "_key": "!items!62ffcbddd90bb4b7",
+  "name": "Battle Axe",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Battle Axe",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Hafted"
+  }
+}

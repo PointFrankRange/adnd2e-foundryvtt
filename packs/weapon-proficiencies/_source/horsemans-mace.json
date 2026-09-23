@@ -1,0 +1,16 @@
+{
+  "_id": "f0ab7fdac8b13075",
+  "_key": "!items!f0ab7fdac8b13075",
+  "name": "Horseman's Mace",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Horseman's Mace",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Bludgeoning"
+  }
+}

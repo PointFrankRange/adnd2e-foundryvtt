@@ -1,0 +1,16 @@
+{
+  "_id": "d67d7457634fdbac",
+  "_key": "!items!d67d7457634fdbac",
+  "name": "Voulge",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Voulge",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}
