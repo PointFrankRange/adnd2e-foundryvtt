@@ -33,7 +33,8 @@
       "weaponProficiency": {},
       "nonweaponProficiency": {},
       "classFeature": {},
-      "condition": {}
+      "condition": {},
+      "trait": {}
     },
     "ActiveEffect": {
       "adnd2e": {}

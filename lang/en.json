@@ -598,7 +598,8 @@
       "weaponProficiency": "Weapon Proficiency",
       "nonweaponProficiency": "Non-Weapon Proficiency",
       "classFeature": "Class Feature",
-      "condition": "Condition"
+      "condition": "Condition",
+      "trait": "Trait"
     },
     "ActiveEffect": {
       "adnd2e": "AD&D 2E Effect"
