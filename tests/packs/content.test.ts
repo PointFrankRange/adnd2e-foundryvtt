@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { CLASS_IDS, RACE_IDS, ABILITY_KEYS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
+import { TRAITS, toTraitEffect, type RawTraitEffect } from "../../src/core/skills/traits";
 
 const ROOT = path.resolve(__dirname, "..", "..");
 function docs(pack: string): Record<string, unknown>[] {
@@ -132,5 +133,37 @@ describe("weapon-proficiencies pack content", () => {
     for (const d of items) counts[sys(d).proficiencyGroup as string] = (counts[sys(d).proficiencyGroup as string] ?? 0) + 1;
     expect(counts).toEqual(EXPECTED_PER_GROUP);
     expect(new Set(Object.keys(counts))).toEqual(new Set(groupNames));
+  });
+});
+
+describe("traits pack content (drift-tested against the pure TRAITS table)", () => {
+  const items = docs("traits");
+
+  it("has exactly one trait Item per TRAITS row (14), with unique ids and names", () => {
+    expect(items).toHaveLength(14);
+    expect(items).toHaveLength(TRAITS.length);
+    expect(new Set(items.map((d) => d._id)).size).toBe(14);
+    expect(new Set(items.map((d) => d.name)).size).toBe(14);
+    for (const d of items) expect(d.type, String(d.name)).toBe("trait");
+  });
+
+  it("every doc matches its TRAITS row: name, cost, img, traitId and effect", () => {
+    for (const t of TRAITS) {
+      const d = items.find((x) => sys(x).traitId === t.id);
+      expect(d, t.id).toBeDefined();
+      expect(d!.name, t.id).toBe(t.name);
+      expect(sys(d!).cost, t.id).toBe(t.cost);
+      expect(sys(d!).description, t.id).toBe("");
+      expect(d!.img, t.id).toBe(t.cost < 0 ? "icons/svg/downgrade.svg" : "icons/svg/upgrade.svg");
+      // round-trip: the stored flat effect must normalise to exactly the table's typed effect
+      expect(toTraitEffect(sys(d!).effect as RawTraitEffect), t.id).toEqual(t.effect);
+    }
+  });
+
+  it("stores the flat effect with every member present (unused members blank)", () => {
+    for (const d of items) {
+      const e = sys(d).effect as Record<string, unknown>;
+      expect(Object.keys(e).sort(), String(d.name)).toEqual(["ability", "amount", "kind", "mode", "save", "track"]);
+    }
   });
 });

@@ -1,0 +1,20 @@
+{
+  "_id": "b63391d1d345b468",
+  "_key": "!items!b63391d1d345b468",
+  "name": "Hardy",
+  "type": "trait",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "",
+    "traitId": "hardy",
+    "cost": 6,
+    "effect": {
+      "kind": "bonusHp",
+      "ability": "",
+      "save": "",
+      "mode": "",
+      "track": "",
+      "amount": 4
+    }
+  }
+}

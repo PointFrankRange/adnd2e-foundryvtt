@@ -1,0 +1,20 @@
+{
+  "_id": "3f144b61d6bfcff3",
+  "_key": "!items!3f144b61d6bfcff3",
+  "name": "Frail",
+  "type": "trait",
+  "img": "icons/svg/downgrade.svg",
+  "system": {
+    "description": "",
+    "traitId": "frail",
+    "cost": -4,
+    "effect": {
+      "kind": "bonusHp",
+      "ability": "",
+      "save": "",
+      "mode": "",
+      "track": "",
+      "amount": -3
+    }
+  }
+}

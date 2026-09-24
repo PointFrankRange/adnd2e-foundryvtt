@@ -1,0 +1,20 @@
+{
+  "_id": "5d8225b0d4ecef0f",
+  "_key": "!items!5d8225b0d4ecef0f",
+  "name": "Quick Study",
+  "type": "trait",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "",
+    "traitId": "quick-study",
+    "cost": 4,
+    "effect": {
+      "kind": "proficiencySlots",
+      "ability": "",
+      "save": "",
+      "mode": "",
+      "track": "nonweapon",
+      "amount": 2
+    }
+  }
+}

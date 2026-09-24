@@ -1,0 +1,20 @@
+{
+  "_id": "eb590f6d9ceaada8",
+  "_key": "!items!eb590f6d9ceaada8",
+  "name": "Slow Learner",
+  "type": "trait",
+  "img": "icons/svg/downgrade.svg",
+  "system": {
+    "description": "",
+    "traitId": "slow-learner",
+    "cost": -3,
+    "effect": {
+      "kind": "proficiencySlots",
+      "ability": "",
+      "save": "",
+      "mode": "",
+      "track": "nonweapon",
+      "amount": -1
+    }
+  }
+}

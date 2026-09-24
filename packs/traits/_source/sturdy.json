@@ -1,0 +1,20 @@
+{
+  "_id": "0c35707ec5932e42",
+  "_key": "!items!0c35707ec5932e42",
+  "name": "Sturdy",
+  "type": "trait",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "",
+    "traitId": "sturdy",
+    "cost": 7,
+    "effect": {
+      "kind": "abilityBonus",
+      "ability": "con",
+      "save": "",
+      "mode": "",
+      "track": "",
+      "amount": 1
+    }
+  }
+}
