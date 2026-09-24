@@ -79,3 +79,7 @@ export const ENCUMBRANCE_CATEGORIES: readonly EncumbranceCategory[] = [
 export const DISPOSITIONS: readonly string[] = ["friendly", "neutral", "hostile"];
 export const SAVE_MODES: readonly string[] = ["explicit", "asClass"];
 export const ATTACK_TYPES: readonly string[] = ["melee", "ranged"];
+
+export {
+  TRAIT_EFFECT_KINDS, TRAIT_ATTACK_MODES, TRAIT_PROFICIENCY_TRACKS, TRAIT_SAVE_CATEGORIES,
+} from "../../core/skills/traits";

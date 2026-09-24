@@ -190,6 +190,22 @@
         "mainLocked": "Derived from the two sub-scores below",
         "seedBlockedWarning": "Sub-scores can't be seeded right now — refresh the sheet."
       },
+      "traits": {
+        "title": "Character Points & Traits",
+        "pool": "Pool",
+        "poolGmOnly": "Only the GM can change the character-point pool.",
+        "spent": "Spent",
+        "available": "Available",
+        "overspent": "Overspent — remove a trait or raise the pool. Existing traits are never removed automatically.",
+        "refundCapped": "Disadvantage refunds are capped at 10 character points in total.",
+        "refundCappedToast": "That disadvantage refunds only part of its cost (the total refund cap is 10 character points).",
+        "none": "No traits yet — drag one from the Traits compendium.",
+        "remove": "Remove",
+        "removeBlockedWarning": "That trait can't be removed.",
+        "mode": { "melee": "melee to-hit", "ranged": "ranged to-hit" },
+        "track": { "weapon": "weapon proficiency slots", "nonweapon": "non-weapon proficiency slots" },
+        "target": { "hp": "hit points", "none": "no effect" }
+      },
       "tabs": {
         "main": "Main",
         "combat": "Combat",
@@ -210,7 +226,11 @@
       "drop": {
         "duplicateRace": "This character already has a race.",
         "duplicateClass": "This character already has that class.",
-        "insufficientSlots": "Not enough proficiency slots available for that."
+        "insufficientSlots": "Not enough proficiency slots available for that.",
+        "duplicateTrait": "You already have that trait.",
+        "insufficientCp": "Not enough character points for that trait.",
+        "traitsDisabled": "Traits are only used while the Skills & Powers character-point build rule is on.",
+        "traitsPcOnly": "Traits can only be added to a player character's sheet."
       },
       "xp": {
         "award": "Award XP",
@@ -558,7 +578,7 @@
       },
       "characterPointBuild": {
         "name": "Skills & Powers: Character Point Build",
-        "hint": "Buy sub-scores and traits with character points (Skills & Powers). (not yet enforced — lands in a later Skills & Powers plan)"
+        "hint": "Spend a character-point pool on sub-scores and traits when building a character (Skills & Powers). Trait effects apply only while this is on."
       },
       "expandedProficiencies": {
         "name": "Skills & Powers: Expanded Proficiencies",
@@ -598,7 +618,8 @@
       "weaponProficiency": "Weapon Proficiency",
       "nonweaponProficiency": "Non-Weapon Proficiency",
       "classFeature": "Class Feature",
-      "condition": "Condition"
+      "condition": "Condition",
+      "trait": "Trait"
     },
     "ActiveEffect": {
       "adnd2e": "AD&D 2E Effect"

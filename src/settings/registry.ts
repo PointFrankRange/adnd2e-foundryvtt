@@ -40,7 +40,7 @@ export const SETTING_DESCRIPTORS: readonly SettingDescriptor[] = [
   // --- skillsAndPowers: Sub-project 8 ---
   { key: "skillsAndPowersEnabled", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "skillsAndPowersEnabled", requiresReload: true },
   { key: "subAbilityScores", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "subAbilityScores", requiresReload: true },
-  { key: "characterPointBuild", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "characterPointBuild" },
+  { key: "characterPointBuild", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "characterPointBuild", requiresReload: true },
   { key: "expandedProficiencies", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "expandedProficiencies" },
   // --- spellsAndMagic: reserved for Sub-project 9 ---
   { key: "spellsAndMagicEnabled", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: null },

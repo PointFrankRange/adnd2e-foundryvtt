@@ -1,0 +1,20 @@
+{
+  "_id": "0a63deedd3825238",
+  "_key": "!items!0a63deedd3825238",
+  "name": "Nervous",
+  "type": "trait",
+  "img": "icons/svg/downgrade.svg",
+  "system": {
+    "description": "",
+    "traitId": "nervous",
+    "cost": -4,
+    "effect": {
+      "kind": "saveBonus",
+      "ability": "",
+      "save": "spell",
+      "mode": "",
+      "track": "",
+      "amount": -1
+    }
+  }
+}

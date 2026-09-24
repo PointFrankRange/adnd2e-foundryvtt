@@ -1,0 +1,20 @@
+{
+  "_id": "5d8f13a9b1ba1b17",
+  "_key": "!items!5d8f13a9b1ba1b17",
+  "name": "Steady Aim",
+  "type": "trait",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "",
+    "traitId": "steady-aim",
+    "cost": 8,
+    "effect": {
+      "kind": "attackBonus",
+      "ability": "",
+      "save": "",
+      "mode": "ranged",
+      "track": "",
+      "amount": 1
+    }
+  }
+}

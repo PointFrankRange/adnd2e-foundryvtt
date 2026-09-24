@@ -5,6 +5,7 @@ import type {
   ActorSnapshot, ClassEntry, DualClassState, EquippedArmor, EquippedShield, MemorizedEntry,
 } from "../derive/character";
 import type { ClassId, Race, ThiefSkill, WizardSchool } from "../../core/types";
+import { toTraitEntries } from "../derive/character";
 import { containerAdjustedCarriedWeight } from "../derive/character/container-weight";
 
 interface ClassItemSystem {
@@ -120,5 +121,6 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
     spentNonweaponSlots,
     baseMovement: raceItem ? ((raceItem.system as RaceItemSystem).baseMovement ?? 12) : 12,
     thiefSkillAllocations,
+    traits: toTraitEntries(items),
   };
 }

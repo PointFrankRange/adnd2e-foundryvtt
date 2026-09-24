@@ -10,3 +10,4 @@ export * from "./proficiencies";
 export * from "./encumbrance";
 export * from "./container-weight";
 export * from "./multiclass";
+export * from "./traits";

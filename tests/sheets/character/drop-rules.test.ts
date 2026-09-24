@@ -70,3 +70,29 @@ describe("validateItemDrop", () => {
     expect(r.reason).toBe("ADND2E.sheet.drop.insufficientSlots");
   });
 });
+
+describe("validateItemDrop — trait drops (SP8 Plan 8c)", () => {
+  const trait = { dropType: "trait", hasRace: false, existingChassisIds: [] as string[] };
+
+  it("rejects every trait drop while the rule is off (availableCp null or absent)", () => {
+    expect(validateItemDrop({ ...trait, dropTraitCost: 4, dropTraitId: "hardy", availableCp: null })).toEqual({ ok: false, reason: "ADND2E.sheet.drop.traitsDisabled" });
+    expect(validateItemDrop({ ...trait, dropTraitCost: 4, dropTraitId: "hardy" })).toEqual({ ok: false, reason: "ADND2E.sheet.drop.traitsDisabled" });
+  });
+
+  it("rejects a duplicate trait id", () => {
+    expect(validateItemDrop({ ...trait, dropTraitCost: 6, dropTraitId: "hardy", ownedTraitIds: ["hardy"], availableCp: 50, refundedSoFar: 0 })).toEqual({ ok: false, reason: "ADND2E.sheet.drop.duplicateTrait" });
+  });
+
+  it("rejects an advantage costing more than the available CP, allows one that fits", () => {
+    expect(validateItemDrop({ ...trait, dropTraitCost: 8, dropTraitId: "brawler", ownedTraitIds: [], availableCp: 7, refundedSoFar: 0 })).toEqual({ ok: false, reason: "ADND2E.sheet.drop.insufficientCp" });
+    expect(validateItemDrop({ ...trait, dropTraitCost: 8, dropTraitId: "brawler", ownedTraitIds: [], availableCp: 8, refundedSoFar: 0 })).toEqual({ ok: true });
+  });
+
+  it("always allows a disadvantage, even overspent or past the refund cap", () => {
+    expect(validateItemDrop({ ...trait, dropTraitCost: -4, dropTraitId: "frail", ownedTraitIds: [], availableCp: -9, refundedSoFar: 10 })).toEqual({ ok: true });
+  });
+
+  it("defaults a missing cost to 0, id to blank, owned ids to none and refund to 0", () => {
+    expect(validateItemDrop({ ...trait, availableCp: 0 })).toEqual({ ok: true });
+  });
+});

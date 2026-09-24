@@ -39,11 +39,12 @@ describe("SETTING_DESCRIPTORS", () => {
     }
   });
 
-  it("exactly skillsAndPowersEnabled and subAbilityScores require a world reload", () => {
+  it("exactly skillsAndPowersEnabled, subAbilityScores and characterPointBuild require a world reload", () => {
+    const reload = ["characterPointBuild", "skillsAndPowersEnabled", "subAbilityScores"];
     const keys = SETTING_DESCRIPTORS.filter((d) => d.requiresReload === true).map((d) => d.key);
-    expect(keys.sort()).toEqual(["skillsAndPowersEnabled", "subAbilityScores"]);
+    expect(keys.sort()).toEqual(reload);
     for (const d of SETTING_DESCRIPTORS) {
-      if (d.key === "skillsAndPowersEnabled" || d.key === "subAbilityScores") {
+      if (reload.includes(d.key)) {
         expect(d.requiresReload).toBe(true);
       } else {
         expect(d.requiresReload).not.toBe(true);

@@ -5,6 +5,7 @@ import {
   CASTER_CLASSES, SAVING_THROW_KINDS, DUAL_CLASS_STATES, FEATURE_SOURCE_TYPES, FEATURE_ACTIVATIONS,
   ALIGNMENTS, MOVEMENT_MODES, DISPOSITIONS, SAVE_MODES, ATTACK_TYPES, ENCUMBRANCE_CATEGORIES,
   MULTICLASS_MODES, CLASS_GROUPS,
+  TRAIT_EFFECT_KINDS, TRAIT_ATTACK_MODES, TRAIT_PROFICIENCY_TRACKS, TRAIT_SAVE_CATEGORIES,
 } from "../../src/data/item/choices";
 
 describe("item schema choice arrays match the engine unions", () => {
@@ -86,5 +87,14 @@ describe("actor schema choice arrays", () => {
   });
   it("CLASS_GROUPS = the four core ClassGroup members", () => {
     expect([...CLASS_GROUPS].sort()).toEqual(["priest", "rogue", "warrior", "wizard"]);
+  });
+});
+
+describe("trait effect choice arrays (SP8 Plan 8c)", () => {
+  it("match the pure trait enums", () => {
+    expect([...TRAIT_EFFECT_KINDS]).toEqual(["abilityBonus", "saveBonus", "attackBonus", "proficiencySlots", "bonusHp"]);
+    expect([...TRAIT_ATTACK_MODES]).toEqual(["melee", "ranged"]);
+    expect([...TRAIT_PROFICIENCY_TRACKS]).toEqual(["weapon", "nonweapon"]);
+    expect([...TRAIT_SAVE_CATEGORIES]).toEqual(["ppd", "rsw", "pp", "bw", "spell"]);
   });
 });

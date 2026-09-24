@@ -1,3 +1,5 @@
+import { canAffordTrait } from "../../core/skills/character-points";
+
 export interface DropCheckInput {
   /** the dropped item's `type` */
   dropType: string;
@@ -16,6 +18,17 @@ export interface DropCheckInput {
    *  nonweapon) — defaults to 0 if omitted, so an un-supplied value rejects
    *  rather than silently allowing an unbounded drop. */
   availableSlots?: number;
+  /** trait drops: the dropped trait's CP cost (negative = a disadvantage) */
+  dropTraitCost?: number;
+  /** trait drops: the dropped trait's `system.traitId` ("" for a hand-made custom trait) */
+  dropTraitId?: string;
+  /** `system.traitId` of every `trait` item already on the actor */
+  ownedTraitIds?: readonly string[];
+  /** CP currently available — `null`/absent means the character-point build rule is off
+   *  (the ledger was null), which rejects every trait drop */
+  availableCp?: number | null;
+  /** disadvantage refund already counted against the cap */
+  refundedSoFar?: number;
 }
 
 export interface DropVerdict {
@@ -37,6 +50,17 @@ export function validateItemDrop(input: DropCheckInput): DropVerdict {
     const cost = input.dropSlotCost ?? 1;
     const available = input.availableSlots ?? 0;
     return cost > available ? { ok: false, reason: "ADND2E.sheet.drop.insufficientSlots" } : { ok: true };
+  }
+  if (input.dropType === "trait") {
+    if (input.availableCp == null) return { ok: false, reason: "ADND2E.sheet.drop.traitsDisabled" };
+    const verdict = canAffordTrait({
+      traitCost: input.dropTraitCost ?? 0,
+      traitId: input.dropTraitId ?? "",
+      ownedTraitIds: input.ownedTraitIds ?? [],
+      available: input.availableCp,
+      refundedSoFar: input.refundedSoFar ?? 0,
+    });
+    return verdict.ok ? { ok: true } : { ok: false, reason: verdict.reason };
   }
   return { ok: true };
 }

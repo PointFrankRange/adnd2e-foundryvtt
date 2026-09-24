@@ -1,0 +1,20 @@
+{
+  "_id": "7294570297d3b158",
+  "_key": "!items!7294570297d3b158",
+  "name": "Brawler",
+  "type": "trait",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "",
+    "traitId": "brawler",
+    "cost": 8,
+    "effect": {
+      "kind": "attackBonus",
+      "ability": "",
+      "save": "",
+      "mode": "melee",
+      "track": "",
+      "amount": 1
+    }
+  }
+}

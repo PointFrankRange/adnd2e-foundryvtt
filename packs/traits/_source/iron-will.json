@@ -1,0 +1,20 @@
+{
+  "_id": "ec0864827f37b6c9",
+  "_key": "!items!ec0864827f37b6c9",
+  "name": "Iron Will",
+  "type": "trait",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "",
+    "traitId": "iron-will",
+    "cost": 5,
+    "effect": {
+      "kind": "saveBonus",
+      "ability": "",
+      "save": "spell",
+      "mode": "",
+      "track": "",
+      "amount": 1
+    }
+  }
+}

@@ -63,7 +63,7 @@ The system follows a two-layer contract:
 
 ## Compendium content
 
-The system ships six Item compendium packs:
+The system ships seven Item compendium packs:
 
 - `classes` — Character classes
 - `races` — Player character races
@@ -71,6 +71,7 @@ The system ships six Item compendium packs:
 - `weapon-proficiency-groups` — Weapon proficiency group slots
 - `weapon-proficiencies` — One specific-weapon proficiency per weapon name (51), each tagged with its proficiency group (names and group only)
 - `conditions` — The 15 status-effect condition markers
+- `traits` — The 14 Skills & Powers character-point traits (this project's own designed costs and effects)
 
 Pack sources are JSON files under `packs/<name>/_source/`, one document per file, compiled to LevelDB by `npm run build:packs`. Mechanical values are transcribed from the PHB and DMG with page citations in each pack's `_MANIFEST.md`.
 
@@ -85,7 +86,7 @@ Pack sources are JSON files under `packs/<name>/_source/`, one document per file
 | **5. Proficiencies & skills** | ✅ Complete | Weapon proficiency slots + specialization, non-weapon proficiency checks, thief/bard skill points + rolls, backstab |
 | **6. NPC / monster sheet + bestiary scaffolding** | ✅ Complete | Single-page creature stat-block sheet (fully editable), streamlined 3-tab NPC sheet, empty Bestiary compendium folder + authoring docs |
 | **7. Player's Option: Combat & Tactics** | ✅ Complete | Real `CONFIG.statusEffects` wiring (prone/blinded/stunned/held mechanics, the other 11 conditions as flavor markers), a Combat Tracker initiative-modifier UI, critical-hit/fumble severity tables, armor-vs-weapon-type attack modifiers, a 4-tier weapon mastery system (Specialized/Mastery/Grand Mastery, with a real world-data migration), and called shots (head/weapon hand/leg) + 4 curated combat maneuvers (disarm, knock down/trip, grapple, bull rush) via a per-weapon-row dropdown |
-| **8. Player's Option: Skills & Powers** | 🚧 In progress (Plans 8a-8b/3 done) | The four Skills & Powers toggles are wired into `OptionalRules`, and sub-ability scores (12 authored sub-scores averaging into the six main scores, with a PC-sheet seed action) and expanded proficiencies (a related-weapon penalty: attacking with a weapon in the same group as a specific-weapon proficiency you hold costs half the non-proficiency penalty, plus a 51-item specific-weapon proficiency pack) — the character-point build still to come (Plan 8c) |
+| **8. Player's Option: Skills & Powers** | ✅ Complete | The four Skills & Powers toggles wired into `OptionalRules`; sub-ability scores (12 authored sub-scores averaging into the six main scores, with a PC-sheet seed action); expanded proficiencies (a related-weapon penalty: attacking with a weapon in the same group as a specific-weapon proficiency you hold costs half the non-proficiency penalty, plus a 51-item specific-weapon proficiency pack); and the character-point build (a new `trait` item type with a 14-trait compendium, trait effects on ability scores, saves, to-hit, proficiency slots and HP, and a PC Features-tab CP ledger with a GM-editable pool and hard-blocked unaffordable/duplicate trait drops) |
 | **9. Player's Option: Spells & Magic** | 🔜 Planned | Spell points, expanded casting rules |
 
 ### Known backlog items
@@ -99,3 +100,7 @@ Pack sources are JSON files under `packs/<name>/_source/`, one document per file
 - **Expanded proficiencies: pre-existing and hand-made proficiencies can't count as related.** The related-weapon penalty matches on a proficiency's `proficiencyGroup`, which only the new `weapon-proficiencies` pack items carry; proficiencies created before Plan 8b or by hand have an empty group and behave exactly as before (full non-proficiency penalty). The PC sheet has no way to open an owned item to set it, so the workaround is to delete and re-drop the proficiency from the pack (which resets its mastery tier and slots). A future fix could fall back to the group of the owned weapon with the same name.
 - **Duplicate weapon-proficiency drops aren't guarded.** Dropping a proficiency the actor already holds creates a second copy and charges a second slot (pre-existing since Sub-project 5a).
 - **A weapon's `proficiencyGroup` is free text.** Related-weapon matching needs the exact group name including case (e.g. `Blades`); a dropdown limited to the 8 group names would prevent typos.
+- **Skills & Powers scope left out of Sub-project 8.** A custom-class builder, character kits and per-level character-point awards (the pool is a creation budget only), plus the expanded-proficiency options offered but not selected: a larger non-weapon proficiency list, secondary-ability checks, and wiring the `weaponProficienciesUsed`/`nonweaponProficienciesUsed` toggles.
+- **Sub-scores and traits are invisible on the NPC's own sheet.** The shared derivation applies them to NPCs (hand-set sub-scores, or traits added while the NPC was switched to the full PC sheet), but the streamlined NPC sheet shows neither. The NPC sheet rejects trait drops; the full PC sheet, when selected for an NPC, does not.
+- **Trait ability bonuses show inside the ability row's "racial" delta,** and the exceptional-Strength percentile input keys off the authored score, so STR 17 + Powerful prepares as 18 without the percentile input (the same as a racial +1 today). Cosmetic.
+- **Sub-score character-point refunds are uncapped** (a sub-score of 9 or less refunds CP), exactly as specced; only disadvantage traits share the 10-point refund cap. A trait dropped onto a creature sheet is inert.

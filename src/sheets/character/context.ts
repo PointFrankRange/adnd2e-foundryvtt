@@ -15,12 +15,15 @@ import type {
   SpellItemView,
   TabDescriptor,
   ThiefSkillRow,
+  TraitRow,
   WeaponProfView,
 } from "./context-types";
 import { mainScoreFromSubs, SUB_ABILITIES } from "../../core/abilities/sub-abilities";
 import { getChassis } from "../../core/classes/chassis";
 import { MANEUVERS } from "../../core/combat/maneuvers";
 import { canLearnSpell } from "../../core/magic/spellbook";
+import { characterPointLedgerFor, DEFAULT_CHARACTER_POINT_POOL } from "../../core/skills/character-points";
+import { toTraitEffect, type TraitEffect } from "../../core/skills/traits";
 import { canWeaponSpecialize } from "../../core/proficiencies/weapon";
 import { weaponMasteryTierCost } from "../../core/proficiencies/weapon-mastery";
 import { bardSkillBaseScore, classifyThiefArmor, resolveBardSkill, resolveThiefSkill, thiefSkillBaseScore, thiefSkillPerSkillCap } from "../../core/proficiencies/thief-skills";
@@ -75,6 +78,7 @@ interface SourceView {
     details: { alignment: string };
     currency: { pp: number; gp: number; ep: number; sp: number; cp: number };
     resources: { reputation: string; henchmen: string; followers: string };
+    options?: { skillsAndPowers?: { characterPoints?: { pool?: number } } };
   };
 }
 
@@ -624,6 +628,60 @@ function buildFeatures(input: CharacterSheetInput): CharacterSheetContext["featu
   };
 }
 
+/* ---------- traits + character-point ledger (SP8 Plan 8c) ---------- */
+
+function signedAmount(n: number): string {
+  return n > 0 ? `+${n}` : String(n);
+}
+
+function traitTargetKey(effect: TraitEffect, config: CharacterSheetInput["config"]): string {
+  switch (effect.kind) {
+    case "abilityBonus":
+      return config.abilities[effect.ability];
+    case "saveBonus":
+      return config.saves[effect.save];
+    case "attackBonus":
+      return `ADND2E.sheet.traits.mode.${effect.mode}`;
+    case "proficiencySlots":
+      return `ADND2E.sheet.traits.track.${effect.track}`;
+    case "bonusHp":
+      return "ADND2E.sheet.traits.target.hp";
+  }
+}
+
+function buildTraits(input: CharacterSheetInput): CharacterSheetContext["traits"] {
+  const src = input.source as unknown as SourceView;
+  const items = input.traitItems ?? [];
+  const pool = src.system.options?.skillsAndPowers?.characterPoints?.pool ?? DEFAULT_CHARACTER_POINT_POOL;
+  // null while the rule is off — the ledger IS the gate (never restate it here)
+  const ledger = characterPointLedgerFor(input.optionalRules, {
+    pool,
+    abilities: src.system.abilities,
+    traitCosts: items.map((t) => t.cost),
+  });
+  const rows: TraitRow[] = items.map((t) => {
+    const effect = toTraitEffect(t.effect);
+    return {
+      id: t.id,
+      name: t.name,
+      img: t.img,
+      cost: t.cost,
+      active: effect !== null,
+      summaryAmount: effect ? signedAmount(effect.amount) : "—",
+      summaryTargetKey: effect ? traitTargetKey(effect, input.config) : "ADND2E.sheet.traits.target.none",
+      canRemove: input.perms.editable,
+    };
+  });
+  return {
+    enabled: ledger !== null,
+    canEditPool: input.perms.isGM && input.perms.editable,
+    pool,
+    ledger,
+    rows: ledger ? rows : [],
+    refundCapped: ledger !== null && ledger.refundUncapped > ledger.refund,
+  };
+}
+
 /* ---------- entry point ---------- */
 
 export function buildCharacterSheetContext(input: CharacterSheetInput): CharacterSheetContext {
@@ -639,6 +697,7 @@ export function buildCharacterSheetContext(input: CharacterSheetInput): Characte
     skills: buildSkills(input),
     spells: buildSpells(input),
     features: buildFeatures(input),
+    traits: buildTraits(input),
     biography: {
       detailFields: [...DETAIL_FIELDS],
       showGmNotes: input.perms.isGM,

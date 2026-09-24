@@ -1,0 +1,20 @@
+{
+  "_id": "f840c4224ada7266",
+  "_key": "!items!f840c4224ada7266",
+  "name": "Resilient",
+  "type": "trait",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "",
+    "traitId": "resilient",
+    "cost": 5,
+    "effect": {
+      "kind": "saveBonus",
+      "ability": "",
+      "save": "ppd",
+      "mode": "",
+      "track": "",
+      "amount": 1
+    }
+  }
+}

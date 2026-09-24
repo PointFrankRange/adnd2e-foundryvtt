@@ -1,0 +1,20 @@
+{
+  "_id": "cc654816c2629aaf",
+  "_key": "!items!cc654816c2629aaf",
+  "name": "Poor Aim",
+  "type": "trait",
+  "img": "icons/svg/downgrade.svg",
+  "system": {
+    "description": "",
+    "traitId": "poor-aim",
+    "cost": -5,
+    "effect": {
+      "kind": "attackBonus",
+      "ability": "",
+      "save": "",
+      "mode": "ranged",
+      "track": "",
+      "amount": -1
+    }
+  }
+}

@@ -17,6 +17,7 @@ const base: ActorSnapshot = {
   spentNonweaponSlots: 0,
   baseMovement: 12,
   thiefSkillAllocations: [],
+  traits: [],
 };
 
 const fighterClass = {
@@ -91,6 +92,7 @@ describe("deriveCharacter — full single-class pipeline (§5.6 steps 3-10)", ()
     spentNonweaponSlots: 2,
     baseMovement: 12,
     thiefSkillAllocations: [],
+    traits: [],
   };
 
   it("levels, HP, THAC0, AC, saves, proficiencies, encumbrance", () => {
@@ -153,6 +155,7 @@ describe("deriveCharacter — multiclass (§5.6 step 1)", () => {
     spentNonweaponSlots: 0,
     baseMovement: 12,
     thiefSkillAllocations: [],
+    traits: [],
   };
 
   it("Fighter 5 / Mage 6: averaged HP, best THAC0, best-of saves, split prof classes", () => {
@@ -235,6 +238,7 @@ describe("deriveCharacter — dual-class (§5.6 step 1)", () => {
     spentNonweaponSlots: 0,
     baseMovement: 12,
     thiefSkillAllocations: [],
+    traits: [],
   });
 
   it("suppressed (mage 3 <= fighter 6): mage THAC0/saves, HP frozen, mage spells", () => {

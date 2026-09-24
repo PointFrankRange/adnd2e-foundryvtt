@@ -9,6 +9,7 @@ import { WeaponProficiencyItemModel } from "./weapon-proficiency";
 import { NonweaponProficiencyItemModel } from "./nonweapon-proficiency";
 import { ClassFeatureItemModel } from "./class-feature";
 import { ConditionItemModel } from "./condition";
+import { TraitItemModel } from "./trait";
 
 export {
   ClassItemModel,
@@ -21,6 +22,7 @@ export {
   NonweaponProficiencyItemModel,
   ClassFeatureItemModel,
   ConditionItemModel,
+  TraitItemModel,
 };
 
 /** Registered on `CONFIG.Item.dataModels` in the init hook. Keys ≡ `ITEM_SUBTYPES`. */
@@ -38,4 +40,5 @@ export const ITEM_DATA_MODELS: Record<
   nonweaponProficiency: NonweaponProficiencyItemModel,
   classFeature: ClassFeatureItemModel,
   condition: ConditionItemModel,
+  trait: TraitItemModel,
 };

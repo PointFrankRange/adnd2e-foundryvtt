@@ -1,0 +1,20 @@
+{
+  "_id": "d9226609012c8569",
+  "_key": "!items!d9226609012c8569",
+  "name": "Powerful",
+  "type": "trait",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "",
+    "traitId": "powerful",
+    "cost": 7,
+    "effect": {
+      "kind": "abilityBonus",
+      "ability": "str",
+      "save": "",
+      "mode": "",
+      "track": "",
+      "amount": 1
+    }
+  }
+}
