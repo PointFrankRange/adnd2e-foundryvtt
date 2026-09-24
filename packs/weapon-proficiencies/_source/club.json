@@ -1,0 +1,16 @@
+{
+  "_id": "d15c07f80fb8a49b",
+  "_key": "!items!d15c07f80fb8a49b",
+  "name": "Club",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Club",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Bludgeoning"
+  }
+}

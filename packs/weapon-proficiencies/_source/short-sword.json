@@ -1,0 +1,16 @@
+{
+  "_id": "f90621b8472d77bc",
+  "_key": "!items!f90621b8472d77bc",
+  "name": "Short Sword",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Short Sword",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Blades"
+  }
+}

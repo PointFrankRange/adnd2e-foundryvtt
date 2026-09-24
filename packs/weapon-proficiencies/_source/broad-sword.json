@@ -1,0 +1,16 @@
+{
+  "_id": "4e06b18e0c029d9a",
+  "_key": "!items!4e06b18e0c029d9a",
+  "name": "Broad Sword",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Broad Sword",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Blades"
+  }
+}

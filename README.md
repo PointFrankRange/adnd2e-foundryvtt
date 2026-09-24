@@ -63,12 +63,14 @@ The system follows a two-layer contract:
 
 ## Compendium content
 
-The system ships four Item compendium packs:
+The system ships six Item compendium packs:
 
 - `classes` — Character classes
 - `races` — Player character races
 - `nonweapon-proficiencies` — Non-weapon proficiency items
 - `weapon-proficiency-groups` — Weapon proficiency group slots
+- `weapon-proficiencies` — One specific-weapon proficiency per weapon name (51), each tagged with its proficiency group (names and group only)
+- `conditions` — The 15 status-effect condition markers
 
 Pack sources are JSON files under `packs/<name>/_source/`, one document per file, compiled to LevelDB by `npm run build:packs`. Mechanical values are transcribed from the PHB and DMG with page citations in each pack's `_MANIFEST.md`.
 
@@ -83,7 +85,7 @@ Pack sources are JSON files under `packs/<name>/_source/`, one document per file
 | **5. Proficiencies & skills** | ✅ Complete | Weapon proficiency slots + specialization, non-weapon proficiency checks, thief/bard skill points + rolls, backstab |
 | **6. NPC / monster sheet + bestiary scaffolding** | ✅ Complete | Single-page creature stat-block sheet (fully editable), streamlined 3-tab NPC sheet, empty Bestiary compendium folder + authoring docs |
 | **7. Player's Option: Combat & Tactics** | ✅ Complete | Real `CONFIG.statusEffects` wiring (prone/blinded/stunned/held mechanics, the other 11 conditions as flavor markers), a Combat Tracker initiative-modifier UI, critical-hit/fumble severity tables, armor-vs-weapon-type attack modifiers, a 4-tier weapon mastery system (Specialized/Mastery/Grand Mastery, with a real world-data migration), and called shots (head/weapon hand/leg) + 4 curated combat maneuvers (disarm, knock down/trip, grapple, bull rush) via a per-weapon-row dropdown |
-| **8. Player's Option: Skills & Powers** | 🚧 In progress (Plan 8a/3 done) | The four Skills & Powers toggles are wired into `OptionalRules`, and sub-ability scores (12 authored sub-scores averaging into the six main scores, with a PC-sheet seed action) — expanded proficiencies and the character-point build still to come (Plans 8b-8c) |
+| **8. Player's Option: Skills & Powers** | 🚧 In progress (Plans 8a-8b/3 done) | The four Skills & Powers toggles are wired into `OptionalRules`, and sub-ability scores (12 authored sub-scores averaging into the six main scores, with a PC-sheet seed action) and expanded proficiencies (a related-weapon penalty: attacking with a weapon in the same group as a specific-weapon proficiency you hold costs half the non-proficiency penalty, plus a 51-item specific-weapon proficiency pack) — the character-point build still to come (Plan 8c) |
 | **9. Player's Option: Spells & Magic** | 🔜 Planned | Spell points, expanded casting rules |
 
 ### Known backlog items
@@ -94,3 +96,6 @@ Pack sources are JSON files under `packs/<name>/_source/`, one document per file
 - **The full Combat & Tactics maneuver list beyond the curated 4 remains parked.** Sub-project 7 ships only disarm, knock down/trip, grapple, and bull rush (plus 3 called-shot locations), unified as an attack roll with a penalty and an on-hit effect — a deliberate simplification of the book's varied per-maneuver mechanics (some opposed ability checks). The remaining maneuvers are a candidate for a future revisit (spec §7).
 - **Conditions have no duration or automatic expiry.** Stunned, held, and prone (applied by called shots and maneuvers, or by hand from the Token HUD) stay until a GM clears them manually. Grapple's `held` (blocks the target from acting and grants all attackers +4) is the strongest of these for its −2 cost, which the plan's value table under-priced; surfaced in the setting hints rather than re-balanced. A round-based expiry mechanism would be the proper fix, and would also let the 11 flavor-only conditions gain mechanics.
 - **Non-GM players can't apply damage or maneuver effects to GM-owned targets.** The Apply Damage button (Sub-project 3) and Plan 7d's maneuver effects both require OWNER permission on the target. Players see a permission warning and the GM applies the result by hand. A GM-relayed apply (socket or a GM-executed macro) would let players resolve these end to end.
+- **Expanded proficiencies: pre-existing and hand-made proficiencies can't count as related.** The related-weapon penalty matches on a proficiency's `proficiencyGroup`, which only the new `weapon-proficiencies` pack items carry; proficiencies created before Plan 8b or by hand have an empty group and behave exactly as before (full non-proficiency penalty). The PC sheet has no way to open an owned item to set it, so the workaround is to delete and re-drop the proficiency from the pack (which resets its mastery tier and slots). A future fix could fall back to the group of the owned weapon with the same name.
+- **Duplicate weapon-proficiency drops aren't guarded.** Dropping a proficiency the actor already holds creates a second copy and charges a second slot (pre-existing since Sub-project 5a).
+- **A weapon's `proficiencyGroup` is free text.** Related-weapon matching needs the exact group name including case (e.g. `Blades`); a dropdown limited to the 8 group names would prevent typos.

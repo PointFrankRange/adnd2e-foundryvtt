@@ -1,0 +1,16 @@
+{
+  "_id": "ce6edfa4fe1b29ba",
+  "_key": "!items!ce6edfa4fe1b29ba",
+  "name": "Composite Long Bow",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Composite Long Bow",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Bows"
+  }
+}

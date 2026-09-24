@@ -1,0 +1,16 @@
+{
+  "_id": "c7822161081cfe2d",
+  "_key": "!items!c7822161081cfe2d",
+  "name": "Bec de Corbin",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Bec de Corbin",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

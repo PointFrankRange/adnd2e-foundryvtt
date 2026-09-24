@@ -1,0 +1,16 @@
+{
+  "_id": "fd12da17648c6d78",
+  "_key": "!items!fd12da17648c6d78",
+  "name": "Hand Crossbow",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Hand Crossbow",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Crossbows"
+  }
+}

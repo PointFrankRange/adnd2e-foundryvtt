@@ -1,0 +1,16 @@
+{
+  "_id": "f6784973de3622cb",
+  "_key": "!items!f6784973de3622cb",
+  "name": "Halberd",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Halberd",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

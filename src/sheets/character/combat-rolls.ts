@@ -5,6 +5,7 @@ import { getChassis } from "../../core/classes/chassis";
 import { attackModifiers, hitResult } from "../../core/combat/attack";
 import { attackFormula } from "../../core/dice/formula";
 import { weaponAttackPenalty } from "../../core/proficiencies/weapon";
+import { expandedProficienciesEnabled, isRelatedGroup, weaponProficiencyMode } from "../../core/proficiencies/weapon-relation";
 import { weaponMasteryEffect } from "../../core/proficiencies/weapon-mastery";
 import { canBackstab } from "../../core/weapons/backstab";
 import { backstabMultiplier } from "../../core/proficiencies/thief-skills";
@@ -85,39 +86,54 @@ interface GenericAttackerItem {
 }
 
 /** Resolves the attack-roll `proficiencyModifier` (per core/combat/attack.ts's
- *  AttackModifierInput doc comment: "0 if proficient; class non-proficiency
- *  penalty if not; tiered mastery bonus if specialized/mastered") by matching
- *  `weapon` against the actor's weaponProficiency items — by exact name for a
- *  specific-weapon proficiency, or by `weaponOrGroup === weapon.system.proficiencyGroup`
- *  for a group proficiency. Uses the FIRST class item's chassis for the
- *  non-proficiency penalty and the mastery category-to-bonus lookup (a
- *  documented v1 simplification for multi-classed actors — see this plan's
- *  Global Constraints). Only "proficient"/"non-proficient" are ever resolved;
- *  "related" weapon proficiency isn't modeled anywhere in this codebase.
- *  Tier 1 (Specialized) is the pre-existing, always-on mechanic; tiers 2-3
- *  (Mastery/Grand Mastery) are gated behind the `weaponMastery` optional rule
- *  and capped back down to tier 1 when it's off. */
+ *  AttackModifierInput doc comment) by matching `weapon` against the actor's
+ *  weaponProficiency items — by exact name for a specific-weapon proficiency,
+ *  or by `weaponOrGroup === weapon.system.proficiencyGroup` for a group
+ *  proficiency (both -> "proficient", penalty 0). Only when neither matches AND
+ *  the Skills & Powers expanded-proficiencies rule is on
+ *  (`expandedProficienciesEnabled`), a held SPECIFIC-weapon proficiency in the
+ *  same weapon group makes the weapon "related": half the non-proficiency
+ *  penalty (`weaponAttackPenalty(p, "related")`), and no mastery bonus — mastery
+ *  applies only in "proficient" mode. Uses the FIRST class item's chassis for
+ *  the non-proficiency penalty and the mastery category-to-bonus lookup (a
+ *  documented v1 simplification for multi-classed actors). Precedence:
+ *  exact > group > related > non-proficient. Rule off -> exactly the pre-8b
+ *  behavior. Tier 1 (Specialized) is the pre-existing, always-on mechanic;
+ *  tiers 2-3 (Mastery/Grand Mastery) are gated behind the `weaponMastery`
+ *  optional rule and capped back down to tier 1 when it's off. ROLL-time rule:
+ *  `getOptionalRules()` is read fresh on every attack, so toggling a setting
+ *  needs no reload. */
 function resolveProficiencyModifier(actor: AttackerActor, weapon: WeaponItemHandle): number {
-  let isProficient = false;
-  let masteryTier: 0 | 1 | 2 | 3 = 0;
+  const rules = getOptionalRules();
+  let exactMatch = false;
+  let exactTier: 0 | 1 | 2 | 3 = 0;
   let groupMatch: { masteryTier?: 0 | 1 | 2 | 3 } | null = null;
+  const heldSpecificGroups: string[] = [];
   for (const item of actor.items) {
     if (item.type !== "weaponProficiency") continue;
-    const s = item.system as { weaponOrGroup?: string; isGroup?: boolean; masteryTier?: 0 | 1 | 2 | 3 };
+    const s = item.system as {
+      weaponOrGroup?: string;
+      isGroup?: boolean;
+      masteryTier?: 0 | 1 | 2 | 3;
+      proficiencyGroup?: string;
+    };
     if (s.isGroup !== true && s.weaponOrGroup === weapon.name) {
-      isProficient = true;
-      masteryTier = s.masteryTier ?? 0;
+      exactMatch = true;
+      exactTier = s.masteryTier ?? 0;
       groupMatch = null;
       break;
     }
     if (s.isGroup === true && s.weaponOrGroup === weapon.system.proficiencyGroup && !groupMatch) {
       groupMatch = s;
     }
+    if (s.isGroup !== true && s.proficiencyGroup) heldSpecificGroups.push(s.proficiencyGroup);
   }
-  if (!isProficient && groupMatch) {
-    isProficient = true;
-    masteryTier = groupMatch.masteryTier ?? 0;
-  }
+
+  const relatedGroupMatch =
+    expandedProficienciesEnabled(rules) && isRelatedGroup(weapon.system.proficiencyGroup, heldSpecificGroups);
+  const mode = weaponProficiencyMode({ exactMatch, groupMatch: groupMatch !== null, relatedGroupMatch });
+  const isProficient = mode === "proficient";
+  const masteryTier = exactMatch ? exactTier : (groupMatch?.masteryTier ?? 0);
 
   let nonProficiencyPenalty = 0;
   for (const item of actor.items) {
@@ -129,7 +145,8 @@ function resolveProficiencyModifier(actor: AttackerActor, weapon: WeaponItemHand
     }
   }
 
-  const base = weaponAttackPenalty(nonProficiencyPenalty, isProficient ? "proficient" : "non-proficient");
+  const base = weaponAttackPenalty(nonProficiencyPenalty, mode);
+  // "related" and "non-proficient" never carry a mastery bonus.
   if (!isProficient || masteryTier === 0) return base;
 
   // Tier 1 (Specialized) is the pre-existing, always-on mechanic — it applies
@@ -141,7 +158,7 @@ function resolveProficiencyModifier(actor: AttackerActor, weapon: WeaponItemHand
   // both re-checked at roll time in this same file, not only at UI-render
   // time — spec §5's "not... rendered and then ignored server-side" applies
   // equally to a persisted tier as to an ephemeral per-roll UI choice).
-  const rules = getOptionalRules();
+  // `rules` is the single read at the top of the function.
   const masteryEnabled = rules.combatAndTacticsEnabled && rules.weaponMastery;
   const effectiveTier = masteryEnabled ? masteryTier : (Math.min(masteryTier, 1) as 0 | 1);
 

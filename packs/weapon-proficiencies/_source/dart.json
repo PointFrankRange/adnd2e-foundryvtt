@@ -1,0 +1,16 @@
+{
+  "_id": "db3db0f221569ab9",
+  "_key": "!items!db3db0f221569ab9",
+  "name": "Dart",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Dart",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Hurled"
+  }
+}

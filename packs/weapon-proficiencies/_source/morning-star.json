@@ -1,0 +1,16 @@
+{
+  "_id": "5268a69605216652",
+  "_key": "!items!5268a69605216652",
+  "name": "Morning Star",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Morning Star",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Bludgeoning"
+  }
+}

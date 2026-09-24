@@ -1,0 +1,16 @@
+{
+  "_id": "48dbbacf1d00cb09",
+  "_key": "!items!48dbbacf1d00cb09",
+  "name": "Harpoon",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Harpoon",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Hurled"
+  }
+}

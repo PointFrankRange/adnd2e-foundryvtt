@@ -1,0 +1,16 @@
+{
+  "_id": "f5346af8069a025d",
+  "_key": "!items!f5346af8069a025d",
+  "name": "Fauchard",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Fauchard",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

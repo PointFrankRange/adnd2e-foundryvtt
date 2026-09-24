@@ -1,0 +1,16 @@
+{
+  "_id": "eb62fe4a41aaa1da",
+  "_key": "!items!eb62fe4a41aaa1da",
+  "name": "Footman's Mace",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Footman's Mace",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Bludgeoning"
+  }
+}

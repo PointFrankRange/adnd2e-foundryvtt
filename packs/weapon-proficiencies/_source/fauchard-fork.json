@@ -1,0 +1,16 @@
+{
+  "_id": "ad2552a4d4b33afc",
+  "_key": "!items!ad2552a4d4b33afc",
+  "name": "Fauchard-Fork",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Fauchard-Fork",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

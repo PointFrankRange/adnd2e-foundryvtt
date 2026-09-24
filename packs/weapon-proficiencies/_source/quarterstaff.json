@@ -1,0 +1,16 @@
+{
+  "_id": "094d5814ba291146",
+  "_key": "!items!094d5814ba291146",
+  "name": "Quarterstaff",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Quarterstaff",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Bludgeoning"
+  }
+}

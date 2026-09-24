@@ -1,0 +1,16 @@
+{
+  "_id": "cef3bc08993e6d12",
+  "_key": "!items!cef3bc08993e6d12",
+  "name": "Ranseur",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Ranseur",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}

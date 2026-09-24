@@ -1,0 +1,16 @@
+{
+  "_id": "6adec68d9dbbf04c",
+  "_key": "!items!6adec68d9dbbf04c",
+  "name": "Footman's Flail",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Footman's Flail",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Hafted"
+  }
+}

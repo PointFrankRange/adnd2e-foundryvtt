@@ -1,0 +1,16 @@
+{
+  "_id": "96606a9f053c513c",
+  "_key": "!items!96606a9f053c513c",
+  "name": "Long Bow",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Long Bow",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Bows"
+  }
+}

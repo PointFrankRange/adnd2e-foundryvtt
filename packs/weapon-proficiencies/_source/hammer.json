@@ -1,0 +1,16 @@
+{
+  "_id": "a04e490d182c025d",
+  "_key": "!items!a04e490d182c025d",
+  "name": "Hammer",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Hammer",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Bludgeoning"
+  }
+}

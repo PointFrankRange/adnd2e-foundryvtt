@@ -41,10 +41,10 @@ describe("system.json packFolders", () => {
     }
   });
 
-  it("ships the 5 Item compendium packs", () => {
-    expect(manifest.packs ?? []).toHaveLength(5);
+  it("ships the 6 Item compendium packs", () => {
+    expect(manifest.packs ?? []).toHaveLength(6);
     const names = (manifest.packs ?? []).map((p: unknown) => (p as Record<string, unknown>).name).sort();
-    expect(names).toEqual(["classes", "conditions", "nonweapon-proficiencies", "races", "weapon-proficiency-groups"]);
+    expect(names).toEqual(["classes", "conditions", "nonweapon-proficiencies", "races", "weapon-proficiencies", "weapon-proficiency-groups"]);
   });
 });
 

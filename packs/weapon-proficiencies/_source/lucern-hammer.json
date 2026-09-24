@@ -1,0 +1,16 @@
+{
+  "_id": "6725d5a5f8369368",
+  "_key": "!items!6725d5a5f8369368",
+  "name": "Lucern Hammer",
+  "type": "weaponProficiency",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "",
+    "weaponOrGroup": "Lucern Hammer",
+    "isGroup": false,
+    "slotsInvested": 0,
+    "styleSpecialization": null,
+    "masteryTier": 0,
+    "proficiencyGroup": "Pole Arms"
+  }
+}
