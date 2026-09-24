@@ -3,7 +3,7 @@ import { DEFAULT_OPTIONAL_RULES } from "../../src/core/options";
 import type { OptionalRules } from "../../src/core/options";
 
 describe("DEFAULT_OPTIONAL_RULES", () => {
-  it("has exactly the eighteen core, combatAndTactics and skillsAndPowers toggles", () => {
+  it("has exactly the twenty core, combatAndTactics, skillsAndPowers and spellsAndMagic toggles", () => {
     expect(Object.keys(DEFAULT_OPTIONAL_RULES).sort()).toEqual(
       [
         "armorTypeVsWeaponType",
@@ -13,12 +13,14 @@ describe("DEFAULT_OPTIONAL_RULES", () => {
         "combatManeuvers",
         "criticalHits",
         "exceptionalStrength",
+        "expandedCastingTime",
         "expandedProficiencies",
         "maxSpellsPerLevel",
         "multiclassHpAveraging",
         "nonweaponProficienciesUsed",
         "skillsAndPowersEnabled",
         "spellFailureFromWisdom",
+        "spellsAndMagicEnabled",
         "subAbilityScores",
         "trainingRequiredToLevel",
         "weaponMastery",
@@ -48,6 +50,8 @@ describe("DEFAULT_OPTIONAL_RULES", () => {
       subAbilityScores: false,
       characterPointBuild: false,
       expandedProficiencies: false,
+      spellsAndMagicEnabled: false,
+      expandedCastingTime: false,
     };
     expect(DEFAULT_OPTIONAL_RULES).toEqual(expected);
   });

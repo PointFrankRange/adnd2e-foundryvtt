@@ -3,10 +3,8 @@
  * a rule switch can change. `data/` builds this from `game.settings`
  * (`getOptionalRules()`); `core/` only ever receives it as a parameter.
  *
- * `core`, `combatAndTactics` and `skillsAndPowers` group toggles all live here
- * (Sub-projects 7 and 8 wired the latter two). `spellsAndMagic.*` settings are
- * registered but are not part of this bag until Sub-project 9 wires the
- * branches (spec §6.2).
+ * `core`, `combatAndTactics`, `skillsAndPowers` and `spellsAndMagic` group toggles all live here
+ * (Sub-projects 7, 8 and 9 wired those latter three). `spellsAndMagic.spellPoints` and `.channelers` are registered but not implemented (they come from *Player's Option: Spells & Magic*, which this system does not reference).
  */
 export interface OptionalRules {
   /** PHB p.18: warriors roll d100 for exceptional Strength at STR 18. */
@@ -47,6 +45,11 @@ export interface OptionalRules {
   characterPointBuild: boolean;
   /** Sub-project 8 Plan 8b: related-weapon proficiency penalty + specific-weapon proficiencies. */
   expandedProficiencies: boolean;
+  /** Sub-project 9 master switch — every other spellsAndMagic.* key is a
+   *  no-op unless this is also true. */
+  spellsAndMagicEnabled: boolean;
+  /** Sub-project 9 Plan 9a: PHB casting time + spell disruption (PHB p.86-87, p.95). */
+  expandedCastingTime: boolean;
 }
 
 export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
@@ -68,4 +71,6 @@ export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
   subAbilityScores: false,
   characterPointBuild: false,
   expandedProficiencies: false,
+  spellsAndMagicEnabled: false,
+  expandedCastingTime: false,
 };

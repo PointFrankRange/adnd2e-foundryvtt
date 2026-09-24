@@ -586,19 +586,19 @@
       },
       "spellsAndMagicEnabled": {
         "name": "Spells & Magic: Enabled",
-        "hint": "Master switch for the Spells & Magic option group. Requires Sub-project 9."
+        "hint": "Master switch for the Spells & Magic option group — every other Spells & Magic rule is a no-op unless this is also on."
       },
       "spellPoints": {
         "name": "Spells & Magic: Spell Points",
-        "hint": "Cast from a spell-point pool instead of fixed slots (Spells & Magic). Requires Sub-project 9."
+        "hint": "Not implemented — spell points come from Player's Option: Spells & Magic, which this system does not reference."
       },
       "expandedCastingTime": {
         "name": "Spells & Magic: Expanded Casting Time",
-        "hint": "The expanded casting-time and interruption rules (Spells & Magic). Requires Sub-project 9."
+        "hint": "Casting time adds to initiative, multi-round spells finish at the end of their last round, and losing hit points or failing a save while casting loses the spell; no Dexterity AC bonus while casting (PHB optional rule)."
       },
       "channelers": {
         "name": "Spells & Magic: Channelers",
-        "hint": "The channeler wizard variant (Spells & Magic). Requires Sub-project 9."
+        "hint": "Not implemented — channelers come from Player's Option: Spells & Magic, which this system does not reference."
       }
     }
   },
