@@ -7,8 +7,10 @@ import type {
   NwpView,
   PhysicalItemView,
   SpellItemView,
+  TraitItemView,
   WeaponProfView,
 } from "../../../src/sheets/character/context-types";
+import type { RawTraitEffect } from "../../../src/core/skills/traits";
 
 // fixture factory — a single-class L7 fighter, human, no items
 function input(over: Partial<CharacterSheetInput> = {}): CharacterSheetInput {
@@ -1868,5 +1870,122 @@ describe("sub-ability rows (SP8a)", () => {
       input({ subAbilityUi: true, perms: { isGM: false, isOwner: false, editable: false } }),
     );
     expect(c.subAbilities).toEqual({ enabled: true, canSeed: false });
+  });
+});
+
+describe("buildCharacterSheetContext — traits + character points (SP8 Plan 8c)", () => {
+  const ON = { ...DEFAULT_OPTIONAL_RULES, skillsAndPowersEnabled: true, characterPointBuild: true };
+  const fx = (over: Partial<RawTraitEffect> = {}): RawTraitEffect => ({ kind: "bonusHp", ability: "", save: "", mode: "", track: "", amount: 4, ...over });
+  const trait = (over: Partial<TraitItemView> = {}): TraitItemView => ({ id: "t1", name: "Hardy", img: "", traitId: "hardy", cost: 6, effect: fx(), ...over });
+  /** the fixture source with `system` keys merged in */
+  function src(sys: Record<string, unknown>): Record<string, unknown> {
+    const s = input().source as { system: Record<string, unknown> };
+    return { ...s, system: { ...s.system, ...sys } };
+  }
+  const abilitiesWithStrSubs = () => {
+    const a = (input().source as { system: { abilities: Record<string, unknown> } }).system.abilities;
+    return { ...a, str: { ...(a.str as object), sub: { a: 18, b: 14 } } };
+  };
+
+  it("is disabled with no ledger and no rows while the rule is off — in each off combination, even with traits owned", () => {
+    for (const rules of [
+      DEFAULT_OPTIONAL_RULES,
+      { ...DEFAULT_OPTIONAL_RULES, skillsAndPowersEnabled: true },
+      { ...DEFAULT_OPTIONAL_RULES, characterPointBuild: true },
+    ]) {
+      const t = buildCharacterSheetContext(input({ optionalRules: rules, traitItems: [trait()] })).traits;
+      expect(t.enabled).toBe(false);
+      expect(t.ledger).toBeNull();
+      expect(t.rows).toEqual([]);
+      expect(t.refundCapped).toBe(false);
+    }
+  });
+
+  it("rule on, nothing owned and no options in the source: the default 60-point pool is all available", () => {
+    const t = buildCharacterSheetContext(input({ optionalRules: ON })).traits;
+    expect(t.enabled).toBe(true);
+    expect(t.pool).toBe(60);
+    expect(t.rows).toEqual([]);
+    expect(t.ledger).toMatchObject({ pool: 60, spent: 0, available: 60, overspent: false });
+  });
+
+  it("reads the authored pool from the source", () => {
+    const source = src({ options: { skillsAndPowers: { characterPoints: { pool: 45 } } } });
+    const t = buildCharacterSheetContext(input({ optionalRules: ON, source })).traits;
+    expect(t.pool).toBe(45);
+    expect(t.ledger!.available).toBe(45);
+  });
+
+  it("builds a row with a signed amount and the target key, and charges the ledger", () => {
+    const t = buildCharacterSheetContext(input({ optionalRules: ON, traitItems: [trait()] })).traits;
+    expect(t.rows).toEqual([
+      { id: "t1", name: "Hardy", img: "", cost: 6, active: true, summaryAmount: "+4", summaryTargetKey: "ADND2E.sheet.traits.target.hp", canRemove: true },
+    ]);
+    expect(t.ledger).toMatchObject({ spent: 6, available: 54 });
+  });
+
+  it("maps every effect kind to its target key (ability/save labels come from the config)", () => {
+    const rows = buildCharacterSheetContext(
+      input({
+        optionalRules: ON,
+        traitItems: [
+          trait({ id: "a", effect: fx({ kind: "abilityBonus", ability: "str", amount: 1 }) }),
+          trait({ id: "b", effect: fx({ kind: "saveBonus", save: "spell", amount: -1 }) }),
+          trait({ id: "c", effect: fx({ kind: "attackBonus", mode: "ranged", amount: 1 }) }),
+          trait({ id: "d", effect: fx({ kind: "proficiencySlots", track: "weapon", amount: 2 }) }),
+          trait({ id: "e", effect: fx({ kind: "bonusHp", amount: 0 }) }),
+        ],
+      }),
+    ).traits.rows;
+    expect(rows.map((r) => [r.summaryAmount, r.summaryTargetKey])).toEqual([
+      ["+1", "ADND2E.abilities.str"],
+      ["-1", "ADND2E.saves.spell"],
+      ["+1", "ADND2E.sheet.traits.mode.ranged"],
+      ["+2", "ADND2E.sheet.traits.track.weapon"],
+      ["0", "ADND2E.sheet.traits.target.hp"],
+    ]);
+    expect(rows.every((r) => r.active)).toBe(true);
+  });
+
+  it("shows a malformed trait as inert while still charging its cost", () => {
+    const t = buildCharacterSheetContext(input({ optionalRules: ON, traitItems: [trait({ cost: 5, effect: fx({ kind: "" }) })] })).traits;
+    expect(t.rows[0]).toMatchObject({ active: false, summaryAmount: "—", summaryTargetKey: "ADND2E.sheet.traits.target.none" });
+    expect(t.ledger!.spent).toBe(5);
+  });
+
+  it("counts authored sub-scores in the ledger only when sub-ability scores are also on", () => {
+    const source = src({ abilities: abilitiesWithStrSubs() });
+    const off = buildCharacterSheetContext(input({ optionalRules: ON, source })).traits;
+    expect(off.ledger!.subSpent).toBe(0);
+    const on = buildCharacterSheetContext(input({ optionalRules: { ...ON, subAbilityScores: true }, source })).traits;
+    expect(on.ledger!.subSpent).toBe(17);
+    expect(on.ledger!.available).toBe(43);
+  });
+
+  it("flags overspend without hiding anything", () => {
+    const source = src({ options: { skillsAndPowers: { characterPoints: { pool: 5 } } } });
+    const t = buildCharacterSheetContext(input({ optionalRules: ON, source, traitItems: [trait({ cost: 8 })] })).traits;
+    expect(t.ledger).toMatchObject({ available: -3, overspent: true });
+    expect(t.rows).toHaveLength(1);
+  });
+
+  it("flags a capped disadvantage refund only when the raw refund exceeds the cap", () => {
+    const capped = buildCharacterSheetContext(
+      input({ optionalRules: ON, traitItems: [trait({ id: "x", cost: -8 }), trait({ id: "y", cost: -5 })] }),
+    ).traits;
+    expect(capped.ledger).toMatchObject({ refund: 10, refundUncapped: 13 });
+    expect(capped.refundCapped).toBe(true);
+    const under = buildCharacterSheetContext(input({ optionalRules: ON, traitItems: [trait({ cost: -4 })] })).traits;
+    expect(under.refundCapped).toBe(false);
+  });
+
+  it("only a GM who can edit may change the pool; anyone who can edit may remove a trait", () => {
+    const rules = { optionalRules: ON, traitItems: [trait()] };
+    const gm = buildCharacterSheetContext(input({ ...rules, perms: { isGM: true, isOwner: true, editable: true } })).traits;
+    expect([gm.canEditPool, gm.rows[0].canRemove]).toEqual([true, true]);
+    const player = buildCharacterSheetContext(input({ ...rules, perms: { isGM: false, isOwner: true, editable: true } })).traits;
+    expect([player.canEditPool, player.rows[0].canRemove]).toEqual([false, true]);
+    const viewer = buildCharacterSheetContext(input({ ...rules, perms: { isGM: true, isOwner: false, editable: false } })).traits;
+    expect([viewer.canEditPool, viewer.rows[0].canRemove]).toEqual([false, false]);
   });
 });

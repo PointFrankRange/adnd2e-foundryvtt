@@ -4,6 +4,8 @@ import type {
 } from "../../core/types";
 import type { OptionalRules } from "../../core/options";
 import type { SubAbilityId } from "../../core/abilities/sub-abilities";
+import type { CharacterPointLedger } from "../../core/skills/character-points";
+import type { RawTraitEffect } from "../../core/skills/traits";
 
 /* ---------- input (assembled by sheet.ts from plain data) ---------- */
 
@@ -24,6 +26,8 @@ export interface CharacterSheetInput {
   thiefSkillAllocations: { skill: ThiefSkill; allocatedPoints: number }[];
   spellItems: SpellItemView[];
   featureItems: FeatureItemView[];
+  /** Sub-project 8 Plan 8c: every owned `trait` item. Absent = none (the NPC sheet never sets it). */
+  traitItems?: TraitItemView[];
   /** CONFIG.ADND2E — label maps only */
   config: Adnd2eConfigView;
   perms: { isGM: boolean; isOwner: boolean; editable: boolean };
@@ -191,6 +195,12 @@ export interface FeatureItemView {
   uses: { value: number; max: number; per: string } | null;
   description: string;
 }
+export interface TraitItemView {
+  id: string; name: string; img: string;
+  traitId: string; cost: number;
+  /** the stored flat effect (`system.effect`) */
+  effect: RawTraitEffect;
+}
 
 /* ---------- output (consumed by the templates) ---------- */
 
@@ -205,6 +215,17 @@ export interface SubScoreCell {
   value: number | null;
   /** the authored main score the derivation falls back to while `value` is null */
   placeholder: number;
+}
+
+export interface TraitRow {
+  id: string; name: string; img: string; cost: number;
+  /** false for a malformed (inert) trait */
+  active: boolean;
+  /** signed, e.g. "+4"; "—" for an inert trait */
+  summaryAmount: string;
+  /** i18n key of what the amount applies to */
+  summaryTargetKey: string;
+  canRemove: boolean;
 }
 
 export interface AbilityRow {
@@ -299,6 +320,17 @@ export interface CharacterSheetContext {
     racialAbilities: string[];
     languagesMax: number;
     resources: { reputation: string; henchmen: string; followers: string };
+  };
+  traits: {
+    /** true only while the ledger exists, i.e. the character-point build rule is on */
+    enabled: boolean;
+    canEditPool: boolean;
+    /** the authored pool */
+    pool: number;
+    ledger: CharacterPointLedger | null;
+    rows: TraitRow[];
+    /** disadvantage refunds exceed the cap, so part of them is not returned */
+    refundCapped: boolean;
   };
   biography: { detailFields: string[]; showGmNotes: boolean };
   tabs: TabDescriptor[];
