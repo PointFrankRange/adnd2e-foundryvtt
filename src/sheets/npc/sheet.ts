@@ -266,6 +266,12 @@ export class Adnd2eNpcSheet extends Base {
       type: string;
       system: { slotCost?: number; group?: NonweaponGroup };
     };
+    // SP8 Plan 8c: traits are PC-sheet-only (spec §7). The shared derive would
+    // apply a dropped trait's effects invisibly on this streamlined sheet, so refuse it.
+    if (dropped.type === "trait") {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.drop.traitsPcOnly"));
+      return null;
+    }
 
     let dropSlotCost: number | undefined;
     if (dropped.type === "weaponProficiency") {

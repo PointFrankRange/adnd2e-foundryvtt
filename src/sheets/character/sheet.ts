@@ -3,6 +3,7 @@ import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
 import { getChassis } from "../../core/classes/chassis";
 import type { ManeuverId } from "../../core/combat/maneuvers";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
+import type { RawTraitEffect } from "../../core/skills/traits";
 import type { ArmorType, ClassId, NonweaponGroup, SaveCategory, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
 import { rollAttack, rollSave } from "./combat-rolls";
@@ -15,6 +16,7 @@ import type {
   PhysicalItemView,
   RaceItemView,
   SpellItemView,
+  TraitItemView,
   WeaponProfView,
 } from "./context-types";
 import { validateItemDrop } from "./drop-rules";
@@ -22,6 +24,7 @@ import { rollHitPoints } from "./hp-roll";
 import { advanceWeaponMastery, allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill } from "./proficiency-actions";
 import { castSpell, forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
 import { seedSubAbilities } from "./sub-ability-actions";
+import { removeTrait, traitDropInputs, traitRefundCapped, type TraitDropInputs } from "./trait-actions";
 import { awardXpSplit } from "./xp";
 
 /* ---------------------------------------------------------------------------
@@ -260,6 +263,11 @@ export function toFeatureView(it: RawItem): FeatureItemView {
   };
 }
 
+export function toTraitView(it: RawItem): TraitItemView {
+  const s = it.system as { traitId: string; cost: number; effect: RawTraitEffect };
+  return { id: it.id, name: it.name, img: it.img, traitId: s.traitId, cost: s.cost, effect: { ...s.effect } };
+}
+
 /* ------------------------------------------------------------------------- */
 
 export class Adnd2eCharacterSheet extends Base {
@@ -272,6 +280,7 @@ export class Adnd2eCharacterSheet extends Base {
       rollHp: Adnd2eCharacterSheet.#onRollHp,
       takeAverageHp: Adnd2eCharacterSheet.#onTakeAverageHp,
       seedSubAbilities: Adnd2eCharacterSheet.#onSeedSubAbilities,
+      removeTrait: Adnd2eCharacterSheet.#onRemoveTrait,
       awardXp: Adnd2eCharacterSheet.#onAwardXp,
       toggleDualClass: Adnd2eCharacterSheet.#onToggleDualClass,
       rollAttack: Adnd2eCharacterSheet.#onRollAttack,
@@ -381,6 +390,7 @@ export class Adnd2eCharacterSheet extends Base {
     const nonweaponProfs: NwpView[] = [];
     const spellItems: SpellItemView[] = [];
     const featureItems: FeatureItemView[] = [];
+    const traitItems: TraitItemView[] = [];
 
     for (const it of items) {
       switch (it.type) {
@@ -407,6 +417,9 @@ export class Adnd2eCharacterSheet extends Base {
         case "classFeature":
           featureItems.push(toFeatureView(it));
           break;
+        case "trait":
+          traitItems.push(toTraitView(it));
+          break;
         default:
           break;
       }
@@ -428,6 +441,7 @@ export class Adnd2eCharacterSheet extends Base {
       ],
       spellItems,
       featureItems,
+      traitItems,
       config: {
         abilities: cfg.abilities,
         saves: cfg.saves,
@@ -460,6 +474,14 @@ export class Adnd2eCharacterSheet extends Base {
       type: string;
       system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup };
     };
+    const isNewDrop =
+      (item as unknown as { parent?: { uuid?: string } }).parent?.uuid !==
+      (this.document as unknown as { uuid: string }).uuid;
+    // Re-sorting an already-owned trait is not a purchase — never validated.
+    if (dropped.type === "trait" && !isNewDrop) return super._onDropItem(event, item);
+    // Re-derived from the actor's CURRENT authored state + settings at drop time.
+    const traitInputs: Partial<TraitDropInputs> =
+      dropped.type === "trait" ? traitDropInputs(this.document as never, dropped as never) : {};
 
     let dropSlotCost: number | undefined;
     let availableSlots: number | undefined;
@@ -484,6 +506,7 @@ export class Adnd2eCharacterSheet extends Base {
         .filter(Boolean),
       dropSlotCost,
       availableSlots,
+      ...traitInputs,
     });
     if (!verdict.ok) {
       ui.notifications?.warn(game.i18n!.localize(verdict.reason!));
@@ -491,9 +514,6 @@ export class Adnd2eCharacterSheet extends Base {
     }
 
     const result = await super._onDropItem(event, item);
-    const isNewDrop =
-      (item as unknown as { parent?: { uuid?: string } }).parent?.uuid !==
-      (this.document as unknown as { uuid: string }).uuid;
     if (
       result &&
       isNewDrop &&
@@ -503,6 +523,9 @@ export class Adnd2eCharacterSheet extends Base {
       await (result as unknown as { update(data: Record<string, unknown>): Promise<unknown> }).update({
         "system.slotsInvested": dropSlotCost,
       });
+    }
+    if (result && isNewDrop && dropped.type === "trait" && traitRefundCapped(traitInputs)) {
+      ui.notifications?.info(game.i18n!.localize("ADND2E.sheet.traits.refundCappedToast"));
     }
     return result;
   }
@@ -571,6 +594,15 @@ export class Adnd2eCharacterSheet extends Base {
     _target: HTMLElement,
   ): Promise<void> {
     await seedSubAbilities(this.document as never);
+  }
+
+  static async #onRemoveTrait(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const itemId = target.dataset.itemId;
+    if (itemId && this.isEditable) await removeTrait(this.document as never, itemId);
   }
 
   static async #onAwardXp(this: Adnd2eCharacterSheet): Promise<void> {

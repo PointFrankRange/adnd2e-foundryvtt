@@ -463,3 +463,34 @@ describe("lang/en.json — SP8a sub-ability strings", () => {
     }
   });
 });
+
+describe("lang/en.json — SP8 Plan 8c trait strings", () => {
+  it("resolves every ADND2E.sheet.traits.* and trait drop key the sheet layer references", () => {
+    for (const key of [
+      "ADND2E.sheet.drop.duplicateTrait",
+      "ADND2E.sheet.drop.insufficientCp",
+      "ADND2E.sheet.drop.traitsDisabled",
+      "ADND2E.sheet.drop.traitsPcOnly",
+      "ADND2E.sheet.traits.title",
+      "ADND2E.sheet.traits.pool",
+      "ADND2E.sheet.traits.poolGmOnly",
+      "ADND2E.sheet.traits.spent",
+      "ADND2E.sheet.traits.available",
+      "ADND2E.sheet.traits.overspent",
+      "ADND2E.sheet.traits.refundCapped",
+      "ADND2E.sheet.traits.refundCappedToast",
+      "ADND2E.sheet.traits.none",
+      "ADND2E.sheet.traits.remove",
+      "ADND2E.sheet.traits.removeBlockedWarning",
+      "ADND2E.sheet.traits.mode.melee",
+      "ADND2E.sheet.traits.mode.ranged",
+      "ADND2E.sheet.traits.track.weapon",
+      "ADND2E.sheet.traits.track.nonweapon",
+      "ADND2E.sheet.traits.target.hp",
+      "ADND2E.sheet.traits.target.none",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

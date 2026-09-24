@@ -20,6 +20,32 @@
     {{/each}}
   </div>
 
+  {{#if adnd2e.traits.enabled}}
+  <div class="traits panel">
+    <h3>{{localize 'ADND2E.sheet.traits.title'}}</h3>
+    <div class="cp-ledger">
+      <label>
+        {{localize 'ADND2E.sheet.traits.pool'}}
+        <input type="number" min="0" step="1" name="system.options.skillsAndPowers.characterPoints.pool" value="{{adnd2e.traits.pool}}"{{#unless adnd2e.traits.canEditPool}} disabled title="{{localize 'ADND2E.sheet.traits.poolGmOnly'}}"{{/unless}} />
+      </label>
+      <span class="cp-spent">{{localize 'ADND2E.sheet.traits.spent'}}: {{adnd2e.traits.ledger.spent}}</span>
+      <span class="cp-available{{#if adnd2e.traits.ledger.overspent}} overspent{{/if}}">{{localize 'ADND2E.sheet.traits.available'}}: {{adnd2e.traits.ledger.available}}</span>
+    </div>
+    {{#if adnd2e.traits.ledger.overspent}}<p class="warning">{{localize 'ADND2E.sheet.traits.overspent'}}</p>{{/if}}
+    {{#if adnd2e.traits.refundCapped}}<p class="hint">{{localize 'ADND2E.sheet.traits.refundCapped'}}</p>{{/if}}
+    {{#each adnd2e.traits.rows as |row|}}
+      <div class="trait-row{{#unless row.active}} inert{{/unless}}" data-item-id="{{row.id}}">
+        <span class="name">{{row.name}}</span>
+        <span class="cost">{{row.cost}}</span>
+        <span class="effect">{{row.summaryAmount}} {{localize row.summaryTargetKey}}</span>
+        {{#if row.canRemove}}<button type="button" data-action="removeTrait" data-item-id="{{row.id}}">{{localize 'ADND2E.sheet.traits.remove'}}</button>{{/if}}
+      </div>
+    {{else}}
+      <p class="placeholder">{{localize 'ADND2E.sheet.traits.none'}}</p>
+    {{/each}}
+  </div>
+  {{/if}}
+
   <div class="racial-abilities panel">
     <h3>{{localize 'ADND2E.sheet.features.racial'}}</h3>
     <ul>
