@@ -5,7 +5,9 @@ import { ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, ENCUMBRANCE_CATEGORIES, MULTICLASS
 import { applyRacialDeltas, mainScoreFromSubs, subAbilitiesEnabled } from "../../core/abilities";
 import { THIEF_SKILLS } from "../../core/proficiencies/thief-skills";
 import type { AbilityScores, Race } from "../../core/types";
-import { deriveCharacter } from "../derive/character";
+import { DEFAULT_CHARACTER_POINT_POOL } from "../../core/skills/character-points";
+import { abilityScoreWithBonus } from "../../core/skills/traits";
+import { deriveCharacter, resolveTraitTotals, toTraitEntries } from "../derive/character";
 import { getOptionalRules } from "../../settings";
 import { snapshotActor } from "./snapshot";
 
@@ -207,7 +209,12 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
     biography: htmlField(),
     options: new SchemaField({
       combatAndTactics: new foundry.data.fields.ObjectField({ required: true, initial: {} }),
-      skillsAndPowers: new foundry.data.fields.ObjectField({ required: true, initial: {} }),
+      skillsAndPowers: new SchemaField({
+        /** Sub-project 8 Plan 8c: the authored character-point build budget (creation only; GM-editable). */
+        characterPoints: new SchemaField({
+          pool: new NumberField({ required: true, integer: true, min: 0, initial: DEFAULT_CHARACTER_POINT_POOL }),
+        }),
+      }),
       spellsAndMagic: new foundry.data.fields.ObjectField({ required: true, initial: {} }),
     }),
   };
@@ -257,6 +264,28 @@ export function applyRacialAdjustment(model: foundry.abstract.TypeDataModel.Any)
   const raw = Object.fromEntries(ABILITY_KEYS.map((k) => [k, sys.abilities[k].score])) as unknown as AbilityScores;
   const adj = applyRacialDeltas(raw, raceItem.system.raceId as Race);
   for (const k of ABILITY_KEYS) sys.abilities[k].score = Math.max(1, adj[k]);
+}
+
+/**
+ * Sub-project 8 Plan 8c: applies the owned traits' ability bonuses onto the
+ * PREPARED `system.abilities.<k>.score`, AFTER the racial adjustment (order:
+ * sub-scores -> racial -> traits), clamped to [1, 25]. Uses the same
+ * `resolveTraitTotals` as `deriveCharacter` — the ONLY place the character-point
+ * gate is consulted for traits — so rule off (or no ability trait) is a no-op
+ * that leaves every prepared score byte-identical. Writes the prepared score only
+ * (never `_source`); Foundry rebuilds prepared fields from `_source` every cycle
+ * (`reset()` -> `_initialize()`), so it cannot ratchet. `deriveCharacter`
+ * deliberately ignores `abilityBonus`, so a bonus is never counted twice.
+ */
+export function applyTraitAbilityBonuses(model: foundry.abstract.TypeDataModel.Any): void {
+  const sys = model as unknown as {
+    abilities: Record<string, { score: number }>;
+    parent: { items: Iterable<{ type: string; system: unknown }> };
+  };
+  const totals = resolveTraitTotals(toTraitEntries(sys.parent.items), getOptionalRules());
+  for (const k of ABILITY_KEYS) {
+    sys.abilities[k].score = abilityScoreWithBonus(sys.abilities[k].score, totals.abilityBonus[k]);
+  }
 }
 
 /** The `system.*` write surface for `deriveAndCache` (spec §5.1 paths). */

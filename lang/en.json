@@ -558,7 +558,7 @@
       },
       "characterPointBuild": {
         "name": "Skills & Powers: Character Point Build",
-        "hint": "Buy sub-scores and traits with character points (Skills & Powers). (not yet enforced — lands in a later Skills & Powers plan)"
+        "hint": "Spend a character-point pool on sub-scores and traits when building a character (Skills & Powers). Trait effects apply only while this is on."
       },
       "expandedProficiencies": {
         "name": "Skills & Powers: Expanded Proficiencies",
