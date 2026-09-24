@@ -8,5 +8,6 @@ export * from "./dice";
 export * from "./combat";
 export * from "./magic";
 export * from "./proficiencies";
+export * from "./skills";
 export * from "./encumbrance";
 export * from "./weapons";
