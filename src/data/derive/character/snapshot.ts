@@ -3,6 +3,7 @@
 // consumes only this. Fields beyond what 1c.3a uses (`classes`) are the forward
 // contract Plan 1c.3b fills.
 import type { AbilityScores, ClassId, Race, ThiefSkill, WizardSchool } from "../../../core/types";
+import type { TraitEffect } from "../../../core/skills/traits";
 
 export type DualClassState = "primary" | "active";
 
@@ -34,6 +35,13 @@ export interface EquippedShield {
   magicBonus: number;
 }
 
+export interface TraitEntry {
+  traitId: string;
+  /** CP cost (negative = disadvantage) */
+  cost: number;
+  effect: TraitEffect;
+}
+
 export interface ActorSnapshot {
   /** post-racial-adjustment ability scores (CharacterModel.prepareBaseData applies the delta) */
   abilities: AbilityScores;
@@ -56,4 +64,6 @@ export interface ActorSnapshot {
   baseMovement: number;
   /** authored thief/bard skill-point allocations — `system.thiefSkills.allocations` */
   thiefSkillAllocations: readonly { skill: ThiefSkill; allocatedPoints: number }[];
+  /** every owned `trait` item whose stored effect is well-formed, in item order — applied only while the character-point build rule is on */
+  traits: readonly TraitEntry[];
 }

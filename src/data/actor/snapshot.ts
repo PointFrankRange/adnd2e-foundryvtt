@@ -120,5 +120,6 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
     spentNonweaponSlots,
     baseMovement: raceItem ? ((raceItem.system as RaceItemSystem).baseMovement ?? 12) : 12,
     thiefSkillAllocations,
+    traits: [], // placeholder — Task 6 reads the owned trait items
   };
 }

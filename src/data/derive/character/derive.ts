@@ -10,6 +10,7 @@ import type {
   ArrangementResolution, ClassArrangement, ClassMember, DualClassResolution,
 } from "../../../core/classes/multiclass";
 import type { ActorSnapshot } from "./snapshot";
+import { applyTraitEffects, resolveTraitTotals } from "./traits";
 import { deriveClassLevels } from "./levels";
 import { characterHpMax } from "./hp";
 import { deriveThac0 } from "./thac0";
@@ -80,7 +81,7 @@ function mergeCasterSlots(
   return out;
 }
 
-export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules): CharacterDerived {
+function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): CharacterDerived {
   // NOTE: one flag for deriveAbilities, so abilities.con.mods.hpAdjustment shows
   // the warrior column for any multiclass containing a warrior. The HP *math*
   // (multiclass.ts) uses the correct per-class column; this only affects the
@@ -210,4 +211,13 @@ export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules)
       hpAveraged: mode === "multiclass" && options.multiclassHpAveraging,
     },
   };
+}
+
+/**
+ * The character pipeline (spec §5.6) plus the SP8 Plan 8c trait effects. While
+ * the character-point build rule is off `resolveTraitTotals` is all zeros, so
+ * this equals the base pipeline exactly.
+ */
+export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules): CharacterDerived {
+  return applyTraitEffects(deriveCharacterBase(snapshot, options), resolveTraitTotals(snapshot.traits, options));
 }
