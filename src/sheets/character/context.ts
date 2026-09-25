@@ -1,6 +1,7 @@
 import type { ArmorType, BardSkill, ClassId, DexterityModifiers, IntelligenceModifiers, Race, SphereName, WizardSchool } from "../../core/types";
 import type {
   AbilityRow,
+  CastingPanel,
   CharacterDerivedView,
   CharacterSheetContext,
   CharacterSheetInput,
@@ -21,6 +22,7 @@ import type {
 import { mainScoreFromSubs, SUB_ABILITIES } from "../../core/abilities/sub-abilities";
 import { getChassis } from "../../core/classes/chassis";
 import { MANEUVERS } from "../../core/combat/maneuvers";
+import { canCompleteCasting } from "../../core/magic/casting-time";
 import { canLearnSpell } from "../../core/magic/spellbook";
 import { characterPointLedgerFor, DEFAULT_CHARACTER_POINT_POOL } from "../../core/skills/character-points";
 import { toTraitEffect, type TraitEffect } from "../../core/skills/traits";
@@ -209,6 +211,7 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
       encumbranceCategory: a.movement.encumbranceCategory,
       encumbranceCategoryLabel: input.config.encumbranceCategories[a.movement.encumbranceCategory],
     },
+    casting: Boolean(input.castingStatus),
   };
 }
 
@@ -470,6 +473,7 @@ function buildSpells(input: CharacterSheetInput): CharacterSheetContext["spells"
   const sphereAccessOverride = sc.priest.sphereAccessOverride as SphereName[] | null;
   const int = input.derived.abilities.int.mods as IntelligenceModifiers;
   const specialistSchool = school as WizardSchool | null;
+  const casting = buildCastingPanel(input);
 
   const known: { level: number; items: SpellItemView[] }[] = [];
   for (let level = 1; level <= 9; level += 1) {
@@ -479,7 +483,8 @@ function buildSpells(input: CharacterSheetInput): CharacterSheetContext["spells"
     const learnCtx: LearnEligibilityContext = {
       int, specialistSchool, knownAtThisLevel, castableAtThisLevel, optionalRules: input.optionalRules,
     };
-    const items = levelItems.map((s) => buildSpellRow(s, sc, priestChassisId, sphereAccessOverride, learnCtx));
+    let items = levelItems.map((s) => buildSpellRow(s, sc, priestChassisId, sphereAccessOverride, learnCtx));
+    items = casting ? items.map((r) => ({ ...r, canCast: false })) : items;
     if (items.length > 0) known.push({ level, items });
   }
   return {
@@ -488,6 +493,25 @@ function buildSpells(input: CharacterSheetInput): CharacterSheetContext["spells"
     specialistSchoolLabel: school ? input.config.schools[school] : null,
     known,
     orphaned: buildOrphanedSpells(input, sc),
+    casting,
+  };
+}
+
+/* ---------- casting (SP9a) ---------- */
+
+function buildCastingPanel(input: CharacterSheetInput): CastingPanel | null {
+  const s = input.castingStatus;
+  if (!s) return null;
+  const isRounds = s.completeRound !== null;
+  return {
+    spellName: s.spellName,
+    detailKey: isRounds ? "ADND2E.sheet.casting.completesRound" : "ADND2E.sheet.casting.onYourTurn",
+    detailValue: isRounds ? (s.completeRound as number) : (s.segments ?? 0),
+    canComplete:
+      input.perms.editable &&
+      s.combatRound !== null &&
+      canCompleteCasting(s, { combatRound: s.combatRound, isCasterTurn: s.isCasterTurn }),
+    canGmControl: input.perms.isGM,
   };
 }
 

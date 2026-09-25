@@ -40,6 +40,29 @@ export interface CharacterSheetInput {
    *  every other consumer of this builder — notably the NPC sheet, which shares
    *  the ability-row partial — is off by default. */
   subAbilityUi?: boolean;
+  /** Sub-project 9a: the in-progress cast; absent/null when idle or the rule is off */
+  castingStatus?: CastingStatusInput | null;
+}
+
+/** Sub-project 9a: the in-progress cast, assembled by sheet.ts ONLY while the casting-time rule is on. */
+export interface CastingStatusInput {
+  spellName: string;
+  startRound: number;
+  completeRound: number | null;
+  segments: number | null;
+  /** the cast's combat round, or null when that combat no longer exists / has not started */
+  combatRound: number | null;
+  /** it is currently the caster's combatant's turn */
+  isCasterTurn: boolean;
+}
+
+export interface CastingPanel {
+  spellName: string;
+  /** i18n key taking a `value` argument */
+  detailKey: string;
+  detailValue: number;
+  canComplete: boolean;
+  canGmControl: boolean;
 }
 
 export interface Adnd2eConfigView {
@@ -276,6 +299,8 @@ export interface CharacterSheetContext {
     ac: { normal: number; rearAttack: number; surprised: number; shieldless: number };
     saves: SaveRow[];
     movement: { base: number; current: number; encumbranceCategory: string; encumbranceCategoryLabel: string };
+    /** Sub-project 9a: true while a cast is in progress — drives the AC badge */
+    casting: boolean;
   };
   classes: ClassRow[];
   dualClassToggle: { available: boolean; on: boolean };
@@ -314,6 +339,8 @@ export interface CharacterSheetContext {
     specialistSchoolLabel: string | null;
     known: { level: number; items: SpellItemView[] }[];
     orphaned: OrphanedSpellRow[];
+    /** Sub-project 9a: the in-progress cast's panel, or null when idle/the rule is off */
+    casting: CastingPanel | null;
   };
   features: {
     groups: { sourceType: string; sourceTypeLabel: string; items: FeatureItemView[] }[];
