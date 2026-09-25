@@ -17,7 +17,8 @@ import { buildCharacterSheetContext } from "../character/context";
 import type { CharacterSheetInput } from "../character/context-types";
 import { rollHitPoints } from "../character/hp-roll";
 import { advanceWeaponMastery, rollNonweaponCheck, rollThiefSkill } from "../character/proficiency-actions";
-import { castSpell, forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "../character/spell-actions";
+import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "../character/casting-actions";
+import { forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "../character/spell-actions";
 
 /* ---------------------------------------------------------------------------
  * Adnd2eNpcSheet — SP6 Task 4.
@@ -94,6 +95,9 @@ export class Adnd2eNpcSheet extends Base {
       castSpell: Adnd2eNpcSheet.#onCastSpell,
       restSpellcasting: Adnd2eNpcSheet.#onRestSpellcasting,
       learnSpell: Adnd2eNpcSheet.#onLearnSpell,
+      completeCasting: Adnd2eNpcSheet.#onCompleteCasting,
+      disruptCasting: Adnd2eNpcSheet.#onDisruptCasting,
+      cancelCasting: Adnd2eNpcSheet.#onCancelCasting,
       advanceWeaponMastery: Adnd2eNpcSheet.#onAdvanceWeaponMastery,
       rollNonweaponCheck: Adnd2eNpcSheet.#onRollNonweaponCheck,
       rollThiefSkill: Adnd2eNpcSheet.#onRollThiefSkill,
@@ -246,6 +250,7 @@ export class Adnd2eNpcSheet extends Base {
         editable: this.isEditable,
       },
       optionalRules: getOptionalRules(),
+      castingStatus: readCastingStatus(this.document as never),
     };
   }
 
@@ -383,7 +388,7 @@ export class Adnd2eNpcSheet extends Base {
 
   static async #onCastSpell(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {
     const id = target.dataset.itemId;
-    if (id) await castSpell(this.document as never, id);
+    if (id) await castOrBegin(this.document as never, id);
   }
 
   static async #onRestSpellcasting(this: Adnd2eNpcSheet): Promise<void> {
@@ -393,6 +398,18 @@ export class Adnd2eNpcSheet extends Base {
   static async #onLearnSpell(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {
     const id = target.dataset.itemId;
     if (id) await learnSpell(this.document as never, id);
+  }
+
+  static async #onCompleteCasting(this: Adnd2eNpcSheet): Promise<void> {
+    if (this.isEditable) await completeCasting(this.document as never);
+  }
+
+  static async #onDisruptCasting(this: Adnd2eNpcSheet): Promise<void> {
+    if (game.user?.isGM) await disruptCasting(this.document as never, { announce: true });
+  }
+
+  static async #onCancelCasting(this: Adnd2eNpcSheet): Promise<void> {
+    if (game.user?.isGM) await disruptCasting(this.document as never, { announce: false });
   }
 
   static async #onAdvanceWeaponMastery(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {

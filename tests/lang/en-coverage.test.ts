@@ -508,3 +508,24 @@ describe("lang/en.json — SP9a casting chat strings", () => {
     }
   });
 });
+
+describe("lang/en.json — SP9a casting sheet strings", () => {
+  it("resolves every ADND2E.sheet.casting.* and casting warning key", () => {
+    for (const key of [
+      "ADND2E.sheet.casting.title",
+      "ADND2E.sheet.casting.badge",
+      "ADND2E.sheet.casting.badgeHint",
+      "ADND2E.sheet.casting.completesRound",
+      "ADND2E.sheet.casting.onYourTurn",
+      "ADND2E.sheet.casting.complete",
+      "ADND2E.sheet.casting.disrupt",
+      "ADND2E.sheet.casting.cancel",
+      "ADND2E.sheet.casting.busyWarning",
+      "ADND2E.sheet.casting.notReadyWarning",
+      "ADND2E.sheet.casting.initiativeNotice",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

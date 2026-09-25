@@ -316,6 +316,19 @@
         "learn": "Learn Spell",
         "learnBlockedWarning": "That spell can no longer be learned — refresh the sheet."
       },
+      "casting": {
+        "title": "Casting",
+        "badge": "Casting",
+        "badgeHint": "No Dexterity bonus to AC while casting.",
+        "completesRound": "Takes effect at the end of round {value}.",
+        "onYourTurn": "Takes effect on your turn (+{value} initiative).",
+        "complete": "Complete casting",
+        "disrupt": "Disrupt",
+        "cancel": "Cancel",
+        "busyWarning": "Already casting a spell — complete or cancel it first.",
+        "notReadyWarning": "That spell can't be completed yet.",
+        "initiativeNotice": "Casting time couldn't be added to initiative — the GM must adjust it."
+      },
       "skills": {
         "weapon": "Weapon Proficiencies",
         "nonweapon": "Non-Weapon Proficiencies",

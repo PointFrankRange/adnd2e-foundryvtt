@@ -18,13 +18,13 @@ import { getOptionalRules } from "../../settings";
  * memorized array, rolls dice, and posts chat messages.
  * ------------------------------------------------------------------------- */
 
-interface MemorizedEntry {
+export interface MemorizedEntry {
   spellItemId: string;
   spellLevel: number;
   expended: boolean;
 }
 
-interface SpellItemHandle {
+export interface SpellItemHandle {
   id: string;
   name: string;
   system: {
@@ -51,7 +51,7 @@ interface GenericItemHandle {
   system: Record<string, unknown>;
 }
 
-interface SpellcasterActor {
+export interface SpellcasterActor {
   name: string;
   img: string;
   system: {
@@ -74,7 +74,7 @@ interface SpellcasterActor {
   update(data: Record<string, unknown>): Promise<unknown>;
 }
 
-function casterKey(spell: SpellItemHandle): "wizard" | "priest" {
+export function casterKey(spell: SpellItemHandle): "wizard" | "priest" {
   return spell.system.casterClass === "priest" ? "priest" : "wizard";
 }
 
@@ -169,6 +169,55 @@ export async function restSpellcasting(actor: SpellcasterActor): Promise<void> {
   });
 }
 
+export type SpellRoll = Awaited<ReturnType<InstanceType<typeof Roll>["evaluate"]>>;
+export type SpellRollResult = { kind: "damage" | "healing"; formula: string; total: number };
+
+/** Rolls the spell's automation formula (damage wins over healing). `null` means the formula failed to roll — a toast was shown. */
+export async function rollSpellAutomation(
+  spell: SpellItemHandle,
+): Promise<{ roll: SpellRoll | null; rollResult: SpellRollResult | null } | null> {
+  const { damage, healing } = spell.system.automation;
+  const formula = damage || healing;
+  if (!formula) return { roll: null, rollResult: null };
+  try {
+    const roll = await new Roll(formula).evaluate();
+    return { roll, rollResult: { kind: damage ? "damage" : "healing", formula, total: roll.total ?? 0 } };
+  } catch {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castRollFailedWarning"));
+    return null;
+  }
+}
+
+/** Posts the normal cast chat card (with an Apply button when there was a roll). */
+export async function postCastCard(
+  actor: SpellcasterActor,
+  spell: SpellItemHandle,
+  rolled: { roll: SpellRoll | null; rollResult: SpellRollResult | null },
+): Promise<void> {
+  const context = buildCastCardContext({
+    actorName: actor.name,
+    actorImg: actor.img,
+    spellName: spell.name,
+    spellLevel: spell.system.level,
+    range: spell.system.range,
+    duration: spell.system.duration,
+    castingTime: spell.system.castingTime,
+    savingThrow: spell.system.savingThrow,
+    components: spell.system.components,
+    rollResult: rolled.rollResult,
+  });
+  const content = await foundry.applications.handlebars.renderTemplate(
+    TEMPLATE_PATH("chat/cast-roll.hbs"),
+    context as unknown as Record<string, unknown>,
+  );
+  const speaker = ChatMessage.getSpeaker({ actor: actor as never });
+  if (rolled.roll) {
+    await rolled.roll.toMessage({ speaker, content } as unknown as Roll.MessageData);
+  } else {
+    await ChatMessage.create({ speaker, content } as unknown as ChatMessage.CreateData);
+  }
+}
+
 /** Casts a memorized, non-expended spell: rolls its automation.damage/
  *  healing formula if set (damage takes priority if a spell somehow set both
  *  — the schema doesn't prevent it, but no v1 content should), marks it
@@ -202,46 +251,11 @@ export async function castSpell(actor: SpellcasterActor, spellItemId: string): P
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
     return;
   }
-
-  let roll: Awaited<ReturnType<InstanceType<typeof Roll>["evaluate"]>> | null = null;
-  let rollResult: { kind: "damage" | "healing"; formula: string; total: number } | null = null;
-  const { damage, healing } = spell.system.automation;
-  const formula = damage || healing;
-  if (formula) {
-    try {
-      roll = await new Roll(formula).evaluate();
-    } catch {
-      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castRollFailedWarning"));
-      return;
-    }
-    rollResult = { kind: damage ? "damage" : "healing", formula, total: roll.total ?? 0 };
-  }
-
+  const rolled = await rollSpellAutomation(spell);
+  if (!rolled) return;
   const updated = list.map((m) => (m.spellItemId === spellItemId ? { ...m, expended: true } : m));
   await actor.update({ [`system.spellcasting.${key}.memorized`]: updated });
-
-  const context = buildCastCardContext({
-    actorName: actor.name,
-    actorImg: actor.img,
-    spellName: spell.name,
-    spellLevel: spell.system.level,
-    range: spell.system.range,
-    duration: spell.system.duration,
-    castingTime: spell.system.castingTime,
-    savingThrow: spell.system.savingThrow,
-    components: spell.system.components,
-    rollResult,
-  });
-  const content = await foundry.applications.handlebars.renderTemplate(
-    TEMPLATE_PATH("chat/cast-roll.hbs"),
-    context as unknown as Record<string, unknown>,
-  );
-  const speaker = ChatMessage.getSpeaker({ actor: actor as never });
-  if (roll) {
-    await roll.toMessage({ speaker, content } as unknown as Roll.MessageData);
-  } else {
-    await ChatMessage.create({ speaker, content } as unknown as ChatMessage.CreateData);
-  }
+  await postCastCard(actor, spell, rolled);
 }
 
 /** Attempts to learn a wizard spell not yet in the spellbook: re-derives the

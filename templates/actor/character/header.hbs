@@ -15,6 +15,7 @@
   <div class="quick-vitals">
     <span title="{{localize 'ADND2E.sheet.vitals.hp'}}">HP {{adnd2e.vitals.hp.value}}/{{adnd2e.vitals.hp.max}}</span>
     <span title="{{localize 'ADND2E.sheet.vitals.ac'}}">AC {{adnd2e.vitals.ac.normal}}</span>
+    {{#if adnd2e.vitals.casting}}<span class="casting-badge" title="{{localize 'ADND2E.sheet.casting.badgeHint'}}">{{localize 'ADND2E.sheet.casting.badge'}}</span>{{/if}}
     <span title="{{localize 'ADND2E.sheet.vitals.thac0'}}">THAC0 {{adnd2e.vitals.thac0.melee}}</span>
   </div>
 </header>

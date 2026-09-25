@@ -22,7 +22,8 @@ import type {
 import { validateItemDrop } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
 import { advanceWeaponMastery, allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill } from "./proficiency-actions";
-import { castSpell, forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
+import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "./casting-actions";
+import { forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
 import { seedSubAbilities } from "./sub-ability-actions";
 import { removeTrait, traitDropInputs, traitRefundCapped, type TraitDropInputs } from "./trait-actions";
 import { awardXpSplit } from "./xp";
@@ -290,6 +291,9 @@ export class Adnd2eCharacterSheet extends Base {
       castSpell: Adnd2eCharacterSheet.#onCastSpell,
       restSpellcasting: Adnd2eCharacterSheet.#onRestSpellcasting,
       learnSpell: Adnd2eCharacterSheet.#onLearnSpell,
+      completeCasting: Adnd2eCharacterSheet.#onCompleteCasting,
+      disruptCasting: Adnd2eCharacterSheet.#onDisruptCasting,
+      cancelCasting: Adnd2eCharacterSheet.#onCancelCasting,
       advanceWeaponMastery: Adnd2eCharacterSheet.#onAdvanceWeaponMastery,
       rollNonweaponCheck: Adnd2eCharacterSheet.#onRollNonweaponCheck,
       allocateThiefSkillPoint: Adnd2eCharacterSheet.#onAllocateThiefSkillPoint,
@@ -458,6 +462,7 @@ export class Adnd2eCharacterSheet extends Base {
       },
       optionalRules: rules,
       subAbilityUi: subAbilitiesEnabled(rules),
+      castingStatus: readCastingStatus(this.document as never),
     };
   }
 
@@ -694,7 +699,7 @@ export class Adnd2eCharacterSheet extends Base {
     target: HTMLElement,
   ): Promise<void> {
     const spellItemId = target.dataset.itemId;
-    if (spellItemId) await castSpell(this.document as never, spellItemId);
+    if (spellItemId) await castOrBegin(this.document as never, spellItemId);
   }
 
   static async #onRestSpellcasting(this: Adnd2eCharacterSheet): Promise<void> {
@@ -708,6 +713,18 @@ export class Adnd2eCharacterSheet extends Base {
   ): Promise<void> {
     const spellItemId = target.dataset.itemId;
     if (spellItemId) await learnSpell(this.document as never, spellItemId);
+  }
+
+  static async #onCompleteCasting(this: Adnd2eCharacterSheet): Promise<void> {
+    if (this.isEditable) await completeCasting(this.document as never);
+  }
+
+  static async #onDisruptCasting(this: Adnd2eCharacterSheet): Promise<void> {
+    if (game.user?.isGM) await disruptCasting(this.document as never, { announce: true });
+  }
+
+  static async #onCancelCasting(this: Adnd2eCharacterSheet): Promise<void> {
+    if (game.user?.isGM) await disruptCasting(this.document as never, { announce: false });
   }
 
   // Interaction handlers — SP5a.
