@@ -287,6 +287,8 @@ export interface CharacterSheetContext {
   identity: {
     name: string; img: string;
     raceName: string | null;
+    /** the owned race item's id (for the header's edit/delete controls), or null */
+    raceItemId: string | null;
     classLine: string;
     arrangementBadge: string | null;
     alignmentValue: string;

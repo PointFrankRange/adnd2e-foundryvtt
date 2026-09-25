@@ -316,6 +316,12 @@
         "learn": "Learn Spell",
         "learnBlockedWarning": "That spell can no longer be learned — refresh the sheet."
       },
+      "itemControls": {
+        "edit": "Open this item's sheet",
+        "delete": "Delete this item",
+        "deleteTitle": "Delete Item",
+        "deleteConfirm": "Delete {name} from this character? This can't be undone."
+      },
       "casting": {
         "title": "Casting",
         "badge": "Casting",

@@ -12,6 +12,7 @@
               <span class="uses">{{f.uses.value}} / {{f.uses.max}} ({{f.uses.per}})</span>
             {{/if}}
             <div class="description">{{{f.description}}}</div>
+            {{> adnd2e.item-controls id=f.id deletable=@root.editable}}
           </div>
         {{/each}}
       </div>
@@ -39,6 +40,7 @@
         <span class="cost">{{row.cost}}</span>
         <span class="effect">{{row.summaryAmount}} {{localize row.summaryTargetKey}}</span>
         {{#if row.canRemove}}<button type="button" data-action="removeTrait" data-item-id="{{row.id}}">{{localize 'ADND2E.sheet.traits.remove'}}</button>{{/if}}
+        {{> adnd2e.item-controls id=row.id}}
       </div>
     {{else}}
       <p class="placeholder">{{localize 'ADND2E.sheet.traits.none'}}</p>

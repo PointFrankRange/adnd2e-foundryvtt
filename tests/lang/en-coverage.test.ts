@@ -529,3 +529,17 @@ describe("lang/en.json — SP9a casting sheet strings", () => {
     }
   });
 });
+
+describe("lang/en.json — owned-item row controls", () => {
+  it("resolves every ADND2E.sheet.itemControls.* key", () => {
+    for (const key of [
+      "ADND2E.sheet.itemControls.edit",
+      "ADND2E.sheet.itemControls.delete",
+      "ADND2E.sheet.itemControls.deleteTitle",
+      "ADND2E.sheet.itemControls.deleteConfirm",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

@@ -9,6 +9,7 @@ const PARTIALS = [
   "actor/character/partials/item-row.hbs",
   "actor/character/partials/encumbrance-gauge.hbs",
   "actor/character/partials/slot-table.hbs",
+  "actor/character/partials/item-controls.hbs",
 ];
 
 /**

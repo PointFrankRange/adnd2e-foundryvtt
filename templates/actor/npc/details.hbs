@@ -55,6 +55,7 @@
               <span class="uses">{{f.uses.value}} / {{f.uses.max}} ({{f.uses.per}})</span>
             {{/if}}
             <div class="description">{{{f.description}}}</div>
+            {{> adnd2e.item-controls id=f.id deletable=@root.editable}}
           </div>
         {{/each}}
       </div>

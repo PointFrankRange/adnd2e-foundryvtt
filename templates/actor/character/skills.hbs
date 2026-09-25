@@ -21,6 +21,7 @@
               {{localize 'ADND2E.sheet.skills.advanceMastery'}}
             </button>
           {{/if}}
+          {{> adnd2e.item-controls id=w.id deletable=@root.editable}}
         </div>
       {{else}}
         <p class="placeholder">{{localize 'ADND2E.sheet.skills.none'}}</p>
@@ -46,6 +47,7 @@
           <button type="button" data-action="rollNonweaponCheck" data-item-id="{{n.id}}">
             {{localize 'ADND2E.sheet.skills.check'}}
           </button>
+          {{> adnd2e.item-controls id=n.id deletable=@root.editable}}
         </div>
       {{else}}
         <p class="placeholder">{{localize 'ADND2E.sheet.skills.none'}}</p>

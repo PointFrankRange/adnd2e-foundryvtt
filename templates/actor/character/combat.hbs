@@ -31,6 +31,7 @@
               {{localize 'ADND2E.sheet.combat.rollAttack'}}
             </button>
           {{/if}}
+          {{> adnd2e.item-controls id=w.id deletable=@root.editable}}
         </div>
       {{else}}
         <p class="placeholder">{{localize 'ADND2E.sheet.combat.noWeapons'}}</p>
@@ -60,6 +61,7 @@
           <span class="equipped-state">
             {{#if a.equipped}}{{localize 'ADND2E.sheet.combat.equipped'}}{{else}}{{localize 'ADND2E.sheet.combat.notEquipped'}}{{/if}}
           </span>
+          {{> adnd2e.item-controls id=a.id deletable=@root.editable}}
         </div>
       {{else}}
         <p class="placeholder">{{localize 'ADND2E.sheet.combat.noArmor'}}</p>
