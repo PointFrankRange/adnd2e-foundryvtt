@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { groupInventory } from "../../../src/sheets/character/grouping";
+import { containerContentsReset, groupInventory } from "../../../src/sheets/character/grouping";
 import type { PhysicalItemView } from "../../../src/sheets/character/context-types";
 
 function item(over: Partial<PhysicalItemView>): PhysicalItemView {
@@ -58,5 +58,25 @@ describe("groupInventory", () => {
     const r = groupInventory([outer, inner]);
     expect(r.containers.map((c) => c.item.id)).toEqual(["outer", "inner"]);
     expect(r.containers.find((c) => c.item.id === "outer")!.contents.map((i) => i.id)).toEqual(["inner"]);
+  });
+});
+
+describe("containerContentsReset", () => {
+  it("moves every item located in the container back to loose, and nothing else", () => {
+    const items = [
+      { id: "bag", location: "" },
+      { id: "rope", location: "bag" },
+      { id: "torch", location: "bag" },
+      { id: "sword", location: "other-bag" },
+      { id: "coin", location: "" },
+    ];
+    expect(containerContentsReset(items, "bag")).toEqual([
+      { _id: "rope", "system.location": "" },
+      { _id: "torch", "system.location": "" },
+    ]);
+  });
+
+  it("is empty for a container with nothing in it", () => {
+    expect(containerContentsReset([{ id: "bag", location: "" }], "bag")).toEqual([]);
   });
 });
