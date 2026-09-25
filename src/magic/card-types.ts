@@ -54,3 +54,28 @@ export interface LearnSpellCardContext {
   reasonLabel: string | null;
   roll: { d100: number; success: boolean } | null;
 }
+
+export interface CastingNoticeInput {
+  actorName: string;
+  actorImg: string;
+  spellName: string;
+  spellLevel: number;
+  /** "begin" when a timed cast starts in combat; "lost" when it is disrupted */
+  kind: "begin" | "lost";
+  /** round spells: the round at whose end it takes effect */
+  completeRound: number | null;
+  /** segment spells: the initiative addition */
+  initiativeAdd: number | null;
+}
+
+export interface CastingNoticeContext {
+  actorName: string;
+  actorImg: string;
+  spellName: string;
+  spellLevel: number;
+  headlineKey: string;
+  /** i18n key of the detail line, or null when there is none */
+  detailKey: string | null;
+  detailValue: number | null;
+  lost: boolean;
+}

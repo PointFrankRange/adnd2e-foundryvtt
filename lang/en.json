@@ -464,6 +464,12 @@
         "damageRoll": "Damage",
         "healingRoll": "Healing"
       },
+      "casting": {
+        "begin": "begins casting.",
+        "lost": "The spell is disrupted and lost.",
+        "initiativeAdded": "Casting time +{value} to initiative; takes effect on the caster's turn.",
+        "completesRound": "Takes effect at the end of round {value}."
+      },
       "learnSpell": {
         "chance": "Chance to learn",
         "success": "Learned!",

@@ -494,3 +494,17 @@ describe("lang/en.json — SP8 Plan 8c trait strings", () => {
     }
   });
 });
+
+describe("lang/en.json — SP9a casting chat strings", () => {
+  it("resolves every ADND2E.chat.casting.* key", () => {
+    for (const key of [
+      "ADND2E.chat.casting.begin",
+      "ADND2E.chat.casting.lost",
+      "ADND2E.chat.casting.initiativeAdded",
+      "ADND2E.chat.casting.completesRound",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
