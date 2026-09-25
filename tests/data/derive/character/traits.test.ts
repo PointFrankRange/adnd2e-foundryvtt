@@ -24,6 +24,7 @@ const snap: ActorSnapshot = {
   baseMovement: 12,
   thiefSkillAllocations: [],
   traits: [],
+  isCasting: false,
 };
 
 function entry(id: string): TraitEntry {

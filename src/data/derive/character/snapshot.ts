@@ -66,4 +66,6 @@ export interface ActorSnapshot {
   thiefSkillAllocations: readonly { skill: ThiefSkill; allocatedPoints: number }[];
   /** every owned `trait` item whose stored effect is well-formed, in item order — applied only while the character-point build rule is on */
   traits: readonly TraitEntry[];
+  /** true while `system.options.spellsAndMagic.casting` is set — honoured only while the casting-time rule is on */
+  isCasting: boolean;
 }

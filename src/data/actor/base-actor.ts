@@ -215,7 +215,21 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
           pool: new NumberField({ required: true, integer: true, min: 0, initial: DEFAULT_CHARACTER_POINT_POOL }),
         }),
       }),
-      spellsAndMagic: new foundry.data.fields.ObjectField({ required: true, initial: {} }),
+      spellsAndMagic: new SchemaField({
+        /** Sub-project 9 Plan 9a: the in-progress cast (null when idle). See core/magic/casting-time.ts CastingState. */
+        casting: new SchemaField(
+          {
+            spellItemId: new StringField({ required: true, blank: false }),
+            casterKey: new StringField({ required: true, blank: false, choices: ["wizard", "priest"] }),
+            combatId: new StringField({ required: true, blank: false }),
+            startRound: new NumberField({ required: true, integer: true, min: 0 }),
+            completeRound: new NumberField({ required: true, nullable: true, integer: true, min: 0, initial: null }),
+            segments: new NumberField({ required: true, nullable: true, integer: true, min: 0, initial: null }),
+            hp: new NumberField({ required: true, integer: true }),
+          },
+          { required: true, nullable: true, initial: null },
+        ),
+      }),
     }),
   };
 }
