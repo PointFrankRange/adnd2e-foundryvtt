@@ -6,6 +6,7 @@ import type {
   ClassId, DerivedAbilities, EncumbranceCategory, SaveCategory,
 } from "../../../core/types";
 import type { OptionalRules } from "../../../core/options";
+import { acDexAdjWhileCasting, expandedCastingTimeEnabled } from "../../../core/magic/casting-time";
 import type {
   ArrangementResolution, ClassArrangement, ClassMember, DualClassResolution,
 } from "../../../core/classes/multiclass";
@@ -107,7 +108,11 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
   const ac = deriveAc({
     equippedArmor: snapshot.equippedArmor,
     equippedShield: snapshot.equippedShield,
-    dexDefensiveAdj: abilities.dex.defensiveAdj,
+    // PHB p.86 — no Dexterity AC bonus while casting (casting-time rule only)
+    dexDefensiveAdj: acDexAdjWhileCasting(
+      abilities.dex.defensiveAdj,
+      snapshot.isCasting && expandedCastingTimeEnabled(options),
+    ),
   });
 
   // §5.6 step 10 — encumbrance (class-independent).

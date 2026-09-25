@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_OPTIONAL_RULES } from "../../../src/core/options";
 import { buildCharacterSheetContext } from "../../../src/sheets/character/context";
 import type {
+  CastingStatusInput,
   CharacterSheetInput,
   FeatureItemView,
   NwpView,
@@ -1987,5 +1988,76 @@ describe("buildCharacterSheetContext — traits + character points (SP8 Plan 8c)
     expect([player.canEditPool, player.rows[0].canRemove]).toEqual([false, true]);
     const viewer = buildCharacterSheetContext(input({ ...rules, perms: { isGM: true, isOwner: false, editable: false } })).traits;
     expect([viewer.canEditPool, viewer.rows[0].canRemove]).toEqual([false, false]);
+  });
+});
+
+describe("buildCharacterSheetContext — casting (SP9a)", () => {
+  const status = (over: Partial<CastingStatusInput> = {}): CastingStatusInput => ({
+    spellName: "Fireball",
+    startRound: 2,
+    completeRound: 3,
+    segments: null,
+    combatRound: 2,
+    isCasterTurn: false,
+    ...over,
+  });
+  const spell = (over: Partial<SpellItemView> = {}): SpellItemView => ({
+    id: "s1", name: "Magic Missile", img: "", casterClass: "wizard", level: 1,
+    schools: ["evocation"], spheres: [], range: "", castingTime: "1", savingThrow: "none",
+    inSpellbook: true, memorized: false, expended: false, canMemorize: false, canCast: false, canLearn: false,
+    ...over,
+  });
+  const memorizedWizard = () => {
+    const d = input().derived;
+    return {
+      ...d,
+      spellcasting: {
+        ...d.spellcasting,
+        wizard: { ...d.spellcasting.wizard, slots: { 1: { max: 1, used: 1 } }, memorized: [{ spellItemId: "s1", spellLevel: 1, expended: false }] },
+      },
+    };
+  };
+
+  it("with no casting status: no panel, no badge, and a memorized spell stays castable", () => {
+    const c = buildCharacterSheetContext(input({ derived: memorizedWizard(), spellItems: [spell()] }));
+    expect(c.spells.casting).toBeNull();
+    expect(c.vitals.casting).toBe(false);
+    expect(c.spells.known[0].items[0].canCast).toBe(true);
+  });
+
+  it("while casting: shows the panel and badge and hides every Cast button", () => {
+    const c = buildCharacterSheetContext(input({ derived: memorizedWizard(), spellItems: [spell()], castingStatus: status() }));
+    expect(c.vitals.casting).toBe(true);
+    expect(c.spells.known[0].items[0].canCast).toBe(false);
+    expect(c.spells.casting).toEqual({
+      spellName: "Fireball",
+      detailKey: "ADND2E.sheet.casting.completesRound",
+      detailValue: 3,
+      canComplete: false,
+      canGmControl: true,
+    });
+  });
+
+  it("a round spell can be completed from its complete round", () => {
+    const c = buildCharacterSheetContext(input({ castingStatus: status({ combatRound: 3 }) }));
+    expect(c.spells.casting!.canComplete).toBe(true);
+  });
+
+  it("a segment spell shows its initiative addition and completes on the caster's turn", () => {
+    const seg = status({ completeRound: null, segments: 3 });
+    const waiting = buildCharacterSheetContext(input({ castingStatus: seg })).spells.casting!;
+    expect(waiting).toMatchObject({ detailKey: "ADND2E.sheet.casting.onYourTurn", detailValue: 3, canComplete: false });
+    expect(buildCharacterSheetContext(input({ castingStatus: { ...seg, isCasterTurn: true } })).spells.casting!.canComplete).toBe(true);
+  });
+
+  it("a segment spell with no recorded segments shows 0", () => {
+    const c = buildCharacterSheetContext(input({ castingStatus: status({ completeRound: null, segments: null }) }));
+    expect(c.spells.casting!.detailValue).toBe(0);
+  });
+
+  it("cannot be completed outside a started combat (combatRound null) or by a viewer who cannot edit", () => {
+    expect(buildCharacterSheetContext(input({ castingStatus: status({ combatRound: null }) })).spells.casting!.canComplete).toBe(false);
+    const viewer = input({ castingStatus: status({ combatRound: 3 }), perms: { isGM: false, isOwner: false, editable: false } });
+    expect(buildCharacterSheetContext(viewer).spells.casting).toMatchObject({ canComplete: false, canGmControl: false });
   });
 });

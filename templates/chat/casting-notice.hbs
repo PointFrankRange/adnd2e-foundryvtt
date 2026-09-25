@@ -1,0 +1,8 @@
+<div class="adnd2e chat-card casting-notice{{#if lost}} lost{{/if}}">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} — {{spellName}} ({{localize 'ADND2E.sheet.spells.level' level=spellLevel}})</h3>
+  </header>
+  <p class="headline">{{localize headlineKey}}</p>
+  {{#if detailKey}}<p class="detail">{{localize detailKey value=detailValue}}</p>{{/if}}
+</div>

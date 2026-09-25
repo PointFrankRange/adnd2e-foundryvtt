@@ -1,4 +1,19 @@
 <section class="tab spells scrollable{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+  {{#if adnd2e.spells.casting}}
+    <div class="casting panel">
+      <h3>{{localize 'ADND2E.sheet.casting.title'}}: {{adnd2e.spells.casting.spellName}}</h3>
+      <p class="detail">{{localize adnd2e.spells.casting.detailKey value=adnd2e.spells.casting.detailValue}}</p>
+      <div class="casting-actions">
+        {{#if adnd2e.spells.casting.canComplete}}
+          <button type="button" data-action="completeCasting">{{localize 'ADND2E.sheet.casting.complete'}}</button>
+        {{/if}}
+        {{#if adnd2e.spells.casting.canGmControl}}
+          <button type="button" data-action="disruptCasting">{{localize 'ADND2E.sheet.casting.disrupt'}}</button>
+          <button type="button" data-action="cancelCasting">{{localize 'ADND2E.sheet.casting.cancel'}}</button>
+        {{/if}}
+      </div>
+    </div>
+  {{/if}}
 
   {{#if adnd2e.spells.wizardSlots}}
     <div class="spell-slots wizard panel">

@@ -316,6 +316,19 @@
         "learn": "Learn Spell",
         "learnBlockedWarning": "That spell can no longer be learned — refresh the sheet."
       },
+      "casting": {
+        "title": "Casting",
+        "badge": "Casting",
+        "badgeHint": "No Dexterity bonus to AC while casting.",
+        "completesRound": "Takes effect at the end of round {value}.",
+        "onYourTurn": "Takes effect on your turn (+{value} initiative).",
+        "complete": "Complete casting",
+        "disrupt": "Disrupt",
+        "cancel": "Cancel",
+        "busyWarning": "Already casting a spell — complete or cancel it first.",
+        "notReadyWarning": "That spell can't be completed yet.",
+        "initiativeNotice": "Casting time couldn't be added to initiative — the GM must adjust it."
+      },
       "skills": {
         "weapon": "Weapon Proficiencies",
         "nonweapon": "Non-Weapon Proficiencies",
@@ -464,6 +477,12 @@
         "damageRoll": "Damage",
         "healingRoll": "Healing"
       },
+      "casting": {
+        "begin": "begins casting.",
+        "lost": "The spell is disrupted and lost.",
+        "initiativeAdded": "Casting time +{value} to initiative; takes effect on the caster's turn.",
+        "completesRound": "Takes effect at the end of round {value}."
+      },
       "learnSpell": {
         "chance": "Chance to learn",
         "success": "Learned!",
@@ -586,19 +605,19 @@
       },
       "spellsAndMagicEnabled": {
         "name": "Spells & Magic: Enabled",
-        "hint": "Master switch for the Spells & Magic option group. Requires Sub-project 9."
+        "hint": "Master switch for the Spells & Magic option group — every other Spells & Magic rule is a no-op unless this is also on."
       },
       "spellPoints": {
         "name": "Spells & Magic: Spell Points",
-        "hint": "Cast from a spell-point pool instead of fixed slots (Spells & Magic). Requires Sub-project 9."
+        "hint": "Not implemented — spell points come from Player's Option: Spells & Magic, which this system does not reference."
       },
       "expandedCastingTime": {
         "name": "Spells & Magic: Expanded Casting Time",
-        "hint": "The expanded casting-time and interruption rules (Spells & Magic). Requires Sub-project 9."
+        "hint": "Casting time adds to initiative, multi-round spells finish at the end of their last round, and losing hit points or failing a save while casting loses the spell; no Dexterity AC bonus while casting (PHB optional rule)."
       },
       "channelers": {
         "name": "Spells & Magic: Channelers",
-        "hint": "The channeler wizard variant (Spells & Magic). Requires Sub-project 9."
+        "hint": "Not implemented — channelers come from Player's Option: Spells & Magic, which this system does not reference."
       }
     }
   },

@@ -42,10 +42,10 @@ export const SETTING_DESCRIPTORS: readonly SettingDescriptor[] = [
   { key: "subAbilityScores", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "subAbilityScores", requiresReload: true },
   { key: "characterPointBuild", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "characterPointBuild", requiresReload: true },
   { key: "expandedProficiencies", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "expandedProficiencies" },
-  // --- spellsAndMagic: reserved for Sub-project 9 ---
-  { key: "spellsAndMagicEnabled", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: null },
+  // --- spellsAndMagic: Sub-project 9 ---
+  { key: "spellsAndMagicEnabled", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: "spellsAndMagicEnabled", requiresReload: true },
   { key: "spellPoints", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: null },
-  { key: "expandedCastingTime", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: null },
+  { key: "expandedCastingTime", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: "expandedCastingTime", requiresReload: true },
   { key: "channelers", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: null },
 ];
 

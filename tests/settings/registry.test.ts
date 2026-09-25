@@ -26,29 +26,22 @@ describe("SETTING_DESCRIPTORS", () => {
     for (const d of SETTING_DESCRIPTORS) expect(typeof d.default).toBe("boolean");
   });
 
-  it("core, combatAndTactics and skillsAndPowers settings bind 1:1 to OptionalRules fields; spellsAndMagic binds to null", () => {
+  it("core, combatAndTactics, skillsAndPowers and two spellsAndMagic settings bind 1:1 to OptionalRules fields", () => {
     const bound = SETTING_DESCRIPTORS.filter((d) => d.optionalRulesKey !== null);
-    expect(bound).toHaveLength(18);
-    for (const d of bound) expect(["core", "combatAndTactics", "skillsAndPowers"]).toContain(d.group);
-
+    expect(bound).toHaveLength(20);
     const boundKeys = bound.map((d) => d.optionalRulesKey).sort();
     expect(boundKeys).toEqual(Object.keys(DEFAULT_OPTIONAL_RULES).sort());
-
-    for (const d of SETTING_DESCRIPTORS.filter((x) => x.group === "spellsAndMagic")) {
-      expect(d.optionalRulesKey).toBeNull();
-    }
+    const unbound = SETTING_DESCRIPTORS.filter((d) => d.optionalRulesKey === null).map((d) => d.key).sort();
+    expect(unbound).toEqual(["channelers", "spellPoints"]);
   });
 
-  it("exactly skillsAndPowersEnabled, subAbilityScores and characterPointBuild require a world reload", () => {
-    const reload = ["characterPointBuild", "skillsAndPowersEnabled", "subAbilityScores"];
+  it("exactly the five prepare-time rules require a world reload", () => {
+    const reload = ["characterPointBuild", "expandedCastingTime", "skillsAndPowersEnabled", "spellsAndMagicEnabled", "subAbilityScores"];
     const keys = SETTING_DESCRIPTORS.filter((d) => d.requiresReload === true).map((d) => d.key);
     expect(keys.sort()).toEqual(reload);
     for (const d of SETTING_DESCRIPTORS) {
-      if (reload.includes(d.key)) {
-        expect(d.requiresReload).toBe(true);
-      } else {
-        expect(d.requiresReload).not.toBe(true);
-      }
+      if (reload.includes(d.key)) expect(d.requiresReload).toBe(true);
+      else expect(d.requiresReload).not.toBe(true);
     }
   });
 

@@ -400,7 +400,7 @@ export async function rollAttack(
 /** Roll one of the 5 saving-throw categories using the actor's already-cached
  *  system.saves.<category>. */
 export async function rollSave(
-  actor: { name: string; img: string; system: { saves: Record<SaveCategory, { target: number; rollModifier: number }> } },
+  actor: { name: string; img: string; uuid: string; system: { saves: Record<SaveCategory, { target: number; rollModifier: number }> } },
   category: SaveCategory,
 ): Promise<void> {
   const save = actor.system.saves[category];
@@ -414,5 +414,10 @@ export async function rollSave(
   const content = await foundry.applications.handlebars.renderTemplate(
     TEMPLATE_PATH("chat/save-roll.hbs"), context as unknown as Record<string, unknown>,
   );
-  await roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor: actor as never }), content });
+  await roll.toMessage({
+    speaker: ChatMessage.getSpeaker({ actor: actor as never }),
+    content,
+    // SP9a: lets the active GM's client disrupt a cast on a failed save (PHB p.86)
+    flags: { [SYSTEM_ID]: { save: { actorUuid: actor.uuid, success: context.success } } },
+  } as never);
 }

@@ -486,4 +486,18 @@
       opacity: 0.8;
     }
   }
+
+  .casting.panel {
+    border-left: 3px solid var(--adnd2e-accent);
+
+    .casting-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+  }
+
+  .casting-badge {
+    font-weight: 700;
+    color: var(--adnd2e-accent);
+  }
 }

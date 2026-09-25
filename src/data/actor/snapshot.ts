@@ -46,6 +46,7 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
       abilities: Record<string, { score: number; exceptional: number | null }>;
       spellcasting: SpellcastingSystem;
       thiefSkills: ThiefSkillsSystem;
+      options?: { spellsAndMagic?: { casting?: unknown } };
     };
     items: Iterable<{ id: string; type: string; system: unknown }>;
   };
@@ -122,5 +123,6 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
     baseMovement: raceItem ? ((raceItem.system as RaceItemSystem).baseMovement ?? 12) : 12,
     thiefSkillAllocations,
     traits: toTraitEntries(items),
+    isCasting: Boolean(doc.system.options?.spellsAndMagic?.casting),
   };
 }
