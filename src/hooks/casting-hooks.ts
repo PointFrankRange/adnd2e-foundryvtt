@@ -25,7 +25,7 @@ export function registerCastingHooks(): void {
     const newHp = foundry.utils.getProperty(changed as object, "system.attributes.hp.value");
     if (typeof newHp !== "number") return;
     if (hpChangeDisrupts(casting.hp, newHp)) void disruptCasting(doc as never, { announce: true });
-    else if (newHp > casting.hp) void doc.update({ "system.options.spellsAndMagic.casting.hp": newHp });
+    else if (newHp > casting.hp) void doc.update({ "system.options.spellsAndMagic.casting.hp": newHp }).catch(() => {});
   });
 
   // A failed saving throw while casting disrupts (the save card is flagged by rollSave).
