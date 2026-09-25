@@ -4,3 +4,4 @@ export * from "./priest-slots";
 export * from "./class-slots";
 export * from "./spheres";
 export * from "./spellbook";
+export * from "./casting-time";
