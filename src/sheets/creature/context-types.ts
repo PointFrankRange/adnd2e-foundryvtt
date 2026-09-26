@@ -9,6 +9,16 @@ export interface CreatureAttackEntry {
   special: string;
 }
 
+export interface CreatureGearView {
+  id: string; name: string; img: string;
+  type: "weapon" | "armor" | "equipment";
+  quantity: number; equipped: boolean;
+  /** weapons only */
+  weapon?: { category: string; magicBonus: number; damageVsSM: string | null; damageVsL: string | null };
+}
+
+export interface CreatureSpellView { id: string; name: string; img: string; level: number }
+
 export interface CreatureSheetInput {
   name: string;
   img: string;
@@ -41,6 +51,8 @@ export interface CreatureSheetInput {
     description: string;
   };
   perms: { isGM: boolean; isOwner: boolean; editable: boolean };
+  gear?: CreatureGearView[];
+  spells?: CreatureSpellView[];
 }
 
 export interface CreatureSheetContext {
@@ -68,6 +80,10 @@ export interface CreatureSheetContext {
     description: string;
   };
   perms: { isGM: boolean; isOwner: boolean; editable: boolean };
+  gear: { id: string; name: string; img: string; type: "weapon" | "armor" | "equipment"; quantity: number; equipped: boolean }[];
+  /** one row per EQUIPPED weapon */
+  weaponAttacks: { id: string; name: string; damage: string; type: "melee" | "ranged" }[];
+  spells: { level: number; items: { id: string; name: string; img: string }[] }[];
 }
 
 // re-exported so context.ts doesn't need a second import line for a type it only forwards
