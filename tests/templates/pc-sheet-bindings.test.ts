@@ -15,6 +15,7 @@ const TEMPLATES = allHbs(PC_DIR).map((p) => readFileSync(p, "utf8")).join("\n")
   // the shared item-controls partial is reused by the PC templates
   + readFileSync(path.join(ROOT, "templates", "actor", "character", "partials", "item-controls.hbs"), "utf8");
 const SHEET = readFileSync(path.join(ROOT, "src", "sheets", "character", "sheet.ts"), "utf8");
+const FAVORITES = readFileSync(path.join(ROOT, "src", "sheets", "kit", "favorites.ts"), "utf8");
 
 const NOTHING_LOST_ACTIONS = [
   "advanceWeaponMastery", "allocateThiefSkillPoint", "awardXp", "cancelCasting", "castSpell", "completeCasting",
@@ -47,5 +48,16 @@ describe("PC sheet templates (sheet redesign R1)", () => {
     const used = new Set([...TEMPLATES.matchAll(/data-action="([a-zA-Z]+)"/g)].map((m) => m[1]!));
     const registered = new Set([...SHEET.matchAll(/^\s+([a-zA-Z]+): Adnd2eCharacterSheet\.#on/gm)].map((m) => m[1]!));
     for (const a of used) expect(registered.has(a) || CORE_ACTIONS.has(a), a).toBe(true);
+  });
+
+  it("every action a FavoriteRow can carry (rendered dynamically as data-action=\"{{f.action}}\", invisible to the static scan above) is registered on the PC sheet", () => {
+    // FavoriteRow["action"]'s union literal, e.g.:
+    //   action: "rollAttack" | "castSpell" | "rollThiefSkill" | "editItem" | null;
+    const unionLine = FAVORITES.match(/^\s*action:\s*(.+);\s*$/m)?.[1];
+    expect(unionLine, "FavoriteRow's action union not found in favorites.ts").toBeTruthy();
+    const favoriteActions = [...unionLine!.matchAll(/"([a-zA-Z]+)"/g)].map((m) => m[1]!);
+    expect(favoriteActions.length).toBeGreaterThan(0);
+    const registered = new Set([...SHEET.matchAll(/^\s+([a-zA-Z]+): Adnd2eCharacterSheet\.#on/gm)].map((m) => m[1]!));
+    for (const a of favoriteActions) expect(registered.has(a), a).toBe(true);
   });
 });

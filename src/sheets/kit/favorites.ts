@@ -53,6 +53,22 @@ export interface FavoriteRow {
   /** dataset for the action button: `data-item-id` (items, spells) or `data-skill` (thief skills) */
   itemId: string | null;
   skill: string | null;
+  /** the action button's icon class — "" when `action` is null (the button isn't rendered) */
+  icon: string;
+}
+
+/** `editItem` only opens the item sheet (not a roll), so it gets its own icon;
+ *  every roll-triggering action shares the d20. A null action never renders a
+ *  button, so its icon is the empty string. */
+const ACTION_ICONS: Record<Exclude<FavoriteRow["action"], null>, string> = {
+  editItem: "fa-solid fa-up-right-from-square",
+  rollAttack: "fa-solid fa-dice-d20",
+  castSpell: "fa-solid fa-dice-d20",
+  rollThiefSkill: "fa-solid fa-dice-d20",
+};
+
+function iconFor(action: FavoriteRow["action"]): string {
+  return action ? ACTION_ICONS[action] : "";
 }
 
 /** One row per favorite whose target still exists, in list order. */
@@ -62,24 +78,26 @@ export function buildFavoriteRows(list: readonly FavoriteEntry[], sources: Favor
     if (fav.kind === "item") {
       const it = sources.items.find((i) => i.id === fav.id);
       if (!it) continue;
+      const action = it.type === "weapon" && it.equipped ? "rollAttack" : "editItem";
       rows.push({
         kind: "item", id: it.id, name: it.name, img: it.img, nameIsKey: false, detail: "",
-        action: it.type === "weapon" && it.equipped ? "rollAttack" : "editItem",
-        itemId: it.id, skill: null,
+        action, itemId: it.id, skill: null, icon: iconFor(action),
       });
     } else if (fav.kind === "spell") {
       const sp = sources.spells.find((s) => s.id === fav.id);
       if (!sp) continue;
+      const action = sp.canCast ? "castSpell" : null;
       rows.push({
         kind: "spell", id: sp.id, name: sp.name, img: sp.img, nameIsKey: false, detail: "",
-        action: sp.canCast ? "castSpell" : null, itemId: sp.id, skill: null,
+        action, itemId: sp.id, skill: null, icon: iconFor(action),
       });
     } else {
       const t = sources.thiefSkills.find((s) => s.skill === fav.id);
       if (!t) continue;
+      const action = t.usable ? "rollThiefSkill" : null;
       rows.push({
         kind: "thiefSkill", id: t.skill, name: t.label, img: "", nameIsKey: true, detail: `${t.effective}%`,
-        action: t.usable ? "rollThiefSkill" : null, itemId: null, skill: t.skill,
+        action, itemId: null, skill: t.skill, icon: iconFor(action),
       });
     }
   }

@@ -8,7 +8,7 @@
           {{#if f.img}}<img src="{{f.img}}" alt="" width="20" height="20">{{/if}}
           <span class="name">{{#if f.nameIsKey}}{{localize f.name}}{{else}}{{f.name}}{{/if}}</span>
           {{#if f.detail}}<span class="detail">{{f.detail}}</span>{{/if}}
-          {{#if f.action}}<button type="button" class="kit-roll" data-action="{{f.action}}"{{#if f.itemId}} data-item-id="{{f.itemId}}"{{/if}}{{#if f.skill}} data-skill="{{f.skill}}"{{/if}}><i class="fa-solid fa-dice-d20" inert></i></button>{{/if}}
+          {{#if f.action}}<button type="button" class="kit-roll" data-action="{{f.action}}"{{#if f.itemId}} data-item-id="{{f.itemId}}"{{/if}}{{#if f.skill}} data-skill="{{f.skill}}"{{/if}}><i class="{{f.icon}}" inert></i></button>{{/if}}
           {{#if @root.adnd2e.favorites.canFavorite}}<button type="button" class="kit-star on" data-action="toggleFavorite" data-kind="{{f.kind}}" data-id="{{f.id}}" title="{{localize 'ADND2E.sheet.kit.favorite'}}">★</button>{{/if}}
         </div>
       {{else}}

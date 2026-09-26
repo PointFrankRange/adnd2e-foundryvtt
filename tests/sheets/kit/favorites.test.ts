@@ -81,13 +81,13 @@ describe("buildFavoriteRows", () => {
       sources,
     );
     expect(rows).toEqual([
-      { kind: "spell", id: "s1", name: "Sleep", img: "sleep.png", nameIsKey: false, detail: "", action: "castSpell", itemId: "s1", skill: null },
-      { kind: "item", id: "w1", name: "Long Sword", img: "sword.png", nameIsKey: false, detail: "", action: "rollAttack", itemId: "w1", skill: null },
-      { kind: "item", id: "w2", name: "Dagger", img: "dagger.png", nameIsKey: false, detail: "", action: "editItem", itemId: "w2", skill: null },
-      { kind: "item", id: "e1", name: "Rope", img: "rope.png", nameIsKey: false, detail: "", action: "editItem", itemId: "e1", skill: null },
-      { kind: "spell", id: "s2", name: "Light", img: "light.png", nameIsKey: false, detail: "", action: null, itemId: "s2", skill: null },
-      { kind: "thiefSkill", id: "climb-walls", name: "ADND2E.chat.thiefSkill.skills.climbWalls", img: "", nameIsKey: true, detail: "85%", action: "rollThiefSkill", itemId: null, skill: "climb-walls" },
-      { kind: "thiefSkill", id: "read-languages", name: "ADND2E.chat.thiefSkill.skills.readLanguages", img: "", nameIsKey: true, detail: "0%", action: null, itemId: null, skill: "read-languages" },
+      { kind: "spell", id: "s1", name: "Sleep", img: "sleep.png", nameIsKey: false, detail: "", action: "castSpell", itemId: "s1", skill: null, icon: "fa-solid fa-dice-d20" },
+      { kind: "item", id: "w1", name: "Long Sword", img: "sword.png", nameIsKey: false, detail: "", action: "rollAttack", itemId: "w1", skill: null, icon: "fa-solid fa-dice-d20" },
+      { kind: "item", id: "w2", name: "Dagger", img: "dagger.png", nameIsKey: false, detail: "", action: "editItem", itemId: "w2", skill: null, icon: "fa-solid fa-up-right-from-square" },
+      { kind: "item", id: "e1", name: "Rope", img: "rope.png", nameIsKey: false, detail: "", action: "editItem", itemId: "e1", skill: null, icon: "fa-solid fa-up-right-from-square" },
+      { kind: "spell", id: "s2", name: "Light", img: "light.png", nameIsKey: false, detail: "", action: null, itemId: "s2", skill: null, icon: "" },
+      { kind: "thiefSkill", id: "climb-walls", name: "ADND2E.chat.thiefSkill.skills.climbWalls", img: "", nameIsKey: true, detail: "85%", action: "rollThiefSkill", itemId: null, skill: "climb-walls", icon: "fa-solid fa-dice-d20" },
+      { kind: "thiefSkill", id: "read-languages", name: "ADND2E.chat.thiefSkill.skills.readLanguages", img: "", nameIsKey: true, detail: "0%", action: null, itemId: null, skill: "read-languages", icon: "" },
     ]);
   });
 

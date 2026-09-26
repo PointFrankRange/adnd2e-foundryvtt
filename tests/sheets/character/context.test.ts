@@ -2107,7 +2107,7 @@ describe("buildCharacterSheetContext — sheet redesign R1 fields", () => {
     const c = buildCharacterSheetContext(input({ physicalItems: [sword], favorites: [{ kind: "item", id: "w1" }] }));
     expect(c.favorites.canFavorite).toBe(true);
     expect(c.favorites.rows).toEqual([
-      { kind: "item", id: "w1", name: "Long Sword", img: "s.png", nameIsKey: false, detail: "", action: "rollAttack", itemId: "w1", skill: null },
+      { kind: "item", id: "w1", name: "Long Sword", img: "s.png", nameIsKey: false, detail: "", action: "rollAttack", itemId: "w1", skill: null, icon: "fa-solid fa-dice-d20" },
     ]);
     expect(c.combat.weapons.find((w) => w.id === "w1")!.favorite).toBe(true);
     expect(c.inventory.sections[0]).toMatchObject({ id: "weapons", rows: [{ favorite: true }] });

@@ -16,11 +16,17 @@
     {{/if}}
   </div>
   <div class="kit-mods">{{#each row.mods as |m|}}<span title="{{m.label}}">{{m.value}}</span>{{/each}}</div>
-  {{#if row.subs}}{{#if unlocked}}
+  {{#if row.subs}}
     <div class="sub-scores">
-      {{#each row.subs as |sub|}}
-        <label class="sub-score">{{localize sub.label}}<input type="number" min="1" max="25" name="{{sub.name}}" value="{{sub.value}}" placeholder="{{sub.placeholder}}"></label>
-      {{/each}}
+      {{#if unlocked}}
+        {{#each row.subs as |sub|}}
+          <label class="sub-score">{{localize sub.label}}<input type="number" min="1" max="25" name="{{sub.name}}" value="{{sub.value}}" placeholder="{{sub.placeholder}}"></label>
+        {{/each}}
+      {{else}}
+        {{#each row.subs as |sub|}}
+          <span class="sub-score">{{localize sub.label}} {{#if sub.value}}{{sub.value}}{{else}}{{sub.placeholder}}{{/if}}</span>
+        {{/each}}
+      {{/if}}
     </div>
-  {{/if}}{{/if}}
+  {{/if}}
 </div>
