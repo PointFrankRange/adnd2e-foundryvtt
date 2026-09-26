@@ -282,6 +282,8 @@ export interface AbilityRow {
 }
 export interface SaveRow {
   key: string; label: string; target: number; rollModifier: number; effectiveTarget: number;
+  /** sheet redesign R1 dev-world fix 3: the header saves strip's short caption i18n key */
+  shortLabel: string;
 }
 export interface ClassRow {
   id: string; name: string; chassisId: string; level: number;

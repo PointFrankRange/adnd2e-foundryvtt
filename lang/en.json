@@ -273,6 +273,15 @@
         "movement": "Movement",
         "effective": "Effective"
       },
+      "saves": {
+        "short": {
+          "ppd": "PPD",
+          "rsw": "RSW",
+          "pp": "P/P",
+          "bw": "Breath",
+          "spell": "Spell"
+        }
+      },
       "drop": {
         "duplicateRace": "This character already has a race.",
         "duplicateClass": "This character already has that class.",

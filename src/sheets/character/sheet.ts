@@ -282,7 +282,7 @@ export function toTraitView(it: RawItem): TraitItemView {
 export class Adnd2eCharacterSheet extends Base {
   static DEFAULT_OPTIONS = {
     classes: ["adnd2e", "sheet", "actor", "pc-sheet"],
-    position: { width: 860, height: 880 },
+    position: { width: 1160, height: 880 },
     window: { resizable: true },
     form: { submitOnChange: true, closeOnSubmit: false },
     actions: {

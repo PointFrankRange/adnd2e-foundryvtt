@@ -53,4 +53,15 @@
       </div>
     </section>
   </div>
+
+  <div class="pc-saves">
+    {{#each adnd2e.vitals.saves as |row|}}
+      <div class="kit-stat kit-save-box" data-save="{{row.key}}" title="{{localize row.label}} — {{row.target}} {{adnd2eSigned row.rollModifier}}">
+        <div class="kit-bar">{{localize row.shortLabel}}</div>
+        <span class="kit-big">{{row.effectiveTarget}}
+          <button type="button" class="kit-roll kit-save-roll" data-action="rollSave" data-save="{{row.key}}" title="{{localize 'ADND2E.sheet.combat.rollSave'}}"><i class="fa-solid fa-dice-d20" inert></i></button>
+        </span>
+      </div>
+    {{/each}}
+  </div>
 </header>

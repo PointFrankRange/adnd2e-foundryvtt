@@ -216,6 +216,9 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
       target: s.target,
       rollModifier: s.rollModifier,
       effectiveTarget: s.effectiveTarget,
+      // sheet redesign R1 dev-world fix 3: additive — `label` above stays
+      // unchanged for the Character NPC sheet's old save-row.hbs partial.
+      shortLabel: `ADND2E.sheet.saves.short.${key}`,
     };
   });
   return {

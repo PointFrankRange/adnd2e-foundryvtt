@@ -27,8 +27,6 @@
     .sub-scores { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px; input { width: 40px; } }
   }
 
-  .kit-save { display: grid; grid-template-columns: 1fr auto auto; gap: 4px; align-items: center; padding: 1px 0; }
-
   .pc-header {
     .pc-title-row { display: flex; align-items: center; gap: 8px; }
     .pc-name { flex: 1; font-family: Georgia, "Times New Roman", serif; font-size: 22px; font-weight: 700; color: var(--kit-accent-ink); margin: 0; border: none; background: transparent; }
@@ -61,6 +59,12 @@
     // `.pc-header-row` on its own once `.pc-classes` can't fit at 260px.
     .pc-classes { flex: 1 1 auto; min-width: 260px; margin-bottom: 0; .class-row { padding: 2px 6px; } }
     .casting-badge { font-weight: 700; color: var(--kit-accent-ink); }
+
+    .pc-saves { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+    .pc-saves .kit-save-box { width: 96px; display: flex; flex-direction: column; }
+    .pc-saves .kit-bar { justify-content: center; white-space: nowrap; font-size: 11px; height: 20px; padding: 0 4px; }
+    .pc-saves .kit-big { height: 34px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 4px; font-size: 18px; line-height: 1; }
+    .pc-saves .kit-save-roll { width: 24px; height: 24px; padding: 0; font-size: 12px; line-height: 24px; }
   }
 
   .weapon-row, .armor-row, .class-row, .prof-row, .spell-row, .feature-row, .trait-row {

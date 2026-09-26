@@ -454,6 +454,11 @@ describe("buildCharacterSheetContext — vitals / classes / dual-class toggle", 
     expect(c.vitals.saves.map((s) => s.key)).toEqual(["ppd", "rsw", "pp", "bw", "spell"]);
     expect(c.vitals.saves[0].effectiveTarget).toBe(12);
     expect(c.vitals.saves[0].label).toBe("ADND2E.saves.ppd");
+    expect(c.vitals.saves[0].shortLabel).toBe("ADND2E.sheet.saves.short.ppd");
+    expect(c.vitals.saves.map((s) => s.shortLabel)).toEqual([
+      "ADND2E.sheet.saves.short.ppd", "ADND2E.sheet.saves.short.rsw", "ADND2E.sheet.saves.short.pp",
+      "ADND2E.sheet.saves.short.bw", "ADND2E.sheet.saves.short.spell",
+    ]);
   });
 
   it("movement carries the localised encumbrance-category label", () => {

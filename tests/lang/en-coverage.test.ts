@@ -637,6 +637,16 @@ describe("lang/en.json — dev-world fix 1 (labelled ability-modifier mini-boxes
   });
 });
 
+describe("lang/en.json — dev-world fix 3 (saves strip short labels)", () => {
+  it("resolves every ADND2E.sheet.saves.short.* key for the five save keys", () => {
+    for (const key of ["ppd", "rsw", "pp", "bw", "spell"]) {
+      const lookupKey = `ADND2E.sheet.saves.short.${key}`;
+      expect(typeof resolve(lookupKey), lookupKey).toBe("string");
+      expect((resolve(lookupKey) as string).length, lookupKey).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — sheet redesign R1 (PC sheet kit)", () => {
   it("resolves the new PC-tab labels", () => {
     for (const key of ["ADND2E.sheet.tabs.proficiencies", "ADND2E.sheet.tabs.journal"]) {
