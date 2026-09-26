@@ -230,7 +230,8 @@
         "duplicateTrait": "You already have that trait.",
         "insufficientCp": "Not enough character points for that trait.",
         "traitsDisabled": "Traits are only used while the Skills & Powers character-point build rule is on.",
-        "traitsPcOnly": "Traits can only be added to a player character's sheet."
+        "traitsPcOnly": "Traits can only be added to a player character's sheet.",
+        "monsterRejects": "A Monster NPC can carry weapons, armor, equipment and spells — not classes, races, proficiencies, traits or class features."
       },
       "xp": {
         "award": "Award XP",
@@ -423,7 +424,16 @@
         "xpValue": "XP Value",
         "specialAttacks": "Special Attacks",
         "specialDefenses": "Special Defenses",
-        "description": "Description"
+        "description": "Description",
+        "gear": "Gear",
+        "noGear": "No gear",
+        "equipped": "Equipped",
+        "quantity": "Qty",
+        "weaponAttacks": "Weapon Attacks",
+        "spells": "Spells",
+        "noSpells": "No spells",
+        "cast": "Cast",
+        "weaponAttackBlockedWarning": "That weapon isn't equipped any more — refresh the sheet."
       }
     },
     "chat": {

@@ -71,10 +71,54 @@
       {{else}}
         <p class="placeholder">{{localize 'ADND2E.sheet.creature.noAttacks'}}</p>
       {{/each}}
+      {{#if adnd2e.weaponAttacks.length}}
+        <h4>{{localize 'ADND2E.sheet.creature.weaponAttacks'}}</h4>
+        {{#each adnd2e.weaponAttacks as |wa|}}
+          <div class="attack-row weapon-attack" data-item-id="{{wa.id}}">
+            <span class="name">{{wa.name}}</span>
+            <span class="damage">{{wa.damage}}</span>
+            <span class="type">{{localize (concat 'ADND2E.attackTypes.' wa.type)}}</span>
+            <button type="button" data-action="rollWeaponAttack" data-item-id="{{wa.id}}">{{localize 'ADND2E.sheet.combat.rollAttack'}}</button>
+          </div>
+        {{/each}}
+      {{/if}}
     </div>
     <button type="button" data-action="addAttack">
       {{localize 'ADND2E.sheet.creature.addAttack'}}
     </button>
+  </div>
+
+  <div class="gear panel">
+    <h3>{{localize 'ADND2E.sheet.creature.gear'}}</h3>
+    {{#each adnd2e.gear as |g|}}
+      <div class="gear-row" data-item-id="{{g.id}}">
+        <span class="name">{{g.name}}</span>
+        <span class="quantity" title="{{localize 'ADND2E.sheet.creature.quantity'}}">×{{g.quantity}}</span>
+        <label class="equipped">
+          <input type="checkbox" data-action="toggleEquipped" data-item-id="{{g.id}}" {{checked g.equipped}} {{#unless @root.editable}}disabled{{/unless}}>
+          {{localize 'ADND2E.sheet.creature.equipped'}}
+        </label>
+        {{> adnd2e.item-controls id=g.id deletable=@root.editable}}
+      </div>
+    {{else}}
+      <p class="placeholder">{{localize 'ADND2E.sheet.creature.noGear'}}</p>
+    {{/each}}
+  </div>
+
+  <div class="spells panel">
+    <h3>{{localize 'ADND2E.sheet.creature.spells'}}</h3>
+    {{#each adnd2e.spells as |grp|}}
+      <h4>{{localize 'ADND2E.sheet.spells.level' level=grp.level}}</h4>
+      {{#each grp.items as |s|}}
+        <div class="spell-row" data-item-id="{{s.id}}">
+          <span class="name">{{s.name}}</span>
+          <button type="button" data-action="castMonsterSpell" data-item-id="{{s.id}}">{{localize 'ADND2E.sheet.creature.cast'}}</button>
+          {{> adnd2e.item-controls id=s.id deletable=@root.editable}}
+        </div>
+      {{/each}}
+    {{else}}
+      <p class="placeholder">{{localize 'ADND2E.sheet.creature.noSpells'}}</p>
+    {{/each}}
   </div>
 
   <table class="saves panel">

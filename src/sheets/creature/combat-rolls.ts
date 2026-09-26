@@ -5,9 +5,10 @@ import { blindedAttackPenalty, canAct, heldAttackBonus, proneArmorClassPenalty }
 import { attackModifiers, hitResult } from "../../core/combat/attack";
 import { attackFormula } from "../../core/dice/formula";
 import { criticalSeverity, fumbleSeverity } from "../../combat/critical";
+import { monsterWeaponDamageFormula } from "../../combat/monster-gear";
 import { getOptionalRules } from "../../settings";
 import { TEMPLATE_PATH } from "../../constants";
-import type { SaveCategory } from "../../core/types";
+import type { CreatureSize, SaveCategory } from "../../core/types";
 
 /* ---------------------------------------------------------------------------
  * combat-rolls — SP6, creature-shaped.
@@ -66,19 +67,61 @@ function applyMessageMode(chatData: Record<string, unknown>): Record<string, unk
   ).applyMode(chatData, mode);
 }
 
+interface AttackSource {
+  name: string;
+  thac0: number;
+  /** 0 for stat-block attacks; the weapon's magic bonus for weapon attacks */
+  weaponMagicBonus: number;
+  /** the damage formula for a hit against a target of this size (null = none to roll) */
+  damageFormula(targetSize: CreatureSize | null): string | null;
+}
+
 /** Roll one attack from `attacks[attackIndex]` against the current token
  *  target(s) (or a manually-entered AC, via DialogV2, when zero or more than
- *  one is targeted — mirrors the PC sheet's rollAttack exactly). On a hit,
- *  ALSO immediately rolls `attack.damage` and posts it as a second message
- *  using templates/chat/creature-damage.hbs — a creature's damage is already
- *  one fixed formula with no target-size dependency, so there's no need for
- *  the PC sheet's separate "Roll Damage" button/step; the card carries its
- *  own "Apply to Targeted Token(s)" button (chat-listeners.ts's
- *  `applyDamage`, routed through the relay) instead. */
+ *  one is targeted — mirrors the PC sheet's rollAttack exactly). Delegates to
+ *  `rollCreatureAttack` (Monster NPC inventory plan Task 3) with the
+ *  stat-block's own THAC0 (no weapon magic bonus, no target-size dependency
+ *  in its damage) — behavior-identical to the pre-Task-3 inline version. */
 export async function rollAttack(actor: CreatureActor, attackIndex: number): Promise<void> {
   const attack = actor.system.attacks[attackIndex];
   if (!attack) return;
+  await rollCreatureAttack(actor, {
+    name: attack.name,
+    thac0: attack.thac0Override ?? actor.system.attributes.thac0.value,
+    weaponMagicBonus: 0,
+    damageFormula: () => attack.damage,
+  });
+}
 
+/** Attack with an EQUIPPED weapon item: monster THAC0 + the weapon's magic bonus,
+ *  the weapon's S-M / L damage by target size (Monster NPC gear design). */
+export async function rollWeaponAttack(actor: CreatureActor & { items: { get(id: string): unknown } }, itemId: string): Promise<void> {
+  const item = actor.items.get(itemId) as
+    | { name: string; type: string; system: { equipped?: boolean; category: string; magicBonus: number; damageVsSM: string | null; damageVsL: string | null } }
+    | undefined;
+  if (!item || item.type !== "weapon" || !item.system.equipped) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.creature.weaponAttackBlockedWarning"));
+    return;
+  }
+  const weapon = { category: item.system.category, magicBonus: item.system.magicBonus ?? 0, damageVsSM: item.system.damageVsSM, damageVsL: item.system.damageVsL };
+  await rollCreatureAttack(actor, {
+    name: item.name,
+    thac0: actor.system.attributes.thac0.value,
+    weaponMagicBonus: weapon.magicBonus,
+    damageFormula: (size) => monsterWeaponDamageFormula(weapon, size),
+  });
+}
+
+/** Shared Roll Attack routine for both a stat-block attack (`rollAttack`) and
+ *  an equipped-weapon attack (`rollWeaponAttack`) — on a hit, ALSO
+ *  immediately rolls the source's damage formula and posts it as a second
+ *  message using templates/chat/creature-damage.hbs — a creature's damage is
+ *  already one fixed formula (or, for a weapon, resolved by target size)
+ *  with no separate roll step, so there's no need for the PC sheet's
+ *  separate "Roll Damage" button/step; the card carries its own "Apply to
+ *  Targeted Token(s)" button (chat-listeners.ts's `applyDamage`, routed
+ *  through the relay) instead. */
+async function rollCreatureAttack(actor: CreatureActor, source: AttackSource): Promise<void> {
   if (!canAct(actor.statuses)) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.attack.cannotActWarning"));
     return;
@@ -87,14 +130,16 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
   const targets = [...(game as unknown as { user: { targets: Iterable<{ name: string; actor: unknown }> } }).user.targets];
   let targetName: string | null = null;
   let targetAc: number;
+  let targetSize: CreatureSize | null = null;
   let targetStatuses: ReadonlySet<string> = new Set<string>();
 
   if (targets.length === 1) {
     const t = targets[0]!;
     targetName = t.name;
     targetStatuses = (t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>();
-    targetAc = resolveTargetCombatInfo(t.actor as Parameters<typeof resolveTargetCombatInfo>[0]).ac
-      + proneArmorClassPenalty(targetStatuses);
+    const info = resolveTargetCombatInfo(t.actor as Parameters<typeof resolveTargetCombatInfo>[0]);
+    targetAc = info.ac + proneArmorClassPenalty(targetStatuses);
+    targetSize = info.size as CreatureSize | null;
   } else {
     const manualAc = await foundry.applications.api.DialogV2.prompt({
       window: { title: game.i18n!.localize("ADND2E.chat.attack.manualAcTitle") },
@@ -113,11 +158,14 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
     targetAc = manualAc;
   }
 
-  const thac0 = attack.thac0Override ?? actor.system.attributes.thac0.value;
+  const thac0 = source.thac0;
   // A monster's THAC0 already bakes in every modifier PHB combat tables would
   // otherwise apply separately — no strength/proficiency/range term is
-  // modeled here, matching how a 2E stat block is authored (spec §7).
+  // modeled here, matching how a 2E stat block is authored (spec §7). The
+  // weapon's magic bonus (0 for a stat-block attack) is the only addition an
+  // equipped weapon contributes here.
   const { total: attackBonus, breakdown } = attackModifiers({
+    weaponMagicBonus: source.weaponMagicBonus,
     situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses),
   });
   const formula = attackFormula(attackBonus);
@@ -136,13 +184,16 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
       flavor: game.i18n!.localize("ADND2E.chat.attack.fumbleSelfInjury"),
     } as unknown as Roll.MessageData);
   }
-  // Creature attacks have no weapon Item to unequip on a "weapon drops"
-  // fumble (attacks[] is a flat array, not an embedded Item) — this outcome
-  // is a no-op for a creature attacker, a deliberate v1 scope boundary.
+  // Neither a stat-block attack nor an equipped-weapon attack unequips
+  // anything on a "weapon drops" fumble here: attacks[] is a flat array with
+  // no weapon Item to unequip, and an equipped weapon's own drop-on-fumble
+  // outcome is out of this plan's v1 scope (matches the PC sheet's Task 1-4
+  // boundary being about DAMAGE, not fumble effects) — a deliberate v1 scope
+  // boundary carried over unchanged from the pre-Task-3 rollAttack.
 
   const context = buildAttackCardContext({
     actorName: actor.name, actorImg: actor.img,
-    weaponName: attack.name, targetName,
+    weaponName: source.name, targetName,
     formula, naturalD20, hit, backstab: false, modifierBreakdown: breakdown,
     critLabel: crit ? `ADND2E.chat.attack.crit.${crit.tier}` : null,
     fumbleLabel: fumble ? `ADND2E.chat.attack.fumble.${fumble.tier}` : null,
@@ -157,43 +208,51 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
   );
 
   if (hit.hit) {
-    const damageRoll = await new Roll(attack.damage).evaluate();
-    const flavor = game.i18n!.format("ADND2E.chat.creature.damageFlavor", { name: attack.name });
-    const renderDamage = (total: number, crit: boolean) =>
-      foundry.applications.handlebars.renderTemplate(TEMPLATE_PATH("chat/creature-damage.hbs"), {
-        formula: damageRoll.formula,
-        total,
-        crit,
-      });
-    if (!crit) {
-      await damageRoll.toMessage({
-        speaker: ChatMessage.getSpeaker({ actor: actor as never }),
-        flavor,
-        content: await renderDamage(damageRoll.total ?? 0, false),
-      } as unknown as Roll.MessageData);
-    } else {
-      // A crit multiplies/boosts the total, which Roll#toMessage() cannot
-      // display while keeping the real evaluated roll attached (it always
-      // shows the roll's own unmodified total) — this branch ONLY runs for
-      // an active crit, never for a normal hit. Verified against real
-      // v14.364 source (client/dice/roll.mjs Roll#toMessage,
-      // client/documents/chat-message.mjs #renderRollContent): this mirrors
-      // exactly what Roll#toMessage() itself does internally
-      // (`messageData.rolls = [this]; ChatMessage.create(...)`), and a
-      // custom `content` containing at least one HTML element is preserved
-      // rather than overwritten by the default roll card. Also mirrors
-      // Roll#toMessage()'s OWN roll-mode application step, via
-      // `applyMessageMode` below, so a crit doesn't bypass the world's
-      // Private GM Roll / Blind Roll / Self Roll setting the way a bare
-      // ChatMessage.create() call would.
-      const finalDamageTotal = (damageRoll.total ?? 0) * crit.damageMultiplier + crit.flatBonus;
-      const messageData = applyMessageMode({
-        speaker: ChatMessage.getSpeaker({ actor: actor as never }),
-        content: await renderDamage(finalDamageTotal, true),
-        flavor,
-        rolls: [damageRoll],
-      });
-      await ChatMessage.create(messageData as unknown as Record<string, unknown>);
+    const damageFormula = source.damageFormula(targetSize);
+    // `damageFormula` is falsy both for `null` (no die modeled — a weapon
+    // with no S-M/L dice authored) and for `""` (a stat-block attack whose
+    // `damage` field was left blank) — skipping the roll in both cases,
+    // rather than calling `new Roll("")`, is this refactor's one intentional
+    // behavior change from the pre-Task-3 code; see the Task 3 report.
+    if (damageFormula) {
+      const damageRoll = await new Roll(damageFormula).evaluate();
+      const flavor = game.i18n!.format("ADND2E.chat.creature.damageFlavor", { name: source.name });
+      const renderDamage = (total: number, crit: boolean) =>
+        foundry.applications.handlebars.renderTemplate(TEMPLATE_PATH("chat/creature-damage.hbs"), {
+          formula: damageRoll.formula,
+          total,
+          crit,
+        });
+      if (!crit) {
+        await damageRoll.toMessage({
+          speaker: ChatMessage.getSpeaker({ actor: actor as never }),
+          flavor,
+          content: await renderDamage(damageRoll.total ?? 0, false),
+        } as unknown as Roll.MessageData);
+      } else {
+        // A crit multiplies/boosts the total, which Roll#toMessage() cannot
+        // display while keeping the real evaluated roll attached (it always
+        // shows the roll's own unmodified total) — this branch ONLY runs for
+        // an active crit, never for a normal hit. Verified against real
+        // v14.364 source (client/dice/roll.mjs Roll#toMessage,
+        // client/documents/chat-message.mjs #renderRollContent): this mirrors
+        // exactly what Roll#toMessage() itself does internally
+        // (`messageData.rolls = [this]; ChatMessage.create(...)`), and a
+        // custom `content` containing at least one HTML element is preserved
+        // rather than overwritten by the default roll card. Also mirrors
+        // Roll#toMessage()'s OWN roll-mode application step, via
+        // `applyMessageMode` below, so a crit doesn't bypass the world's
+        // Private GM Roll / Blind Roll / Self Roll setting the way a bare
+        // ChatMessage.create() call would.
+        const finalDamageTotal = (damageRoll.total ?? 0) * crit.damageMultiplier + crit.flatBonus;
+        const messageData = applyMessageMode({
+          speaker: ChatMessage.getSpeaker({ actor: actor as never }),
+          content: await renderDamage(finalDamageTotal, true),
+          flavor,
+          rolls: [damageRoll],
+        });
+        await ChatMessage.create(messageData as unknown as Record<string, unknown>);
+      }
     }
   }
 }
