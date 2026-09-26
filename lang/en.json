@@ -624,6 +624,26 @@
       "channelers": {
         "name": "Spells & Magic: Channelers",
         "hint": "Not implemented — channelers come from Player's Option: Spells & Magic, which this system does not reference."
+      },
+      "playerAppliedEffects": {
+        "name": "Player-Applied Damage & Effects",
+        "hint": "When a player applies damage, healing or a maneuver effect to a token they don't own, the active GM's client applies it. Choose whether that happens automatically or waits for the GM to approve each one. Requires a GM to be connected.",
+        "auto": "Apply automatically",
+        "approve": "GM must approve"
+      }
+    },
+    "relay": {
+      "noGmWarning": "No GM is connected — the GM must apply this to a token you don't own.",
+      "failedWarning": "Couldn't apply that to a token you don't own — ask the GM to apply it.",
+      "declinedWarning": "The GM declined to apply that.",
+      "approveTitle": "Player-Applied Effect",
+      "approvePrompt": "{user} wants to apply {effect} to {target}. Allow it?",
+      "log": "{user} applied {effect} to {target}.",
+      "effect": {
+        "damage": "{amount} damage",
+        "healing": "{amount} healing",
+        "condition": "the {condition} condition",
+        "unequip": "a disarm (unequip weapon)"
       }
     }
   },

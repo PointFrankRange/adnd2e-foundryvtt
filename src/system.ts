@@ -14,6 +14,7 @@ import { registerMigrationSettings, runMigrations } from "./migrations/run";
 import { registerChatListeners } from "./chat/chat-listeners";
 import { promptInitiativeModifier } from "./combat/initiative-modifier-dialog";
 import { registerCastingHooks } from "./hooks/casting-hooks";
+import { registerRelayQuery } from "./relay/relay-handler";
 
 Hooks.once("init", () => {
   console.log(`${SYSTEM_ID} | Initializing`);
@@ -71,6 +72,7 @@ Hooks.once("init", () => {
   }
   CONFIG.specialStatusEffects.BLIND = "blinded";
   registerSettings();
+  registerRelayQuery();
   registerMigrationSettings();
   registerSheets();
   // Real hook name mechanically confirmed by reading v14.364 source (NOT the
