@@ -604,6 +604,39 @@ describe("lang/en.json — DM-run actor type labels", () => {
   });
 });
 
+describe("lang/en.json — dev-world fix 1 (labelled ability-modifier mini-boxes)", () => {
+  // Every field of StrengthModifiers/DexterityModifiers/.../CharismaModifiers
+  // (src/core/types.ts) needs a short + long caption. reactionAdj appears on
+  // both DexterityModifiers and CharismaModifiers — that's the SAME lang key
+  // resolved twice below, which is fine (the brief calls this out explicitly:
+  // "one entry").
+  const derivedModsKeys = [
+    // StrengthModifiers
+    "hitProb", "damageAdj", "weightAllowance", "maxPress", "openDoors", "openDoorsMagical", "bendBarsLiftGates",
+    // DexterityModifiers
+    "reactionAdj", "missileAttackAdj", "defensiveAdj",
+    // ConstitutionModifiers
+    "hpAdjustment", "systemShock", "resurrectionSurvival", "poisonSave", "regeneration", "hitDieMinimumRoll",
+    // IntelligenceModifiers
+    "bonusLanguages", "maxSpellLevel", "learnSpellChance", "maxSpellsPerLevel", "illusionImmunityLevel",
+    // WisdomModifiers
+    "magicalDefenseAdj", "bonusPriestSpells", "spellFailureChance", "spellImmunityFromScore",
+    // CharismaModifiers
+    "maxHenchmen", "loyaltyBase", "reactionAdj",
+  ];
+
+  it("resolves a short + long caption for every derived.mods key (56 keys)", () => {
+    expect(derivedModsKeys).toHaveLength(28);
+    for (const key of derivedModsKeys) {
+      for (const leaf of ["short", "long"]) {
+        const lookupKey = `ADND2E.sheet.abilityMods.${key}.${leaf}`;
+        expect(typeof resolve(lookupKey), lookupKey).toBe("string");
+        expect((resolve(lookupKey) as string).length, lookupKey).toBeGreaterThan(0);
+      }
+    }
+  });
+});
+
 describe("lang/en.json — sheet redesign R1 (PC sheet kit)", () => {
   it("resolves the new PC-tab labels", () => {
     for (const key of ["ADND2E.sheet.tabs.proficiencies", "ADND2E.sheet.tabs.journal"]) {

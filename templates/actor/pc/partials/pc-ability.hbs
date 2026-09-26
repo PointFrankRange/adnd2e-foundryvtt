@@ -16,7 +16,7 @@
       {{/if}}
     {{/if}}
   </div>
-  <div class="kit-mods">{{#each row.mods as |m|}}<span title="{{m.label}}">{{m.value}}</span>{{/each}}</div>
+  <div class="kit-mods">{{#each row.mods as |m|}}<div class="kit-mod" title="{{localize m.longKey}}"><span class="kit-mod-cap">{{localize m.shortKey}}</span><span class="kit-mod-val">{{m.display}}</span></div>{{/each}}</div>
   {{#if row.subs}}
     <div class="sub-scores">
       {{#if unlocked}}

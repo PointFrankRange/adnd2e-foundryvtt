@@ -266,7 +266,15 @@ export interface AbilityRow {
   key: string; label: string;
   score: number; racialDelta: number; effectiveScore: number;
   exceptional: number | null; showExceptional: boolean;
-  mods: { label: string; value: string }[];
+  mods: {
+    label: string; value: string;
+    /** sheet redesign R1 dev-world fix 1: the labelled mini-box's short caption i18n key */
+    shortKey: string;
+    /** sheet redesign R1 dev-world fix 1: the mini-box's hover-title (long name) i18n key */
+    longKey: string;
+    /** sheet redesign R1 dev-world fix 1: the formatted value (formatAbilityMod) */
+    display: string;
+  }[];
   /** true while sub-scores derive the main score — the main input renders `disabled` */
   scoreLocked: boolean;
   /** the two sub-score cells, or null when the sub-score UI is off */

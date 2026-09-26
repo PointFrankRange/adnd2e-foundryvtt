@@ -37,6 +37,21 @@
       border-radius: 3px;
       font-weight: 700;
     }
+
+    // A plain (unstyled) <button> inside a maroon .kit-bar — e.g. the Classes
+    // bar's "Award XP" — otherwise renders with the browser's default dark
+    // button chrome, unreadable on the maroon background.
+    button {
+      background: var(--kit-tan);
+      color: var(--kit-tan-ink);
+      border: 1px solid var(--kit-maroon-ink);
+      border-radius: 4px;
+      font-size: 11px;
+      line-height: 1.4;
+      padding: 0 8px;
+      width: auto;
+      height: auto;
+    }
   }
 
   .kit-panel {

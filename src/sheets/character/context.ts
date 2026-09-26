@@ -37,6 +37,7 @@ import { xpToNext } from "./xp";
 import { buildFavoriteRows, isFavorite, normalizeFavorites, type FavoriteKind } from "../kit/favorites";
 import { lockState } from "../kit/lock";
 import { buildInventorySections } from "../kit/inventory-sections";
+import { formatAbilityMod } from "../kit/ability-mods";
 
 /* ---------------------------------------------------------------------------
  * `buildCharacterSheetContext` — the pure PC-sheet render-context builder.
@@ -162,6 +163,12 @@ function buildAbilities(input: CharacterSheetInput): AbilityRow[] {
     const mods = Object.entries(derived.mods).map(([k, v]) => ({
       label: humanize(k),
       value: v == null ? "—" : String(v),
+      // sheet redesign R1 dev-world fix 1: additive fields for the Roll20-style
+      // labelled mini-boxes — `label`/`value` above stay byte-identical for the
+      // Character NPC sheet's old ability-row.hbs partial.
+      shortKey: `ADND2E.sheet.abilityMods.${k}.short`,
+      longKey: `ADND2E.sheet.abilityMods.${k}.long`,
+      display: formatAbilityMod(k, v),
     }));
     const [idA, idB] = SUB_ABILITIES[key];
     return {
