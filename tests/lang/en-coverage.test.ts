@@ -567,3 +567,9 @@ describe("lang/en.json — player-applied effects relay", () => {
     }
   });
 });
+
+describe("lang/en.json — creature damage card", () => {
+  it("resolves the creature crit-damage label", () => {
+    expect(typeof resolve("ADND2E.chat.creature.critDamage")).toBe("string");
+  });
+});

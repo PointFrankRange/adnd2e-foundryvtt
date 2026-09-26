@@ -520,7 +520,8 @@
         }
       },
       "creature": {
-        "damageFlavor": "{name} damage"
+        "damageFlavor": "{name} damage",
+        "critDamage": "Critical hit damage"
       }
     },
     "combat": {

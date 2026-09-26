@@ -70,9 +70,11 @@ function applyMessageMode(chatData: Record<string, unknown>): Record<string, unk
  *  target(s) (or a manually-entered AC, via DialogV2, when zero or more than
  *  one is targeted — mirrors the PC sheet's rollAttack exactly). On a hit,
  *  ALSO immediately rolls `attack.damage` and posts it as a second message
- *  using Foundry's own default roll card (no custom template) — a creature's
- *  damage is already one fixed formula with no target-size dependency, so
- *  there's no need for the PC sheet's separate "Roll Damage" button/step. */
+ *  using templates/chat/creature-damage.hbs — a creature's damage is already
+ *  one fixed formula with no target-size dependency, so there's no need for
+ *  the PC sheet's separate "Roll Damage" button/step; the card carries its
+ *  own "Apply to Targeted Token(s)" button (chat-listeners.ts's
+ *  `applyDamage`, routed through the relay) instead. */
 export async function rollAttack(actor: CreatureActor, attackIndex: number): Promise<void> {
   const attack = actor.system.attacks[attackIndex];
   if (!attack) return;
@@ -156,10 +158,18 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
 
   if (hit.hit) {
     const damageRoll = await new Roll(attack.damage).evaluate();
+    const flavor = game.i18n!.format("ADND2E.chat.creature.damageFlavor", { name: attack.name });
+    const renderDamage = (total: number, crit: boolean) =>
+      foundry.applications.handlebars.renderTemplate(TEMPLATE_PATH("chat/creature-damage.hbs"), {
+        formula: damageRoll.formula,
+        total,
+        crit,
+      });
     if (!crit) {
       await damageRoll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: actor as never }),
-        flavor: game.i18n!.format("ADND2E.chat.creature.damageFlavor", { name: attack.name }),
+        flavor,
+        content: await renderDamage(damageRoll.total ?? 0, false),
       } as unknown as Roll.MessageData);
     } else {
       // A crit multiplies/boosts the total, which Roll#toMessage() cannot
@@ -179,8 +189,8 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
       const finalDamageTotal = (damageRoll.total ?? 0) * crit.damageMultiplier + crit.flatBonus;
       const messageData = applyMessageMode({
         speaker: ChatMessage.getSpeaker({ actor: actor as never }),
-        content: `${damageRoll.formula} = <strong>${finalDamageTotal}</strong>`,
-        flavor: game.i18n!.format("ADND2E.chat.creature.damageFlavor", { name: attack.name }),
+        content: await renderDamage(finalDamageTotal, true),
+        flavor,
         rolls: [damageRoll],
       });
       await ChatMessage.create(messageData as unknown as Record<string, unknown>);

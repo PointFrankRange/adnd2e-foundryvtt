@@ -17,6 +17,9 @@ import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { MANEUVERS, resolveManeuverOutcome } from "../../core/combat/maneuvers";
 import type { ManeuverId } from "../../core/combat/maneuvers";
 import type { ArmorType, ClassId, SaveCategory } from "../../core/types";
+import { requestApply } from "../../relay/relay-client";
+import type { EffectTarget } from "../../relay/apply-effect";
+import type { RelayConditionId } from "../../combat/apply-relay";
 
 /* ---------------------------------------------------------------------------
  * combat-rolls — SP3 Task 5.
@@ -182,26 +185,13 @@ function resolveThiefBackstabInfo(actor: AttackerActor): { isThief: boolean; thi
 }
 
 /** Sets a weapon Item to unequipped — the "weapon knocked away" operation
- *  shared by a fumble's weaponDrops outcome (on the ATTACKER's own weapon)
- *  and a disarm maneuver/called-shot's unequip outcome (on the TARGET's
- *  weapon, resolved by `resolveTargetEquippedWeapon`) — same operation,
- *  different whose-weapon the caller decides. */
+ *  used by a fumble's weaponDrops outcome, on the ATTACKER's own weapon. A
+ *  disarm maneuver/called-shot's unequip outcome on the TARGET's weapon is a
+ *  DIFFERENT actor's write (see the relay comment below) and goes through
+ *  `applyEffectLocally`'s own "unequip" case (relay/apply-effect.ts) instead,
+ *  which finds the target's first equipped weapon itself. */
 async function unequipWeapon(weaponItem: { update(d: Record<string, unknown>): Promise<unknown> }): Promise<void> {
   await weaponItem.update({ "system.equipped": false });
-}
-
-/** Finds the target actor's FIRST equipped weapon Item (first-member-wins,
- *  matching this codebase's established multi-match tie-break convention —
- *  see e.g. proficiency-actions.ts's `firstClassChassisId`). Returns `null`
- *  for an unarmed target — a maneuver's `unequip` outcome is then correctly
- *  a no-op (spec §5), not an error. */
-function resolveTargetEquippedWeapon(
-  targetActor: { items: Iterable<{ id: string; type: string; system: { equipped?: boolean }; update(d: Record<string, unknown>): Promise<unknown> }> },
-): { update(d: Record<string, unknown>): Promise<unknown> } | null {
-  for (const item of targetActor.items) {
-    if (item.type === "weapon" && item.system.equipped) return item;
-  }
-  return null;
 }
 
 /** Roll one attack for `weaponItemId` against the current token target(s) (or
@@ -355,43 +345,32 @@ export async function rollAttack(
   );
 
   // A maneuver's effect MUTATES THE TARGET actor — `toggleStatusEffect` writes
-  // an ActiveEffect on it, `unequipWeapon` updates an Item embedded in it —
-  // and both need OWNER permission on that actor, which a player attacking a
-  // GM-owned monster does not have. So this deliberately runs AFTER
-  // `roll.toMessage()` and never rethrows: whatever goes wrong here (a
+  // an ActiveEffect on it, the "unequip" outcome updates an Item embedded in
+  // it — and both need OWNER permission on that actor, which a player
+  // attacking a GM-owned monster does not have. So this deliberately runs
+  // AFTER `roll.toMessage()` and never rethrows: whatever goes wrong here (a
   // rejected write, a since-deleted actor, a future Foundry API change), the
-  // dice the player already rolled must always reach chat. A "push" (bull
-  // rush) outcome is narrative-only — no persisted state change at all; the
-  // card's maneuverLabel line alone communicates it.
+  // dice the player already rolled must always reach chat. The effect now
+  // relays through the active GM when the attacker doesn't own the target
+  // (relay/relay-client.ts's `requestApply`), instead of being skipped with a
+  // "the GM must apply this by hand" warning. A "push" (bull rush) outcome
+  // is narrative-only — no persisted state change at all; the card's
+  // maneuverLabel line alone communicates it.
   if (maneuverEffect && maneuverEffect.kind !== "push") {
-    const maneuverTarget = (targets.length === 1 ? targets[0]!.actor : null) as {
-      isOwner: boolean;
-      toggleStatusEffect(id: string, opts: { active: boolean }): Promise<unknown>;
-      items: Iterable<{ id: string; type: string; system: { equipped?: boolean }; update(d: Record<string, unknown>): Promise<unknown> }>;
-    } | null;
-    // A targeted token whose actor was deleted yields a null `.actor` — treat
-    // it as "no real target" and skip, the same way chat-listeners.ts's
-    // apply-damage handlers do (`if (!actor) continue`).
+    const maneuverTarget = (targets.length === 1 ? targets[0]!.actor : null) as
+      | (EffectTarget & { uuid: string; isOwner: boolean })
+      | null;
     if (maneuverTarget) {
-      const isGM = (game as unknown as { user: { isGM: boolean } }).user.isGM;
-      if (!isGM && !maneuverTarget.isOwner) {
-        // Same guard chat-listeners.ts's applyDamage/applyCastEffect use. The
-        // card keeps its maneuverLabel line (the outcome is still narrated);
-        // this toast tells the acting player the mechanical effect wasn't
-        // auto-applied and the GM needs to apply it by hand.
-        ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.attack.maneuverNotOwnerWarning"));
-      } else {
-        try {
-          if (maneuverEffect.kind === "condition") {
-            await maneuverTarget.toggleStatusEffect(maneuverEffect.conditionId, { active: true });
-          } else {
-            const targetWeapon = resolveTargetEquippedWeapon(maneuverTarget);
-            if (targetWeapon) await unequipWeapon(targetWeapon);
-          }
-        } catch (err) {
-          console.error(`${SYSTEM_ID} | failed to apply maneuver effect to the target`, err);
-          ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.attack.maneuverEffectFailedWarning"));
-        }
+      try {
+        await requestApply(
+          maneuverTarget,
+          maneuverEffect.kind === "condition"
+            ? { kind: "condition", targetUuid: maneuverTarget.uuid, conditionId: maneuverEffect.conditionId as RelayConditionId }
+            : { kind: "unequip", targetUuid: maneuverTarget.uuid },
+        );
+      } catch (err) {
+        console.error(`${SYSTEM_ID} | failed to apply maneuver effect to the target`, err);
+        ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.attack.maneuverEffectFailedWarning"));
       }
     }
   }

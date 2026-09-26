@@ -3,6 +3,8 @@ import { pickDamageDice } from "../combat/damage-dice";
 import { damageModifiers } from "../core/combat/damage";
 import { damageFormula } from "../core/dice/formula";
 import { TEMPLATE_PATH } from "../constants";
+import { requestApply } from "../relay/relay-client";
+import type { EffectTarget } from "../relay/apply-effect";
 
 /* ---------------------------------------------------------------------------
  * chat-listeners — SP3 Task 6.
@@ -73,25 +75,10 @@ async function onApplyDamage(button: HTMLButtonElement): Promise<void> {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.damage.noTargetsWarning"));
     return;
   }
-  const isGM = (game as unknown as { user: { isGM: boolean } }).user.isGM;
   for (const t of targets) {
-    const actor = t.actor as {
-      isOwner: boolean;
-      system: { attributes: { hp: { value: number; temp?: number } } };
-      update(data: Record<string, unknown>): Promise<unknown>;
-    } | null;
+    const actor = t.actor as (EffectTarget & { uuid: string; isOwner: boolean }) | null;
     if (!actor) continue;
-    if (!isGM && !actor.isOwner) {
-      ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.damage.notOwnerWarning"));
-      continue;
-    }
-    const hp = actor.system.attributes.hp;
-    const temp = hp.temp ?? 0;
-    const fromTemp = Math.min(temp, amount);
-    const fromValue = amount - fromTemp;
-    const update: Record<string, unknown> = { "system.attributes.hp.value": hp.value - fromValue };
-    if ("temp" in hp) update["system.attributes.hp.temp"] = temp - fromTemp;
-    await actor.update(update);
+    await requestApply(actor, { kind: "damage", targetUuid: actor.uuid, amount });
   }
 }
 
@@ -108,29 +95,10 @@ async function onApplyCastEffect(button: HTMLButtonElement): Promise<void> {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.damage.noTargetsWarning"));
     return;
   }
-  const isGM = (game as unknown as { user: { isGM: boolean } }).user.isGM;
   for (const t of targets) {
-    const actor = t.actor as {
-      isOwner: boolean;
-      system: { attributes: { hp: { value: number; max: number; temp?: number } } };
-      update(data: Record<string, unknown>): Promise<unknown>;
-    } | null;
+    const actor = t.actor as (EffectTarget & { uuid: string; isOwner: boolean }) | null;
     if (!actor) continue;
-    if (!isGM && !actor.isOwner) {
-      ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.damage.notOwnerWarning"));
-      continue;
-    }
-    const hp = actor.system.attributes.hp;
-    if (kind === "healing") {
-      await actor.update({ "system.attributes.hp.value": Math.min(hp.max, hp.value + signedAmount) });
-      continue;
-    }
-    const temp = hp.temp ?? 0;
-    const fromTemp = Math.min(temp, signedAmount);
-    const fromValue = signedAmount - fromTemp;
-    const update: Record<string, unknown> = { "system.attributes.hp.value": hp.value - fromValue };
-    if ("temp" in hp) update["system.attributes.hp.temp"] = temp - fromTemp;
-    await actor.update(update);
+    await requestApply(actor, { kind: kind === "healing" ? "healing" : "damage", targetUuid: actor.uuid, amount: signedAmount });
   }
 }
 
