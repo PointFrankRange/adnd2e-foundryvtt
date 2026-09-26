@@ -33,4 +33,15 @@
     border-bottom: 1px solid var(--adnd2e-accent);
     padding-bottom: 0.25rem;
   }
+
+  // Monster NPC inventory (Task 3) — a weapon-attack row shares
+  // `.attack-row`'s grid above, but has far fewer cells (name/damage/type/
+  // roll button, no thac0Override/special/delete columns), so it opts out of
+  // that grid in favor of a simple flex row, matching the gear/spell rows
+  // below.
+  .gear-row, .spell-row, .weapon-attack {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
 }

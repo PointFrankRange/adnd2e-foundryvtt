@@ -67,4 +67,8 @@ describe("spellDeletionUpdate", () => {
     delete s.options;
     expect(spellDeletionUpdate(s as never, "z")).toEqual({ "system.spellcasting.wizard.spellbookItemIds": [] });
   });
+
+  it("an actor with no spellcasting block returns {}", () => {
+    expect(spellDeletionUpdate({} as never, "z")).toEqual({});
+  });
 });

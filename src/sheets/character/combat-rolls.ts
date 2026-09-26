@@ -48,20 +48,28 @@ export function resolveTargetCombatInfo(
 
 /** Finds the target's equipped, non-shield `armor`-type item and reads its
  *  armorType, defaulting to "none" (the unarmored group) when the target has
- *  no equipped body-armor item at all — including every `creature`-type
- *  target, which has no armor Item concept (a safe no-op, since this plan's
- *  weaponVsArmorModifier table returns 0 for "unarmored" on every
- *  damage type). Shields are ALSO `armor`-type Items in this schema (see
- *  data/item/armor.ts's `isShield` field) with their own armorType (usually
- *  "none"), so they must be excluded here or an equipped shield found before
- *  the target's equipped body armor would silently zero this modifier —
- *  mirrors proficiency-actions.ts's `resolveWornArmorType`, which already
- *  solves this exact problem for the thief-skill-armor feature. */
+ *  no equipped body-armor item at all. A `creature`-type target (Monster
+ *  NPC) ALWAYS resolves to "none" here regardless of what it has equipped —
+ *  the Monster NPC inventory design's locked ruling (decision 6) is that a
+ *  monster's worn armor is mechanically inert: its AC is the authored stat
+ *  block, full stop, so this modifier must never see a monster's equipped
+ *  armor Item at all (the Monster NPC inventory plan's Task 3 added the
+ *  ability to equip an `armor`-type item on a `creature` actor, which made
+ *  this function's PRE-EXISTING "creature has no armor Item concept" premise
+ *  false — this early return keeps that premise true in effect). Shields are
+ *  ALSO `armor`-type Items in this schema (see data/item/armor.ts's
+ *  `isShield` field) with their own armorType (usually "none"), so they must
+ *  be excluded here or an equipped shield found before the target's equipped
+ *  body armor would silently zero this modifier — mirrors
+ *  proficiency-actions.ts's `resolveWornArmorType`, which already solves
+ *  this exact problem for the thief-skill-armor feature. */
 function resolveTargetArmorType(
   targetActor: {
+    type: string;
     items: Iterable<{ type: string; system: { armorType?: string; equipped?: boolean; isShield?: boolean } }>;
   },
 ): ArmorType {
+  if (targetActor.type === "creature") return "none";
   const armorItem = [...targetActor.items].find(
     (i) => i.type === "armor" && i.system.equipped && !i.system.isShield,
   );

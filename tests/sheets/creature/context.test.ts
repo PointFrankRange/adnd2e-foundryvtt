@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildCreatureSheetContext } from "../../../src/sheets/creature/context";
-import type { CreatureSheetInput } from "../../../src/sheets/creature/context-types";
+import type { CreatureGearView, CreatureSheetInput } from "../../../src/sheets/creature/context-types";
 
 function input(over: Partial<CreatureSheetInput> = {}): CreatureSheetInput {
   return {
@@ -109,5 +109,66 @@ describe("buildCreatureSheetContext", () => {
   it("passes perms through unchanged", () => {
     const c = buildCreatureSheetContext(input({ perms: { isGM: false, isOwner: true, editable: false } }));
     expect(c.perms).toEqual({ isGM: false, isOwner: true, editable: false });
+  });
+});
+
+describe("buildCreatureSheetContext — gear, weapon attacks, spells", () => {
+  const w = (over: Partial<CreatureGearView> = {}): CreatureGearView => ({
+    id: "w1", name: "Long Sword", img: "", type: "weapon", quantity: 1, equipped: true,
+    weapon: { category: "melee", magicBonus: 1, damageVsSM: "1d8", damageVsL: "1d12" },
+    ...over,
+  });
+
+  it("is empty when the monster carries nothing", () => {
+    const c = buildCreatureSheetContext(input());
+    expect(c.gear).toEqual([]);
+    expect(c.weaponAttacks).toEqual([]);
+    expect(c.spells).toEqual([]);
+  });
+
+  it("lists all gear, but only EQUIPPED weapons become attack rows", () => {
+    const c = buildCreatureSheetContext(
+      input({
+        gear: [
+          w(),
+          w({ id: "w2", name: "Short Bow", equipped: false, weapon: { category: "bow", magicBonus: 0, damageVsSM: null, damageVsL: null } }),
+          w({ id: "w3", name: "Javelin", weapon: { category: "thrown", magicBonus: 0, damageVsSM: "1d6", damageVsL: "1d6" } }),
+          { id: "a1", name: "Chain Mail", img: "", type: "armor", quantity: 1, equipped: true },
+          { id: "e1", name: "Rope", img: "", type: "equipment", quantity: 2, equipped: false },
+        ],
+      }),
+    );
+    expect(c.gear.map((g) => [g.id, g.type, g.quantity, g.equipped])).toEqual([
+      ["w1", "weapon", 1, true],
+      ["w2", "weapon", 1, false],
+      ["w3", "weapon", 1, true],
+      ["a1", "armor", 1, true],
+      ["e1", "equipment", 2, false],
+    ]);
+    expect(c.weaponAttacks).toEqual([
+      { id: "w1", name: "Long Sword", damage: "1d8 / 1d12 +1", type: "melee" },
+      { id: "w3", name: "Javelin", damage: "1d6 / 1d6", type: "ranged" },
+    ]);
+  });
+
+  it("an equipped weapon item with no weapon data yields no attack row", () => {
+    const c = buildCreatureSheetContext(input({ gear: [w({ weapon: undefined })] }));
+    expect(c.weaponAttacks).toEqual([]);
+  });
+
+  it("groups spells by level, ascending", () => {
+    const c = buildCreatureSheetContext(
+      input({
+        spells: [
+          { id: "s3", name: "Fireball", img: "", level: 3 },
+          { id: "s1", name: "Magic Missile", img: "", level: 1 },
+          { id: "s1b", name: "Sleep", img: "", level: 1 },
+        ],
+      }),
+    );
+    expect(c.spells).toEqual([
+      { level: 1, items: [{ id: "s1", name: "Magic Missile", img: "" }, { id: "s1b", name: "Sleep", img: "" }] },
+      { level: 3, items: [{ id: "s3", name: "Fireball", img: "" }] },
+    ]);
   });
 });

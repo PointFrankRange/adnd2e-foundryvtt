@@ -575,6 +575,26 @@ describe("lang/en.json — creature damage card", () => {
   });
 });
 
+describe("lang/en.json — Monster NPC gear & spells", () => {
+  it("resolves every new Monster NPC key", () => {
+    for (const key of [
+      "ADND2E.sheet.drop.monsterRejects",
+      "ADND2E.sheet.creature.gear",
+      "ADND2E.sheet.creature.noGear",
+      "ADND2E.sheet.creature.equipped",
+      "ADND2E.sheet.creature.quantity",
+      "ADND2E.sheet.creature.weaponAttacks",
+      "ADND2E.sheet.creature.spells",
+      "ADND2E.sheet.creature.noSpells",
+      "ADND2E.sheet.creature.cast",
+      "ADND2E.sheet.creature.weaponAttackBlockedWarning",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — DM-run actor type labels", () => {
   it("names the npc type 'Character NPC' and the creature type 'Monster NPC' everywhere they are shown", () => {
     expect(resolve("TYPES.Actor.npc")).toBe("Character NPC");

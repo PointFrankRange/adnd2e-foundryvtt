@@ -1,5 +1,6 @@
-import type { CreatureSheetContext, CreatureSheetInput } from "./context-types";
+import type { CreatureSheetContext, CreatureSheetInput, CreatureSpellView } from "./context-types";
 import type { SaveCategory } from "../../core/types";
+import { monsterWeaponAttackType, monsterWeaponDamageLabel } from "../../combat/monster-gear";
 
 const SAVE_CATEGORIES: readonly SaveCategory[] = ["ppd", "rsw", "pp", "bw", "spell"];
 const MOVEMENT_LABELS: Record<"burrow" | "climb" | "fly" | "swim", string> = {
@@ -18,6 +19,14 @@ function buildMovementSummary(m: CreatureSheetInput["attributes"]["movement"]): 
     parts.push(`${MOVEMENT_LABELS[mode]} ${value}${suffix}`);
   }
   return parts.join(", ");
+}
+
+function buildSpellGroups(spells: readonly CreatureSpellView[]): CreatureSheetContext["spells"] {
+  const levels = [...new Set(spells.map((s) => s.level))].sort((a, b) => a - b);
+  return levels.map((level) => ({
+    level,
+    items: spells.filter((s) => s.level === level).map((s) => ({ id: s.id, name: s.name, img: s.img })),
+  }));
 }
 
 /** Pure sheet-context builder for the `creature` actor type — mirrors the
@@ -58,5 +67,17 @@ export function buildCreatureSheetContext(input: CreatureSheetInput): CreatureSh
       description: input.details.description,
     },
     perms: { ...input.perms },
+    gear: (input.gear ?? []).map((g) => ({
+      id: g.id, name: g.name, img: g.img, type: g.type, quantity: g.quantity, equipped: g.equipped,
+    })),
+    weaponAttacks: (input.gear ?? [])
+      .filter((g) => g.type === "weapon" && g.equipped && g.weapon)
+      .map((g) => ({
+        id: g.id,
+        name: g.name,
+        damage: monsterWeaponDamageLabel(g.weapon!),
+        type: monsterWeaponAttackType(g.weapon!.category),
+      })),
+    spells: buildSpellGroups(input.spells ?? []),
   };
 }
