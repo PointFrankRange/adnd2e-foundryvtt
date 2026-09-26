@@ -244,6 +244,7 @@ export function toSpellView(it: RawItem, spellbookIds: Set<string>): SpellItemVi
     canMemorize: false,
     canCast: false,
     canLearn: false,
+    favorite: false,
   };
 }
 

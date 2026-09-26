@@ -580,6 +580,7 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
         speedFactor: 5,
         range: null,
         canBackstab: false,
+        favorite: false,
       },
       {
         id: "w2",
@@ -590,6 +591,7 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
         speedFactor: 2,
         range: "10/20/30",
         canBackstab: false,
+        favorite: false,
       },
     ]);
   });
@@ -830,6 +832,7 @@ describe("buildCharacterSheetContext — spells / features / biography / tabs", 
       canMemorize: false,
       canCast: false,
       canLearn: false,
+      favorite: false,
       ...over,
     });
     const c = buildCharacterSheetContext(
@@ -897,6 +900,7 @@ describe("buildCharacterSheetContext — spells / features / biography / tabs", 
       schools: [], spheres: [], range: "", castingTime: "", savingThrow: "",
       inSpellbook: true, memorized: false, expended: false, canMemorize: false, canCast: false,
       canLearn: false,
+      favorite: false,
       ...over,
     });
     const c = buildCharacterSheetContext(
@@ -1021,6 +1025,7 @@ describe("buildCharacterSheetContext — spell memorize/cast eligibility", () =>
     canMemorize: false,
     canCast: false,
     canLearn: false,
+    favorite: false,
     ...over,
   });
 
@@ -1171,6 +1176,15 @@ describe("buildCharacterSheetContext — spell memorize/cast eligibility", () =>
     );
     expect(c.spells.known[0]!.items[0]!.canMemorize).toBe(false);
   });
+
+  it("a spell row is not favorite by default; favorite true when the actor's favorites list it", () => {
+    const notFav = buildCharacterSheetContext(input({ spellItems: [wizardSpell({ inSpellbook: true })] }));
+    expect(notFav.spells.known[0]!.items[0]!.favorite).toBe(false);
+    const fav = buildCharacterSheetContext(
+      input({ spellItems: [wizardSpell({ inSpellbook: true })], favorites: [{ kind: "spell", id: "mm" }] }),
+    );
+    expect(fav.spells.known[0]!.items[0]!.favorite).toBe(true);
+  });
 });
 
 describe("buildCharacterSheetContext — spell learn eligibility", () => {
@@ -1193,6 +1207,7 @@ describe("buildCharacterSheetContext — spell learn eligibility", () => {
     canMemorize: false,
     canCast: false,
     canLearn: false,
+    favorite: false,
     ...over,
   });
   const fullInt = {
@@ -1804,6 +1819,15 @@ describe("buildCharacterSheetContext — thief/bard skills + backstab eligibilit
       expect(row.usable).toBe(true);
     }
   });
+
+  it("a thief skill row is not favorite by default; favorite true when the actor's favorites list it", () => {
+    const notFav = buildCharacterSheetContext(input({ classItems: [thiefClass] }));
+    expect(notFav.skills.thief!.items.find((r) => r.skill === "pick-pockets")!.favorite).toBe(false);
+    const fav = buildCharacterSheetContext(
+      input({ classItems: [thiefClass], favorites: [{ kind: "thiefSkill", id: "pick-pockets" }] }),
+    );
+    expect(fav.skills.thief!.items.find((r) => r.skill === "pick-pockets")!.favorite).toBe(true);
+  });
 });
 
 describe("sub-ability rows (SP8a)", () => {
@@ -2007,6 +2031,7 @@ describe("buildCharacterSheetContext — casting (SP9a)", () => {
     id: "s1", name: "Magic Missile", img: "", casterClass: "wizard", level: 1,
     schools: ["evocation"], spheres: [], range: "", castingTime: "1", savingThrow: "none",
     inSpellbook: true, memorized: false, expended: false, canMemorize: false, canCast: false, canLearn: false,
+    favorite: false,
     ...over,
   });
   const memorizedWizard = () => {
@@ -2061,5 +2086,41 @@ describe("buildCharacterSheetContext — casting (SP9a)", () => {
     expect(buildCharacterSheetContext(input({ castingStatus: status({ combatRound: null }) })).spells.casting!.canComplete).toBe(false);
     const viewer = input({ castingStatus: status({ combatRound: 3 }), perms: { isGM: false, isOwner: false, editable: false } });
     expect(buildCharacterSheetContext(viewer).spells.casting).toMatchObject({ canComplete: false, canGmControl: false });
+  });
+});
+
+describe("buildCharacterSheetContext — sheet redesign R1 fields", () => {
+  it("is locked by default; only an editor can unlock", () => {
+    expect(buildCharacterSheetContext(input()).lock).toEqual({ canUnlock: true, unlocked: false });
+    expect(buildCharacterSheetContext(input({ unlocked: true })).lock).toEqual({ canUnlock: true, unlocked: true });
+    const viewer = input({ unlocked: true, perms: { isGM: false, isOwner: false, editable: false } });
+    expect(buildCharacterSheetContext(viewer).lock).toEqual({ canUnlock: false, unlocked: false });
+  });
+
+  it("only owners can favorite; favorites build rows and flag the matching rows", () => {
+    const sword: PhysicalItemView = {
+      id: "w1", name: "Long Sword", img: "s.png", type: "weapon", quantity: 1, weight: 4, totalWeight: 4,
+      location: "", equipped: true, identified: true, magicBonus: 0, isContainer: false, capacity: null,
+      contentsWeightMultiplier: 1,
+      weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee", damageType: "slashing" },
+    };
+    const c = buildCharacterSheetContext(input({ physicalItems: [sword], favorites: [{ kind: "item", id: "w1" }] }));
+    expect(c.favorites.canFavorite).toBe(true);
+    expect(c.favorites.rows).toEqual([
+      { kind: "item", id: "w1", name: "Long Sword", img: "s.png", nameIsKey: false, detail: "", action: "rollAttack", itemId: "w1", skill: null },
+    ]);
+    expect(c.combat.weapons.find((w) => w.id === "w1")!.favorite).toBe(true);
+    expect(c.inventory.sections[0]).toMatchObject({ id: "weapons", rows: [{ favorite: true }] });
+
+    const stranger = buildCharacterSheetContext(
+      input({ physicalItems: [sword], favorites: [{ kind: "item", id: "w1" }], perms: { isGM: false, isOwner: false, editable: false } }),
+    );
+    expect(stranger.favorites.canFavorite).toBe(false);
+  });
+
+  it("with no favorites flag the panel is empty and nothing is flagged", () => {
+    const c = buildCharacterSheetContext(input());
+    expect(c.favorites.rows).toEqual([]);
+    expect(c.inventory.sections.map((s) => s.id)).toEqual(["weapons", "armor", "equipment"]);
   });
 });
