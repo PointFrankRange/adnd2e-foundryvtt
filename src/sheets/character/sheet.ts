@@ -26,6 +26,7 @@ import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from 
 import { forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
 import { seedSubAbilities } from "./sub-ability-actions";
 import { removeTrait, traitDropInputs, traitRefundCapped, type TraitDropInputs } from "./trait-actions";
+import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
 import { awardXpSplit } from "./xp";
 
 /* ---------------------------------------------------------------------------
@@ -294,6 +295,8 @@ export class Adnd2eCharacterSheet extends Base {
       completeCasting: Adnd2eCharacterSheet.#onCompleteCasting,
       disruptCasting: Adnd2eCharacterSheet.#onDisruptCasting,
       cancelCasting: Adnd2eCharacterSheet.#onCancelCasting,
+      editItem: Adnd2eCharacterSheet.#onEditItem,
+      deleteItem: Adnd2eCharacterSheet.#onDeleteItem,
       advanceWeaponMastery: Adnd2eCharacterSheet.#onAdvanceWeaponMastery,
       rollNonweaponCheck: Adnd2eCharacterSheet.#onRollNonweaponCheck,
       allocateThiefSkillPoint: Adnd2eCharacterSheet.#onAllocateThiefSkillPoint,
@@ -599,6 +602,16 @@ export class Adnd2eCharacterSheet extends Base {
     _target: HTMLElement,
   ): Promise<void> {
     await seedSubAbilities(this.document as never);
+  }
+
+  static #onEditItem(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): void {
+    const itemId = target.dataset.itemId;
+    if (itemId) editOwnedItem(this.document as never, itemId);
+  }
+
+  static async #onDeleteItem(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const itemId = target.dataset.itemId;
+    if (itemId && this.isEditable) await deleteOwnedItem(this.document as never, itemId);
   }
 
   static async #onRemoveTrait(

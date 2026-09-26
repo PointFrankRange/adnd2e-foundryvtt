@@ -18,6 +18,7 @@ import type { CharacterSheetInput } from "../character/context-types";
 import { rollHitPoints } from "../character/hp-roll";
 import { advanceWeaponMastery, rollNonweaponCheck, rollThiefSkill } from "../character/proficiency-actions";
 import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "../character/casting-actions";
+import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
 import { forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "../character/spell-actions";
 
 /* ---------------------------------------------------------------------------
@@ -98,6 +99,8 @@ export class Adnd2eNpcSheet extends Base {
       completeCasting: Adnd2eNpcSheet.#onCompleteCasting,
       disruptCasting: Adnd2eNpcSheet.#onDisruptCasting,
       cancelCasting: Adnd2eNpcSheet.#onCancelCasting,
+      editItem: Adnd2eNpcSheet.#onEditItem,
+      deleteItem: Adnd2eNpcSheet.#onDeleteItem,
       advanceWeaponMastery: Adnd2eNpcSheet.#onAdvanceWeaponMastery,
       rollNonweaponCheck: Adnd2eNpcSheet.#onRollNonweaponCheck,
       rollThiefSkill: Adnd2eNpcSheet.#onRollThiefSkill,
@@ -406,6 +409,16 @@ export class Adnd2eNpcSheet extends Base {
 
   static async #onDisruptCasting(this: Adnd2eNpcSheet): Promise<void> {
     if (game.user?.isGM) await disruptCasting(this.document as never, { announce: true });
+  }
+
+  static #onEditItem(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): void {
+    const itemId = target.dataset.itemId;
+    if (itemId) editOwnedItem(this.document as never, itemId);
+  }
+
+  static async #onDeleteItem(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const itemId = target.dataset.itemId;
+    if (itemId && this.isEditable) await deleteOwnedItem(this.document as never, itemId);
   }
 
   static async #onCancelCasting(this: Adnd2eNpcSheet): Promise<void> {

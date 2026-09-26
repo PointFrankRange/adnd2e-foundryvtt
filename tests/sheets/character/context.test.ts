@@ -186,6 +186,7 @@ describe("buildCharacterSheetContext — identity", () => {
     expect(c.identity.classLine).toBe("Fighter 7");
     expect(c.identity.arrangementBadge).toBeNull();
     expect(c.identity.raceName).toBeNull();
+    expect(c.identity.raceItemId).toBeNull();
     expect(c.identity.name).toBe("Aldric");
     expect(c.identity.alignmentValue).toBe("true-neutral");
   });
@@ -384,6 +385,7 @@ describe("buildCharacterSheetContext — identity", () => {
       }),
     );
     expect(c.identity.raceName).toBe("Elf");
+    expect(c.identity.raceItemId).toBe("r1");
     expect(c.features.racialAbilities).toEqual(["infravision-60", "resist-sleep-charm"]);
   });
 });

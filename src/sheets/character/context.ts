@@ -108,6 +108,7 @@ function buildIdentity(input: CharacterSheetInput): CharacterSheetContext["ident
     name: input.name,
     img: input.img,
     raceName: input.raceItem?.name ?? null,
+    raceItemId: input.raceItem?.id ?? null,
     classLine: buildClassLine(input),
     arrangementBadge: buildArrangementBadge(input),
     alignmentValue: src.system.details.alignment,

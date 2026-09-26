@@ -33,3 +33,17 @@ export function groupInventory(
 
   return { containers, loose };
 }
+
+/**
+ * The embedded-Item updates that move a deleted container's contents back to
+ * loose (`location: ""`), so none of them is left pointing at an id that no
+ * longer exists.
+ */
+export function containerContentsReset(
+  items: readonly { id: string; location: string }[],
+  containerId: string,
+): { _id: string; "system.location": string }[] {
+  return items
+    .filter((i) => i.id !== containerId && i.location === containerId)
+    .map((i) => ({ _id: i.id, "system.location": "" }));
+}

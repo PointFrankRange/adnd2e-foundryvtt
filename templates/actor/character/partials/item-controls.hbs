@@ -1,0 +1,6 @@
+<span class="item-controls">
+  <button type="button" class="item-control" data-action="editItem" data-item-id="{{id}}" title="{{localize 'ADND2E.sheet.itemControls.edit'}}" aria-label="{{localize 'ADND2E.sheet.itemControls.edit'}}"><i class="fa-solid fa-pen-to-square"></i></button>
+  {{#if deletable}}
+    <button type="button" class="item-control" data-action="deleteItem" data-item-id="{{id}}" title="{{localize 'ADND2E.sheet.itemControls.delete'}}" aria-label="{{localize 'ADND2E.sheet.itemControls.delete'}}"><i class="fa-solid fa-trash"></i></button>
+  {{/if}}
+</span>

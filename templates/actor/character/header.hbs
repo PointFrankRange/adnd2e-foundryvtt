@@ -5,7 +5,7 @@
     <input type="text" name="name" value="{{adnd2e.identity.name}}"
       placeholder="{{localize 'ADND2E.sheet.namePlaceholder'}}" />
     <div class="class-line">
-      {{#if adnd2e.identity.raceName}}<span class="race">{{adnd2e.identity.raceName}}</span>{{/if}}
+      {{#if adnd2e.identity.raceName}}<span class="race">{{adnd2e.identity.raceName}}</span>{{#if adnd2e.identity.raceItemId}}{{> adnd2e.item-controls id=adnd2e.identity.raceItemId deletable=editable}}{{/if}}{{/if}}
       <span class="classes">{{adnd2e.identity.classLine}}</span>
       {{#if adnd2e.identity.arrangementBadge}}
         <span class="badge">{{adnd2e.identity.arrangementBadge}}</span>
