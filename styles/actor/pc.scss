@@ -1,0 +1,46 @@
+.adnd2e.pc-sheet {
+  .window-content {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    grid-template-rows: auto auto 1fr;
+    gap: 0 10px;
+    padding: 8px;
+    overflow: hidden;
+  }
+  .pc-left { grid-column: 1; grid-row: 1 / -1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .pc-header { grid-column: 2; grid-row: 1; }
+  .kit-tabs { grid-column: 2; grid-row: 2; }
+  .window-content > .tab { grid-column: 2; grid-row: 3; overflow-y: auto; }
+
+  .portrait { width: 100%; max-height: 220px; object-fit: cover; border: 2px solid var(--kit-maroon); cursor: pointer; }
+
+  .kit-ability {
+    .kit-ability-body { display: flex; align-items: center; gap: 6px; background: var(--kit-field-bg); color: var(--kit-field-ink); border: 1px solid var(--kit-field-border); border-top: none; padding: 2px 6px; }
+    .kit-big { font-size: 18px; font-weight: 700; min-width: 28px; text-align: center; }
+    input[type="number"] { width: 48px; }
+    .exceptional { width: 44px; }
+    .racial { color: var(--kit-maroon); font-weight: 700; }
+    .kit-mods { font-size: 10px; color: var(--kit-muted); display: flex; flex-wrap: wrap; gap: 2px 6px; padding: 1px 2px; }
+    .sub-scores { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px; input { width: 40px; } }
+  }
+
+  .kit-save { display: grid; grid-template-columns: 1fr auto auto; gap: 4px; align-items: center; padding: 1px 0; }
+
+  .pc-header {
+    .pc-title-row { display: flex; align-items: center; gap: 8px; }
+    .pc-name { flex: 1; font-family: Georgia, "Times New Roman", serif; font-size: 22px; font-weight: 700; color: var(--kit-maroon); margin: 0; border: none; background: transparent; }
+    input.pc-name { background: var(--kit-field-bg); border: 1px solid var(--kit-field-border); }
+    .pc-class-line { color: var(--kit-muted); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 2px 0 6px; }
+    .pc-vitals { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; input[type="number"] { width: 50px; } }
+    .casting-badge { font-weight: 700; color: var(--kit-maroon); }
+  }
+
+  .weapon-row, .armor-row, .class-row, .prof-row, .spell-row, .feature-row, .trait-row {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 3px 6px; border-bottom: 1px solid var(--kit-row-rule);
+  }
+  .expended { opacity: .6; }
+  .casting.panel, .kit-casting { border-left: 3px solid var(--kit-maroon); padding-left: 6px; }
+  .overspent, .warning { color: var(--kit-maroon); font-weight: 700; }
+  .currency-inputs { display: flex; flex-wrap: wrap; gap: 6px; input { width: 60px; } }
+  .detail-fields { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 10px; }
+}
