@@ -3,6 +3,7 @@
   <div class="kit-ability-body">
     {{#if unlocked}}
       <input type="number" name="system.abilities.{{row.key}}.score" value="{{row.score}}"{{#if row.scoreLocked}} disabled title="{{localize 'ADND2E.sheet.subAbilities.mainLocked'}}"{{/if}}>
+      <span class="effective">= {{row.effectiveScore}}</span>
     {{else}}
       <span class="kit-big">{{row.effectiveScore}}</span>
     {{/if}}

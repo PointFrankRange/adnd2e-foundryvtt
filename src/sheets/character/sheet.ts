@@ -63,6 +63,9 @@ const Base = HandlebarsApplicationMixin(ActorSheetV2 as never) as unknown as new
   ): Promise<Record<string, unknown>>;
   _onDropItem(event: DragEvent, item: Item.Implementation): Promise<unknown>;
   _onRender(context: unknown, options: unknown): Promise<void>;
+  // Not awaited by the close process (client/applications/api/application.mjs:1808-1823:
+  // `_preClose` is async/awaited; `_onClose` is sync and fired-and-forgotten via `_doEvent`).
+  _onClose(options: unknown): void;
   render(options?: unknown): Promise<unknown>;
 };
 
@@ -555,6 +558,14 @@ export class Adnd2eCharacterSheet extends Base {
       });
     }
     bindSheetKit(this.element, `pc-${(this.document as unknown as { id: string }).id}`);
+  }
+
+  // v14 caches the sheet instance across close/reopen (client/documents/abstract/
+  // client-document.mjs:213-231), so `#unlocked` would otherwise survive a close —
+  // every sheet must open locked (spec), so reset it on close.
+  override _onClose(options: unknown): void {
+    super._onClose(options);
+    this.#unlocked = false;
   }
 
   async #onItemFieldChange(el: HTMLInputElement | HTMLSelectElement): Promise<void> {

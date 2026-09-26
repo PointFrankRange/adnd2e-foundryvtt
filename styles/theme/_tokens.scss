@@ -9,7 +9,11 @@ $noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' wid
   --kit-bg-image: #{$noise}, radial-gradient(circle at 25% 15%, #f1e3bf 0, #d8bf88 70%, #c9ad74 100%);
   --kit-maroon: #7a0a0a;
   --kit-maroon-ink: #ffffff;
-  --kit-tan: #a8895a;
+  // text-accent — same maroon family as --kit-maroon, but a separate token so
+  // dark mode can swap it for a light warm red without touching the maroon
+  // used for backgrounds/borders (which stays legible against dark-mode ink).
+  --kit-accent-ink: #7a0a0a;
+  --kit-tan: #8a6a3c;
   --kit-tan-ink: #ffffff;
   --kit-ink: #1a1208;
   --kit-muted: #5a3e14;
@@ -26,6 +30,7 @@ body.theme-dark .adnd2e.pc-sheet,
   --kit-bg-image: #{$noise}, radial-gradient(circle at 25% 15%, #3a2d24 0, #241b16 70%, #1b1411 100%);
   --kit-maroon: #8c1c1c;
   --kit-maroon-ink: #f6ecd6;
+  --kit-accent-ink: #e39a7a;
   --kit-tan: #7d6440;
   --kit-tan-ink: #f6ecd6;
   --kit-ink: #eee3cc;

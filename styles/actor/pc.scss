@@ -19,7 +19,7 @@
     .kit-big { font-size: 18px; font-weight: 700; min-width: 28px; text-align: center; }
     input[type="number"] { width: 48px; }
     .exceptional { width: 44px; }
-    .racial { color: var(--kit-maroon); font-weight: 700; }
+    .racial { color: var(--kit-accent-ink); font-weight: 700; }
     .kit-mods { font-size: 10px; color: var(--kit-muted); display: flex; flex-wrap: wrap; gap: 2px 6px; padding: 1px 2px; }
     .sub-scores { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px; input { width: 40px; } }
   }
@@ -28,11 +28,11 @@
 
   .pc-header {
     .pc-title-row { display: flex; align-items: center; gap: 8px; }
-    .pc-name { flex: 1; font-family: Georgia, "Times New Roman", serif; font-size: 22px; font-weight: 700; color: var(--kit-maroon); margin: 0; border: none; background: transparent; }
+    .pc-name { flex: 1; font-family: Georgia, "Times New Roman", serif; font-size: 22px; font-weight: 700; color: var(--kit-accent-ink); margin: 0; border: none; background: transparent; }
     input.pc-name { background: var(--kit-field-bg); border: 1px solid var(--kit-field-border); }
     .pc-class-line { color: var(--kit-muted); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 2px 0 6px; }
     .pc-vitals { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; input[type="number"] { width: 50px; } }
-    .casting-badge { font-weight: 700; color: var(--kit-maroon); }
+    .casting-badge { font-weight: 700; color: var(--kit-accent-ink); }
   }
 
   .weapon-row, .armor-row, .class-row, .prof-row, .spell-row, .feature-row, .trait-row {
@@ -40,7 +40,7 @@
   }
   .expended { opacity: .6; }
   .casting.panel, .kit-casting { border-left: 3px solid var(--kit-maroon); padding-left: 6px; }
-  .overspent, .warning { color: var(--kit-maroon); font-weight: 700; }
+  .overspent, .warning { color: var(--kit-accent-ink); font-weight: 700; }
   .currency-inputs { display: flex; flex-wrap: wrap; gap: 6px; input { width: 60px; } }
   .detail-fields { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 10px; }
 }

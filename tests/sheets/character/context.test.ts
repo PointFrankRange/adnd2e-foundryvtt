@@ -994,15 +994,14 @@ describe("buildCharacterSheetContext — spells / features / biography / tabs", 
     ).toBe(false);
   });
 
-  it("seven tabs in order", () => {
+  it("six tabs in order (sheet redesign R1)", () => {
     expect(buildCharacterSheetContext(input()).tabs.map((t) => t.id)).toEqual([
       "main",
-      "combat",
       "inventory",
-      "skills",
+      "proficiencies",
       "spells",
       "features",
-      "biography",
+      "journal",
     ]);
   });
 });
@@ -2122,5 +2121,47 @@ describe("buildCharacterSheetContext — sheet redesign R1 fields", () => {
     const c = buildCharacterSheetContext(input());
     expect(c.favorites.rows).toEqual([]);
     expect(c.inventory.sections.map((s) => s.id)).toEqual(["weapons", "armor", "equipment"]);
+  });
+
+  it("a favorited thief skill's one-click action is disabled when worn armor disables thief skills", () => {
+    const thiefClass = {
+      id: "c1", name: "Thief", img: "", chassisId: "thief", hitDie: 6,
+      xp: 0, level: 1, canLevelUp: false, dualClassState: null, specialistSchool: null,
+    };
+    const chainMail: PhysicalItemView = {
+      id: "a1", name: "Chain Mail", img: "", type: "armor",
+      quantity: 1, weight: 40, totalWeight: 40, location: "", equipped: true, identified: true, magicBonus: 0,
+      isContainer: false, capacity: null, contentsWeightMultiplier: 1,
+      armor: { baseAc: 5, isShield: false, shieldAcBonus: 0, armorType: "chain-mail" },
+    };
+    const disabled = buildCharacterSheetContext(
+      input({
+        classItems: [thiefClass],
+        physicalItems: [chainMail],
+        favorites: [{ kind: "thiefSkill", id: "pick-pockets" }],
+      }),
+    );
+    expect(disabled.skills.thief!.armorDisabled).toBe(true);
+    const disabledRow = disabled.favorites.rows.find((r) => r.kind === "thiefSkill")!;
+    expect(disabledRow.action).toBeNull();
+    expect(disabledRow.icon).toBe("");
+
+    // same favorite, no armor worn: the section isn't disabled, so the row keeps its action + icon.
+    const usable = buildCharacterSheetContext(
+      input({ classItems: [thiefClass], favorites: [{ kind: "thiefSkill", id: "pick-pockets" }] }),
+    );
+    expect(usable.skills.thief!.armorDisabled).toBe(false);
+    const usableRow = usable.favorites.rows.find((r) => r.kind === "thiefSkill")!;
+    expect(usableRow.action).toBe("rollThiefSkill");
+    expect(usableRow.icon).toBe("fa-solid fa-dice-d20");
+
+    // a skill that's independently not-usable (read-languages, level < 4) stays disabled
+    // regardless of armor — covers the `t.usable` side of the combined check.
+    const notUsable = buildCharacterSheetContext(
+      input({ classItems: [thiefClass], favorites: [{ kind: "thiefSkill", id: "read-languages" }] }),
+    );
+    const notUsableRow = notUsable.favorites.rows.find((r) => r.kind === "thiefSkill")!;
+    expect(notUsableRow.action).toBeNull();
+    expect(notUsableRow.icon).toBe("");
   });
 });

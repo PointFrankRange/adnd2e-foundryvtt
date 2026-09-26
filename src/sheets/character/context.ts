@@ -67,14 +67,17 @@ const DETAIL_FIELDS: readonly string[] = [
   "kit",
 ];
 
+// sheet redesign R1: the six PC-sheet tabs — must match sheet.ts's static TABS
+// (id + icon) exactly; the NPC/creature sheets don't read `adnd2e.tabs` (they
+// use core ApplicationV2 tab navigation off their own static TABS), so this
+// list is PC-only.
 const TABS_DEF: readonly TabDescriptor[] = [
   { id: "main", label: "ADND2E.sheet.tabs.main", icon: "fa-solid fa-user" },
-  { id: "combat", label: "ADND2E.sheet.tabs.combat", icon: "fa-solid fa-shield-halved" },
   { id: "inventory", label: "ADND2E.sheet.tabs.inventory", icon: "fa-solid fa-box-open" },
-  { id: "skills", label: "ADND2E.sheet.tabs.skills", icon: "fa-solid fa-hand-fist" },
+  { id: "proficiencies", label: "ADND2E.sheet.tabs.proficiencies", icon: "fa-solid fa-hand-fist" },
   { id: "spells", label: "ADND2E.sheet.tabs.spells", icon: "fa-solid fa-wand-sparkles" },
   { id: "features", label: "ADND2E.sheet.tabs.features", icon: "fa-solid fa-star" },
-  { id: "biography", label: "ADND2E.sheet.tabs.biography", icon: "fa-solid fa-book" },
+  { id: "journal", label: "ADND2E.sheet.tabs.journal", icon: "fa-solid fa-book" },
 ];
 
 /** Shape of `input.source._source.system` that the builder actually touches. */
@@ -730,6 +733,7 @@ export function buildCharacterSheetContext(input: CharacterSheetInput): Characte
   // thief skill), not the raw item data.
   const skills = buildSkills(input, fav);
   const spells = buildSpells(input, fav);
+  const thiefArmorDisabled = skills.thief?.armorDisabled ?? false;
 
   return {
     identity: buildIdentity(input),
@@ -755,7 +759,9 @@ export function buildCharacterSheetContext(input: CharacterSheetInput): Characte
       rows: buildFavoriteRows(favs, {
         items: input.physicalItems.map((i) => ({ id: i.id, name: i.name, img: i.img, type: i.type, equipped: i.equipped })),
         spells: spells.known.flatMap((g) => g.items.map((i) => ({ id: i.id, name: i.name, img: i.img, canCast: i.canCast }))),
-        thiefSkills: skills.thief?.items ?? [],
+        // worn armor disabling thief skills entirely (skills.thief.armorDisabled)
+        // must also disable an already-favorited thief skill's one-click button.
+        thiefSkills: (skills.thief?.items ?? []).map((t) => ({ ...t, usable: t.usable && !thiefArmorDisabled })),
       }),
     },
   };

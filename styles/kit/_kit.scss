@@ -25,6 +25,18 @@
     display: flex;
     align-items: center;
     gap: 6px;
+
+    // an over-capacity warning inside the maroon bar: `.overspent, .warning`
+    // (pc.scss) sets a maroon-family text color for warnings on the parchment
+    // background, which disappears against this bar's own maroon background.
+    // Use the bar's own ink color instead, chipped so it still reads as a warning.
+    .warning {
+      color: var(--kit-maroon-ink);
+      background: rgba(0, 0, 0, .25);
+      padding: 0 4px;
+      border-radius: 3px;
+      font-weight: 700;
+    }
   }
 
   .kit-panel {
@@ -104,6 +116,6 @@
 
   .item-controls {
     display: inline-flex; gap: 2px; margin-left: auto;
-    .item-control { background: none; border: none; width: auto; padding: 0 3px; color: var(--kit-maroon); }
+    .item-control { background: none; border: none; width: auto; padding: 0 3px; color: var(--kit-accent-ink); }
   }
 }
