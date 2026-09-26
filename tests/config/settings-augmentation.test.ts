@@ -6,6 +6,14 @@ import { SETTING_DESCRIPTORS } from "../../src/settings/registry";
 
 const descriptorKeys = SETTING_DESCRIPTORS.map((d) => d.key).sort();
 
+// Registered directly in src/settings/index.ts (not via SETTING_DESCRIPTORS) because
+// it is a string choice setting, not a boolean OptionalRules toggle — like
+// "adnd2e.systemMigrationVersion" it is invisible to the boolean-only key-contract
+// test above, but unlike that setting it IS shown in the config UI (config: true),
+// so it legitimately has name/hint/choice-label strings under ADND2E.settings in
+// lang/en.json and must be excluded from the orphan-key check below by name.
+const NON_OPTIONAL_RULE_SETTING_KEYS = ["playerAppliedEffects"];
+
 describe("settings-key contract", () => {
   it("src/types/global.d.ts SettingConfig covers exactly the registered keys", () => {
     const src = readFileSync(
@@ -22,6 +30,6 @@ describe("settings-key contract", () => {
     const settings = (enJson as unknown as {
       ADND2E: { settings: Record<string, unknown> };
     }).ADND2E.settings;
-    expect(Object.keys(settings).sort()).toEqual(descriptorKeys);
+    expect(Object.keys(settings).sort()).toEqual([...descriptorKeys, ...NON_OPTIONAL_RULE_SETTING_KEYS].sort());
   });
 });

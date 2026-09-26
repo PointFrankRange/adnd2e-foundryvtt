@@ -1,0 +1,7 @@
+<div class="adnd2e chat-card damage-roll creature-damage">
+  <p class="formula">{{formula}} = <strong>{{total}}</strong></p>
+  {{#if crit}}<p class="crit">{{localize 'ADND2E.chat.creature.critDamage'}}</p>{{/if}}
+  <button type="button" data-action="applyDamage" data-amount="{{total}}">
+    {{localize 'ADND2E.chat.damage.applyToTargets'}}
+  </button>
+</div>

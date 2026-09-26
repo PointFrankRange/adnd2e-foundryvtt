@@ -45,6 +45,10 @@ declare global {
     // is intentionally NOT augmented here (that test asserts the boolean keys are
     // exactly the OptionalRules descriptors).
     "adnd2e.systemMigrationVersion": string;
+    // player-applied effects relay (post-SP9) — a string choice setting, not an
+    // OptionalRules toggle, so (like systemMigrationVersion) it is invisible to the
+    // boolean-only key-contract test.
+    "adnd2e.playerAppliedEffects": string;
     // core — wired into OptionalRules
     "adnd2e.exceptionalStrength": boolean;
     "adnd2e.maxSpellsPerLevel": boolean;

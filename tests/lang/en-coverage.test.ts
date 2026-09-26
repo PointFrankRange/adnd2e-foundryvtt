@@ -543,3 +543,34 @@ describe("lang/en.json — owned-item row controls", () => {
     }
   });
 });
+
+describe("lang/en.json — player-applied effects relay", () => {
+  it("resolves every relay key and the setting's choice labels", () => {
+    for (const key of [
+      "ADND2E.settings.playerAppliedEffects.name",
+      "ADND2E.settings.playerAppliedEffects.hint",
+      "ADND2E.settings.playerAppliedEffects.auto",
+      "ADND2E.settings.playerAppliedEffects.approve",
+      "ADND2E.relay.noGmWarning",
+      "ADND2E.relay.failedWarning",
+      "ADND2E.relay.declinedWarning",
+      "ADND2E.relay.approveTitle",
+      "ADND2E.relay.approvePrompt",
+      "ADND2E.relay.log",
+      "ADND2E.relay.expiredWarning",
+      "ADND2E.relay.effect.damage",
+      "ADND2E.relay.effect.healing",
+      "ADND2E.relay.effect.condition",
+      "ADND2E.relay.effect.unequip",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("lang/en.json — creature damage card", () => {
+  it("resolves the creature crit-damage label", () => {
+    expect(typeof resolve("ADND2E.chat.creature.critDamage")).toBe("string");
+  });
+});
