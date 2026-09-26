@@ -203,9 +203,16 @@ export class Adnd2eCreatureSheet extends Base {
   static async #onCastMonsterSpell(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
     const itemId = target.dataset.itemId;
     if (!itemId) return;
-    const actor = this.document as unknown as { items: { get(id: string): unknown } };
+    const actor = this.document as unknown as { items: { get(id: string): { type: string } | undefined } };
     const spell = actor.items.get(itemId);
-    if (!spell) return;
+    // Defensive re-check (a stale button click, a since-deleted/changed item)
+    // — mirrors the PC sheet's own castSpell/memorizeSpell "toast instead of
+    // silence" convention (src/sheets/character/spell-actions.ts) rather
+    // than letting rollSpellAutomation see a non-spell item's shape.
+    if (!spell || spell.type !== "spell") {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
+      return;
+    }
     const rolled = await rollSpellAutomation(spell as never);
     if (rolled) await postCastCard(this.document as never, spell as never, rolled);
   }

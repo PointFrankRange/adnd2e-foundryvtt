@@ -11,7 +11,11 @@ interface MemorizedEntry {
 }
 
 export interface SpellcastingSource {
-  spellcasting: {
+  // Optional — a Monster NPC (`creature` actor type) has no spellcasting block
+  // at all (its owned spells are cast directly off the Item, no spellbook/
+  // memorized concept), so `deleteOwnedItem` must be able to call this helper
+  // for ANY actor type without first checking which kind of actor it is.
+  spellcasting?: {
     wizard: { spellbookItemIds: readonly string[]; memorized: readonly MemorizedEntry[] };
     priest: { memorized: readonly MemorizedEntry[] };
   };
@@ -20,11 +24,11 @@ export interface SpellcastingSource {
 
 export function spellDeletionUpdate(system: SpellcastingSource, spellItemId: string): Record<string, unknown> {
   const update: Record<string, unknown> = {};
-  const { wizard, priest } = system.spellcasting;
-  if (wizard.spellbookItemIds.includes(spellItemId)) {
+  const { wizard, priest } = system.spellcasting ?? {};
+  if (wizard && wizard.spellbookItemIds.includes(spellItemId)) {
     update["system.spellcasting.wizard.spellbookItemIds"] = wizard.spellbookItemIds.filter((id) => id !== spellItemId);
   }
-  for (const [key, list] of [["wizard", wizard.memorized], ["priest", priest.memorized]] as const) {
+  for (const [key, list] of [["wizard", wizard?.memorized ?? []], ["priest", priest?.memorized ?? []]] as const) {
     if (list.some((e) => e.spellItemId === spellItemId)) {
       update[`system.spellcasting.${key}.memorized`] = list.filter((e) => e.spellItemId !== spellItemId);
     }
