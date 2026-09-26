@@ -1,0 +1,110 @@
+<section class="tab features{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.tabs.features'}}</div>
+    <div class="kit-body">
+      {{#each adnd2e.features.groups as |grp|}}
+        <div class="feature-group" data-source-type="{{grp.sourceType}}">
+          <h4>{{localize grp.sourceTypeLabel}}</h4>
+          {{#each grp.items as |f|}}
+            <div class="feature-row" data-item-id="{{f.id}}">
+              <span class="name">{{f.name}}</span>
+              {{#if f.uses}}
+                <span class="uses">{{f.uses.value}} / {{f.uses.max}} ({{f.uses.per}})</span>
+              {{/if}}
+              <div class="description">{{{f.description}}}</div>
+              {{#if @root.adnd2e.lock.unlocked}}{{> adnd2e.item-controls id=f.id deletable=true}}{{/if}}
+            </div>
+          {{/each}}
+        </div>
+      {{else}}
+        <p class="placeholder">{{localize 'ADND2E.sheet.features.none'}}</p>
+      {{/each}}
+    </div>
+  </section>
+
+  {{#if adnd2e.traits.enabled}}
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.traits.title'}}</div>
+    <div class="kit-body">
+      <div class="cp-ledger">
+        <label>
+          {{localize 'ADND2E.sheet.traits.pool'}}
+          {{#if @root.adnd2e.lock.unlocked}}
+            <input type="number" min="0" step="1" name="system.options.skillsAndPowers.characterPoints.pool" value="{{adnd2e.traits.pool}}"{{#unless adnd2e.traits.canEditPool}} disabled title="{{localize 'ADND2E.sheet.traits.poolGmOnly'}}"{{/unless}} />
+          {{else}}
+            <span>{{adnd2e.traits.pool}}</span>
+          {{/if}}
+        </label>
+        <span class="cp-spent">{{localize 'ADND2E.sheet.traits.spent'}}: {{adnd2e.traits.ledger.spent}}</span>
+        <span class="cp-available{{#if adnd2e.traits.ledger.overspent}} overspent{{/if}}">{{localize 'ADND2E.sheet.traits.available'}}: {{adnd2e.traits.ledger.available}}</span>
+      </div>
+      {{#if adnd2e.traits.ledger.overspent}}<p class="warning">{{localize 'ADND2E.sheet.traits.overspent'}}</p>{{/if}}
+      {{#if adnd2e.traits.refundCapped}}<p class="hint">{{localize 'ADND2E.sheet.traits.refundCapped'}}</p>{{/if}}
+      {{#each adnd2e.traits.rows as |row|}}
+        <div class="trait-row{{#unless row.active}} inert{{/unless}}" data-item-id="{{row.id}}">
+          <span class="name">{{row.name}}</span>
+          <span class="cost">{{row.cost}}</span>
+          <span class="effect">{{row.summaryAmount}} {{localize row.summaryTargetKey}}</span>
+          {{#if @root.adnd2e.lock.unlocked}}{{#if row.canRemove}}<button type="button" data-action="removeTrait" data-item-id="{{row.id}}">{{localize 'ADND2E.sheet.traits.remove'}}</button>{{/if}}{{/if}}
+          {{#if @root.adnd2e.lock.unlocked}}{{> adnd2e.item-controls id=row.id deletable=true}}{{/if}}
+        </div>
+      {{else}}
+        <p class="placeholder">{{localize 'ADND2E.sheet.traits.none'}}</p>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
+
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.features.racial'}}</div>
+    <div class="kit-body">
+      <ul>
+        {{#each adnd2e.features.racialAbilities as |ability|}}
+          <li>{{ability}}</li>
+        {{else}}
+          <li class="placeholder">{{localize 'ADND2E.sheet.features.none'}}</li>
+        {{/each}}
+      </ul>
+    </div>
+  </section>
+
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.features.languages'}}</div>
+    <div class="kit-body">
+      <p class="languages-max">{{adnd2e.features.languagesMax}}</p>
+      <p class="hint">{{localize 'ADND2E.sheet.features.languagesHint'}}</p>
+    </div>
+  </section>
+
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.features.resources'}}</div>
+    <div class="kit-body">
+      <label>
+        {{localize 'ADND2E.sheet.features.reputation'}}
+        {{#if @root.adnd2e.lock.unlocked}}
+          <input type="text" name="system.resources.reputation" value="{{adnd2e.features.resources.reputation}}" />
+        {{else}}
+          <span>{{adnd2e.features.resources.reputation}}</span>
+        {{/if}}
+      </label>
+      <label>
+        {{localize 'ADND2E.sheet.features.henchmen'}}
+        {{#if @root.adnd2e.lock.unlocked}}
+          <input type="text" name="system.resources.henchmen" value="{{adnd2e.features.resources.henchmen}}" />
+        {{else}}
+          <span>{{adnd2e.features.resources.henchmen}}</span>
+        {{/if}}
+      </label>
+      <label>
+        {{localize 'ADND2E.sheet.features.followers'}}
+        {{#if @root.adnd2e.lock.unlocked}}
+          <input type="text" name="system.resources.followers" value="{{adnd2e.features.resources.followers}}" />
+        {{else}}
+          <span>{{adnd2e.features.resources.followers}}</span>
+        {{/if}}
+      </label>
+    </div>
+  </section>
+
+</section>

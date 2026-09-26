@@ -603,3 +603,44 @@ describe("lang/en.json — DM-run actor type labels", () => {
     expect(resolve("ADND2E.sheet.creatureTitle")).toBe("Monster NPC");
   });
 });
+
+describe("lang/en.json — sheet redesign R1 (PC sheet kit)", () => {
+  it("resolves the new PC-tab labels", () => {
+    for (const key of ["ADND2E.sheet.tabs.proficiencies", "ADND2E.sheet.tabs.journal"]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+
+  it("resolves every ADND2E.sheet.kit.* key", () => {
+    for (const key of [
+      "ADND2E.sheet.kit.lock",
+      "ADND2E.sheet.kit.unlock",
+      "ADND2E.sheet.kit.favorites",
+      "ADND2E.sheet.kit.noFavorites",
+      "ADND2E.sheet.kit.favorite",
+      "ADND2E.sheet.kit.filter",
+      "ADND2E.sheet.kit.attacks",
+      "ADND2E.sheet.kit.sections.weapons",
+      "ADND2E.sheet.kit.sections.armor",
+      "ADND2E.sheet.kit.sections.equipment",
+      "ADND2E.sheet.kit.cols.name",
+      "ADND2E.sheet.kit.cols.damage",
+      "ADND2E.sheet.kit.cols.speed",
+      "ADND2E.sheet.kit.cols.qty",
+      "ADND2E.sheet.kit.cols.weight",
+      "ADND2E.sheet.kit.cols.location",
+      "ADND2E.sheet.kit.cols.equipped",
+      "ADND2E.sheet.kit.cols.identified",
+      "ADND2E.sheet.kit.summary.range",
+      "ADND2E.sheet.kit.summary.category",
+      "ADND2E.sheet.kit.summary.damageType",
+      "ADND2E.sheet.kit.summary.baseAc",
+      "ADND2E.sheet.kit.summary.shieldBonus",
+      "ADND2E.sheet.kit.summary.armorType",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

@@ -1,0 +1,21 @@
+<aside class="pc-left">
+  <img class="portrait" src="{{adnd2e.identity.img}}" data-action="editImage" data-edit="img" alt="{{adnd2e.identity.name}}">
+  {{#if adnd2e.lock.unlocked}}{{#if adnd2e.subAbilities.canSeed}}
+    <button type="button" class="kit-small" data-action="seedSubAbilities">{{localize 'ADND2E.sheet.subAbilities.seed'}}</button>
+  {{/if}}{{/if}}
+  {{#each adnd2e.abilities as |row|}}
+    {{> adnd2e.pc-ability row=row unlocked=@root.adnd2e.lock.unlocked}}
+  {{/each}}
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.vitals.saves'}}</div>
+    <div class="kit-body">
+      {{#each adnd2e.vitals.saves as |row|}}
+        <div class="kit-save" data-save="{{row.key}}">
+          <span class="label">{{localize row.label}}</span>
+          <span class="value" title="{{row.target}} {{adnd2eSigned row.rollModifier}}">{{row.effectiveTarget}}</span>
+          <button type="button" class="kit-roll" data-action="rollSave" data-save="{{row.key}}" title="{{localize 'ADND2E.sheet.combat.rollSave'}}"><i class="fa-solid fa-dice-d20" inert></i></button>
+        </div>
+      {{/each}}
+    </div>
+  </section>
+</aside>

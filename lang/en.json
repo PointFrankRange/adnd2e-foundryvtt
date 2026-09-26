@@ -213,7 +213,28 @@
         "skills": "Skills",
         "spells": "Spells",
         "features": "Features",
-        "biography": "Biography"
+        "biography": "Biography",
+        "proficiencies": "Proficiencies",
+        "journal": "Journal"
+      },
+      "kit": {
+        "lock": "Unlock to edit",
+        "unlock": "Lock (play mode)",
+        "favorites": "Favorites",
+        "noFavorites": "Star weapons, gear, spells or thief skills to pin them here.",
+        "favorite": "Toggle favorite",
+        "filter": "Filter…",
+        "attacks": "Attacks",
+        "sections": { "weapons": "Weapons", "armor": "Armor", "equipment": "Equipment" },
+        "cols": { "name": "Name", "damage": "Dmg S-M / L", "speed": "Spd", "qty": "Qty", "weight": "Wt", "location": "Location", "equipped": "Equipped", "identified": "Identified" },
+        "summary": {
+          "range": "Range",
+          "category": "Category",
+          "damageType": "Damage type",
+          "baseAc": "Base AC",
+          "shieldBonus": "Shield bonus",
+          "armorType": "Armor type"
+        }
       },
       "vitals": {
         "hp": "Hit Points",

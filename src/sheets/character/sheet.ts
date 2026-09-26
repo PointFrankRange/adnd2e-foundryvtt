@@ -1,4 +1,4 @@
-import { TEMPLATE_PATH } from "../../constants";
+import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
 import { getChassis } from "../../core/classes/chassis";
 import type { ManeuverId } from "../../core/combat/maneuvers";
@@ -28,6 +28,8 @@ import { seedSubAbilities } from "./sub-ability-actions";
 import { removeTrait, traitDropInputs, traitRefundCapped, type TraitDropInputs } from "./trait-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
 import { awardXpSplit } from "./xp";
+import { normalizeFavorites, toggleFavoriteList, type FavoriteKind } from "../kit/favorites";
+import { bindSheetKit } from "../kit-dom";
 
 /* ---------------------------------------------------------------------------
  * Adnd2eCharacterSheet — the ApplicationV2 PC sheet shell (SP2 Task 5).
@@ -61,9 +63,10 @@ const Base = HandlebarsApplicationMixin(ActorSheetV2 as never) as unknown as new
   ): Promise<Record<string, unknown>>;
   _onDropItem(event: DragEvent, item: Item.Implementation): Promise<unknown>;
   _onRender(context: unknown, options: unknown): Promise<void>;
+  render(options?: unknown): Promise<unknown>;
 };
 
-const T = (p: string): string => TEMPLATE_PATH("actor/character", p);
+const TP = (p: string): string => TEMPLATE_PATH("actor/pc", p);
 
 /* ---------- item -> *View mappers (mechanical field projection) ---------- */
 
@@ -275,11 +278,13 @@ export function toTraitView(it: RawItem): TraitItemView {
 
 export class Adnd2eCharacterSheet extends Base {
   static DEFAULT_OPTIONS = {
-    classes: ["adnd2e", "sheet", "actor", "character"],
-    position: { width: 720, height: 800 },
+    classes: ["adnd2e", "sheet", "actor", "pc-sheet"],
+    position: { width: 860, height: 880 },
     window: { resizable: true },
     form: { submitOnChange: true, closeOnSubmit: false },
     actions: {
+      toggleLock: Adnd2eCharacterSheet.#onToggleLock,
+      toggleFavorite: Adnd2eCharacterSheet.#onToggleFavorite,
       rollHp: Adnd2eCharacterSheet.#onRollHp,
       takeAverageHp: Adnd2eCharacterSheet.#onTakeAverageHp,
       seedSubAbilities: Adnd2eCharacterSheet.#onSeedSubAbilities,
@@ -307,23 +312,15 @@ export class Adnd2eCharacterSheet extends Base {
   };
 
   static PARTS = {
-    header: { template: T("header.hbs") },
-    tabs: { template: "templates/generic/tab-navigation.hbs" },
-    main: {
-      template: T("main.hbs"),
-      scrollable: [""],
-      templates: [
-        T("partials/ability-row.hbs"),
-        T("partials/save-row.hbs"),
-        T("partials/class-row.hbs"),
-      ],
-    },
-    combat: { template: T("combat.hbs"), scrollable: [""] },
-    inventory: { template: T("inventory.hbs"), scrollable: [""] },
-    skills: { template: T("skills.hbs"), scrollable: [""] },
-    spells: { template: T("spells.hbs"), scrollable: [""] },
-    features: { template: T("features.hbs"), scrollable: [""] },
-    biography: { template: T("biography.hbs"), scrollable: [""] },
+    left: { template: TP("left.hbs") },
+    header: { template: TP("header.hbs") },
+    tabs: { template: TP("tabs.hbs") },
+    main: { template: TP("main.hbs"), scrollable: [""] },
+    inventory: { template: TP("inventory.hbs"), scrollable: [""] },
+    proficiencies: { template: TP("proficiencies.hbs"), scrollable: [""] },
+    spells: { template: TP("spells.hbs"), scrollable: [""] },
+    features: { template: TP("features.hbs"), scrollable: [""] },
+    journal: { template: TP("journal.hbs"), scrollable: [""] },
   };
 
   static TABS = {
@@ -332,21 +329,24 @@ export class Adnd2eCharacterSheet extends Base {
       labelPrefix: "ADND2E.sheet.tabs",
       tabs: [
         { id: "main", icon: "fa-solid fa-user" },
-        { id: "combat", icon: "fa-solid fa-shield-halved" },
         { id: "inventory", icon: "fa-solid fa-box-open" },
-        { id: "skills", icon: "fa-solid fa-hand-fist" },
+        { id: "proficiencies", icon: "fa-solid fa-hand-fist" },
         { id: "spells", icon: "fa-solid fa-wand-sparkles" },
         { id: "features", icon: "fa-solid fa-star" },
-        { id: "biography", icon: "fa-solid fa-book" },
+        { id: "journal", icon: "fa-solid fa-book" },
       ],
     },
   };
+
+  /** sheet redesign R1: the viewer's unlock state — never persisted, opens locked. */
+  #unlocked = false;
 
   override async _prepareContext(options: unknown): Promise<Record<string, unknown>> {
     const context = await super._prepareContext(options);
     context.adnd2e = buildCharacterSheetContext(this.#buildInput());
     context.editable = this.isEditable;
     context.notEditable = !this.isEditable;
+    context.proseDisabled = !this.isEditable || !this.#unlocked;
     // The SYSTEM DataModel's own schema — distinct from `context.fields`,
     // which DocumentSheetV2._prepareContext already exposes as the actor's
     // top-level (name/img/system/…) schema. Needed so biography.hbs can
@@ -467,6 +467,11 @@ export class Adnd2eCharacterSheet extends Base {
       optionalRules: rules,
       subAbilityUi: subAbilitiesEnabled(rules),
       castingStatus: readCastingStatus(this.document as never),
+      unlocked: this.#unlocked,
+      favorites: (this.document as unknown as { getFlag(scope: string, key: string): unknown }).getFlag(
+        SYSTEM_ID,
+        "favorites",
+      ),
     };
   }
 
@@ -549,6 +554,7 @@ export class Adnd2eCharacterSheet extends Base {
         void this.#onItemFieldChange(el);
       });
     }
+    bindSheetKit(this.element, `pc-${(this.document as unknown as { id: string }).id}`);
   }
 
   async #onItemFieldChange(el: HTMLInputElement | HTMLSelectElement): Promise<void> {
@@ -576,6 +582,26 @@ export class Adnd2eCharacterSheet extends Base {
     return [...(this.document as unknown as { items: Iterable<RawItemHandle> }).items].filter(
       (i) => i.type === "class",
     );
+  }
+
+  // Interaction handlers — sheet redesign R1 (edit lock + favorites).
+  static async #onToggleLock(this: Adnd2eCharacterSheet): Promise<void> {
+    if (!this.isEditable) return;
+    this.#unlocked = !this.#unlocked;
+    await this.render();
+  }
+
+  static async #onToggleFavorite(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const actor = this.document as unknown as {
+      isOwner: boolean;
+      getFlag(scope: string, key: string): unknown;
+      setFlag(scope: string, key: string, value: unknown): Promise<unknown>;
+    };
+    const kind = target.dataset.kind as FavoriteKind | undefined;
+    const id = target.dataset.id;
+    if (!actor.isOwner || !kind || !id) return;
+    const current = normalizeFavorites(actor.getFlag(SYSTEM_ID, "favorites"));
+    await actor.setFlag(SYSTEM_ID, "favorites", toggleFavoriteList(current, { kind, id }));
   }
 
   // Interaction handlers — SP2 Task 8.

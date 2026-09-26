@@ -1,0 +1,51 @@
+import { describe, expect, it } from "vitest";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import path from "node:path";
+
+const ROOT = path.resolve(__dirname, "..", "..");
+const PC_DIR = path.join(ROOT, "templates", "actor", "pc");
+
+function allHbs(dir: string): string[] {
+  return readdirSync(dir).flatMap((f) => {
+    const p = path.join(dir, f);
+    return statSync(p).isDirectory() ? allHbs(p) : p.endsWith(".hbs") ? [p] : [];
+  });
+}
+const TEMPLATES = allHbs(PC_DIR).map((p) => readFileSync(p, "utf8")).join("\n")
+  // the shared item-controls partial is reused by the PC templates
+  + readFileSync(path.join(ROOT, "templates", "actor", "character", "partials", "item-controls.hbs"), "utf8");
+const SHEET = readFileSync(path.join(ROOT, "src", "sheets", "character", "sheet.ts"), "utf8");
+
+const NOTHING_LOST_ACTIONS = [
+  "advanceWeaponMastery", "allocateThiefSkillPoint", "awardXp", "cancelCasting", "castSpell", "completeCasting",
+  "deallocateThiefSkillPoint", "deleteItem", "disruptCasting", "editImage", "editItem", "forgetSpell", "learnSpell",
+  "memorizeSpell", "removeTrait", "restSpellcasting", "rollAttack", "rollHp", "rollNonweaponCheck", "rollSave",
+  "rollThiefSkill", "seedSubAbilities", "takeAverageHp", "toggleDualClass",
+];
+const NOTHING_LOST_NAMES = [
+  'name="name"', 'name="system.abilities.{{row.key}}.score"', 'name="system.abilities.str.exceptional"',
+  'name="{{sub.name}}"', 'name="system.attributes.hp.value"', 'name="system.attributes.hp.temp"', 'name="system.biography"',
+  'name="system.currency.pp"', 'name="system.currency.gp"', 'name="system.currency.ep"', 'name="system.currency.sp"',
+  'name="system.currency.cp"', 'name="system.details.alignment"', 'name="system.details.campaignNotes"',
+  'name="system.details.gmNotes"', 'name="system.details.{{field}}"', 'name="system.options.skillsAndPowers.characterPoints.pool"',
+  'name="system.resources.reputation"', 'name="system.resources.henchmen"', 'name="system.resources.followers"',
+];
+const NOTHING_LOST_FIELDS = ['data-field="quantity"', 'data-field="location"', 'data-field="equipped"', 'data-field="identified"'];
+const CORE_ACTIONS = new Set(["tab", "editImage"]);
+
+describe("PC sheet templates (sheet redesign R1)", () => {
+  it("keep every pre-redesign binding (nothing lost)", () => {
+    for (const a of NOTHING_LOST_ACTIONS) expect(TEMPLATES, a).toContain(`data-action="${a}"`);
+    for (const n of NOTHING_LOST_NAMES) expect(TEMPLATES, n).toContain(n);
+    for (const f of NOTHING_LOST_FIELDS) expect(TEMPLATES, f).toContain(f);
+    expect(TEMPLATES).toContain('class="weapon-row');
+    expect(TEMPLATES).toContain('class="backstab-toggle"');
+    expect(TEMPLATES).toContain('class="maneuver-select"');
+  });
+
+  it("every data-action used by a PC template is registered on the PC sheet (or is a core action)", () => {
+    const used = new Set([...TEMPLATES.matchAll(/data-action="([a-zA-Z]+)"/g)].map((m) => m[1]!));
+    const registered = new Set([...SHEET.matchAll(/^\s+([a-zA-Z]+): Adnd2eCharacterSheet\.#on/gm)].map((m) => m[1]!));
+    for (const a of used) expect(registered.has(a) || CORE_ACTIONS.has(a), a).toBe(true);
+  });
+});

@@ -1,0 +1,7 @@
+<nav class="kit-tabs tabs" aria-roledescription="{{localize 'SHEETS.FormNavLabel'}}">
+  {{#each tabs as |tab|}}
+    <a data-action="tab" data-group="{{tab.group}}" data-tab="{{tab.id}}"{{#if tab.cssClass}} class="{{tab.cssClass}}"{{/if}}>
+      {{#if tab.icon}}<i class="{{tab.icon}}" inert></i>{{/if}} <span>{{localize tab.label}}</span>
+    </a>
+  {{/each}}
+</nav>
