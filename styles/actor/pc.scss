@@ -34,18 +34,36 @@
     .pc-name { flex: 1; font-family: Georgia, "Times New Roman", serif; font-size: 22px; font-weight: 700; color: var(--kit-accent-ink); margin: 0; border: none; background: transparent; }
     input.pc-name { background: var(--kit-field-bg); border: 1px solid var(--kit-field-border); }
     .pc-class-line { color: var(--kit-muted); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 2px 0 6px; }
+    .pc-header-row { display: flex; align-items: flex-start; gap: 10px; }
     .pc-vitals {
-      display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end;
-      .kit-big {
-        display: flex; align-items: center; justify-content: center; gap: 2px;
-        input[type="number"] {
-          border: none; background: transparent; color: inherit; font-size: inherit; font-weight: inherit;
-          text-align: center; width: 3.2ch; min-width: 2.5ch; padding: 0; height: auto;
-          &:focus { outline: 2px solid var(--kit-accent-ink); }
+      flex: 0 0 auto;
+      display: flex; gap: 6px; align-items: stretch;
+      .kit-stat {
+        width: 76px;
+        display: flex; flex-direction: column;
+        .kit-bar { justify-content: center; white-space: nowrap; font-size: 11px; height: 20px; padding: 0 4px; }
+        .kit-big {
+          height: 34px; box-sizing: border-box;
+          display: flex; align-items: center; justify-content: center; gap: 2px;
+          padding: 0 4px; font-size: 18px; line-height: 1;
+          input[type="number"] {
+            border: none; background: transparent; color: inherit; font-weight: inherit;
+            text-align: center; width: 3.2ch; min-width: 2.5ch; padding: 0;
+            height: 28px; line-height: 28px; font-size: 18px; font-weight: 700;
+            &:focus { outline: 2px solid var(--kit-accent-ink); }
+          }
         }
       }
     }
+    .pc-classes { flex: 1 1 auto; min-width: 0; margin-bottom: 0; .class-row { padding: 2px 6px; } }
     .casting-badge { font-weight: 700; color: var(--kit-accent-ink); }
+
+    // narrow windows: let the classes panel drop below the vitals row rather
+    // than being squeezed to unreadable widths.
+    @media (max-width: 700px) {
+      .pc-header-row { flex-wrap: wrap; }
+      .pc-classes { min-width: 260px; }
+    }
   }
 
   .weapon-row, .armor-row, .class-row, .prof-row, .spell-row, .feature-row, .trait-row {
