@@ -574,3 +574,12 @@ describe("lang/en.json — creature damage card", () => {
     expect(typeof resolve("ADND2E.chat.creature.critDamage")).toBe("string");
   });
 });
+
+describe("lang/en.json — DM-run actor type labels", () => {
+  it("names the npc type 'Character NPC' and the creature type 'Monster NPC' everywhere they are shown", () => {
+    expect(resolve("TYPES.Actor.npc")).toBe("Character NPC");
+    expect(resolve("TYPES.Actor.creature")).toBe("Monster NPC");
+    expect(resolve("ADND2E.sheet.npcTitle")).toBe("Character NPC");
+    expect(resolve("ADND2E.sheet.creatureTitle")).toBe("Monster NPC");
+  });
+});
