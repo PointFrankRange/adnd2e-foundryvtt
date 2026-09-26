@@ -3,8 +3,9 @@ import { applyEffectLocally, type EffectTarget } from "./apply-effect";
 
 /* Routes a player-applied effect: GM or owner → applied here, exactly as before;
  * otherwise relayed to the active GM through v14's User#query
- * (client/documents/user.mjs:289-321). Never throws; failures are warnings (the
- * chat card the button lives on already exists). */
+ * (client/documents/user.mjs:289-321). The relayed path never throws (failures
+ * are warning toasts); the local GM/owner path propagates errors exactly as the
+ * direct calls it replaced did. */
 
 const TIMEOUT_MS = 120_000;
 
@@ -20,6 +21,7 @@ export async function requestApply(
     await applyEffectLocally(target, request);
     return;
   }
+  if ((request.kind === "damage" || request.kind === "healing") && request.amount < 1) return;
   const gm = g.users.activeGM;
   if (!gm) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.relay.noGmWarning"));

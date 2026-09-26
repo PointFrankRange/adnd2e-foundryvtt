@@ -1,4 +1,5 @@
 import { RELAY_QUERY, relayEffectText, validateRelayRequest, type RelayResult } from "../combat/apply-relay";
+import { SYSTEM_ID } from "../constants";
 import { getPlayerApplyMode } from "../settings";
 import { applyEffectLocally, type EffectTarget } from "./apply-effect";
 
@@ -8,13 +9,20 @@ import { applyEffectLocally, type EffectTarget } from "./apply-effect";
  * player's query. Trusts nothing: re-validates, re-resolves the target, and only
  * acts on the active GM's client. */
 
-async function handleApplyQuery(data: unknown, context: { user: { name: string } }): Promise<RelayResult> {
+async function handleApplyQuery(
+  data: unknown,
+  context: { user: { name: string }; timeout?: number },
+): Promise<RelayResult> {
   const self = game.user as unknown as { isActiveGM?: boolean };
   if (!self.isActiveGM) return { applied: false, reason: "notActiveGm" };
   const request = validateRelayRequest(data);
   if (!request) throw new Error("Invalid adnd2e.applyEffect request");
-  const target = (await fromUuid(request.targetUuid)) as unknown as (EffectTarget & { documentName?: string; name: string }) | null;
-  if (!target || target.documentName !== "Actor") throw new Error("adnd2e.applyEffect target not found");
+  const target = (await fromUuid(request.targetUuid)) as unknown as
+    | (EffectTarget & { documentName?: string; name: string; pack?: string | null })
+    | null;
+  if (!target || target.documentName !== "Actor" || (target as unknown as { pack?: string | null }).pack) {
+    throw new Error("adnd2e.applyEffect target not found");
+  }
 
   const text = relayEffectText(request);
   const esc = foundry.utils.escapeHTML;
@@ -24,21 +32,30 @@ async function handleApplyQuery(data: unknown, context: { user: { name: string }
     target: esc(target.name),
   };
   if (getPlayerApplyMode() === "approve") {
+    const started = Date.now();
     const ok = await foundry.applications.api.DialogV2.confirm({
       window: { title: game.i18n!.localize("ADND2E.relay.approveTitle") },
       content: `<p>${game.i18n!.format("ADND2E.relay.approvePrompt", names)}</p>`,
     } as never);
     if (ok !== true) return { applied: false, reason: "declined" };
+    if (context.timeout && Date.now() - started >= context.timeout) {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.relay.expiredWarning"));
+      return { applied: false, reason: "declined" };
+    }
   }
 
   await applyEffectLocally(target, request);
-  const recipients = (ChatMessage as unknown as { getWhisperRecipients(name: string): { id: string }[] })
-    .getWhisperRecipients("GM")
-    .map((u) => u.id);
-  await ChatMessage.create({
-    content: `<p>${game.i18n!.format("ADND2E.relay.log", names)}</p>`,
-    whisper: recipients,
-  } as unknown as ChatMessage.CreateData);
+  try {
+    const recipients = (ChatMessage as unknown as { getWhisperRecipients(name: string): { id: string }[] })
+      .getWhisperRecipients("GM")
+      .map((u) => u.id);
+    await ChatMessage.create({
+      content: `<p>${game.i18n!.format("ADND2E.relay.log", names)}</p>`,
+      whisper: recipients,
+    } as unknown as ChatMessage.CreateData);
+  } catch (err) {
+    console.error(`${SYSTEM_ID} | relay log failed`, err);
+  }
   return { applied: true };
 }
 

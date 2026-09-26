@@ -640,6 +640,7 @@
       "approveTitle": "Player-Applied Effect",
       "approvePrompt": "{user} wants to apply {effect} to {target}. Allow it?",
       "log": "{user} applied {effect} to {target}.",
+      "expiredWarning": "That player request expired before you approved it — nothing was applied.",
       "effect": {
         "damage": "{amount} damage",
         "healing": "{amount} healing",

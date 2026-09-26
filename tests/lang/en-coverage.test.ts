@@ -557,6 +557,7 @@ describe("lang/en.json — player-applied effects relay", () => {
       "ADND2E.relay.approveTitle",
       "ADND2E.relay.approvePrompt",
       "ADND2E.relay.log",
+      "ADND2E.relay.expiredWarning",
       "ADND2E.relay.effect.damage",
       "ADND2E.relay.effect.healing",
       "ADND2E.relay.effect.condition",
