@@ -162,8 +162,8 @@
     },
     "sheet": {
       "title": "Character Sheet",
-      "creatureTitle": "Creature",
-      "npcTitle": "NPC",
+      "creatureTitle": "Monster NPC",
+      "npcTitle": "Character NPC",
       "namePlaceholder": "Character name",
       "identity": {
         "alignment": "Alignment"
@@ -652,8 +652,8 @@
   "TYPES": {
     "Actor": {
       "character": "Character",
-      "npc": "NPC",
-      "creature": "Creature"
+      "npc": "Character NPC",
+      "creature": "Monster NPC"
     },
     "Item": {
       "class": "Class",
