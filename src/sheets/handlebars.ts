@@ -1,13 +1,8 @@
 import { TEMPLATE_PATH } from "../constants";
 
-// Sheet partials shipped with SP2. Registered under short `adnd2e.<name>` ids so
-// templates can `{{> adnd2e.ability-row row=row}}`.
+// Sheet partials shipped with SP2 and later. Registered under short
+// `adnd2e.<name>` ids so templates can `{{> adnd2e.pc-ability ability=a}}`.
 const PARTIALS = [
-  "actor/character/partials/ability-row.hbs",
-  "actor/character/partials/save-row.hbs",
-  "actor/character/partials/class-row.hbs",
-  "actor/character/partials/item-row.hbs",
-  "actor/character/partials/encumbrance-gauge.hbs",
   "actor/shared/partials/slot-table.hbs",
   "actor/shared/partials/item-controls.hbs",
   "actor/pc/partials/pc-ability.hbs",

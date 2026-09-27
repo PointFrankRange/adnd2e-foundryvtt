@@ -111,9 +111,8 @@
     input[type="text"] { font-weight: 700; }
   }
 
-  // dev-world fix 9: the PC-only encumbrance gauge (the shared
-  // adnd2e.encumbrance-gauge partial is Character-NPC-only and untouched) —
-  // same shrinkable vitals-box look as .pc-vitals/the old .pc-saves boxes.
+  // dev-world fix 9: the PC-only encumbrance gauge with the same
+  // shrinkable vitals-box look as .pc-vitals/the old .pc-saves boxes.
   .pc-encumbrance .kit-body { display: flex; flex-wrap: wrap; gap: 6px; }
   .pc-encumbrance .kit-stat {
     flex: 0 1 96px; min-width: 72px;
