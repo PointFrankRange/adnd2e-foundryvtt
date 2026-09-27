@@ -37,7 +37,7 @@
     input.pc-name { background: var(--kit-field-bg); border: 1px solid var(--kit-field-border); }
     .pc-class-line { color: var(--kit-muted); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 2px 0 6px; }
     .pc-vitals {
-      display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; margin-bottom: 0;
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch;
       .kit-stat {
         flex: 0 1 76px; min-width: 56px;
         display: flex; flex-direction: column;
@@ -55,16 +55,25 @@
         }
       }
     }
-    // fixed 550px. `max-width: 100%` keeps it inside narrow windows without a
+    // fixed 465px. `max-width: 100%` keeps it inside narrow windows without a
     // viewport media query (which would check the browser, not the sheet).
     .pc-classes { width: 465px; max-width: 100%; flex: none; margin: 0 0 6px; .class-row { padding: 2px 6px; } }
     .casting-badge { font-weight: 700; color: var(--kit-accent-ink); }
 
-    .pc-saves { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
-    .pc-saves .kit-save-box { flex: 0 1 96px; min-width: 72px; display: flex; flex-direction: column; }
-    .pc-saves .kit-bar { justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; height: 20px; padding: 0 4px; }
-    .pc-saves .kit-big { height: 34px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 4px; font-size: 18px; line-height: 1; }
-    .pc-saves .kit-save-roll { width: 24px; height: 24px; padding: 0; font-size: 12px; line-height: 24px; }
+    .pc-top { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 16px; margin: 4px 0 10px; }
+    .pc-top-left { flex: 0 1 465px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    // the pc-top-left flex column's own `gap` now spaces Classes from
+    // Vitals, so .pc-classes's own bottom margin (set above, for when it
+    // stood alone) would stack on top of it — zero it out here instead of
+    // stacking a second, conflicting spacing rule.
+    .pc-top-left .pc-classes { margin: 0; }
+    .pc-saves-card { flex: 1 1 300px; min-width: 260px; max-width: 460px; margin: 0; }
+    .pc-saves-card .kit-body { padding: 2px 6px; }
+    .pc-save-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 2px 0; border-bottom: 1px solid var(--kit-row-rule); }
+    .pc-save-row:last-child { border-bottom: none; }
+    .pc-save-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pc-save-value { font-size: 16px; font-weight: 700; min-width: 2ch; text-align: right; }
+    .kit-save-roll { width: 24px; height: 24px; padding: 0; font-size: 12px; line-height: 24px; }
   }
 
   .weapon-row, .armor-row, .class-row, .prof-row, .spell-row, .feature-row, .trait-row {
