@@ -76,6 +76,18 @@
     .kit-save-roll { width: 24px; height: 24px; padding: 0; font-size: 12px; line-height: 24px; }
   }
 
+  // dev-world fix 8: the Favorites panel had no styles at all, so every row's
+  // <img>/<span>/<button> children — all block-level by default — stacked one
+  // per line instead of reading as a single compact row.
+  .favorites .kit-body { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 2px 14px; }
+  .favorites .kit-empty { grid-column: 1 / -1; }
+  .favorite-row { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 2px 4px; border-bottom: 1px solid var(--kit-row-rule); }
+  .favorite-row img { width: 22px; height: 22px; flex: none; border: none; }
+  .favorite-row .name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .favorite-row .detail { flex: none; color: var(--kit-muted); font-size: 12px; }
+  .favorite-row .kit-roll { flex: none; width: 26px; height: 24px; padding: 0; line-height: 24px; }
+  .favorite-row .kit-star { flex: none; }
+
   .weapon-row, .armor-row, .class-row, .prof-row, .spell-row, .feature-row, .trait-row {
     display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 3px 6px; border-bottom: 1px solid var(--kit-row-rule);
   }

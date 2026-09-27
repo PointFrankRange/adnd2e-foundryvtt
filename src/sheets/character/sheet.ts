@@ -29,7 +29,7 @@ import { removeTrait, traitDropInputs, traitRefundCapped, type TraitDropInputs }
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
 import { awardXpSplit } from "./xp";
 import { normalizeFavorites, toggleFavoriteList, type FavoriteKind } from "../kit/favorites";
-import { bindSheetKit } from "../kit-dom";
+import { bindSheetKit, clearSheetKit } from "../kit-dom";
 
 /* ---------------------------------------------------------------------------
  * Adnd2eCharacterSheet — the ApplicationV2 PC sheet shell (SP2 Task 5).
@@ -282,7 +282,7 @@ export function toTraitView(it: RawItem): TraitItemView {
 export class Adnd2eCharacterSheet extends Base {
   static DEFAULT_OPTIONS = {
     classes: ["adnd2e", "sheet", "actor", "pc-sheet"],
-    position: { width: 1160, height: 1020 },
+    position: { width: 1025, height: 1020 },
     window: { resizable: true },
     form: { submitOnChange: true, closeOnSubmit: false },
     actions: {
@@ -547,6 +547,13 @@ export class Adnd2eCharacterSheet extends Base {
     return result;
   }
 
+  /** the same key `bindSheetKit`/`clearSheetKit` use to namespace this sheet's
+   *  client-side DOM state (collapsed sections, the inventory filter) — one
+   *  getter so `_onRender` and `_onClose` can't drift out of sync with each other. */
+  get #sheetKitKey(): string {
+    return `pc-${(this.document as unknown as { id: string }).id}`;
+  }
+
   override async _onRender(context: unknown, options: unknown): Promise<void> {
     await super._onRender(context, options);
     const fields = Array.from(
@@ -557,7 +564,7 @@ export class Adnd2eCharacterSheet extends Base {
         void this.#onItemFieldChange(el);
       });
     }
-    bindSheetKit(this.element, `pc-${(this.document as unknown as { id: string }).id}`);
+    bindSheetKit(this.element, this.#sheetKitKey);
   }
 
   // v14 caches the sheet instance across close/reopen (client/documents/abstract/
@@ -566,6 +573,10 @@ export class Adnd2eCharacterSheet extends Base {
   override _onClose(options: unknown): void {
     super._onClose(options);
     this.#unlocked = false;
+    // dev-world fix 8: drop this sheet's persisted inventory-filter text —
+    // it's per-open-sheet state (a module-level Map in kit-dom.ts), not a
+    // durable preference, and must not leak across the client session.
+    clearSheetKit(this.#sheetKitKey);
   }
 
   async #onItemFieldChange(el: HTMLInputElement | HTMLSelectElement): Promise<void> {

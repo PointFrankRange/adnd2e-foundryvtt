@@ -14,7 +14,7 @@
           <span>{{#if r.item.weapon}}{{r.item.weapon.damageVsSM}} / {{r.item.weapon.damageVsL}}{{/if}}</span>
           <span>{{r.item.totalWeight}}</span>
           <span>{{#if @root.adnd2e.lock.unlocked}}<input type="number" min="0" value="{{r.item.quantity}}" data-item-id="{{r.item.id}}" data-field="quantity" style="width:40px">{{else}}{{r.item.quantity}}{{/if}}</span>
-          <span>{{#if @root.adnd2e.lock.unlocked}}<select data-item-id="{{r.item.id}}" data-field="location">{{#each @root.adnd2e.inventory.locationOptions as |opt|}}<option value="{{opt.value}}" {{#if (eq opt.value r.item.location)}}selected{{/if}}>{{#if opt.value}}{{opt.label}}{{else}}{{localize opt.label}}{{/if}}</option>{{/each}}</select>{{/if}}</span>
+          <span><select data-item-id="{{r.item.id}}" data-field="location">{{#each @root.adnd2e.inventory.locationOptions as |opt|}}<option value="{{opt.value}}" {{#if (eq opt.value r.item.location)}}selected{{/if}}>{{#if opt.value}}{{opt.label}}{{else}}{{localize opt.label}}{{/if}}</option>{{/each}}</select></span>
           <span class="kit-row-actions">
             <label title="{{localize 'ADND2E.sheet.kit.cols.equipped'}}"><input type="checkbox" data-item-id="{{r.item.id}}" data-field="equipped" {{checked r.item.equipped}}></label>
             {{#if @root.user.isGM}}{{#if @root.adnd2e.lock.unlocked}}<label title="{{localize 'ADND2E.sheet.kit.cols.identified'}}"><input type="checkbox" data-item-id="{{r.item.id}}" data-field="identified" {{checked r.item.identified}}></label>{{/if}}{{/if}}
