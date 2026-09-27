@@ -164,8 +164,10 @@ function buildAbilities(input: CharacterSheetInput): AbilityRow[] {
       label: humanize(k),
       value: v == null ? "—" : String(v),
       // sheet redesign R1 dev-world fix 1: additive fields for the Roll20-style
-      // labelled mini-boxes — `label`/`value` above stay byte-identical for the
-      // Character NPC sheet's old ability-row.hbs partial.
+      // labelled mini-boxes — `label`/`value` above are kept for API
+      // compatibility and are now unused by templates (sheet redesign R2
+      // removed their last consumer, the Character NPC sheet's old
+      // ability-row.hbs partial).
       shortKey: `ADND2E.sheet.abilityMods.${k}.short`,
       longKey: `ADND2E.sheet.abilityMods.${k}.long`,
       display: formatAbilityMod(k, v),
@@ -217,7 +219,9 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
       rollModifier: s.rollModifier,
       effectiveTarget: s.effectiveTarget,
       // sheet redesign R1 dev-world fix 3: additive — `label` above stays
-      // unchanged for the Character NPC sheet's old save-row.hbs partial.
+      // unchanged (still rendered by header.hbs's pc-save-row row; the old
+      // save-row.hbs partial it originally served is gone). `shortLabel`
+      // itself is kept for API compatibility and is currently unused by templates.
       shortLabel: `ADND2E.sheet.saves.short.${key}`,
     };
   });

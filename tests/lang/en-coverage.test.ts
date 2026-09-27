@@ -404,6 +404,7 @@ describe("lang/en.json — SP6 NPC sheet title", () => {
 describe("lang/en.json — SP6 NPC panel fields (whole-branch fix I3)", () => {
   it("resolves every ADND2E.sheet.npc.* key", () => {
     for (const key of [
+      "ADND2E.sheet.npc.title",
       "ADND2E.sheet.npc.morale",
       "ADND2E.sheet.npc.xpValue",
       "ADND2E.sheet.npc.disposition",

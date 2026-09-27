@@ -1,0 +1,38 @@
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.kit.details'}}</div>
+    <div class="kit-body detail-fields">
+      {{#each adnd2e.biography.detailFields as |field|}}
+        <div class="detail-field">
+          <span class="cap">{{localize (concat 'ADND2E.sheet.details.' field)}}</span>
+          {{#if @root.adnd2e.lock.unlocked}}
+            <input type="text" name="system.details.{{field}}" value="{{lookup @root.source.system.details field}}">
+          {{else}}
+            <span class="val">{{#if (lookup @root.source.system.details field)}}{{lookup @root.source.system.details field}}{{else}}—{{/if}}</span>
+          {{/if}}
+        </div>
+      {{/each}}
+    </div>
+  </section>
+
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.biography.notes'}}</div>
+    <div class="kit-body pc-editor">
+      {{formInput systemFields.biography value=source.system.biography name="system.biography" disabled=proseDisabled}}
+    </div>
+  </section>
+
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.biography.campaignNotes'}}</div>
+    <div class="kit-body pc-editor">
+      {{formInput systemFields.details.fields.campaignNotes value=source.system.details.campaignNotes name="system.details.campaignNotes" disabled=proseDisabled}}
+    </div>
+  </section>
+
+  {{#if adnd2e.biography.showGmNotes}}
+    <section class="kit-panel">
+      <div class="kit-bar">{{localize 'ADND2E.sheet.biography.gmNotes'}}</div>
+      <div class="kit-body pc-editor">
+        {{formInput systemFields.details.fields.gmNotes value=source.system.details.gmNotes name="system.details.gmNotes" disabled=proseDisabled}}
+      </div>
+    </section>
+  {{/if}}

@@ -1,19 +1,18 @@
 import { TEMPLATE_PATH } from "../constants";
 
-// Sheet partials shipped with SP2. Registered under short `adnd2e.<name>` ids so
-// templates can `{{> adnd2e.ability-row row=row}}`.
+// Sheet partials shipped with SP2 and later. Registered under short
+// `adnd2e.<name>` ids so templates can `{{> adnd2e.pc-ability ability=a}}`.
 const PARTIALS = [
-  "actor/character/partials/ability-row.hbs",
-  "actor/character/partials/save-row.hbs",
-  "actor/character/partials/class-row.hbs",
-  "actor/character/partials/item-row.hbs",
-  "actor/character/partials/encumbrance-gauge.hbs",
-  "actor/character/partials/slot-table.hbs",
-  "actor/character/partials/item-controls.hbs",
+  "actor/shared/partials/slot-table.hbs",
+  "actor/shared/partials/item-controls.hbs",
   "actor/pc/partials/pc-ability.hbs",
   "actor/pc/partials/pc-class-row.hbs",
   "actor/pc/partials/pc-item-table.hbs",
   "actor/pc/partials/pc-encumbrance.hbs",
+  "actor/pc/partials/pc-main-panels.hbs",
+  "actor/pc/partials/pc-proficiency-panels.hbs",
+  "actor/pc/partials/pc-feature-panels.hbs",
+  "actor/pc/partials/pc-journal-panels.hbs",
 ];
 
 /**
@@ -33,4 +32,8 @@ export async function registerSheetPartials(): Promise<void> {
     const n = Number(v);
     return n > 0 ? `+${n}` : String(n);
   });
+  // sheet redesign R2 fix wave: locked-view display for a numeric field that
+  // may legitimately be 0 — plain `{{#if}}` treats 0 as falsy, so this checks
+  // for null/undefined/empty specifically instead.
+  Handlebars.registerHelper("adnd2eOrDash", (v: unknown) => (v === null || v === undefined || v === "" ? "—" : String(v)));
 }

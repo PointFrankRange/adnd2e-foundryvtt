@@ -111,9 +111,8 @@
     input[type="text"] { font-weight: 700; }
   }
 
-  // dev-world fix 9: the PC-only encumbrance gauge (the shared
-  // adnd2e.encumbrance-gauge partial is Character-NPC-only and untouched) —
-  // same shrinkable vitals-box look as .pc-vitals/the old .pc-saves boxes.
+  // dev-world fix 9: the PC-only encumbrance gauge with the same
+  // shrinkable vitals-box look as .pc-vitals/the old .pc-saves boxes.
   .pc-encumbrance .kit-body { display: flex; flex-wrap: wrap; gap: 6px; }
   .pc-encumbrance .kit-stat {
     flex: 0 1 96px; min-width: 72px;
@@ -149,11 +148,24 @@
   // _kit.scss) needs a minimum height so an empty <prose-mirror> doesn't read
   // as a void, and its ProseMirror toolbar needs kit tokens so it reads in
   // both light and dark modes instead of Foundry's own default chrome.
+  // Size it ONLY through core's `--min-height` custom property: core lays
+  // <prose-mirror> out as a flex column whose `.editor-container` (flex: 1,
+  // overflow: hidden) holds an absolutely-positioned `.editor-content`
+  // (inset: 0). Overriding `display` or giving `.editor-content` its own
+  // min-height collapses the container to 0px and clips the typing area away.
   .pc-editor prose-mirror {
-    display: block;
-    min-height: 120px;
-    .editor-content { min-height: 120px; padding: 4px 6px; }
+    --min-height: 160px;
+    .editor-content { padding: 4px 6px; }
     .editor-menu { background: var(--kit-expand-bg); border-bottom: 1px solid var(--kit-row-rule); }
+    // Core colours toolbar buttons from the Foundry theme, not our kit
+    // background, so in dark mode they came out dark-on-dark. Every toolbar
+    // control (icon buttons and the `button.pm-dropdown` Format/font/size
+    // pickers, common/prosemirror/dropdown.mjs:120) follows the kit field ink;
+    // hover/active use the accent ink over core's own --color-control-hover.
+    menu button, menu button i, menu .pm-dropdown > span, menu .pm-dropdown i { color: var(--kit-field-ink); }
+    menu button:hover, menu button.active,
+    menu button:hover i, menu button.active i,
+    menu button:hover > span, menu button.active > span { color: var(--kit-accent-ink); }
   }
 
   // dev-world fix 9: the shared adnd2e.slot-table partial (spells.hbs) is

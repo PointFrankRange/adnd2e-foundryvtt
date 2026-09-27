@@ -1,0 +1,36 @@
+<section class="tab journal{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+
+  <section class="kit-panel npc-fields">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.npc.title'}}</div>
+    <div class="kit-body detail-fields">
+      <div class="detail-field">
+        <span class="cap">{{localize 'ADND2E.sheet.npc.morale'}}</span>
+        {{#if @root.adnd2e.lock.unlocked}}
+          <input type="number" name="system.npc.morale" value="{{source.system.npc.morale}}">
+        {{else}}
+          <span class="val">{{adnd2eOrDash source.system.npc.morale}}</span>
+        {{/if}}
+      </div>
+      <div class="detail-field">
+        <span class="cap">{{localize 'ADND2E.sheet.npc.xpValue'}}</span>
+        {{#if @root.adnd2e.lock.unlocked}}
+          <input type="number" name="system.npc.xpValue" value="{{source.system.npc.xpValue}}">
+        {{else}}
+          <span class="val">{{adnd2eOrDash source.system.npc.xpValue}}</span>
+        {{/if}}
+      </div>
+      <div class="detail-field">
+        <span class="cap">{{localize 'ADND2E.sheet.npc.disposition'}}</span>
+        {{#if @root.adnd2e.lock.unlocked}}
+          <select name="system.npc.disposition">{{selectOptions dispositions selected=source.system.npc.disposition localize=true}}</select>
+        {{else}}
+          <span class="val">{{localize (lookup dispositions source.system.npc.disposition)}}</span>
+        {{/if}}
+      </div>
+    </div>
+  </section>
+
+  {{> adnd2e.pc-feature-panels}}
+  {{> adnd2e.pc-journal-panels}}
+
+</section>

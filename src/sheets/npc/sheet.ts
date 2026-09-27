@@ -1,4 +1,4 @@
-import { TEMPLATE_PATH } from "../../constants";
+import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import type { ManeuverId } from "../../core/combat/maneuvers";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
 import type { NonweaponGroup, ThiefSkill } from "../../core/types";
@@ -20,20 +20,32 @@ import { advanceWeaponMastery, rollNonweaponCheck, rollThiefSkill } from "../cha
 import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "../character/casting-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
 import { forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "../character/spell-actions";
+import { bindSheetKit, clearSheetKit } from "../kit-dom";
+import { toggleFavoriteFlag } from "../kit-actions";
 
 /* ---------------------------------------------------------------------------
- * Adnd2eNpcSheet — SP6 Task 4.
+ * Adnd2eNpcSheet — SP6 Task 4; rebuilt on the parchment kit (sheet redesign
+ * R2 Task 2).
  *
- * A streamlined 3-tab sheet for `npc` actors. `npc` shares the exact same
- * DataModel schema as `character` (both were served by Adnd2eCharacterSheet
- * before this task), so this class reuses the SAME item-mapper functions
- * (now exported from character/sheet.ts), the SAME pure
- * `buildCharacterSheetContext` (character/context.ts, unchanged), and the
- * SAME action-function glue (combat-rolls / spell-actions / proficiency-
- * actions) the PC sheet already uses — zero new pure logic. Only the
- * template set (3 tabs instead of 7) and a couple of PC-only affordances
- * (XP award, dual-class toggle, drag-drop item validation — see this task's
- * report for the explicit scoping rulings) differ.
+ * A streamlined 4-tab sheet for `npc` actors, built on the SAME left column
+ * / header / tabs / inventory / spells kit parts the PC sheet
+ * (Adnd2eCharacterSheet) uses — `npc` shares the exact same DataModel schema
+ * as `character`, so this class reuses the SAME item-mapper functions (now
+ * exported from character/sheet.ts), the SAME pure `buildCharacterSheetContext`
+ * (character/context.ts, unchanged), and the SAME action-function glue
+ * (combat-rolls / spell-actions / proficiency-actions) the PC sheet already
+ * uses — zero new pure logic. Only the template set (4 tabs instead of 6) and
+ * a couple of PC-only affordances differ.
+ *
+ * The `pcActions` root-context flag (set `true` by Adnd2eCharacterSheet to
+ * gate awardXp / toggleDualClass / seedSubAbilities / the thief allocate-
+ * deallocate buttons / the traits panel) is deliberately left UNSET here —
+ * this sheet never registers those PC-only actions, so the shared kit
+ * partials render as if `pcActions` were absent, exactly as before this task
+ * (no traits panel, no XP/dual-class controls). The edit-lock and favorites
+ * wiring (`#unlocked`, `#sheetKitKey`, `bindSheetKit`/`clearSheetKit`,
+ * `proseDisabled`, `unlocked`/`favorites` in `#buildInput`) mirrors the PC
+ * sheet exactly, since those affordances are not PC-only.
  *
  * Foundry-coupled, no unit tests (matches src/sheets/character/sheet.ts's
  * and src/sheets/creature/sheet.ts's established convention) — verified in a
@@ -65,12 +77,14 @@ const Base = HandlebarsApplicationMixin(ActorSheetV2 as never) as unknown as new
   ): Promise<Record<string, unknown>>;
   _onRender(context: unknown, options: unknown): Promise<void>;
   _onDropItem(event: DragEvent, item: Item.Implementation): Promise<unknown>;
+  // Not awaited by the close process (see Adnd2eCharacterSheet's own Base for
+  // the client/applications/api/application.mjs citation).
+  _onClose(options: unknown): void;
+  render(options?: unknown): Promise<unknown>;
 };
 
-const T = (p: string): string => TEMPLATE_PATH("actor/npc", p);
-
 /** Minimal shape needed to mutate an owned Item's `system.*` field from the
- *  `[data-item-id][data-field]` inputs the reused `item-row.hbs` partial
+ *  `[data-item-id][data-field]` inputs the reused `pc-item-table.hbs` partial
  *  renders (inventory quantity/location/equipped/identified) — same pattern
  *  as Adnd2eCharacterSheet's own `#onItemFieldChange`. */
 interface RawItemHandle {
@@ -82,11 +96,13 @@ interface RawItemHandle {
 
 export class Adnd2eNpcSheet extends Base {
   static DEFAULT_OPTIONS = {
-    classes: ["adnd2e", "sheet", "actor", "npc"],
-    position: { width: 640, height: 680 },
+    classes: ["adnd2e", "sheet", "actor", "pc-sheet", "npc-sheet"],
+    position: { width: 1045, height: 960 },
     window: { resizable: true },
     form: { submitOnChange: true, closeOnSubmit: false },
     actions: {
+      toggleLock: Adnd2eNpcSheet.#onToggleLock,
+      toggleFavorite: Adnd2eNpcSheet.#onToggleFavorite,
       rollHp: Adnd2eNpcSheet.#onRollHp,
       takeAverageHp: Adnd2eNpcSheet.#onTakeAverageHp,
       rollAttack: Adnd2eNpcSheet.#onRollAttack,
@@ -107,20 +123,19 @@ export class Adnd2eNpcSheet extends Base {
     },
   };
 
+  // Reuses the PC sheet's left/header/tabs/inventory/spells kit parts
+  // verbatim by path (byte-identical, no npc-specific markup needed) — same
+  // "reuse, don't duplicate" pattern the pre-redesign header PART already
+  // followed. Only main.hbs and journal.hbs are npc-specific (they fold in
+  // the npc morale/xpValue/disposition fields the PC sheet doesn't have).
   static PARTS = {
-    // Reuses the PC sheet's header verbatim (unchanged) — it renders only
-    // `adnd2e.identity.*`/`adnd2e.vitals.*` fields, which this sheet's
-    // reused `buildCharacterSheetContext` produces identically for `npc`
-    // actors. No npc-specific header.hbs is created (nothing about it needs
-    // to differ), per this task's explicit "reuse, don't duplicate" brief.
-    header: { template: TEMPLATE_PATH("actor/character", "header.hbs") },
-    tabs: { template: "templates/generic/tab-navigation.hbs" },
-    main: { template: T("main.hbs"), scrollable: [""] },
-    // Reuses the PC sheet's spells.hbs by path (byte-identical, no npc-specific
-    // markup needed) — same "reuse, don't duplicate" pattern the header PART
-    // above already follows (whole-branch-review I4 fix; was a duplicated file).
-    spells: { template: TEMPLATE_PATH("actor/character", "spells.hbs"), scrollable: [""] },
-    details: { template: T("details.hbs"), scrollable: [""] },
+    left: { template: TEMPLATE_PATH("actor/pc", "left.hbs") },
+    header: { template: TEMPLATE_PATH("actor/pc", "header.hbs") },
+    tabs: { template: TEMPLATE_PATH("actor/pc", "tabs.hbs") },
+    main: { template: TEMPLATE_PATH("actor/npc", "main.hbs"), scrollable: [""] },
+    inventory: { template: TEMPLATE_PATH("actor/pc", "inventory.hbs"), scrollable: [""] },
+    spells: { template: TEMPLATE_PATH("actor/pc", "spells.hbs"), scrollable: [""] },
+    journal: { template: TEMPLATE_PATH("actor/npc", "journal.hbs"), scrollable: [""] },
   };
 
   static TABS = {
@@ -129,17 +144,27 @@ export class Adnd2eNpcSheet extends Base {
       labelPrefix: "ADND2E.sheet.tabs",
       tabs: [
         { id: "main", icon: "fa-solid fa-user" },
+        { id: "inventory", icon: "fa-solid fa-box-open" },
         { id: "spells", icon: "fa-solid fa-wand-sparkles" },
-        { id: "details", icon: "fa-solid fa-box-open" },
+        { id: "journal", icon: "fa-solid fa-book" },
       ],
     },
   };
+
+  /** sheet redesign R2: the viewer's unlock state — never persisted, opens locked
+   *  (mirrors Adnd2eCharacterSheet's own `#unlocked`). */
+  #unlocked = false;
 
   override async _prepareContext(options: unknown): Promise<Record<string, unknown>> {
     const context = await super._prepareContext(options);
     context.adnd2e = buildCharacterSheetContext(this.#buildInput());
     context.editable = this.isEditable;
     context.notEditable = !this.isEditable;
+    context.proseDisabled = !this.isEditable || !this.#unlocked;
+    // Deliberately NOT set here: `context.pcActions`. Its absence keeps every
+    // PC-only action (awardXp, toggleDualClass, seedSubAbilities, the thief
+    // allocate/deallocate buttons, the traits panel) hidden on this sheet —
+    // see this class's header comment.
     // matches src/sheets/character/sheet.ts's own _prepareContext exactly —
     // `context.source` and `context.user` are already provided by
     // super._prepareContext(options) (DocumentSheetV2's own base behavior);
@@ -254,6 +279,11 @@ export class Adnd2eNpcSheet extends Base {
       },
       optionalRules: getOptionalRules(),
       castingStatus: readCastingStatus(this.document as never),
+      unlocked: this.#unlocked,
+      favorites: (this.document as unknown as { getFlag(scope: string, key: string): unknown }).getFlag(
+        SYSTEM_ID,
+        "favorites",
+      ),
     };
   }
 
@@ -308,10 +338,20 @@ export class Adnd2eNpcSheet extends Base {
     return result;
   }
 
-  // Wires the `[data-item-id][data-field]` inputs the reused `item-row.hbs`
+  /** the same key `bindSheetKit`/`clearSheetKit` use to namespace this sheet's
+   *  client-side DOM state (collapsed sections, the inventory filter) — one
+   *  getter so `_onRender` and `_onClose` can't drift out of sync with each
+   *  other. Mirrors Adnd2eCharacterSheet's own `#sheetKitKey` exactly (a
+   *  distinct `npc-` prefix keeps it from colliding with a `character`
+   *  actor's own sheet-kit state if the two ever shared an id namespace). */
+  get #sheetKitKey(): string {
+    return `npc-${(this.document as unknown as { id: string }).id}`;
+  }
+
+  // Wires the `[data-item-id][data-field]` inputs the reused `pc-item-table.hbs`
   // partial renders (inventory quantity/location/equipped/identified) — same
   // pattern as Adnd2eCharacterSheet's own `_onRender`/`#onItemFieldChange`,
-  // needed because `details.hbs` (this task's Step 6) folds in the PC
+  // needed because the reused `pc/inventory.hbs` PART folds in the PC
   // sheet's inventory panel content verbatim, partial and all.
   override async _onRender(context: unknown, options: unknown): Promise<void> {
     await super._onRender(context, options);
@@ -323,6 +363,16 @@ export class Adnd2eNpcSheet extends Base {
         void this.#onItemFieldChange(el);
       });
     }
+    bindSheetKit(this.element, this.#sheetKitKey);
+  }
+
+  // v14 caches the sheet instance across close/reopen (see Adnd2eCharacterSheet's
+  // own `_onClose` for the client-document.mjs citation) — every sheet must open
+  // locked (spec), so reset it on close.
+  override _onClose(options: unknown): void {
+    super._onClose(options);
+    this.#unlocked = false;
+    clearSheetKit(this.#sheetKitKey);
   }
 
   async #onItemFieldChange(el: HTMLInputElement | HTMLSelectElement): Promise<void> {
@@ -344,11 +394,24 @@ export class Adnd2eNpcSheet extends Base {
     return (this.document as unknown as { items: { get(id: string): RawItemHandle | undefined } }).items.get(id);
   }
 
-  // Wires class-row.hbs's rollHp/takeAverageHp buttons — that partial is
-  // reused verbatim from the PC sheet (see main.hbs) and renders these
-  // buttons whenever a class item has canLevelUp:true, so they must stay
-  // wired here too or clicking them on an npc actor is a silent no-op.
-  // Mirrors Adnd2eCharacterSheet's own #onRollHp/#onTakeAverageHp exactly.
+  // Interaction handlers — sheet redesign R2 (edit lock + favorites). Mirror
+  // Adnd2eCharacterSheet's own #onToggleLock/#onToggleFavorite exactly.
+  static async #onToggleLock(this: Adnd2eNpcSheet): Promise<void> {
+    if (!this.isEditable) return;
+    this.#unlocked = !this.#unlocked;
+    await this.render();
+  }
+
+  static async #onToggleFavorite(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    await toggleFavoriteFlag(this.document, target);
+  }
+
+  // Wires pc-class-row.hbs's rollHp/takeAverageHp buttons — that partial is
+  // reused verbatim from the PC sheet (class rows render in the pc header,
+  // see header.hbs) and renders these buttons whenever a class item has
+  // canLevelUp:true, so they must stay wired here too or clicking them on
+  // an npc actor is a silent no-op. Mirrors Adnd2eCharacterSheet's own
+  // #onRollHp/#onTakeAverageHp exactly.
   static async #onRollHp(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
     const item = this.#getItem(target.dataset.classId);
     if (item) await rollHitPoints(item as never, { average: false });
@@ -360,10 +423,10 @@ export class Adnd2eNpcSheet extends Base {
   }
 
   // rollAttack reads the optional per-weapon-row backstab toggle exactly like
-  // Adnd2eCharacterSheet's own #onRollAttack — the same combat.hbs weapon-row
-  // markup (backstab checkbox included) is reused verbatim in this sheet's
-  // folded-together main.hbs, so it must stay wired the same way or the
-  // checkbox would silently do nothing.
+  // Adnd2eCharacterSheet's own #onRollAttack — the same pc-main-panels.hbs
+  // weapon-row markup (backstab checkbox included) is reused verbatim in this
+  // sheet's folded-together main.hbs, so it must stay wired the same way or
+  // the checkbox would silently do nothing.
   static async #onRollAttack(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {
     const weaponItemId = target.dataset.itemId;
     if (!weaponItemId) return;
