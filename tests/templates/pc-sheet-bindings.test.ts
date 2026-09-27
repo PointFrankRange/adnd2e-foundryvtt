@@ -13,7 +13,7 @@ function allHbs(dir: string): string[] {
 }
 const TEMPLATES = allHbs(PC_DIR).map((p) => readFileSync(p, "utf8")).join("\n")
   // the shared item-controls partial is reused by the PC templates
-  + readFileSync(path.join(ROOT, "templates", "actor", "character", "partials", "item-controls.hbs"), "utf8");
+  + readFileSync(path.join(ROOT, "templates", "actor", "shared", "partials", "item-controls.hbs"), "utf8");
 const SHEET = readFileSync(path.join(ROOT, "src", "sheets", "character", "sheet.ts"), "utf8");
 const FAVORITES = readFileSync(path.join(ROOT, "src", "sheets", "kit", "favorites.ts"), "utf8");
 
@@ -59,5 +59,20 @@ describe("PC sheet templates (sheet redesign R1)", () => {
     expect(favoriteActions.length).toBeGreaterThan(0);
     const registered = new Set([...SHEET.matchAll(/^\s+([a-zA-Z]+): Adnd2eCharacterSheet\.#on/gm)].map((m) => m[1]!));
     for (const a of favoriteActions) expect(registered.has(a), a).toBe(true);
+  });
+});
+
+const PC_ONLY_ACTIONS = ["awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait"];
+
+describe("PC-only actions (sheet redesign R2)", () => {
+  it("every PC template that renders a PC-only action gates it on @root.pcActions", () => {
+    for (const file of allHbs(PC_DIR)) {
+      const text = readFileSync(file, "utf8");
+      const used = PC_ONLY_ACTIONS.filter((a) => text.includes(`data-action="${a}"`));
+      if (used.length) expect(text, `${file} renders ${used.join(", ")}`).toContain("@root.pcActions");
+    }
+  });
+  it("the PC sheet sets pcActions", () => {
+    expect(SHEET).toMatch(/context\.pcActions = true;/);
   });
 });

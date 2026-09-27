@@ -1,8 +1,8 @@
 <aside class="pc-left">
   <img class="portrait" src="{{adnd2e.identity.img}}" data-action="editImage" data-edit="img" alt="{{adnd2e.identity.name}}">
-  {{#if adnd2e.lock.unlocked}}{{#if adnd2e.subAbilities.canSeed}}
+  {{#if @root.pcActions}}{{#if adnd2e.lock.unlocked}}{{#if adnd2e.subAbilities.canSeed}}
     <button type="button" class="kit-small" data-action="seedSubAbilities">{{localize 'ADND2E.sheet.subAbilities.seed'}}</button>
-  {{/if}}{{/if}}
+  {{/if}}{{/if}}{{/if}}
   {{#each adnd2e.abilities as |row|}}
     {{> adnd2e.pc-ability row=row unlocked=@root.adnd2e.lock.unlocked}}
   {{/each}}

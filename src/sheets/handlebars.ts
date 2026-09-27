@@ -8,12 +8,16 @@ const PARTIALS = [
   "actor/character/partials/class-row.hbs",
   "actor/character/partials/item-row.hbs",
   "actor/character/partials/encumbrance-gauge.hbs",
-  "actor/character/partials/slot-table.hbs",
-  "actor/character/partials/item-controls.hbs",
+  "actor/shared/partials/slot-table.hbs",
+  "actor/shared/partials/item-controls.hbs",
   "actor/pc/partials/pc-ability.hbs",
   "actor/pc/partials/pc-class-row.hbs",
   "actor/pc/partials/pc-item-table.hbs",
   "actor/pc/partials/pc-encumbrance.hbs",
+  "actor/pc/partials/pc-main-panels.hbs",
+  "actor/pc/partials/pc-proficiency-panels.hbs",
+  "actor/pc/partials/pc-feature-panels.hbs",
+  "actor/pc/partials/pc-journal-panels.hbs",
 ];
 
 /**

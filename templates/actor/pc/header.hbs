@@ -25,7 +25,7 @@
     <div class="pc-top-left">
       <section class="kit-panel pc-classes">
         <div class="kit-bar">{{localize 'ADND2E.sheet.sections.classes'}}
-          <button type="button" class="kit-small" data-action="awardXp" style="margin-left:auto">{{localize 'ADND2E.sheet.xp.award'}}</button>
+          {{#if @root.pcActions}}<button type="button" class="kit-small" data-action="awardXp" style="margin-left:auto">{{localize 'ADND2E.sheet.xp.award'}}</button>{{/if}}
         </div>
         <div class="kit-body">
           {{#each adnd2e.classes as |c|}}
@@ -33,12 +33,14 @@
           {{else}}
             <p class="kit-empty">{{localize 'ADND2E.sheet.sections.classes'}}</p>
           {{/each}}
+          {{#if @root.pcActions}}
           {{#if adnd2e.lock.unlocked}}
             {{#if adnd2e.dualClassToggle.available}}
               <button type="button" data-action="toggleDualClass">{{localize 'ADND2E.sheet.dualClass.toggle'}}</button>
             {{else if adnd2e.dualClassToggle.on}}
               <button type="button" data-action="toggleDualClass">{{localize 'ADND2E.sheet.dualClass.clear'}}</button>
             {{/if}}
+          {{/if}}
           {{/if}}
         </div>
       </section>

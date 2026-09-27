@@ -28,8 +28,8 @@ import { seedSubAbilities } from "./sub-ability-actions";
 import { removeTrait, traitDropInputs, traitRefundCapped, type TraitDropInputs } from "./trait-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
 import { awardXpSplit } from "./xp";
-import { normalizeFavorites, toggleFavoriteList, type FavoriteKind } from "../kit/favorites";
 import { bindSheetKit, clearSheetKit } from "../kit-dom";
+import { toggleFavoriteFlag } from "../kit-actions";
 
 /* ---------------------------------------------------------------------------
  * Adnd2eCharacterSheet — the ApplicationV2 PC sheet shell (SP2 Task 5).
@@ -350,6 +350,7 @@ export class Adnd2eCharacterSheet extends Base {
     context.editable = this.isEditable;
     context.notEditable = !this.isEditable;
     context.proseDisabled = !this.isEditable || !this.#unlocked;
+    context.pcActions = true;
     // The SYSTEM DataModel's own schema — distinct from `context.fields`,
     // which DocumentSheetV2._prepareContext already exposes as the actor's
     // top-level (name/img/system/…) schema. Needed so biography.hbs can
@@ -614,16 +615,7 @@ export class Adnd2eCharacterSheet extends Base {
   }
 
   static async #onToggleFavorite(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
-    const actor = this.document as unknown as {
-      isOwner: boolean;
-      getFlag(scope: string, key: string): unknown;
-      setFlag(scope: string, key: string, value: unknown): Promise<unknown>;
-    };
-    const kind = target.dataset.kind as FavoriteKind | undefined;
-    const id = target.dataset.id;
-    if (!actor.isOwner || !kind || !id) return;
-    const current = normalizeFavorites(actor.getFlag(SYSTEM_ID, "favorites"));
-    await actor.setFlag(SYSTEM_ID, "favorites", toggleFavoriteList(current, { kind, id }));
+    await toggleFavoriteFlag(this.document, target);
   }
 
   // Interaction handlers — SP2 Task 8.
