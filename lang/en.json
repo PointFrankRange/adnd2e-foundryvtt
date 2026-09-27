@@ -452,6 +452,7 @@
         "gmNotes": "GM Notes"
       },
       "npc": {
+        "title": "NPC",
         "morale": "Morale",
         "xpValue": "XP Value",
         "disposition": "Disposition"
