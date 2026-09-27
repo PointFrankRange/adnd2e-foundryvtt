@@ -157,6 +157,15 @@
     --min-height: 160px;
     .editor-content { padding: 4px 6px; }
     .editor-menu { background: var(--kit-expand-bg); border-bottom: 1px solid var(--kit-row-rule); }
+    // Core colours toolbar buttons from the Foundry theme, not our kit
+    // background, so in dark mode they came out dark-on-dark. Every toolbar
+    // control (icon buttons and the `button.pm-dropdown` Format/font/size
+    // pickers, common/prosemirror/dropdown.mjs:120) follows the kit field ink;
+    // hover/active use the accent ink over core's own --color-control-hover.
+    menu button, menu button i, menu .pm-dropdown > span, menu .pm-dropdown i { color: var(--kit-field-ink); }
+    menu button:hover, menu button.active,
+    menu button:hover i, menu button.active i,
+    menu button:hover > span, menu button.active > span { color: var(--kit-accent-ink); }
   }
 
   // dev-world fix 9: the shared adnd2e.slot-table partial (spells.hbs) is
