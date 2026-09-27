@@ -57,7 +57,7 @@
     }
     // fixed 550px. `max-width: 100%` keeps it inside narrow windows without a
     // viewport media query (which would check the browser, not the sheet).
-    .pc-classes { width: 550px; max-width: 100%; flex: none; margin: 0 0 6px; .class-row { padding: 2px 6px; } }
+    .pc-classes { width: 465px; max-width: 100%; flex: none; margin: 0 0 6px; .class-row { padding: 2px 6px; } }
     .casting-badge { font-weight: 700; color: var(--kit-accent-ink); }
 
     .pc-saves { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
