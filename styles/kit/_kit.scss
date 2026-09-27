@@ -56,6 +56,8 @@
 
   .kit-panel {
     margin-bottom: 8px;
+    min-width: 0;
+    max-width: 100%;
     > .kit-body {
       background: var(--kit-field-bg);
       color: var(--kit-field-ink);
@@ -116,10 +118,17 @@
     &.collapsed .kit-rows { display: none; }
     .kit-rows { background: var(--kit-field-bg); color: var(--kit-field-ink); border: 1px solid var(--kit-field-border); border-top: none; }
     .kit-head, .kit-row > .kit-cells { display: grid; grid-template-columns: var(--kit-cols, 1fr auto); gap: 6px; align-items: center; padding: 2px 6px; }
+    // min-width: 0 on every grid cell lets the row shrink with its column
+    // instead of overflowing (a grid cell's automatic minimum is otherwise
+    // its content's width). Only .kit-name gets the ellipsis treatment below
+    // — the other cells hold inputs/selects/action buttons, which an
+    // overflow:hidden text-overflow:ellipsis on the cell would clip instead
+    // of truncate.
+    .kit-head > *, .kit-row > .kit-cells > * { min-width: 0; }
     .kit-head { background: var(--kit-tan); color: var(--kit-tan-ink); font-size: 11px; font-weight: 700; }
     .kit-row { border-bottom: 1px solid var(--kit-row-rule); }
     .kit-row[hidden] { display: none; }
-    .kit-name { cursor: pointer; display: flex; align-items: center; gap: 4px; img { width: 20px; height: 20px; border: none; } }
+    .kit-name { cursor: pointer; display: flex; align-items: center; gap: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; img { width: 20px; height: 20px; border: none; flex: none; } }
     .kit-summary { display: none; background: var(--kit-expand-bg); padding: 4px 8px; font-size: 12px; }
     .kit-row.expanded .kit-summary { display: block; }
     .kit-empty { padding: 4px 6px; font-style: italic; opacity: .8; }

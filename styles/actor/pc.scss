@@ -1,7 +1,11 @@
 .adnd2e.pc-sheet {
   .window-content {
     display: grid;
-    grid-template-columns: 210px 1fr;
+    // minmax(0, 1fr): a plain 1fr has an automatic minimum sized to its
+    // content, which refuses to shrink below that content's width — this
+    // lets the right column (and everything in it) actually shrink with
+    // the window instead of overflowing.
+    grid-template-columns: 210px minmax(0, 1fr);
     grid-template-rows: auto auto 1fr;
     gap: 0 10px;
     padding: 8px;
@@ -35,9 +39,9 @@
     .pc-vitals {
       display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; margin-bottom: 0;
       .kit-stat {
-        width: 76px;
+        flex: 0 1 76px; min-width: 56px;
         display: flex; flex-direction: column;
-        .kit-bar { justify-content: center; white-space: nowrap; font-size: 11px; height: 20px; padding: 0 4px; }
+        .kit-bar { justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; height: 20px; padding: 0 4px; }
         .kit-big {
           height: 34px; box-sizing: border-box;
           display: flex; align-items: center; justify-content: center; gap: 2px;
@@ -51,15 +55,14 @@
         }
       }
     }
-    // fixed 740px: fits the longest class name at max level without
-    // wrapping. `max-width: 100%` keeps it inside narrow windows without a
+    // fixed 550px. `max-width: 100%` keeps it inside narrow windows without a
     // viewport media query (which would check the browser, not the sheet).
-    .pc-classes { width: 740px; max-width: 100%; flex: none; margin: 0 0 6px; .class-row { padding: 2px 6px; } }
+    .pc-classes { width: 550px; max-width: 100%; flex: none; margin: 0 0 6px; .class-row { padding: 2px 6px; } }
     .casting-badge { font-weight: 700; color: var(--kit-accent-ink); }
 
     .pc-saves { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
-    .pc-saves .kit-save-box { width: 96px; display: flex; flex-direction: column; }
-    .pc-saves .kit-bar { justify-content: center; white-space: nowrap; font-size: 11px; height: 20px; padding: 0 4px; }
+    .pc-saves .kit-save-box { flex: 0 1 96px; min-width: 72px; display: flex; flex-direction: column; }
+    .pc-saves .kit-bar { justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; height: 20px; padding: 0 4px; }
     .pc-saves .kit-big { height: 34px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 4px; font-size: 18px; line-height: 1; }
     .pc-saves .kit-save-roll { width: 24px; height: 24px; padding: 0; font-size: 12px; line-height: 24px; }
   }
