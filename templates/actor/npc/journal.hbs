@@ -8,7 +8,7 @@
         {{#if @root.adnd2e.lock.unlocked}}
           <input type="number" name="system.npc.morale" value="{{source.system.npc.morale}}">
         {{else}}
-          <span class="val">{{source.system.npc.morale}}</span>
+          <span class="val">{{adnd2eOrDash source.system.npc.morale}}</span>
         {{/if}}
       </div>
       <div class="detail-field">
@@ -16,7 +16,7 @@
         {{#if @root.adnd2e.lock.unlocked}}
           <input type="number" name="system.npc.xpValue" value="{{source.system.npc.xpValue}}">
         {{else}}
-          <span class="val">{{source.system.npc.xpValue}}</span>
+          <span class="val">{{adnd2eOrDash source.system.npc.xpValue}}</span>
         {{/if}}
       </div>
       <div class="detail-field">

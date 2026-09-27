@@ -32,4 +32,8 @@ export async function registerSheetPartials(): Promise<void> {
     const n = Number(v);
     return n > 0 ? `+${n}` : String(n);
   });
+  // sheet redesign R2 fix wave: locked-view display for a numeric field that
+  // may legitimately be 0 — plain `{{#if}}` treats 0 as falsy, so this checks
+  // for null/undefined/empty specifically instead.
+  Handlebars.registerHelper("adnd2eOrDash", (v: unknown) => (v === null || v === undefined || v === "" ? "—" : String(v)));
 }

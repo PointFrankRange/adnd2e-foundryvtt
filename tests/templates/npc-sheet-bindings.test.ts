@@ -1,24 +1,42 @@
 import { describe, expect, it } from "vitest";
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const TPL = path.join(ROOT, "templates");
 const SHEET = readFileSync(path.join(ROOT, "src", "sheets", "npc", "sheet.ts"), "utf8");
 
-function allHbs(dir: string): string[] {
-  return readdirSync(dir).flatMap((f) => {
-    const p = path.join(dir, f);
-    return statSync(p).isDirectory() ? allHbs(p) : p.endsWith(".hbs") ? [p] : [];
-  });
-}
-
-// The NPC sheet's PARTS templates (parsed from sheet.ts) + every partial they can reach.
+// The NPC sheet's PARTS templates (parsed from sheet.ts) + every partial reachable
+// from them via `{{> adnd2e.<name>}}` includes, walked transitively so a partial
+// that itself includes another partial (e.g. journal.hbs -> pc-feature-panels.hbs)
+// is still picked up. A name that resolves to neither partials folder fails the walk.
 const PART_FILES = [...SHEET.matchAll(/TEMPLATE_PATH\("(actor\/[a-z]+)", "([a-z-]+\.hbs)"\)/g)].map((m) =>
   path.join(TPL, ...m[1]!.split("/"), m[2]!),
 );
-const PARTIAL_FILES = [...allHbs(path.join(TPL, "actor", "pc", "partials")), ...allHbs(path.join(TPL, "actor", "shared", "partials"))];
-const FILES = [...PART_FILES, ...PARTIAL_FILES];
+
+function resolvePartial(name: string): string {
+  const pcPath = path.join(TPL, "actor", "pc", "partials", `${name}.hbs`);
+  const sharedPath = path.join(TPL, "actor", "shared", "partials", `${name}.hbs`);
+  if (existsSync(pcPath)) return pcPath;
+  if (existsSync(sharedPath)) return sharedPath;
+  throw new Error(`{{> adnd2e.${name}}} does not resolve to a partial under templates/actor/{pc,shared}/partials/`);
+}
+
+const visited = new Set<string>(PART_FILES);
+const queue = [...PART_FILES];
+const reachedPartials: string[] = [];
+while (queue.length) {
+  const file = queue.shift()!;
+  const text = readFileSync(file, "utf8");
+  for (const m of text.matchAll(/\{\{>\s*adnd2e\.([a-z-]+)/g)) {
+    const resolved = resolvePartial(m[1]!);
+    if (visited.has(resolved)) continue;
+    visited.add(resolved);
+    reachedPartials.push(resolved);
+    queue.push(resolved);
+  }
+}
+const FILES = [...PART_FILES, ...reachedPartials];
 const TEMPLATES = FILES.map((f) => readFileSync(f, "utf8")).join("\n");
 
 const NOTHING_LOST_ACTIONS = [
@@ -77,6 +95,6 @@ describe("Character NPC sheet templates (sheet redesign R2)", () => {
       expect(f.includes(`${path.sep}npc${path.sep}`), `${f} must not contain PC-only actions`).toBe(false);
       expect(text, `${f} renders ${used.join(", ")} ungated`).toContain("@root.pcActions");
     }
-    expect(SHEET).not.toMatch(/pcActions\s*=\s*true/);
+    expect(SHEET).not.toMatch(/pcActions\s*[:=]/);
   });
 });

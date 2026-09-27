@@ -41,7 +41,8 @@ export interface CharacterSheetInput {
   /** Sub-project 8 Plan 8a: true ONLY when this sheet renders the sub-score
    *  inputs (the PC sheet, with `subAbilitiesEnabled(rules)` true). Optional so
    *  every other consumer of this builder — notably the NPC sheet, which shares
-   *  the ability-row partial — is off by default. */
+   *  this same builder and its rendered pc-ability.hbs partial — is off by
+   *  default. */
   subAbilityUi?: boolean;
   /** Sub-project 9a: the in-progress cast; absent/null when idle or the rule is off */
   castingStatus?: CastingStatusInput | null;

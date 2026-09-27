@@ -84,7 +84,7 @@ const Base = HandlebarsApplicationMixin(ActorSheetV2 as never) as unknown as new
 };
 
 /** Minimal shape needed to mutate an owned Item's `system.*` field from the
- *  `[data-item-id][data-field]` inputs the reused `item-row.hbs` partial
+ *  `[data-item-id][data-field]` inputs the reused `pc-item-table.hbs` partial
  *  renders (inventory quantity/location/equipped/identified) — same pattern
  *  as Adnd2eCharacterSheet's own `#onItemFieldChange`. */
 interface RawItemHandle {
@@ -348,7 +348,7 @@ export class Adnd2eNpcSheet extends Base {
     return `npc-${(this.document as unknown as { id: string }).id}`;
   }
 
-  // Wires the `[data-item-id][data-field]` inputs the reused `item-row.hbs`
+  // Wires the `[data-item-id][data-field]` inputs the reused `pc-item-table.hbs`
   // partial renders (inventory quantity/location/equipped/identified) — same
   // pattern as Adnd2eCharacterSheet's own `_onRender`/`#onItemFieldChange`,
   // needed because the reused `pc/inventory.hbs` PART folds in the PC
@@ -406,11 +406,12 @@ export class Adnd2eNpcSheet extends Base {
     await toggleFavoriteFlag(this.document, target);
   }
 
-  // Wires class-row.hbs's rollHp/takeAverageHp buttons — that partial is
-  // reused verbatim from the PC sheet (see main.hbs) and renders these
-  // buttons whenever a class item has canLevelUp:true, so they must stay
-  // wired here too or clicking them on an npc actor is a silent no-op.
-  // Mirrors Adnd2eCharacterSheet's own #onRollHp/#onTakeAverageHp exactly.
+  // Wires pc-class-row.hbs's rollHp/takeAverageHp buttons — that partial is
+  // reused verbatim from the PC sheet (class rows render in the pc header,
+  // see header.hbs) and renders these buttons whenever a class item has
+  // canLevelUp:true, so they must stay wired here too or clicking them on
+  // an npc actor is a silent no-op. Mirrors Adnd2eCharacterSheet's own
+  // #onRollHp/#onTakeAverageHp exactly.
   static async #onRollHp(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
     const item = this.#getItem(target.dataset.classId);
     if (item) await rollHitPoints(item as never, { average: false });
@@ -422,10 +423,10 @@ export class Adnd2eNpcSheet extends Base {
   }
 
   // rollAttack reads the optional per-weapon-row backstab toggle exactly like
-  // Adnd2eCharacterSheet's own #onRollAttack — the same combat.hbs weapon-row
-  // markup (backstab checkbox included) is reused verbatim in this sheet's
-  // folded-together main.hbs, so it must stay wired the same way or the
-  // checkbox would silently do nothing.
+  // Adnd2eCharacterSheet's own #onRollAttack — the same pc-main-panels.hbs
+  // weapon-row markup (backstab checkbox included) is reused verbatim in this
+  // sheet's folded-together main.hbs, so it must stay wired the same way or
+  // the checkbox would silently do nothing.
   static async #onRollAttack(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {
     const weaponItemId = target.dataset.itemId;
     if (!weaponItemId) return;
