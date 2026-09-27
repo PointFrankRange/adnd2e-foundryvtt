@@ -1,0 +1,46 @@
+<header class="pc-header">
+  <div class="pc-title-row">
+    {{#if adnd2e.lock.unlocked}}
+      <input type="text" class="pc-name" name="name" value="{{adnd2e.identity.name}}">
+    {{else}}
+      <h1 class="pc-name">{{adnd2e.identity.name}}</h1>
+    {{/if}}
+    {{#if adnd2e.lock.canUnlock}}
+      <button type="button" class="kit-lock" data-action="toggleLock" title="{{#if adnd2e.lock.unlocked}}{{localize 'ADND2E.sheet.kit.unlock'}}{{else}}{{localize 'ADND2E.sheet.kit.lock'}}{{/if}}">
+        <i class="fa-solid {{#if adnd2e.lock.unlocked}}fa-lock-open{{else}}fa-lock{{/if}}" inert></i>
+      </button>
+    {{/if}}
+  </div>
+  <div class="pc-class-line">
+    <span class="size">{{localize (lookup sizes source.system.details.size)}}</span>
+    {{#if adnd2e.lock.unlocked}}
+      <select name="system.details.alignment">{{selectOptions alignments selected=source.system.details.alignment localize=true}}</select>
+    {{else}}
+      <span class="alignment">{{localize (lookup alignments source.system.details.alignment)}}</span>
+    {{/if}}
+  </div>
+  <div class="pc-top">
+    <div class="pc-top-left">
+      <div class="pc-vitals">
+        <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.hp'}}</div>
+          <span class="kit-big"><input type="number" name="system.attributes.hp.value" value="{{source.system.attributes.hp.value}}"> / {{adnd2e.vitals.hp.max}}</span></div>
+        <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.ac'}}</div>
+          <span class="kit-big">{{#if adnd2e.lock.unlocked}}<input type="number" name="system.attributes.ac.value" value="{{source.system.attributes.ac.value}}">{{else}}{{adnd2e.vitals.ac}}{{/if}}</span></div>
+        <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.thac0'}}</div><span class="kit-big">{{adnd2e.vitals.thac0}}</span></div>
+        <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.movement'}}</div><span class="kit-big" title="{{adnd2e.vitals.movementSummary}}">{{source.system.attributes.movement.land}}</span></div>
+      </div>
+    </div>
+    <section class="kit-panel pc-saves-card">
+      <div class="kit-bar">{{localize 'ADND2E.sheet.vitals.saves'}}</div>
+      <div class="kit-body">
+        {{#each adnd2e.saves as |row|}}
+          <div class="pc-save-row" data-save="{{row.category}}">
+            <span class="pc-save-label">{{localize row.label}}</span>
+            <span class="pc-save-value">{{row.target}}</span>
+            <button type="button" class="kit-roll kit-save-roll" data-action="rollSave" data-save="{{row.category}}" title="{{localize 'ADND2E.sheet.combat.rollSave'}}"><i class="fa-solid fa-dice-d20" inert></i></button>
+          </div>
+        {{/each}}
+      </div>
+    </section>
+  </div>
+</header>

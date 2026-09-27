@@ -244,7 +244,10 @@
         "features": "Features",
         "biography": "Biography",
         "proficiencies": "Proficiencies",
-        "journal": "Journal"
+        "journal": "Journal",
+        "statBlock": "Stat Block",
+        "gear": "Gear",
+        "notes": "Notes"
       },
       "kit": {
         "lock": "Unlock to edit",
@@ -463,6 +466,10 @@
         "fixedHp": "Fixed HP",
         "thac0AsFighterLevel": "THAC0 as Fighter Level",
         "intelligence": "Intelligence",
+        "statAuthoring": "Stat authoring",
+        "size": "Size",
+        "movementModes": "Movement modes",
+        "stats": "Stats",
         "attacks": "Attacks",
         "noAttacks": "No attacks defined",
         "attackName": "Name",

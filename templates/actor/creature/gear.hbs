@@ -1,0 +1,25 @@
+<section class="tab gear{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+  <input type="text" class="kit-filter" data-kit-filter="gear" placeholder="{{localize 'ADND2E.sheet.kit.filter'}}">
+  <div data-kit-filter-scope="gear">
+    {{#each adnd2e.gearSections as |section|}}
+      <section class="kit-table" data-kit-section="{{section.id}}" style="--kit-cols: 1fr 60px 90px auto">
+        <div class="kit-bar" data-kit-section-toggle><span class="kit-caret"></span>{{localize section.labelKey}} ({{section.rows.length}})</div>
+        <div class="kit-rows">
+          <div class="kit-head"><span>{{localize 'ADND2E.sheet.kit.cols.name'}}</span><span>{{localize 'ADND2E.sheet.kit.cols.qty'}}</span><span>{{localize 'ADND2E.sheet.kit.cols.equipped'}}</span><span></span></div>
+          {{#each section.rows as |g|}}
+            <div class="kit-row" data-kit-row data-kit-name="{{g.name}}" data-item-id="{{g.id}}">
+              <div class="kit-cells">
+                <span class="kit-name">{{#if g.img}}<img src="{{g.img}}" alt="">{{/if}}{{g.name}}</span>
+                <span>×{{g.quantity}}</span>
+                <span><input type="checkbox" data-action="toggleEquipped" data-item-id="{{g.id}}" {{checked g.equipped}}{{#unless @root.editable}} disabled{{/unless}}></span>
+                <span class="kit-row-actions">{{#if @root.adnd2e.lock.unlocked}}{{> adnd2e.item-controls id=g.id deletable=true}}{{/if}}</span>
+              </div>
+            </div>
+          {{else}}
+            <p class="kit-empty">{{localize 'ADND2E.sheet.creature.noGear'}}</p>
+          {{/each}}
+        </div>
+      </section>
+    {{/each}}
+  </div>
+</section>

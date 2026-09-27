@@ -1,0 +1,25 @@
+<section class="tab notes{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.kit.details'}}</div>
+    <div class="kit-body detail-fields">
+      <div class="detail-field">
+        <span class="cap">{{localize 'ADND2E.sheet.creature.treasureType'}}</span>
+        {{#if adnd2e.lock.unlocked}}<input type="text" name="system.details.treasureType" value="{{source.system.details.treasureType}}">{{else}}<span class="val">{{adnd2eOrDash source.system.details.treasureType}}</span>{{/if}}
+      </div>
+      <div class="detail-field">
+        <span class="cap">{{localize 'ADND2E.sheet.creature.numberAppearing'}}</span>
+        {{#if adnd2e.lock.unlocked}}<input type="text" name="system.details.numberAppearing" value="{{source.system.details.numberAppearing}}">{{else}}<span class="val">{{adnd2eOrDash source.system.details.numberAppearing}}</span>{{/if}}
+      </div>
+      <div class="detail-field">
+        <span class="cap">{{localize 'ADND2E.sheet.creature.xpValue'}}</span>
+        {{#if adnd2e.lock.unlocked}}<input type="number" name="system.details.xpValue" value="{{source.system.details.xpValue}}">{{else}}<span class="val">{{adnd2eOrDash source.system.details.xpValue}}</span>{{/if}}
+      </div>
+    </div>
+  </section>
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.creature.description'}}</div>
+    <div class="kit-body pc-editor">
+      {{formInput systemFields.details.fields.description value=source.system.details.description name="system.details.description" disabled=proseDisabled}}
+    </div>
+  </section>
+</section>

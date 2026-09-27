@@ -1,0 +1,89 @@
+<section class="tab statblock{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+
+  <section class="kit-panel creature-attacks">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.creature.attacks'}}
+      {{#if adnd2e.lock.unlocked}}<button type="button" class="kit-small" data-action="addAttack" style="margin-left:auto">{{localize 'ADND2E.sheet.creature.addAttack'}}</button>{{/if}}
+    </div>
+    <div class="kit-body">
+      {{#if adnd2e.lock.unlocked}}
+        <div class="attack-row attack-row-header">
+          <span>{{localize 'ADND2E.sheet.creature.attackName'}}</span>
+          <span>{{localize 'ADND2E.sheet.creature.attackCount'}}</span>
+          <span>{{localize 'ADND2E.sheet.creature.attackDamage'}}</span>
+          <span>{{localize 'ADND2E.sheet.creature.attackType'}}</span>
+          <span>{{localize 'ADND2E.sheet.creature.attackSpecial'}}</span>
+          <span>{{localize 'ADND2E.sheet.creature.attackThac0Override'}}</span>
+        </div>
+        {{#each source.system.attacks as |a|}}
+          <div class="attack-row">
+            <input type="text" name="system.attacks.{{@index}}.name" value="{{a.name}}">
+            <input type="number" name="system.attacks.{{@index}}.count" value="{{a.count}}" min="1">
+            <input type="text" name="system.attacks.{{@index}}.damage" value="{{a.damage}}">
+            <select name="system.attacks.{{@index}}.type">{{selectOptions @root.attackTypes selected=a.type localize=true}}</select>
+            <input type="text" name="system.attacks.{{@index}}.special" value="{{a.special}}">
+            <input type="number" name="system.attacks.{{@index}}.thac0Override" value="{{a.thac0Override}}">
+            <button type="button" class="kit-roll" data-action="rollAttack" data-attack-index="{{@index}}">{{localize 'ADND2E.sheet.combat.rollAttack'}}</button>
+            <button type="button" class="kit-small" data-action="deleteAttack" data-attack-index="{{@index}}">{{localize 'ADND2E.sheet.creature.deleteAttack'}}</button>
+          </div>
+        {{else}}
+          <p class="kit-empty">{{localize 'ADND2E.sheet.creature.noAttacks'}}</p>
+        {{/each}}
+      {{else}}
+        {{#each adnd2e.attacks as |a|}}
+          <div class="attack-line">
+            <span class="name">{{a.name}}</span>
+            <span class="count">×{{a.count}}</span>
+            <span class="damage">{{a.damage}}</span>
+            <span class="type">{{localize (concat 'ADND2E.attackTypes.' a.type)}}</span>
+            {{#if a.special}}<span class="special">{{a.special}}</span>{{/if}}
+            <button type="button" class="kit-roll" data-action="rollAttack" data-attack-index="{{a.index}}">{{localize 'ADND2E.sheet.combat.rollAttack'}}</button>
+          </div>
+        {{else}}
+          <p class="kit-empty">{{localize 'ADND2E.sheet.creature.noAttacks'}}</p>
+        {{/each}}
+      {{/if}}
+      {{#if adnd2e.weaponAttacks.length}}
+        <h4 class="kit-subhead">{{localize 'ADND2E.sheet.creature.weaponAttacks'}}</h4>
+        {{#each adnd2e.weaponAttacks as |wa|}}
+          <div class="attack-line weapon-attack" data-item-id="{{wa.id}}">
+            <span class="name">{{wa.name}}</span>
+            <span class="damage">{{wa.damage}}</span>
+            <span class="type">{{localize (concat 'ADND2E.attackTypes.' wa.type)}}</span>
+            <button type="button" class="kit-roll" data-action="rollWeaponAttack" data-item-id="{{wa.id}}">{{localize 'ADND2E.sheet.combat.rollAttack'}}</button>
+          </div>
+        {{/each}}
+      {{/if}}
+    </div>
+  </section>
+
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.creature.specialAttacks'}}</div>
+    <div class="kit-body pc-editor">
+      {{formInput systemFields.details.fields.specialAttacks value=source.system.details.specialAttacks name="system.details.specialAttacks" disabled=proseDisabled}}
+    </div>
+  </section>
+
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.creature.specialDefenses'}}</div>
+    <div class="kit-body pc-editor">
+      {{formInput systemFields.details.fields.specialDefenses value=source.system.details.specialDefenses name="system.details.specialDefenses" disabled=proseDisabled}}
+    </div>
+  </section>
+
+  {{#if adnd2e.lock.unlocked}}
+    <section class="kit-panel creature-authoring">
+      <div class="kit-bar">{{localize 'ADND2E.sheet.creature.statAuthoring'}}</div>
+      <div class="kit-body detail-fields">
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.vitals.thac0'}}</span><input type="number" name="system.attributes.thac0.value" value="{{source.system.attributes.thac0.value}}"></label>
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.thac0AsFighterLevel'}}</span><input type="number" name="system.attributes.thac0.asFighterLevel" value="{{source.system.attributes.thac0.asFighterLevel}}"></label>
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.saveMode'}}</span><select name="system.saves.mode">{{selectOptions saveModes selected=source.system.saves.mode localize=true}}</select></label>
+        {{#each adnd2e.saves as |row|}}
+          <label class="detail-field"><span class="cap">{{localize row.label}}</span><input type="number" name="system.saves.explicit.{{row.category}}" value="{{lookup @root.source.system.saves.explicit row.category}}"></label>
+        {{/each}}
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.saveClassGroup'}}</span><select name="system.saves.asClass.group">{{selectOptions classGroups selected=source.system.saves.asClass.group localize=true blank=""}}</select></label>
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.saveClassLevel'}}</span><input type="number" name="system.saves.asClass.level" value="{{source.system.saves.asClass.level}}" min="1"></label>
+      </div>
+    </section>
+  {{/if}}
+
+</section>

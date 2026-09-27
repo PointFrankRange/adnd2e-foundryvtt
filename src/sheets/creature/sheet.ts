@@ -6,18 +6,25 @@ import { rollSpellAutomation, postCastCard } from "../character/spell-actions";
 import { editOwnedItem, deleteOwnedItem } from "../item-row-actions";
 import { buildCreatureSheetContext } from "./context";
 import type { CreatureGearView, CreatureSheetInput, CreatureSpellView } from "./context-types";
+import { bindSheetKit, clearSheetKit } from "../kit-dom";
 
 /* ---------------------------------------------------------------------------
- * Adnd2eCreatureSheet — SP6 Task 3.
+ * Adnd2eCreatureSheet — SP6 Task 3; rebuilt on the parchment kit (sheet
+ * redesign R3 Task 2).
  *
- * The real creature sheet: a single-page stat-block, replacing the SP1
- * raw-field stub as the default for `creature` actors. No `TABS` (spec §2
- * "layout style" decision — matches 2E's own single-block stat-block
- * convention). Foundry-coupled, no unit tests (matches
+ * The Monster NPC sheet, now built on the SAME left column / header / tabs
+ * kit parts as the PC and Character NPC sheets, but with its own creature-
+ * specific tab set (statblock/gear/spells/notes — 4 tabs) since CreatureModel's
+ * schema shares nothing with CharacterModel's. Carries the same edit lock
+ * (`#unlocked`/`#sheetKitKey`/`bindSheetKit`/`clearSheetKit`/`proseDisabled`)
+ * as the PC/NPC sheets — every sheet in this redesign opens locked and reveals
+ * its authoring inputs (movement modes, the editable attacks table, the saves
+ * authoring panel) only once unlocked. No favorites (spec — Monster NPC has
+ * no favorites bar). Foundry-coupled, no unit tests (matches
  * src/sheets/character/sheet.ts's established convention) — verified in a
  * linked dev world. All rendering data is produced by the pure
  * `buildCreatureSheetContext` (Task 1); this class only reads the document,
- * assembles the plain input, and wires the two roll actions (Task 2).
+ * assembles the plain input, and wires the action handlers.
  * ------------------------------------------------------------------------- */
 
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -34,25 +41,28 @@ const Base = HandlebarsApplicationMixin(ActorSheetV2 as never) as unknown as new
   element: HTMLElement;
   isEditable: boolean;
   _prepareContext(options: unknown): Promise<Record<string, unknown>>;
+  _preparePartContext(
+    partId: string,
+    context: Record<string, unknown>,
+    options: unknown,
+  ): Promise<Record<string, unknown>>;
   _onRender(context: unknown, options: unknown): Promise<void>;
   _onDropItem(event: DragEvent, item: Item.Implementation): Promise<unknown>;
+  // Not awaited by the close process (see Adnd2eCharacterSheet's own Base for
+  // the client/applications/api/application.mjs citation).
+  _onClose(options: unknown): void;
+  render(options?: unknown): Promise<unknown>;
 };
-
-const T = (p: string): string => TEMPLATE_PATH("actor/creature", p);
 
 export class Adnd2eCreatureSheet extends Base {
   static DEFAULT_OPTIONS = {
-    classes: ["adnd2e", "sheet", "actor", "creature"],
-    // Bumped from the original 640 — the C1 whole-branch-review fix added
-    // several new panels (movement, an editable attacks table, a saves
-    // authoring panel) and 640 left only the header/vitals visible before
-    // scrolling. 760 shows meaningfully more content on a typical screen
-    // while still fitting comfortably; the sheet is scrollable regardless
-    // (see styles/actor/creature.scss) so this is a convenience, not a fix.
-    position: { width: 560, height: 760 },
+    classes: ["adnd2e", "sheet", "actor", "pc-sheet", "creature-sheet"],
+    // Matches the PC/Character NPC kit sheets' own size (sheet redesign R3).
+    position: { width: 1045, height: 960 },
     window: { resizable: true },
     form: { submitOnChange: true, closeOnSubmit: false },
     actions: {
+      toggleLock: Adnd2eCreatureSheet.#onToggleLock,
       rollAttack: Adnd2eCreatureSheet.#onRollAttack,
       rollSave: Adnd2eCreatureSheet.#onRollSave,
       addAttack: Adnd2eCreatureSheet.#onAddAttack,
@@ -66,14 +76,38 @@ export class Adnd2eCreatureSheet extends Base {
   };
 
   static PARTS = {
-    sheet: { template: T("sheet.hbs"), scrollable: [""] },
+    left: { template: TEMPLATE_PATH("actor/creature", "left.hbs") },
+    header: { template: TEMPLATE_PATH("actor/creature", "header.hbs") },
+    tabs: { template: TEMPLATE_PATH("actor/pc", "tabs.hbs") },
+    statblock: { template: TEMPLATE_PATH("actor/creature", "statblock.hbs"), scrollable: [""] },
+    gear: { template: TEMPLATE_PATH("actor/creature", "gear.hbs"), scrollable: [""] },
+    spells: { template: TEMPLATE_PATH("actor/creature", "spells.hbs"), scrollable: [""] },
+    notes: { template: TEMPLATE_PATH("actor/creature", "notes.hbs"), scrollable: [""] },
   };
+
+  static TABS = {
+    primary: {
+      initial: "statblock",
+      labelPrefix: "ADND2E.sheet.tabs",
+      tabs: [
+        { id: "statblock", label: "ADND2E.sheet.tabs.statBlock", icon: "fa-solid fa-dragon" },
+        { id: "gear", icon: "fa-solid fa-box-open" },
+        { id: "spells", icon: "fa-solid fa-wand-sparkles" },
+        { id: "notes", icon: "fa-solid fa-book" },
+      ],
+    },
+  };
+
+  /** sheet redesign R3: the viewer's unlock state — never persisted, opens locked
+   *  (mirrors Adnd2eCharacterSheet's/Adnd2eNpcSheet's own `#unlocked`). */
+  #unlocked = false;
 
   override async _prepareContext(options: unknown): Promise<Record<string, unknown>> {
     const context = await super._prepareContext(options);
     context.adnd2e = buildCreatureSheetContext(this.#buildInput());
     context.editable = this.isEditable;
     context.notEditable = !this.isEditable;
+    context.proseDisabled = !this.isEditable || !this.#unlocked;
     // matches src/sheets/character/sheet.ts's own _prepareContext exactly —
     // `context.source` (the actor's `_source`) is already provided by
     // super._prepareContext(options) (DocumentSheetV2's own base behavior);
@@ -92,6 +126,47 @@ export class Adnd2eCreatureSheet extends Base {
     context.attackTypes = cfg.attackTypes;
     context.saveModes = cfg.saveModes;
     return context;
+  }
+
+  override async _preparePartContext(
+    partId: string,
+    context: Record<string, unknown>,
+    options: unknown,
+  ): Promise<Record<string, unknown>> {
+    const ctx = await super._preparePartContext(partId, context, options);
+    const tabs = ctx.tabs as Record<string, unknown> | undefined;
+    if (tabs && partId in tabs) ctx.tab = tabs[partId];
+    return ctx;
+  }
+
+  /** the same key `bindSheetKit`/`clearSheetKit` use to namespace this sheet's
+   *  client-side DOM state (collapsed gear sections, the gear filter) — one
+   *  getter so `_onRender` and `_onClose` can't drift out of sync with each
+   *  other. Mirrors Adnd2eNpcSheet's own `#sheetKitKey` exactly (a distinct
+   *  `creature-` prefix keeps it from colliding with another actor type's own
+   *  sheet-kit state if the two ever shared an id namespace). */
+  get #sheetKitKey(): string {
+    return `creature-${(this.document as unknown as { id: string }).id}`;
+  }
+
+  override async _onRender(context: unknown, options: unknown): Promise<void> {
+    await super._onRender(context, options);
+    bindSheetKit(this.element, this.#sheetKitKey);
+  }
+
+  // v14 caches the sheet instance across close/reopen (see Adnd2eCharacterSheet's
+  // own `_onClose` for the client-document.mjs citation) — every sheet must open
+  // locked (spec), so reset it on close.
+  override _onClose(options: unknown): void {
+    super._onClose(options);
+    this.#unlocked = false;
+    clearSheetKit(this.#sheetKitKey);
+  }
+
+  static async #onToggleLock(this: Adnd2eCreatureSheet): Promise<void> {
+    if (!this.isEditable) return;
+    this.#unlocked = !this.#unlocked;
+    await this.render();
   }
 
   #buildInput(): CreatureSheetInput {
@@ -141,6 +216,7 @@ export class Adnd2eCreatureSheet extends Base {
         isOwner: actor.isOwner,
         editable: this.isEditable,
       },
+      unlocked: this.#unlocked,
       gear,
       spells,
     };
@@ -161,6 +237,7 @@ export class Adnd2eCreatureSheet extends Base {
   // array, matching every other action on this sheet's "read the document,
   // call update()" style (whole-branch-review C1 fix).
   static async #onAddAttack(this: Adnd2eCreatureSheet): Promise<void> {
+    if (!this.isEditable) return;
     const actor = this.document as unknown as {
       system: { attacks: CreatureSheetInput["attacks"] };
       update(data: Record<string, unknown>): Promise<unknown>;
@@ -170,6 +247,7 @@ export class Adnd2eCreatureSheet extends Base {
   }
 
   static async #onDeleteAttack(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
     const index = target.dataset.attackIndex;
     if (index === undefined) return;
     const actor = this.document as unknown as {

@@ -1,47 +1,23 @@
-// AD&D 2E creature/monster stat-block sheet (SP6 Task 3). Intentionally
-// minimal — just making the sheet's content scrollable inside Foundry core's
-// `.window-content` (which clips overflow: public/css/foundry2.css's
-// `.application .window-content { overflow: hidden; }`). A full styling pass
-// is out of scope (matches a design boundary kept during the SP6 whole-branch
-// review: .creature scope with unstyled vitals/movement/saves/details).
-.adnd2e.sheet.creature {
-  // A flex child's default min-height: auto refuses to shrink below its
-  // content size, which silently defeats overflow-y until this is set.
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-
-  // Scoped to the attacks table only (live dev-world testing gap) — the rest
-  // of this sheet (vitals/movement/saves/details) is still deliberately
-  // unstyled, matching the standing I1 boundary. Without a shared grid
-  // template, .attack-row-header's labels didn't line up above the
-  // corresponding input/select/button in every .attack-row data row below
-  // it, and the header row read as just another data row.
+// Monster NPC sheet on the parchment kit (sheet redesign R3). Layout, bars,
+// tables, header and saves card come from styles/kit + styles/actor/pc.scss
+// (the sheet carries the `pc-sheet` class); only creature-specific rows here.
+.adnd2e.pc-sheet.creature-sheet {
   .attack-row {
     display: grid;
-    // name / count / damage / type / special / thac0Override / roll button /
-    // delete button — the header row only fills the first 6 of these 8
-    // tracks (it has no roll/delete cells), which grid leaves empty rather
-    // than misaligning, so header labels still land above their column.
-    grid-template-columns: 2fr 3.5rem 1.5fr 6rem 2fr 5rem auto auto;
-    gap: 0.25rem;
+    grid-template-columns: minmax(0, 2fr) 3.5rem minmax(0, 1.5fr) 6rem minmax(0, 2fr) 4.5rem auto auto;
+    gap: 4px;
     align-items: center;
+    padding: 2px 0;
+    border-bottom: 1px solid var(--kit-row-rule);
+    input, select { width: 100%; min-width: 0; }
   }
-
-  .attack-row-header {
-    font-weight: 700;
-    border-bottom: 1px solid var(--adnd2e-accent);
-    padding-bottom: 0.25rem;
+  .attack-row-header { font-size: 11px; font-weight: 700; color: var(--kit-muted); }
+  .attack-line, .spell-row {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    padding: 3px 4px; border-bottom: 1px solid var(--kit-row-rule);
+    .name { flex: 1 1 auto; min-width: 0; font-weight: 700; }
+    .special { color: var(--kit-muted); font-size: 12px; }
   }
-
-  // Monster NPC inventory (Task 3) — a weapon-attack row shares
-  // `.attack-row`'s grid above, but has far fewer cells (name/damage/type/
-  // roll button, no thac0Override/special/delete columns), so it opts out of
-  // that grid in favor of a simple flex row, matching the gear/spell rows
-  // below.
-  .gear-row, .spell-row, .weapon-attack {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-  }
+  .creature-stats .detail-field-wide { grid-column: 1 / -1; }
+  .creature-stats input[type="number"] { width: 48px; }
 }
