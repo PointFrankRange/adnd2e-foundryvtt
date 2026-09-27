@@ -97,5 +97,73 @@
   .casting.panel, .kit-casting { border-left: 3px solid var(--kit-maroon); padding-left: 6px; }
   .overspent, .warning { color: var(--kit-accent-ink); font-weight: 700; }
   .currency-inputs { display: flex; flex-wrap: wrap; gap: 6px; input { width: 60px; } }
-  .detail-fields { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 10px; }
+  .detail-fields {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 10px;
+    .detail-field { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .cap { font-size: 10px; text-transform: uppercase; color: var(--kit-muted); }
+    .val { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    input[type="text"] { font-weight: 700; }
+  }
+
+  // dev-world fix 9: the PC-only encumbrance gauge (the shared
+  // adnd2e.encumbrance-gauge partial is Character-NPC-only and untouched) —
+  // same shrinkable vitals-box look as .pc-vitals/the old .pc-saves boxes.
+  .pc-encumbrance .kit-body { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pc-encumbrance .kit-stat {
+    flex: 0 1 96px; min-width: 72px;
+    display: flex; flex-direction: column;
+    .kit-bar { justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; height: 20px; padding: 0 4px; }
+    .kit-big { height: 34px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 4px; font-size: 16px; line-height: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  }
+
+  // dev-world fix 9: the AC breakdown (Armor panel) reuses the same
+  // shrinkable .kit-stat box look instead of a bulleted <ul>.
+  .ac-breakdown { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 6px 0 0; padding: 0; }
+  .ac-breakdown .kit-stat {
+    flex: 0 1 76px; min-width: 56px;
+    display: flex; flex-direction: column;
+    .kit-bar { justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; height: 20px; padding: 0 4px; }
+    .kit-big { height: 34px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 4px; font-size: 16px; line-height: 1; }
+  }
+
+  // dev-world fix 9: a small kit-styled sub-heading for the leftover plain
+  // <h4> group headings (Features source-type groups, spell-level groups) —
+  // excluded from the generic h2/h3/h4 reset below so its own font-size/
+  // color/border-bottom aren't fought by that lower-specificity rule.
+  .kit-subhead { margin: 4px 0 2px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--kit-accent-ink); border-bottom: 1px solid var(--kit-row-rule); padding-bottom: 2px; }
+
+  // dev-world fix 9: a chip list for short, name-only lists (racial
+  // abilities) instead of the browser's default bulleted <ul>.
+  .kit-chips { display: flex; flex-wrap: wrap; gap: 4px 6px; list-style: none; margin: 0; padding: 0; }
+  .kit-chips li { background: var(--kit-tan); color: var(--kit-tan-ink); border-radius: 10px; padding: 2px 8px; font-size: 12px; }
+  .kit-chips li.placeholder { background: none; color: var(--kit-muted); font-style: italic; padding: 0; }
+
+  // dev-world fix 9: an editor's field area (`.kit-body` already gets
+  // var(--kit-field-bg) from the shared `.kit-panel > .kit-body` rule in
+  // _kit.scss) needs a minimum height so an empty <prose-mirror> doesn't read
+  // as a void, and its ProseMirror toolbar needs kit tokens so it reads in
+  // both light and dark modes instead of Foundry's own default chrome.
+  .pc-editor prose-mirror {
+    display: block;
+    min-height: 120px;
+    .editor-content { min-height: 120px; padding: 4px 6px; }
+    .editor-menu { background: var(--kit-expand-bg); border-bottom: 1px solid var(--kit-row-rule); }
+  }
+
+  // dev-world fix 9: the shared adnd2e.slot-table partial (spells.hbs) is
+  // untouched — styled here, scoped to the Spells tab, instead.
+  .tab.spells .slot-table {
+    width: 100%; border-collapse: collapse; margin-bottom: 6px;
+    th, td { padding: 2px 6px; text-align: center; border: 1px solid var(--kit-row-rule); }
+    thead th { background: var(--kit-tan); color: var(--kit-tan-ink); font-size: 11px; font-weight: 700; }
+    tbody td { background: var(--kit-field-bg); color: var(--kit-field-ink); }
+  }
+
+  // dev-world fix 9: a defensive reset for any OTHER plain heading inside a
+  // tab that would otherwise inherit Foundry's large default h2/h3/h4 font —
+  // :not(.kit-subhead) so it never fights that class's own, more specific
+  // treatment above.
+  .tab h2:not(.kit-subhead), .tab h3:not(.kit-subhead), .tab h4:not(.kit-subhead) {
+    font-family: inherit; font-size: 13px; font-weight: 700; margin: 4px 0 2px; color: var(--kit-ink);
+  }
 }

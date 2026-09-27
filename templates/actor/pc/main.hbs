@@ -73,8 +73,8 @@
       {{else}}
         <p class="kit-empty">{{localize 'ADND2E.sheet.combat.noArmor'}}</p>
       {{/each}}
-      <ul class="derived">
-        {{#each adnd2e.combat.acBreakdown as |row|}}<li><span class="label">{{localize row.label}}</span> <span class="value">{{row.value}}</span></li>{{/each}}
+      <ul class="ac-breakdown">
+        {{#each adnd2e.combat.acBreakdown as |row|}}<li class="kit-stat"><div class="kit-bar">{{localize row.label}}</div><span class="kit-big">{{row.value}}</span></li>{{/each}}
       </ul>
     </div>
   </section>

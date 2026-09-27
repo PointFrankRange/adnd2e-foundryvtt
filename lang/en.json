@@ -254,6 +254,7 @@
         "favorite": "Toggle favorite",
         "filter": "Filter…",
         "attacks": "Attacks",
+        "details": "Details",
         "sections": { "weapons": "Weapons", "armor": "Armor", "equipment": "Equipment" },
         "cols": { "name": "Name", "damage": "Dmg S-M / L", "speed": "Spd", "qty": "Qty", "weight": "Wt", "location": "Location", "equipped": "Equipped", "identified": "Identified" },
         "summary": {

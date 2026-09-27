@@ -13,6 +13,7 @@ const PARTIALS = [
   "actor/pc/partials/pc-ability.hbs",
   "actor/pc/partials/pc-class-row.hbs",
   "actor/pc/partials/pc-item-table.hbs",
+  "actor/pc/partials/pc-encumbrance.hbs",
 ];
 
 /**

@@ -647,6 +647,13 @@ describe("lang/en.json — dev-world fix 3 (saves strip short labels)", () => {
   });
 });
 
+describe("lang/en.json — dev-world fix 9 (journal Details panel)", () => {
+  it("resolves ADND2E.sheet.kit.details", () => {
+    expect(typeof resolve("ADND2E.sheet.kit.details")).toBe("string");
+    expect((resolve("ADND2E.sheet.kit.details") as string).length).toBeGreaterThan(0);
+  });
+});
+
 describe("lang/en.json — sheet redesign R1 (PC sheet kit)", () => {
   it("resolves the new PC-tab labels", () => {
     for (const key of ["ADND2E.sheet.tabs.proficiencies", "ADND2E.sheet.tabs.journal"]) {

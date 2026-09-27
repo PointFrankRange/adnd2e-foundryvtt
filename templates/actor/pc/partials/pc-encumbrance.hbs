@@ -1,0 +1,10 @@
+<section class="kit-panel pc-encumbrance">
+  <div class="kit-bar">{{localize 'ADND2E.sheet.inventory.encumbrance'}}</div>
+  <div class="kit-body">
+    <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.inventory.carried'}}</div><span class="kit-big">{{gauge.carried}}</span></div>
+    <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.inventory.category'}}</div><span class="kit-big">{{localize gauge.categoryLabel}}</span></div>
+    <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.movement'}}</div><span class="kit-big">{{gauge.movementRate}} / {{gauge.baseMove}}</span></div>
+    <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.inventory.penaltyAttack'}}</div><span class="kit-big">{{adnd2eSigned gauge.penalty.attackRoll}}</span></div>
+    <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.inventory.penaltyAc'}}</div><span class="kit-big">{{adnd2eSigned gauge.penalty.armorClass}}</span></div>
+  </div>
+</section>

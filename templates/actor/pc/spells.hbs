@@ -33,7 +33,7 @@
     <div class="kit-body">
       {{#each adnd2e.spells.known as |grp|}}
         <div class="spell-level-group">
-          <h4>{{localize 'ADND2E.sheet.spells.level' level=grp.level}}</h4>
+          <h4 class="kit-subhead">{{localize 'ADND2E.sheet.spells.level' level=grp.level}}</h4>
           {{#each grp.items as |s|}}
             <div class="spell-row{{#if s.expended}} expended{{/if}}" data-item-id="{{s.id}}">
               <span class="name">

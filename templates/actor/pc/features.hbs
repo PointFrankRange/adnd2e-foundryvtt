@@ -5,7 +5,7 @@
     <div class="kit-body">
       {{#each adnd2e.features.groups as |grp|}}
         <div class="feature-group" data-source-type="{{grp.sourceType}}">
-          <h4>{{localize grp.sourceTypeLabel}}</h4>
+          <h4 class="kit-subhead">{{localize grp.sourceTypeLabel}}</h4>
           {{#each grp.items as |f|}}
             <div class="feature-row" data-item-id="{{f.id}}">
               <span class="name">{{f.name}}</span>
@@ -59,7 +59,7 @@
   <section class="kit-panel">
     <div class="kit-bar">{{localize 'ADND2E.sheet.features.racial'}}</div>
     <div class="kit-body">
-      <ul>
+      <ul class="kit-chips">
         {{#each adnd2e.features.racialAbilities as |ability|}}
           <li>{{ability}}</li>
         {{else}}
