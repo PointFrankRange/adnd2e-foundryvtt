@@ -5,7 +5,7 @@
     // content, which refuses to shrink below that content's width — this
     // lets the right column (and everything in it) actually shrink with
     // the window instead of overflowing.
-    grid-template-columns: 210px minmax(0, 1fr);
+    grid-template-columns: 230px minmax(0, 1fr);
     grid-template-rows: auto auto 1fr;
     gap: 0 10px;
     padding: 8px;
@@ -19,16 +19,22 @@
   .portrait { width: 100%; max-height: 220px; object-fit: cover; border: 2px solid var(--kit-maroon); cursor: pointer; }
 
   .kit-ability {
-    .kit-ability-body { display: flex; align-items: center; gap: 6px; background: var(--kit-field-bg); color: var(--kit-field-ink); border: 1px solid var(--kit-field-border); border-top: none; padding: 2px 6px; }
-    .kit-big { font-size: 18px; font-weight: 700; min-width: 28px; text-align: center; }
-    input[type="number"] { width: 48px; }
-    .exceptional { width: 44px; }
-    .racial { color: var(--kit-accent-ink); font-weight: 700; }
-    .kit-mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 2px; padding: 2px 0 4px; }
+    margin-bottom: 6px;
+    .kit-ability-grid { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 4px; padding: 3px 0 0; align-items: start; }
+    .kit-ability-score {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+      min-height: 56px; background: var(--kit-field-bg); color: var(--kit-field-ink);
+      border: 1px solid var(--kit-field-border); border-radius: 2px; padding: 2px;
+      .kit-big { font-size: 24px; font-weight: 700; line-height: 1; }
+      input[type="number"] { width: 48px; text-align: center; font-size: 18px; font-weight: 700; }
+      .effective, .exceptional, .racial { font-size: 11px; line-height: 1.1; }
+      .racial { color: var(--kit-accent-ink); font-weight: 700; }
+    }
+    .kit-mods { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; padding: 0; }
     .kit-mod { display: flex; flex-direction: column; align-items: center; background: var(--kit-field-bg); color: var(--kit-field-ink); border: 1px solid var(--kit-row-rule); border-radius: 2px; padding: 1px 2px; cursor: help; }
-    .kit-mod-cap { font-size: 9px; line-height: 1.1; text-transform: uppercase; color: var(--kit-muted); white-space: nowrap; }
+    .kit-mod-cap { font-size: 9px; line-height: 1.1; text-transform: uppercase; color: var(--kit-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .kit-mod-val { font-size: 12px; font-weight: 700; line-height: 1.2; }
-    .sub-scores { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px; input { width: 40px; } }
+    .sub-scores { font-size: 11px; color: var(--kit-muted); padding: 2px 2px 0; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; input { width: 40px; } }
   }
 
   .pc-header {

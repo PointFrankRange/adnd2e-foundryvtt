@@ -1,22 +1,24 @@
 <div class="kit-ability" data-ability="{{row.key}}">
   <div class="kit-bar">{{localize row.label}}</div>
-  <div class="kit-ability-body">
-    {{#if unlocked}}
-      <input type="number" name="system.abilities.{{row.key}}.score" value="{{row.score}}"{{#if row.scoreLocked}} disabled title="{{localize 'ADND2E.sheet.subAbilities.mainLocked'}}"{{/if}}>
-      <span class="effective">= {{row.effectiveScore}}</span>
-    {{else}}
-      <span class="kit-big">{{row.effectiveScore}}</span>
-    {{/if}}
-    {{#if row.racialDelta}}<span class="racial">{{adnd2eSigned row.racialDelta}}</span>{{/if}}
-    {{#if row.showExceptional}}
+  <div class="kit-ability-grid">
+    <div class="kit-ability-score">
       {{#if unlocked}}
-        <input type="number" class="exceptional" name="system.abilities.str.exceptional" value="{{row.exceptional}}" placeholder="%">
-      {{else if row.exceptional}}
-        <span class="exceptional">/{{row.exceptional}}</span>
+        <input type="number" name="system.abilities.{{row.key}}.score" value="{{row.score}}"{{#if row.scoreLocked}} disabled title="{{localize 'ADND2E.sheet.subAbilities.mainLocked'}}"{{/if}}>
+        <span class="effective">= {{row.effectiveScore}}</span>
+      {{else}}
+        <span class="kit-big">{{row.effectiveScore}}</span>
       {{/if}}
-    {{/if}}
+      {{#if row.racialDelta}}<span class="racial">{{adnd2eSigned row.racialDelta}}</span>{{/if}}
+      {{#if row.showExceptional}}
+        {{#if unlocked}}
+          <input type="number" class="exceptional" name="system.abilities.str.exceptional" value="{{row.exceptional}}" placeholder="%">
+        {{else if row.exceptional}}
+          <span class="exceptional">/{{row.exceptional}}</span>
+        {{/if}}
+      {{/if}}
+    </div>
+    <div class="kit-mods">{{#each row.mods as |m|}}<div class="kit-mod" title="{{localize m.longKey}}"><span class="kit-mod-cap">{{localize m.shortKey}}</span><span class="kit-mod-val">{{m.display}}</span></div>{{/each}}</div>
   </div>
-  <div class="kit-mods">{{#each row.mods as |m|}}<div class="kit-mod" title="{{localize m.longKey}}"><span class="kit-mod-cap">{{localize m.shortKey}}</span><span class="kit-mod-val">{{m.display}}</span></div>{{/each}}</div>
   {{#if row.subs}}
     <div class="sub-scores">
       {{#if unlocked}}
