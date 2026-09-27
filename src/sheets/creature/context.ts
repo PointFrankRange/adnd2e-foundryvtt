@@ -1,11 +1,17 @@
 import type { CreatureSheetContext, CreatureSheetInput, CreatureSpellView } from "./context-types";
 import type { SaveCategory } from "../../core/types";
 import { monsterWeaponAttackType, monsterWeaponDamageLabel } from "../../combat/monster-gear";
+import { lockState } from "../kit/lock";
 
 const SAVE_CATEGORIES: readonly SaveCategory[] = ["ppd", "rsw", "pp", "bw", "spell"];
 const MOVEMENT_LABELS: Record<"burrow" | "climb" | "fly" | "swim", string> = {
   burrow: "burrow", climb: "climb", fly: "fly", swim: "swim",
 };
+const GEAR_SECTIONS = [
+  ["weapons", "weapon"],
+  ["armor", "armor"],
+  ["equipment", "equipment"],
+] as const;
 
 /** "12, climb 3, fly 18 (C)" — land is always shown first (unlabeled, even if 0),
  *  every other mode is omitted when it's 0. `flyManeuverability` (a bare class
@@ -34,6 +40,10 @@ function buildSpellGroups(spells: readonly CreatureSpellView[]): CreatureSheetCo
  *  no Foundry calls) but is a wholly separate function, since CreatureModel's
  *  schema shares nothing with CharacterModel's. */
 export function buildCreatureSheetContext(input: CreatureSheetInput): CreatureSheetContext {
+  const gear = (input.gear ?? []).map((g) => ({
+    id: g.id, name: g.name, img: g.img, type: g.type, quantity: g.quantity, equipped: g.equipped,
+  }));
+
   return {
     identity: {
       name: input.name,
@@ -67,8 +77,12 @@ export function buildCreatureSheetContext(input: CreatureSheetInput): CreatureSh
       description: input.details.description,
     },
     perms: { ...input.perms },
-    gear: (input.gear ?? []).map((g) => ({
-      id: g.id, name: g.name, img: g.img, type: g.type, quantity: g.quantity, equipped: g.equipped,
+    lock: lockState(input.perms.editable, input.unlocked === true),
+    gear,
+    gearSections: GEAR_SECTIONS.map(([id, type]) => ({
+      id,
+      labelKey: `ADND2E.sheet.kit.sections.${id}`,
+      rows: gear.filter((g) => g.type === type),
     })),
     weaponAttacks: (input.gear ?? [])
       .filter((g) => g.type === "weapon" && g.equipped && g.weapon)

@@ -172,3 +172,30 @@ describe("buildCreatureSheetContext — gear, weapon attacks, spells", () => {
     ]);
   });
 });
+
+describe("buildCreatureSheetContext — sheet redesign R3", () => {
+  const gear: CreatureGearView[] = [
+    { id: "w1", name: "Spear", img: "", type: "weapon", quantity: 1, equipped: true, weapon: { category: "melee", magicBonus: 0, damageVsSM: "1d6", damageVsL: "1d8" } },
+    { id: "a1", name: "Hide", img: "", type: "armor", quantity: 1, equipped: true },
+    { id: "e1", name: "Sack", img: "", type: "equipment", quantity: 2, equipped: false },
+    { id: "e2", name: "Coins", img: "", type: "equipment", quantity: 1, equipped: false },
+  ];
+
+  it("is locked by default; only an editor can unlock", () => {
+    expect(buildCreatureSheetContext(input()).lock).toEqual({ canUnlock: true, unlocked: false });
+    expect(buildCreatureSheetContext(input({ unlocked: true })).lock).toEqual({ canUnlock: true, unlocked: true });
+    const viewer = input({ unlocked: true, perms: { isGM: false, isOwner: false, editable: false } });
+    expect(buildCreatureSheetContext(viewer).lock).toEqual({ canUnlock: false, unlocked: false });
+  });
+
+  it("groups gear into weapons / armor / equipment sections in that order, keeping empty sections", () => {
+    const c = buildCreatureSheetContext(input({ gear }));
+    expect(c.gearSections.map((s) => [s.id, s.labelKey, s.rows.map((r) => r.id)])).toEqual([
+      ["weapons", "ADND2E.sheet.kit.sections.weapons", ["w1"]],
+      ["armor", "ADND2E.sheet.kit.sections.armor", ["a1"]],
+      ["equipment", "ADND2E.sheet.kit.sections.equipment", ["e1", "e2"]],
+    ]);
+    const empty = buildCreatureSheetContext(input());
+    expect(empty.gearSections.map((s) => [s.id, s.rows.length])).toEqual([["weapons", 0], ["armor", 0], ["equipment", 0]]);
+  });
+});
