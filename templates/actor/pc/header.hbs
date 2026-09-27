@@ -21,37 +21,35 @@
       <span class="alignment">{{localize (lookup alignments adnd2e.identity.alignmentValue)}}</span>
     {{/if}}
   </div>
-  <div class="pc-header-row">
-    <div class="pc-vitals">
-      <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.hp'}}</div>
-        <span class="kit-big"><input type="number" name="system.attributes.hp.value" value="{{adnd2e.vitals.hp.value}}"> / {{adnd2e.vitals.hp.max}}</span></div>
-      <div class="kit-stat"><div class="kit-bar">+ HP</div>
-        <span class="kit-big"><input type="number" name="system.attributes.hp.temp" value="{{adnd2e.vitals.hp.temp}}"></span></div>
-      <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.ac'}}</div><span class="kit-big">{{adnd2e.vitals.ac.normal}}</span></div>
-      <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.thac0'}}</div><span class="kit-big">{{adnd2e.vitals.thac0.melee}}</span></div>
-      <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.movement'}}</div><span class="kit-big" title="{{localize adnd2e.vitals.movement.encumbranceCategoryLabel}}">{{adnd2e.vitals.movement.current}}</span></div>
-      {{#if adnd2e.vitals.casting}}<span class="casting-badge" title="{{localize 'ADND2E.sheet.casting.badgeHint'}}">{{localize 'ADND2E.sheet.casting.badge'}}</span>{{/if}}
+  <section class="kit-panel pc-classes">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.sections.classes'}}
+      <button type="button" class="kit-small" data-action="awardXp" style="margin-left:auto">{{localize 'ADND2E.sheet.xp.award'}}</button>
     </div>
-
-    <section class="kit-panel pc-classes">
-      <div class="kit-bar">{{localize 'ADND2E.sheet.sections.classes'}}
-        <button type="button" class="kit-small" data-action="awardXp" style="margin-left:auto">{{localize 'ADND2E.sheet.xp.award'}}</button>
-      </div>
-      <div class="kit-body">
-        {{#each adnd2e.classes as |c|}}
-          {{> adnd2e.pc-class-row c=c unlocked=@root.adnd2e.lock.unlocked}}
-        {{else}}
-          <p class="kit-empty">{{localize 'ADND2E.sheet.sections.classes'}}</p>
-        {{/each}}
-        {{#if adnd2e.lock.unlocked}}
-          {{#if adnd2e.dualClassToggle.available}}
-            <button type="button" data-action="toggleDualClass">{{localize 'ADND2E.sheet.dualClass.toggle'}}</button>
-          {{else if adnd2e.dualClassToggle.on}}
-            <button type="button" data-action="toggleDualClass">{{localize 'ADND2E.sheet.dualClass.clear'}}</button>
-          {{/if}}
+    <div class="kit-body">
+      {{#each adnd2e.classes as |c|}}
+        {{> adnd2e.pc-class-row c=c unlocked=@root.adnd2e.lock.unlocked}}
+      {{else}}
+        <p class="kit-empty">{{localize 'ADND2E.sheet.sections.classes'}}</p>
+      {{/each}}
+      {{#if adnd2e.lock.unlocked}}
+        {{#if adnd2e.dualClassToggle.available}}
+          <button type="button" data-action="toggleDualClass">{{localize 'ADND2E.sheet.dualClass.toggle'}}</button>
+        {{else if adnd2e.dualClassToggle.on}}
+          <button type="button" data-action="toggleDualClass">{{localize 'ADND2E.sheet.dualClass.clear'}}</button>
         {{/if}}
-      </div>
-    </section>
+      {{/if}}
+    </div>
+  </section>
+
+  <div class="pc-vitals">
+    <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.hp'}}</div>
+      <span class="kit-big"><input type="number" name="system.attributes.hp.value" value="{{adnd2e.vitals.hp.value}}"> / {{adnd2e.vitals.hp.max}}</span></div>
+    <div class="kit-stat"><div class="kit-bar">+ HP</div>
+      <span class="kit-big"><input type="number" name="system.attributes.hp.temp" value="{{adnd2e.vitals.hp.temp}}"></span></div>
+    <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.ac'}}</div><span class="kit-big">{{adnd2e.vitals.ac.normal}}</span></div>
+    <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.thac0'}}</div><span class="kit-big">{{adnd2e.vitals.thac0.melee}}</span></div>
+    <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.movement'}}</div><span class="kit-big" title="{{localize adnd2e.vitals.movement.encumbranceCategoryLabel}}">{{adnd2e.vitals.movement.current}}</span></div>
+    {{#if adnd2e.vitals.casting}}<span class="casting-badge" title="{{localize 'ADND2E.sheet.casting.badgeHint'}}">{{localize 'ADND2E.sheet.casting.badge'}}</span>{{/if}}
   </div>
 
   <div class="pc-saves">

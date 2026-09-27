@@ -32,10 +32,8 @@
     .pc-name { flex: 1; font-family: Georgia, "Times New Roman", serif; font-size: 22px; font-weight: 700; color: var(--kit-accent-ink); margin: 0; border: none; background: transparent; }
     input.pc-name { background: var(--kit-field-bg); border: 1px solid var(--kit-field-border); }
     .pc-class-line { color: var(--kit-muted); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 2px 0 6px; }
-    .pc-header-row { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
     .pc-vitals {
-      flex: 0 0 auto;
-      display: flex; gap: 6px; align-items: stretch;
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; margin-bottom: 0;
       .kit-stat {
         width: 76px;
         display: flex; flex-direction: column;
@@ -53,11 +51,10 @@
         }
       }
     }
-    // min-width (not a media query): this is the sheet WINDOW's own width,
-    // which can be narrow inside a wide browser — a media query would check
-    // the browser viewport instead and never trigger. Flexbox wraps
-    // `.pc-header-row` on its own once `.pc-classes` can't fit at 260px.
-    .pc-classes { flex: 1 1 auto; min-width: 260px; margin-bottom: 0; .class-row { padding: 2px 6px; } }
+    // fixed 740px: fits the longest class name at max level without
+    // wrapping. `max-width: 100%` keeps it inside narrow windows without a
+    // viewport media query (which would check the browser, not the sheet).
+    .pc-classes { width: 740px; max-width: 100%; flex: none; margin: 0 0 6px; .class-row { padding: 2px 6px; } }
     .casting-badge { font-weight: 700; color: var(--kit-accent-ink); }
 
     .pc-saves { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
