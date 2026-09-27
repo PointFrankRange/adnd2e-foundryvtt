@@ -603,3 +603,94 @@ describe("lang/en.json — DM-run actor type labels", () => {
     expect(resolve("ADND2E.sheet.creatureTitle")).toBe("Monster NPC");
   });
 });
+
+describe("lang/en.json — dev-world fix 1 (labelled ability-modifier mini-boxes)", () => {
+  // Every field of StrengthModifiers/DexterityModifiers/.../CharismaModifiers
+  // (src/core/types.ts) needs a short + long caption. reactionAdj appears on
+  // both DexterityModifiers and CharismaModifiers — that's the SAME lang key
+  // resolved twice below, which is fine (the brief calls this out explicitly:
+  // "one entry").
+  const derivedModsKeys = [
+    // StrengthModifiers
+    "hitProb", "damageAdj", "weightAllowance", "maxPress", "openDoors", "openDoorsMagical", "bendBarsLiftGates",
+    // DexterityModifiers
+    "reactionAdj", "missileAttackAdj", "defensiveAdj",
+    // ConstitutionModifiers
+    "hpAdjustment", "systemShock", "resurrectionSurvival", "poisonSave", "regeneration", "hitDieMinimumRoll",
+    // IntelligenceModifiers
+    "bonusLanguages", "maxSpellLevel", "learnSpellChance", "maxSpellsPerLevel", "illusionImmunityLevel",
+    // WisdomModifiers
+    "magicalDefenseAdj", "bonusPriestSpells", "spellFailureChance", "spellImmunityFromScore",
+    // CharismaModifiers
+    "maxHenchmen", "loyaltyBase", "reactionAdj",
+  ];
+
+  it("resolves a short + long caption for every derived.mods key (56 keys)", () => {
+    expect(derivedModsKeys).toHaveLength(28);
+    for (const key of derivedModsKeys) {
+      for (const leaf of ["short", "long"]) {
+        const lookupKey = `ADND2E.sheet.abilityMods.${key}.${leaf}`;
+        expect(typeof resolve(lookupKey), lookupKey).toBe("string");
+        expect((resolve(lookupKey) as string).length, lookupKey).toBeGreaterThan(0);
+      }
+    }
+  });
+});
+
+describe("lang/en.json — dev-world fix 3 (saves strip short labels)", () => {
+  it("resolves every ADND2E.sheet.saves.short.* key for the five save keys", () => {
+    for (const key of ["ppd", "rsw", "pp", "bw", "spell"]) {
+      const lookupKey = `ADND2E.sheet.saves.short.${key}`;
+      expect(typeof resolve(lookupKey), lookupKey).toBe("string");
+      expect((resolve(lookupKey) as string).length, lookupKey).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("lang/en.json — dev-world fix 9 (journal Details panel)", () => {
+  it("resolves ADND2E.sheet.kit.details", () => {
+    expect(typeof resolve("ADND2E.sheet.kit.details")).toBe("string");
+    expect((resolve("ADND2E.sheet.kit.details") as string).length).toBeGreaterThan(0);
+  });
+});
+
+describe("lang/en.json — sheet redesign R1 (PC sheet kit)", () => {
+  it("resolves the new PC-tab labels", () => {
+    for (const key of ["ADND2E.sheet.tabs.proficiencies", "ADND2E.sheet.tabs.journal"]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+
+  it("resolves every ADND2E.sheet.kit.* key", () => {
+    for (const key of [
+      "ADND2E.sheet.kit.lock",
+      "ADND2E.sheet.kit.unlock",
+      "ADND2E.sheet.kit.favorites",
+      "ADND2E.sheet.kit.noFavorites",
+      "ADND2E.sheet.kit.favorite",
+      "ADND2E.sheet.kit.filter",
+      "ADND2E.sheet.kit.attacks",
+      "ADND2E.sheet.kit.sections.weapons",
+      "ADND2E.sheet.kit.sections.armor",
+      "ADND2E.sheet.kit.sections.equipment",
+      "ADND2E.sheet.kit.cols.name",
+      "ADND2E.sheet.kit.cols.damage",
+      "ADND2E.sheet.kit.cols.speed",
+      "ADND2E.sheet.kit.cols.qty",
+      "ADND2E.sheet.kit.cols.weight",
+      "ADND2E.sheet.kit.cols.location",
+      "ADND2E.sheet.kit.cols.equipped",
+      "ADND2E.sheet.kit.cols.identified",
+      "ADND2E.sheet.kit.summary.range",
+      "ADND2E.sheet.kit.summary.category",
+      "ADND2E.sheet.kit.summary.damageType",
+      "ADND2E.sheet.kit.summary.baseAc",
+      "ADND2E.sheet.kit.summary.shieldBonus",
+      "ADND2E.sheet.kit.summary.armorType",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

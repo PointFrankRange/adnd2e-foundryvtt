@@ -6,6 +6,9 @@ import type { OptionalRules } from "../../core/options";
 import type { SubAbilityId } from "../../core/abilities/sub-abilities";
 import type { CharacterPointLedger } from "../../core/skills/character-points";
 import type { RawTraitEffect } from "../../core/skills/traits";
+import type { FavoriteRow } from "../kit/favorites";
+import type { LockState } from "../kit/lock";
+import type { InventorySection } from "../kit/inventory-sections";
 
 /* ---------- input (assembled by sheet.ts from plain data) ---------- */
 
@@ -42,6 +45,10 @@ export interface CharacterSheetInput {
   subAbilityUi?: boolean;
   /** Sub-project 9a: the in-progress cast; absent/null when idle or the rule is off */
   castingStatus?: CastingStatusInput | null;
+  /** sheet redesign R1: the viewer's unlock state (never persisted) */
+  unlocked?: boolean;
+  /** raw flags.adnd2e.favorites */
+  favorites?: unknown;
 }
 
 /** Sub-project 9a: the in-progress cast, assembled by sheet.ts ONLY while the casting-time rule is on. */
@@ -197,6 +204,8 @@ export interface ThiefSkillRow {
    *  the skill is computable at any level but not usable yet. Bards have no
    *  such prerequisite. Always true for every other skill. */
   usable: boolean;
+  /** sheet redesign R1: true when this skill is in the actor's favorites list */
+  favorite: boolean;
 }
 export interface SpellItemView {
   id: string; name: string; img: string; casterClass: string; level: number;
@@ -211,6 +220,8 @@ export interface SpellItemView {
   /** wizard-only: true when this spell is NOT yet in the spellbook and
    *  core/magic/spellbook.ts's canLearnSpell allows attempting to learn it */
   canLearn: boolean;
+  /** sheet redesign R1: true when this spell is in the actor's favorites list */
+  favorite: boolean;
 }
 export interface FeatureItemView {
   id: string; name: string; img: string;
@@ -255,7 +266,15 @@ export interface AbilityRow {
   key: string; label: string;
   score: number; racialDelta: number; effectiveScore: number;
   exceptional: number | null; showExceptional: boolean;
-  mods: { label: string; value: string }[];
+  mods: {
+    label: string; value: string;
+    /** sheet redesign R1 dev-world fix 1: the labelled mini-box's short caption i18n key */
+    shortKey: string;
+    /** sheet redesign R1 dev-world fix 1: the mini-box's hover-title (long name) i18n key */
+    longKey: string;
+    /** sheet redesign R1 dev-world fix 1: the formatted value (formatAbilityMod) */
+    display: string;
+  }[];
   /** true while sub-scores derive the main score — the main input renders `disabled` */
   scoreLocked: boolean;
   /** the two sub-score cells, or null when the sub-score UI is off */
@@ -263,6 +282,8 @@ export interface AbilityRow {
 }
 export interface SaveRow {
   key: string; label: string; target: number; rollModifier: number; effectiveTarget: number;
+  /** sheet redesign R1 dev-world fix 3: the header saves strip's short caption i18n key */
+  shortLabel: string;
 }
 export interface ClassRow {
   id: string; name: string; chassisId: string; level: number;
@@ -312,9 +333,11 @@ export interface CharacterSheetContext {
     encumbrance: EncumbranceGauge;
     currency: { pp: number; gp: number; ep: number; sp: number; cp: number };
     locationOptions: { value: string; label: string }[];
+    /** sheet redesign R1: the inventory tab's item-table sections */
+    sections: InventorySection[];
   };
   combat: {
-    weapons: { id: string; name: string; equipped: boolean; toHitNote: string; damageNote: string; speedFactor: number; range: string | null; canBackstab: boolean }[];
+    weapons: { id: string; name: string; equipped: boolean; toHitNote: string; damageNote: string; speedFactor: number; range: string | null; canBackstab: boolean; favorite: boolean }[];
     acBreakdown: { label: string; value: number }[];
     armor: { id: string; name: string; equipped: boolean; isShield: boolean; baseAc: number }[];
     maneuverOptions: { value: string; label: string }[];
@@ -363,4 +386,8 @@ export interface CharacterSheetContext {
   };
   biography: { detailFields: string[]; showGmNotes: boolean };
   tabs: TabDescriptor[];
+  /** sheet redesign R1: the sheet's edit lock */
+  lock: LockState;
+  /** sheet redesign R1: the Favorites panel */
+  favorites: { canFavorite: boolean; rows: FavoriteRow[] };
 }

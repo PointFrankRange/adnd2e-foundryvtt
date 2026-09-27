@@ -1,0 +1,19 @@
+<section class="tab inventory{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+  <input type="text" class="kit-filter" data-kit-filter="inventory" placeholder="{{localize 'ADND2E.sheet.kit.filter'}}">
+  <div data-kit-filter-scope="inventory">
+    {{#each adnd2e.inventory.sections as |section|}}
+      {{> adnd2e.pc-item-table section=section}}
+    {{/each}}
+  </div>
+  {{> adnd2e.pc-encumbrance gauge=adnd2e.inventory.encumbrance}}
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.inventory.currency'}}</div>
+    <div class="kit-body currency-inputs">
+      <label>PP <input type="number" min="0" name="system.currency.pp" value="{{adnd2e.inventory.currency.pp}}"></label>
+      <label>GP <input type="number" min="0" name="system.currency.gp" value="{{adnd2e.inventory.currency.gp}}"></label>
+      <label>EP <input type="number" min="0" name="system.currency.ep" value="{{adnd2e.inventory.currency.ep}}"></label>
+      <label>SP <input type="number" min="0" name="system.currency.sp" value="{{adnd2e.inventory.currency.sp}}"></label>
+      <label>CP <input type="number" min="0" name="system.currency.cp" value="{{adnd2e.inventory.currency.cp}}"></label>
+    </div>
+  </section>
+</section>

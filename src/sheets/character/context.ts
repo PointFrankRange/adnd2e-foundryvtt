@@ -34,6 +34,10 @@ import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { canMemorizePriestSpell } from "../../magic/priest-sphere-access";
 import { groupInventory } from "./grouping";
 import { xpToNext } from "./xp";
+import { buildFavoriteRows, isFavorite, normalizeFavorites, type FavoriteKind } from "../kit/favorites";
+import { lockState } from "../kit/lock";
+import { buildInventorySections } from "../kit/inventory-sections";
+import { formatAbilityMod } from "../kit/ability-mods";
 
 /* ---------------------------------------------------------------------------
  * `buildCharacterSheetContext` — the pure PC-sheet render-context builder.
@@ -46,6 +50,10 @@ import { xpToNext } from "./xp";
  * ------------------------------------------------------------------------- */
 
 type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
+/** sheet redesign R1: checks whether a (kind, id) pair is in the actor's
+ *  favorites list — threaded into every builder whose rows carry a
+ *  `favorite` flag. */
+type FavCheck = (kind: FavoriteKind, id: string) => boolean;
 
 const ABILITY_KEYS: readonly AbilityKey[] = ["str", "dex", "con", "int", "wis", "cha"];
 const SAVE_KEYS = ["ppd", "rsw", "pp", "bw", "spell"] as const;
@@ -60,14 +68,17 @@ const DETAIL_FIELDS: readonly string[] = [
   "kit",
 ];
 
+// sheet redesign R1: the six PC-sheet tabs — must match sheet.ts's static TABS
+// (id + icon) exactly; the NPC/creature sheets don't read `adnd2e.tabs` (they
+// use core ApplicationV2 tab navigation off their own static TABS), so this
+// list is PC-only.
 const TABS_DEF: readonly TabDescriptor[] = [
   { id: "main", label: "ADND2E.sheet.tabs.main", icon: "fa-solid fa-user" },
-  { id: "combat", label: "ADND2E.sheet.tabs.combat", icon: "fa-solid fa-shield-halved" },
   { id: "inventory", label: "ADND2E.sheet.tabs.inventory", icon: "fa-solid fa-box-open" },
-  { id: "skills", label: "ADND2E.sheet.tabs.skills", icon: "fa-solid fa-hand-fist" },
+  { id: "proficiencies", label: "ADND2E.sheet.tabs.proficiencies", icon: "fa-solid fa-hand-fist" },
   { id: "spells", label: "ADND2E.sheet.tabs.spells", icon: "fa-solid fa-wand-sparkles" },
   { id: "features", label: "ADND2E.sheet.tabs.features", icon: "fa-solid fa-star" },
-  { id: "biography", label: "ADND2E.sheet.tabs.biography", icon: "fa-solid fa-book" },
+  { id: "journal", label: "ADND2E.sheet.tabs.journal", icon: "fa-solid fa-book" },
 ];
 
 /** Shape of `input.source._source.system` that the builder actually touches. */
@@ -152,6 +163,12 @@ function buildAbilities(input: CharacterSheetInput): AbilityRow[] {
     const mods = Object.entries(derived.mods).map(([k, v]) => ({
       label: humanize(k),
       value: v == null ? "—" : String(v),
+      // sheet redesign R1 dev-world fix 1: additive fields for the Roll20-style
+      // labelled mini-boxes — `label`/`value` above stay byte-identical for the
+      // Character NPC sheet's old ability-row.hbs partial.
+      shortKey: `ADND2E.sheet.abilityMods.${k}.short`,
+      longKey: `ADND2E.sheet.abilityMods.${k}.long`,
+      display: formatAbilityMod(k, v),
     }));
     const [idA, idB] = SUB_ABILITIES[key];
     return {
@@ -199,6 +216,9 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
       target: s.target,
       rollModifier: s.rollModifier,
       effectiveTarget: s.effectiveTarget,
+      // sheet redesign R1 dev-world fix 3: additive — `label` above stays
+      // unchanged for the Character NPC sheet's old save-row.hbs partial.
+      shortLabel: `ADND2E.sheet.saves.short.${key}`,
     };
   });
   return {
@@ -249,7 +269,7 @@ function buildDualClassToggle(input: CharacterSheetInput): { available: boolean;
 
 /* ---------- inventory ---------- */
 
-function buildInventory(input: CharacterSheetInput): CharacterSheetContext["inventory"] {
+function buildInventory(input: CharacterSheetInput, fav: FavCheck): CharacterSheetContext["inventory"] {
   const src = input.source as unknown as SourceView;
   const { containers, loose } = groupInventory(input.physicalItems);
   const enc = input.derived.attributes.encumbrance;
@@ -265,12 +285,13 @@ function buildInventory(input: CharacterSheetInput): CharacterSheetContext["inve
     { value: "", label: "ADND2E.sheet.inventory.noContainer" },
     ...containers.map((c) => ({ value: c.item.id, label: c.item.name })),
   ];
-  return { containers, loose, encumbrance, currency: src.system.currency, locationOptions };
+  const sections = buildInventorySections({ containers, loose }, (id) => fav("item", id));
+  return { containers, loose, encumbrance, currency: src.system.currency, locationOptions, sections };
 }
 
 /* ---------- combat ---------- */
 
-function buildCombat(input: CharacterSheetInput): CharacterSheetContext["combat"] {
+function buildCombat(input: CharacterSheetInput, fav: FavCheck): CharacterSheetContext["combat"] {
   const isThief = input.classItems.some((c) => c.chassisId === "thief");
   const weapons = input.physicalItems
     .filter((i) => i.type === "weapon")
@@ -285,6 +306,7 @@ function buildCombat(input: CharacterSheetInput): CharacterSheetContext["combat"
         speedFactor: w.speedFactor,
         range: w.range,
         canBackstab: isThief && canBackstab({ category: w.category, damageType: w.damageType }),
+        favorite: fav("item", i.id),
       };
     });
 
@@ -323,7 +345,7 @@ function buildCombat(input: CharacterSheetInput): CharacterSheetContext["combat"
 
 /* ---------- skills ---------- */
 
-function buildSkills(input: CharacterSheetInput): CharacterSheetContext["skills"] {
+function buildSkills(input: CharacterSheetInput, fav: FavCheck): CharacterSheetContext["skills"] {
   const p = input.derived.proficiencies;
   return {
     weapon: {
@@ -334,7 +356,7 @@ function buildSkills(input: CharacterSheetInput): CharacterSheetContext["skills"
       ...p.nonweapon,
       items: input.proficiencyItems.nonweapon.map((n) => buildNwpRow(n, input)),
     },
-    thief: buildThiefSkills(input),
+    thief: buildThiefSkills(input, fav),
   };
 }
 
@@ -352,7 +374,7 @@ function resolveWornArmorType(physicalItems: PhysicalItemView[]): ArmorType {
  *  it at Roll time; `canAllocate`/`canDeallocate` mirror the SAME
  *  eligibility `proficiency-actions.ts`'s allocate/deallocate actions
  *  independently re-check (the established duplicate-re-validation pattern). */
-function buildThiefSkills(input: CharacterSheetInput): CharacterSheetContext["skills"]["thief"] {
+function buildThiefSkills(input: CharacterSheetInput, fav: FavCheck): CharacterSheetContext["skills"]["thief"] {
   const thiefOrBardClass =
     input.classItems.find((c) => c.chassisId === "thief") ??
     input.classItems.find((c) => c.chassisId === "bard") ??
@@ -389,6 +411,7 @@ function buildThiefSkills(input: CharacterSheetInput): CharacterSheetContext["sk
       canAllocate: t.available > 0 && (!isThiefClass || allocated < perSkillCap),
       canDeallocate: allocated > 0,
       usable: !(skill === "read-languages" && isThiefClass && thiefOrBardClass!.level < 4),
+      favorite: fav("thiefSkill", skill),
     };
   });
 
@@ -465,7 +488,7 @@ function buildWeaponProfRow(
 
 /* ---------- spells ---------- */
 
-function buildSpells(input: CharacterSheetInput): CharacterSheetContext["spells"] {
+function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetContext["spells"] {
   const sc = input.derived.spellcasting;
   const school = sc.wizard.specialistSchool;
   const priestChassisId =
@@ -484,7 +507,7 @@ function buildSpells(input: CharacterSheetInput): CharacterSheetContext["spells"
     const learnCtx: LearnEligibilityContext = {
       int, specialistSchool, knownAtThisLevel, castableAtThisLevel, optionalRules: input.optionalRules,
     };
-    let items = levelItems.map((s) => buildSpellRow(s, sc, priestChassisId, sphereAccessOverride, learnCtx));
+    let items = levelItems.map((s) => buildSpellRow(s, sc, priestChassisId, sphereAccessOverride, learnCtx, fav));
     items = casting ? items.map((r) => ({ ...r, canCast: false })) : items;
     if (items.length > 0) known.push({ level, items });
   }
@@ -568,6 +591,7 @@ function buildSpellRow(
   priestChassisId: string | null,
   sphereAccessOverride: SphereName[] | null,
   learnCtx: LearnEligibilityContext,
+  fav: FavCheck,
 ): SpellItemView {
   const isWizard = item.casterClass === "wizard";
   const memorizedList = isWizard ? sc.wizard.memorized : sc.priest.memorized;
@@ -590,6 +614,7 @@ function buildSpellRow(
     canMemorize: !memorized && hasFreeSlot && eligible,
     canCast: memorized && !expended,
     canLearn: isWizard && !item.inSpellbook && canLearnForRow(item, learnCtx),
+    favorite: fav("spell", item.id),
   };
 }
 
@@ -710,6 +735,16 @@ function buildTraits(input: CharacterSheetInput): CharacterSheetContext["traits"
 /* ---------- entry point ---------- */
 
 export function buildCharacterSheetContext(input: CharacterSheetInput): CharacterSheetContext {
+  const favs = normalizeFavorites(input.favorites);
+  const fav: FavCheck = (kind, id) => isFavorite(favs, kind, id);
+
+  // Built first — the Favorites panel below needs their FINAL canCast/usable
+  // values (e.g. a memorized-and-not-expended spell, a currently-allocatable
+  // thief skill), not the raw item data.
+  const skills = buildSkills(input, fav);
+  const spells = buildSpells(input, fav);
+  const thiefArmorDisabled = skills.thief?.armorDisabled ?? false;
+
   return {
     identity: buildIdentity(input),
     abilities: buildAbilities(input),
@@ -717,10 +752,10 @@ export function buildCharacterSheetContext(input: CharacterSheetInput): Characte
     vitals: buildVitals(input),
     classes: buildClasses(input),
     dualClassToggle: buildDualClassToggle(input),
-    inventory: buildInventory(input),
-    combat: buildCombat(input),
-    skills: buildSkills(input),
-    spells: buildSpells(input),
+    inventory: buildInventory(input, fav),
+    combat: buildCombat(input, fav),
+    skills,
+    spells,
     features: buildFeatures(input),
     traits: buildTraits(input),
     biography: {
@@ -728,5 +763,16 @@ export function buildCharacterSheetContext(input: CharacterSheetInput): Characte
       showGmNotes: input.perms.isGM,
     },
     tabs: [...TABS_DEF],
+    lock: lockState(input.perms.editable, input.unlocked === true),
+    favorites: {
+      canFavorite: input.perms.isOwner,
+      rows: buildFavoriteRows(favs, {
+        items: input.physicalItems.map((i) => ({ id: i.id, name: i.name, img: i.img, type: i.type, equipped: i.equipped })),
+        spells: spells.known.flatMap((g) => g.items.map((i) => ({ id: i.id, name: i.name, img: i.img, canCast: i.canCast }))),
+        // worn armor disabling thief skills entirely (skills.thief.armorDisabled)
+        // must also disable an already-favorited thief skill's one-click button.
+        thiefSkills: (skills.thief?.items ?? []).map((t) => ({ ...t, usable: t.usable && !thiefArmorDisabled })),
+      }),
+    },
   };
 }

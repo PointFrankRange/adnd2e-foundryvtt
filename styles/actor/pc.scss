@@ -1,0 +1,175 @@
+.adnd2e.pc-sheet {
+  .window-content {
+    display: grid;
+    // minmax(0, 1fr): a plain 1fr has an automatic minimum sized to its
+    // content, which refuses to shrink below that content's width — this
+    // lets the right column (and everything in it) actually shrink with
+    // the window instead of overflowing.
+    grid-template-columns: 230px minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;
+    gap: 0 10px;
+    padding: 8px;
+    overflow: hidden;
+  }
+  .pc-left { grid-column: 1; grid-row: 1 / -1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .pc-header { grid-column: 2; grid-row: 1; }
+  .kit-tabs { grid-column: 2; grid-row: 2; }
+  .window-content > .tab { grid-column: 2; grid-row: 3; overflow-y: auto; }
+
+  .portrait { width: 100%; max-height: 220px; object-fit: cover; border: 2px solid var(--kit-maroon); cursor: pointer; }
+
+  .kit-ability {
+    margin-bottom: 6px;
+    .kit-ability-grid { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 4px; padding: 3px 0 0; align-items: start; }
+    .kit-ability-score {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+      min-height: 56px; background: var(--kit-field-bg); color: var(--kit-field-ink);
+      border: 1px solid var(--kit-field-border); border-radius: 2px; padding: 2px;
+      .kit-big { font-size: 24px; font-weight: 700; line-height: 1; }
+      input[type="number"] { width: 48px; text-align: center; font-size: 18px; font-weight: 700; }
+      .effective, .exceptional, .racial { font-size: 11px; line-height: 1.1; }
+      .racial { color: var(--kit-accent-ink); font-weight: 700; }
+    }
+    .kit-mods { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; padding: 0; }
+    .kit-mod { display: flex; flex-direction: column; align-items: center; background: var(--kit-field-bg); color: var(--kit-field-ink); border: 1px solid var(--kit-row-rule); border-radius: 2px; padding: 1px 2px; cursor: help; }
+    .kit-mod-cap { font-size: 9px; line-height: 1.1; text-transform: uppercase; color: var(--kit-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .kit-mod-val { font-size: 12px; font-weight: 700; line-height: 1.2; }
+    .sub-scores { font-size: 11px; color: var(--kit-muted); padding: 2px 2px 0; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; input { width: 40px; } }
+  }
+
+  .pc-header {
+    .pc-title-row { display: flex; align-items: center; gap: 8px; }
+    .pc-name { flex: 1; font-family: Georgia, "Times New Roman", serif; font-size: 22px; font-weight: 700; color: var(--kit-accent-ink); margin: 0; border: none; background: transparent; }
+    input.pc-name { background: var(--kit-field-bg); border: 1px solid var(--kit-field-border); }
+    .pc-class-line { color: var(--kit-muted); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 2px 0 6px; }
+    .pc-vitals {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch;
+      .kit-stat {
+        flex: 0 1 76px; min-width: 56px;
+        display: flex; flex-direction: column;
+        .kit-bar { justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; height: 20px; padding: 0 4px; }
+        .kit-big {
+          height: 34px; box-sizing: border-box;
+          display: flex; align-items: center; justify-content: center; gap: 2px;
+          padding: 0 4px; font-size: 18px; line-height: 1;
+          input[type="number"] {
+            border: none; background: transparent; color: inherit;
+            text-align: center; width: 3.2ch; min-width: 2.5ch; padding: 0;
+            height: 28px; line-height: 28px; font-size: 18px; font-weight: 700;
+            &:focus { outline: 2px solid var(--kit-accent-ink); }
+          }
+        }
+      }
+    }
+    // fixed 465px. `max-width: 100%` keeps it inside narrow windows without a
+    // viewport media query (which would check the browser, not the sheet).
+    .pc-classes { width: 465px; max-width: 100%; flex: none; margin: 0 0 6px; .class-row { padding: 2px 6px; } }
+    .casting-badge { font-weight: 700; color: var(--kit-accent-ink); }
+
+    .pc-top { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 16px; margin: 4px 0 10px; }
+    .pc-top-left { flex: 0 1 465px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    // the pc-top-left flex column's own `gap` now spaces Classes from
+    // Vitals, so .pc-classes's own bottom margin (set above, for when it
+    // stood alone) would stack on top of it — zero it out here instead of
+    // stacking a second, conflicting spacing rule.
+    .pc-top-left .pc-classes { margin: 0; }
+    .pc-saves-card { flex: 1 1 300px; min-width: 260px; max-width: 460px; margin: 0; }
+    .pc-saves-card .kit-body { padding: 2px 6px; }
+    .pc-save-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 2px 0; border-bottom: 1px solid var(--kit-row-rule); }
+    .pc-save-row:last-child { border-bottom: none; }
+    .pc-save-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pc-save-value { font-size: 16px; font-weight: 700; min-width: 2ch; text-align: right; }
+    .kit-save-roll { width: 24px; height: 24px; padding: 0; font-size: 12px; line-height: 24px; }
+  }
+
+  // dev-world fix 8: the Favorites panel had no styles at all, so every row's
+  // <img>/<span>/<button> children — all block-level by default — stacked one
+  // per line instead of reading as a single compact row.
+  .favorites .kit-body { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 2px 14px; }
+  .favorites .kit-empty { grid-column: 1 / -1; }
+  .favorite-row { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 2px 4px; border-bottom: 1px solid var(--kit-row-rule); }
+  .favorite-row img { width: 22px; height: 22px; flex: none; border: none; }
+  .favorite-row .name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .favorite-row .detail { flex: none; color: var(--kit-muted); font-size: 12px; }
+  .favorite-row .kit-roll { flex: none; width: 26px; height: 24px; padding: 0; line-height: 24px; }
+  .favorite-row .kit-star { flex: none; }
+
+  .weapon-row, .armor-row, .class-row, .prof-row, .spell-row, .feature-row, .trait-row {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 3px 6px; border-bottom: 1px solid var(--kit-row-rule);
+  }
+  .weapon-row select, .weapon-row input[type="checkbox"] { width: auto; flex: 0 0 auto; }
+  .weapon-row .maneuver-select { max-width: 180px; }
+  .expended { opacity: .6; }
+  .casting.panel, .kit-casting { border-left: 3px solid var(--kit-maroon); padding-left: 6px; }
+  .overspent, .warning { color: var(--kit-accent-ink); font-weight: 700; }
+  .currency-inputs { display: flex; flex-wrap: wrap; gap: 6px; input { width: 60px; } }
+  .detail-fields {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 10px;
+    .detail-field { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .cap { font-size: 10px; text-transform: uppercase; color: var(--kit-muted); }
+    .val { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    input[type="text"] { font-weight: 700; }
+  }
+
+  // dev-world fix 9: the PC-only encumbrance gauge (the shared
+  // adnd2e.encumbrance-gauge partial is Character-NPC-only and untouched) —
+  // same shrinkable vitals-box look as .pc-vitals/the old .pc-saves boxes.
+  .pc-encumbrance .kit-body { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pc-encumbrance .kit-stat {
+    flex: 0 1 96px; min-width: 72px;
+    display: flex; flex-direction: column;
+    .kit-bar { justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; height: 20px; padding: 0 4px; }
+    .kit-big { height: 34px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 4px; font-size: 16px; line-height: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  }
+
+  // dev-world fix 9: the AC breakdown (Armor panel) reuses the same
+  // shrinkable .kit-stat box look instead of a bulleted <ul>.
+  .ac-breakdown { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 6px 0 0; padding: 0; }
+  .ac-breakdown .kit-stat {
+    flex: 0 1 76px; min-width: 56px;
+    display: flex; flex-direction: column;
+    .kit-bar { justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; height: 20px; padding: 0 4px; }
+    .kit-big { height: 34px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 4px; font-size: 16px; line-height: 1; }
+  }
+
+  // dev-world fix 9: a small kit-styled sub-heading for the leftover plain
+  // <h4> group headings (Features source-type groups, spell-level groups) —
+  // excluded from the generic h2/h3/h4 reset below so its own font-size/
+  // color/border-bottom aren't fought by that lower-specificity rule.
+  .kit-subhead { margin: 4px 0 2px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--kit-accent-ink); border-bottom: 1px solid var(--kit-row-rule); padding-bottom: 2px; }
+
+  // dev-world fix 9: a chip list for short, name-only lists (racial
+  // abilities) instead of the browser's default bulleted <ul>.
+  .kit-chips { display: flex; flex-wrap: wrap; gap: 4px 6px; list-style: none; margin: 0; padding: 0; }
+  .kit-chips li { background: var(--kit-tan); color: var(--kit-tan-ink); border-radius: 10px; padding: 2px 8px; font-size: 12px; }
+  .kit-chips li.placeholder { background: none; color: var(--kit-muted); font-style: italic; padding: 0; }
+
+  // dev-world fix 9: an editor's field area (`.kit-body` already gets
+  // var(--kit-field-bg) from the shared `.kit-panel > .kit-body` rule in
+  // _kit.scss) needs a minimum height so an empty <prose-mirror> doesn't read
+  // as a void, and its ProseMirror toolbar needs kit tokens so it reads in
+  // both light and dark modes instead of Foundry's own default chrome.
+  .pc-editor prose-mirror {
+    display: block;
+    min-height: 120px;
+    .editor-content { min-height: 120px; padding: 4px 6px; }
+    .editor-menu { background: var(--kit-expand-bg); border-bottom: 1px solid var(--kit-row-rule); }
+  }
+
+  // dev-world fix 9: the shared adnd2e.slot-table partial (spells.hbs) is
+  // untouched — styled here, scoped to the Spells tab, instead.
+  .tab.spells .slot-table {
+    width: 100%; border-collapse: collapse; margin-bottom: 6px;
+    th, td { padding: 2px 6px; text-align: center; border: 1px solid var(--kit-row-rule); }
+    thead th { background: var(--kit-tan); color: var(--kit-tan-ink); font-size: 11px; font-weight: 700; }
+    tbody td { background: var(--kit-field-bg); color: var(--kit-field-ink); }
+  }
+
+  // dev-world fix 9: a defensive reset for any OTHER plain heading inside a
+  // tab that would otherwise inherit Foundry's large default h2/h3/h4 font —
+  // :not(.kit-subhead) so it never fights that class's own, more specific
+  // treatment above.
+  .tab h2:not(.kit-subhead), .tab h3:not(.kit-subhead), .tab h4:not(.kit-subhead) {
+    font-family: inherit; font-size: 13px; font-weight: 700; margin: 4px 0 2px; color: var(--kit-ink);
+  }
+}

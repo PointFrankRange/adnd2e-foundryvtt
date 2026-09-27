@@ -110,4 +110,11 @@ Pack sources are JSON files under `packs/<name>/_source/`, one document per file
 - **Trait ability bonuses show inside the ability row's "racial" delta,** and the exceptional-Strength percentile input keys off the authored score, so STR 17 + Powerful prepares as 18 without the percentile input (the same as a racial +1 today). Cosmetic.
 - **Sub-score character-point refunds are uncapped** (a sub-score of 9 or less refunds CP), exactly as specced; only disadvantage traits share the 10-point refund cap. A trait dropped onto a creature sheet is inert.
 - **Spell points and channelers are not implemented.** They come from *Player's Option: Spells & Magic*, which isn't in this project's references; their toggles stay registered with "not implemented" hints. Also parked from Sub-project 9: spell mishaps, the Table 56 innate-ability/magic-item initiative modifiers, casting time for creature stat blocks, and structured casting-time fields (only the free-text Casting Time is parsed: a bare number, "N rounds" or "N turns"; anything else casts immediately).
+- **Sheet redesign R1 (PC sheet) follow-ups.** The Character NPC and Monster NPC sheets still use the old layout until Plans R2/R3. Also:
+  - Clicking an item's name shows its stats but no prose description, and it prints raw values such as `chain-mail` or `piercing-slashing` because there's no label map.
+  - A weapon with no damage dice shows a bare ` / `.
+  - Deleted items stay in the favorites flag. They're hidden from the panel but not pruned.
+  - A non-owner observer's inventory filter box is disabled by Foundry's read-only form handling.
+  - Expanded item summaries collapse on every re-render.
+  - When unlocked, the exceptional-Strength input is the same size as the score input.
 - **Casting-time rough edges.** A segment spell's initiative addition stays until initiative is re-rolled; a round spell can be completed at any point during its final round (honor system); a combatant removed from a running combat keeps its casting state until the GM cancels it; near-simultaneous disruptions can post two "spell lost" cards. Automatic disruption needs a GM connected.

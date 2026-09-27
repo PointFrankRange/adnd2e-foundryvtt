@@ -190,6 +190,35 @@
         "mainLocked": "Derived from the two sub-scores below",
         "seedBlockedWarning": "Sub-scores can't be seeded right now — refresh the sheet."
       },
+      "abilityMods": {
+        "hitProb": { "short": "Hit", "long": "Hit Probability" },
+        "damageAdj": { "short": "Dmg", "long": "Damage Adjustment" },
+        "weightAllowance": { "short": "Wt Allow", "long": "Weight Allowance" },
+        "maxPress": { "short": "Press", "long": "Maximum Press" },
+        "openDoors": { "short": "Doors", "long": "Open Doors" },
+        "openDoorsMagical": { "short": "Doors (M)", "long": "Open Magically Held Doors" },
+        "bendBarsLiftGates": { "short": "BB/LG", "long": "Bend Bars / Lift Gates" },
+        "reactionAdj": { "short": "React", "long": "Reaction Adjustment" },
+        "missileAttackAdj": { "short": "Missile", "long": "Missile Attack Adjustment" },
+        "defensiveAdj": { "short": "Def", "long": "Defensive Adjustment" },
+        "hpAdjustment": { "short": "HP", "long": "Hit Point Adjustment" },
+        "systemShock": { "short": "Shock", "long": "System Shock" },
+        "resurrectionSurvival": { "short": "Res", "long": "Resurrection Survival" },
+        "poisonSave": { "short": "Poison", "long": "Poison Save" },
+        "regeneration": { "short": "Regen", "long": "Regeneration" },
+        "hitDieMinimumRoll": { "short": "HD Min", "long": "Hit Die Minimum Roll" },
+        "bonusLanguages": { "short": "Lang", "long": "Bonus Languages" },
+        "maxSpellLevel": { "short": "Max Lvl", "long": "Maximum Spell Level" },
+        "learnSpellChance": { "short": "Learn", "long": "Chance to Learn Spell" },
+        "maxSpellsPerLevel": { "short": "Max/Lvl", "long": "Maximum Spells per Level" },
+        "illusionImmunityLevel": { "short": "Illus Imm", "long": "Illusion Immunity (spell level)" },
+        "magicalDefenseAdj": { "short": "Mag Def", "long": "Magical Defense Adjustment" },
+        "bonusPriestSpells": { "short": "Bonus Sp", "long": "Bonus Priest Spells (level×count)" },
+        "spellFailureChance": { "short": "Fail", "long": "Spell Failure Chance" },
+        "spellImmunityFromScore": { "short": "Sp Imm", "long": "Spell Immunity" },
+        "maxHenchmen": { "short": "Hench", "long": "Maximum Henchmen" },
+        "loyaltyBase": { "short": "Loyal", "long": "Loyalty Base" }
+      },
       "traits": {
         "title": "Character Points & Traits",
         "pool": "Pool",
@@ -213,7 +242,29 @@
         "skills": "Skills",
         "spells": "Spells",
         "features": "Features",
-        "biography": "Biography"
+        "biography": "Biography",
+        "proficiencies": "Proficiencies",
+        "journal": "Journal"
+      },
+      "kit": {
+        "lock": "Unlock to edit",
+        "unlock": "Lock (play mode)",
+        "favorites": "Favorites",
+        "noFavorites": "Star weapons, gear, spells or thief skills to pin them here.",
+        "favorite": "Toggle favorite",
+        "filter": "Filter…",
+        "attacks": "Attacks",
+        "details": "Details",
+        "sections": { "weapons": "Weapons", "armor": "Armor", "equipment": "Equipment" },
+        "cols": { "name": "Name", "damage": "Dmg S-M / L", "speed": "Spd", "qty": "Qty", "weight": "Wt", "location": "Location", "equipped": "Equipped", "identified": "Identified" },
+        "summary": {
+          "range": "Range",
+          "category": "Category",
+          "damageType": "Damage type",
+          "baseAc": "Base AC",
+          "shieldBonus": "Shield bonus",
+          "armorType": "Armor type"
+        }
       },
       "vitals": {
         "hp": "Hit Points",
@@ -222,6 +273,15 @@
         "saves": "Saving Throws",
         "movement": "Movement",
         "effective": "Effective"
+      },
+      "saves": {
+        "short": {
+          "ppd": "PPD",
+          "rsw": "RSW",
+          "pp": "P/P",
+          "bw": "Breath",
+          "spell": "Spell"
+        }
       },
       "drop": {
         "duplicateRace": "This character already has a race.",
