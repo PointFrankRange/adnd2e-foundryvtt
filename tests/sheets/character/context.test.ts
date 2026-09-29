@@ -2208,7 +2208,7 @@ describe("buildCharacterSheetContext — sheet redesign R1 fields", () => {
   it("with no favorites flag the panel is empty and nothing is flagged", () => {
     const c = buildCharacterSheetContext(input());
     expect(c.favorites.rows).toEqual([]);
-    expect(c.inventory.sections.map((s) => s.id)).toEqual(["weapons", "armor", "equipment"]);
+    expect(c.inventory.sections.map((s) => s.id)).toEqual(["weapons", "armor", "equipment", "ammo"]);
   });
 
   it("a favorited thief skill's one-click action is disabled when worn armor disables thief skills", () => {

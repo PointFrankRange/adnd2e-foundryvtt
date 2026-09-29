@@ -23,7 +23,7 @@ export function buildInventorySections(
   isFav: (id: string) => boolean,
 ): InventorySection[] {
   const row = (item: PhysicalItemView): InventoryRow => ({ item, favorite: isFav(item.id) });
-  const typed = (id: "weapons" | "armor" | "equipment", type: PhysicalItemView["type"]): InventorySection => ({
+  const typed = (id: "weapons" | "armor" | "equipment" | "ammo", type: PhysicalItemView["type"]): InventorySection => ({
     id,
     labelKey: `ADND2E.sheet.kit.sections.${id}`,
     label: null,
@@ -35,6 +35,7 @@ export function buildInventorySections(
     typed("weapons", "weapon"),
     typed("armor", "armor"),
     typed("equipment", "equipment"),
+    typed("ammo", "ammo"),
     ...inv.containers.map((c) => ({
       id: `container-${c.item.id}`,
       labelKey: null,

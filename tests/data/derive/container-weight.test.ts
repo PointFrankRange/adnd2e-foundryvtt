@@ -15,6 +15,13 @@ describe("containerAdjustedCarriedWeight", () => {
     ])).toBe(17);
   });
 
+  it("includes ammo weight alongside weapon/armor/equipment", () => {
+    expect(containerAdjustedCarriedWeight([
+      wi({ totalWeight: 10, type: "weapon" }),
+      wi({ totalWeight: 2, type: "ammo" }),
+    ])).toBe(12);
+  });
+
   it("multiplies an item's weight by its container's multiplier", () => {
     const bag = wi({ id: "bag", isContainer: true, totalWeight: 15, contentsWeightMultiplier: 0 });
     const rock = wi({ id: "rock", location: "bag", totalWeight: 100 });

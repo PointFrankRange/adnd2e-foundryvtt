@@ -1,4 +1,4 @@
-const PHYSICAL_TYPES = new Set(["weapon", "armor", "equipment"]);
+const PHYSICAL_TYPES = new Set(["weapon", "armor", "equipment", "ammo"]);
 
 export interface WeightedItem {
   id: string;

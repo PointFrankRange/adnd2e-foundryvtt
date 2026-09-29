@@ -1,6 +1,6 @@
 import { buildAttackCardContext } from "../../combat/attack-card";
 import { buildSaveCardContext } from "../../combat/save-card";
-import { matchingAmmo } from "../../combat/ammo";
+import { matchingAmmo, defaultAmmoSelection } from "../../combat/ammo";
 import type { AmmoStock } from "../../combat/ammo";
 import { blindedAttackPenalty, canAct, heldAttackBonus, proneArmorClassPenalty } from "../../combat/condition-effects";
 import { getChassis } from "../../core/classes/chassis";
@@ -91,6 +91,7 @@ interface WeaponItemHandle {
     damageType: string | null;
     /** bow/crossbow only — null for melee/thrown */
     ammoType: string | null;
+    selectedAmmoId: string | null;
   };
 }
 /** Minimal shape needed to find the actor's class chassis and weapon-proficiency
@@ -240,7 +241,10 @@ export async function rollAttack(
       ammoType: String((i.system as { ammoType?: string }).ammoType ?? ""),
       quantity: Number((i.system as { quantity?: number }).quantity ?? 0),
     }));
-    const chosen = ammoItemId ? matchingAmmo(stock, weaponAmmoType).find((a) => a.id === ammoItemId) : undefined;
+    const candidates = matchingAmmo(stock, weaponAmmoType);
+    const chosen = ammoItemId
+      ? candidates.find((a) => a.id === ammoItemId)
+      : defaultAmmoSelection(candidates, weapon.system.selectedAmmoId);
     if (!chosen) {
       ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.attack.noAmmoWarning"));
       return;
