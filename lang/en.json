@@ -739,6 +739,7 @@
       "weapon": "Weapon",
       "armor": "Armor",
       "equipment": "Equipment",
+      "ammo": "Ammunition",
       "spell": "Spell",
       "weaponProficiency": "Weapon Proficiency",
       "nonweaponProficiency": "Non-Weapon Proficiency",

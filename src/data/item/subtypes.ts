@@ -6,6 +6,7 @@ export type ItemSubtype =
   | "weapon"
   | "armor"
   | "equipment"
+  | "ammo"
   | "spell"
   | "weaponProficiency"
   | "nonweaponProficiency"
@@ -19,6 +20,7 @@ export const ITEM_SUBTYPES: readonly ItemSubtype[] = [
   "weapon",
   "armor",
   "equipment",
+  "ammo",
   "spell",
   "weaponProficiency",
   "nonweaponProficiency",

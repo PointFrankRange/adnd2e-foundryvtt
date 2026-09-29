@@ -31,6 +31,8 @@ export class WeaponItemModel extends Adnd2eItemModel {
       handsRequired: new NumberField({ required: true, integer: true, choices: [1, 2], initial: 1 }),
       materialToHit: new NumberField({ required: true, integer: true, initial: 0 }),
       styleGroup: new StringField({ required: true, blank: true, initial: "" }),
+      ammoType: new StringField({ required: true, nullable: true, initial: null }),
+      selectedAmmoId: new StringField({ required: true, nullable: true, initial: null }),
     };
   }
 
