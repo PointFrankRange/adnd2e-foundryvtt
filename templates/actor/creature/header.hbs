@@ -27,7 +27,7 @@
         <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.ac'}}</div>
           <span class="kit-big">{{#if adnd2e.lock.unlocked}}<input type="number" name="system.attributes.ac.value" value="{{source.system.attributes.ac.value}}">{{else}}{{adnd2e.vitals.ac}}{{/if}}</span></div>
         <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.thac0'}}</div><span class="kit-big">{{adnd2e.vitals.thac0}}</span></div>
-        <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.movement'}}</div><span class="kit-big" title="{{adnd2e.vitals.movementSummary}}">{{source.system.attributes.movement.land}}</span></div>
+        <div class="kit-stat creature-move"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.movement'}}</div><span class="kit-big" title="{{adnd2e.vitals.movementSummary}}">{{adnd2e.vitals.movementSummary}}</span></div>
       </div>
     </div>
     <section class="kit-panel pc-saves-card">

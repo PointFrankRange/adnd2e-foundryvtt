@@ -18,6 +18,10 @@
     .name { flex: 1 1 auto; min-width: 0; font-weight: 700; }
     .special { color: var(--kit-muted); font-size: 12px; }
   }
+  .creature-move .kit-big { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kit-empty { font-style: italic; opacity: .8; padding: 4px 6px; }
+  .gear .kit-name { cursor: default; }
+  .creature-add-attack { margin-left: auto; }
   .creature-stats .detail-field-wide { grid-column: 1 / -1; }
   // fix round 1: the unlocked HD row (count/die/bonus, 3 number inputs) and
   // the Movement summary both live in a .detail-field-wide .val — the

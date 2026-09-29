@@ -106,7 +106,6 @@ export class Adnd2eCreatureSheet extends Base {
     const context = await super._prepareContext(options);
     context.adnd2e = buildCreatureSheetContext(this.#buildInput());
     context.editable = this.isEditable;
-    context.notEditable = !this.isEditable;
     context.proseDisabled = !this.isEditable || !this.#unlocked;
     // matches src/sheets/character/sheet.ts's own _prepareContext exactly —
     // `context.source` (the actor's `_source`) is already provided by

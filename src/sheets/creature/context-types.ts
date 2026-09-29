@@ -73,7 +73,7 @@ export interface CreatureSheetContext {
     /** e.g. "12, climb 3, fly 18 (C)" — zero-value modes omitted, land always first (unlabeled) */
     movementSummary: string;
   };
-  attacks: { index: number; name: string; count: number; damage: string; type: "melee" | "ranged"; special: string }[];
+  attacks: { index: number; name: string; count: number; damage: string; thac0Override: number | null; type: "melee" | "ranged"; special: string }[];
   saves: { category: SaveCategory; label: string; target: number }[];
   details: {
     size: string;

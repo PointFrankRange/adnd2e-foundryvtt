@@ -2,7 +2,7 @@
 
   <section class="kit-panel creature-attacks">
     <div class="kit-bar">{{localize 'ADND2E.sheet.creature.attacks'}}
-      {{#if adnd2e.lock.unlocked}}<button type="button" class="kit-small" data-action="addAttack" style="margin-left:auto">{{localize 'ADND2E.sheet.creature.addAttack'}}</button>{{/if}}
+      {{#if adnd2e.lock.unlocked}}<button type="button" class="kit-small creature-add-attack" data-action="addAttack">{{localize 'ADND2E.sheet.creature.addAttack'}}</button>{{/if}}
     </div>
     <div class="kit-body">
       {{#if adnd2e.lock.unlocked}}
@@ -35,6 +35,7 @@
             <span class="count">×{{a.count}}</span>
             <span class="damage">{{a.damage}}</span>
             <span class="type">{{localize (concat 'ADND2E.attackTypes.' a.type)}}</span>
+            {{#if a.thac0Override}}<span class="special">{{localize 'ADND2E.sheet.creature.attackThac0Override'}} {{a.thac0Override}}</span>{{/if}}
             {{#if a.special}}<span class="special">{{a.special}}</span>{{/if}}
             <button type="button" class="kit-roll" data-action="rollAttack" data-attack-index="{{a.index}}">{{localize 'ADND2E.sheet.combat.rollAttack'}}</button>
           </div>

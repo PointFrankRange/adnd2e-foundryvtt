@@ -75,10 +75,23 @@ describe("buildCreatureSheetContext", () => {
     const c = buildCreatureSheetContext(input());
     expect(c.attacks).toHaveLength(2);
     expect(c.attacks[0]).toEqual({
-      index: 0, name: "Claw", count: 2, damage: "1d6+1", type: "melee", special: "",
+      index: 0, name: "Claw", count: 2, damage: "1d6+1", thac0Override: null, type: "melee", special: "",
     });
     expect(c.attacks[1]!.name).toBe("Bite");
     expect(c.attacks[1]!.special).toBe("hug on both claws");
+  });
+
+  it("passes thac0Override through unchanged, both null and a number", () => {
+    const c = buildCreatureSheetContext(
+      input({
+        attacks: [
+          { name: "Claw", count: 2, damage: "1d6+1", thac0Override: null, type: "melee", special: "" },
+          { name: "Bite", count: 1, damage: "1d8", thac0Override: 12, type: "melee", special: "" },
+        ],
+      }),
+    );
+    expect(c.attacks[0]!.thac0Override).toBeNull();
+    expect(c.attacks[1]!.thac0Override).toBe(12);
   });
 
   it("shows each save category's effective target", () => {

@@ -56,7 +56,7 @@ export function buildCreatureSheetContext(input: CreatureSheetInput): CreatureSh
       movementSummary: buildMovementSummary(input.attributes.movement),
     },
     attacks: input.attacks.map((a, index) => ({
-      index, name: a.name, count: a.count, damage: a.damage, type: a.type, special: a.special,
+      index, name: a.name, count: a.count, damage: a.damage, thac0Override: a.thac0Override, type: a.type, special: a.special,
     })),
     saves: SAVE_CATEGORIES.map((category) => ({
       category,
