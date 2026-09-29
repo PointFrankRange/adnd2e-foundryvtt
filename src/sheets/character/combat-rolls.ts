@@ -64,8 +64,11 @@ export function resolveTargetCombatInfo(
  *  be excluded here or an equipped shield found before the target's equipped
  *  body armor would silently zero this modifier — mirrors
  *  proficiency-actions.ts's `resolveWornArmorType`, which already solves
- *  this exact problem for the thief-skill-armor feature. */
-function resolveTargetArmorType(
+ *  this exact problem for the thief-skill-armor feature. Exported for
+ *  creature/combat-rolls.ts to reuse unchanged — the creature-target "none"
+ *  early return already gives the correct answer for a Monster NPC attacker
+ *  too, so there's no reason to re-implement this a second time. */
+export function resolveTargetArmorType(
   targetActor: {
     type: string;
     items: Iterable<{ type: string; system: { armorType?: string; equipped?: boolean; isShield?: boolean } }>;

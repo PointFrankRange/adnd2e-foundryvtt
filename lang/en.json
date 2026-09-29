@@ -723,6 +723,7 @@
       "approveTitle": "Player-Applied Effect",
       "approvePrompt": "{user} wants to apply {effect} to {target}. Allow it?",
       "log": "{user} applied {effect} to {target}.",
+      "logNoEffect": "{user} attempted {effect} on {target}, but nothing changed.",
       "expiredWarning": "That player request expired before you approved it — nothing was applied.",
       "effect": {
         "damage": "{amount} damage",
