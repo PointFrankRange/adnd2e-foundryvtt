@@ -1,4 +1,4 @@
-import { DAMAGE_TYPES, WEAPON_CATEGORIES, WEAPON_SIZES } from "./choices";
+import { DAMAGE_TYPES, WEAPON_CATEGORIES, WEAPON_PROFICIENCY_GROUPS, WEAPON_SIZES } from "./choices";
 import { physicalItemSchema } from "../common/physical-item";
 import { toWeaponData } from "../derive/weapon";
 import { totalWeight } from "../derive/physical-item";
@@ -27,7 +27,7 @@ export class WeaponItemModel extends Adnd2eItemModel {
         },
         { required: true, nullable: true, initial: null },
       ),
-      proficiencyGroup: new StringField({ required: true, blank: true, initial: "" }),
+      proficiencyGroup: new StringField({ required: true, blank: true, initial: "", choices: WEAPON_PROFICIENCY_GROUPS }),
       handsRequired: new NumberField({ required: true, integer: true, choices: [1, 2], initial: 1 }),
       materialToHit: new NumberField({ required: true, integer: true, initial: 0 }),
       styleGroup: new StringField({ required: true, blank: true, initial: "" }),

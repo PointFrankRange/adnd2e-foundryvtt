@@ -1,4 +1,5 @@
 import { Adnd2eItemModel } from "./base-item";
+import { WEAPON_PROFICIENCY_GROUPS } from "./choices";
 
 const { StringField, NumberField, BooleanField } = foundry.data.fields;
 
@@ -15,7 +16,7 @@ export class WeaponProficiencyItemModel extends Adnd2eItemModel {
        *  belongs to (e.g. "Blades") — read only when the expandedProficiencies
        *  rule is on, to resolve the "related weapon" penalty. Empty on group
        *  proficiencies and hand-made items (they never count as related). */
-      proficiencyGroup: new StringField({ required: true, blank: true, initial: "" }),
+      proficiencyGroup: new StringField({ required: true, blank: true, initial: "", choices: WEAPON_PROFICIENCY_GROUPS }),
     };
   }
 
