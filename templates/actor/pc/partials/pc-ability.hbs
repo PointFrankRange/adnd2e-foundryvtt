@@ -8,7 +8,8 @@
       {{else}}
         <span class="kit-big">{{row.effectiveScore}}</span>
       {{/if}}
-      {{#if row.racialDelta}}<span class="racial">{{adnd2eSigned row.racialDelta}}</span>{{/if}}
+      {{#if row.racialDelta}}<span class="racial" title="{{localize 'ADND2E.sheet.abilityDelta.racial'}}">{{adnd2eSigned row.racialDelta}}</span>{{/if}}
+      {{#if row.traitDelta}}<span class="trait" title="{{localize 'ADND2E.sheet.abilityDelta.trait'}}">{{adnd2eSigned row.traitDelta}}</span>{{/if}}
       {{#if row.showExceptional}}
         {{#if unlocked}}
           <input type="number" class="exceptional" name="system.abilities.str.exceptional" value="{{row.exceptional}}" placeholder="%">

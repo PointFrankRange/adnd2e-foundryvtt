@@ -173,6 +173,10 @@
         "classes": "Classes",
         "vitals": "Vitals"
       },
+      "abilityDelta": {
+        "racial": "Racial adjustment",
+        "trait": "Trait adjustment"
+      },
       "subAbilities": {
         "muscle": "Muscle",
         "stamina": "Stamina",
