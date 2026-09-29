@@ -192,6 +192,7 @@ describe("buildCreatureSheetContext — sheet redesign R3", () => {
     { id: "a1", name: "Hide", img: "", type: "armor", quantity: 1, equipped: true },
     { id: "e1", name: "Sack", img: "", type: "equipment", quantity: 2, equipped: false },
     { id: "e2", name: "Coins", img: "", type: "equipment", quantity: 1, equipped: false },
+    { id: "am1", name: "Arrows", img: "", type: "ammo", quantity: 12, equipped: false },
   ];
 
   it("is locked by default; only an editor can unlock", () => {
@@ -201,14 +202,15 @@ describe("buildCreatureSheetContext — sheet redesign R3", () => {
     expect(buildCreatureSheetContext(viewer).lock).toEqual({ canUnlock: false, unlocked: false });
   });
 
-  it("groups gear into weapons / armor / equipment sections in that order, keeping empty sections", () => {
+  it("groups gear into weapons / armor / equipment / ammo sections in that order, keeping empty sections", () => {
     const c = buildCreatureSheetContext(input({ gear }));
     expect(c.gearSections.map((s) => [s.id, s.labelKey, s.rows.map((r) => r.id)])).toEqual([
       ["weapons", "ADND2E.sheet.kit.sections.weapons", ["w1"]],
       ["armor", "ADND2E.sheet.kit.sections.armor", ["a1"]],
       ["equipment", "ADND2E.sheet.kit.sections.equipment", ["e1", "e2"]],
+      ["ammo", "ADND2E.sheet.kit.sections.ammo", ["am1"]],
     ]);
     const empty = buildCreatureSheetContext(input());
-    expect(empty.gearSections.map((s) => [s.id, s.rows.length])).toEqual([["weapons", 0], ["armor", 0], ["equipment", 0]]);
+    expect(empty.gearSections.map((s) => [s.id, s.rows.length])).toEqual([["weapons", 0], ["armor", 0], ["equipment", 0], ["ammo", 0]]);
   });
 });

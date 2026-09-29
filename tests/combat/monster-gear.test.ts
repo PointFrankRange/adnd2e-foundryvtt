@@ -10,11 +10,11 @@ import {
 const sword = { category: "melee", magicBonus: 0, damageVsSM: "1d8", damageVsL: "1d12" };
 
 describe("monsterDropVerdict", () => {
-  it("accepts gear and spells", () => {
-    expect([...MONSTER_ITEM_TYPES]).toEqual(["weapon", "armor", "equipment", "spell"]);
+  it("accepts gear (including ammo as inert loot) and spells", () => {
+    expect([...MONSTER_ITEM_TYPES]).toEqual(["weapon", "armor", "equipment", "ammo", "spell"]);
     for (const t of MONSTER_ITEM_TYPES) expect(monsterDropVerdict(t)).toEqual({ ok: true });
   });
-  it.each(["class", "race", "weaponProficiency", "nonweaponProficiency", "trait", "classFeature", "condition", "ammo", "bogus"])(
+  it.each(["class", "race", "weaponProficiency", "nonweaponProficiency", "trait", "classFeature", "condition", "bogus"])(
     "rejects %s",
     (t) => {
       expect(monsterDropVerdict(t)).toEqual({ ok: false, reason: "ADND2E.sheet.drop.monsterRejects" });

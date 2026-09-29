@@ -11,6 +11,7 @@ const GEAR_SECTIONS = [
   ["weapons", "weapon"],
   ["armor", "armor"],
   ["equipment", "equipment"],
+  ["ammo", "ammo"],
 ] as const;
 
 /** "12, climb 3, fly 18 (C)" — land is always shown first (unlabeled, even if 0),
