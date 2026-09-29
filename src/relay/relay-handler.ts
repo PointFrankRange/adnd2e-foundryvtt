@@ -44,19 +44,20 @@ async function handleApplyQuery(
     }
   }
 
-  await applyEffectLocally(target, request);
+  const changed = await applyEffectLocally(target, request);
   try {
     const recipients = (ChatMessage as unknown as { getWhisperRecipients(name: string): { id: string }[] })
       .getWhisperRecipients("GM")
       .map((u) => u.id);
+    const logKey = changed ? "ADND2E.relay.log" : "ADND2E.relay.logNoEffect";
     await ChatMessage.create({
-      content: `<p>${game.i18n!.format("ADND2E.relay.log", names)}</p>`,
+      content: `<p>${game.i18n!.format(logKey, names)}</p>`,
       whisper: recipients,
     } as unknown as ChatMessage.CreateData);
   } catch (err) {
     console.error(`${SYSTEM_ID} | relay log failed`, err);
   }
-  return { applied: true };
+  return { applied: true, changed };
 }
 
 /** Registers the relay query. Call once, on `init`. */

@@ -64,8 +64,11 @@ export function resolveTargetCombatInfo(
  *  be excluded here or an equipped shield found before the target's equipped
  *  body armor would silently zero this modifier — mirrors
  *  proficiency-actions.ts's `resolveWornArmorType`, which already solves
- *  this exact problem for the thief-skill-armor feature. */
-function resolveTargetArmorType(
+ *  this exact problem for the thief-skill-armor feature. Exported for
+ *  creature/combat-rolls.ts to reuse unchanged — the creature-target "none"
+ *  early return already gives the correct answer for a Monster NPC attacker
+ *  too, so there's no reason to re-implement this a second time. */
+export function resolveTargetArmorType(
   targetActor: {
     type: string;
     items: Iterable<{ type: string; system: { armorType?: string; equipped?: boolean; isShield?: boolean } }>;
@@ -397,7 +400,7 @@ export async function rollAttack(
   const content = await foundry.applications.handlebars.renderTemplate(
     TEMPLATE_PATH("chat/attack-roll.hbs"), context as unknown as Record<string, unknown>,
   );
-  await roll.toMessage(
+  const message = await roll.toMessage(
     {
       speaker: ChatMessage.getSpeaker({ actor: actor as never }),
       content,
@@ -423,12 +426,27 @@ export async function rollAttack(
       | null;
     if (maneuverTarget) {
       try {
-        await requestApply(
+        const changed = await requestApply(
           maneuverTarget,
           maneuverEffect.kind === "condition"
             ? { kind: "condition", targetUuid: maneuverTarget.uuid, conditionId: maneuverEffect.conditionId as RelayConditionId }
             : { kind: "unequip", targetUuid: maneuverTarget.uuid },
         );
+        // An "unequip" outcome (disarm / called-shot weapon-hand) against an
+        // already-unarmed target is the one maneuver effect that can silently
+        // do nothing — requestApply's info toast alone isn't a durable
+        // record, so the ALREADY-POSTED card's "Disarm succeeds!" line (which
+        // had to be written before this relay round-trip resolved — see the
+        // comment above) gets corrected in place, the same way a crit's
+        // damage total is patched onto an already-posted roll elsewhere in
+        // this codebase (creature/combat-rolls.ts's applyMessageMode path).
+        if (!changed && maneuverEffect.kind === "unequip" && message) {
+          const correctedContent = await foundry.applications.handlebars.renderTemplate(
+            TEMPLATE_PATH("chat/attack-roll.hbs"),
+            { ...context, maneuverLabel: "ADND2E.chat.attack.maneuverNoEffectUnequip" } as unknown as Record<string, unknown>,
+          );
+          await message.update({ content: correctedContent } as never);
+        }
       } catch (err) {
         console.error(`${SYSTEM_ID} | failed to apply maneuver effect to the target`, err);
         ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.attack.maneuverEffectFailedWarning"));

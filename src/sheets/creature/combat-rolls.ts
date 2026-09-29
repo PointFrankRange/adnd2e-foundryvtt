@@ -1,4 +1,4 @@
-import { resolveTargetCombatInfo } from "../character/combat-rolls";
+import { resolveTargetArmorType, resolveTargetCombatInfo } from "../character/combat-rolls";
 import { buildAttackCardContext } from "../../combat/attack-card";
 import { buildSaveCardContext } from "../../combat/save-card";
 import { blindedAttackPenalty, canAct, heldAttackBonus, proneArmorClassPenalty } from "../../combat/condition-effects";
@@ -6,9 +6,11 @@ import { attackModifiers, hitResult } from "../../core/combat/attack";
 import { attackFormula } from "../../core/dice/formula";
 import { criticalSeverity, fumbleSeverity } from "../../combat/critical";
 import { monsterWeaponDamageFormula } from "../../combat/monster-gear";
+import { toArmorGroup, weaponVsArmorModifier } from "../../combat/weapon-vs-armor";
 import { getOptionalRules } from "../../settings";
 import { TEMPLATE_PATH } from "../../constants";
 import type { CreatureSize, SaveCategory } from "../../core/types";
+import type { DamageType } from "../../core/weapons/data";
 
 /* ---------------------------------------------------------------------------
  * combat-rolls — SP6, creature-shaped.
@@ -74,6 +76,14 @@ interface AttackSource {
   weaponMagicBonus: number;
   /** the damage formula for a hit against a target of this size (null = none to roll) */
   damageFormula(targetSize: CreatureSize | null): string | null;
+  /** null for a stat-block attack (no weapon Item to read it from) — otherwise
+   *  the equipped weapon's damage type, feeding the same Combat & Tactics
+   *  weapon-vs-armor modifier the PC sheet already applies. */
+  damageType: DamageType | null;
+  /** null for a stat-block attack (nothing to unequip) — otherwise the
+   *  equipped weapon Item itself, unequipped on a "weapon drops" fumble
+   *  exactly like the PC sheet's rollAttack does. */
+  weaponItem: { update(d: Record<string, unknown>): Promise<unknown> } | null;
 }
 
 /** Roll one attack from `attacks[attackIndex]` against the current token
@@ -90,6 +100,8 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
     thac0: attack.thac0Override ?? actor.system.attributes.thac0.value,
     weaponMagicBonus: 0,
     damageFormula: () => attack.damage,
+    damageType: null,
+    weaponItem: null,
   });
 }
 
@@ -97,7 +109,11 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
  *  the weapon's S-M / L damage by target size (Monster NPC gear design). */
 export async function rollWeaponAttack(actor: CreatureActor & { items: { get(id: string): unknown } }, itemId: string): Promise<void> {
   const item = actor.items.get(itemId) as
-    | { name: string; type: string; system: { equipped?: boolean; category: string; magicBonus: number; damageVsSM: string | null; damageVsL: string | null } }
+    | {
+        name: string; type: string;
+        system: { equipped?: boolean; category: string; magicBonus: number; damageVsSM: string | null; damageVsL: string | null; damageType: DamageType | null };
+        update(d: Record<string, unknown>): Promise<unknown>;
+      }
     | undefined;
   if (!item || item.type !== "weapon" || !item.system.equipped) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.creature.weaponAttackBlockedWarning"));
@@ -109,6 +125,8 @@ export async function rollWeaponAttack(actor: CreatureActor & { items: { get(id:
     thac0: actor.system.attributes.thac0.value,
     weaponMagicBonus: weapon.magicBonus,
     damageFormula: (size) => monsterWeaponDamageFormula(weapon, size),
+    damageType: item.system.damageType,
+    weaponItem: item,
   });
 }
 
@@ -127,11 +145,13 @@ async function rollCreatureAttack(actor: CreatureActor, source: AttackSource): P
     return;
   }
 
+  const rules = getOptionalRules();
   const targets = [...(game as unknown as { user: { targets: Iterable<{ name: string; actor: unknown }> } }).user.targets];
   let targetName: string | null = null;
   let targetAc: number;
   let targetSize: CreatureSize | null = null;
   let targetStatuses: ReadonlySet<string> = new Set<string>();
+  let armorVsWeaponModifier = 0;
 
   if (targets.length === 1) {
     const t = targets[0]!;
@@ -140,6 +160,10 @@ async function rollCreatureAttack(actor: CreatureActor, source: AttackSource): P
     const info = resolveTargetCombatInfo(t.actor as Parameters<typeof resolveTargetCombatInfo>[0]);
     targetAc = info.ac + proneArmorClassPenalty(targetStatuses);
     targetSize = info.size as CreatureSize | null;
+    if (rules.combatAndTacticsEnabled && rules.armorTypeVsWeaponType && source.damageType) {
+      const targetArmorType = resolveTargetArmorType(t.actor as Parameters<typeof resolveTargetArmorType>[0]);
+      armorVsWeaponModifier = weaponVsArmorModifier(source.damageType as never, toArmorGroup(targetArmorType));
+    }
   } else {
     const manualAc = await foundry.applications.api.DialogV2.prompt({
       window: { title: game.i18n!.localize("ADND2E.chat.attack.manualAcTitle") },
@@ -166,14 +190,14 @@ async function rollCreatureAttack(actor: CreatureActor, source: AttackSource): P
   // equipped weapon contributes here.
   const { total: attackBonus, breakdown } = attackModifiers({
     weaponMagicBonus: source.weaponMagicBonus,
-    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses),
+    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses) + armorVsWeaponModifier,
   });
   const formula = attackFormula(attackBonus);
   const roll = await new Roll(formula).evaluate();
   const naturalD20 = roll.dice[0]?.total ?? 0;
   const hit = hitResult({ naturalD20, attackBonus, thac0, targetAc });
 
-  const critEnabled = getOptionalRules().combatAndTacticsEnabled && getOptionalRules().criticalHits;
+  const critEnabled = rules.combatAndTacticsEnabled && rules.criticalHits;
   const crit = critEnabled && hit.autoHit ? criticalSeverity(Math.ceil(Math.random() * 10)) : null;
   const fumble = critEnabled && hit.autoMiss ? fumbleSeverity(Math.ceil(Math.random() * 10)) : null;
 
@@ -184,12 +208,12 @@ async function rollCreatureAttack(actor: CreatureActor, source: AttackSource): P
       flavor: game.i18n!.localize("ADND2E.chat.attack.fumbleSelfInjury"),
     } as unknown as Roll.MessageData);
   }
-  // Neither a stat-block attack nor an equipped-weapon attack unequips
-  // anything on a "weapon drops" fumble here: attacks[] is a flat array with
-  // no weapon Item to unequip, and an equipped weapon's own drop-on-fumble
-  // outcome is out of this plan's v1 scope (matches the PC sheet's Task 1-4
-  // boundary being about DAMAGE, not fumble effects) — a deliberate v1 scope
-  // boundary carried over unchanged from the pre-Task-3 rollAttack.
+  // A stat-block attack (attacks[], no weapon Item) has nothing to unequip —
+  // source.weaponItem is null there, so this only ever fires for an
+  // equipped-weapon attack, mirroring the PC sheet's rollAttack.
+  if (fumble?.effect === "weaponDrops" && source.weaponItem) {
+    await source.weaponItem.update({ "system.equipped": false });
+  }
 
   const context = buildAttackCardContext({
     actorName: actor.name, actorImg: actor.img,
