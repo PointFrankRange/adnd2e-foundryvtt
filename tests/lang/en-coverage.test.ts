@@ -655,6 +655,23 @@ describe("lang/en.json — dev-world fix 9 (journal Details panel)", () => {
   });
 });
 
+describe("lang/en.json — sheet redesign R3 (Monster NPC sheet kit)", () => {
+  it("resolves the new tab labels and creature statAuthoring/left-column keys", () => {
+    for (const key of [
+      "ADND2E.sheet.tabs.statBlock",
+      "ADND2E.sheet.tabs.gear",
+      "ADND2E.sheet.tabs.notes",
+      "ADND2E.sheet.creature.statAuthoring",
+      "ADND2E.sheet.creature.size",
+      "ADND2E.sheet.creature.movementModes",
+      "ADND2E.sheet.creature.stats",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("lang/en.json — sheet redesign R1 (PC sheet kit)", () => {
   it("resolves the new PC-tab labels", () => {
     for (const key of ["ADND2E.sheet.tabs.proficiencies", "ADND2E.sheet.tabs.journal"]) {

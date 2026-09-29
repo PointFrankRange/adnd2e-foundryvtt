@@ -1,0 +1,19 @@
+<section class="tab spells{{#if tab.active}} active{{/if}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.creature.spells'}}</div>
+    <div class="kit-body">
+      {{#each adnd2e.spells as |grp|}}
+        <h4 class="kit-subhead">{{localize 'ADND2E.sheet.spells.level' level=grp.level}}</h4>
+        {{#each grp.items as |s|}}
+          <div class="spell-row" data-item-id="{{s.id}}">
+            <span class="name">{{s.name}}</span>
+            <button type="button" class="kit-roll" data-action="castMonsterSpell" data-item-id="{{s.id}}">{{localize 'ADND2E.sheet.creature.cast'}}</button>
+            {{#if @root.adnd2e.lock.unlocked}}{{> adnd2e.item-controls id=s.id deletable=true}}{{/if}}
+          </div>
+        {{/each}}
+      {{else}}
+        <p class="kit-empty">{{localize 'ADND2E.sheet.creature.noSpells'}}</p>
+      {{/each}}
+    </div>
+  </section>
+</section>

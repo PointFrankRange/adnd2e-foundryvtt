@@ -1,4 +1,5 @@
 import type { ClassGroup, SaveCategory } from "../../core/types";
+import type { LockState } from "../kit/lock";
 
 export interface CreatureAttackEntry {
   name: string;
@@ -18,6 +19,12 @@ export interface CreatureGearView {
 }
 
 export interface CreatureSpellView { id: string; name: string; img: string; level: number }
+
+export interface CreatureGearSection {
+  id: "weapons" | "armor" | "equipment";
+  labelKey: string;
+  rows: CreatureSheetContext["gear"];
+}
 
 export interface CreatureSheetInput {
   name: string;
@@ -51,6 +58,8 @@ export interface CreatureSheetInput {
     description: string;
   };
   perms: { isGM: boolean; isOwner: boolean; editable: boolean };
+  /** sheet redesign R3: the viewer's unlock state (never persisted) */
+  unlocked?: boolean;
   gear?: CreatureGearView[];
   spells?: CreatureSpellView[];
 }
@@ -64,7 +73,7 @@ export interface CreatureSheetContext {
     /** e.g. "12, climb 3, fly 18 (C)" — zero-value modes omitted, land always first (unlabeled) */
     movementSummary: string;
   };
-  attacks: { index: number; name: string; count: number; damage: string; type: "melee" | "ranged"; special: string }[];
+  attacks: { index: number; name: string; count: number; damage: string; thac0Override: number | null; type: "melee" | "ranged"; special: string }[];
   saves: { category: SaveCategory; label: string; target: number }[];
   details: {
     size: string;
@@ -80,7 +89,9 @@ export interface CreatureSheetContext {
     description: string;
   };
   perms: { isGM: boolean; isOwner: boolean; editable: boolean };
+  lock: LockState;
   gear: { id: string; name: string; img: string; type: "weapon" | "armor" | "equipment"; quantity: number; equipped: boolean }[];
+  gearSections: CreatureGearSection[];
   /** one row per EQUIPPED weapon */
   weaponAttacks: { id: string; name: string; damage: string; type: "melee" | "ranged" }[];
   spells: { level: number; items: { id: string; name: string; img: string }[] }[];

@@ -1,0 +1,73 @@
+<aside class="pc-left">
+  <img class="portrait" src="{{adnd2e.identity.img}}" data-action="editImage" data-edit="img" alt="{{adnd2e.identity.name}}">
+  <section class="kit-panel creature-stats">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.creature.stats'}}</div>
+    <div class="kit-body detail-fields">
+      <div class="detail-field detail-field-wide">
+        <span class="cap">{{localize 'ADND2E.sheet.creature.hd'}}</span>
+        {{#if adnd2e.lock.unlocked}}
+          <span class="val"><input type="number" name="system.hd.count" value="{{source.system.hd.count}}"> d<input type="number" name="system.hd.dieType" value="{{source.system.hd.dieType}}"> + <input type="number" name="system.hd.bonus" value="{{source.system.hd.bonus}}"></span>
+        {{else}}
+          <span class="val">{{source.system.hd.count}}d{{source.system.hd.dieType}}{{#if source.system.hd.bonus}} {{adnd2eSigned source.system.hd.bonus}}{{/if}}</span>
+        {{/if}}
+      </div>
+      <div class="detail-field">
+        <span class="cap">{{localize 'ADND2E.sheet.creature.fixedHp'}}</span>
+        {{#if adnd2e.lock.unlocked}}
+          <input type="number" name="system.hd.fixedHp" value="{{source.system.hd.fixedHp}}">
+        {{else}}
+          <span class="val">{{adnd2eOrDash source.system.hd.fixedHp}}</span>
+        {{/if}}
+      </div>
+      <div class="detail-field">
+        <span class="cap">{{localize 'ADND2E.sheet.creature.size'}}</span>
+        {{#if adnd2e.lock.unlocked}}
+          <select name="system.details.size">{{selectOptions sizes selected=source.system.details.size localize=true}}</select>
+        {{else}}
+          <span class="val">{{localize (lookup sizes source.system.details.size)}}</span>
+        {{/if}}
+      </div>
+      <div class="detail-field">
+        <span class="cap">{{localize 'ADND2E.sheet.creature.intelligence'}}</span>
+        {{#if adnd2e.lock.unlocked}}
+          <input type="text" name="system.details.intelligence" value="{{source.system.details.intelligence}}">
+        {{else}}
+          <span class="val">{{adnd2eOrDash source.system.details.intelligence}}</span>
+        {{/if}}
+      </div>
+      <div class="detail-field">
+        <span class="cap">{{localize 'ADND2E.sheet.creature.morale'}}</span>
+        {{#if adnd2e.lock.unlocked}}
+          <input type="number" name="system.details.morale" value="{{source.system.details.morale}}">
+        {{else}}
+          <span class="val">{{adnd2eOrDash source.system.details.morale}}</span>
+        {{/if}}
+      </div>
+      <div class="detail-field">
+        <span class="cap">{{localize 'ADND2E.sheet.creature.magicResistance'}}</span>
+        {{#if adnd2e.lock.unlocked}}
+          <span class="val"><input type="number" name="system.details.magicResistance" value="{{source.system.details.magicResistance}}">%</span>
+        {{else}}
+          <span class="val">{{adnd2eOrDash source.system.details.magicResistance}}%</span>
+        {{/if}}
+      </div>
+      <div class="detail-field detail-field-wide">
+        <span class="cap">{{localize 'ADND2E.sheet.vitals.movement'}}</span>
+        <span class="val">{{adnd2e.vitals.movementSummary}}</span>
+      </div>
+    </div>
+  </section>
+  {{#if adnd2e.lock.unlocked}}
+    <section class="kit-panel creature-movement">
+      <div class="kit-bar">{{localize 'ADND2E.sheet.creature.movementModes'}}</div>
+      <div class="kit-body detail-fields">
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.movementModes.land'}}</span><input type="number" name="system.attributes.movement.land" value="{{source.system.attributes.movement.land}}"></label>
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.movementModes.burrow'}}</span><input type="number" name="system.attributes.movement.burrow" value="{{source.system.attributes.movement.burrow}}"></label>
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.movementModes.climb'}}</span><input type="number" name="system.attributes.movement.climb" value="{{source.system.attributes.movement.climb}}"></label>
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.movementModes.fly'}}</span><input type="number" name="system.attributes.movement.fly" value="{{source.system.attributes.movement.fly}}"></label>
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.movementModes.swim'}}</span><input type="number" name="system.attributes.movement.swim" value="{{source.system.attributes.movement.swim}}"></label>
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.flyManeuverability'}}</span><input type="text" name="system.attributes.movement.flyManeuverability" value="{{source.system.attributes.movement.flyManeuverability}}"></label>
+      </div>
+    </section>
+  {{/if}}
+</aside>

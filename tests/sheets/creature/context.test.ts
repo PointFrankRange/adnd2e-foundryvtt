@@ -75,10 +75,23 @@ describe("buildCreatureSheetContext", () => {
     const c = buildCreatureSheetContext(input());
     expect(c.attacks).toHaveLength(2);
     expect(c.attacks[0]).toEqual({
-      index: 0, name: "Claw", count: 2, damage: "1d6+1", type: "melee", special: "",
+      index: 0, name: "Claw", count: 2, damage: "1d6+1", thac0Override: null, type: "melee", special: "",
     });
     expect(c.attacks[1]!.name).toBe("Bite");
     expect(c.attacks[1]!.special).toBe("hug on both claws");
+  });
+
+  it("passes thac0Override through unchanged, both null and a number", () => {
+    const c = buildCreatureSheetContext(
+      input({
+        attacks: [
+          { name: "Claw", count: 2, damage: "1d6+1", thac0Override: null, type: "melee", special: "" },
+          { name: "Bite", count: 1, damage: "1d8", thac0Override: 12, type: "melee", special: "" },
+        ],
+      }),
+    );
+    expect(c.attacks[0]!.thac0Override).toBeNull();
+    expect(c.attacks[1]!.thac0Override).toBe(12);
   });
 
   it("shows each save category's effective target", () => {
@@ -170,5 +183,32 @@ describe("buildCreatureSheetContext — gear, weapon attacks, spells", () => {
       { level: 1, items: [{ id: "s1", name: "Magic Missile", img: "" }, { id: "s1b", name: "Sleep", img: "" }] },
       { level: 3, items: [{ id: "s3", name: "Fireball", img: "" }] },
     ]);
+  });
+});
+
+describe("buildCreatureSheetContext — sheet redesign R3", () => {
+  const gear: CreatureGearView[] = [
+    { id: "w1", name: "Spear", img: "", type: "weapon", quantity: 1, equipped: true, weapon: { category: "melee", magicBonus: 0, damageVsSM: "1d6", damageVsL: "1d8" } },
+    { id: "a1", name: "Hide", img: "", type: "armor", quantity: 1, equipped: true },
+    { id: "e1", name: "Sack", img: "", type: "equipment", quantity: 2, equipped: false },
+    { id: "e2", name: "Coins", img: "", type: "equipment", quantity: 1, equipped: false },
+  ];
+
+  it("is locked by default; only an editor can unlock", () => {
+    expect(buildCreatureSheetContext(input()).lock).toEqual({ canUnlock: true, unlocked: false });
+    expect(buildCreatureSheetContext(input({ unlocked: true })).lock).toEqual({ canUnlock: true, unlocked: true });
+    const viewer = input({ unlocked: true, perms: { isGM: false, isOwner: false, editable: false } });
+    expect(buildCreatureSheetContext(viewer).lock).toEqual({ canUnlock: false, unlocked: false });
+  });
+
+  it("groups gear into weapons / armor / equipment sections in that order, keeping empty sections", () => {
+    const c = buildCreatureSheetContext(input({ gear }));
+    expect(c.gearSections.map((s) => [s.id, s.labelKey, s.rows.map((r) => r.id)])).toEqual([
+      ["weapons", "ADND2E.sheet.kit.sections.weapons", ["w1"]],
+      ["armor", "ADND2E.sheet.kit.sections.armor", ["a1"]],
+      ["equipment", "ADND2E.sheet.kit.sections.equipment", ["e1", "e2"]],
+    ]);
+    const empty = buildCreatureSheetContext(input());
+    expect(empty.gearSections.map((s) => [s.id, s.rows.length])).toEqual([["weapons", 0], ["armor", 0], ["equipment", 0]]);
   });
 });
