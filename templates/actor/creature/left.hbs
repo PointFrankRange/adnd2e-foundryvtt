@@ -3,7 +3,7 @@
   <section class="kit-panel creature-stats">
     <div class="kit-bar">{{localize 'ADND2E.sheet.creature.stats'}}</div>
     <div class="kit-body detail-fields">
-      <div class="detail-field">
+      <div class="detail-field detail-field-wide">
         <span class="cap">{{localize 'ADND2E.sheet.creature.hd'}}</span>
         {{#if adnd2e.lock.unlocked}}
           <span class="val"><input type="number" name="system.hd.count" value="{{source.system.hd.count}}"> d<input type="number" name="system.hd.dieType" value="{{source.system.hd.dieType}}"> + <input type="number" name="system.hd.bonus" value="{{source.system.hd.bonus}}"></span>

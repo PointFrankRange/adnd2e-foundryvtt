@@ -19,5 +19,13 @@
     .special { color: var(--kit-muted); font-size: 12px; }
   }
   .creature-stats .detail-field-wide { grid-column: 1 / -1; }
+  // fix round 1: the unlocked HD row (count/die/bonus, 3 number inputs) and
+  // the Movement summary both live in a .detail-field-wide .val — the
+  // shared .val rule (styles/actor/pc.scss) sets white-space: nowrap +
+  // overflow: hidden, which clipped the HD row's third input (`bonus`)
+  // since 3 fixed-48px inputs + separator text overflow a single line.
+  // Letting this ONE .val wrap (not touching pc.scss's shared rule) fixes
+  // it without affecting any other kit sheet.
+  .creature-stats .detail-field-wide .val { white-space: normal; overflow: visible; }
   .creature-stats input[type="number"] { width: 48px; }
 }
