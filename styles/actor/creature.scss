@@ -18,7 +18,27 @@
     .name { flex: 1 1 auto; min-width: 0; font-weight: 700; }
     .special { color: var(--kit-muted); font-size: 12px; }
   }
-  .creature-move .kit-big { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  // dev-world fix 1: the kit's own `.pc-vitals .kit-stat .kit-big` rule
+  // (styles/actor/pc.scss) is a flex container with a fixed `height: 34px`
+  // — `text-overflow: ellipsis` never renders cleanly on that box, so a
+  // multi-mode movement summary was clipped mid-word with no ellipsis
+  // shown. Wrapping instead of truncating always shows the full value; the
+  // extra specificity (.pc-vitals .kit-stat.creature-move, matching the
+  // kit rule's own selector depth plus this box's own class) is required
+  // to win over pc.scss's same-property declarations, since @use "actor/pc"
+  // is loaded after @use "actor/creature" in styles/system.scss.
+  .pc-vitals .kit-stat.creature-move {
+    flex: 1 1 96px;
+    .kit-big {
+      font-size: 13px;
+      line-height: 1.15;
+      white-space: normal;
+      word-break: break-word;
+      height: auto;
+      min-height: 34px;
+      padding: 3px 4px;
+    }
+  }
   .kit-empty { font-style: italic; opacity: .8; padding: 4px 6px; }
   .gear .kit-name { cursor: default; }
   .creature-add-attack { margin-left: auto; }
