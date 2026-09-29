@@ -297,6 +297,34 @@ function buildInventory(input: CharacterSheetInput, fav: FavCheck): CharacterShe
 
 /* ---------- combat ---------- */
 
+/** Whether `weapon`'s effective mastery tier is Grand Mastery (3) — the only
+ *  tier that grants `weaponMasteryEffect`'s `extraAttacks`. Mirrors
+ *  combat-rolls.ts's `resolveProficiencyModifier` matching precedence (exact
+ *  specific-weapon match by `baseWeaponName` — falling back to the item's own
+ *  `name` — beats a group match by the weapon's own `proficiencyGroup`) and
+ *  its same weaponMastery-optional-rule tier cap, for display purposes only:
+ *  nothing in this codebase gates re-clicking Roll Attack, so this is purely
+ *  informational (see `grandMasteryExtraAttack`'s own doc comment). */
+function hasGrandMasteryExtraAttack(
+  weapon: NonNullable<PhysicalItemView["weapon"]>,
+  weaponName: string,
+  proficiencyItems: readonly WeaponProfView[],
+  optionalRules: CharacterSheetInput["optionalRules"],
+): boolean {
+  if (!(optionalRules.combatAndTacticsEnabled && optionalRules.weaponMastery)) return false;
+  const key = weapon.baseWeaponName || weaponName;
+  let exactTier: 0 | 1 | 2 | 3 | null = null;
+  let groupTier: 0 | 1 | 2 | 3 | null = null;
+  for (const p of proficiencyItems) {
+    if (!p.isGroup && p.weaponOrGroup === key) {
+      exactTier = p.masteryTier;
+      break;
+    }
+    if (p.isGroup && p.weaponOrGroup === weapon.proficiencyGroup && groupTier === null) groupTier = p.masteryTier;
+  }
+  return (exactTier ?? groupTier ?? 0) === 3;
+}
+
 function buildCombat(input: CharacterSheetInput, fav: FavCheck): CharacterSheetContext["combat"] {
   const isThief = input.classItems.some((c) => c.chassisId === "thief");
   const ammoItems = input.physicalItems.filter((i) => i.type === "ammo");
@@ -332,6 +360,7 @@ function buildCombat(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
           label: `${ammoItems.find((it) => it.id === a.id)!.name} (${a.quantity})`,
           selected: selected?.id === a.id,
         })),
+        grandMasteryExtraAttack: hasGrandMasteryExtraAttack(w, i.name, input.proficiencyItems.weapon, input.optionalRules),
       };
     });
 

@@ -154,6 +154,9 @@ export interface PhysicalItemView {
     /** blank means "use this item's own display `name`" for proficiency
      *  matching — see WeaponItemModel's baseWeaponName field doc comment. */
     baseWeaponName: string;
+    /** the weapon's own group tag (e.g. "Blades") — used to match a GROUP
+     *  weapon proficiency, mirroring combat-rolls.ts's roll-time lookup. */
+    proficiencyGroup: string;
     damageType: "slashing" | "piercing" | "bludgeoning" | "piercing-slashing" | "piercing-bludgeoning" | null;
     /** bow/crossbow only — what ammo this weapon takes, and the actor's currently-selected ammo item id */
     ammoType: string | null;
@@ -360,6 +363,12 @@ export interface CharacterSheetContext {
       /** bow/crossbow only — null for melee/thrown, which render no ammo selector */
       ammoType: string | null;
       ammoOptions: { value: string; label: string; selected: boolean }[];
+      /** true when this weapon's effective mastery tier is Grand Mastery (3)
+       *  — weaponMasteryEffect's extraAttacks: 1. Display-only: nothing in
+       *  this codebase gates re-clicking Roll Attack, so this just tells the
+       *  player they're entitled to a second attack this round; it does not
+       *  track or limit how many times they actually click it. */
+      grandMasteryExtraAttack: boolean;
     }[];
     acBreakdown: { label: string; value: number }[];
     armor: { id: string; name: string; equipped: boolean; isShield: boolean; baseAc: number }[];
