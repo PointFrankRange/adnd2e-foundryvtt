@@ -564,13 +564,13 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
             name: "Long Sword",
             type: "weapon",
             equipped: true,
-            weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee", damageType: "slashing", ammoType: null, selectedAmmoId: null },
+            weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee", baseWeaponName: "", damageType: "slashing", ammoType: null, selectedAmmoId: null },
           }),
           physItem({
             id: "w2",
             name: "Dagger",
             type: "weapon",
-            weapon: { damageVsSM: "1d4", damageVsL: null, speedFactor: 2, range: "10/20/30", category: "melee", damageType: "piercing", ammoType: null, selectedAmmoId: null },
+            weapon: { damageVsSM: "1d4", damageVsL: null, speedFactor: 2, range: "10/20/30", category: "melee", baseWeaponName: "", damageType: "piercing", ammoType: null, selectedAmmoId: null },
           }),
         ],
       }),
@@ -612,7 +612,7 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
           physItem({
             id: "bow1", name: "Short Bow", type: "weapon", equipped: true,
             weapon: {
-              damageVsSM: null, damageVsL: null, speedFactor: 7, range: "50/100/150", category: "bow", damageType: null,
+              damageVsSM: null, damageVsL: null, speedFactor: 7, range: "50/100/150", category: "bow", baseWeaponName: "", damageType: null,
               ammoType: "arrow", selectedAmmoId: null,
             },
           }),
@@ -640,7 +640,7 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
           physItem({
             id: "bow1", name: "Short Bow", type: "weapon", equipped: true,
             weapon: {
-              damageVsSM: null, damageVsL: null, speedFactor: 7, range: "50/100/150", category: "bow", damageType: null,
+              damageVsSM: null, damageVsL: null, speedFactor: 7, range: "50/100/150", category: "bow", baseWeaponName: "", damageType: null,
               ammoType: "arrow", selectedAmmoId: "ammo2",
             },
           }),
@@ -668,7 +668,7 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
           physItem({
             id: "bow1", name: "Short Bow", type: "weapon", equipped: true,
             weapon: {
-              damageVsSM: null, damageVsL: null, speedFactor: 7, range: "50/100/150", category: "bow", damageType: null,
+              damageVsSM: null, damageVsL: null, speedFactor: 7, range: "50/100/150", category: "bow", baseWeaponName: "", damageType: null,
               ammoType: "arrow", selectedAmmoId: null,
             },
           }),
@@ -807,7 +807,7 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
   });
 
   it("weapon proficiencies pass straight; nwp check targets are computed", () => {
-    const weapon: WeaponProfView = { id: "wp1", name: "Sword", weaponOrGroup: "long-sword", isGroup: false, slotsInvested: 1, masteryTier: 0, category: null, masteryTierLabelKey: null, canAdvanceMastery: false };
+    const weapon: WeaponProfView = { id: "wp1", name: "Sword", weaponOrGroup: "long-sword", isGroup: false, proficiencyGroup: "", slotsInvested: 1, masteryTier: 0, category: null, masteryTierLabelKey: null, canAdvanceMastery: false };
     const nwp: NwpView = {
       id: "n1",
       name: "Swimming",
@@ -1388,11 +1388,11 @@ describe("buildCharacterSheetContext — weapon specialization eligibility + rea
     id: "w1", name: "Long Sword", img: "", type: "weapon",
     quantity: 1, weight: 4, totalWeight: 4, location: "", equipped: true, identified: true, magicBonus: 0,
     isContainer: false, capacity: null, contentsWeightMultiplier: 1,
-    weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee", damageType: "slashing", ammoType: null, selectedAmmoId: null },
+    weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee", baseWeaponName: "", damageType: "slashing", ammoType: null, selectedAmmoId: null },
     ...over,
   });
   const weaponProf = (over: Partial<WeaponProfView> = {}): WeaponProfView => ({
-    id: "wp1", name: "Long Sword Proficiency", weaponOrGroup: "Long Sword", isGroup: false,
+    id: "wp1", name: "Long Sword Proficiency", weaponOrGroup: "Long Sword", isGroup: false, proficiencyGroup: "",
     slotsInvested: 1, masteryTier: 0, category: null, masteryTierLabelKey: null, canAdvanceMastery: false,
     ...over,
   });
@@ -1649,7 +1649,7 @@ describe("buildCharacterSheetContext — weapon specialization eligibility + rea
         physicalItems: [
           weaponItem({
             id: "w2", name: "Long Bow",
-            weapon: { damageVsSM: "1d6", damageVsL: "1d6", speedFactor: 7, range: "70/140/210", category: "bow", damageType: "piercing", ammoType: null, selectedAmmoId: null },
+            weapon: { damageVsSM: "1d6", damageVsL: "1d6", speedFactor: 7, range: "70/140/210", category: "bow", baseWeaponName: "", damageType: "piercing", ammoType: null, selectedAmmoId: null },
           }),
         ],
         proficiencyItems: {
@@ -1673,7 +1673,7 @@ describe("buildCharacterSheetContext — weapon specialization eligibility + rea
         physicalItems: [
           weaponItem({
             id: "w3", name: "Light Crossbow",
-            weapon: { damageVsSM: "1d4", damageVsL: "1d4", speedFactor: 8, range: "60/120/180", category: "crossbow", damageType: "piercing", ammoType: null, selectedAmmoId: null },
+            weapon: { damageVsSM: "1d4", damageVsL: "1d4", speedFactor: 8, range: "60/120/180", category: "crossbow", baseWeaponName: "", damageType: "piercing", ammoType: null, selectedAmmoId: null },
           }),
         ],
         proficiencyItems: {
@@ -1688,6 +1688,99 @@ describe("buildCharacterSheetContext — weapon specialization eligibility + rea
       }),
     );
     expect(c.skills.weapon.items[0]!.category).toBe("crossbow");
+  });
+
+  it("resolves category from proficiencyGroup even with no matching owned weapon — can specialize before owning the weapon", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [fighterClass],
+        physicalItems: [], // no owned weapon at all
+        proficiencyItems: { weapon: [weaponProf({ proficiencyGroup: "Blades" })], nonweapon: [] },
+        optionalRules: masteryOptionalRules,
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 4, spent: 1, available: 3 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      }),
+    );
+    const row = c.skills.weapon.items[0]!;
+    expect(row.category).toBe("melee");
+    expect(row.canAdvanceMastery).toBe(true);
+  });
+
+  it("proficiencyGroup 'Bows'/'Crossbows' resolve their own category with no owned weapon", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [fighterClass],
+        physicalItems: [],
+        proficiencyItems: {
+          weapon: [
+            weaponProf({ id: "wp1", weaponOrGroup: "Long Bow", proficiencyGroup: "Bows" }),
+            weaponProf({ id: "wp2", weaponOrGroup: "Light Crossbow", proficiencyGroup: "Crossbows" }),
+          ],
+          nonweapon: [],
+        },
+        optionalRules: masteryOptionalRules,
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 10, spent: 2, available: 8 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      }),
+    );
+    expect(c.skills.weapon.items[0]!.category).toBe("bow");
+    expect(c.skills.weapon.items[1]!.category).toBe("crossbow");
+  });
+
+  it("an unset/unrecognized proficiencyGroup falls back to the owned-weapon lookup, unchanged from before", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [fighterClass],
+        physicalItems: [weaponItem()],
+        proficiencyItems: { weapon: [weaponProf({ proficiencyGroup: "" })], nonweapon: [] },
+        optionalRules: masteryOptionalRules,
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 4, spent: 1, available: 3 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      }),
+    );
+    expect(c.skills.weapon.items[0]!.category).toBe("melee");
+  });
+
+  it("a renamed/magic weapon matches its proficiency via baseWeaponName, not its display name", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [fighterClass],
+        physicalItems: [
+          weaponItem({ name: "Long Sword +1", weapon: { ...weaponItem().weapon!, baseWeaponName: "Long Sword" } }),
+        ],
+        proficiencyItems: { weapon: [weaponProf()], nonweapon: [] }, // weaponOrGroup: "Long Sword"
+        optionalRules: masteryOptionalRules,
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 4, spent: 1, available: 3 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      }),
+    );
+    const row = c.skills.weapon.items[0]!;
+    expect(row.category).toBe("melee");
+    expect(row.canAdvanceMastery).toBe(true);
+  });
+
+  it("a renamed weapon with no baseWeaponName set no longer matches its proficiency (pre-existing exact-name gap)", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [fighterClass],
+        physicalItems: [weaponItem({ name: "Long Sword +1" })], // baseWeaponName still blank
+        proficiencyItems: { weapon: [weaponProf({ proficiencyGroup: "" })], nonweapon: [] },
+        optionalRules: masteryOptionalRules,
+        derived: {
+          ...input().derived,
+          proficiencies: { weapon: { total: 4, spent: 1, available: 3 }, nonweapon: { total: 3, spent: 0, available: 3 } },
+        },
+      }),
+    );
+    expect(c.skills.weapon.items[0]!.category).toBeNull();
   });
 
   it("checkTarget includes the (slotsInvested-1) bonus", () => {
@@ -1803,7 +1896,7 @@ describe("buildCharacterSheetContext — thief/bard skills + backstab eligibilit
           id: "w1", name: "Dagger", img: "", type: "weapon",
           quantity: 1, weight: 1, totalWeight: 1, location: "", equipped: true, identified: true, magicBonus: 0,
           isContainer: false, capacity: null, contentsWeightMultiplier: 1,
-          weapon: { damageVsSM: "1d4", damageVsL: "1d3", speedFactor: 2, range: null, category: "melee", damageType: "piercing", ammoType: null, selectedAmmoId: null },
+          weapon: { damageVsSM: "1d4", damageVsL: "1d3", speedFactor: 2, range: null, category: "melee", baseWeaponName: "", damageType: "piercing", ammoType: null, selectedAmmoId: null },
         }],
       }),
     );
@@ -1818,7 +1911,7 @@ describe("buildCharacterSheetContext — thief/bard skills + backstab eligibilit
           id: "w1", name: "Dagger", img: "", type: "weapon",
           quantity: 1, weight: 1, totalWeight: 1, location: "", equipped: true, identified: true, magicBonus: 0,
           isContainer: false, capacity: null, contentsWeightMultiplier: 1,
-          weapon: { damageVsSM: "1d4", damageVsL: "1d3", speedFactor: 2, range: null, category: "melee", damageType: "piercing", ammoType: null, selectedAmmoId: null },
+          weapon: { damageVsSM: "1d4", damageVsL: "1d3", speedFactor: 2, range: null, category: "melee", baseWeaponName: "", damageType: "piercing", ammoType: null, selectedAmmoId: null },
         }],
       }),
     );
@@ -1833,7 +1926,7 @@ describe("buildCharacterSheetContext — thief/bard skills + backstab eligibilit
           id: "w1", name: "Mace", img: "", type: "weapon",
           quantity: 1, weight: 6, totalWeight: 6, location: "", equipped: true, identified: true, magicBonus: 0,
           isContainer: false, capacity: null, contentsWeightMultiplier: 1,
-          weapon: { damageVsSM: "1d6", damageVsL: "1d6", speedFactor: 7, range: null, category: "melee", damageType: "bludgeoning", ammoType: null, selectedAmmoId: null },
+          weapon: { damageVsSM: "1d6", damageVsL: "1d6", speedFactor: 7, range: null, category: "melee", baseWeaponName: "", damageType: "bludgeoning", ammoType: null, selectedAmmoId: null },
         }],
       }),
     );
@@ -1872,7 +1965,7 @@ describe("buildCharacterSheetContext — thief/bard skills + backstab eligibilit
           id: "w1", name: "Dagger", img: "", type: "weapon",
           quantity: 1, weight: 1, totalWeight: 1, location: "", equipped: true, identified: true, magicBonus: 0,
           isContainer: false, capacity: null, contentsWeightMultiplier: 1,
-          weapon: { damageVsSM: "1d4", damageVsL: "1d3", speedFactor: 2, range: null, category: "melee", damageType: "piercing", ammoType: null, selectedAmmoId: null },
+          weapon: { damageVsSM: "1d4", damageVsL: "1d3", speedFactor: 2, range: null, category: "melee", baseWeaponName: "", damageType: "piercing", ammoType: null, selectedAmmoId: null },
         }],
       }),
     );
@@ -2189,7 +2282,7 @@ describe("buildCharacterSheetContext — sheet redesign R1 fields", () => {
       id: "w1", name: "Long Sword", img: "s.png", type: "weapon", quantity: 1, weight: 4, totalWeight: 4,
       location: "", equipped: true, identified: true, magicBonus: 0, isContainer: false, capacity: null,
       contentsWeightMultiplier: 1,
-      weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee", damageType: "slashing", ammoType: null, selectedAmmoId: null },
+      weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee", baseWeaponName: "", damageType: "slashing", ammoType: null, selectedAmmoId: null },
     };
     const c = buildCharacterSheetContext(input({ physicalItems: [sword], favorites: [{ kind: "item", id: "w1" }] }));
     expect(c.favorites.canFavorite).toBe(true);

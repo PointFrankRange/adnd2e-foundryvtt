@@ -164,6 +164,7 @@ export function toPhysicalView(it: RawItem): PhysicalItemView {
       speedFactor: Number(s.speedFactor ?? 0),
       range: rangeToString(s.range),
       category: (s.category as "melee" | "thrown" | "bow" | "crossbow" | undefined) ?? "melee",
+      baseWeaponName: String(s.baseWeaponName ?? ""),
       damageType: (s.damageType as PhysicalItemView["weapon"] extends undefined ? never : NonNullable<PhysicalItemView["weapon"]>["damageType"]) ?? null,
       ammoType: (s.ammoType as string | null) ?? null,
       selectedAmmoId: (s.selectedAmmoId as string | null) ?? null,
@@ -192,6 +193,7 @@ export function toWeaponProfView(it: RawItem): WeaponProfView {
   const s = it.system as {
     weaponOrGroup: string;
     isGroup: boolean;
+    proficiencyGroup?: string;
     slotsInvested: number;
     masteryTier: 0 | 1 | 2 | 3;
   };
@@ -200,6 +202,7 @@ export function toWeaponProfView(it: RawItem): WeaponProfView {
     name: it.name,
     weaponOrGroup: s.weaponOrGroup,
     isGroup: s.isGroup,
+    proficiencyGroup: s.proficiencyGroup ?? "",
     slotsInvested: s.slotsInvested,
     masteryTier: s.masteryTier,
     // Placeholders — buildWeaponProfRow (context.ts) recomputes both from

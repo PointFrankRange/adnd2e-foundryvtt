@@ -4,6 +4,7 @@ import {
   weaponSpecializationSlotCost,
   weaponSpecializationEffect,
   canWeaponSpecialize,
+  categoryForProficiencyGroup,
 } from "../../../src/core/proficiencies/weapon";
 
 describe("weaponAttackPenalty()", () => {
@@ -46,5 +47,25 @@ describe("canWeaponSpecialize()", () => {
     expect(canWeaponSpecialize({ specializationAllowed: true, isSingleClass: true })).toBe(true);
     expect(canWeaponSpecialize({ specializationAllowed: true, isSingleClass: false })).toBe(false);
     expect(canWeaponSpecialize({ specializationAllowed: false, isSingleClass: true })).toBe(false);
+  });
+});
+
+describe("categoryForProficiencyGroup()", () => {
+  it("Bows and Crossbows get their own category", () => {
+    expect(categoryForProficiencyGroup("Bows")).toBe("bow");
+    expect(categoryForProficiencyGroup("Crossbows")).toBe("crossbow");
+  });
+  it("every other known group collapses to melee", () => {
+    expect(categoryForProficiencyGroup("Blades")).toBe("melee");
+    expect(categoryForProficiencyGroup("Bludgeoning")).toBe("melee");
+    expect(categoryForProficiencyGroup("Hafted")).toBe("melee");
+    expect(categoryForProficiencyGroup("Hurled")).toBe("melee");
+    expect(categoryForProficiencyGroup("Pole Arms")).toBe("melee");
+    expect(categoryForProficiencyGroup("Slings")).toBe("melee");
+  });
+  it("an empty or unrecognized group is null, not a guess", () => {
+    expect(categoryForProficiencyGroup("")).toBeNull();
+    expect(categoryForProficiencyGroup("bow")).toBeNull(); // case-sensitive
+    expect(categoryForProficiencyGroup("Typo'd Group")).toBeNull();
   });
 });

@@ -151,6 +151,9 @@ export interface PhysicalItemView {
   weapon?: {
     damageVsSM: string | null; damageVsL: string | null; speedFactor: number; range: string | null;
     category: "melee" | "thrown" | "bow" | "crossbow";
+    /** blank means "use this item's own display `name`" for proficiency
+     *  matching — see WeaponItemModel's baseWeaponName field doc comment. */
+    baseWeaponName: string;
     damageType: "slashing" | "piercing" | "bludgeoning" | "piercing-slashing" | "piercing-bludgeoning" | null;
     /** bow/crossbow only — what ammo this weapon takes, and the actor's currently-selected ammo item id */
     ammoType: string | null;
@@ -168,6 +171,10 @@ export interface PhysicalItemView {
 
 export interface WeaponProfView {
   id: string; name: string; weaponOrGroup: string; isGroup: boolean;
+  /** Sub-project 8b's weapon-group tag (e.g. "Blades") — blank on a group
+   *  proficiency or a pre-8b/hand-made one that hasn't had it set. Drives
+   *  `category`'s resolution before falling back to an owned-weapon lookup. */
+  proficiencyGroup: string;
   slotsInvested: number; masteryTier: 0 | 1 | 2 | 3;
   /** filled by context.ts's buildWeaponProfRow — sheet.ts's toWeaponProfView
    *  placeholder is null/false until then, same pattern as NwpView's
