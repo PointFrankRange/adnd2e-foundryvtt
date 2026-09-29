@@ -17,7 +17,7 @@ import type { EffectTarget } from "../relay/apply-effect";
  * ------------------------------------------------------------------------- */
 
 async function onRollDamage(button: HTMLButtonElement): Promise<void> {
-  const { actorUuid, weaponItemId, ammoItemId, targetSize, backstabMultiplier, critMultiplier, critFlatBonus } = button.dataset as {
+  const { actorUuid, weaponItemId, ammoItemId, targetSize, backstabMultiplier, critMultiplier, critFlatBonus, specializationBonus } = button.dataset as {
     actorUuid?: string;
     weaponItemId?: string;
     ammoItemId?: string;
@@ -25,6 +25,7 @@ async function onRollDamage(button: HTMLButtonElement): Promise<void> {
     backstabMultiplier?: string;
     critMultiplier?: string;
     critFlatBonus?: string;
+    specializationBonus?: string;
   };
   const actor = (fromUuidSync as (uuid: string) => unknown)(actorUuid ?? "") as {
     name: string;
@@ -52,7 +53,10 @@ async function onRollDamage(button: HTMLButtonElement): Promise<void> {
   );
   if (!dice) return; // no dice modeled (no ammo item resolved for a bow/crossbow)
 
-  const { total: damageBonus } = damageModifiers({ weaponMagicBonus: weapon.system.magicBonus });
+  const { total: damageBonus } = damageModifiers({
+    weaponMagicBonus: weapon.system.magicBonus,
+    specializationBonus: specializationBonus ? Number(specializationBonus) : 0,
+  });
   const formula = damageFormula(dice, damageBonus);
   const roll = await new Roll(formula).evaluate();
   const rolledBaseDamage = (roll.total ?? 0) - damageBonus;

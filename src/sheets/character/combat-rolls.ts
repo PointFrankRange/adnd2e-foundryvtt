@@ -120,8 +120,12 @@ interface GenericAttackerItem {
  *  tiers 2-3 (Mastery/Grand Mastery) are gated behind the `weaponMastery`
  *  optional rule and capped back down to tier 1 when it's off. ROLL-time rule:
  *  `getOptionalRules()` is read fresh on every attack, so toggling a setting
- *  needs no reload. */
-function resolveProficiencyModifier(actor: AttackerActor, weapon: WeaponItemHandle): number {
+ *  needs no reload. Returns both halves of `weaponMasteryEffect` — `damage`
+ *  rides along in the attack card's `damageContext` for the separate "Roll
+ *  Damage" button to apply later (README's tracked gap: this bonus was
+ *  computed here but never carried anywhere). Grand Mastery's `extraAttacks`
+ *  is deliberately still dropped — out of scope for this pass. */
+function resolveProficiencyModifier(actor: AttackerActor, weapon: WeaponItemHandle): { toHit: number; damage: number } {
   const rules = getOptionalRules();
   let exactMatch = false;
   let exactTier: 0 | 1 | 2 | 3 = 0;
@@ -165,7 +169,7 @@ function resolveProficiencyModifier(actor: AttackerActor, weapon: WeaponItemHand
 
   const base = weaponAttackPenalty(nonProficiencyPenalty, mode);
   // "related" and "non-proficient" never carry a mastery bonus.
-  if (!isProficient || masteryTier === 0) return base;
+  if (!isProficient || masteryTier === 0) return { toHit: base, damage: 0 };
 
   // Tier 1 (Specialized) is the pre-existing, always-on mechanic — it applies
   // regardless of the weaponMastery toggle, exactly like it did before this
@@ -181,7 +185,8 @@ function resolveProficiencyModifier(actor: AttackerActor, weapon: WeaponItemHand
   const effectiveTier = masteryEnabled ? masteryTier : (Math.min(masteryTier, 1) as 0 | 1);
 
   const category = weapon.system.category === "bow" ? "bow" : weapon.system.category === "crossbow" ? "crossbow" : "melee";
-  return base + weaponMasteryEffect(effectiveTier, category).toHit;
+  const effect = weaponMasteryEffect(effectiveTier, category);
+  return { toHit: base + effect.toHit, damage: effect.damage };
 }
 
 /** Resolves whether `actor` is a thief and, if so, its thief-class level
@@ -308,9 +313,10 @@ export async function rollAttack(
     (maneuverDescriptor.category === "calledShot" ? rules.calledShots : rules.combatManeuvers);
   const effectiveManeuverId = maneuverAllowed ? maneuverId : null;
   const maneuverPenalty = maneuverAllowed ? (maneuverDescriptor?.attackPenalty ?? 0) : 0;
+  const proficiencyEffect = resolveProficiencyModifier(actor, weapon);
   const { total: attackBonus, breakdown } = attackModifiers({
     weaponMagicBonus: weapon.system.magicBonus,
-    proficiencyModifier: resolveProficiencyModifier(actor, weapon),
+    proficiencyModifier: proficiencyEffect.toHit,
     // STR/DEX modifiers remain out of scope (parent spec §7 boundary,
     // unchanged by this sub-project).
     situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses) + armorVsWeaponModifier + maneuverPenalty,
@@ -379,6 +385,7 @@ export async function rollAttack(
           backstabMultiplier: backstabActive ? backstabMultiplier(thiefLevel) : null,
           critMultiplier: crit?.damageMultiplier ?? null,
           critFlatBonus: crit?.flatBonus ?? 0,
+          specializationBonus: proficiencyEffect.damage,
         }
       : null,
   });

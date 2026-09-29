@@ -27,7 +27,7 @@ export interface AttackCardInput {
   /** carried into the chat message's flags so the "Roll Damage" button knows
    *  what to roll; null when there is no weapon item to roll damage from
    *  (should not normally happen — a "Roll Attack" always originates from a weapon row) */
-  damageContext: { weaponItemId: string; actorUuid: string; targetSize: string | null; ammoItemId: string | null; backstabMultiplier: number | null; critMultiplier: number | null; critFlatBonus: number } | null;
+  damageContext: { weaponItemId: string; actorUuid: string; targetSize: string | null; ammoItemId: string | null; backstabMultiplier: number | null; critMultiplier: number | null; critFlatBonus: number; specializationBonus: number } | null;
   /** an i18n key naming the crit tier ("solid"/"devastating"/"brutal"), or
    *  null when this hit was not a (non-backstab) natural 20. */
   critLabel: string | null;
@@ -47,7 +47,7 @@ export interface AttackCardContext {
   hit: boolean; autoHit: boolean; autoMiss: boolean; backstab: boolean;
   /** zero-value modifiers are omitted — a clean card, not a wall of "+0" lines */
   modifierBreakdown: ModifierLine[];
-  damageContext: { weaponItemId: string; actorUuid: string; targetSize: string | null; ammoItemId: string | null; backstabMultiplier: number | null; critMultiplier: number | null; critFlatBonus: number } | null;
+  damageContext: { weaponItemId: string; actorUuid: string; targetSize: string | null; ammoItemId: string | null; backstabMultiplier: number | null; critMultiplier: number | null; critFlatBonus: number; specializationBonus: number } | null;
   critLabel: string | null;
   fumbleLabel: string | null;
   maneuverLabel: string | null;
