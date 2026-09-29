@@ -41,6 +41,15 @@
           {{#if w.range}}<span class="range">{{w.range}}</span>{{/if}}
           {{#if w.equipped}}
             {{#if w.canBackstab}}<label class="backstab-label"><input type="checkbox" class="backstab-toggle" data-item-id="{{w.id}}"> {{localize 'ADND2E.sheet.combat.backstab'}}</label>{{/if}}
+            {{#if w.ammoType}}
+              <select class="ammo-select" data-item-id="{{w.id}}" data-field="selectedAmmoId">
+                {{#if w.ammoOptions.length}}
+                  {{#each w.ammoOptions as |opt|}}<option value="{{opt.value}}" {{#if opt.selected}}selected{{/if}}>{{opt.label}}</option>{{/each}}
+                {{else}}
+                  <option value="" disabled selected>{{localize 'ADND2E.sheet.combat.noAmmo'}}</option>
+                {{/if}}
+              </select>
+            {{/if}}
             {{#if @root.adnd2e.combat.maneuverOptions.length}}
               <select class="maneuver-select" data-item-id="{{w.id}}">
                 <option value="">{{localize 'ADND2E.sheet.combat.maneuverNone'}}</option>

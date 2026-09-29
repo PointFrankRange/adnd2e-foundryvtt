@@ -727,7 +727,9 @@ export class Adnd2eCharacterSheet extends Base {
     const backstabCheckbox = weaponRow?.querySelector<HTMLInputElement>(".backstab-toggle");
     const maneuverSelect = weaponRow?.querySelector<HTMLSelectElement>(".maneuver-select");
     const maneuverId = (maneuverSelect?.value || null) as ManeuverId | null;
-    await rollAttack(this.document as never, weaponItemId, backstabCheckbox?.checked ?? false, maneuverId);
+    const ammoSelect = weaponRow?.querySelector<HTMLSelectElement>(".ammo-select");
+    const ammoItemId = ammoSelect?.value || null;
+    await rollAttack(this.document as never, weaponItemId, backstabCheckbox?.checked ?? false, maneuverId, ammoItemId);
   }
 
   static async #onRollSave(

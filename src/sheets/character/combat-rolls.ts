@@ -1,5 +1,7 @@
 import { buildAttackCardContext } from "../../combat/attack-card";
 import { buildSaveCardContext } from "../../combat/save-card";
+import { matchingAmmo } from "../../combat/ammo";
+import type { AmmoStock } from "../../combat/ammo";
 import { blindedAttackPenalty, canAct, heldAttackBonus, proneArmorClassPenalty } from "../../combat/condition-effects";
 import { getChassis } from "../../core/classes/chassis";
 import { attackModifiers, hitResult } from "../../core/combat/attack";
@@ -87,11 +89,15 @@ interface WeaponItemHandle {
   system: {
     category: string; proficiencyGroup: string; materialToHit: number; magicBonus: number;
     damageType: string | null;
+    /** bow/crossbow only — null for melee/thrown */
+    ammoType: string | null;
   };
 }
 /** Minimal shape needed to find the actor's class chassis and weapon-proficiency
- *  items without a dedicated Item subtype per iteration entry. */
+ *  items without a dedicated Item subtype per iteration entry — also used to
+ *  find the actor's owned `ammo` items for a bow/crossbow attack. */
 interface GenericAttackerItem {
+  id: string;
   type: string;
   system: Record<string, unknown>;
 }
@@ -211,6 +217,7 @@ export async function rollAttack(
   weaponItemId: string,
   backstab = false,
   maneuverId: ManeuverId | null = null,
+  ammoItemId: string | null = null,
 ): Promise<void> {
   const weapon = actor.items.get(weaponItemId);
   if (!weapon) return;
@@ -218,6 +225,30 @@ export async function rollAttack(
   if (!canAct(actor.statuses)) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.attack.cannotActWarning"));
     return;
+  }
+
+  // A bow/crossbow deals no damage of its own — it must have a valid,
+  // in-stock ammo item selected before anything else happens, checked here
+  // (before the target/manual-AC prompt) so there's nothing to loose and
+  // nothing to roll for damage without one.
+  const weaponAmmoType = weapon.system.ammoType;
+  let ammoToConsume: { id: string; quantity: number; update(d: Record<string, unknown>): Promise<unknown> } | null = null;
+  if (weaponAmmoType) {
+    const ammoItems = [...actor.items].filter((i) => i.type === "ammo");
+    const stock: AmmoStock[] = ammoItems.map((i) => ({
+      id: i.id,
+      ammoType: String((i.system as { ammoType?: string }).ammoType ?? ""),
+      quantity: Number((i.system as { quantity?: number }).quantity ?? 0),
+    }));
+    const chosen = ammoItemId ? matchingAmmo(stock, weaponAmmoType).find((a) => a.id === ammoItemId) : undefined;
+    if (!chosen) {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.attack.noAmmoWarning"));
+      return;
+    }
+    const handle = ammoItems.find((i) => i.id === chosen.id)! as unknown as {
+      id: string; update(d: Record<string, unknown>): Promise<unknown>;
+    };
+    ammoToConsume = { id: handle.id, quantity: chosen.quantity, update: handle.update.bind(handle) };
   }
 
   const targets = [...(game as unknown as { user: { targets: Iterable<{ name: string; actor: unknown }> } }).user.targets];
@@ -282,6 +313,12 @@ export async function rollAttack(
   });
   const formula = attackFormula(attackBonus);
   const roll = await new Roll(formula).evaluate();
+  // Consumed here — hit or miss — and only after every earlier return point
+  // (canAct, ammo validation, the manual-AC prompt) has passed, so cancelling
+  // that prompt never costs an arrow.
+  if (ammoToConsume) {
+    await ammoToConsume.update({ "system.quantity": ammoToConsume.quantity - 1 });
+  }
   const naturalD20 = roll.dice[0]?.total ?? 0;
   const { isThief, thiefLevel } = resolveThiefBackstabInfo(actor);
   const backstabEligible = isThief && canBackstab({ category: weapon.system.category as never, damageType: weapon.system.damageType as never });
@@ -333,7 +370,8 @@ export async function rollAttack(
     maneuverLabel: effectiveManeuverId && maneuverEffect ? `ADND2E.chat.attack.maneuverLabel.${effectiveManeuverId}` : null,
     damageContext: hit.hit
       ? {
-          weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize, ammoItemId: null,
+          weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize,
+          ammoItemId: ammoToConsume?.id ?? null,
           backstabMultiplier: backstabActive ? backstabMultiplier(thiefLevel) : null,
           critMultiplier: crit?.damageMultiplier ?? null,
           critFlatBonus: crit?.flatBonus ?? 0,

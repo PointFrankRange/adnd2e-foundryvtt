@@ -346,6 +346,7 @@
         "backstab": "Backstab",
         "backstabApplied": "×{multiplier} backstab!",
         "maneuverNone": "None",
+        "noAmmo": "No ammo",
         "maneuver": {
           "calledShotHead": "Called Shot: Head",
           "calledShotHand": "Called Shot: Weapon Hand",
@@ -520,6 +521,7 @@
         "modRange": "Range", "modSituational": "Situational",
         "rollDamage": "Roll Damage",
         "cannotActWarning": "This actor is stunned or held and cannot attack this round.",
+        "noAmmoWarning": "No matching ammunition is equipped for this weapon.",
         "crit": {
           "solid": "Critical hit!",
           "devastating": "Devastating critical hit!",
