@@ -142,7 +142,7 @@ export interface RaceItemView {
 }
 
 export interface PhysicalItemView {
-  id: string; name: string; img: string; type: "weapon" | "armor" | "equipment";
+  id: string; name: string; img: string; type: "weapon" | "armor" | "equipment" | "ammo";
   quantity: number; weight: number; totalWeight: number;
   location: string; equipped: boolean; identified: boolean; magicBonus: number;
   /** equipment only */
@@ -152,9 +152,18 @@ export interface PhysicalItemView {
     damageVsSM: string | null; damageVsL: string | null; speedFactor: number; range: string | null;
     category: "melee" | "thrown" | "bow" | "crossbow";
     damageType: "slashing" | "piercing" | "bludgeoning" | "piercing-slashing" | "piercing-bludgeoning" | null;
+    /** bow/crossbow only — what ammo this weapon takes, and the actor's currently-selected ammo item id */
+    ammoType: string | null;
+    selectedAmmoId: string | null;
   };
   /** armor only */
   armor?: { baseAc: number; isShield: boolean; shieldAcBonus: number; armorType: ArmorType };
+  /** ammo only */
+  ammo?: {
+    ammoType: string;
+    damageVsSM: string; damageVsL: string;
+    damageType: "slashing" | "piercing" | "bludgeoning" | "piercing-slashing" | "piercing-bludgeoning";
+  };
 }
 
 export interface WeaponProfView {
@@ -338,7 +347,13 @@ export interface CharacterSheetContext {
     sections: InventorySection[];
   };
   combat: {
-    weapons: { id: string; name: string; equipped: boolean; toHitNote: string; damageNote: string; speedFactor: number; range: string | null; canBackstab: boolean; favorite: boolean }[];
+    weapons: {
+      id: string; name: string; equipped: boolean; toHitNote: string; damageNote: string;
+      speedFactor: number; range: string | null; canBackstab: boolean; favorite: boolean;
+      /** bow/crossbow only — null for melee/thrown, which render no ammo selector */
+      ammoType: string | null;
+      ammoOptions: { value: string; label: string; selected: boolean }[];
+    }[];
     acBreakdown: { label: string; value: number }[];
     armor: { id: string; name: string; equipped: boolean; isShield: boolean; baseAc: number }[];
     maneuverOptions: { value: string; label: string }[];

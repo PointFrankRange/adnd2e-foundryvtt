@@ -30,6 +30,8 @@ import { canWeaponSpecialize } from "../../core/proficiencies/weapon";
 import { weaponMasteryTierCost } from "../../core/proficiencies/weapon-mastery";
 import { bardSkillBaseScore, classifyThiefArmor, resolveBardSkill, resolveThiefSkill, thiefSkillBaseScore, thiefSkillPerSkillCap } from "../../core/proficiencies/thief-skills";
 import { canBackstab } from "../../core/weapons/backstab";
+import { matchingAmmo, defaultAmmoSelection } from "../../combat/ammo";
+import type { AmmoStock } from "../../combat/ammo";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { canMemorizePriestSpell } from "../../magic/priest-sphere-access";
 import { groupInventory } from "./grouping";
@@ -297,20 +299,39 @@ function buildInventory(input: CharacterSheetInput, fav: FavCheck): CharacterShe
 
 function buildCombat(input: CharacterSheetInput, fav: FavCheck): CharacterSheetContext["combat"] {
   const isThief = input.classItems.some((c) => c.chassisId === "thief");
+  const ammoItems = input.physicalItems.filter((i) => i.type === "ammo");
+  const ammoStock: AmmoStock[] = ammoItems.map((i) => ({
+    id: i.id,
+    ammoType: i.ammo!.ammoType,
+    quantity: i.quantity,
+  }));
+
   const weapons = input.physicalItems
     .filter((i) => i.type === "weapon")
     .map((i) => {
       const w = i.weapon as NonNullable<PhysicalItemView["weapon"]>;
+      const ammoCandidates = w.ammoType ? matchingAmmo(ammoStock, w.ammoType) : [];
+      const selected = w.ammoType ? defaultAmmoSelection(ammoCandidates, w.selectedAmmoId) : null;
+      const selectedAmmoItem = selected ? ammoItems.find((a) => a.id === selected.id) : undefined;
+      const damageNote = w.ammoType
+        ? [selectedAmmoItem?.ammo?.damageVsSM, selectedAmmoItem?.ammo?.damageVsL].filter(Boolean).join(" / ")
+        : [w.damageVsSM, w.damageVsL].filter(Boolean).join(" / ");
       return {
         id: i.id,
         name: i.name,
         equipped: i.equipped,
         toHitNote: "",
-        damageNote: [w.damageVsSM, w.damageVsL].filter(Boolean).join(" / "),
+        damageNote,
         speedFactor: w.speedFactor,
         range: w.range,
         canBackstab: isThief && canBackstab({ category: w.category, damageType: w.damageType }),
         favorite: fav("item", i.id),
+        ammoType: w.ammoType,
+        ammoOptions: ammoCandidates.map((a) => ({
+          value: a.id,
+          label: `${ammoItems.find((it) => it.id === a.id)!.name} (${a.quantity})`,
+          selected: selected?.id === a.id,
+        })),
       };
     });
 
