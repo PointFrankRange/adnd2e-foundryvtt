@@ -5,6 +5,7 @@ import {
   weaponSpecializationEffect,
   canWeaponSpecialize,
   categoryForProficiencyGroup,
+  WEAPON_PROFICIENCY_GROUPS,
 } from "../../../src/core/proficiencies/weapon";
 
 describe("weaponAttackPenalty()", () => {
@@ -67,5 +68,18 @@ describe("categoryForProficiencyGroup()", () => {
     expect(categoryForProficiencyGroup("")).toBeNull();
     expect(categoryForProficiencyGroup("bow")).toBeNull(); // case-sensitive
     expect(categoryForProficiencyGroup("Typo'd Group")).toBeNull();
+  });
+  it("every canonical group resolves to a non-null category", () => {
+    for (const group of WEAPON_PROFICIENCY_GROUPS) {
+      expect(categoryForProficiencyGroup(group)).not.toBeNull();
+    }
+  });
+});
+
+describe("WEAPON_PROFICIENCY_GROUPS", () => {
+  it("is the 8 fixed Sub-project 8b group names", () => {
+    expect(WEAPON_PROFICIENCY_GROUPS).toEqual([
+      "Blades", "Bludgeoning", "Bows", "Crossbows", "Hafted", "Hurled", "Pole Arms", "Slings",
+    ]);
   });
 });

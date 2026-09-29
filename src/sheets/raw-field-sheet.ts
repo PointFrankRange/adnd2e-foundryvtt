@@ -137,6 +137,7 @@ function walk(
       const choices = toChoiceRows((field as unknown as { choices?: unknown }).choices, value);
       if (choices && choices.length) {
         const nullable = (field as unknown as { nullable?: boolean }).nullable === true;
+        const blank = (field as unknown as { blank?: boolean }).blank === true;
         if (nullable) {
           // A bare blank <option value=""> alone throws `"" is not a valid choice`
           // and aborts the save; pair it with `data-null="true"` (template) so the
@@ -146,6 +147,21 @@ function walk(
             value: "",
             label: "—",
             selected: value === null || value === undefined,
+          });
+        } else if (blank && !choices.some((c) => c.value === "")) {
+          // Not nullable, but "" is itself a valid stored value for a blank
+          // field (its own "unset" sentinel) — unlike the nullable case
+          // above, no data-null round-trip is needed, the <select> submits ""
+          // directly and the field already accepts it. Without this, an
+          // unset value has no matching <option> and the browser silently
+          // defaults to the first real choice, which then overwrites the
+          // blank value on the next unrelated save. Skipped when "" is
+          // already an explicit member of `choices` (e.g. creature.ts's
+          // `group` field) to avoid a redundant second blank option.
+          choices.unshift({
+            value: "",
+            label: "—",
+            selected: value === "" || value === undefined,
           });
         }
         out.push({ path, label: humanizeKey(key), indent: depth * 12, kind: "select", value, choices, nullable });

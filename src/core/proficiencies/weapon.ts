@@ -49,10 +49,17 @@ export function canWeaponSpecialize(input: {
   return input.specializationAllowed && input.isSingleClass;
 }
 
-/** Sub-project 8b's 8 fixed weapon-proficiency-group names that are melee
- *  (everything except the two missile groups, which get their own
- *  SpecializationCategory bucket below). */
-const MELEE_PROFICIENCY_GROUPS = new Set(["Blades", "Bludgeoning", "Hafted", "Hurled", "Pole Arms", "Slings"]);
+/** Sub-project 8b's 8 fixed weapon-proficiency-group names (the `weapon` and
+ *  `weaponProficiency` item schemas both use this as their `proficiencyGroup`
+ *  field's `choices` — the single source of truth for the constrained list). */
+export const WEAPON_PROFICIENCY_GROUPS: readonly string[] = [
+  "Blades", "Bludgeoning", "Bows", "Crossbows", "Hafted", "Hurled", "Pole Arms", "Slings",
+];
+
+/** The 6 of `WEAPON_PROFICIENCY_GROUPS` that are melee (everything except the
+ *  two missile groups, which get their own SpecializationCategory bucket
+ *  below). */
+const MELEE_PROFICIENCY_GROUPS = new Set(WEAPON_PROFICIENCY_GROUPS.filter((g) => g !== "Bows" && g !== "Crossbows"));
 
 /**
  * A specific-weapon proficiency's specialization category, derived from its

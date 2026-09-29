@@ -83,3 +83,5 @@ export const ATTACK_TYPES: readonly string[] = ["melee", "ranged"];
 export {
   TRAIT_EFFECT_KINDS, TRAIT_ATTACK_MODES, TRAIT_PROFICIENCY_TRACKS, TRAIT_SAVE_CATEGORIES,
 } from "../../core/skills/traits";
+
+export { WEAPON_PROFICIENCY_GROUPS } from "../../core/proficiencies/weapon";
