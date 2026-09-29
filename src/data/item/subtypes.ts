@@ -1,4 +1,4 @@
-// The eleven Item sub-types this system registers (must equal system.json
+// The twelve Item sub-types this system registers (must equal system.json
 // documentTypes.Item — asserted in tests/data/subtypes.test.ts).
 export type ItemSubtype =
   | "class"
