@@ -345,6 +345,7 @@
         "rollSave": "Save",
         "backstab": "Backstab",
         "backstabApplied": "×{multiplier} backstab!",
+        "grandMasteryExtraAttack": "Grand Mastery: +1 attack/round",
         "maneuverNone": "None",
         "noAmmo": "No ammo",
         "maneuver": {
