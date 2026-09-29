@@ -157,6 +157,9 @@ export interface PhysicalItemView {
     /** the weapon's own group tag (e.g. "Blades") — used to match a GROUP
      *  weapon proficiency, mirroring combat-rolls.ts's roll-time lookup. */
     proficiencyGroup: string;
+    /** PHB Table 35 bucket for this weapon's specialist attacks/round rate —
+     *  "" means unset (no rate shown). See WeaponItemModel's own field doc. */
+    specialistWeaponClass: string;
     damageType: "slashing" | "piercing" | "bludgeoning" | "piercing-slashing" | "piercing-bludgeoning" | null;
     /** bow/crossbow only — what ammo this weapon takes, and the actor's currently-selected ammo item id */
     ammoType: string | null;
@@ -369,6 +372,15 @@ export interface CharacterSheetContext {
        *  player they're entitled to a second attack this round; it does not
        *  track or limit how many times they actually click it. */
       grandMasteryExtraAttack: boolean;
+      /** PHB Table 35: this weapon's specialist attacks-per-round rate, when
+       *  the actor is a single-class fighter Specialized (mastery tier ≥ 1)
+       *  in this weapon AND its `specialistWeaponClass` is set — null
+       *  otherwise. Display-only, same static-rate philosophy as
+       *  `grandMasteryExtraAttack` (no live combat-round tracking): shows
+       *  e.g. "3 attacks / 2 rounds", the player tracks which round
+       *  themselves. Independent of `grandMasteryExtraAttack` — both can
+       *  apply to the same weapon at once. */
+      specialistAttackRate: { attacks: number; rounds: number } | null;
     }[];
     acBreakdown: { label: string; value: number }[];
     armor: { id: string; name: string; equipped: boolean; isShield: boolean; baseAc: number }[];

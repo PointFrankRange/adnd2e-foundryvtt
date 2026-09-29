@@ -346,6 +346,8 @@
         "backstab": "Backstab",
         "backstabApplied": "×{multiplier} backstab!",
         "grandMasteryExtraAttack": "Grand Mastery: +1 attack/round",
+        "specialistAttackRateBadge": "{attacks}/{rounds} attacks",
+        "specialistAttackRateTitle": "PHB Table 35: {attacks} attacks per {rounds} rounds — you decide which round gets the extra attack",
         "maneuverNone": "None",
         "noAmmo": "No ammo",
         "maneuver": {

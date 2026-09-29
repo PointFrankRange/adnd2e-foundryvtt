@@ -11,6 +11,14 @@ export type SpecialistWeaponClass =
   | "thrown-dart"
   | "other-missile";
 
+/** The 6 SpecialistWeaponClass members — the single source of truth for the
+ *  `weapon` item schema's `specialistWeaponClass` field's `choices` (nothing
+ *  on a weapon item otherwise distinguishes e.g. a light from a heavy
+ *  crossbow, so the GM sets this explicitly per weapon when it matters). */
+export const SPECIALIST_WEAPON_CLASSES: readonly SpecialistWeaponClass[] = [
+  "melee", "light-crossbow", "heavy-crossbow", "thrown-dagger", "thrown-dart", "other-missile",
+];
+
 export interface AttackRate {
   attacks: number;
   rounds: number;

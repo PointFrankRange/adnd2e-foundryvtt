@@ -1,4 +1,4 @@
-import { DAMAGE_TYPES, WEAPON_CATEGORIES, WEAPON_PROFICIENCY_GROUPS, WEAPON_SIZES } from "./choices";
+import { DAMAGE_TYPES, SPECIALIST_WEAPON_CLASSES, WEAPON_CATEGORIES, WEAPON_PROFICIENCY_GROUPS, WEAPON_SIZES } from "./choices";
 import { physicalItemSchema } from "../common/physical-item";
 import { toWeaponData } from "../derive/weapon";
 import { totalWeight } from "../derive/physical-item";
@@ -40,6 +40,14 @@ export class WeaponItemModel extends Adnd2eItemModel {
        *  match (combat-rolls.ts's resolveProficiencyModifier, context.ts's
        *  resolveWeaponCategory) holds regardless of the display name. */
       baseWeaponName: new StringField({ required: true, blank: true, initial: "" }),
+      /** PHB Table 35 (`core/weapons/specialist-attacks.ts`): which of the 6
+       *  SpecialistWeaponClass buckets this weapon falls into for a fighter
+       *  specialist's attacks-per-round rate — blank means "not set," so no
+       *  rate is shown (matches this field's own blank-until-set precedent,
+       *  same as proficiencyGroup). Nothing else on this schema can derive
+       *  it (e.g. `category:"crossbow"` doesn't say light vs heavy), so the
+       *  GM sets it explicitly per weapon when it matters. */
+      specialistWeaponClass: new StringField({ required: true, blank: true, initial: "", choices: SPECIALIST_WEAPON_CLASSES }),
       ammoType: new StringField({ required: true, nullable: true, initial: null }),
       selectedAmmoId: new StringField({ required: true, nullable: true, initial: null }),
     };
