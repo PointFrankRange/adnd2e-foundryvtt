@@ -333,7 +333,7 @@ export async function rollAttack(
     maneuverLabel: effectiveManeuverId && maneuverEffect ? `ADND2E.chat.attack.maneuverLabel.${effectiveManeuverId}` : null,
     damageContext: hit.hit
       ? {
-          weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize,
+          weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize, ammoItemId: null,
           backstabMultiplier: backstabActive ? backstabMultiplier(thiefLevel) : null,
           critMultiplier: crit?.damageMultiplier ?? null,
           critFlatBonus: crit?.flatBonus ?? 0,
