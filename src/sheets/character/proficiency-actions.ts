@@ -1,6 +1,6 @@
 import { getChassis } from "../../core/classes/chassis";
 import { nonweaponCheck } from "../../core/proficiencies/nonweapon";
-import { canWeaponSpecialize } from "../../core/proficiencies/weapon";
+import { canWeaponSpecialize, categoryForProficiencyGroup } from "../../core/proficiencies/weapon";
 import { weaponMasteryTierCost } from "../../core/proficiencies/weapon-mastery";
 import { bardSkillCheck, classifyThiefArmor, thiefSkillCheck, thiefSkillPerSkillCap } from "../../core/proficiencies/thief-skills";
 import type { AbilityKey, ArmorType, BardSkill, ClassId, Race, ThiefSkill } from "../../core/types";
@@ -23,14 +23,17 @@ import { TEMPLATE_PATH } from "../../constants";
 
 interface WeaponProfItemHandle {
   id: string;
-  system: { weaponOrGroup: string; isGroup: boolean; slotsInvested: number; masteryTier: 0 | 1 | 2 | 3 };
+  system: {
+    weaponOrGroup: string; isGroup: boolean; proficiencyGroup: string;
+    slotsInvested: number; masteryTier: 0 | 1 | 2 | 3;
+  };
 }
 interface NwpItemHandle {
   id: string; name: string;
   system: { governingAbility: string; modifier: number; slotCost: number; group: string; slotsInvested: number };
 }
 interface WeaponItemHandle2 {
-  system: { category: string; proficiencyGroup: string };
+  system: { category: string; proficiencyGroup: string; baseWeaponName: string };
 }
 /** Minimal shape needed to find the actor's class chassis and its owned
  *  weapon Items (for resolving a weapon proficiency's specialization
@@ -68,17 +71,23 @@ function firstClassChassisId(actor: ProficiencyActor): ClassId | null {
   return null;
 }
 
-/** Resolves a weapon proficiency item's specialization category by matching
- *  its `weaponOrGroup` name against the actor's owned weapon Items — null
- *  for a group proficiency or no matching weapon. Thrown weapons map to
+/** Resolves a weapon proficiency item's specialization category — first from
+ *  its own `proficiencyGroup` (Sub-project 8b's fixed 8 names, no owned
+ *  weapon needed at all), falling back to matching its `weaponOrGroup` name
+ *  against an owned weapon Item's `baseWeaponName` (or, if that's blank, its
+ *  display name) for a pre-8b/hand-made proficiency with no group set. Null
+ *  for a group proficiency or no match either way. Thrown weapons map to
  *  "melee" (locked brainstorming decision). */
 function resolveCategory(actor: ProficiencyActor, prof: WeaponProfItemHandle): "melee" | "crossbow" | "bow" | null {
   if (prof.system.isGroup) return null;
+  const byGroup = categoryForProficiencyGroup(prof.system.proficiencyGroup);
+  if (byGroup) return byGroup;
   for (const item of actor.items) {
-    if (item.type !== "weapon" || item.name !== prof.system.weaponOrGroup) continue;
-    const cat = (item as unknown as WeaponItemHandle2).system.category;
-    if (cat === "bow") return "bow";
-    if (cat === "crossbow") return "crossbow";
+    if (item.type !== "weapon") continue;
+    const w = (item as unknown as WeaponItemHandle2).system;
+    if ((w.baseWeaponName || item.name) !== prof.system.weaponOrGroup) continue;
+    if (w.category === "bow") return "bow";
+    if (w.category === "crossbow") return "crossbow";
     return "melee";
   }
   return null;

@@ -31,6 +31,15 @@ export class WeaponItemModel extends Adnd2eItemModel {
       handsRequired: new NumberField({ required: true, integer: true, choices: [1, 2], initial: 1 }),
       materialToHit: new NumberField({ required: true, integer: true, initial: 0 }),
       styleGroup: new StringField({ required: true, blank: true, initial: "" }),
+      /** The weapon's base type name for proficiency matching, distinct from
+       *  the item's own freely-editable display `name` — blank means "use
+       *  `name`" (unchanged behavior for every weapon that has never had
+       *  this set). Lets a renamed/enchanted weapon ("Long Sword +1",
+       *  "Frostbrand") still match its "Long Sword" specific-weapon
+       *  proficiency: set this back to "Long Sword" and the exact-string
+       *  match (combat-rolls.ts's resolveProficiencyModifier, context.ts's
+       *  resolveWeaponCategory) holds regardless of the display name. */
+      baseWeaponName: new StringField({ required: true, blank: true, initial: "" }),
       ammoType: new StringField({ required: true, nullable: true, initial: null }),
       selectedAmmoId: new StringField({ required: true, nullable: true, initial: null }),
     };

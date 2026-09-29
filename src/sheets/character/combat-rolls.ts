@@ -87,7 +87,7 @@ interface AttackerActor {
 interface WeaponItemHandle {
   id: string; name: string;
   system: {
-    category: string; proficiencyGroup: string; materialToHit: number; magicBonus: number;
+    category: string; proficiencyGroup: string; baseWeaponName: string; materialToHit: number; magicBonus: number;
     damageType: string | null;
     /** bow/crossbow only — null for melee/thrown */
     ammoType: string | null;
@@ -105,8 +105,12 @@ interface GenericAttackerItem {
 
 /** Resolves the attack-roll `proficiencyModifier` (per core/combat/attack.ts's
  *  AttackModifierInput doc comment) by matching `weapon` against the actor's
- *  weaponProficiency items — by exact name for a specific-weapon proficiency,
- *  or by `weaponOrGroup === weapon.system.proficiencyGroup` for a group
+ *  weaponProficiency items — for a specific-weapon proficiency, by exact
+ *  string against `weapon.system.baseWeaponName` (falling back to the item's
+ *  own display `name` when that's blank, e.g. every weapon that predates this
+ *  field), so a renamed/enchanted weapon ("Long Sword +1") still matches its
+ *  "Long Sword" proficiency once its baseWeaponName is set back; or by
+ *  `weaponOrGroup === weapon.system.proficiencyGroup` for a group
  *  proficiency (both -> "proficient", penalty 0). Only when neither matches AND
  *  the Skills & Powers expanded-proficiencies rule is on
  *  (`expandedProficienciesEnabled`), a held SPECIFIC-weapon proficiency in the
@@ -139,7 +143,7 @@ function resolveProficiencyModifier(actor: AttackerActor, weapon: WeaponItemHand
       masteryTier?: 0 | 1 | 2 | 3;
       proficiencyGroup?: string;
     };
-    if (s.isGroup !== true && s.weaponOrGroup === weapon.name) {
+    if (s.isGroup !== true && s.weaponOrGroup === (weapon.system.baseWeaponName || weapon.name)) {
       exactMatch = true;
       exactTier = s.masteryTier ?? 0;
       groupMatch = null;

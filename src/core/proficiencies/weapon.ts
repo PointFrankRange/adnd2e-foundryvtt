@@ -48,3 +48,23 @@ export function canWeaponSpecialize(input: {
 }): boolean {
   return input.specializationAllowed && input.isSingleClass;
 }
+
+/** Sub-project 8b's 8 fixed weapon-proficiency-group names that are melee
+ *  (everything except the two missile groups, which get their own
+ *  SpecializationCategory bucket below). */
+const MELEE_PROFICIENCY_GROUPS = new Set(["Blades", "Bludgeoning", "Hafted", "Hurled", "Pole Arms", "Slings"]);
+
+/**
+ * A specific-weapon proficiency's specialization category, derived from its
+ * `proficiencyGroup` (Sub-project 8b) instead of an owned weapon Item — lets
+ * a fighter start specializing in a weapon type before ever owning one.
+ * Matches by exact string, the same fragility `isRelatedGroup` already
+ * accepts for this same field. Returns null for an empty or unrecognized
+ * group (a pre-8b or hand-made proficiency with no group set) — the caller
+ * falls back to deriving the category from an owned matching weapon instead.
+ */
+export function categoryForProficiencyGroup(group: string): SpecializationCategory | null {
+  if (group === "Bows") return "bow";
+  if (group === "Crossbows") return "crossbow";
+  return MELEE_PROFICIENCY_GROUPS.has(group) ? "melee" : null;
+}

@@ -26,7 +26,7 @@ import { canCompleteCasting } from "../../core/magic/casting-time";
 import { canLearnSpell } from "../../core/magic/spellbook";
 import { characterPointLedgerFor, DEFAULT_CHARACTER_POINT_POOL } from "../../core/skills/character-points";
 import { toTraitEffect, type TraitEffect } from "../../core/skills/traits";
-import { canWeaponSpecialize } from "../../core/proficiencies/weapon";
+import { canWeaponSpecialize, categoryForProficiencyGroup } from "../../core/proficiencies/weapon";
 import { weaponMasteryTierCost } from "../../core/proficiencies/weapon-mastery";
 import { bardSkillBaseScore, classifyThiefArmor, resolveBardSkill, resolveThiefSkill, thiefSkillBaseScore, thiefSkillPerSkillCap } from "../../core/proficiencies/thief-skills";
 import { canBackstab } from "../../core/weapons/backstab";
@@ -460,7 +460,14 @@ function buildNwpRow(n: NwpView, input: CharacterSheetInput): NwpView {
  *  the melee rule). */
 function resolveWeaponCategory(prof: WeaponProfView, physicalItems: PhysicalItemView[]): "melee" | "crossbow" | "bow" | null {
   if (prof.isGroup) return null;
-  const weapon = physicalItems.find((p) => p.type === "weapon" && p.name === prof.weaponOrGroup);
+  const byGroup = categoryForProficiencyGroup(prof.proficiencyGroup);
+  if (byGroup) return byGroup;
+  // Pre-8b / hand-made proficiency with no (or unrecognized) group — fall
+  // back to deriving the category from an owned weapon whose baseWeaponName
+  // (or, if that's blank, its own display name) matches this proficiency.
+  const weapon = physicalItems.find(
+    (p) => p.type === "weapon" && (p.weapon?.baseWeaponName || p.name) === prof.weaponOrGroup,
+  );
   if (!weapon?.weapon) return null;
   if (weapon.weapon.category === "bow") return "bow";
   if (weapon.weapon.category === "crossbow") return "crossbow";
