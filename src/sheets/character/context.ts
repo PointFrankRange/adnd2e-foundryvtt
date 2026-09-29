@@ -30,6 +30,8 @@ import { canWeaponSpecialize, categoryForProficiencyGroup } from "../../core/pro
 import { weaponMasteryTierCost } from "../../core/proficiencies/weapon-mastery";
 import { bardSkillBaseScore, classifyThiefArmor, resolveBardSkill, resolveThiefSkill, thiefSkillBaseScore, thiefSkillPerSkillCap } from "../../core/proficiencies/thief-skills";
 import { canBackstab } from "../../core/weapons/backstab";
+import { specialistAttacksPerRound } from "../../core/weapons/specialist-attacks";
+import type { AttackRate, SpecialistWeaponClass } from "../../core/weapons/specialist-attacks";
 import { matchingAmmo, defaultAmmoSelection } from "../../combat/ammo";
 import type { AmmoStock } from "../../combat/ammo";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
@@ -297,21 +299,20 @@ function buildInventory(input: CharacterSheetInput, fav: FavCheck): CharacterShe
 
 /* ---------- combat ---------- */
 
-/** Whether `weapon`'s effective mastery tier is Grand Mastery (3) — the only
- *  tier that grants `weaponMasteryEffect`'s `extraAttacks`. Mirrors
- *  combat-rolls.ts's `resolveProficiencyModifier` matching precedence (exact
- *  specific-weapon match by `baseWeaponName` — falling back to the item's own
- *  `name` — beats a group match by the weapon's own `proficiencyGroup`) and
- *  its same weaponMastery-optional-rule tier cap, for display purposes only:
- *  nothing in this codebase gates re-clicking Roll Attack, so this is purely
- *  informational (see `grandMasteryExtraAttack`'s own doc comment). */
-function hasGrandMasteryExtraAttack(
+/** `weapon`'s RAW (uncapped) effective mastery tier — mirrors
+ *  combat-rolls.ts's `resolveProficiencyModifier` matching precedence: an
+ *  exact specific-weapon match (by `baseWeaponName`, falling back to the
+ *  item's own `name`) beats a group match (by the weapon's own
+ *  `proficiencyGroup`), else 0. NOT capped by the weaponMastery optional
+ *  rule — callers that care about the tier-2/3 cap apply it themselves
+ *  (`hasGrandMasteryExtraAttack`); a caller that only needs ">= 1"
+ *  (Specialized, the base always-on PHB mechanic) doesn't need the cap at
+ *  all, since capping never changes whether the raw tier is >= 1. */
+function resolveMasteryTierForWeapon(
   weapon: NonNullable<PhysicalItemView["weapon"]>,
   weaponName: string,
   proficiencyItems: readonly WeaponProfView[],
-  optionalRules: CharacterSheetInput["optionalRules"],
-): boolean {
-  if (!(optionalRules.combatAndTacticsEnabled && optionalRules.weaponMastery)) return false;
+): 0 | 1 | 2 | 3 {
   const key = weapon.baseWeaponName || weaponName;
   let exactTier: 0 | 1 | 2 | 3 | null = null;
   let groupTier: 0 | 1 | 2 | 3 | null = null;
@@ -322,7 +323,48 @@ function hasGrandMasteryExtraAttack(
     }
     if (p.isGroup && p.weaponOrGroup === weapon.proficiencyGroup && groupTier === null) groupTier = p.masteryTier;
   }
-  return (exactTier ?? groupTier ?? 0) === 3;
+  return exactTier ?? groupTier ?? 0;
+}
+
+/** Whether `weapon`'s effective mastery tier is Grand Mastery (3) — the only
+ *  tier that grants `weaponMasteryEffect`'s `extraAttacks`. Applies the same
+ *  weaponMastery-optional-rule tier cap combat-rolls.ts's
+ *  `resolveProficiencyModifier` does, for display purposes only: nothing in
+ *  this codebase gates re-clicking Roll Attack, so this is purely
+ *  informational (see `grandMasteryExtraAttack`'s own doc comment). */
+function hasGrandMasteryExtraAttack(
+  weapon: NonNullable<PhysicalItemView["weapon"]>,
+  weaponName: string,
+  proficiencyItems: readonly WeaponProfView[],
+  optionalRules: CharacterSheetInput["optionalRules"],
+): boolean {
+  if (!(optionalRules.combatAndTacticsEnabled && optionalRules.weaponMastery)) return false;
+  return resolveMasteryTierForWeapon(weapon, weaponName, proficiencyItems) === 3;
+}
+
+/** `weapon`'s PHB Table 35 specialist attacks-per-round rate, or null when it
+ *  doesn't apply: the actor must be a single-class fighter (the same
+ *  `canWeaponSpecialize` gate `buildWeaponProfRow`'s Advance Mastery button
+ *  uses), Specialized in this weapon (mastery tier >= 1 — the base, always-on
+ *  PHB mechanic; unlike Grand Mastery's extra attack, this is NOT gated by
+ *  the weaponMastery optional rule), and the weapon's own
+ *  `specialistWeaponClass` must be set (nothing else can derive it). Display
+ *  only — see `specialistAttackRate`'s own doc comment for why this doesn't
+ *  try to compute which round you're currently in. */
+function resolveSpecialistAttackRate(
+  weapon: NonNullable<PhysicalItemView["weapon"]>,
+  weaponName: string,
+  input: CharacterSheetInput,
+): AttackRate | null {
+  if (!weapon.specialistWeaponClass) return null;
+  if (resolveMasteryTierForWeapon(weapon, weaponName, input.proficiencyItems.weapon) < 1) return null;
+  const primaryClass = input.classItems[0];
+  if (!primaryClass || input.classItems.length !== 1 || primaryClass.level < 1) return null;
+  const chassis = getChassis(primaryClass.chassisId as ClassId);
+  if (!canWeaponSpecialize({ specializationAllowed: chassis.weaponSpecializationAllowed, isSingleClass: true })) {
+    return null;
+  }
+  return specialistAttacksPerRound(primaryClass.level, weapon.specialistWeaponClass as SpecialistWeaponClass);
 }
 
 function buildCombat(input: CharacterSheetInput, fav: FavCheck): CharacterSheetContext["combat"] {
@@ -361,6 +403,7 @@ function buildCombat(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
           selected: selected?.id === a.id,
         })),
         grandMasteryExtraAttack: hasGrandMasteryExtraAttack(w, i.name, input.proficiencyItems.weapon, input.optionalRules),
+        specialistAttackRate: resolveSpecialistAttackRate(w, i.name, input),
       };
     });
 

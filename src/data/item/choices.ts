@@ -85,3 +85,4 @@ export {
 } from "../../core/skills/traits";
 
 export { WEAPON_PROFICIENCY_GROUPS } from "../../core/proficiencies/weapon";
+export { SPECIALIST_WEAPON_CLASSES } from "../../core/weapons/specialist-attacks";

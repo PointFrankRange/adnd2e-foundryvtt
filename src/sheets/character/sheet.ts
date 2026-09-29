@@ -166,6 +166,7 @@ export function toPhysicalView(it: RawItem): PhysicalItemView {
       category: (s.category as "melee" | "thrown" | "bow" | "crossbow" | undefined) ?? "melee",
       baseWeaponName: String(s.baseWeaponName ?? ""),
       proficiencyGroup: String(s.proficiencyGroup ?? ""),
+      specialistWeaponClass: String(s.specialistWeaponClass ?? ""),
       damageType: (s.damageType as PhysicalItemView["weapon"] extends undefined ? never : NonNullable<PhysicalItemView["weapon"]>["damageType"]) ?? null,
       ammoType: (s.ammoType as string | null) ?? null,
       selectedAmmoId: (s.selectedAmmoId as string | null) ?? null,
