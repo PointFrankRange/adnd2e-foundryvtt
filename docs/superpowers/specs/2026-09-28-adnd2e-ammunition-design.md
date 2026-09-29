@@ -23,9 +23,9 @@
 ## 3. Global Constraints
 
 - **Foundry v14.364** source is authoritative — never `fvtt-types`.
-- **Two-layer contract:** pure logic — the ammo schema, `toWeaponData()`'s ammo-resolution, and the damage-dice source selection — unit tested; Foundry glue (`combat-rolls.ts`, `chat-listeners.ts`, sheet listeners, templates) stays typecheck/lint gated and dev-world verified, matching the existing convention for those files (spec §9 precedent: "Foundry-coupled, verified in a linked dev world").
+- **Two-layer contract:** pure logic — the ammo schema and ammo-matching helper (§4) — unit tested; Foundry glue (`combat-rolls.ts`, `chat-listeners.ts`, `context.ts`, sheet listeners, templates) stays typecheck/lint gated and dev-world verified, matching the existing convention for those files (spec §9 precedent: "Foundry-coupled, verified in a linked dev world").
 - **Schema change, no data migration needed:** a new item subtype and two new nullable weapon fields are additive; no existing item data is reshaped.
-- Existing melee/thrown weapon behavior is unchanged end-to-end (their `ammoType`/`selectedAmmoId` stay `null`, so `toWeaponData()` and `rollAttack()` take the pre-existing code path).
+- Existing melee/thrown weapon behavior is unchanged end-to-end (their `ammoType`/`selectedAmmoId` stay `null`, so `rollAttack()` takes the pre-existing code path).
 - No `npm run format`/`prettier`/`npm install`/`npm update`; `npm run build` needs Foundry closed; vitest via `tail`/redirect, never `| grep`.
 - Mandatory whole-branch review; GATED dev-world check (must include a non-GM player seat per standing project convention).
 
@@ -35,7 +35,7 @@
   - New `src/data/item/ammo.ts`: extends the shared physical-item fields (`quantity`, `weight`, `cost`, `location`, `identified`) with `ammoType` (string), `damageVsSM`/`damageVsL` (required strings), `damageType` (required string).
   - Registered in `src/data/item/subtypes.ts` (`ITEM_SUBTYPES`) and `system.json` `documentTypes.Item`, following the existing weapon/armor/equipment pattern.
   - `src/data/item/weapon.ts`: two new nullable fields, populated only when `category` is `"bow"` or `"crossbow"`: `ammoType` (what it fires) and `selectedAmmoId` (id of the currently-selected ammo item on the same actor).
-  - `src/core/weapons/data.ts` (`toWeaponData()`/`selectDamageDice()`): for a bow/crossbow, resolves `selectedAmmoId` against the actor's items and, when found, sources `damageVsSM`/`damageVsL`/`damageType` from the ammo item instead of returning `null`. Unresolvable/missing selection still yields `null` dice (today's behavior), which is what makes the "block the roll" check in `rollAttack()` meaningful rather than redundant.
+  - **Correction found while writing the plan:** `WeaponData`/`toWeaponData()` (`src/core/weapons/data.ts` / `src/data/derive/weapon.ts`) is a pure field-mapper with no actor context, and its output (`system.weaponData`, set in `WeaponItemModel.prepareDerivedData()`) is never read anywhere else in `src/` — `combat-rolls.ts`, `chat-listeners.ts` and `context.ts` all read a weapon's raw schema fields (`weapon.system.category`, `.damageVsSM`, etc.) directly. It has no way to look up an ammo item (no actor reference) and isn't wired into any runtime path, so it is **left untouched**; ammo resolution instead happens at the three real call sites below, reading the ammo item's own schema fields the same way weapon fields are read today.
 
 - **Attack/consumption flow:**
   - `rollAttack()` (`src/sheets/character/combat-rolls.ts`): for a bow/crossbow, before rolling to-hit, look up the weapon's `selectedAmmoId` on the actor. Missing item or `quantity <= 0` → warning toast, abort (no roll, no card). Otherwise proceed with the existing to-hit flow, and decrement the ammo item's `quantity` by 1 via `item.update()` (same shape as the existing `unequipWeapon()` call at `combat-rolls.ts:201-203`, applied to the ammo item).
@@ -61,8 +61,9 @@
 
 - `tests/data/subtypes.test.ts`: extend for the new `ammo` subtype.
 - New `tests/data/item/ammo.test.ts`: ammo schema defaults and required fields.
-- `tests/data/derive/weapon.test.ts` (`toWeaponData()`): bow/crossbow resolving dice/type from a linked, valid ammo item; falling back to `null` when `selectedAmmoId` is unset or unresolvable.
-- `tests/combat/damage-dice.test.ts`: existing null-dice case stays valid (a bow with no ammo resolved); add a case where ammo-sourced dice flow through `pickDamageDice()` normally.
+- New pure ammo-matching helper (e.g. `src/combat/ammo.ts`, used by both `context.ts` and `combat-rolls.ts`): unit tested for matching-by-`ammoType`, excluding zero-`quantity` stock, and resolving/validating a `selectedAmmoId`.
+- `tests/combat/damage-dice.test.ts`: existing null-dice case stays valid (a bow with no ammo resolved); add a case where ammo-sourced dice flow through `pickDamageDice()` normally (no code change to `pickDamageDice()` itself — it already takes any `{damageVsSM, damageVsL}` source).
+- `tests/combat/monster-gear.test.ts`: add a case confirming `monsterDropVerdict("ammo")` is rejected.
 - `combat-rolls.ts`/`chat-listeners.ts` stay dev-world verified only, per existing convention. Manual checklist for the plan: shoot with ammo selected (hit and miss, confirm quantity drops both times); shoot to 0 and confirm block + toast; switch ammo type mid-session and confirm the pick persists across a re-render; drop an ammo item on a Monster NPC sheet and confirm it's rejected like other unsupported types.
 
 ## 7. Out of scope
