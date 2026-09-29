@@ -18,7 +18,8 @@ export async function requestApply(
     users: { activeGM: { query(name: string, data: unknown, opts: { timeout: number }): Promise<unknown> } | null };
   };
   if (g.user.isGM || target.isOwner) {
-    await applyEffectLocally(target, request);
+    const changed = await applyEffectLocally(target, request);
+    if (!changed) ui.notifications?.info(game.i18n!.localize("ADND2E.relay.noEffectInfo"));
     return;
   }
   if ((request.kind === "damage" || request.kind === "healing") && request.amount < 1) return;
@@ -29,7 +30,10 @@ export async function requestApply(
   }
   try {
     const result = (await gm.query(RELAY_QUERY, request, { timeout: TIMEOUT_MS })) as RelayResult | undefined;
-    if (result?.applied) return;
+    if (result?.applied) {
+      if (!result.changed) ui.notifications?.info(game.i18n!.localize("ADND2E.relay.noEffectInfo"));
+      return;
+    }
     const key = result && !result.applied && result.reason === "declined" ? "ADND2E.relay.declinedWarning" : "ADND2E.relay.failedWarning";
     ui.notifications?.warn(game.i18n!.localize(key));
   } catch {

@@ -22,7 +22,14 @@ export type RelayRequest =
   | { kind: "condition"; targetUuid: string; conditionId: RelayConditionId }
   | { kind: "unequip"; targetUuid: string };
 
-export type RelayResult = { applied: true } | { applied: false; reason: "declined" | "notActiveGm" };
+/** `changed` distinguishes "the request was processed" from "the target's
+ *  state actually changed" — `unequip` against an already-unarmed target is
+ *  processed successfully but changes nothing (every other kind always
+ *  changes something). The requester uses this to avoid claiming success
+ *  (e.g. a disarm chat card) when nothing actually happened. */
+export type RelayResult =
+  | { applied: true; changed: boolean }
+  | { applied: false; reason: "declined" | "notActiveGm" };
 
 function isAmount(v: unknown): v is number {
   return typeof v === "number" && Number.isInteger(v) && v >= 1 && v <= MAX_AMOUNT;

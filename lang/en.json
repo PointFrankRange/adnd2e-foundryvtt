@@ -718,6 +718,7 @@
     },
     "relay": {
       "noGmWarning": "No GM is connected — the GM must apply this to a token you don't own.",
+      "noEffectInfo": "That had no effect — there was nothing to affect.",
       "failedWarning": "Couldn't apply that to a token you don't own — ask the GM to apply it.",
       "declinedWarning": "The GM declined to apply that.",
       "approveTitle": "Player-Applied Effect",

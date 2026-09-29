@@ -57,7 +57,7 @@ async function handleApplyQuery(
   } catch (err) {
     console.error(`${SYSTEM_ID} | relay log failed`, err);
   }
-  return { applied: true };
+  return { applied: true, changed };
 }
 
 /** Registers the relay query. Call once, on `init`. */
