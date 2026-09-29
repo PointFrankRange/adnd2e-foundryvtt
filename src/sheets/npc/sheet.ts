@@ -229,6 +229,7 @@ export class Adnd2eNpcSheet extends Base {
         case "weapon":
         case "armor":
         case "equipment":
+        case "ammo":
           physicalItems.push(toPhysicalView(it));
           break;
         case "weaponProficiency":
@@ -434,7 +435,9 @@ export class Adnd2eNpcSheet extends Base {
     const backstabCheckbox = weaponRow?.querySelector<HTMLInputElement>(".backstab-toggle");
     const maneuverSelect = weaponRow?.querySelector<HTMLSelectElement>(".maneuver-select");
     const maneuverId = (maneuverSelect?.value || null) as ManeuverId | null;
-    await rollAttack(this.document as never, weaponItemId, backstabCheckbox?.checked ?? false, maneuverId);
+    const ammoSelect = weaponRow?.querySelector<HTMLSelectElement>(".ammo-select");
+    const ammoItemId = ammoSelect?.value || null;
+    await rollAttack(this.document as never, weaponItemId, backstabCheckbox?.checked ?? false, maneuverId, ammoItemId);
   }
 
   static async #onRollSave(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {

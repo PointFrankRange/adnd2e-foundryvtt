@@ -2,11 +2,17 @@
 // Monster NPC accepts, and how an equipped weapon becomes an attack — the
 // monster's own THAC0 with the weapon's magic bonus, the weapon's S-M / L damage
 // by target size. Pure.
+//
+// `ammo` is accepted as inert loot (Gear panel listing only) — a monster's
+// ranged attacks stay on the flat monsterWeaponDamageFormula path regardless
+// of what ammo it's carrying (docs/superpowers/specs/2026-09-28-adnd2e-
+// ammunition-design.md's "PCs only" scope; ammo tracking/consumption is
+// deliberately never wired into monster attacks).
 import { damageFormula } from "../core/dice/formula";
 import type { CreatureSize } from "../core/types";
 import { pickDamageDice } from "./damage-dice";
 
-export const MONSTER_ITEM_TYPES = ["weapon", "armor", "equipment", "spell"] as const;
+export const MONSTER_ITEM_TYPES = ["weapon", "armor", "equipment", "ammo", "spell"] as const;
 
 export function monsterDropVerdict(type: string): { ok: true } | { ok: false; reason: string } {
   return (MONSTER_ITEM_TYPES as readonly string[]).includes(type)

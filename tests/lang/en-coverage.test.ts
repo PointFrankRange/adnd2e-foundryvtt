@@ -712,3 +712,12 @@ describe("lang/en.json — sheet redesign R1 (PC sheet kit)", () => {
     }
   });
 });
+
+describe("lang/en.json — bow/crossbow ammunition strings", () => {
+  it("resolves the ammo-select and no-ammo-warning keys", () => {
+    for (const key of ["ADND2E.sheet.combat.noAmmo", "ADND2E.chat.attack.noAmmoWarning"]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

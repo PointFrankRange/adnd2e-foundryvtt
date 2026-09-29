@@ -4,6 +4,7 @@ import { RaceItemModel } from "./race";
 import { WeaponItemModel } from "./weapon";
 import { ArmorItemModel } from "./armor";
 import { EquipmentItemModel } from "./equipment";
+import { AmmoItemModel } from "./ammo";
 import { SpellItemModel } from "./spell";
 import { WeaponProficiencyItemModel } from "./weapon-proficiency";
 import { NonweaponProficiencyItemModel } from "./nonweapon-proficiency";
@@ -17,6 +18,7 @@ export {
   WeaponItemModel,
   ArmorItemModel,
   EquipmentItemModel,
+  AmmoItemModel,
   SpellItemModel,
   WeaponProficiencyItemModel,
   NonweaponProficiencyItemModel,
@@ -35,6 +37,7 @@ export const ITEM_DATA_MODELS: Record<
   weapon: WeaponItemModel,
   armor: ArmorItemModel,
   equipment: EquipmentItemModel,
+  ammo: AmmoItemModel,
   spell: SpellItemModel,
   weaponProficiency: WeaponProficiencyItemModel,
   nonweaponProficiency: NonweaponProficiencyItemModel,

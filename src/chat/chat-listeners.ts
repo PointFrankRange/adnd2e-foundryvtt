@@ -17,9 +17,10 @@ import type { EffectTarget } from "../relay/apply-effect";
  * ------------------------------------------------------------------------- */
 
 async function onRollDamage(button: HTMLButtonElement): Promise<void> {
-  const { actorUuid, weaponItemId, targetSize, backstabMultiplier, critMultiplier, critFlatBonus } = button.dataset as {
+  const { actorUuid, weaponItemId, ammoItemId, targetSize, backstabMultiplier, critMultiplier, critFlatBonus } = button.dataset as {
     actorUuid?: string;
     weaponItemId?: string;
+    ammoItemId?: string;
     targetSize?: string;
     backstabMultiplier?: string;
     critMultiplier?: string;
@@ -39,11 +40,17 @@ async function onRollDamage(button: HTMLButtonElement): Promise<void> {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.damage.sourceNotFoundWarning"));
     return;
   }
+  // A bow/crossbow's own damage dice are null — the ammo item consumed for
+  // this shot (attack card's damageContext.ammoItemId, Task 5) carries the
+  // real dice instead. Melee/thrown weapons have no ammoItemId and are
+  // unaffected (docs/superpowers/specs/2026-09-28-adnd2e-ammunition-design.md).
+  const ammo = ammoItemId ? actor.items.get(ammoItemId) : undefined;
+  const diceSource = ammo ?? weapon;
   const dice = pickDamageDice(
-    { damageVsSM: weapon.system.damageVsSM, damageVsL: weapon.system.damageVsL },
+    { damageVsSM: diceSource.system.damageVsSM, damageVsL: diceSource.system.damageVsL },
     (targetSize as never) || null,
   );
-  if (!dice) return; // no dice modeled (e.g. a ranged weapon with no ammo item — spec §7)
+  if (!dice) return; // no dice modeled (no ammo item resolved for a bow/crossbow)
 
   const { total: damageBonus } = damageModifiers({ weaponMagicBonus: weapon.system.magicBonus });
   const formula = damageFormula(dice, damageBonus);

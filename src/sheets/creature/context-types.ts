@@ -12,7 +12,7 @@ export interface CreatureAttackEntry {
 
 export interface CreatureGearView {
   id: string; name: string; img: string;
-  type: "weapon" | "armor" | "equipment";
+  type: "weapon" | "armor" | "equipment" | "ammo";
   quantity: number; equipped: boolean;
   /** weapons only */
   weapon?: { category: string; magicBonus: number; damageVsSM: string | null; damageVsL: string | null };
@@ -21,7 +21,7 @@ export interface CreatureGearView {
 export interface CreatureSpellView { id: string; name: string; img: string; level: number }
 
 export interface CreatureGearSection {
-  id: "weapons" | "armor" | "equipment";
+  id: "weapons" | "armor" | "equipment" | "ammo";
   labelKey: string;
   rows: CreatureSheetContext["gear"];
 }
@@ -90,7 +90,7 @@ export interface CreatureSheetContext {
   };
   perms: { isGM: boolean; isOwner: boolean; editable: boolean };
   lock: LockState;
-  gear: { id: string; name: string; img: string; type: "weapon" | "armor" | "equipment"; quantity: number; equipped: boolean }[];
+  gear: { id: string; name: string; img: string; type: "weapon" | "armor" | "equipment" | "ammo"; quantity: number; equipped: boolean }[];
   gearSections: CreatureGearSection[];
   /** one row per EQUIPPED weapon */
   weaponAttacks: { id: string; name: string; damage: string; type: "melee" | "ranged" }[];

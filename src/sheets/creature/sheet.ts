@@ -184,10 +184,10 @@ export class Adnd2eCreatureSheet extends Base {
     };
     const items = [...actor.items];
     const gear: CreatureGearView[] = items
-      .filter((i) => i.type === "weapon" || i.type === "armor" || i.type === "equipment")
+      .filter((i) => i.type === "weapon" || i.type === "armor" || i.type === "equipment" || i.type === "ammo")
       .map((i) => ({
         id: i.id, name: i.name, img: i.img,
-        type: i.type as "weapon" | "armor" | "equipment",
+        type: i.type as "weapon" | "armor" | "equipment" | "ammo",
         quantity: Number(i.system.quantity ?? 1),
         equipped: Boolean(i.system.equipped),
         weapon: i.type === "weapon"
@@ -258,11 +258,13 @@ export class Adnd2eCreatureSheet extends Base {
   }
 
   // Monster NPC inventory plan Task 3: which items a Monster NPC accepts —
-  // weapons, armor, equipment and spells only, per `monsterDropVerdict`
-  // (Task 1, pure). Every other item type (a class, race, proficiency, trait
-  // or class feature — all PC/Character-NPC-only concepts on this actor
-  // type) is rejected with a toast, matching Adnd2eCharacterSheet/
-  // Adnd2eNpcSheet's own drop-guard convention.
+  // weapons, armor, equipment, ammo and spells, per `monsterDropVerdict`
+  // (Task 1, pure). Ammo is accepted as inert loot only — see monster-gear.ts's
+  // header comment; it never gates a monster's ranged attacks. Every other
+  // item type (a class, race, proficiency, trait or class feature — all
+  // PC/Character-NPC-only concepts on this actor type) is rejected with a
+  // toast, matching Adnd2eCharacterSheet/Adnd2eNpcSheet's own drop-guard
+  // convention.
   override async _onDropItem(event: DragEvent, item: Item.Implementation): Promise<unknown> {
     const verdict = monsterDropVerdict((item as unknown as { type: string }).type);
     if (!verdict.ok) {

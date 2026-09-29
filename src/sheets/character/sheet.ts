@@ -165,6 +165,8 @@ export function toPhysicalView(it: RawItem): PhysicalItemView {
       range: rangeToString(s.range),
       category: (s.category as "melee" | "thrown" | "bow" | "crossbow" | undefined) ?? "melee",
       damageType: (s.damageType as PhysicalItemView["weapon"] extends undefined ? never : NonNullable<PhysicalItemView["weapon"]>["damageType"]) ?? null,
+      ammoType: (s.ammoType as string | null) ?? null,
+      selectedAmmoId: (s.selectedAmmoId as string | null) ?? null,
     };
   }
   if (type === "armor") {
@@ -173,6 +175,14 @@ export function toPhysicalView(it: RawItem): PhysicalItemView {
       isShield: Boolean(s.isShield),
       shieldAcBonus: Number(s.shieldAcBonus ?? 0),
       armorType: (s.armorType as ArmorType | undefined) ?? "none",
+    };
+  }
+  if (type === "ammo") {
+    view.ammo = {
+      ammoType: String(s.ammoType ?? ""),
+      damageVsSM: String(s.damageVsSM ?? ""),
+      damageVsL: String(s.damageVsL ?? ""),
+      damageType: (s.damageType as PhysicalItemView["ammo"] extends undefined ? never : NonNullable<PhysicalItemView["ammo"]>["damageType"]) ?? "piercing",
     };
   }
   return view;
@@ -415,6 +425,7 @@ export class Adnd2eCharacterSheet extends Base {
         case "weapon":
         case "armor":
         case "equipment":
+        case "ammo":
           physicalItems.push(toPhysicalView(it));
           break;
         case "weaponProficiency":
@@ -716,7 +727,9 @@ export class Adnd2eCharacterSheet extends Base {
     const backstabCheckbox = weaponRow?.querySelector<HTMLInputElement>(".backstab-toggle");
     const maneuverSelect = weaponRow?.querySelector<HTMLSelectElement>(".maneuver-select");
     const maneuverId = (maneuverSelect?.value || null) as ManeuverId | null;
-    await rollAttack(this.document as never, weaponItemId, backstabCheckbox?.checked ?? false, maneuverId);
+    const ammoSelect = weaponRow?.querySelector<HTMLSelectElement>(".ammo-select");
+    const ammoItemId = ammoSelect?.value || null;
+    await rollAttack(this.document as never, weaponItemId, backstabCheckbox?.checked ?? false, maneuverId, ammoItemId);
   }
 
   static async #onRollSave(
