@@ -153,6 +153,22 @@ describe("deriveCharacter — full single-class pipeline (§5.6 steps 3-10)", ()
     expect(d.spellPoints).toEqual({});
   });
 
+  it("mage L5 INT 16, channelers rule on -> wizard channelling max (SP14b)", () => {
+    const mage: ActorSnapshot = {
+      ...fighter7,
+      abilities: { str: 10, dex: 10, con: 10, int: 16, wis: 10, cha: 10 },
+      classes: [{ chassisId: "mage", specialistSchool: null, xp: 20000, hpRolls: [4, 3, 4, 2, 3], dualClassState: null, level: 5 }],
+      equippedArmor: null, equippedShield: null,
+    };
+    const d = deriveCharacter(mage, { ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true, channelers: true });
+    expect(d.channelling.wizard).toBeDefined();
+  });
+
+  it("channelers rule on, non-wizard single class -> channelling stays empty", () => {
+    const d = deriveCharacter(fighter7, { ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true, channelers: true });
+    expect(d.channelling).toEqual({});
+  });
+
 });
 
 describe("deriveCharacter — multiclass (§5.6 step 1)", () => {
@@ -200,6 +216,11 @@ describe("deriveCharacter — multiclass (§5.6 step 1)", () => {
   it("Fighter 5 / Mage 6, spellPoints rule on -> wizard spell points record (SP14a)", () => {
     const d = deriveCharacter(elfFM, { ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true });
     expect(d.spellPoints.wizard).toBeDefined();
+  });
+
+  it("Fighter 5 / Mage 6, channelers rule on -> wizard channelling max (SP14b)", () => {
+    const d = deriveCharacter(elfFM, { ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true, channelers: true });
+    expect(d.channelling.wizard).toBeDefined();
   });
 
   it("Fighter/Thief (no caster): spellSlots is empty", () => {
