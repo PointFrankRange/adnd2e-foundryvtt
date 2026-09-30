@@ -424,6 +424,10 @@ export interface CharacterSheetContext {
     orphaned: OrphanedSpellRow[];
     /** Sub-project 9a: the in-progress cast's panel, or null when idle/the rule is off */
     casting: CastingPanel | null;
+    /** Sub-project 14 Plan A: null when the rule is off or the actor has no wizard levels */
+    spellPoints: { max: number; spent: number; remaining: number } | null;
+    /** Sub-project 14 Plan A: one row per currently-memorized free magick, across all levels */
+    freeMagicks: { level: number; expended: boolean }[];
   };
   features: {
     groups: { sourceType: string; sourceTypeLabel: string; items: FeatureItemView[] }[];

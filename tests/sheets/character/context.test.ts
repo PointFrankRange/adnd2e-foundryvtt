@@ -2596,3 +2596,83 @@ describe("buildCharacterSheetContext — sheet redesign R1 fields", () => {
     expect(notUsableRow.icon).toBe("");
   });
 });
+
+describe("buildCharacterSheetContext — wizard spell points (SP14a)", () => {
+  const spellPointsRules = { ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true };
+  const withSpellPoints = (over: Record<string, unknown> = {}) => ({
+    ...input().derived,
+    spellcasting: {
+      wizard: {
+        specialistSchool: null,
+        slots: {},
+        spellPoints: { maxSpellLevel: 2, maxPerLevel: 3, sp: 15, spent: 4, remaining: 11 },
+        memorized: [{ spellItemId: "s1", spellLevel: 1, expended: false, magickType: "fixed" as const }],
+        ...over,
+      },
+      priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+    },
+  });
+  const spell = (over: Record<string, unknown> = {}) => ({
+    id: "s1", name: "Magic Missile", img: "", casterClass: "wizard", level: 1,
+    schools: ["evocation"], spheres: [], range: "", castingTime: "1", savingThrow: "none",
+    inSpellbook: true, memorized: false, expended: false, canMemorize: false, canCast: false, canLearn: false,
+    favorite: false,
+    ...over,
+  });
+
+  it("rule off: no SP bar, no free magicks", () => {
+    const c = buildCharacterSheetContext(input());
+    expect(c.spells.spellPoints).toBeNull();
+    expect(c.spells.freeMagicks).toEqual([]);
+  });
+
+  it("rule on: exposes the SP bar", () => {
+    const c = buildCharacterSheetContext(input({ derived: withSpellPoints(), optionalRules: spellPointsRules }));
+    expect(c.spells.spellPoints).toEqual({ max: 15, spent: 4, remaining: 11 });
+  });
+
+  it("lists each memorized free magick, expended or not (independent of the rule's current on/off state — see plan's Locked design decisions)", () => {
+    const derived = withSpellPoints({
+      memorized: [
+        { spellItemId: "s1", spellLevel: 1, expended: false, magickType: "fixed" as const },
+        { spellItemId: null, spellLevel: 2, expended: false, magickType: "free" as const },
+        { spellItemId: null, spellLevel: 2, expended: true, magickType: "free" as const },
+      ],
+    });
+    const c = buildCharacterSheetContext(input({ derived, spellItems: [spell()], optionalRules: spellPointsRules }));
+    expect(c.spells.freeMagicks).toEqual([
+      { level: 2, expended: false },
+      { level: 2, expended: true },
+    ]);
+  });
+
+  it("a fixed-magick row's canMemorize gates on the flat per-level cap and remaining SP, not the classic SlotRecord", () => {
+    const derived = withSpellPoints({ spellPoints: { maxSpellLevel: 2, maxPerLevel: 1, sp: 15, spent: 4, remaining: 11 }, memorized: [] });
+    const atCap = buildCharacterSheetContext(
+      input({
+        derived: { ...derived, spellcasting: { ...derived.spellcasting, wizard: { ...derived.spellcasting.wizard, memorized: [{ spellItemId: "other", spellLevel: 1, expended: false, magickType: "fixed" as const }] } } },
+        spellItems: [spell()],
+        optionalRules: spellPointsRules,
+      }),
+    );
+    expect(atCap.spells.known[0].items[0].canMemorize).toBe(false); // maxPerLevel 1, already 1 held at level 1
+
+    const tooPoor = buildCharacterSheetContext(
+      input({
+        derived: { ...derived, spellcasting: { ...derived.spellcasting, wizard: { ...derived.spellcasting.wizard, spellPoints: { maxSpellLevel: 2, maxPerLevel: 3, sp: 3, spent: 0, remaining: 3 } } } },
+        spellItems: [spell()],
+        optionalRules: spellPointsRules,
+      }),
+    );
+    expect(tooPoor.spells.known[0].items[0].canMemorize).toBe(false); // needs 4 SP (level 1 fixed), only 3 available
+
+    const affordable = buildCharacterSheetContext(
+      input({
+        derived: { ...derived, spellcasting: { ...derived.spellcasting, wizard: { ...derived.spellcasting.wizard, spellPoints: { maxSpellLevel: 2, maxPerLevel: 3, sp: 4, spent: 0, remaining: 4 } } } },
+        spellItems: [spell()],
+        optionalRules: spellPointsRules,
+      }),
+    );
+    expect(affordable.spells.known[0].items[0].canMemorize).toBe(true); // exactly 4 SP for a level-1 fixed magick, room under the cap
+  });
+});

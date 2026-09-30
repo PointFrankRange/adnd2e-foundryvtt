@@ -54,7 +54,14 @@ const NOTHING_LOST_NAMES = [
   'name="system.details.gmNotes"',
 ];
 const NOTHING_LOST_FIELDS = ['data-field="quantity"', 'data-field="location"', 'data-field="equipped"', 'data-field="identified"'];
-const PC_ONLY_ACTIONS = ["awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait"];
+const PC_ONLY_ACTIONS = [
+  "awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait",
+  // Sub-project 14 Plan A: wizard spell points' Free Magicks panel (memorize/cast/forget a
+  // free magick) is gated behind `@root.pcActions` in spells.hbs, same as this list's other
+  // entries — the Character NPC sheet reuses that same shared PC template but its sheet.ts
+  // has no matching action-map wiring for these three (that's PC-sheet-only, Task 4/5 of SP14a).
+  "memorizeFreeMagick", "castFreeMagick", "forgetFreeMagick",
+];
 const CORE_ACTIONS = new Set(["tab", "editImage"]);
 const registered = new Set([...SHEET.matchAll(/^\s+([a-zA-Z]+): Adnd2eNpcSheet\.#on/gm)].map((m) => m[1]!));
 
