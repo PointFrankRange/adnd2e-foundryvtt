@@ -1,4 +1,4 @@
-import type { ArmorType, BardSkill, ClassId, DexterityModifiers, IntelligenceModifiers, Race, SphereName, WizardSchool } from "../../core/types";
+import type { AbilityScores, ArmorType, BardSkill, ClassId, DexterityModifiers, IntelligenceModifiers, Race, SphereName, WizardSchool } from "../../core/types";
 import type {
   AbilityRow,
   CastingPanel,
@@ -20,6 +20,7 @@ import type {
   WeaponProfView,
 } from "./context-types";
 import { mainScoreFromSubs, SUB_ABILITIES } from "../../core/abilities/sub-abilities";
+import { applyRacialDeltas } from "../../core/abilities/racial-adjustments";
 import { getChassis } from "../../core/classes/chassis";
 import { MANEUVERS } from "../../core/combat/maneuvers";
 import { canCompleteCasting } from "../../core/magic/casting-time";
@@ -155,15 +156,39 @@ function buildArrangementBadge(input: CharacterSheetInput): string | null {
 function buildAbilities(input: CharacterSheetInput): AbilityRow[] {
   const src = input.source as unknown as SourceView;
   const subsOn = input.subAbilityUi === true;
+  // The displayed main score per ability — the averaged sub-score while that
+  // rule is on (pre-racial, pre-trait), else the authored score. Computed for
+  // ALL 6 abilities up front so applyRacialDeltas (which takes the whole
+  // AbilityScores object) can be called once, exactly mirroring
+  // base-actor.ts's own prepare-cycle order (sub-scores -> racial -> traits).
+  const scores = Object.fromEntries(
+    ABILITY_KEYS.map((key) => {
+      const authored = src.system.abilities[key];
+      const sub = authored.sub ?? { a: null, b: null };
+      return [key, subsOn ? mainScoreFromSubs(sub.a, sub.b, authored.score) : authored.score];
+    }),
+  ) as unknown as AbilityScores;
+  const race = (input.raceItem?.raceId ?? "human") as Race;
+  const postRacial = applyRacialDeltas(scores, race);
+
   return ABILITY_KEYS.map((key) => {
     const authored = src.system.abilities[key];
     const derived = input.derived.abilities[key];
     const sub = authored.sub ?? { a: null, b: null };
-    // While the rule is on, the displayed main score is the averaged (pre-racial)
-    // value — the same pure function prepareBaseData uses — so racialDelta below
-    // is only the racial part. Off: the authored score, exactly as before.
-    const score = subsOn ? mainScoreFromSubs(sub.a, sub.b, authored.score) : authored.score;
+    const score = scores[key];
     const effectiveScore = derived.score;
+    // The racial and trait contributions are each computed independently
+    // from their own source (racial: applyRacialDeltas above, clamped at 1
+    // exactly like base-actor.ts's applyRacialAdjustment; trait: whatever's
+    // left between the post-racial value and the actor's final prepared
+    // score, which is by construction the ONLY remaining step — see
+    // base-actor.ts's applyTraitAbilityBonuses doc comment) rather than
+    // guessed by splitting one combined number, so a trait's ability bonus
+    // (e.g. the "Powerful" trait's +1 STR) no longer shows as a mislabeled
+    // "racial" adjustment.
+    const racialAdjustedScore = Math.max(1, postRacial[key]);
+    const racialDelta = racialAdjustedScore - score;
+    const traitDelta = effectiveScore - racialAdjustedScore;
     const mods = Object.entries(derived.mods).map(([k, v]) => ({
       label: humanize(k),
       value: v == null ? "—" : String(v),
@@ -181,10 +206,14 @@ function buildAbilities(input: CharacterSheetInput): AbilityRow[] {
       key,
       label: input.config.abilities[key],
       score,
-      racialDelta: effectiveScore - score,
+      racialDelta,
+      traitDelta,
       effectiveScore,
       exceptional: authored.exceptional,
-      showExceptional: key === "str" && Number(score) === 18,
+      // Keys off the FINAL effective score, not the pre-racial/pre-trait
+      // displayed score — a racial or trait +1 that pushes 17 -> 18 now shows
+      // the percentile input too, not just an authored 18.
+      showExceptional: key === "str" && Number(effectiveScore) === 18,
       mods,
       scoreLocked: subsOn,
       subs: subsOn

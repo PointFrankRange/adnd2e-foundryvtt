@@ -396,6 +396,12 @@ describe("buildCharacterSheetContext — abilities", () => {
   it("six rows, racial delta from source vs derived", () => {
     const c = buildCharacterSheetContext(
       input({
+        // dwarf: con +1 (racial-adjustments.ts) — matches the derived.con.score
+        // override below exactly, so the whole delta is attributed to race.
+        raceItem: {
+          id: "r1", name: "Dwarf", img: "", raceId: "dwarf", size: "M",
+          baseMovement: 12, infravision: 60, grantedFeatures: [], bonusLanguages: [],
+        },
         derived: {
           ...input().derived,
           abilities: {
@@ -410,8 +416,56 @@ describe("buildCharacterSheetContext — abilities", () => {
     expect(con.score).toBe(15);
     expect(con.effectiveScore).toBe(16);
     expect(con.racialDelta).toBe(1);
+    expect(con.traitDelta).toBe(0);
     expect(con.label).toBe("ADND2E.abilities.con");
     expect(con.mods.some((m) => m.label === "Hp Adjustment" && m.value === "1")).toBe(true);
+  });
+
+  it("a trait's ability bonus shows as traitDelta, not racialDelta — and now correctly shows the exceptional-Strength input", () => {
+    // No race override (defaults to human, zero racial deltas) — authored STR
+    // 17, effective 18 entirely from a trait (e.g. the "Powerful" trait's +1
+    // STR). Backlog bug: this used to show neither a distinct trait badge nor
+    // the percentile input, because both were gated on the PRE-trait score.
+    const c = buildCharacterSheetContext(
+      input({
+        derived: {
+          ...input().derived,
+          abilities: {
+            ...input().derived.abilities,
+            str: { score: 18, mods: input().derived.abilities.str.mods },
+          },
+        },
+      }),
+    );
+    const str = c.abilities.find((a) => a.key === "str")!;
+    expect(str.score).toBe(17);
+    expect(str.effectiveScore).toBe(18);
+    expect(str.racialDelta).toBe(0);
+    expect(str.traitDelta).toBe(1);
+    expect(str.showExceptional).toBe(true);
+  });
+
+  it("racial and trait deltas combine additively when both apply", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        raceItem: {
+          id: "r1", name: "Dwarf", img: "", raceId: "dwarf", size: "M",
+          baseMovement: 12, infravision: 60, grantedFeatures: [], bonusLanguages: [],
+        },
+        derived: {
+          ...input().derived,
+          abilities: {
+            ...input().derived.abilities,
+            // authored con 15 -> +1 racial (dwarf) -> +1 trait -> 17
+            con: { score: 17, mods: input().derived.abilities.con.mods },
+          },
+        },
+      }),
+    );
+    const con = c.abilities.find((a) => a.key === "con")!;
+    expect(con.racialDelta).toBe(1);
+    expect(con.traitDelta).toBe(1);
+    expect(con.effectiveScore).toBe(17);
   });
 
   it("null modifier values render as an em dash", () => {
@@ -2223,20 +2277,35 @@ describe("sub-ability rows (SP8a)", () => {
     expect(c.subAbilities).toEqual({ enabled: true, canSeed: true });
   });
 
-  it("rule on, authored sub-scores: displayed main score is their average; racialDelta is measured from it", () => {
+  it("rule on, authored sub-scores: displayed main score is their average; the delta is measured from it", () => {
     const c = buildCharacterSheetContext(
       input({ subAbilityUi: true, source: withSubs({ str: { a: 18, b: 14 } }) }),
     );
     const str = c.abilities.find((a) => a.key === "str")!;
     expect(str.score).toBe(16); // (18 + 14) / 2
     expect(str.effectiveScore).toBe(17); // derived fixture value
-    expect(str.racialDelta).toBe(1); // 17 - 16, NOT 17 - authored 17
+    // 17 - 16, NOT 17 - authored 17. No race is configured (human, no STR
+    // delta), so the whole gap attributes to traitDelta, not racialDelta.
+    expect(str.racialDelta).toBe(0);
+    expect(str.traitDelta).toBe(1);
     expect(str.subs!.map((s) => s.value)).toEqual([18, 14]);
   });
 
-  it("exceptional Strength keys off the displayed (averaged) main score", () => {
+  it("exceptional Strength keys off the effective score, itself derived from the averaged main score", () => {
     const c = buildCharacterSheetContext(
-      input({ subAbilityUi: true, source: withSubs({ str: { a: 18, b: 18 } }) }),
+      input({
+        subAbilityUi: true,
+        source: withSubs({ str: { a: 18, b: 18 } }),
+        // In real play deriveCharacter's own sub-score averaging feeds
+        // straight into the effective score it then prepares from; this
+        // mock's derived block is independent of source, so it's set here to
+        // match what that average would actually produce (18) with no
+        // race/trait adjustment on top.
+        derived: {
+          ...input().derived,
+          abilities: { ...input().derived.abilities, str: { score: 18, mods: input().derived.abilities.str.mods } },
+        },
+      }),
     );
     expect(c.abilities.find((a) => a.key === "str")!.showExceptional).toBe(true); // authored 17, averaged 18
   });

@@ -287,7 +287,12 @@ export interface TraitRow {
 
 export interface AbilityRow {
   key: string; label: string;
-  score: number; racialDelta: number; effectiveScore: number;
+  score: number; racialDelta: number;
+  /** the ability-bonus portion of `effectiveScore - score` attributable to an
+   *  owned trait (e.g. the "Powerful" trait's +1 STR) — previously lumped
+   *  into `racialDelta`, now split out so the sheet doesn't mislabel it. */
+  traitDelta: number;
+  effectiveScore: number;
   exceptional: number | null; showExceptional: boolean;
   mods: {
     label: string; value: string;
