@@ -1,4 +1,5 @@
 import { getChassis } from "../../core/classes/chassis";
+import { canAffordMemorize, spellPointsEnabled, spellsMemorizedAtLevel } from "../../core/magic/spell-points";
 import { canLearnSpell, learnSpellRoll } from "../../core/magic/spellbook";
 import type { ClassId, IntelligenceModifiers, SphereName, WizardSchool } from "../../core/types";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
@@ -63,6 +64,7 @@ export interface SpellcasterActor {
         specialistSchool: string | null;
         memorized: MemorizedEntry[];
         slots: Record<string, { max: number; used: number }>;
+        spellPoints: { maxSpellLevel?: number; maxPerLevel?: number; sp?: number; spent?: number; remaining?: number };
         spellbookItemIds: string[];
       };
       priest: {
@@ -95,6 +97,20 @@ function findPriestChassisId(actor: SpellcasterActor): ClassId | null {
   return null;
 }
 
+/** Table-17-based eligibility for a wizard spell-points memorize (fixed or
+ *  free magick): the spell's level must be within the wizard's cached Table
+ *  17/Intelligence max, there must be room under the flat per-level cap, and
+ *  enough spell points left. `sp.maxSpellLevel` is absent (cached as `{}`)
+ *  when the rule is off or the actor has no wizard levels. */
+function canMemorizeWizardSpellPoints(actor: SpellcasterActor, spellLevel: number, magickType: "fixed" | "free"): boolean {
+  const sp = actor.system.spellcasting.wizard.spellPoints;
+  if (typeof sp.maxSpellLevel !== "number") return false;
+  if (spellLevel > sp.maxSpellLevel) return false;
+  const atLevel = spellsMemorizedAtLevel(actor.system.spellcasting.wizard.memorized, spellLevel);
+  if (atLevel >= (sp.maxPerLevel ?? 0)) return false;
+  return canAffordMemorize(sp.sp ?? 0, sp.spent ?? 0, spellLevel, magickType);
+}
+
 /** Re-derives the same eligibility context.ts's `buildSpellRow` already
  *  computed for the render layer (already memorized / free slot at the
  *  spell's level / in-spellbook or sphere-access eligible), so memorizeSpell
@@ -105,9 +121,13 @@ function canReMemorize(actor: SpellcasterActor, spell: SpellItemHandle): boolean
   const sc = actor.system.spellcasting[key];
   if (sc.memorized.some((m) => m.spellItemId === spell.id)) return false;
 
-  const slotRow = sc.slots[spell.system.level];
-  const hasFreeSlot = Boolean(slotRow) && slotRow.used < slotRow.max;
-  if (!hasFreeSlot) return false;
+  if (key === "wizard" && spellPointsEnabled(getOptionalRules())) {
+    if (!canMemorizeWizardSpellPoints(actor, spell.system.level, "fixed")) return false;
+  } else {
+    const slotRow = sc.slots[spell.system.level];
+    const hasFreeSlot = Boolean(slotRow) && slotRow.used < slotRow.max;
+    if (!hasFreeSlot) return false;
+  }
 
   if (key === "wizard") {
     return actor.system.spellcasting.wizard.spellbookItemIds.includes(spell.id);
@@ -138,7 +158,8 @@ export async function memorizeSpell(actor: SpellcasterActor, spellItemId: string
   }
   const key = casterKey(spell);
   const list = actor.system.spellcasting[key].memorized;
-  const updated: MemorizedEntry[] = [...list, { spellItemId, spellLevel: spell.system.level, expended: false }];
+  const magickType: "fixed" | undefined = key === "wizard" && spellPointsEnabled(getOptionalRules()) ? "fixed" : undefined;
+  const updated: MemorizedEntry[] = [...list, { spellItemId, spellLevel: spell.system.level, expended: false, magickType }];
   await actor.update({ [`system.spellcasting.${key}.memorized`]: updated });
 }
 
@@ -336,4 +357,63 @@ export async function learnSpell(actor: SpellcasterActor, spellItemId: string): 
     speaker: ChatMessage.getSpeaker({ actor: actor as never }),
     content,
   } as unknown as ChatMessage.CreateData);
+}
+
+/** Sub-project 14 Plan A: memorizes a free magick — reserves a spell LEVEL
+ *  rather than a specific spell; the actual spell is chosen when it's cast
+ *  (see castFreeMagick). Wizard-only. A no-op with a warning when the rule is
+ *  off, or the wizard can't fit/afford another entry at that level. */
+export async function memorizeFreeMagick(actor: SpellcasterActor, spellLevel: number): Promise<void> {
+  if (!spellPointsEnabled(getOptionalRules()) || !canMemorizeWizardSpellPoints(actor, spellLevel, "free")) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.memorizeBlockedWarning"));
+    return;
+  }
+  const list = actor.system.spellcasting.wizard.memorized;
+  const updated: MemorizedEntry[] = [
+    ...list,
+    { spellItemId: null, spellLevel, expended: false, magickType: "free" },
+  ];
+  await actor.update({ "system.spellcasting.wizard.memorized": updated });
+}
+
+/** Forgets one free-magick entry at spellLevel (first match, regardless of
+ *  expended state) — free magicks are fungible, so which specific entry is
+ *  removed doesn't matter mechanically. Silent no-op if none exist (mirrors
+ *  forgetSpell — the sheet only shows Forget when one exists). */
+export async function forgetFreeMagick(actor: SpellcasterActor, spellLevel: number): Promise<void> {
+  const list = actor.system.spellcasting.wizard.memorized;
+  const index = list.findIndex((m) => m.magickType === "free" && m.spellLevel === spellLevel);
+  if (index === -1) return;
+  const updated = [...list.slice(0, index), ...list.slice(index + 1)];
+  await actor.update({ "system.spellcasting.wizard.memorized": updated });
+}
+
+/** Casts a free magick: rolls the CHOSEN spell's automation (the spell is
+ *  picked at cast time, not at memorization — spec §1.1), then expends one
+ *  matching non-expended free-magick entry at spellLevel. Does NOT route
+ *  through the SP9 Begin/Complete casting-time flow (castOrBegin) — a
+ *  free-magick cast is always immediate in this plan (Locked design decision
+ *  3; extending CastingState to a null-spellItemId state is a follow-up). */
+export async function castFreeMagick(
+  actor: SpellcasterActor,
+  spellLevel: number,
+  chosenSpellItemId: string,
+): Promise<void> {
+  const list = actor.system.spellcasting.wizard.memorized;
+  const index = list.findIndex((m) => m.magickType === "free" && m.spellLevel === spellLevel && !m.expended);
+  const chosen = actor.items.get(chosenSpellItemId);
+  const eligible =
+    Boolean(chosen) &&
+    chosen!.system.casterClass === "wizard" &&
+    chosen!.system.level === spellLevel &&
+    actor.system.spellcasting.wizard.spellbookItemIds.includes(chosenSpellItemId);
+  if (index === -1 || !eligible || !chosen) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
+    return;
+  }
+  const rolled = await rollSpellAutomation(chosen);
+  if (!rolled) return;
+  const updated = list.map((m, i) => (i === index ? { ...m, expended: true } : m));
+  await actor.update({ "system.spellcasting.wizard.memorized": updated });
+  await postCastCard(actor, chosen, rolled);
 }

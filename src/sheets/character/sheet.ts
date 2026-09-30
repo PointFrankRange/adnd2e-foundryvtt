@@ -23,7 +23,8 @@ import { validateItemDrop } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
 import { advanceWeaponMastery, allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill } from "./proficiency-actions";
 import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "./casting-actions";
-import { forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "./spell-actions";
+import { castFreeMagick, forgetFreeMagick, forgetSpell, learnSpell, memorizeFreeMagick, memorizeSpell, restSpellcasting } from "./spell-actions";
+import { promptFreeMagickLevel, promptFreeMagickSpell } from "./free-magick-dialog";
 import { seedSubAbilities } from "./sub-ability-actions";
 import { removeTrait, traitDropInputs, traitRefundCapped, type TraitDropInputs } from "./trait-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
@@ -314,6 +315,9 @@ export class Adnd2eCharacterSheet extends Base {
       memorizeSpell: Adnd2eCharacterSheet.#onMemorizeSpell,
       forgetSpell: Adnd2eCharacterSheet.#onForgetSpell,
       castSpell: Adnd2eCharacterSheet.#onCastSpell,
+      memorizeFreeMagick: Adnd2eCharacterSheet.#onMemorizeFreeMagick,
+      castFreeMagick: Adnd2eCharacterSheet.#onCastFreeMagick,
+      forgetFreeMagick: Adnd2eCharacterSheet.#onForgetFreeMagick,
       restSpellcasting: Adnd2eCharacterSheet.#onRestSpellcasting,
       learnSpell: Adnd2eCharacterSheet.#onLearnSpell,
       completeCasting: Adnd2eCharacterSheet.#onCompleteCasting,
@@ -791,6 +795,34 @@ export class Adnd2eCharacterSheet extends Base {
   ): Promise<void> {
     const spellItemId = target.dataset.itemId;
     if (spellItemId) await castOrBegin(this.document as never, spellItemId);
+  }
+
+  static async #onMemorizeFreeMagick(this: Adnd2eCharacterSheet): Promise<void> {
+    const actor = this.document as unknown as { system: { spellcasting: { wizard: { spellPoints?: { maxSpellLevel?: number } } } } };
+    const maxSpellLevel = actor.system.spellcasting.wizard.spellPoints?.maxSpellLevel;
+    if (!maxSpellLevel) return;
+    const level = await promptFreeMagickLevel(maxSpellLevel);
+    if (level !== null) await memorizeFreeMagick(this.document as never, level);
+  }
+
+  static async #onCastFreeMagick(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const level = Number(target.dataset.level);
+    if (!level) return;
+    const spellId = await promptFreeMagickSpell(this.document as never, level);
+    if (spellId) await castFreeMagick(this.document as never, level, spellId);
+  }
+
+  static async #onForgetFreeMagick(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const level = Number(target.dataset.level);
+    if (level) await forgetFreeMagick(this.document as never, level);
   }
 
   static async #onRestSpellcasting(this: Adnd2eCharacterSheet): Promise<void> {

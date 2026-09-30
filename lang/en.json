@@ -388,7 +388,14 @@
         "castBlockedWarning": "That spell can't be cast right now — refresh the sheet.",
         "castRollFailedWarning": "This spell's damage/healing formula couldn't be rolled — check the item's Automation fields.",
         "learn": "Learn Spell",
-        "learnBlockedWarning": "That spell can no longer be learned — refresh the sheet."
+        "learnBlockedWarning": "That spell can no longer be learned — refresh the sheet.",
+        "spellPoints": "Spell Points",
+        "freeMagick": "Free Magicks",
+        "freeMagickEntry": "Free magick — any level {level} spell",
+        "memorizeFreeMagick": "Memorize Free Magick",
+        "freeMagickLevelTitle": "Memorize Free Magick",
+        "freeMagickLevelHint": "Reserve a spell level rather than a specific spell — you'll choose which known spell to cast when you cast it.",
+        "freeMagickCastTitle": "Cast Free Magick — Choose a Spell"
       },
       "itemControls": {
         "edit": "Open this item's sheet",
