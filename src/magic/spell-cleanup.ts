@@ -5,7 +5,7 @@
 // that could never complete. Pure — returns only the keys that actually change.
 
 interface MemorizedEntry {
-  spellItemId: string;
+  spellItemId: string | null;
   spellLevel: number;
   expended: boolean;
 }

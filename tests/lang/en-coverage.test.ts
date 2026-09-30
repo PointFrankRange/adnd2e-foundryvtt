@@ -721,3 +721,21 @@ describe("lang/en.json — bow/crossbow ammunition strings", () => {
     }
   });
 });
+
+describe("lang/en.json — SP14a spell-points sheet strings", () => {
+  it("resolves every ADND2E.sheet.spells.freeMagick* and spellPoints key", () => {
+    for (const key of [
+      "ADND2E.sheet.spells.spellPoints",
+      "ADND2E.sheet.spells.freeMagick",
+      "ADND2E.sheet.spells.freeMagickEntry",
+      "ADND2E.sheet.spells.memorizeFreeMagick",
+      "ADND2E.sheet.spells.freeMagickLevelTitle",
+      "ADND2E.sheet.spells.freeMagickLevelHint",
+      "ADND2E.sheet.spells.freeMagickCastTitle",
+      "ADND2E.sheet.spells.freeMagickRuleOffHint",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

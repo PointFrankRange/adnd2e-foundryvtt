@@ -31,12 +31,14 @@ function abilitiesSchema() {
 function memorizedSchema() {
   return new ArrayField(
     new SchemaField({
-      spellItemId: new StringField({ required: true, blank: false }),
+      spellItemId: new StringField({ required: true, nullable: true, blank: false }),
       spellLevel: new NumberField({ required: true, integer: true, min: 1, max: 9 }),
       /** true once this memorized spell has been cast today — the slot stays
        *  occupied (see slots.ts's toRecord, which counts memorized.length
        *  regardless of expended) until a "Rest" action clears it. */
       expended: new BooleanField({ required: true, initial: false }),
+      /** Sub-project 14 Plan A: which spell-point magick this is; absent for an entry created before the rule ever ran (treated as fixed, see core/magic/spell-points.ts). */
+      magickType: new StringField({ required: true, nullable: true, initial: null, choices: ["fixed", "free"] }),
     }),
     { required: true, initial: [] },
   );
@@ -199,6 +201,8 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
         spellbookItemIds: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: [] }),
         memorized: memorizedSchema(),
         slots: new ObjectField({ required: true, initial: {} }),
+        /** Sub-project 14 Plan A: cached deriveSpellPoints() output (see slots's own precedent — Ruling PF-C: left alone, not cleared, when there's no wizard-progression caster). */
+        spellPoints: new ObjectField({ required: true, initial: {} }),
       }),
       priest: new SchemaField({
         sphereAccessOverride: new ArrayField(new StringField({ required: true, blank: false, choices: SPHERE_NAMES }), { required: true, nullable: true, initial: null }),
@@ -318,7 +322,7 @@ interface DerivedWriteSurface {
   proficiencies: unknown;
   thiefSkills: { total: number; spent: number; available: number; allocations: unknown };
   languagesKnown: unknown;
-  spellcasting: { wizard: { slots: unknown }; priest: { slots: unknown } };
+  spellcasting: { wizard: { slots: unknown; spellPoints: unknown }; priest: { slots: unknown } };
 }
 
 /**
@@ -368,6 +372,7 @@ export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void 
 
   if (derived.spellSlots.wizard) sys.spellcasting.wizard.slots = derived.spellSlots.wizard;
   if (derived.spellSlots.priest) sys.spellcasting.priest.slots = derived.spellSlots.priest;
+  if (derived.spellPoints.wizard) sys.spellcasting.wizard.spellPoints = derived.spellPoints.wizard;
 }
 
 export abstract class Adnd2eActorModel<

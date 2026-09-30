@@ -111,7 +111,16 @@ export interface CharacterDerivedView {
     wizard: {
       specialistSchool: string | null;
       slots: Record<string, { max: number; used: number }>;
-      memorized: { spellItemId: string; spellLevel: number; expended: boolean }[];
+      /** Sub-project 14 Plan A. The whole field is optional (test fixtures may
+       *  omit it entirely); every subfield is ALSO optional because real system
+       *  data's `ObjectField` default is `{}` (present but empty) whenever the
+       *  rule is off or the actor has no wizard levels — never a fully-populated
+       *  object with some fields missing, but never "undefined" from live data
+       *  either. Always default with `?? {}` before reading a subfield. */
+      spellPoints?: {
+        maxSpellLevel?: number; maxPerLevel?: number; sp?: number; spent?: number; remaining?: number;
+      };
+      memorized: { spellItemId: string | null; spellLevel: number; expended: boolean; magickType?: "fixed" | "free" }[];
     };
     priest: {
       slots: Record<string, { max: number; used: number }>;
@@ -415,6 +424,10 @@ export interface CharacterSheetContext {
     orphaned: OrphanedSpellRow[];
     /** Sub-project 9a: the in-progress cast's panel, or null when idle/the rule is off */
     casting: CastingPanel | null;
+    /** Sub-project 14 Plan A: null when the rule is off or the actor has no wizard levels */
+    spellPoints: { max: number; spent: number; remaining: number } | null;
+    /** Sub-project 14 Plan A: one row per currently-memorized free magick, across all levels */
+    freeMagicks: { level: number; expended: boolean; canCast: boolean }[];
   };
   features: {
     groups: { sourceType: string; sourceTypeLabel: string; items: FeatureItemView[] }[];

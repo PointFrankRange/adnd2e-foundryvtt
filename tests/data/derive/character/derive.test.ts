@@ -136,6 +136,23 @@ describe("deriveCharacter — full single-class pipeline (§5.6 steps 3-10)", ()
     expect(d.spellSlots.wizard![1].max).toBe(4);
   });
 
+  it("mage L5 INT 16, spellPoints rule on -> wizard spell points record (SP14a)", () => {
+    const mage: ActorSnapshot = {
+      ...fighter7,
+      abilities: { str: 10, dex: 10, con: 10, int: 16, wis: 10, cha: 10 },
+      classes: [{ chassisId: "mage", specialistSchool: null, xp: 20000, hpRolls: [4, 3, 4, 2, 3], dualClassState: null, level: 5 }],
+      equippedArmor: null, equippedShield: null,
+    };
+    const d = deriveCharacter(mage, { ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true });
+    expect(d.spellPoints.wizard).toBeDefined();
+    expect(d.spellPoints.wizard!.maxSpellLevel).toBe(3); // Table 17 L5 -> 3rd
+  });
+
+  it("spellPoints rule on, non-wizard single class -> spellPoints stays empty", () => {
+    const d = deriveCharacter(fighter7, { ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true });
+    expect(d.spellPoints).toEqual({});
+  });
+
 });
 
 describe("deriveCharacter — multiclass (§5.6 step 1)", () => {
@@ -178,6 +195,11 @@ describe("deriveCharacter — multiclass (§5.6 step 1)", () => {
     expect(d.spellSlots.wizard).toBeDefined();
     expect(d.spellSlots.priest).toBeUndefined();
     expect(d.multiclass.dualClass).toEqual({ dormantChassisId: null, activeChassisId: null, surpassed: false });
+  });
+
+  it("Fighter 5 / Mage 6, spellPoints rule on -> wizard spell points record (SP14a)", () => {
+    const d = deriveCharacter(elfFM, { ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true });
+    expect(d.spellPoints.wizard).toBeDefined();
   });
 
   it("Fighter/Thief (no caster): spellSlots is empty", () => {

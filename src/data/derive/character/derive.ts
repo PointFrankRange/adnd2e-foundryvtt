@@ -7,6 +7,7 @@ import type {
 } from "../../../core/types";
 import type { OptionalRules } from "../../../core/options";
 import { acDexAdjWhileCasting, expandedCastingTimeEnabled } from "../../../core/magic/casting-time";
+import { spellPointsEnabled } from "../../../core/magic/spell-points";
 import type {
   ArrangementResolution, ClassArrangement, ClassMember, DualClassResolution,
 } from "../../../core/classes/multiclass";
@@ -18,6 +19,7 @@ import { deriveThac0 } from "./thac0";
 import { deriveAc } from "./ac";
 import { deriveSaves } from "./saves";
 import { deriveSpellSlots, type SlotRecord } from "./slots";
+import { deriveSpellPoints, type SpellPointsRecord } from "./spell-points";
 import { deriveProficiencySlots, type SlotBlock } from "./proficiencies";
 import { deriveThiefSkillPoints, type ThiefSkillPointBlock } from "./thief-skills";
 import { deriveEncumbrance } from "./encumbrance";
@@ -33,6 +35,7 @@ export interface CharacterDerived {
   ac: { normal: number; rearAttack: number; surprised: number; shieldless: number };
   saves: Record<SaveCategory, { target: number; rollModifier: number; effectiveTarget: number }> | null;
   spellSlots: { wizard?: SlotRecord; priest?: SlotRecord };
+  spellPoints: { wizard?: SpellPointsRecord };
   proficiencies: { weapon: SlotBlock; nonweapon: SlotBlock; languagesMax: number } | null;
   thiefSkills: ThiefSkillPointBlock;
   encumbrance: {
@@ -65,7 +68,11 @@ function spellInput(
     wisdomScore: snapshot.abilities.wis,
     wisdomBonusSpells: abilities.wis.bonusPriestSpells,
     specialist: m.specialistSchool !== null,
-    wizardMemorized: snapshot.wizardMemorized,
+    // Sub-project 14 Plan A: a free magick occupies a spell-points cap slot
+    // (Table 17), never a classic Table-21 slot — exclude it here (not in
+    // slots.ts itself, which stays untouched) so it's truly inert to the
+    // classic path whether the spell-points rule is on or off (spec §5).
+    wizardMemorized: snapshot.wizardMemorized.filter((mem) => mem.magickType !== "free"),
     priestMemorized: snapshot.priestMemorized,
   };
 }
@@ -78,6 +85,28 @@ function mergeCasterSlots(
   let out: { wizard?: SlotRecord; priest?: SlotRecord } = {};
   for (const c of casters) {
     out = { ...out, ...deriveSpellSlots(spellInput(c, snapshot, abilities)) };
+  }
+  return out;
+}
+
+function mergeCasterSpellPoints(
+  casters: readonly ClassMember[],
+  snapshot: ActorSnapshot,
+  abilities: DerivedAbilities,
+): { wizard?: SpellPointsRecord } {
+  let out: { wizard?: SpellPointsRecord } = {};
+  for (const c of casters) {
+    out = {
+      ...out,
+      ...deriveSpellPoints({
+        chassisId: c.chassisId,
+        level: c.level,
+        intScore: snapshot.abilities.int,
+        maxSpellLevelKnown: abilities.int.maxSpellLevel,
+        specialist: c.specialistSchool !== null,
+        wizardMemorized: snapshot.wizardMemorized,
+      }),
+    };
   }
   return out;
 }
@@ -151,6 +180,8 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
           })
         : null,
       spellSlots: primaryMember ? mergeCasterSlots([primaryMember], snapshot, abilities) : {},
+      spellPoints:
+        primaryMember && spellPointsEnabled(options) ? mergeCasterSpellPoints([primaryMember], snapshot, abilities) : {},
       proficiencies: primary
         ? deriveProficiencySlots(
             { chassisId: primary.chassisId, level },
@@ -201,6 +232,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
       dexDefensiveAdj: abilities.dex.defensiveAdj,
     }),
     spellSlots: mergeCasterSlots(resolution.casters, snapshot, abilities),
+    spellPoints: spellPointsEnabled(options) ? mergeCasterSpellPoints(resolution.casters, snapshot, abilities) : {},
     proficiencies: deriveProficiencySlots(
       resolution.weaponProfSource,
       resolution.nonweaponProfSource,

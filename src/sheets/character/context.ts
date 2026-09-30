@@ -37,6 +37,7 @@ import { matchingAmmo, defaultAmmoSelection } from "../../combat/ammo";
 import type { AmmoStock } from "../../combat/ammo";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { canMemorizePriestSpell } from "../../magic/priest-sphere-access";
+import { magickCost, spellPointsEnabled, spellsMemorizedAtLevel } from "../../core/magic/spell-points";
 import { groupInventory } from "./grouping";
 import { xpToNext } from "./xp";
 import { buildFavoriteRows, isFavorite, normalizeFavorites, type FavoriteKind } from "../kit/favorites";
@@ -631,6 +632,11 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   const int = input.derived.abilities.int.mods as IntelligenceModifiers;
   const specialistSchool = school as WizardSchool | null;
   const casting = buildCastingPanel(input);
+  const spellPointsOn = spellPointsEnabled(input.optionalRules);
+  // `?? {}` handles BOTH shapes the field can take: a test fixture that omits
+  // it entirely (undefined), and real system data's ObjectField default of
+  // `{}` (present but empty) when the rule is off or there's no wizard caster.
+  const wizardSp = sc.wizard.spellPoints ?? {};
 
   const known: { level: number; items: SpellItemView[] }[] = [];
   for (let level = 1; level <= 9; level += 1) {
@@ -640,7 +646,9 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
     const learnCtx: LearnEligibilityContext = {
       int, specialistSchool, knownAtThisLevel, castableAtThisLevel, optionalRules: input.optionalRules,
     };
-    let items = levelItems.map((s) => buildSpellRow(s, sc, priestChassisId, sphereAccessOverride, learnCtx, fav));
+    let items = levelItems.map((s) =>
+      buildSpellRow(s, sc, priestChassisId, sphereAccessOverride, learnCtx, fav, spellPointsOn, wizardSp),
+    );
     items = casting ? items.map((r) => ({ ...r, canCast: false })) : items;
     if (items.length > 0) known.push({ level, items });
   }
@@ -651,6 +659,13 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
     known,
     orphaned: buildOrphanedSpells(input, sc),
     casting,
+    spellPoints:
+      spellPointsOn && typeof wizardSp.remaining === "number"
+        ? { max: wizardSp.sp ?? 0, spent: wizardSp.spent ?? 0, remaining: wizardSp.remaining }
+        : null,
+    freeMagicks: sc.wizard.memorized
+      .filter((m) => m.magickType === "free")
+      .map((m) => ({ level: m.spellLevel, expended: m.expended, canCast: !m.expended && !casting })),
   };
 }
 
@@ -701,7 +716,8 @@ function buildOrphanedSpells(
   const knownIds = new Set(input.spellItems.map((s) => s.id));
   const orphaned: OrphanedSpellRow[] = [];
   for (const m of sc.wizard.memorized) {
-    if (!knownIds.has(m.spellItemId)) {
+    // a free magick (Sub-project 14 Plan A) has no backing spell item to lose — never orphaned
+    if (m.spellItemId !== null && !knownIds.has(m.spellItemId)) {
       orphaned.push({ spellItemId: m.spellItemId, casterClass: "wizard", spellLevel: m.spellLevel });
     }
   }
@@ -725,6 +741,8 @@ function buildSpellRow(
   sphereAccessOverride: SphereName[] | null,
   learnCtx: LearnEligibilityContext,
   fav: FavCheck,
+  spellPointsOn: boolean,
+  wizardSp: CharacterDerivedView["spellcasting"]["wizard"]["spellPoints"],
 ): SpellItemView {
   const isWizard = item.casterClass === "wizard";
   const memorizedList = isWizard ? sc.wizard.memorized : sc.priest.memorized;
@@ -732,9 +750,17 @@ function buildSpellRow(
   const memorized = Boolean(entry);
   const expended = entry?.expended ?? false;
 
-  const slots = isWizard ? sc.wizard.slots : sc.priest.slots;
-  const slotRow = slots[item.level];
-  const hasFreeSlot = Boolean(slotRow) && slotRow.used < slotRow.max;
+  let hasFreeSlot: boolean;
+  if (isWizard && spellPointsOn && wizardSp && typeof wizardSp.maxSpellLevel === "number") {
+    hasFreeSlot =
+      item.level <= wizardSp.maxSpellLevel &&
+      spellsMemorizedAtLevel(sc.wizard.memorized, item.level) < (wizardSp.maxPerLevel ?? 0) &&
+      (wizardSp.remaining ?? 0) >= magickCost(item.level, "fixed");
+  } else {
+    const slots = isWizard ? sc.wizard.slots : sc.priest.slots;
+    const slotRow = slots[item.level];
+    hasFreeSlot = Boolean(slotRow) && slotRow.used < slotRow.max;
+  }
 
   const eligible = isWizard
     ? item.inSpellbook

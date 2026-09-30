@@ -388,7 +388,15 @@
         "castBlockedWarning": "That spell can't be cast right now — refresh the sheet.",
         "castRollFailedWarning": "This spell's damage/healing formula couldn't be rolled — check the item's Automation fields.",
         "learn": "Learn Spell",
-        "learnBlockedWarning": "That spell can no longer be learned — refresh the sheet."
+        "learnBlockedWarning": "That spell can no longer be learned — refresh the sheet.",
+        "spellPoints": "Spell Points",
+        "freeMagick": "Free Magicks",
+        "freeMagickEntry": "Free magick — any level {level} spell",
+        "memorizeFreeMagick": "Memorize Free Magick",
+        "freeMagickLevelTitle": "Memorize Free Magick",
+        "freeMagickLevelHint": "Reserve a spell level rather than a specific spell — you'll choose which known spell to cast when you cast it.",
+        "freeMagickCastTitle": "Cast Free Magick — Choose a Spell",
+        "freeMagickRuleOffHint": "Spell points is off — you can still forget these, but not cast or memorize new ones."
       },
       "itemControls": {
         "edit": "Open this item's sheet",
@@ -706,7 +714,7 @@
       },
       "spellPoints": {
         "name": "Spells & Magic: Spell Points",
-        "hint": "Not implemented — spell points come from Player's Option: Spells & Magic, which this system does not reference."
+        "hint": "Wizards spend a spell-point pool to memorize fixed magicks (one specific spell) or free magicks (any spell of that level, chosen when cast) instead of filling flat per-level slots for free (Player's Option: Spells & Magic)."
       },
       "expandedCastingTime": {
         "name": "Spells & Magic: Expanded Casting Time",
@@ -714,7 +722,7 @@
       },
       "channelers": {
         "name": "Spells & Magic: Channelers",
-        "hint": "Not implemented — channelers come from Player's Option: Spells & Magic, which this system does not reference."
+        "hint": "Not implemented — Channelers (a later plan in this sub-project) will let a wizard cast repeatedly by spending spell points instead of expending a memorized spell, at the cost of escalating fatigue."
       },
       "playerAppliedEffects": {
         "name": "Player-Applied Damage & Effects",

@@ -26,17 +26,17 @@ describe("SETTING_DESCRIPTORS", () => {
     for (const d of SETTING_DESCRIPTORS) expect(typeof d.default).toBe("boolean");
   });
 
-  it("core, combatAndTactics, skillsAndPowers and two spellsAndMagic settings bind 1:1 to OptionalRules fields", () => {
+  it("core, combatAndTactics, skillsAndPowers and three spellsAndMagic settings bind 1:1 to OptionalRules fields", () => {
     const bound = SETTING_DESCRIPTORS.filter((d) => d.optionalRulesKey !== null);
-    expect(bound).toHaveLength(20);
+    expect(bound).toHaveLength(21);
     const boundKeys = bound.map((d) => d.optionalRulesKey).sort();
     expect(boundKeys).toEqual(Object.keys(DEFAULT_OPTIONAL_RULES).sort());
     const unbound = SETTING_DESCRIPTORS.filter((d) => d.optionalRulesKey === null).map((d) => d.key).sort();
-    expect(unbound).toEqual(["channelers", "spellPoints"]);
+    expect(unbound).toEqual(["channelers"]);
   });
 
-  it("exactly the five prepare-time rules require a world reload", () => {
-    const reload = ["characterPointBuild", "expandedCastingTime", "skillsAndPowersEnabled", "spellsAndMagicEnabled", "subAbilityScores"];
+  it("exactly the six prepare-time rules require a world reload", () => {
+    const reload = ["characterPointBuild", "expandedCastingTime", "skillsAndPowersEnabled", "spellPoints", "spellsAndMagicEnabled", "subAbilityScores"];
     const keys = SETTING_DESCRIPTORS.filter((d) => d.requiresReload === true).map((d) => d.key);
     expect(keys.sort()).toEqual(reload);
     for (const d of SETTING_DESCRIPTORS) {
@@ -78,10 +78,5 @@ describe("readOptionalRules()", () => {
     const bag = readOptionalRules((key) => (key === "subAbilityScores" ? true : undefined));
     expect(bag.subAbilityScores).toBe(true);
     expect(bag.skillsAndPowersEnabled).toBe(false); // untouched default
-  });
-
-  it("ignores spellsAndMagic keys — they never appear in the bag", () => {
-    const bag = readOptionalRules((key) => (key === "spellPoints" ? true : undefined));
-    expect(bag).not.toHaveProperty("spellPoints");
   });
 });

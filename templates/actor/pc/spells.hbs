@@ -14,6 +14,15 @@
     </section>
   {{/if}}
 
+  {{#if adnd2e.spells.spellPoints}}
+    <section class="kit-panel">
+      <div class="kit-bar">{{localize 'ADND2E.sheet.spells.spellPoints'}}</div>
+      <div class="kit-body">
+        <p>{{adnd2e.spells.spellPoints.remaining}} / {{adnd2e.spells.spellPoints.max}}</p>
+      </div>
+    </section>
+  {{/if}}
+
   {{#if adnd2e.spells.priestSlots}}
     <section class="kit-panel">
       <div class="kit-bar">{{localize 'ADND2E.sheet.spells.priestSlots'}}</div>
@@ -80,6 +89,61 @@
       {{/each}}
     </div>
   </section>
+
+  {{#if @root.pcActions}}
+  {{#if adnd2e.spells.spellPoints}}
+    <section class="kit-panel">
+      <div class="kit-bar">
+        {{localize 'ADND2E.sheet.spells.freeMagick'}}
+        <button type="button" class="kit-small" data-action="memorizeFreeMagick" style="margin-left:auto">
+          {{localize 'ADND2E.sheet.spells.memorizeFreeMagick'}}
+        </button>
+      </div>
+      <div class="kit-body">
+        {{#each adnd2e.spells.freeMagicks as |m|}}
+          <div class="spell-row{{#if m.expended}} expended{{/if}}">
+            <span class="name">
+              {{localize 'ADND2E.sheet.spells.freeMagickEntry' level=m.level}}
+              {{#if m.expended}}
+                <span class="badge expended-badge" title="{{localize 'ADND2E.sheet.spells.expended'}}">✓</span>
+              {{/if}}
+            </span>
+            {{#if m.canCast}}
+              <button type="button" data-action="castFreeMagick" data-level="{{m.level}}">
+                {{localize 'ADND2E.sheet.spells.cast'}}
+              </button>
+            {{/if}}
+            <button type="button" data-action="forgetFreeMagick" data-level="{{m.level}}" data-expended="{{m.expended}}">
+              {{localize 'ADND2E.sheet.spells.forget'}}
+            </button>
+          </div>
+        {{else}}
+          <p class="placeholder">{{localize 'ADND2E.sheet.spells.none'}}</p>
+        {{/each}}
+      </div>
+    </section>
+  {{else if adnd2e.spells.freeMagicks.length}}
+    <section class="kit-panel">
+      <div class="kit-bar">{{localize 'ADND2E.sheet.spells.freeMagick'}}</div>
+      <div class="kit-body">
+        <p class="placeholder">{{localize 'ADND2E.sheet.spells.freeMagickRuleOffHint'}}</p>
+        {{#each adnd2e.spells.freeMagicks as |m|}}
+          <div class="spell-row{{#if m.expended}} expended{{/if}}">
+            <span class="name">
+              {{localize 'ADND2E.sheet.spells.freeMagickEntry' level=m.level}}
+              {{#if m.expended}}
+                <span class="badge expended-badge" title="{{localize 'ADND2E.sheet.spells.expended'}}">✓</span>
+              {{/if}}
+            </span>
+            <button type="button" data-action="forgetFreeMagick" data-level="{{m.level}}" data-expended="{{m.expended}}">
+              {{localize 'ADND2E.sheet.spells.forget'}}
+            </button>
+          </div>
+        {{/each}}
+      </div>
+    </section>
+  {{/if}}
+  {{/if}}
 
   {{#if adnd2e.spells.orphaned.length}}
     <section class="kit-panel">
