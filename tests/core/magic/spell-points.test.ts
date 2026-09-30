@@ -6,6 +6,7 @@ import {
   spellPointsEnabled,
   spellPointsSpent,
   spellsMemorizedAtLevel,
+  wizardBaseSpellPoints,
   wizardMaxPerLevel,
   wizardMaxSpellLevel,
   wizardSpellPointTotal,
@@ -128,5 +129,15 @@ describe("canAffordMemorize", () => {
   });
   it("blocks one point over", () => {
     expect(canAffordMemorize(40, 37, 1, "fixed")).toBe(false); // 37 + 4 = 41
+  });
+});
+
+describe("wizardBaseSpellPoints (Table 17 base + specialist bonus, no Int)", () => {
+  it("matches Table 17's own numbers with no Intelligence term", () => {
+    expect(wizardBaseSpellPoints(1, false)).toBe(4);
+    expect(wizardBaseSpellPoints(6, true)).toBe(75); // 55 base + 20 specialist bonus
+  });
+  it("wizardSpellPointTotal equals wizardBaseSpellPoints plus the Table 19 Int bonus, always", () => {
+    expect(wizardSpellPointTotal(6, 18, true)).toBe(wizardBaseSpellPoints(6, true) + 7); // Int 18 -> +7
   });
 });

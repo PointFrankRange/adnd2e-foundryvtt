@@ -97,12 +97,20 @@ function bonusSpForIntelligence(intScore: number): number {
   return BONUS_SP_BY_INTELLIGENCE.find((row) => intScore >= row.min)?.bonus ?? 0;
 }
 
+/** Table 17 base SP + specialist bonus (zero past level 20) — WITHOUT the
+ *  Table 19 Intelligence bonus. Exported for Sub-project 14 Plan B's
+ *  Channellers, which substitutes a Constitution/Wisdom term for Intelligence
+ *  (design spec §1.1) instead of adding to this same base. */
+export function wizardBaseSpellPoints(wizardLevel: number, specialist: boolean): number {
+  const row = wizardRow(wizardLevel);
+  const specialistBonus = specialist ? row.specialistBonusSp : 0;
+  return row.sp + specialistBonus;
+}
+
 /** Table 17 SP (+ specialist bonus, zero past level 20) + Table 19 Intelligence bonus. */
 export function wizardSpellPointTotal(wizardLevel: number, intScore: number, specialist: boolean): number {
   assertAbilityScore(intScore, "int");
-  const row = wizardRow(wizardLevel);
-  const specialistBonus = specialist ? row.specialistBonusSp : 0;
-  return row.sp + specialistBonus + bonusSpForIntelligence(intScore);
+  return wizardBaseSpellPoints(wizardLevel, specialist) + bonusSpForIntelligence(intScore);
 }
 
 // prettier-ignore

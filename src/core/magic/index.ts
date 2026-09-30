@@ -6,3 +6,4 @@ export * from "./spheres";
 export * from "./spellbook";
 export * from "./casting-time";
 export * from "./spell-points";
+export * from "./channellers";
