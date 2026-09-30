@@ -53,9 +53,10 @@
       .kit-stat {
         flex: 0 1 76px; min-width: 56px;
         display: flex; flex-direction: column;
-        .kit-bar { justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; height: 20px; padding: 0 4px; }
+        // same ellipsis-in-a-centered-flex-box gotcha as .pc-encumbrance/.ac-breakdown below.
+        .kit-bar { justify-content: center; white-space: normal; word-break: break-word; font-size: 11px; min-height: 20px; padding: 2px 4px; }
         .kit-big {
-          height: 34px; box-sizing: border-box;
+          min-height: 34px; box-sizing: border-box;
           display: flex; align-items: center; justify-content: center; gap: 2px;
           padding: 0 4px; font-size: 18px; line-height: 1;
           input[type="number"] {
@@ -123,8 +124,13 @@
   .pc-encumbrance .kit-stat {
     flex: 0 1 96px; min-width: 72px;
     display: flex; flex-direction: column;
-    .kit-bar { justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; height: 20px; padding: 0 4px; }
-    .kit-big { height: 34px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 4px; font-size: 16px; line-height: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    // text-overflow:ellipsis doesn't render inside a centered flex box (the
+    // kit's own recurring gotcha, first hit on the Monster NPC header's Move
+    // box): with justify-content:center, overflowing text is centered and
+    // hard-clipped from BOTH ends with no "…" shown at all, not truncated
+    // from one end. Wrap instead of truncating.
+    .kit-bar { justify-content: center; white-space: normal; word-break: break-word; font-size: 11px; min-height: 20px; padding: 2px 4px; }
+    .kit-big { min-height: 34px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 2px 4px; font-size: 16px; line-height: 1.1; white-space: normal; word-break: break-word; text-align: center; }
   }
 
   // dev-world fix 9: the AC breakdown (Armor panel) reuses the same
@@ -133,7 +139,8 @@
   .ac-breakdown .kit-stat {
     flex: 0 1 76px; min-width: 56px;
     display: flex; flex-direction: column;
-    .kit-bar { justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; height: 20px; padding: 0 4px; }
+    // same ellipsis-in-a-centered-flex-box gotcha as .pc-encumbrance above.
+    .kit-bar { justify-content: center; white-space: normal; word-break: break-word; font-size: 11px; min-height: 20px; padding: 2px 4px; }
     .kit-big { height: 34px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 4px; font-size: 16px; line-height: 1; }
   }
 
