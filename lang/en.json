@@ -706,7 +706,7 @@
       },
       "spellPoints": {
         "name": "Spells & Magic: Spell Points",
-        "hint": "Not implemented — spell points come from Player's Option: Spells & Magic, which this system does not reference."
+        "hint": "Wizards spend a spell-point pool to memorize fixed magicks (one specific spell) or free magicks (any spell of that level, chosen when cast) instead of filling flat per-level slots for free (Player's Option: Spells & Magic)."
       },
       "expandedCastingTime": {
         "name": "Spells & Magic: Expanded Casting Time",

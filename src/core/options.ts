@@ -4,7 +4,7 @@
  * (`getOptionalRules()`); `core/` only ever receives it as a parameter.
  *
  * `core`, `combatAndTactics`, `skillsAndPowers` and `spellsAndMagic` group toggles all live here
- * (Sub-projects 7, 8 and 9 wired those latter three). `spellsAndMagic.spellPoints` and `.channelers` are registered but not implemented (they come from *Player's Option: Spells & Magic*, which this system does not reference).
+ * (Sub-projects 7, 8 and 9 wired those latter three). `spellsAndMagic.channelers` is registered but not implemented (a later plan in this sub-project — see the Spell Points design spec).
  */
 export interface OptionalRules {
   /** PHB p.18: warriors roll d100 for exceptional Strength at STR 18. */
@@ -50,6 +50,8 @@ export interface OptionalRules {
   spellsAndMagicEnabled: boolean;
   /** Sub-project 9 Plan 9a: PHB casting time + spell disruption (PHB p.86-87, p.95). */
   expandedCastingTime: boolean;
+  /** Sub-project 14 Plan A: Player's Option: Spells & Magic wizard spell points (pp.78, 80). */
+  spellPoints: boolean;
 }
 
 export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
@@ -73,4 +75,5 @@ export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
   expandedProficiencies: false,
   spellsAndMagicEnabled: false,
   expandedCastingTime: false,
+  spellPoints: false,
 };
