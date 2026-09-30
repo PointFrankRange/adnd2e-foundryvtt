@@ -1,6 +1,7 @@
 // DOM behaviour for the sheet kit (sheet redesign R1): collapsible item-table
 // sections (state per viewer in localStorage), the client-side filter box, and
-// click-to-expand item summaries. No document writes. Foundry-free DOM glue,
+// click-to-expand item summaries (state per open sheet, surviving a
+// re-render — see `expandedRows`). No document writes. Foundry-free DOM glue,
 // dev-world verified.
 
 const key = (sheetKey: string, section: string): string => `adnd2e.collapsed.${sheetKey}.${section}`;
@@ -49,15 +50,22 @@ function applyFilter(scope: HTMLElement, q: string): void {
   }
 }
 
-/** Drops a sheet's persisted filter text when its sheet closes — otherwise this
- *  module-level Map would leak an entry per closed sheet for the rest of the
- *  client session. Call from the sheet's `_onClose` with the SAME `sheetKey`
- *  passed to `bindSheetKit`. */
+/** Which item rows are expanded, per sheet — same rationale and lifecycle as
+ *  `filterText` above (a re-render rebuilds the row DOM from scratch with no
+ *  memory of which rows were expanded, so this must be restored after every
+ *  render; per-open-sheet state, not a durable preference, cleared on close). */
+const expandedRows = new Map<string, Set<string>>();
+
+/** Drops a sheet's persisted filter text and expanded-row state when its
+ *  sheet closes — otherwise these module-level maps would leak an entry per
+ *  closed sheet for the rest of the client session. Call from the sheet's
+ *  `_onClose` with the SAME `sheetKey` passed to `bindSheetKit`. */
 export function clearSheetKit(sheetKey: string): void {
   const prefix = `${sheetKey}:`;
   for (const k of Array.from(filterText.keys())) {
     if (k.startsWith(prefix)) filterText.delete(k);
   }
+  expandedRows.delete(sheetKey);
 }
 
 export function bindSheetKit(root: HTMLElement, sheetKey: string): void {
@@ -72,6 +80,14 @@ export function bindSheetKit(root: HTMLElement, sheetKey: string): void {
     });
   }
   for (const input of Array.from(root.querySelectorAll<HTMLInputElement>("input[data-kit-filter]"))) {
+    // A non-owner observer's sheet renders read-only: DocumentSheetV2's own
+    // _onRender (which our _onRender's `super` call runs before this) blanket-
+    // disables every element in `form.elements` via `_toggleDisabled(true)`
+    // whenever `!isEditable` (client/applications/api/document-sheet.mjs) —
+    // this filter box writes nothing (it's excluded from form submission
+    // below) and reads the actor a viewer can already see, so it should stay
+    // usable regardless of edit permission.
+    input.disabled = false;
     const filterId = input.dataset.kitFilter ?? "";
     const scope = root.querySelector<HTMLElement>(`[data-kit-filter-scope="${filterId}"]`);
     if (!scope) continue;
@@ -99,7 +115,21 @@ export function bindSheetKit(root: HTMLElement, sheetKey: string): void {
       if (event.key === "Enter") event.preventDefault();
     });
   }
+  const expanded = expandedRows.get(sheetKey) ?? new Set<string>();
+  expandedRows.set(sheetKey, expanded);
+  for (const row of Array.from(root.querySelectorAll<HTMLElement>("[data-kit-row]"))) {
+    const itemId = row.dataset.itemId;
+    if (itemId && expanded.has(itemId)) row.classList.add("expanded");
+  }
   for (const el of Array.from(root.querySelectorAll<HTMLElement>("[data-kit-expand]"))) {
-    el.addEventListener("click", () => el.closest("[data-kit-row]")?.classList.toggle("expanded"));
+    el.addEventListener("click", () => {
+      const row = el.closest<HTMLElement>("[data-kit-row]");
+      if (!row) return;
+      const itemId = row.dataset.itemId;
+      const isExpanded = row.classList.toggle("expanded");
+      if (!itemId) return;
+      if (isExpanded) expanded.add(itemId);
+      else expanded.delete(itemId);
+    });
   }
 }
