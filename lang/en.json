@@ -396,7 +396,19 @@
         "freeMagickLevelTitle": "Memorize Free Magick",
         "freeMagickLevelHint": "Reserve a spell level rather than a specific spell — you'll choose which known spell to cast when you cast it.",
         "freeMagickCastTitle": "Cast Free Magick — Choose a Spell",
-        "freeMagickRuleOffHint": "Spell points is off — you can still forget these, but not cast or memorize new ones."
+        "freeMagickRuleOffHint": "Spell points is off — you can still forget these, but not cast or memorize new ones.",
+        "channelling": "Channelling",
+        "channellingRecover": "Recover",
+        "channellingRecoverTitle": "Recover Spell Points",
+        "channellingActivityLabel": "Activity",
+        "channellingHoursLabel": "Hours",
+        "channellingBlockedWarning": "Channellers isn't active for this character — refresh the sheet.",
+        "channellingActivity": {
+          "hardExertion": "Hard Exertion (combat, forced march) — no recovery",
+          "walkingRiding": "Walking or Riding",
+          "sittingResting": "Sitting or Resting",
+          "sleeping": "Sleeping"
+        }
       },
       "itemControls": {
         "edit": "Open this item's sheet",

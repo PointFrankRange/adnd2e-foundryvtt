@@ -1,4 +1,5 @@
 import { getChassis } from "../../core/classes/chassis";
+import { canAffordCast, channellersEnabled, recoverSp, spendCastSp, type ChannellerActivity } from "../../core/magic/channellers";
 import { canAffordMemorize, spellPointsEnabled, spellsMemorizedAtLevel } from "../../core/magic/spell-points";
 import { canLearnSpell, learnSpellRoll } from "../../core/magic/spellbook";
 import type { ClassId, IntelligenceModifiers, SphereName, WizardSchool } from "../../core/types";
@@ -65,6 +66,7 @@ export interface SpellcasterActor {
         memorized: MemorizedEntry[];
         slots: Record<string, { max: number; used: number }>;
         spellPoints: { maxSpellLevel?: number; maxPerLevel?: number; sp?: number; spent?: number; remaining?: number };
+        channelling: { current?: number; max?: number };
         spellbookItemIds: string[];
       };
       priest: {
@@ -108,6 +110,9 @@ function canMemorizeWizardSpellPoints(actor: SpellcasterActor, spellLevel: numbe
   if (spellLevel > sp.maxSpellLevel) return false;
   const atLevel = spellsMemorizedAtLevel(actor.system.spellcasting.wizard.memorized, spellLevel);
   if (atLevel >= (sp.maxPerLevel ?? 0)) return false;
+  // Sub-project 14 Plan B: a channeller's slate selection costs nothing from
+  // the pool (design spec §1.1) — only the Table 17 caps above still gate it.
+  if (channellersEnabled(getOptionalRules())) return true;
   return canAffordMemorize(sp.sp ?? 0, sp.spent ?? 0, spellLevel, magickType);
 }
 
@@ -269,9 +274,29 @@ export async function castSpell(actor: SpellcasterActor, spellItemId: string): P
   }
   const key = casterKey(spell);
   const list = actor.system.spellcasting[key].memorized;
-  const entry = list.find((m) => m.spellItemId === spellItemId && !m.expended);
+  const channelling = key === "wizard" && channellersEnabled(getOptionalRules());
+  // A channelling entry is never expended (spec §2) — any match is castable
+  // subject to affordability, checked below; the classic path still requires
+  // a non-expended entry.
+  const entry = channelling
+    ? list.find((m) => m.spellItemId === spellItemId)
+    : list.find((m) => m.spellItemId === spellItemId && !m.expended);
   if (!entry) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
+    return;
+  }
+  if (channelling) {
+    const current = actor.system.spellcasting.wizard.channelling.current ?? 0;
+    if (!canAffordCast(current, entry.spellLevel, entry.magickType ?? "fixed")) {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
+      return;
+    }
+    const rolled = await rollSpellAutomation(spell);
+    if (!rolled) return;
+    await actor.update({
+      "system.spellcasting.wizard.channelling.current": spendCastSp(current, entry.spellLevel, entry.magickType ?? "fixed"),
+    });
+    await postCastCard(actor, spell, rolled);
     return;
   }
   const rolled = await rollSpellAutomation(spell);
@@ -404,7 +429,10 @@ export async function castFreeMagick(
   chosenSpellItemId: string,
 ): Promise<void> {
   const list = actor.system.spellcasting.wizard.memorized;
-  const index = list.findIndex((m) => m.magickType === "free" && m.spellLevel === spellLevel && !m.expended);
+  const channelling = channellersEnabled(getOptionalRules());
+  const index = channelling
+    ? list.findIndex((m) => m.magickType === "free" && m.spellLevel === spellLevel)
+    : list.findIndex((m) => m.magickType === "free" && m.spellLevel === spellLevel && !m.expended);
   const chosen = actor.items.get(chosenSpellItemId);
   const eligible =
     Boolean(chosen) &&
@@ -415,9 +443,41 @@ export async function castFreeMagick(
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
     return;
   }
+  if (channelling) {
+    const current = actor.system.spellcasting.wizard.channelling.current ?? 0;
+    if (!canAffordCast(current, spellLevel, "free")) {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
+      return;
+    }
+    const rolled = await rollSpellAutomation(chosen);
+    if (!rolled) return;
+    await actor.update({
+      "system.spellcasting.wizard.channelling.current": spendCastSp(current, spellLevel, "free"),
+    });
+    await postCastCard(actor, chosen, rolled);
+    return;
+  }
   const rolled = await rollSpellAutomation(chosen);
   if (!rolled) return;
   const updated = list.map((m, i) => (i === index ? { ...m, expended: true } : m));
   await actor.update({ "system.spellcasting.wizard.memorized": updated });
   await postCastCard(actor, chosen, rolled);
+}
+
+/** Sub-project 14 Plan B: Table 20 recovery. No-op with a warning if
+ *  Channellers isn't active for this actor (defensive re-check, matching
+ *  every other action in this file). */
+export async function recoverChannellerSp(
+  actor: SpellcasterActor,
+  activity: ChannellerActivity,
+  hours: number,
+): Promise<void> {
+  if (!channellersEnabled(getOptionalRules())) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.channellingBlockedWarning"));
+    return;
+  }
+  const { current, max } = actor.system.spellcasting.wizard.channelling;
+  await actor.update({
+    "system.spellcasting.wizard.channelling.current": recoverSp(current ?? 0, max ?? 0, activity, hours),
+  });
 }

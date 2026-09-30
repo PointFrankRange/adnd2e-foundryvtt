@@ -739,3 +739,23 @@ describe("lang/en.json — SP14a spell-points sheet strings", () => {
     }
   });
 });
+
+describe("lang/en.json — SP14b Channellers sheet strings", () => {
+  it("resolves every ADND2E.sheet.spells.channelling* key", () => {
+    for (const key of [
+      "ADND2E.sheet.spells.channelling",
+      "ADND2E.sheet.spells.channellingRecover",
+      "ADND2E.sheet.spells.channellingRecoverTitle",
+      "ADND2E.sheet.spells.channellingActivityLabel",
+      "ADND2E.sheet.spells.channellingHoursLabel",
+      "ADND2E.sheet.spells.channellingBlockedWarning",
+      "ADND2E.sheet.spells.channellingActivity.hardExertion",
+      "ADND2E.sheet.spells.channellingActivity.walkingRiding",
+      "ADND2E.sheet.spells.channellingActivity.sittingResting",
+      "ADND2E.sheet.spells.channellingActivity.sleeping",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
