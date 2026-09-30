@@ -11,7 +11,7 @@
       <div class="kit-row" data-kit-row data-kit-name="{{r.item.name}}" data-item-id="{{r.item.id}}">
         <div class="kit-cells">
           <span class="kit-name" data-kit-expand>{{#if r.item.img}}<img src="{{r.item.img}}" alt="">{{/if}}{{r.item.name}}</span>
-          <span>{{#if r.item.weapon}}{{r.item.weapon.damageVsSM}} / {{r.item.weapon.damageVsL}}{{/if}}</span>
+          <span>{{#if r.item.weapon}}{{adnd2eOrDash r.item.weapon.damageVsSM}} / {{adnd2eOrDash r.item.weapon.damageVsL}}{{/if}}</span>
           <span>{{r.item.totalWeight}}</span>
           <span>{{#if @root.adnd2e.lock.unlocked}}<input type="number" min="0" value="{{r.item.quantity}}" data-item-id="{{r.item.id}}" data-field="quantity" style="width:40px">{{else}}{{r.item.quantity}}{{/if}}</span>
           <span><select data-item-id="{{r.item.id}}" data-field="location">{{#each @root.adnd2e.inventory.locationOptions as |opt|}}<option value="{{opt.value}}" {{#if (eq opt.value r.item.location)}}selected{{/if}}>{{#if opt.value}}{{opt.label}}{{else}}{{localize opt.label}}{{/if}}</option>{{/each}}</select></span>
@@ -24,7 +24,7 @@
         </div>
         <div class="kit-summary">
           {{#if r.item.weapon}}
-            <span><span class="label">{{localize 'ADND2E.sheet.kit.cols.damage'}}:</span> {{r.item.weapon.damageVsSM}} / {{r.item.weapon.damageVsL}}</span>
+            <span><span class="label">{{localize 'ADND2E.sheet.kit.cols.damage'}}:</span> {{adnd2eOrDash r.item.weapon.damageVsSM}} / {{adnd2eOrDash r.item.weapon.damageVsL}}</span>
             <span><span class="label">{{localize 'ADND2E.sheet.combat.speedFactor'}}:</span> {{r.item.weapon.speedFactor}}</span>
             {{#if r.item.weapon.range}}<span><span class="label">{{localize 'ADND2E.sheet.kit.summary.range'}}:</span> {{r.item.weapon.range}}</span>{{/if}}
             <span><span class="label">{{localize 'ADND2E.sheet.kit.summary.category'}}:</span> {{r.item.weapon.category}}</span>

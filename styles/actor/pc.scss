@@ -27,6 +27,11 @@
       border: 1px solid var(--kit-field-border); border-radius: 2px; padding: 2px;
       .kit-big { font-size: 24px; font-weight: 700; line-height: 1; }
       input[type="number"] { width: 48px; text-align: center; font-size: 18px; font-weight: 700; }
+      // Overrides the generic number-input rule above (same selector
+      // specificity, later in source) — the percentile input holds at most
+      // 2 digits ("01"-"00"), not a 1-2 digit ability score, and looked
+      // oversized sharing the main score input's width/font-size.
+      input.exceptional { width: 28px; font-size: 12px; font-weight: 400; }
       .effective, .exceptional, .racial, .trait { font-size: 11px; line-height: 1.1; }
       .racial { color: var(--kit-accent-ink); font-weight: 700; }
       .trait { color: var(--kit-muted); font-weight: 700; }
