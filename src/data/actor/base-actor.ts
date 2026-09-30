@@ -382,7 +382,7 @@ export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void 
   if (derived.spellSlots.wizard) sys.spellcasting.wizard.slots = derived.spellSlots.wizard;
   if (derived.spellSlots.priest) sys.spellcasting.priest.slots = derived.spellSlots.priest;
   if (derived.spellPoints.wizard) sys.spellcasting.wizard.spellPoints = derived.spellPoints.wizard;
-  // channelling.current is PERSISTED — only .max is overwritten here (mirrors attributes.hp.max, line 343).
+  // channelling.current is PERSISTED — only .max is overwritten here (mirrors attributes.hp.max's own derived-overwrite pattern).
   if (derived.channelling.wizard) sys.spellcasting.wizard.channelling.max = derived.channelling.wizard.max;
 }
 

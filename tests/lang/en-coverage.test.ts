@@ -749,6 +749,7 @@ describe("lang/en.json — SP14b Channellers sheet strings", () => {
       "ADND2E.sheet.spells.channellingActivityLabel",
       "ADND2E.sheet.spells.channellingHoursLabel",
       "ADND2E.sheet.spells.channellingBlockedWarning",
+      "ADND2E.sheet.spells.channellingInvalidHoursWarning",
       "ADND2E.sheet.spells.channellingActivity.hardExertion",
       "ADND2E.sheet.spells.channellingActivity.walkingRiding",
       "ADND2E.sheet.spells.channellingActivity.sittingResting",

@@ -18,11 +18,9 @@
     <section class="kit-panel">
       <div class="kit-bar">
         {{localize 'ADND2E.sheet.spells.channelling'}}
-        {{#if @root.pcActions}}
         <button type="button" class="kit-small" data-action="recoverChannellerSp" style="margin-left:auto">
           {{localize 'ADND2E.sheet.spells.channellingRecover'}}
         </button>
-        {{/if}}
       </div>
       <div class="kit-body">
         <p>{{adnd2e.spells.channelling.current}} / {{adnd2e.spells.channelling.max}}</p>

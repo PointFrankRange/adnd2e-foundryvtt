@@ -28,7 +28,12 @@ export async function promptRecoverChannelling(): Promise<{ activity: Channeller
         const hoursInput = button.form?.elements.namedItem("hours");
         const activity = activitySelect instanceof HTMLSelectElement ? activitySelect.value : null;
         const hours = hoursInput instanceof HTMLInputElement ? Number(hoursInput.value) : null;
-        if (!activity || !hours || !Number.isInteger(hours) || hours < 1) return null;
+        if (!activity || !hours || !Number.isInteger(hours) || hours < 1) {
+          // Distinguishes an invalid hours field from the user clicking Cancel
+          // (both previously returned null silently) — whole-branch review minor.
+          ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.channellingInvalidHoursWarning"));
+          return null;
+        }
         return { activity: activity as ChannellerActivity, hours };
       },
     },

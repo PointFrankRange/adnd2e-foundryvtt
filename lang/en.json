@@ -403,6 +403,7 @@
         "channellingActivityLabel": "Activity",
         "channellingHoursLabel": "Hours",
         "channellingBlockedWarning": "Channellers isn't active for this character — refresh the sheet.",
+        "channellingInvalidHoursWarning": "Enter a whole number of hours (1 or more).",
         "channellingActivity": {
           "hardExertion": "Hard Exertion (combat, forced march) — no recovery",
           "walkingRiding": "Walking or Riding",
