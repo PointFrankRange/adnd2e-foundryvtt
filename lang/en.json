@@ -294,6 +294,8 @@
         "duplicateRace": "This character already has a race.",
         "duplicateClass": "This character already has that class.",
         "insufficientSlots": "Not enough proficiency slots available for that.",
+        "duplicateWeaponProficiency": "This character already has that weapon proficiency.",
+        "duplicateNonweaponProficiency": "This character already has that proficiency.",
         "duplicateTrait": "You already have that trait.",
         "insufficientCp": "Not enough character points for that trait.",
         "traitsDisabled": "Traits are only used while the Skills & Powers character-point build rule is on.",

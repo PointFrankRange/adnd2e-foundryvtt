@@ -69,6 +69,78 @@ describe("validateItemDrop", () => {
     expect(r.ok).toBe(false);
     expect(r.reason).toBe("ADND2E.sheet.drop.insufficientSlots");
   });
+
+  it("rejects a duplicate specific-weapon proficiency, even with slots to spare", () => {
+    const r = validateItemDrop({
+      dropType: "weaponProficiency", hasRace: true, existingChassisIds: ["fighter"],
+      dropSlotCost: 1, availableSlots: 5,
+      dropWeaponOrGroup: "Long Sword", dropIsGroup: false,
+      existingWeaponProfs: [{ weaponOrGroup: "Long Sword", isGroup: false }],
+    });
+    expect(r.ok).toBe(false);
+    expect(r.reason).toBe("ADND2E.sheet.drop.duplicateWeaponProficiency");
+  });
+
+  it("rejects a duplicate GROUP weapon proficiency, but allows the same name as a different isGroup", () => {
+    const dup = validateItemDrop({
+      dropType: "weaponProficiency", hasRace: true, existingChassisIds: ["fighter"],
+      dropSlotCost: 1, availableSlots: 5,
+      dropWeaponOrGroup: "Blades", dropIsGroup: true,
+      existingWeaponProfs: [{ weaponOrGroup: "Blades", isGroup: true }],
+    });
+    expect(dup.ok).toBe(false);
+    expect(dup.reason).toBe("ADND2E.sheet.drop.duplicateWeaponProficiency");
+
+    // Same weaponOrGroup text, but the existing one is a GROUP prof and the
+    // drop is a specific-weapon prof (or vice versa) — not a duplicate.
+    const notDup = validateItemDrop({
+      dropType: "weaponProficiency", hasRace: true, existingChassisIds: ["fighter"],
+      dropSlotCost: 1, availableSlots: 5,
+      dropWeaponOrGroup: "Blades", dropIsGroup: false,
+      existingWeaponProfs: [{ weaponOrGroup: "Blades", isGroup: true }],
+    });
+    expect(notDup).toEqual({ ok: true });
+  });
+
+  it("defaults a missing dropIsGroup to false (a specific-weapon drop)", () => {
+    const r = validateItemDrop({
+      dropType: "weaponProficiency", hasRace: true, existingChassisIds: ["fighter"],
+      dropSlotCost: 1, availableSlots: 5,
+      dropWeaponOrGroup: "Long Sword",
+      existingWeaponProfs: [{ weaponOrGroup: "Long Sword", isGroup: false }],
+    });
+    expect(r.ok).toBe(false);
+    expect(r.reason).toBe("ADND2E.sheet.drop.duplicateWeaponProficiency");
+  });
+
+  it("allows a distinct weapon proficiency alongside an existing one", () => {
+    expect(validateItemDrop({
+      dropType: "weaponProficiency", hasRace: true, existingChassisIds: ["fighter"],
+      dropSlotCost: 1, availableSlots: 5,
+      dropWeaponOrGroup: "Short Sword", dropIsGroup: false,
+      existingWeaponProfs: [{ weaponOrGroup: "Long Sword", isGroup: false }],
+    })).toEqual({ ok: true });
+  });
+
+  it("rejects a duplicate nonweapon proficiency by name, even with slots to spare", () => {
+    const r = validateItemDrop({
+      dropType: "nonweaponProficiency", hasRace: true, existingChassisIds: ["fighter"],
+      dropSlotCost: 1, availableSlots: 5,
+      dropNonweaponName: "Swimming",
+      existingNonweaponNames: ["Swimming"],
+    });
+    expect(r.ok).toBe(false);
+    expect(r.reason).toBe("ADND2E.sheet.drop.duplicateNonweaponProficiency");
+  });
+
+  it("allows a distinct nonweapon proficiency alongside an existing one", () => {
+    expect(validateItemDrop({
+      dropType: "nonweaponProficiency", hasRace: true, existingChassisIds: ["fighter"],
+      dropSlotCost: 1, availableSlots: 5,
+      dropNonweaponName: "Herbalism",
+      existingNonweaponNames: ["Swimming"],
+    })).toEqual({ ok: true });
+  });
 });
 
 describe("validateItemDrop — trait drops (SP8 Plan 8c)", () => {

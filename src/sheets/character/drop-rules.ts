@@ -18,6 +18,17 @@ export interface DropCheckInput {
    *  nonweapon) — defaults to 0 if omitted, so an un-supplied value rejects
    *  rather than silently allowing an unbounded drop. */
   availableSlots?: number;
+  /** weaponProficiency drops: the dropped item's own `(weaponOrGroup, isGroup)` */
+  dropWeaponOrGroup?: string;
+  dropIsGroup?: boolean;
+  /** `(weaponOrGroup, isGroup)` of every weaponProficiency item already on the actor */
+  existingWeaponProfs?: readonly { weaponOrGroup: string; isGroup: boolean }[];
+  /** nonweaponProficiency drops: the dropped item's own name (there's no
+   *  dedicated id field — every pack entry, and any sane hand-made one, is
+   *  uniquely named, e.g. "Swimming") */
+  dropNonweaponName?: string;
+  /** `name` of every nonweaponProficiency item already on the actor */
+  existingNonweaponNames?: readonly string[];
   /** trait drops: the dropped trait's CP cost (negative = a disadvantage) */
   dropTraitCost?: number;
   /** trait drops: the dropped trait's `system.traitId` ("" for a hand-made custom trait) */
@@ -46,7 +57,19 @@ export function validateItemDrop(input: DropCheckInput): DropVerdict {
     const dup = input.dropChassisId != null && input.existingChassisIds.includes(input.dropChassisId);
     return dup ? { ok: false, reason: "ADND2E.sheet.drop.duplicateClass" } : { ok: true };
   }
-  if (input.dropType === "weaponProficiency" || input.dropType === "nonweaponProficiency") {
+  if (input.dropType === "weaponProficiency") {
+    const dup = (input.existingWeaponProfs ?? []).some(
+      (p) => p.weaponOrGroup === input.dropWeaponOrGroup && p.isGroup === (input.dropIsGroup ?? false),
+    );
+    if (dup) return { ok: false, reason: "ADND2E.sheet.drop.duplicateWeaponProficiency" };
+    const cost = input.dropSlotCost ?? 1;
+    const available = input.availableSlots ?? 0;
+    return cost > available ? { ok: false, reason: "ADND2E.sheet.drop.insufficientSlots" } : { ok: true };
+  }
+  if (input.dropType === "nonweaponProficiency") {
+    if ((input.existingNonweaponNames ?? []).includes(input.dropNonweaponName ?? "")) {
+      return { ok: false, reason: "ADND2E.sheet.drop.duplicateNonweaponProficiency" };
+    }
     const cost = input.dropSlotCost ?? 1;
     const available = input.availableSlots ?? 0;
     return cost > available ? { ok: false, reason: "ADND2E.sheet.drop.insufficientSlots" } : { ok: true };

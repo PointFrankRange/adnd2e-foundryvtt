@@ -499,18 +499,30 @@ export class Adnd2eCharacterSheet extends Base {
     const actor = this.document as unknown as {
       system: { proficiencies: { weapon: { available: number }; nonweapon: { available: number } } };
       items: Iterable<{
-        type: string;
-        system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup };
+        id: string; name: string; type: string;
+        system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; weaponOrGroup?: string; isGroup?: boolean };
       }>;
     };
     const existing = [...actor.items];
     const dropped = item as unknown as {
-      type: string;
-      system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup };
+      id: string; name: string; type: string;
+      system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; weaponOrGroup?: string; isGroup?: boolean };
     };
     const isNewDrop =
       (item as unknown as { parent?: { uuid?: string } }).parent?.uuid !==
       (this.document as unknown as { uuid: string }).uuid;
+    // Excludes the dragged item's own id ONLY for a same-actor re-drag
+    // (isNewDrop false) — if this list ever supports reordering, that guards
+    // against flagging an item as a duplicate of itself. A genuinely NEW drop
+    // (isNewDrop true, e.g. from a compendium) must NOT self-exclude: base
+    // Foundry's own _onDropItem (actor-sheet.mjs) does
+    // `keepId = !this.actor.items.has(item.id)`, so a compendium item's
+    // FIRST drop keeps that item's original compendium id on the embedded
+    // copy — meaning a SECOND drag of the SAME compendium entry arrives here
+    // with `item.id` equal to that already-embedded first copy's id. Self-
+    // excluding unconditionally would silently exclude the very duplicate
+    // this check exists to catch (confirmed by dev-world testing: it did).
+    const others = isNewDrop ? existing : existing.filter((i) => i.id !== dropped.id);
     // Re-sorting an already-owned trait is not a purchase — never validated.
     if (dropped.type === "trait" && !isNewDrop) return super._onDropItem(event, item);
     // Re-derived from the actor's CURRENT authored state + settings at drop time.
@@ -540,6 +552,13 @@ export class Adnd2eCharacterSheet extends Base {
         .filter(Boolean),
       dropSlotCost,
       availableSlots,
+      dropWeaponOrGroup: dropped.system?.weaponOrGroup,
+      dropIsGroup: dropped.system?.isGroup,
+      existingWeaponProfs: others
+        .filter((i) => i.type === "weaponProficiency")
+        .map((i) => ({ weaponOrGroup: i.system.weaponOrGroup ?? "", isGroup: i.system.isGroup ?? false })),
+      dropNonweaponName: dropped.name,
+      existingNonweaponNames: others.filter((i) => i.type === "nonweaponProficiency").map((i) => i.name),
       ...traitInputs,
     });
     if (!verdict.ok) {
