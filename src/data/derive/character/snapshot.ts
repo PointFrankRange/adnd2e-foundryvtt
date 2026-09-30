@@ -18,9 +18,12 @@ export interface ClassEntry {
 }
 
 export interface MemorizedEntry {
-  spellItemId: string;
+  /** null for a free magick — the spell is chosen at cast time (Sub-project 14 Plan A) */
+  spellItemId: string | null;
   /** 1–9 */
   spellLevel: number;
+  /** Sub-project 14 Plan A; absent (fixed) for any entry created before this rule ever ran */
+  magickType?: "fixed" | "free";
 }
 
 export interface EquippedArmor {

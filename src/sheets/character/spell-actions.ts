@@ -19,9 +19,11 @@ import { getOptionalRules } from "../../settings";
  * ------------------------------------------------------------------------- */
 
 export interface MemorizedEntry {
-  spellItemId: string;
+  spellItemId: string | null;
   spellLevel: number;
   expended: boolean;
+  /** Sub-project 14 Plan A; absent means fixed magick (or the rule has never been on for this entry) */
+  magickType?: "fixed" | "free";
 }
 
 export interface SpellItemHandle {

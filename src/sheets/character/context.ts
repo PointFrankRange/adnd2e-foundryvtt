@@ -701,7 +701,8 @@ function buildOrphanedSpells(
   const knownIds = new Set(input.spellItems.map((s) => s.id));
   const orphaned: OrphanedSpellRow[] = [];
   for (const m of sc.wizard.memorized) {
-    if (!knownIds.has(m.spellItemId)) {
+    // a free magick (Sub-project 14 Plan A) has no backing spell item to lose — never orphaned
+    if (m.spellItemId !== null && !knownIds.has(m.spellItemId)) {
       orphaned.push({ spellItemId: m.spellItemId, casterClass: "wizard", spellLevel: m.spellLevel });
     }
   }
