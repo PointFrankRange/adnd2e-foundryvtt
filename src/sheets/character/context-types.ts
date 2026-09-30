@@ -120,6 +120,11 @@ export interface CharacterDerivedView {
       spellPoints?: {
         maxSpellLevel?: number; maxPerLevel?: number; sp?: number; spent?: number; remaining?: number;
       };
+      /** Sub-project 14 Plan B. Same "?? {}"-defaulting story as spellPoints
+       *  above. `current` is PERSISTED (never overwritten by
+       *  prepareDerivedData); `max` is derived-overwritten every prepare
+       *  cycle. */
+      channelling?: { current?: number; max?: number };
       memorized: { spellItemId: string | null; spellLevel: number; expended: boolean; magickType?: "fixed" | "free" }[];
     };
     priest: {
@@ -426,6 +431,8 @@ export interface CharacterSheetContext {
     casting: CastingPanel | null;
     /** Sub-project 14 Plan A: null when the rule is off or the actor has no wizard levels */
     spellPoints: { max: number; spent: number; remaining: number } | null;
+    /** Sub-project 14 Plan B: null when Channellers is off or the actor has no wizard levels */
+    channelling: { current: number; max: number } | null;
     /** Sub-project 14 Plan A: one row per currently-memorized free magick, across all levels */
     freeMagicks: { level: number; expended: boolean; canCast: boolean }[];
   };

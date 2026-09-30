@@ -23,6 +23,7 @@ import { mainScoreFromSubs, SUB_ABILITIES } from "../../core/abilities/sub-abili
 import { applyRacialDeltas } from "../../core/abilities/racial-adjustments";
 import { getChassis } from "../../core/classes/chassis";
 import { MANEUVERS } from "../../core/combat/maneuvers";
+import { canAffordCast, channellersEnabled } from "../../core/magic/channellers";
 import { canCompleteCasting } from "../../core/magic/casting-time";
 import { canLearnSpell } from "../../core/magic/spellbook";
 import { characterPointLedgerFor, DEFAULT_CHARACTER_POINT_POOL } from "../../core/skills/character-points";
@@ -637,6 +638,8 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   // it entirely (undefined), and real system data's ObjectField default of
   // `{}` (present but empty) when the rule is off or there's no wizard caster.
   const wizardSp = sc.wizard.spellPoints ?? {};
+  const channellingOn = channellersEnabled(input.optionalRules);
+  const wizardChannelling = sc.wizard.channelling ?? {};
 
   const known: { level: number; items: SpellItemView[] }[] = [];
   for (let level = 1; level <= 9; level += 1) {
@@ -647,7 +650,7 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
       int, specialistSchool, knownAtThisLevel, castableAtThisLevel, optionalRules: input.optionalRules,
     };
     let items = levelItems.map((s) =>
-      buildSpellRow(s, sc, priestChassisId, sphereAccessOverride, learnCtx, fav, spellPointsOn, wizardSp),
+      buildSpellRow(s, sc, priestChassisId, sphereAccessOverride, learnCtx, fav, spellPointsOn, wizardSp, channellingOn, wizardChannelling),
     );
     items = casting ? items.map((r) => ({ ...r, canCast: false })) : items;
     if (items.length > 0) known.push({ level, items });
@@ -663,9 +666,19 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
       spellPointsOn && typeof wizardSp.remaining === "number"
         ? { max: wizardSp.sp ?? 0, spent: wizardSp.spent ?? 0, remaining: wizardSp.remaining }
         : null,
+    channelling:
+      channellingOn && typeof wizardChannelling.max === "number"
+        ? { current: wizardChannelling.current ?? 0, max: wizardChannelling.max }
+        : null,
     freeMagicks: sc.wizard.memorized
       .filter((m) => m.magickType === "free")
-      .map((m) => ({ level: m.spellLevel, expended: m.expended, canCast: !m.expended && !casting })),
+      .map((m) => ({
+        level: m.spellLevel,
+        expended: m.expended,
+        canCast:
+          !casting &&
+          (channellingOn ? canAffordCast(wizardChannelling.current ?? 0, m.spellLevel, "free") : !m.expended),
+      })),
   };
 }
 
@@ -743,6 +756,8 @@ function buildSpellRow(
   fav: FavCheck,
   spellPointsOn: boolean,
   wizardSp: CharacterDerivedView["spellcasting"]["wizard"]["spellPoints"],
+  channellingOn: boolean,
+  wizardChannelling: CharacterDerivedView["spellcasting"]["wizard"]["channelling"],
 ): SpellItemView {
   const isWizard = item.casterClass === "wizard";
   const memorizedList = isWizard ? sc.wizard.memorized : sc.priest.memorized;
@@ -752,10 +767,12 @@ function buildSpellRow(
 
   let hasFreeSlot: boolean;
   if (isWizard && spellPointsOn && wizardSp && typeof wizardSp.maxSpellLevel === "number") {
-    hasFreeSlot =
+    const atLevelOk =
       item.level <= wizardSp.maxSpellLevel &&
-      spellsMemorizedAtLevel(sc.wizard.memorized, item.level) < (wizardSp.maxPerLevel ?? 0) &&
-      (wizardSp.remaining ?? 0) >= magickCost(item.level, "fixed");
+      spellsMemorizedAtLevel(sc.wizard.memorized, item.level) < (wizardSp.maxPerLevel ?? 0);
+    // Sub-project 14 Plan B: memorizing costs nothing from a channeller's
+    // pool (design spec §1.1) — only the Table 17 caps above still gate it.
+    hasFreeSlot = channellingOn ? atLevelOk : atLevelOk && (wizardSp.remaining ?? 0) >= magickCost(item.level, "fixed");
   } else {
     const slots = isWizard ? sc.wizard.slots : sc.priest.slots;
     const slotRow = slots[item.level];
@@ -766,12 +783,20 @@ function buildSpellRow(
     ? item.inSpellbook
     : canMemorizePriestSpell(priestChassisId, sphereAccessOverride, item.spheres as SphereName[], item.level);
 
+  // Sub-project 14 Plan B: a channelling entry is never expended, so its
+  // castability instead tracks live pool affordability, recomputed on every
+  // render — a wizard who casts their pool dry sees the Cast button disable.
+  const canCastChannelling =
+    isWizard && channellingOn && entry
+      ? canAffordCast(wizardChannelling?.current ?? 0, item.level, ("magickType" in entry ? entry.magickType : undefined) ?? "fixed")
+      : null;
+
   return {
     ...item,
     memorized,
     expended,
     canMemorize: !memorized && hasFreeSlot && eligible,
-    canCast: memorized && !expended,
+    canCast: memorized && (canCastChannelling ?? !expended),
     canLearn: isWizard && !item.inSpellbook && canLearnForRow(item, learnCtx),
     favorite: fav("spell", item.id),
   };
