@@ -4,7 +4,7 @@
  * (`getOptionalRules()`); `core/` only ever receives it as a parameter.
  *
  * `core`, `combatAndTactics`, `skillsAndPowers` and `spellsAndMagic` group toggles all live here
- * (Sub-projects 7, 8 and 9 wired those latter three). `spellsAndMagic.channelers` is registered but not implemented (a later plan in this sub-project — see the Spell Points design spec).
+ * (Sub-projects 7, 8 and 9 wired those latter three). Sub-project 14 Plan B implements `spellsAndMagic.channelers`; Table 21 fatigue (Plan C) is not yet built.
  */
 export interface OptionalRules {
   /** PHB p.18: warriors roll d100 for exceptional Strength at STR 18. */
@@ -52,6 +52,8 @@ export interface OptionalRules {
   expandedCastingTime: boolean;
   /** Sub-project 14 Plan A: Player's Option: Spells & Magic wizard spell points (pp.78, 80). */
   spellPoints: boolean;
+  /** Sub-project 14 Plan B: Player's Option: Spells & Magic Channellers — spend-per-cast SP, no fatigue yet (pp.80-82). */
+  channelers: boolean;
 }
 
 export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
@@ -76,4 +78,5 @@ export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
   spellsAndMagicEnabled: false,
   expandedCastingTime: false,
   spellPoints: false,
+  channelers: false,
 };

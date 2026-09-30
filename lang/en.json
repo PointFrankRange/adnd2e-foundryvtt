@@ -722,7 +722,7 @@
       },
       "channelers": {
         "name": "Spells & Magic: Channelers",
-        "hint": "Not implemented — Channelers (a later plan in this sub-project) will let a wizard cast repeatedly by spending spell points instead of expending a memorized spell, at the cost of escalating fatigue."
+        "hint": "Wizards may cast a memorized spell repeatedly by spending spell points from a recoverable pool instead of losing it after one cast; memorizing costs nothing from the pool — only casting does (Player's Option: Spells & Magic). Fatigue from overcasting is a later plan."
       },
       "playerAppliedEffects": {
         "name": "Player-Applied Damage & Effects",
