@@ -499,14 +499,20 @@ export class Adnd2eCharacterSheet extends Base {
     const actor = this.document as unknown as {
       system: { proficiencies: { weapon: { available: number }; nonweapon: { available: number } } };
       items: Iterable<{
-        type: string;
-        system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup };
+        id: string; name: string; type: string;
+        system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; weaponOrGroup?: string; isGroup?: boolean };
       }>;
     };
     const existing = [...actor.items];
+    const droppedId = (item as unknown as { id?: string }).id;
+    // Excludes the dragged item's own id, so a same-actor re-drag (if this
+    // list ever supports reordering) can't flag itself as a duplicate of
+    // itself — mirrors the trait branch's own isNewDrop exemption below,
+    // for a check that has no such exemption of its own.
+    const others = existing.filter((i) => i.id !== droppedId);
     const dropped = item as unknown as {
-      type: string;
-      system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup };
+      name: string; type: string;
+      system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; weaponOrGroup?: string; isGroup?: boolean };
     };
     const isNewDrop =
       (item as unknown as { parent?: { uuid?: string } }).parent?.uuid !==
@@ -540,6 +546,13 @@ export class Adnd2eCharacterSheet extends Base {
         .filter(Boolean),
       dropSlotCost,
       availableSlots,
+      dropWeaponOrGroup: dropped.system?.weaponOrGroup,
+      dropIsGroup: dropped.system?.isGroup,
+      existingWeaponProfs: others
+        .filter((i) => i.type === "weaponProficiency")
+        .map((i) => ({ weaponOrGroup: i.system.weaponOrGroup ?? "", isGroup: i.system.isGroup ?? false })),
+      dropNonweaponName: dropped.name,
+      existingNonweaponNames: others.filter((i) => i.type === "nonweaponProficiency").map((i) => i.name),
       ...traitInputs,
     });
     if (!verdict.ok) {
