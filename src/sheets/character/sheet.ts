@@ -504,19 +504,25 @@ export class Adnd2eCharacterSheet extends Base {
       }>;
     };
     const existing = [...actor.items];
-    const droppedId = (item as unknown as { id?: string }).id;
-    // Excludes the dragged item's own id, so a same-actor re-drag (if this
-    // list ever supports reordering) can't flag itself as a duplicate of
-    // itself — mirrors the trait branch's own isNewDrop exemption below,
-    // for a check that has no such exemption of its own.
-    const others = existing.filter((i) => i.id !== droppedId);
     const dropped = item as unknown as {
-      name: string; type: string;
+      id: string; name: string; type: string;
       system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; weaponOrGroup?: string; isGroup?: boolean };
     };
     const isNewDrop =
       (item as unknown as { parent?: { uuid?: string } }).parent?.uuid !==
       (this.document as unknown as { uuid: string }).uuid;
+    // Excludes the dragged item's own id ONLY for a same-actor re-drag
+    // (isNewDrop false) — if this list ever supports reordering, that guards
+    // against flagging an item as a duplicate of itself. A genuinely NEW drop
+    // (isNewDrop true, e.g. from a compendium) must NOT self-exclude: base
+    // Foundry's own _onDropItem (actor-sheet.mjs) does
+    // `keepId = !this.actor.items.has(item.id)`, so a compendium item's
+    // FIRST drop keeps that item's original compendium id on the embedded
+    // copy — meaning a SECOND drag of the SAME compendium entry arrives here
+    // with `item.id` equal to that already-embedded first copy's id. Self-
+    // excluding unconditionally would silently exclude the very duplicate
+    // this check exists to catch (confirmed by dev-world testing: it did).
+    const others = isNewDrop ? existing : existing.filter((i) => i.id !== dropped.id);
     // Re-sorting an already-owned trait is not a purchase — never validated.
     if (dropped.type === "trait" && !isNewDrop) return super._onDropItem(event, item);
     // Re-derived from the actor's CURRENT authored state + settings at drop time.
