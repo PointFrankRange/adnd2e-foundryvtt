@@ -395,7 +395,8 @@
         "memorizeFreeMagick": "Memorize Free Magick",
         "freeMagickLevelTitle": "Memorize Free Magick",
         "freeMagickLevelHint": "Reserve a spell level rather than a specific spell — you'll choose which known spell to cast when you cast it.",
-        "freeMagickCastTitle": "Cast Free Magick — Choose a Spell"
+        "freeMagickCastTitle": "Cast Free Magick — Choose a Spell",
+        "freeMagickRuleOffHint": "Spell points is off — you can still forget these, but not cast or memorize new ones."
       },
       "itemControls": {
         "edit": "Open this item's sheet",
@@ -721,7 +722,7 @@
       },
       "channelers": {
         "name": "Spells & Magic: Channelers",
-        "hint": "Not implemented — channelers come from Player's Option: Spells & Magic, which this system does not reference."
+        "hint": "Not implemented — Channelers (a later plan in this sub-project) will let a wizard cast repeatedly by spending spell points instead of expending a memorized spell, at the cost of escalating fatigue."
       },
       "playerAppliedEffects": {
         "name": "Player-Applied Damage & Effects",

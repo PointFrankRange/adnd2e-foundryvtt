@@ -427,7 +427,7 @@ export interface CharacterSheetContext {
     /** Sub-project 14 Plan A: null when the rule is off or the actor has no wizard levels */
     spellPoints: { max: number; spent: number; remaining: number } | null;
     /** Sub-project 14 Plan A: one row per currently-memorized free magick, across all levels */
-    freeMagicks: { level: number; expended: boolean }[];
+    freeMagicks: { level: number; expended: boolean; canCast: boolean }[];
   };
   features: {
     groups: { sourceType: string; sourceTypeLabel: string; items: FeatureItemView[] }[];

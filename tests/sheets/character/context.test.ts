@@ -2641,9 +2641,20 @@ describe("buildCharacterSheetContext — wizard spell points (SP14a)", () => {
     });
     const c = buildCharacterSheetContext(input({ derived, spellItems: [spell()], optionalRules: spellPointsRules }));
     expect(c.spells.freeMagicks).toEqual([
-      { level: 2, expended: false },
-      { level: 2, expended: true },
+      { level: 2, expended: false, canCast: true },
+      { level: 2, expended: true, canCast: false },
     ]);
+  });
+
+  it("a free magick's canCast is false while a classic multi-round cast is in progress", () => {
+    const derived = withSpellPoints({
+      memorized: [{ spellItemId: null, spellLevel: 2, expended: false, magickType: "free" }],
+    });
+    const status = {
+      spellName: "Fireball", startRound: 1, completeRound: 3, segments: null, combatRound: 1, isCasterTurn: false,
+    };
+    const c = buildCharacterSheetContext(input({ derived, spellItems: [spell()], optionalRules: spellPointsRules, castingStatus: status }));
+    expect(c.spells.freeMagicks[0]!.canCast).toBe(false);
   });
 
   it("a fixed-magick row's canMemorize gates on the flat per-level cap and remaining SP, not the classic SlotRecord", () => {

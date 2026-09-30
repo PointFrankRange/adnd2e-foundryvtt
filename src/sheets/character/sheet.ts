@@ -822,7 +822,9 @@ export class Adnd2eCharacterSheet extends Base {
     target: HTMLElement,
   ): Promise<void> {
     const level = Number(target.dataset.level);
-    if (level) await forgetFreeMagick(this.document as never, level);
+    if (!level) return;
+    const expended = target.dataset.expended === "true";
+    await forgetFreeMagick(this.document as never, level, expended);
   }
 
   static async #onRestSpellcasting(this: Adnd2eCharacterSheet): Promise<void> {

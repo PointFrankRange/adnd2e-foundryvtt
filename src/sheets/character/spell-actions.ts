@@ -376,13 +376,17 @@ export async function memorizeFreeMagick(actor: SpellcasterActor, spellLevel: nu
   await actor.update({ "system.spellcasting.wizard.memorized": updated });
 }
 
-/** Forgets one free-magick entry at spellLevel (first match, regardless of
- *  expended state) — free magicks are fungible, so which specific entry is
- *  removed doesn't matter mechanically. Silent no-op if none exist (mirrors
- *  forgetSpell — the sheet only shows Forget when one exists). */
-export async function forgetFreeMagick(actor: SpellcasterActor, spellLevel: number): Promise<void> {
+/** Forgets one free-magick entry at spellLevel matching `expended` — the
+ *  Forget button on each row now passes its own row's expended state
+ *  (`data-expended`) so it can only ever remove the specific entry it was
+ *  clicked from, not an arbitrary same-level entry with a different expended
+ *  state (e.g. clicking Forget on a used entry no longer risks deleting an
+ *  unused one instead — see this plan's whole-branch review Finding 1).
+ *  Silent no-op if none exist (mirrors forgetSpell — the sheet only shows
+ *  Forget when one exists). */
+export async function forgetFreeMagick(actor: SpellcasterActor, spellLevel: number, expended: boolean): Promise<void> {
   const list = actor.system.spellcasting.wizard.memorized;
-  const index = list.findIndex((m) => m.magickType === "free" && m.spellLevel === spellLevel);
+  const index = list.findIndex((m) => m.magickType === "free" && m.spellLevel === spellLevel && m.expended === expended);
   if (index === -1) return;
   const updated = [...list.slice(0, index), ...list.slice(index + 1)];
   await actor.update({ "system.spellcasting.wizard.memorized": updated });

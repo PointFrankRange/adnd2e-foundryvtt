@@ -43,7 +43,7 @@ export async function promptFreeMagickSpell(actor: FreeMagickCastActor, spellLev
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
     return null;
   }
-  const options = eligible.map((s) => `<option value="${s.id}">${s.name}</option>`).join("");
+  const options = eligible.map((s) => `<option value="${s.id}">${foundry.utils.escapeHTML(s.name)}</option>`).join("");
   const value = await foundry.applications.api.DialogV2.prompt({
     window: { title: game.i18n!.localize("ADND2E.sheet.spells.freeMagickCastTitle") },
     content: `<select name="spell" autofocus>${options}</select>`,

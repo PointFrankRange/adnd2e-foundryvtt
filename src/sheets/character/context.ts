@@ -665,7 +665,7 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
         : null,
     freeMagicks: sc.wizard.memorized
       .filter((m) => m.magickType === "free")
-      .map((m) => ({ level: m.spellLevel, expended: m.expended })),
+      .map((m) => ({ level: m.spellLevel, expended: m.expended, canCast: !m.expended && !casting })),
   };
 }
 
