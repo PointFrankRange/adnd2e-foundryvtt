@@ -146,6 +146,7 @@ describe("per-tier combat/movement/recovery data", () => {
     expect(fatigueMovementRate("heavy", 12)).toBe(3);
     expect(fatigueMovementRate("severe", 12)).toBe(1);
     expect(fatigueMovementRate("severe", 1)).toBe(1);
+    expect(fatigueMovementRate("severe", 0)).toBe(0);
     expect(fatigueMovementRate("mortal", 12)).toBe(0);
   });
   it("FATIGUE_RECOVERY_INTERVAL matches the book", () => {

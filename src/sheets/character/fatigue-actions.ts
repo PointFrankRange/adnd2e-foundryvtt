@@ -57,6 +57,12 @@ export async function resolveMortalFatigue(
     ui.notifications?.info(game.i18n!.localize("ADND2E.sheet.spells.mortalFatigueDied"));
     return;
   }
+  // Whole-branch review M6: explicitly clear mortalFatigue regardless of path
+  // — if a GM had manually applied it via the Token HUD before this function
+  // ran (outside normal gameplay, but a real inconsistent-state risk), nothing
+  // else here ever turns it back off, which would otherwise leave both
+  // mortalFatigue and severeFatigue active simultaneously.
+  await actor.toggleStatusEffect(FATIGUE_CONDITION_ID.mortal, { active: false });
   await actor.toggleStatusEffect("unconscious", { active: true });
   await actor.toggleStatusEffect(FATIGUE_CONDITION_ID.severe, { active: true });
   ui.notifications?.info(game.i18n!.localize("ADND2E.sheet.spells.mortalFatigueSurvived"));

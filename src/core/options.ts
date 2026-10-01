@@ -53,7 +53,7 @@ export interface OptionalRules {
   expandedCastingTime: boolean;
   /** Sub-project 14 Plan A: Player's Option: Spells & Magic wizard spell points (pp.78, 80). */
   spellPoints: boolean;
-  /** Sub-project 14 Plan B: Player's Option: Spells & Magic Channellers — spend-per-cast SP, no fatigue yet (pp.80-82). */
+  /** Sub-project 14 Plan B: Player's Option: Spells & Magic Channellers — spend-per-cast SP (pp.80-82). */
   channelers: boolean;
   /** Sub-project 14 Plan C: Table 21 spell fatigue for channelling wizards (pp.82-84). */
   channellerFatigue: boolean;

@@ -47,7 +47,13 @@ export interface CharacterSheetInput {
   subAbilityUi?: boolean;
   /** Sub-project 9a: the in-progress cast; absent/null when idle or the rule is off */
   castingStatus?: CastingStatusInput | null;
-  /** Sub-project 14 Plan C: the actor's current fatigue tier, read from live `actor.statuses`; null while unfatigued or the rule is off. */
+  /** Sub-project 14 Plan C: the actor's current fatigue tier, read directly
+   *  from live status effects — present regardless of the rule's current
+   *  on/off state (a condition already applied keeps affecting the sheet
+   *  even if the rule is later toggled off, matching how every other
+   *  condition in this project works). Null only while genuinely unfatigued.
+   *  Only `vitals.canRecoverFatigue` (context-types.ts, computed from this
+   *  same input's `optionalRules`) additionally checks the rule's live state. */
   fatigueTier?: FatigueTier | null;
   /** sheet redesign R1: the viewer's unlock state (never persisted) */
   unlocked?: boolean;
@@ -369,8 +375,19 @@ export interface CharacterSheetContext {
     movement: { base: number; current: number; encumbranceCategory: string; encumbranceCategoryLabel: string };
     /** Sub-project 9a: true while a cast is in progress — drives the AC badge */
     casting: boolean;
-    /** Sub-project 14 Plan C: null while unfatigued. */
-    fatigue: { label: string; recoveryIntervalLabel: string } | null;
+    /** Sub-project 14 Plan C: null while unfatigued. `hintKey` is the full
+     *  i18n key of a pre-written recovery-hint sentence for this tier's rest
+     *  interval (see FATIGUE_HINT_KEY in context.ts) — not interpolated, so
+     *  each tier's sentence reads grammatically correctly. */
+    fatigue: { label: string; hintKey: string } | null;
+    /** Whole-branch review M2: distinct from `fatigue` being non-null — the
+     *  badge/panel and its movement/combat penalties show regardless of the
+     *  rule's current on/off state, but the Recover button additionally
+     *  requires the `channellerFatigue` rule to still be on (a stale
+     *  condition from before the rule was toggled off should still affect
+     *  the sheet, but should not offer a recovery path the rule no longer
+     *  sanctions). */
+    canRecoverFatigue: boolean;
   };
   classes: ClassRow[];
   dualClassToggle: { available: boolean; on: boolean };

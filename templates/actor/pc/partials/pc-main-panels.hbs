@@ -29,16 +29,16 @@
     </section>
   {{/if}}
 
-  {{#if @root.pcActions}}
   {{#if adnd2e.vitals.fatigue}}
     <section class="kit-panel kit-fatigue">
       <div class="kit-bar">{{adnd2e.vitals.fatigue.label}}</div>
       <div class="kit-body">
-        <p class="detail">{{localize 'ADND2E.sheet.spells.fatigueRecoveryHint' interval=adnd2e.vitals.fatigue.recoveryIntervalLabel}}</p>
+        <p class="detail">{{localize adnd2e.vitals.fatigue.hintKey}}</p>
+        {{#if adnd2e.vitals.canRecoverFatigue}}
         <button type="button" class="kit-roll" data-action="recoverFromFatigue">{{localize 'ADND2E.sheet.spells.recoverFromFatigue'}}</button>
+        {{/if}}
       </div>
     </section>
-  {{/if}}
   {{/if}}
 
   <section class="kit-panel">

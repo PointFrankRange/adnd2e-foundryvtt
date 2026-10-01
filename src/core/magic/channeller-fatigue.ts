@@ -123,13 +123,14 @@ export const FATIGUE_AC_PENALTY: Readonly<Record<FatigueTier, number>> = {
 };
 
 /** p.83: light/moderate/heavy are fractions of the current rate (floored);
- *  severe is a flat rate of 1 regardless of input; mortal is 0 ("collapse"). */
+ *  severe is capped at 1 (never INCREASES a lower current rate, e.g. 0 from
+ *  encumbrance stays 0); mortal is 0 ("collapse"). */
 export function fatigueMovementRate(tier: FatigueTier, currentRate: number): number {
   switch (tier) {
     case "light": return Math.floor(currentRate * 0.75);
     case "moderate": return Math.floor(currentRate * 0.5);
     case "heavy": return Math.floor(currentRate * 0.25);
-    case "severe": return 1;
+    case "severe": return Math.min(1, currentRate);
     case "mortal": return 0;
   }
 }
