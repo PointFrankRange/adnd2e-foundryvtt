@@ -210,7 +210,14 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
          *  deriveChannelling's channellerMaxSp result. */
         channelling: new SchemaField({
           current: new NumberField({ required: true, integer: true, initial: 0 }),
-          max: new NumberField({ required: true, integer: true, initial: 0 }),
+          // nullable/initial null (not 0): a real channelling wizard's max is
+          // always >= 4 (channellerMaxSp's floor), so null unambiguously means
+          // "never derived" — the sheet's typeof check (context.ts buildSpells)
+          // relies on this to tell a non-wizard/rule-off actor (max stays null)
+          // apart from a real channeller (max is always a number). A plain 0
+          // default was indistinguishable from a genuine derived value and
+          // made the Channelling bar render on every actor, wizard or not.
+          max: new NumberField({ required: true, nullable: true, integer: true, initial: null }),
         }),
       }),
       priest: new SchemaField({
