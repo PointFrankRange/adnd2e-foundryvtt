@@ -219,6 +219,11 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
           // made the Channelling bar render on every actor, wizard or not.
           max: new NumberField({ required: true, nullable: true, integer: true, initial: null }),
         }),
+        /** Sub-project 14 Plan C: a banked bonus toward the next Recover-from-
+         *  Fatigue saving throw — persisted exactly like channelling.current;
+         *  resets to 0 on a successful recovery save, increments by 1 on a
+         *  failed one. */
+        fatigueSaveBonus: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       }),
       priest: new SchemaField({
         sphereAccessOverride: new ArrayField(new StringField({ required: true, blank: false, choices: SPHERE_NAMES }), { required: true, nullable: true, initial: null }),

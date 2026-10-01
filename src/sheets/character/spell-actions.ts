@@ -1,14 +1,17 @@
 import { getChassis } from "../../core/classes/chassis";
 import { canAffordCast, channellersEnabled, recoverSp, spendCastSp, type ChannellerActivity } from "../../core/magic/channellers";
+import { channellerFatigueEnabled, FATIGUE_CONDITION_ID, resolveCastFatigue, tierForConditionId, type FatigueTier } from "../../core/magic/channeller-fatigue";
 import { canAffordMemorize, spellPointsEnabled, spellsMemorizedAtLevel } from "../../core/magic/spell-points";
 import { canLearnSpell, learnSpellRoll } from "../../core/magic/spellbook";
 import type { ClassId, IntelligenceModifiers, SphereName, WizardSchool } from "../../core/types";
+import { classItemLevel } from "../../data/derive/class-item";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { buildCastCardContext } from "../../magic/cast-card";
 import { buildLearnSpellCardContext } from "../../magic/learn-spell-card";
 import { canMemorizePriestSpell } from "../../magic/priest-sphere-access";
 import { TEMPLATE_PATH } from "../../constants";
 import { getOptionalRules } from "../../settings";
+import { resolveMortalFatigue } from "./fatigue-actions";
 
 /* ---------------------------------------------------------------------------
  * spell-actions — SP4a.
@@ -58,8 +61,11 @@ interface GenericItemHandle {
 export interface SpellcasterActor {
   name: string;
   img: string;
+  statuses: ReadonlySet<string>;
   system: {
     abilities: { int: { mods: IntelligenceModifiers } };
+    attributes: { hp: { value: number; max: number } };
+    saves: { ppd: { target: number; rollModifier: number } };
     spellcasting: {
       wizard: {
         specialistSchool: string | null;
@@ -67,6 +73,7 @@ export interface SpellcasterActor {
         slots: Record<string, { max: number; used: number }>;
         spellPoints: { maxSpellLevel?: number; maxPerLevel?: number; sp?: number; spent?: number; remaining?: number };
         channelling: { current?: number; max?: number };
+        fatigueSaveBonus: number;
         spellbookItemIds: string[];
       };
       priest: {
@@ -78,6 +85,7 @@ export interface SpellcasterActor {
   };
   items: { get(id: string): SpellItemHandle | undefined } & Iterable<GenericItemHandle>;
   update(data: Record<string, unknown>): Promise<unknown>;
+  toggleStatusEffect(id: string, opts: { active: boolean }): Promise<unknown>;
 }
 
 export function casterKey(spell: SpellItemHandle): "wizard" | "priest" {
@@ -97,6 +105,22 @@ function findPriestChassisId(actor: SpellcasterActor): ClassId | null {
     if (chassisId && getChassis(chassisId).spellProgressionId === "priest") return chassisId;
   }
   return null;
+}
+
+/** Finds the actor's wizard-progression class item (if any) and returns its
+ *  current level, derived from its xp exactly like context.ts's own class
+ *  rows are (classItemLevel). Returns 0 if no such class exists — in
+ *  practice applyCastFatigue is only ever called once a channelling cast has
+ *  already succeeded, so a real wizard-progression class is guaranteed. */
+function wizardCasterLevel(actor: SpellcasterActor): number {
+  for (const item of actor.items) {
+    if (item.type !== "class") continue;
+    const chassisId = item.system.chassisId as ClassId | undefined;
+    if (chassisId && getChassis(chassisId).spellProgressionId === "wizard") {
+      return classItemLevel(chassisId, (item.system.xp as number | undefined) ?? 0);
+    }
+  }
+  return 0;
 }
 
 /** Table-17-based eligibility for a wizard spell-points memorize (fixed or
@@ -265,6 +289,44 @@ export function tryChannellingSpend(
   return spendCastSp(current, spellLevel, magickType);
 }
 
+/** Sub-project 14 Plan C: resolves and applies this cast's fatigue tier —
+ *  called AFTER a channelling cast's SP spend has already succeeded, with the
+ *  PRE-deduction current SP (the book counts spell points "before the spell
+ *  is cast", p.83). No-ops entirely when the rule is off. Clears any other
+ *  fatigue condition before applying the new one (they're mutually
+ *  exclusive). Does not itself resolve the mortal-tier save-or-die — the
+ *  caller checks the return value and, if it's "mortal", invokes
+ *  fatigue-actions.ts's resolveMortalFatigue (Task 6) separately, since that
+ *  needs a dice roll this pure-glue function does not perform. */
+export async function applyCastFatigue(
+  actor: SpellcasterActor,
+  spellLevel: number,
+  preDeductionSp: number,
+): Promise<FatigueTier | null> {
+  if (!channellerFatigueEnabled(getOptionalRules())) return null;
+  const currentTier = [...actor.statuses].map(tierForConditionId).find((t) => t !== null) ?? null;
+  const maxSp = actor.system.spellcasting.wizard.channelling.max ?? 0;
+  const resolved = resolveCastFatigue({
+    casterLevel: wizardCasterLevel(actor),
+    spellLevel,
+    currentHp: actor.system.attributes.hp.value,
+    maxHp: actor.system.attributes.hp.max,
+    currentSp: preDeductionSp,
+    maxSp,
+    currentTier,
+  });
+  if (resolved === currentTier) return resolved;
+  for (const id of Object.values(FATIGUE_CONDITION_ID)) {
+    if (id !== FATIGUE_CONDITION_ID[resolved] && actor.statuses.has(id)) {
+      await actor.toggleStatusEffect(id, { active: false });
+    }
+  }
+  if (resolved !== "mortal") {
+    await actor.toggleStatusEffect(FATIGUE_CONDITION_ID[resolved], { active: true });
+  }
+  return resolved;
+}
+
 /** Casts a memorized, non-expended spell: rolls its automation.damage/
  *  healing formula if set (damage takes priority if a spell somehow set both
  *  — the schema doesn't prevent it, but no v1 content should), marks it
@@ -310,6 +372,7 @@ export async function castSpell(actor: SpellcasterActor, spellItemId: string): P
     return;
   }
   if (channelling) {
+    const preDeductionSp = actor.system.spellcasting.wizard.channelling.current ?? 0;
     const spent = tryChannellingSpend(actor, entry.spellLevel, entry.magickType ?? "fixed");
     if (spent === null) return;
     const rolled = await rollSpellAutomation(spell);
@@ -318,6 +381,8 @@ export async function castSpell(actor: SpellcasterActor, spellItemId: string): P
       "system.spellcasting.wizard.channelling.current": spent,
     });
     await postCastCard(actor, spell, rolled);
+    const resolvedTier = await applyCastFatigue(actor, entry.spellLevel, preDeductionSp);
+    if (resolvedTier === "mortal") await resolveMortalFatigue(actor);
     return;
   }
   const rolled = await rollSpellAutomation(spell);
@@ -470,6 +535,7 @@ export async function castFreeMagick(
     return;
   }
   if (channelling) {
+    const preDeductionSp = actor.system.spellcasting.wizard.channelling.current ?? 0;
     const spent = tryChannellingSpend(actor, spellLevel, "free");
     if (spent === null) return;
     const rolled = await rollSpellAutomation(chosen);
@@ -478,6 +544,8 @@ export async function castFreeMagick(
       "system.spellcasting.wizard.channelling.current": spent,
     });
     await postCastCard(actor, chosen, rolled);
+    const resolvedTier = await applyCastFatigue(actor, spellLevel, preDeductionSp);
+    if (resolvedTier === "mortal") await resolveMortalFatigue(actor);
     return;
   }
   const rolled = await rollSpellAutomation(chosen);

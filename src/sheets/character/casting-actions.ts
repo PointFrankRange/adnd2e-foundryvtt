@@ -6,8 +6,9 @@ import { channellersEnabled } from "../../core/magic/channellers";
 import { buildCastingNoticeContext } from "../../magic/casting-card";
 import { getOptionalRules } from "../../settings";
 import type { CastingStatusInput } from "./context-types";
+import { resolveMortalFatigue } from "./fatigue-actions";
 import {
-  casterKey, castSpell, postCastCard, rollSpellAutomation, tryChannellingSpend,
+  applyCastFatigue, casterKey, castSpell, postCastCard, rollSpellAutomation, tryChannellingSpend,
   type SpellcasterActor, type SpellItemHandle,
 } from "./spell-actions";
 
@@ -123,6 +124,7 @@ export async function castOrBegin(actor: CastingActor, spellItemId: string): Pro
   // Afford-check BEFORE any state is built or written — a failed check aborts
   // with no side effects, same as every other cast entry point.
   let channellingSpent: number | null = null;
+  const preDeductionSp = actor.system.spellcasting.wizard.channelling.current ?? 0;
   if (channelling) {
     channellingSpent = tryChannellingSpend(actor, entry.spellLevel, entry.magickType ?? "fixed");
     if (channellingSpent === null) return;
@@ -151,6 +153,10 @@ export async function castOrBegin(actor: CastingActor, spellItemId: string): Pro
     "system.options.spellsAndMagic.casting": casting,
   });
   await postNotice(actor, spell, "begin", casting);
+  if (channelling) {
+    const resolvedTier = await applyCastFatigue(actor, entry.spellLevel, preDeductionSp);
+    if (resolvedTier === "mortal") await resolveMortalFatigue(actor);
+  }
   if (plan.mode === "segments" && plan.initiativeAdd > 0) {
     try {
       let wrote = false;
