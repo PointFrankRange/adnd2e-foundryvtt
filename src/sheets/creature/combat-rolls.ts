@@ -1,7 +1,14 @@
 import { resolveTargetArmorType, resolveTargetCombatInfo } from "../character/combat-rolls";
 import { buildAttackCardContext } from "../../combat/attack-card";
 import { buildSaveCardContext } from "../../combat/save-card";
-import { blindedAttackPenalty, canAct, heldAttackBonus, proneArmorClassPenalty } from "../../combat/condition-effects";
+import {
+  blindedAttackPenalty,
+  canAct,
+  fatigueArmorClassPenalty,
+  fatigueAttackPenalty,
+  heldAttackBonus,
+  proneArmorClassPenalty,
+} from "../../combat/condition-effects";
 import { attackModifiers, hitResult } from "../../core/combat/attack";
 import { attackFormula } from "../../core/dice/formula";
 import { criticalSeverity, fumbleSeverity } from "../../combat/critical";
@@ -158,7 +165,7 @@ async function rollCreatureAttack(actor: CreatureActor, source: AttackSource): P
     targetName = t.name;
     targetStatuses = (t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>();
     const info = resolveTargetCombatInfo(t.actor as Parameters<typeof resolveTargetCombatInfo>[0]);
-    targetAc = info.ac + proneArmorClassPenalty(targetStatuses);
+    targetAc = info.ac + proneArmorClassPenalty(targetStatuses) + fatigueArmorClassPenalty(targetStatuses);
     targetSize = info.size as CreatureSize | null;
     if (rules.combatAndTacticsEnabled && rules.armorTypeVsWeaponType && source.damageType) {
       const targetArmorType = resolveTargetArmorType(t.actor as Parameters<typeof resolveTargetArmorType>[0]);
@@ -190,7 +197,11 @@ async function rollCreatureAttack(actor: CreatureActor, source: AttackSource): P
   // equipped weapon contributes here.
   const { total: attackBonus, breakdown } = attackModifiers({
     weaponMagicBonus: source.weaponMagicBonus,
-    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses) + armorVsWeaponModifier,
+    situationalModifier:
+      blindedAttackPenalty(actor.statuses) +
+      fatigueAttackPenalty(actor.statuses) +
+      heldAttackBonus(targetStatuses) +
+      armorVsWeaponModifier,
   });
   const formula = attackFormula(attackBonus);
   const roll = await new Roll(formula).evaluate();

@@ -5,6 +5,8 @@
 // list. All numeric values are this project's own design (content policy) —
 // not transcribed from any rulebook table.
 
+import { FATIGUE_ATTACK_PENALTY, FATIGUE_AC_PENALTY, FATIGUE_CONDITION_ID } from "../core/magic/channeller-fatigue";
+
 export type ManagedConditionId = "prone" | "blinded" | "stunned" | "held";
 
 export const MANAGED_CONDITIONS: readonly ManagedConditionId[] = ["prone", "blinded", "stunned", "held"];
@@ -37,10 +39,28 @@ export function heldAttackBonus(targetStatuses: StatusSet): number {
   return has(targetStatuses, "held") ? 4 : 0;
 }
 
+/** Sub-project 14 Plan C: a fatigued actor's own attack-roll penalty (p.83).
+ *  At most one fatigue tier is ever present on an actor (mutually exclusive). */
+export function fatigueAttackPenalty(actorStatuses: StatusSet): number {
+  for (const [tier, id] of Object.entries(FATIGUE_CONDITION_ID)) {
+    if (has(actorStatuses, id)) return FATIGUE_ATTACK_PENALTY[tier as keyof typeof FATIGUE_ATTACK_PENALTY];
+  }
+  return 0;
+}
+
+/** Sub-project 14 Plan C: a fatigued actor's own Armor Class penalty (p.83),
+ *  same sign convention as proneArmorClassPenalty. */
+export function fatigueArmorClassPenalty(actorStatuses: StatusSet): number {
+  for (const [tier, id] of Object.entries(FATIGUE_CONDITION_ID)) {
+    if (has(actorStatuses, id)) return FATIGUE_AC_PENALTY[tier as keyof typeof FATIGUE_AC_PENALTY];
+  }
+  return 0;
+}
+
 /** Stunned or held: the actor cannot take an attack action this round.
  *  Scoped to attack rolls only (a deliberate v1 simplification) — saving
  *  throws are NOT gated by this, since resisting something happening to you
  *  is treated as still possible while stunned/held. */
 export function canAct(actorStatuses: StatusSet): boolean {
-  return !has(actorStatuses, "stunned") && !has(actorStatuses, "held");
+  return !has(actorStatuses, "stunned") && !has(actorStatuses, "held") && !has(actorStatuses, "mortalFatigue");
 }

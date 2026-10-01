@@ -5,6 +5,8 @@ import {
   heldAttackBonus,
   canAct,
   MANAGED_CONDITIONS,
+  fatigueAttackPenalty,
+  fatigueArmorClassPenalty,
 } from "../../src/combat/condition-effects";
 
 describe("MANAGED_CONDITIONS", () => {
@@ -55,5 +57,41 @@ describe("canAct", () => {
   });
   it("is false when both are present", () => {
     expect(canAct(["stunned", "held"])).toBe(false);
+  });
+});
+
+describe("fatigueAttackPenalty", () => {
+  it("matches FATIGUE_ATTACK_PENALTY for each tier's condition id", () => {
+    expect(fatigueAttackPenalty(["lightFatigue"])).toBe(0);
+    expect(fatigueAttackPenalty(["moderateFatigue"])).toBe(-1);
+    expect(fatigueAttackPenalty(["heavyFatigue"])).toBe(-2);
+    expect(fatigueAttackPenalty(["severeFatigue"])).toBe(-4);
+    expect(fatigueAttackPenalty(["mortalFatigue"])).toBe(0);
+  });
+  it("is 0 when no fatigue condition is present", () => {
+    expect(fatigueAttackPenalty([])).toBe(0);
+    expect(fatigueAttackPenalty(["prone"])).toBe(0);
+  });
+});
+
+describe("fatigueArmorClassPenalty", () => {
+  it("matches FATIGUE_AC_PENALTY for each tier's condition id", () => {
+    expect(fatigueArmorClassPenalty(["heavyFatigue"])).toBe(1);
+    expect(fatigueArmorClassPenalty(["severeFatigue"])).toBe(3);
+    expect(fatigueArmorClassPenalty(["lightFatigue"])).toBe(0);
+    expect(fatigueArmorClassPenalty(["mortalFatigue"])).toBe(0);
+  });
+  it("is 0 when no fatigue condition is present", () => {
+    expect(fatigueArmorClassPenalty([])).toBe(0);
+  });
+});
+
+describe("canAct — mortal fatigue", () => {
+  it("blocks acting while mortally fatigued, same as stunned/held", () => {
+    expect(canAct(["mortalFatigue"])).toBe(false);
+  });
+  it("does not block acting at any other fatigue tier", () => {
+    expect(canAct(["severeFatigue"])).toBe(true);
+    expect(canAct(["lightFatigue"])).toBe(true);
   });
 });
