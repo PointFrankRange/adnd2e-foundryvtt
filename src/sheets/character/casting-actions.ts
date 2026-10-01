@@ -2,11 +2,13 @@ import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import {
   canCompleteCasting, castingPlan, expandedCastingTimeEnabled, parseCastingTime, type CastingState,
 } from "../../core/magic/casting-time";
+import { channellersEnabled } from "../../core/magic/channellers";
 import { buildCastingNoticeContext } from "../../magic/casting-card";
 import { getOptionalRules } from "../../settings";
 import type { CastingStatusInput } from "./context-types";
 import {
-  casterKey, castSpell, postCastCard, rollSpellAutomation, type SpellcasterActor, type SpellItemHandle,
+  casterKey, castSpell, postCastCard, rollSpellAutomation, tryChannellingSpend,
+  type SpellcasterActor, type SpellItemHandle,
 } from "./spell-actions";
 
 /* ---------------------------------------------------------------------------
@@ -86,7 +88,12 @@ async function clearCombatantFlag(combatId: string, actor: unknown): Promise<voi
   }
 }
 
-/** The Cast button: today's immediate cast unless the rule is on, the caster is in a started combat and the casting time parses. */
+/** The Cast button: today's immediate cast unless the rule is on, the caster
+ *  is in a started combat and the casting time parses. Sub-project 14 Plan B:
+ *  for a channelling wizard, beginning the cast spends spell points right
+ *  away (afford-checked below via the shared `tryChannellingSpend` helper)
+ *  instead of marking the memorized entry expended — see the "commit" note
+ *  further down. */
 export async function castOrBegin(actor: CastingActor, spellItemId: string): Promise<void> {
   const spell = actor.items.get(spellItemId);
   const ctx = expandedCastingTimeEnabled(getOptionalRules()) && spell ? findCombat(actor) : null;
@@ -101,9 +108,24 @@ export async function castOrBegin(actor: CastingActor, spellItemId: string): Pro
   }
   const key = casterKey(spell);
   const list = actor.system.spellcasting[key].memorized;
-  if (!list.some((m) => m.spellItemId === spellItemId && !m.expended)) {
+  // Sub-project 14 Plan B: a channelling entry is never expended (spec §2) —
+  // any match is castable subject to affordability, checked below; the
+  // classic path still requires a non-expended entry. Mirrors castSpell's own
+  // lookup exactly.
+  const channelling = key === "wizard" && channellersEnabled(getOptionalRules());
+  const entry = channelling
+    ? list.find((m) => m.spellItemId === spellItemId)
+    : list.find((m) => m.spellItemId === spellItemId && !m.expended);
+  if (!entry) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
     return;
+  }
+  // Afford-check BEFORE any state is built or written — a failed check aborts
+  // with no side effects, same as every other cast entry point.
+  let channellingSpent: number | null = null;
+  if (channelling) {
+    channellingSpent = tryChannellingSpend(actor, entry.spellLevel, entry.magickType ?? "fixed");
+    if (channellingSpent === null) return;
   }
   const casting: CastingState = {
     spellItemId,
@@ -114,9 +136,18 @@ export async function castOrBegin(actor: CastingActor, spellItemId: string): Pro
     segments: plan.mode === "segments" ? plan.initiativeAdd : null,
     hp: actor.system.attributes.hp.value,
   };
-  // PHB p.86: the spell is committed when casting begins — a disruption loses it.
+  // PHB p.86: the spell is committed when casting begins — a disruption loses
+  // it. For a channelling caster "committed" means the SP is spent NOW (Sub-
+  // project 14 Plan B) instead of the memorized entry being marked expended;
+  // completeCasting/disruptCasting need no further changes either way.
   await actor.update({
-    [`system.spellcasting.${key}.memorized`]: list.map((m) => (m.spellItemId === spellItemId ? { ...m, expended: true } : m)),
+    ...(channelling
+      ? { "system.spellcasting.wizard.channelling.current": channellingSpent }
+      : {
+          [`system.spellcasting.${key}.memorized`]: list.map((m) =>
+            m.spellItemId === spellItemId ? { ...m, expended: true } : m,
+          ),
+        }),
     "system.options.spellsAndMagic.casting": casting,
   });
   await postNotice(actor, spell, "begin", casting);

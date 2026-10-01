@@ -23,8 +23,9 @@ import { validateItemDrop } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
 import { advanceWeaponMastery, allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill } from "./proficiency-actions";
 import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "./casting-actions";
-import { castFreeMagick, forgetFreeMagick, forgetSpell, learnSpell, memorizeFreeMagick, memorizeSpell, restSpellcasting } from "./spell-actions";
+import { castFreeMagick, forgetFreeMagick, forgetSpell, learnSpell, memorizeFreeMagick, memorizeSpell, recoverChannellerSp, restSpellcasting } from "./spell-actions";
 import { promptFreeMagickLevel, promptFreeMagickSpell } from "./free-magick-dialog";
+import { promptRecoverChannelling } from "./recover-dialog";
 import { seedSubAbilities } from "./sub-ability-actions";
 import { removeTrait, traitDropInputs, traitRefundCapped, type TraitDropInputs } from "./trait-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
@@ -319,6 +320,7 @@ export class Adnd2eCharacterSheet extends Base {
       castFreeMagick: Adnd2eCharacterSheet.#onCastFreeMagick,
       forgetFreeMagick: Adnd2eCharacterSheet.#onForgetFreeMagick,
       restSpellcasting: Adnd2eCharacterSheet.#onRestSpellcasting,
+      recoverChannellerSp: Adnd2eCharacterSheet.#onRecoverChannellerSp,
       learnSpell: Adnd2eCharacterSheet.#onLearnSpell,
       completeCasting: Adnd2eCharacterSheet.#onCompleteCasting,
       disruptCasting: Adnd2eCharacterSheet.#onDisruptCasting,
@@ -829,6 +831,11 @@ export class Adnd2eCharacterSheet extends Base {
 
   static async #onRestSpellcasting(this: Adnd2eCharacterSheet): Promise<void> {
     await restSpellcasting(this.document as never);
+  }
+
+  static async #onRecoverChannellerSp(this: Adnd2eCharacterSheet): Promise<void> {
+    const result = await promptRecoverChannelling();
+    if (result) await recoverChannellerSp(this.document as never, result.activity, result.hours);
   }
 
   static async #onLearnSpell(

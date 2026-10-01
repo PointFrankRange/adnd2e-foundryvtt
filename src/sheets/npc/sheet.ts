@@ -19,7 +19,8 @@ import { rollHitPoints } from "../character/hp-roll";
 import { advanceWeaponMastery, rollNonweaponCheck, rollThiefSkill } from "../character/proficiency-actions";
 import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "../character/casting-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
-import { forgetSpell, learnSpell, memorizeSpell, restSpellcasting } from "../character/spell-actions";
+import { forgetSpell, learnSpell, memorizeSpell, recoverChannellerSp, restSpellcasting } from "../character/spell-actions";
+import { promptRecoverChannelling } from "../character/recover-dialog";
 import { bindSheetKit, clearSheetKit } from "../kit-dom";
 import { toggleFavoriteFlag } from "../kit-actions";
 
@@ -111,6 +112,7 @@ export class Adnd2eNpcSheet extends Base {
       forgetSpell: Adnd2eNpcSheet.#onForgetSpell,
       castSpell: Adnd2eNpcSheet.#onCastSpell,
       restSpellcasting: Adnd2eNpcSheet.#onRestSpellcasting,
+      recoverChannellerSp: Adnd2eNpcSheet.#onRecoverChannellerSp,
       learnSpell: Adnd2eNpcSheet.#onLearnSpell,
       completeCasting: Adnd2eNpcSheet.#onCompleteCasting,
       disruptCasting: Adnd2eNpcSheet.#onDisruptCasting,
@@ -462,6 +464,16 @@ export class Adnd2eNpcSheet extends Base {
 
   static async #onRestSpellcasting(this: Adnd2eNpcSheet): Promise<void> {
     await restSpellcasting(this.document as never);
+  }
+
+  // Sub-project 14 Plan B whole-branch fix I2: a Character NPC channeller had
+  // no way to ever gain spell points — the SP bar renders unconditionally
+  // (spells.hbs), but the Recover button was gated behind pcActions with no
+  // matching action-map entry here. Reuses the exact same recoverChannellerSp/
+  // promptRecoverChannelling functions the PC sheet uses.
+  static async #onRecoverChannellerSp(this: Adnd2eNpcSheet): Promise<void> {
+    const result = await promptRecoverChannelling();
+    if (result) await recoverChannellerSp(this.document as never, result.activity, result.hours);
   }
 
   static async #onLearnSpell(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {

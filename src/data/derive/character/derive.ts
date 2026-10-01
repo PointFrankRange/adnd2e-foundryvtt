@@ -8,6 +8,7 @@ import type {
 import type { OptionalRules } from "../../../core/options";
 import { acDexAdjWhileCasting, expandedCastingTimeEnabled } from "../../../core/magic/casting-time";
 import { spellPointsEnabled } from "../../../core/magic/spell-points";
+import { channellersEnabled } from "../../../core/magic/channellers";
 import type {
   ArrangementResolution, ClassArrangement, ClassMember, DualClassResolution,
 } from "../../../core/classes/multiclass";
@@ -20,6 +21,7 @@ import { deriveAc } from "./ac";
 import { deriveSaves } from "./saves";
 import { deriveSpellSlots, type SlotRecord } from "./slots";
 import { deriveSpellPoints, type SpellPointsRecord } from "./spell-points";
+import { deriveChannelling, type ChannellingRecord } from "./channellers";
 import { deriveProficiencySlots, type SlotBlock } from "./proficiencies";
 import { deriveThiefSkillPoints, type ThiefSkillPointBlock } from "./thief-skills";
 import { deriveEncumbrance } from "./encumbrance";
@@ -36,6 +38,7 @@ export interface CharacterDerived {
   saves: Record<SaveCategory, { target: number; rollModifier: number; effectiveTarget: number }> | null;
   spellSlots: { wizard?: SlotRecord; priest?: SlotRecord };
   spellPoints: { wizard?: SpellPointsRecord };
+  channelling: { wizard?: ChannellingRecord };
   proficiencies: { weapon: SlotBlock; nonweapon: SlotBlock; languagesMax: number } | null;
   thiefSkills: ThiefSkillPointBlock;
   encumbrance: {
@@ -105,6 +108,26 @@ function mergeCasterSpellPoints(
         maxSpellLevelKnown: abilities.int.maxSpellLevel,
         specialist: c.specialistSchool !== null,
         wizardMemorized: snapshot.wizardMemorized,
+      }),
+    };
+  }
+  return out;
+}
+
+function mergeCasterChannelling(
+  casters: readonly ClassMember[],
+  abilities: DerivedAbilities,
+): { wizard?: ChannellingRecord } {
+  let out: { wizard?: ChannellingRecord } = {};
+  for (const c of casters) {
+    out = {
+      ...out,
+      ...deriveChannelling({
+        chassisId: c.chassisId,
+        level: c.level,
+        specialist: c.specialistSchool !== null,
+        conHpAdjustment: abilities.con.hpAdjustment,
+        wisMagicalDefenseAdj: abilities.wis.magicalDefenseAdj,
       }),
     };
   }
@@ -182,6 +205,8 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
       spellSlots: primaryMember ? mergeCasterSlots([primaryMember], snapshot, abilities) : {},
       spellPoints:
         primaryMember && spellPointsEnabled(options) ? mergeCasterSpellPoints([primaryMember], snapshot, abilities) : {},
+      channelling:
+        primaryMember && channellersEnabled(options) ? mergeCasterChannelling([primaryMember], abilities) : {},
       proficiencies: primary
         ? deriveProficiencySlots(
             { chassisId: primary.chassisId, level },
@@ -233,6 +258,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
     }),
     spellSlots: mergeCasterSlots(resolution.casters, snapshot, abilities),
     spellPoints: spellPointsEnabled(options) ? mergeCasterSpellPoints(resolution.casters, snapshot, abilities) : {},
+    channelling: channellersEnabled(options) ? mergeCasterChannelling(resolution.casters, abilities) : {},
     proficiencies: deriveProficiencySlots(
       resolution.weaponProfSource,
       resolution.nonweaponProfSource,

@@ -46,7 +46,7 @@ export const SETTING_DESCRIPTORS: readonly SettingDescriptor[] = [
   { key: "spellsAndMagicEnabled", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: "spellsAndMagicEnabled", requiresReload: true },
   { key: "spellPoints", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: "spellPoints", requiresReload: true },
   { key: "expandedCastingTime", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: "expandedCastingTime", requiresReload: true },
-  { key: "channelers", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: null },
+  { key: "channelers", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: "channelers", requiresReload: true },
 ];
 
 /**

@@ -2687,3 +2687,104 @@ describe("buildCharacterSheetContext — wizard spell points (SP14a)", () => {
     expect(affordable.spells.known[0].items[0].canMemorize).toBe(true); // exactly 4 SP for a level-1 fixed magick, room under the cap
   });
 });
+
+describe("buildCharacterSheetContext — Channellers (SP14b)", () => {
+  const channellingRules = {
+    ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true, channelers: true,
+  };
+  const withChannelling = (over: Record<string, unknown> = {}) => ({
+    ...input().derived,
+    spellcasting: {
+      wizard: {
+        specialistSchool: null,
+        slots: {},
+        spellPoints: { maxSpellLevel: 2, maxPerLevel: 3, sp: 15, spent: 0, remaining: 15 },
+        channelling: { current: 8, max: 15 },
+        memorized: [{ spellItemId: "s1", spellLevel: 1, expended: false, magickType: "fixed" as const }],
+        ...over,
+      },
+      priest: { slots: {}, memorized: [], sphereAccessOverride: null },
+    },
+  });
+  const spell = (over: Record<string, unknown> = {}) => ({
+    id: "s1", name: "Magic Missile", img: "", casterClass: "wizard", level: 1,
+    schools: ["evocation"], spheres: [], range: "", castingTime: "1", savingThrow: "none",
+    inSpellbook: true, memorized: false, expended: false, canMemorize: false, canCast: false, canLearn: false,
+    favorite: false,
+    ...over,
+  });
+
+  it("rule off: no channelling bar, Plan A's spell-points bar still shows when that rule alone is on", () => {
+    const spellPointsOnly = { ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true };
+    const c = buildCharacterSheetContext(
+      input({
+        derived: withChannelling({ channelling: undefined }),
+        optionalRules: spellPointsOnly,
+      }),
+    );
+    expect(c.spells.channelling).toBeNull();
+    expect(c.spells.spellPoints).toEqual({ max: 15, spent: 0, remaining: 15 });
+  });
+
+  it("rule on: exposes the channelling bar", () => {
+    const c = buildCharacterSheetContext(input({ derived: withChannelling(), optionalRules: channellingRules }));
+    expect(c.spells.channelling).toEqual({ current: 8, max: 15 });
+  });
+
+  it("memorizing a fixed magick needs no spell points when channelling — only the Table 17 caps", () => {
+    const derived = withChannelling({
+      spellPoints: { maxSpellLevel: 2, maxPerLevel: 1, sp: 0, spent: 0, remaining: 0 }, // 0 SP available
+      channelling: { current: 0, max: 0 },
+      memorized: [],
+    });
+    const c = buildCharacterSheetContext(
+      input({ derived, spellItems: [spell()], optionalRules: channellingRules }),
+    );
+    expect(c.spells.known[0].items[0].canMemorize).toBe(true); // 0 SP is fine — memorizing is free for a channeller
+  });
+
+  it("a memorized fixed magick's canCast reflects live pool affordability, not expended", () => {
+    const affordable = buildCharacterSheetContext(
+      input({
+        derived: withChannelling({ channelling: { current: 4, max: 15 } }),
+        spellItems: [spell()],
+        optionalRules: channellingRules,
+      }),
+    );
+    expect(affordable.spells.known[0].items[0].canCast).toBe(true); // 4 SP available, level-1 fixed costs 4
+
+    const tooPoor = buildCharacterSheetContext(
+      input({
+        derived: withChannelling({ channelling: { current: 3, max: 15 } }),
+        spellItems: [spell()],
+        optionalRules: channellingRules,
+      }),
+    );
+    expect(tooPoor.spells.known[0].items[0].canCast).toBe(false); // needs 4, only 3 left
+  });
+
+  it("a channelling free magick's canCast reflects live pool affordability", () => {
+    // Table 18: a level-2 free magick costs 12 SP.
+    const tooPoor = buildCharacterSheetContext(
+      input({
+        derived: withChannelling({
+          memorized: [{ spellItemId: null, spellLevel: 2, expended: false, magickType: "free" as const }],
+          channelling: { current: 11, max: 15 },
+        }),
+        optionalRules: channellingRules,
+      }),
+    );
+    expect(tooPoor.spells.freeMagicks).toEqual([{ level: 2, expended: false, canCast: false }]);
+
+    const affordable = buildCharacterSheetContext(
+      input({
+        derived: withChannelling({
+          memorized: [{ spellItemId: null, spellLevel: 2, expended: false, magickType: "free" as const }],
+          channelling: { current: 12, max: 15 },
+        }),
+        optionalRules: channellingRules,
+      }),
+    );
+    expect(affordable.spells.freeMagicks).toEqual([{ level: 2, expended: false, canCast: true }]);
+  });
+});

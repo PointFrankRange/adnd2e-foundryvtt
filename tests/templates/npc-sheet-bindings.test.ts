@@ -61,6 +61,11 @@ const PC_ONLY_ACTIONS = [
   // entries — the Character NPC sheet reuses that same shared PC template but its sheet.ts
   // has no matching action-map wiring for these three (that's PC-sheet-only, Task 4/5 of SP14a).
   "memorizeFreeMagick", "castFreeMagick", "forgetFreeMagick",
+  // Sub-project 14 Plan B whole-branch fix I2: recoverChannellerSp is NOT
+  // PC-only — a Character NPC channeller needs to recover spell points too,
+  // so the Recover button in spells.hbs is unconditional and this sheet now
+  // wires the same recoverChannellerSp/promptRecoverChannelling functions the
+  // PC sheet uses. (Removed from this list; kept here only as history.)
 ];
 const CORE_ACTIONS = new Set(["tab", "editImage"]);
 const registered = new Set([...SHEET.matchAll(/^\s+([a-zA-Z]+): Adnd2eNpcSheet\.#on/gm)].map((m) => m[1]!));
