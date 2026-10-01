@@ -29,6 +29,18 @@
     </section>
   {{/if}}
 
+  {{#if @root.pcActions}}
+  {{#if adnd2e.vitals.fatigue}}
+    <section class="kit-panel kit-fatigue">
+      <div class="kit-bar">{{adnd2e.vitals.fatigue.label}}</div>
+      <div class="kit-body">
+        <p class="detail">{{localize 'ADND2E.sheet.spells.fatigueRecoveryHint' interval=adnd2e.vitals.fatigue.recoveryIntervalLabel}}</p>
+        <button type="button" class="kit-roll" data-action="recoverFromFatigue">{{localize 'ADND2E.sheet.spells.recoverFromFatigue'}}</button>
+      </div>
+    </section>
+  {{/if}}
+  {{/if}}
+
   <section class="kit-panel">
     <div class="kit-bar">{{localize 'ADND2E.sheet.kit.attacks'}}</div>
     <div class="kit-body">

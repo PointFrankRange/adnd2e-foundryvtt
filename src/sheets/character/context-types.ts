@@ -3,6 +3,7 @@ import type {
   StrengthModifiers, ThiefSkill, WisdomModifiers,
 } from "../../core/types";
 import type { OptionalRules } from "../../core/options";
+import type { FatigueTier } from "../../core/magic/channeller-fatigue";
 import type { SubAbilityId } from "../../core/abilities/sub-abilities";
 import type { CharacterPointLedger } from "../../core/skills/character-points";
 import type { RawTraitEffect } from "../../core/skills/traits";
@@ -46,6 +47,8 @@ export interface CharacterSheetInput {
   subAbilityUi?: boolean;
   /** Sub-project 9a: the in-progress cast; absent/null when idle or the rule is off */
   castingStatus?: CastingStatusInput | null;
+  /** Sub-project 14 Plan C: the actor's current fatigue tier, read from live `actor.statuses`; null while unfatigued or the rule is off. */
+  fatigueTier?: FatigueTier | null;
   /** sheet redesign R1: the viewer's unlock state (never persisted) */
   unlocked?: boolean;
   /** raw flags.adnd2e.favorites */
@@ -366,6 +369,8 @@ export interface CharacterSheetContext {
     movement: { base: number; current: number; encumbranceCategory: string; encumbranceCategoryLabel: string };
     /** Sub-project 9a: true while a cast is in progress — drives the AC badge */
     casting: boolean;
+    /** Sub-project 14 Plan C: null while unfatigued. */
+    fatigue: { label: string; recoveryIntervalLabel: string } | null;
   };
   classes: ClassRow[];
   dualClassToggle: { available: boolean; on: boolean };

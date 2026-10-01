@@ -2788,3 +2788,27 @@ describe("buildCharacterSheetContext — Channellers (SP14b)", () => {
     expect(affordable.spells.freeMagicks).toEqual([{ level: 2, expended: false, canCast: true }]);
   });
 });
+
+describe("buildCharacterSheetContext — Channellers fatigue (SP14c)", () => {
+  it("no fatigue tier: vitals.fatigue is null, movement unaffected", () => {
+    const c = buildCharacterSheetContext(input());
+    expect(c.vitals.fatigue).toBeNull();
+  });
+
+  it("a fatigue tier adjusts the displayed movement rate and exposes a label", () => {
+    // the fixture's base movement.current is 12 (unencumbered) -> heavy is floor(12*0.25) = 3
+    const c = buildCharacterSheetContext({ ...input(), fatigueTier: "heavy" });
+    expect(c.vitals.movement.current).toBe(3);
+    expect(c.vitals.fatigue).toEqual({ label: "Heavily Fatigued", recoveryIntervalLabel: "turn" });
+  });
+
+  it("severe fatigue is a flat movement rate of 1 regardless of the base rate", () => {
+    const c = buildCharacterSheetContext({ ...input(), fatigueTier: "severe" });
+    expect(c.vitals.movement.current).toBe(1);
+  });
+
+  it("mortal fatigue is a movement rate of 0", () => {
+    const c = buildCharacterSheetContext({ ...input(), fatigueTier: "mortal" });
+    expect(c.vitals.movement.current).toBe(0);
+  });
+});

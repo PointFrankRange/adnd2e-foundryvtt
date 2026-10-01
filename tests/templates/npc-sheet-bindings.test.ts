@@ -66,6 +66,15 @@ const PC_ONLY_ACTIONS = [
   // so the Recover button in spells.hbs is unconditional and this sheet now
   // wires the same recoverChannellerSp/promptRecoverChannelling functions the
   // PC sheet uses. (Removed from this list; kept here only as history.)
+  // Sub-project 14 Plan C (Task 6): the fatigue badge/panel and its
+  // Recover-from-Fatigue button are gated behind `@root.pcActions` in
+  // pc-main-panels.hbs — `fatigueTier` is only threaded into the render
+  // context by the PC sheet's own #buildInput; the Character NPC sheet has
+  // no matching wiring yet (same deferred-NPC-wiring shape as the free-magick
+  // actions above). A follow-up can thread fatigueTier + this action into
+  // npc/sheet.ts the same way Plan B's recoverChannellerSp was later unwired
+  // from this list.
+  "recoverFromFatigue",
 ];
 const CORE_ACTIONS = new Set(["tab", "editImage"]);
 const registered = new Set([...SHEET.matchAll(/^\s+([a-zA-Z]+): Adnd2eNpcSheet\.#on/gm)].map((m) => m[1]!));

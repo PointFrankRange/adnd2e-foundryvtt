@@ -24,6 +24,7 @@ import { applyRacialDeltas } from "../../core/abilities/racial-adjustments";
 import { getChassis } from "../../core/classes/chassis";
 import { MANEUVERS } from "../../core/combat/maneuvers";
 import { canAffordCast, channellersEnabled } from "../../core/magic/channellers";
+import { FATIGUE_CONDITION_ID, FATIGUE_RECOVERY_INTERVAL, fatigueMovementRate } from "../../core/magic/channeller-fatigue";
 import { canCompleteCasting } from "../../core/magic/casting-time";
 import { canLearnSpell } from "../../core/magic/spellbook";
 import { characterPointLedgerFor, DEFAULT_CHARACTER_POINT_POOL } from "../../core/skills/character-points";
@@ -39,6 +40,7 @@ import type { AmmoStock } from "../../combat/ammo";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { canMemorizePriestSpell } from "../../magic/priest-sphere-access";
 import { magickCost, spellPointsEnabled, spellsMemorizedAtLevel } from "../../core/magic/spell-points";
+import { CONDITIONS } from "../../conditions";
 import { groupInventory } from "./grouping";
 import { xpToNext } from "./xp";
 import { buildFavoriteRows, isFavorite, normalizeFavorites, type FavoriteKind } from "../kit/favorites";
@@ -260,6 +262,14 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
       shortLabel: `ADND2E.sheet.saves.short.${key}`,
     };
   });
+  const fatigueTier = input.fatigueTier ?? null;
+  const currentMovement = fatigueTier ? fatigueMovementRate(fatigueTier, a.movement.current) : a.movement.current;
+  const fatigue = fatigueTier
+    ? {
+        label: CONDITIONS.find((c) => c.id === FATIGUE_CONDITION_ID[fatigueTier])?.name ?? fatigueTier,
+        recoveryIntervalLabel: FATIGUE_RECOVERY_INTERVAL[fatigueTier],
+      }
+    : null;
   return {
     hp: a.hp,
     thac0: a.thac0,
@@ -267,11 +277,12 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
     saves,
     movement: {
       base: a.movement.base,
-      current: a.movement.current,
+      current: currentMovement,
       encumbranceCategory: a.movement.encumbranceCategory,
       encumbranceCategoryLabel: input.config.encumbranceCategories[a.movement.encumbranceCategory],
     },
     casting: Boolean(input.castingStatus),
+    fatigue,
   };
 }
 
