@@ -1,0 +1,11 @@
+{
+  "_id": "FatigueLight0001",
+  "_key": "!items!FatigueLight0001",
+  "name": "Lightly Fatigued",
+  "type": "condition",
+  "img": "icons/svg/degen.svg",
+  "system": {
+    "conditionId": "lightFatigue",
+    "description": ""
+  }
+}
