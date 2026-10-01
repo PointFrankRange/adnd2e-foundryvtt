@@ -3,12 +3,13 @@ import { DEFAULT_OPTIONAL_RULES } from "../../src/core/options";
 import type { OptionalRules } from "../../src/core/options";
 
 describe("DEFAULT_OPTIONAL_RULES", () => {
-  it("has exactly the twenty-two core, combatAndTactics, skillsAndPowers and spellsAndMagic toggles", () => {
+  it("has exactly the twenty-three core, combatAndTactics, skillsAndPowers and spellsAndMagic toggles", () => {
     expect(Object.keys(DEFAULT_OPTIONAL_RULES).sort()).toEqual(
       [
         "armorTypeVsWeaponType",
         "calledShots",
         "channelers",
+        "channellerFatigue",
         "characterPointBuild",
         "combatAndTacticsEnabled",
         "combatManeuvers",
@@ -56,6 +57,7 @@ describe("DEFAULT_OPTIONAL_RULES", () => {
       expandedCastingTime: false,
       spellPoints: false,
       channelers: false,
+      channellerFatigue: false,
     };
     expect(DEFAULT_OPTIONAL_RULES).toEqual(expected);
   });

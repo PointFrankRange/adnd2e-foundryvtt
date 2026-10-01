@@ -737,6 +737,10 @@
         "name": "Spells & Magic: Channelers",
         "hint": "Wizards may cast a memorized spell repeatedly by spending spell points from a recoverable pool instead of losing it after one cast; memorizing costs nothing from the pool — only casting does (Player's Option: Spells & Magic). Fatigue from overcasting is a later plan."
       },
+      "channellerFatigue": {
+        "name": "Spells & Magic: Channeller Fatigue",
+        "hint": "Casting as a channeller risks escalating fatigue (Table 21) — real movement/attack/Armor Class penalties, up to incapacitation and a save-or-die at the worst tier. Requires Channelers to also be on."
+      },
       "playerAppliedEffects": {
         "name": "Player-Applied Damage & Effects",
         "hint": "When a player applies damage, healing or a maneuver effect to a token they don't own, the active GM's client applies it. Choose whether that happens automatically or waits for the GM to approve each one. Requires a GM to be connected.",

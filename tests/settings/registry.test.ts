@@ -3,8 +3,8 @@ import { SETTING_DESCRIPTORS, readOptionalRules } from "../../src/settings/regis
 import { DEFAULT_OPTIONAL_RULES } from "../../src/core/options";
 
 describe("SETTING_DESCRIPTORS", () => {
-  it("registers 22 settings across the 4 groups", () => {
-    expect(SETTING_DESCRIPTORS).toHaveLength(22);
+  it("registers 23 settings across the 4 groups", () => {
+    expect(SETTING_DESCRIPTORS).toHaveLength(23);
     const byGroup = SETTING_DESCRIPTORS.reduce<Record<string, number>>((acc, d) => {
       acc[d.group] = (acc[d.group] ?? 0) + 1;
       return acc;
@@ -13,7 +13,7 @@ describe("SETTING_DESCRIPTORS", () => {
       core: 8,
       combatAndTactics: 6,
       skillsAndPowers: 4,
-      spellsAndMagic: 4,
+      spellsAndMagic: 5,
     });
   });
 
@@ -26,17 +26,17 @@ describe("SETTING_DESCRIPTORS", () => {
     for (const d of SETTING_DESCRIPTORS) expect(typeof d.default).toBe("boolean");
   });
 
-  it("core, combatAndTactics, skillsAndPowers and four spellsAndMagic settings bind 1:1 to OptionalRules fields", () => {
+  it("core, combatAndTactics, skillsAndPowers and five spellsAndMagic settings bind 1:1 to OptionalRules fields", () => {
     const bound = SETTING_DESCRIPTORS.filter((d) => d.optionalRulesKey !== null);
-    expect(bound).toHaveLength(22);
+    expect(bound).toHaveLength(23);
     const boundKeys = bound.map((d) => d.optionalRulesKey).sort();
     expect(boundKeys).toEqual(Object.keys(DEFAULT_OPTIONAL_RULES).sort());
     const unbound = SETTING_DESCRIPTORS.filter((d) => d.optionalRulesKey === null).map((d) => d.key).sort();
     expect(unbound).toEqual([]);
   });
 
-  it("exactly the seven prepare-time rules require a world reload", () => {
-    const reload = ["channelers", "characterPointBuild", "expandedCastingTime", "skillsAndPowersEnabled", "spellPoints", "spellsAndMagicEnabled", "subAbilityScores"];
+  it("exactly the eight prepare-time rules require a world reload", () => {
+    const reload = ["channelers", "channellerFatigue", "characterPointBuild", "expandedCastingTime", "skillsAndPowersEnabled", "spellPoints", "spellsAndMagicEnabled", "subAbilityScores"];
     const keys = SETTING_DESCRIPTORS.filter((d) => d.requiresReload === true).map((d) => d.key);
     expect(keys.sort()).toEqual(reload);
     for (const d of SETTING_DESCRIPTORS) {
