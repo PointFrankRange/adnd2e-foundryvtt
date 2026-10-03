@@ -66,6 +66,11 @@ const PC_ONLY_ACTIONS = [
   // so the Recover button in spells.hbs is unconditional and this sheet now
   // wires the same recoverChannellerSp/promptRecoverChannelling functions the
   // PC sheet uses. (Removed from this list; kept here only as history.)
+  // Sub-project 14 Plan C whole-branch review finding I1: recoverFromFatigue
+  // is likewise NOT PC-only — the fatigue panel's Recover button is now
+  // unconditional (gated only on `adnd2e.vitals.canRecoverFatigue`) and this
+  // sheet wires the same recoverFromFatigue function the PC sheet uses.
+  // (Removed from this list; kept here only as history.)
 ];
 const CORE_ACTIONS = new Set(["tab", "editImage"]);
 const registered = new Set([...SHEET.matchAll(/^\s+([a-zA-Z]+): Adnd2eNpcSheet\.#on/gm)].map((m) => m[1]!));

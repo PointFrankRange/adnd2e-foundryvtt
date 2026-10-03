@@ -54,6 +54,7 @@
         <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.thac0'}}</div><span class="kit-big">{{adnd2e.vitals.thac0.melee}}</span></div>
         <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.movement'}}</div><span class="kit-big" title="{{localize adnd2e.vitals.movement.encumbranceCategoryLabel}}">{{adnd2e.vitals.movement.current}}</span></div>
         {{#if adnd2e.vitals.casting}}<span class="casting-badge" title="{{localize 'ADND2E.sheet.casting.badgeHint'}}">{{localize 'ADND2E.sheet.casting.badge'}}</span>{{/if}}
+        {{#if adnd2e.vitals.fatigue}}<span class="fatigue-badge" title="{{localize 'ADND2E.sheet.spells.fatigueBadgeHint'}}">{{adnd2e.vitals.fatigue.label}}</span>{{/if}}
       </div>
     </div>
 

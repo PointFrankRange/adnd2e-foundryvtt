@@ -409,7 +409,18 @@
           "walkingRiding": "Walking or Riding",
           "sittingResting": "Sitting or Resting",
           "sleeping": "Sleeping"
-        }
+        },
+        "fatigueBadge": "Fatigued",
+        "fatigueBadgeHint": "Current fatigue tier from channelling",
+        "recoverFromFatigue": "Recover from Fatigue",
+        "fatigueRecoveryHintRound": "Attempt a saving throw vs. paralyzation to shake off one tier of fatigue (rest a round between attempts for the bonus to apply).",
+        "fatigueRecoveryHintTurn": "Attempt a saving throw vs. paralyzation to shake off one tier of fatigue (rest a turn between attempts for the bonus to apply).",
+        "fatigueRecoveryHintHour": "Attempt a saving throw vs. paralyzation to shake off one tier of fatigue (rest an hour between attempts for the bonus to apply).",
+        "fatigueRecoverySuccess": "The fatigue eases — one tier recovered.",
+        "fatigueRecoveryFailure": "No improvement yet.",
+        "fatigueRecoveryNotFatigued": "You aren't currently fatigued.",
+        "mortalFatigueSurvived": "The strain nearly kills them — they collapse unconscious.",
+        "mortalFatigueDied": "The strain is too much. They perish."
       },
       "itemControls": {
         "edit": "Open this item's sheet",
@@ -735,7 +746,11 @@
       },
       "channelers": {
         "name": "Spells & Magic: Channelers",
-        "hint": "Wizards may cast a memorized spell repeatedly by spending spell points from a recoverable pool instead of losing it after one cast; memorizing costs nothing from the pool — only casting does (Player's Option: Spells & Magic). Fatigue from overcasting is a later plan."
+        "hint": "Wizards may cast a memorized spell repeatedly by spending spell points from a recoverable pool instead of losing it after one cast; memorizing costs nothing from the pool — only casting does (Player's Option: Spells & Magic)."
+      },
+      "channellerFatigue": {
+        "name": "Spells & Magic: Channeller Fatigue",
+        "hint": "Casting as a channeller risks escalating fatigue (Table 21) — real movement/attack/Armor Class penalties, up to incapacitation and a save-or-die at the worst tier. Requires Channelers to also be on."
       },
       "playerAppliedEffects": {
         "name": "Player-Applied Damage & Effects",

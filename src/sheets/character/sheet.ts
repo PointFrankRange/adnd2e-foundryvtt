@@ -6,6 +6,7 @@ import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
 import type { RawTraitEffect } from "../../core/skills/traits";
 import type { ArmorType, ClassId, NonweaponGroup, SaveCategory, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
+import { tierForConditionId } from "../../core/magic/channeller-fatigue";
 import { rollAttack, rollSave } from "./combat-rolls";
 import { buildCharacterSheetContext } from "./context";
 import type {
@@ -24,6 +25,7 @@ import { rollHitPoints } from "./hp-roll";
 import { advanceWeaponMastery, allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill } from "./proficiency-actions";
 import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "./casting-actions";
 import { castFreeMagick, forgetFreeMagick, forgetSpell, learnSpell, memorizeFreeMagick, memorizeSpell, recoverChannellerSp, restSpellcasting } from "./spell-actions";
+import { recoverFromFatigue } from "./fatigue-actions";
 import { promptFreeMagickLevel, promptFreeMagickSpell } from "./free-magick-dialog";
 import { promptRecoverChannelling } from "./recover-dialog";
 import { seedSubAbilities } from "./sub-ability-actions";
@@ -321,6 +323,7 @@ export class Adnd2eCharacterSheet extends Base {
       forgetFreeMagick: Adnd2eCharacterSheet.#onForgetFreeMagick,
       restSpellcasting: Adnd2eCharacterSheet.#onRestSpellcasting,
       recoverChannellerSp: Adnd2eCharacterSheet.#onRecoverChannellerSp,
+      recoverFromFatigue: Adnd2eCharacterSheet.#onRecoverFromFatigue,
       learnSpell: Adnd2eCharacterSheet.#onLearnSpell,
       completeCasting: Adnd2eCharacterSheet.#onCompleteCasting,
       disruptCasting: Adnd2eCharacterSheet.#onDisruptCasting,
@@ -460,6 +463,8 @@ export class Adnd2eCharacterSheet extends Base {
     }
 
     const rules = getOptionalRules();
+    const actorStatuses = (this.document as unknown as { statuses: ReadonlySet<string> }).statuses;
+    const fatigueTier = [...actorStatuses].map(tierForConditionId).find((t) => t !== null) ?? null;
     return {
       name: actor.name,
       img: actor.img,
@@ -493,6 +498,7 @@ export class Adnd2eCharacterSheet extends Base {
       optionalRules: rules,
       subAbilityUi: subAbilitiesEnabled(rules),
       castingStatus: readCastingStatus(this.document as never),
+      fatigueTier,
       unlocked: this.#unlocked,
       favorites: (this.document as unknown as { getFlag(scope: string, key: string): unknown }).getFlag(
         SYSTEM_ID,
@@ -836,6 +842,10 @@ export class Adnd2eCharacterSheet extends Base {
   static async #onRecoverChannellerSp(this: Adnd2eCharacterSheet): Promise<void> {
     const result = await promptRecoverChannelling();
     if (result) await recoverChannellerSp(this.document as never, result.activity, result.hours);
+  }
+
+  static async #onRecoverFromFatigue(this: Adnd2eCharacterSheet): Promise<void> {
+    await recoverFromFatigue(this.document as never);
   }
 
   static async #onLearnSpell(

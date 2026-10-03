@@ -24,6 +24,7 @@ import { applyRacialDeltas } from "../../core/abilities/racial-adjustments";
 import { getChassis } from "../../core/classes/chassis";
 import { MANEUVERS } from "../../core/combat/maneuvers";
 import { canAffordCast, channellersEnabled } from "../../core/magic/channellers";
+import { channellerFatigueEnabled, FATIGUE_CONDITION_ID, FATIGUE_RECOVERY_INTERVAL, fatigueMovementRate } from "../../core/magic/channeller-fatigue";
 import { canCompleteCasting } from "../../core/magic/casting-time";
 import { canLearnSpell } from "../../core/magic/spellbook";
 import { characterPointLedgerFor, DEFAULT_CHARACTER_POINT_POOL } from "../../core/skills/character-points";
@@ -39,6 +40,7 @@ import type { AmmoStock } from "../../combat/ammo";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { canMemorizePriestSpell } from "../../magic/priest-sphere-access";
 import { magickCost, spellPointsEnabled, spellsMemorizedAtLevel } from "../../core/magic/spell-points";
+import { CONDITIONS } from "../../conditions";
 import { groupInventory } from "./grouping";
 import { xpToNext } from "./xp";
 import { buildFavoriteRows, isFavorite, normalizeFavorites, type FavoriteKind } from "../kit/favorites";
@@ -243,6 +245,18 @@ function buildSubAbilities(input: CharacterSheetInput): CharacterSheetContext["s
 
 /* ---------- vitals ---------- */
 
+/** Whole-branch review M3: maps FATIGUE_RECOVERY_INTERVAL's raw machine word
+ *  to the full i18n key of a pre-written, grammatically-correct hint sentence
+ *  for that tier's rest interval — avoids interpolating the raw word into a
+ *  template (which produced "rest a hour" for severe, and never localized the
+ *  word itself). Same "build an i18n key with a template literal" pattern as
+ *  this file's own `shortLabel: \`ADND2E.sheet.saves.short.${key}\`` above. */
+const FATIGUE_HINT_KEY: Record<"round" | "turn" | "hour", string> = {
+  round: "ADND2E.sheet.spells.fatigueRecoveryHintRound",
+  turn: "ADND2E.sheet.spells.fatigueRecoveryHintTurn",
+  hour: "ADND2E.sheet.spells.fatigueRecoveryHintHour",
+};
+
 function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"] {
   const a = input.derived.attributes;
   const saves: SaveRow[] = SAVE_KEYS.map((key) => {
@@ -260,6 +274,22 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
       shortLabel: `ADND2E.sheet.saves.short.${key}`,
     };
   });
+  const fatigueTier = input.fatigueTier ?? null;
+  const currentMovement = fatigueTier ? fatigueMovementRate(fatigueTier, a.movement.current) : a.movement.current;
+  const fatigue = fatigueTier
+    ? {
+        label: CONDITIONS.find((c) => c.id === FATIGUE_CONDITION_ID[fatigueTier])?.name ?? fatigueTier,
+        hintKey: FATIGUE_HINT_KEY[FATIGUE_RECOVERY_INTERVAL[fatigueTier]],
+      }
+    : null;
+  // Whole-branch review M2: the badge/panel and its movement/combat penalties
+  // show regardless of the rule's current on/off state (a condition already
+  // applied keeps affecting the sheet even if the rule is later toggled off —
+  // see CharacterSheetInput.fatigueTier's own doc comment), but the Recover
+  // button additionally requires the rule to still be on, else a stale
+  // condition from before the toggle would offer a recovery path the rule no
+  // longer sanctions.
+  const canRecoverFatigue = channellerFatigueEnabled(input.optionalRules);
   return {
     hp: a.hp,
     thac0: a.thac0,
@@ -267,11 +297,13 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
     saves,
     movement: {
       base: a.movement.base,
-      current: a.movement.current,
+      current: currentMovement,
       encumbranceCategory: a.movement.encumbranceCategory,
       encumbranceCategoryLabel: input.config.encumbranceCategories[a.movement.encumbranceCategory],
     },
     casting: Boolean(input.castingStatus),
+    fatigue,
+    canRecoverFatigue,
   };
 }
 

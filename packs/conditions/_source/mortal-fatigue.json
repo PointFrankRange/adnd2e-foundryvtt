@@ -1,0 +1,11 @@
+{
+  "_id": "FatigueMortl0005",
+  "_key": "!items!FatigueMortl0005",
+  "name": "Mortally Fatigued",
+  "type": "condition",
+  "img": "icons/svg/death-hand.svg",
+  "system": {
+    "conditionId": "mortalFatigue",
+    "description": ""
+  }
+}

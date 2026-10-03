@@ -3,6 +3,7 @@ import type { ManeuverId } from "../../core/combat/maneuvers";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
 import type { NonweaponGroup, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
+import { tierForConditionId } from "../../core/magic/channeller-fatigue";
 import {
   toClassView,
   toFeatureView,
@@ -20,6 +21,7 @@ import { advanceWeaponMastery, rollNonweaponCheck, rollThiefSkill } from "../cha
 import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "../character/casting-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
 import { forgetSpell, learnSpell, memorizeSpell, recoverChannellerSp, restSpellcasting } from "../character/spell-actions";
+import { recoverFromFatigue } from "../character/fatigue-actions";
 import { promptRecoverChannelling } from "../character/recover-dialog";
 import { bindSheetKit, clearSheetKit } from "../kit-dom";
 import { toggleFavoriteFlag } from "../kit-actions";
@@ -113,6 +115,7 @@ export class Adnd2eNpcSheet extends Base {
       castSpell: Adnd2eNpcSheet.#onCastSpell,
       restSpellcasting: Adnd2eNpcSheet.#onRestSpellcasting,
       recoverChannellerSp: Adnd2eNpcSheet.#onRecoverChannellerSp,
+      recoverFromFatigue: Adnd2eNpcSheet.#onRecoverFromFatigue,
       learnSpell: Adnd2eNpcSheet.#onLearnSpell,
       completeCasting: Adnd2eNpcSheet.#onCompleteCasting,
       disruptCasting: Adnd2eNpcSheet.#onDisruptCasting,
@@ -251,6 +254,14 @@ export class Adnd2eNpcSheet extends Base {
       }
     }
 
+    // Sub-project 14 Plan C whole-branch review finding I1: a Character NPC
+    // channeller had no way to ever SEE or RECOVER from fatigue — the fatigue
+    // panel renders unconditionally once gated by this field being present
+    // (pc-main-panels.hbs), but `fatigueTier` was never threaded into this
+    // sheet's render-context input. Mirrors Adnd2eCharacterSheet's own
+    // #buildInput exactly (character/sheet.ts).
+    const npcActorStatuses = (this.document as unknown as { statuses: ReadonlySet<string> }).statuses;
+    const fatigueTier = [...npcActorStatuses].map(tierForConditionId).find((t) => t !== null) ?? null;
     return {
       name: actor.name,
       img: actor.img,
@@ -282,6 +293,7 @@ export class Adnd2eNpcSheet extends Base {
       },
       optionalRules: getOptionalRules(),
       castingStatus: readCastingStatus(this.document as never),
+      fatigueTier,
       unlocked: this.#unlocked,
       favorites: (this.document as unknown as { getFlag(scope: string, key: string): unknown }).getFlag(
         SYSTEM_ID,
@@ -474,6 +486,15 @@ export class Adnd2eNpcSheet extends Base {
   static async #onRecoverChannellerSp(this: Adnd2eNpcSheet): Promise<void> {
     const result = await promptRecoverChannelling();
     if (result) await recoverChannellerSp(this.document as never, result.activity, result.hours);
+  }
+
+  // Sub-project 14 Plan C whole-branch review finding I1: a Character NPC
+  // channeller could become fatigued (castOrBegin fatigues both sheet types
+  // identically) but had no way to ever recover — the fatigue panel's Recover
+  // button was gated behind pcActions with no matching action-map entry here.
+  // Reuses the exact same recoverFromFatigue function the PC sheet uses.
+  static async #onRecoverFromFatigue(this: Adnd2eNpcSheet): Promise<void> {
+    await recoverFromFatigue(this.document as never);
   }
 
   static async #onLearnSpell(this: Adnd2eNpcSheet, _e: PointerEvent, target: HTMLElement): Promise<void> {

@@ -1,0 +1,11 @@
+{
+  "_id": "FatigueSevre0004",
+  "_key": "!items!FatigueSevre0004",
+  "name": "Severely Fatigued",
+  "type": "condition",
+  "img": "icons/svg/frozen.svg",
+  "system": {
+    "conditionId": "severeFatigue",
+    "description": ""
+  }
+}

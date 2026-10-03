@@ -760,3 +760,24 @@ describe("lang/en.json — SP14b Channellers sheet strings", () => {
     }
   });
 });
+
+describe("lang/en.json — SP14c fatigue strings", () => {
+  it("resolves every ADND2E.sheet.spells.fatigue* key", () => {
+    for (const key of [
+      "ADND2E.sheet.spells.fatigueBadge",
+      "ADND2E.sheet.spells.fatigueBadgeHint",
+      "ADND2E.sheet.spells.recoverFromFatigue",
+      "ADND2E.sheet.spells.fatigueRecoveryHintRound",
+      "ADND2E.sheet.spells.fatigueRecoveryHintTurn",
+      "ADND2E.sheet.spells.fatigueRecoveryHintHour",
+      "ADND2E.sheet.spells.fatigueRecoverySuccess",
+      "ADND2E.sheet.spells.fatigueRecoveryFailure",
+      "ADND2E.sheet.spells.fatigueRecoveryNotFatigued",
+      "ADND2E.sheet.spells.mortalFatigueSurvived",
+      "ADND2E.sheet.spells.mortalFatigueDied",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

@@ -1,0 +1,11 @@
+{
+  "_id": "FatigueModrt0002",
+  "_key": "!items!FatigueModrt0002",
+  "name": "Moderately Fatigued",
+  "type": "condition",
+  "img": "icons/svg/downgrade.svg",
+  "system": {
+    "conditionId": "moderateFatigue",
+    "description": ""
+  }
+}

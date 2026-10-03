@@ -70,10 +70,11 @@ declare global {
     "adnd2e.subAbilityScores": boolean;
     "adnd2e.characterPointBuild": boolean;
     "adnd2e.expandedProficiencies": boolean;
-    // spellsAndMagic — reserved for Sub-project 9
+    // spellsAndMagic — reserved for Sub-project 9; Sub-project 14 Plans A, B, C
     "adnd2e.spellsAndMagicEnabled": boolean;
     "adnd2e.spellPoints": boolean;
     "adnd2e.expandedCastingTime": boolean;
     "adnd2e.channelers": boolean;
+    "adnd2e.channellerFatigue": boolean;
   }
 }

@@ -2,7 +2,14 @@ import { buildAttackCardContext } from "../../combat/attack-card";
 import { buildSaveCardContext } from "../../combat/save-card";
 import { matchingAmmo, defaultAmmoSelection } from "../../combat/ammo";
 import type { AmmoStock } from "../../combat/ammo";
-import { blindedAttackPenalty, canAct, heldAttackBonus, proneArmorClassPenalty } from "../../combat/condition-effects";
+import {
+  blindedAttackPenalty,
+  canAct,
+  fatigueArmorClassPenalty,
+  fatigueAttackPenalty,
+  heldAttackBonus,
+  proneArmorClassPenalty,
+} from "../../combat/condition-effects";
 import { getChassis } from "../../core/classes/chassis";
 import { attackModifiers, hitResult } from "../../core/combat/attack";
 import { attackFormula } from "../../core/dice/formula";
@@ -278,7 +285,10 @@ export async function rollAttack(
     const t = targets[0]!;
     targetName = t.name;
     const info = resolveTargetCombatInfo(t.actor as Parameters<typeof resolveTargetCombatInfo>[0]);
-    targetAc = info.ac + proneArmorClassPenalty((t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>());
+    targetAc =
+      info.ac +
+      proneArmorClassPenalty((t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>()) +
+      fatigueArmorClassPenalty((t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>());
     targetSize = info.size;
     targetStatuses = (t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>();
     const rules = getOptionalRules();
@@ -326,7 +336,12 @@ export async function rollAttack(
     proficiencyModifier: proficiencyEffect.toHit,
     // STR/DEX modifiers remain out of scope (parent spec §7 boundary,
     // unchanged by this sub-project).
-    situationalModifier: blindedAttackPenalty(actor.statuses) + heldAttackBonus(targetStatuses) + armorVsWeaponModifier + maneuverPenalty,
+    situationalModifier:
+      blindedAttackPenalty(actor.statuses) +
+      fatigueAttackPenalty(actor.statuses) +
+      heldAttackBonus(targetStatuses) +
+      armorVsWeaponModifier +
+      maneuverPenalty,
   });
   const formula = attackFormula(attackBonus);
   const roll = await new Roll(formula).evaluate();
