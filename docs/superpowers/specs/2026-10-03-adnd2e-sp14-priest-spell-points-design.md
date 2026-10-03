@@ -59,7 +59,7 @@ Priests use the existing `spellPoints` book rule. The book makes it one optional
 - **Free theurgy:** chosen at cast time. A major free theurgy lets the priest pick any spell of that level in a major sphere of access, at the major free cost. A universal free theurgy lets the priest pick any spell of that level, at the universal cost. The book's free theurgy rule is that its cost tier is set by the priest's choice, not the spell's sphere.
 - **Minor access:** minor-sphere spells keep the 3rd-level cap. Their fixed theurgies cost the Table 29 Minor Fixed column (one spell level higher than major). Minor access allows fixed theurgies only, never free ones.
 - **Max-per-level and max-spell-level caps** from Table 26 apply to the total of fixed and free theurgies at each level, as in Plan A.
-- **Constitution adjustment:** the Constitution hit-point adjustment is added to the total SP. A total below 4 is raised to 4 (the same rule as Plan B's `channellerMaxSp`).
+- **Constitution adjustment:** the Constitution hit-point adjustment is added to the total SP (base + Wisdom bonus). If that lowers the total below 4, the adjustment is ignored (book p. 93: "he ignores the adjustments; all priests have at least 4 spell points"). This is not a floor at 4: the Wisdom bonus is kept.
 - **Recovery:** SP spent on memorize or cast return after 8 hours of rest. Memorizing takes 10 minutes of prayer per spell level and needs a quiet place (book p. 91).
 - **Tied-up SP:** an entry holds its SP until the spell is cast, the same as Plan A's tie-up rule.
 
