@@ -2688,6 +2688,164 @@ describe("buildCharacterSheetContext — wizard spell points (SP14a)", () => {
   });
 });
 
+describe("buildCharacterSheetContext — priest spell points (SP14 priest)", () => {
+  const priestRules = { ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true };
+  const clericClass = {
+    id: "c1", name: "Cleric", img: "", chassisId: "cleric", hitDie: 8,
+    xp: 0, level: 5, canLevelUp: false, dualClassState: null, specialistSchool: null,
+  };
+  /** A L5 cleric whose priest pool has `remaining` SP left out of 40 (spent is the rest). */
+  const priestInputWithPool = (
+    pool: { remaining: number; maxPerLevel?: number; memorized?: unknown[] },
+    over: Partial<CharacterSheetInput> = {},
+  ): CharacterSheetInput => {
+    const base = input();
+    return input({
+      classItems: [clericClass],
+      derived: {
+        ...base.derived,
+        spellcasting: {
+          wizard: { specialistSchool: null, slots: {}, memorized: [] },
+          priest: {
+            slots: { "1": { max: 2, used: 0 } },
+            spellPoints: { maxSpellLevel: 7, maxPerLevel: pool.maxPerLevel ?? 10, sp: 40, spent: 40 - pool.remaining, remaining: pool.remaining },
+            memorized: (pool.memorized ?? []) as never,
+            sphereAccessOverride: null,
+          },
+        },
+      },
+      optionalRules: priestRules,
+      ...over,
+    });
+  };
+  const priestSpell = (over: Partial<SpellItemView>): SpellItemView => ({
+    id: "clw", name: "Cure Light Wounds", img: "", casterClass: "priest", level: 1,
+    schools: [], spheres: ["healing"], range: "", castingTime: "", savingThrow: "none",
+    inSpellbook: false, memorized: false, expended: false, canMemorize: false, canCast: false, canLearn: false,
+    favorite: false,
+    ...over,
+  });
+
+  it("rule off: no priest SP bar and no priest free-theurgy controls", () => {
+    const c = buildCharacterSheetContext(priestInputWithPool({ remaining: 3 }, { optionalRules: DEFAULT_OPTIONAL_RULES }));
+    expect(c.spells.priestSpellPoints).toBeNull();
+    expect(c.spells.priestFreeMemorize).toEqual([]);
+  });
+
+  it("shows the priest SP bar with the pool's max, spent and remaining", () => {
+    const c = buildCharacterSheetContext(priestInputWithPool({ remaining: 3 }));
+    expect(c.spells.priestSpellPoints).toEqual({ max: 40, spent: 37, remaining: 3 });
+  });
+
+  it("disables a priest spell row the pool cannot afford (1st-level major fixed costs 4 > remaining 3)", () => {
+    const c = buildCharacterSheetContext(priestInputWithPool({ remaining: 3 }, { spellItems: [priestSpell({})] }));
+    const row = c.spells.known[0]!.items.find((r) => r.name === "Cure Light Wounds");
+    expect(row!.canMemorize).toBe(false);
+  });
+
+  it("enables the same priest spell row when the pool affords the Table 29 cost and the cap has room", () => {
+    const c = buildCharacterSheetContext(priestInputWithPool({ remaining: 40 }, { spellItems: [priestSpell({})] }));
+    const row = c.spells.known[0]!.items.find((r) => r.name === "Cure Light Wounds");
+    expect(row!.canMemorize).toBe(true);
+  });
+
+  it("disables a priest spell row once the per-level cap is reached, even with SP to spare", () => {
+    const c = buildCharacterSheetContext(
+      priestInputWithPool(
+        { remaining: 40, maxPerLevel: 1, memorized: [{ spellItemId: "other", spellLevel: 1, expended: false, magickType: "fixed" }] },
+        { spellItems: [priestSpell({})] },
+      ),
+    );
+    expect(c.spells.known[0]!.items[0]!.canMemorize).toBe(false);
+  });
+
+  it("hides the priest classic slot rows when the rule is on", () => {
+    const on = buildCharacterSheetContext(priestInputWithPool({ remaining: 40 }));
+    expect(on.spells.priestSlots).toEqual([]);
+    const off = buildCharacterSheetContext(priestInputWithPool({ remaining: 40 }, { optionalRules: DEFAULT_OPTIONAL_RULES }));
+    expect(off.spells.priestSlots).toEqual([{ level: 1, max: 2, used: 0 }]);
+  });
+
+  it("offers a major and/or universal free-theurgy memorize per level the pool can afford (Table 29 free costs)", () => {
+    // remaining 40: major free costs 8/12/20/30 for levels 1-4 (affordable), universal 12/20/30/44 (affordable only to level 3)
+    const c = buildCharacterSheetContext(priestInputWithPool({ remaining: 40 }));
+    expect(c.spells.priestFreeMemorize).toEqual([
+      { level: 1, major: true, universal: true },
+      { level: 2, major: true, universal: true },
+      { level: 3, major: true, universal: true },
+      { level: 4, major: true, universal: false },
+    ]);
+  });
+
+  it("a cleric with no major sphere access is offered no major free theurgy, but universal is still offered", () => {
+    const base = priestInputWithPool({ remaining: 40 });
+    const c = buildCharacterSheetContext({
+      ...base,
+      derived: {
+        ...base.derived,
+        spellcasting: {
+          ...base.derived.spellcasting,
+          priest: { ...base.derived.spellcasting.priest, sphereAccessOverride: [] },
+        },
+      },
+    });
+    expect(c.spells.priestFreeMemorize.every((m) => m.major === false)).toBe(true);
+    expect(c.spells.priestFreeMemorize.find((m) => m.level === 1)).toEqual({ level: 1, major: false, universal: true });
+  });
+
+  it("lists each memorized free theurgy with its scope, expended state and cast availability; fixed entries are not listed", () => {
+    const c = buildCharacterSheetContext(
+      priestInputWithPool({
+        remaining: 40,
+        memorized: [
+          { spellItemId: null, spellLevel: 2, expended: false, magickType: "free", theurgyScope: "major" },
+          { spellItemId: null, spellLevel: 3, expended: true, magickType: "free", theurgyScope: "universal" },
+          { spellItemId: "clw", spellLevel: 1, expended: false, magickType: "fixed", theurgyScope: "major" },
+        ],
+      }),
+    );
+    expect(c.spells.priestFreeTheurgies).toEqual([
+      { level: 2, scope: "major", scopeLabelKey: "ADND2E.sheet.spells.freeTheurgyMajor", expended: false, canCast: true },
+      { level: 3, scope: "universal", scopeLabelKey: "ADND2E.sheet.spells.freeTheurgyUniversal", expended: true, canCast: false },
+    ]);
+  });
+
+  it("a priest free theurgy's canCast is false while a classic multi-round cast is in progress", () => {
+    const status = {
+      spellName: "Fireball", startRound: 1, completeRound: 3, segments: null, combatRound: 1, isCasterTurn: false,
+    };
+    const c = buildCharacterSheetContext(
+      priestInputWithPool(
+        { remaining: 40, memorized: [{ spellItemId: null, spellLevel: 2, expended: false, magickType: "free", theurgyScope: "major" }] },
+        { castingStatus: status },
+      ),
+    );
+    expect(c.spells.priestFreeTheurgies[0]!.canCast).toBe(false);
+  });
+
+  it("a free theurgy entry is never reported as an orphaned spell, even though it has no spell item", () => {
+    const c = buildCharacterSheetContext(
+      priestInputWithPool({
+        remaining: 40,
+        memorized: [{ spellItemId: null, spellLevel: 2, expended: false, magickType: "free", theurgyScope: "major" }],
+      }),
+    );
+    expect(c.spells.orphaned).toEqual([]);
+  });
+
+  it("rule off with a free theurgy still held: no memorize controls, but the entry stays listed for Forget", () => {
+    const c = buildCharacterSheetContext(
+      priestInputWithPool(
+        { remaining: 40, memorized: [{ spellItemId: null, spellLevel: 2, expended: false, magickType: "free", theurgyScope: "major" }] },
+        { optionalRules: DEFAULT_OPTIONAL_RULES },
+      ),
+    );
+    expect(c.spells.priestSpellPoints).toBeNull();
+    expect(c.spells.priestFreeMemorize).toEqual([]);
+    expect(c.spells.priestFreeTheurgies).toHaveLength(1);
+  });
+});
+
 describe("buildCharacterSheetContext — Channellers (SP14b)", () => {
   const channellingRules = {
     ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true, channelers: true,

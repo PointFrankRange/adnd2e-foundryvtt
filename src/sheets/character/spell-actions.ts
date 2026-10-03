@@ -9,7 +9,7 @@ import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { buildCastCardContext } from "../../magic/cast-card";
 import { buildLearnSpellCardContext } from "../../magic/learn-spell-card";
 import { canMemorizePriestSpell, priestAccessScope, priestHasMajorAccessAtLevel } from "../../magic/priest-sphere-access";
-import { priestScopeAllowsFree, priestTheurgyCost, type TheurgyScope, type TheurgyType } from "../../core/magic/priest-spell-points";
+import { priestPoolAffords, priestScopeAllowsFree, type TheurgyScope, type TheurgyType } from "../../core/magic/priest-spell-points";
 import { TEMPLATE_PATH } from "../../constants";
 import { getOptionalRules } from "../../settings";
 import { resolveMortalFatigue } from "./fatigue-actions";
@@ -158,12 +158,13 @@ function canMemorizePriestSpellPoints(
   magickType: TheurgyType,
   scope: TheurgyScope,
 ): boolean {
-  const sp = actor.system.spellcasting.priest.spellPoints;
-  if (typeof sp.maxSpellLevel !== "number") return false;
-  if (spellLevel > sp.maxSpellLevel) return false;
-  const atLevel = spellsMemorizedAtLevel(actor.system.spellcasting.priest.memorized, spellLevel);
-  if (atLevel >= (sp.maxPerLevel ?? 0)) return false;
-  return (sp.remaining ?? 0) >= priestTheurgyCost(spellLevel, magickType, scope);
+  return priestPoolAffords(
+    actor.system.spellcasting.priest.spellPoints,
+    actor.system.spellcasting.priest.memorized,
+    spellLevel,
+    magickType,
+    scope,
+  );
 }
 
 /** The Table 29 column a priest memorize of this spell is priced under, or

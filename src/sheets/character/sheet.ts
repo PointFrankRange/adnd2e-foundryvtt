@@ -24,7 +24,7 @@ import { validateItemDrop } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
 import { advanceWeaponMastery, allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill } from "./proficiency-actions";
 import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "./casting-actions";
-import { castFreeMagick, forgetFreeMagick, forgetSpell, learnSpell, memorizeFreeMagick, memorizeSpell, recoverChannellerSp, restSpellcasting } from "./spell-actions";
+import { castFreeMagick, castFreeTheurgy, forgetFreeMagick, forgetFreeTheurgy, forgetSpell, learnSpell, memorizeFreeMagick, memorizeFreeTheurgy, memorizeSpell, recoverChannellerSp, restSpellcasting } from "./spell-actions";
 import { recoverFromFatigue } from "./fatigue-actions";
 import { promptFreeMagickLevel, promptFreeMagickSpell } from "./free-magick-dialog";
 import { promptRecoverChannelling } from "./recover-dialog";
@@ -321,6 +321,9 @@ export class Adnd2eCharacterSheet extends Base {
       memorizeFreeMagick: Adnd2eCharacterSheet.#onMemorizeFreeMagick,
       castFreeMagick: Adnd2eCharacterSheet.#onCastFreeMagick,
       forgetFreeMagick: Adnd2eCharacterSheet.#onForgetFreeMagick,
+      memorizeFreeTheurgy: Adnd2eCharacterSheet.#onMemorizeFreeTheurgy,
+      castFreeTheurgy: Adnd2eCharacterSheet.#onCastFreeTheurgy,
+      forgetFreeTheurgy: Adnd2eCharacterSheet.#onForgetFreeTheurgy,
       restSpellcasting: Adnd2eCharacterSheet.#onRestSpellcasting,
       recoverChannellerSp: Adnd2eCharacterSheet.#onRecoverChannellerSp,
       recoverFromFatigue: Adnd2eCharacterSheet.#onRecoverFromFatigue,
@@ -833,6 +836,47 @@ export class Adnd2eCharacterSheet extends Base {
     if (!level) return;
     const expended = target.dataset.expended === "true";
     await forgetFreeMagick(this.document as never, level, expended);
+  }
+
+  /** Reads the data-scope attribute of a priest free-theurgy control; anything
+   *  other than major/universal (the only scopes the book allows as free) is null. */
+  static #freeTheurgyScope(target: HTMLElement): "major" | "universal" | null {
+    const scope = target.dataset.scope;
+    return scope === "major" || scope === "universal" ? scope : null;
+  }
+
+  static async #onMemorizeFreeTheurgy(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const level = Number(target.dataset.level);
+    const scope = Adnd2eCharacterSheet.#freeTheurgyScope(target);
+    if (!level || !scope) return;
+    await memorizeFreeTheurgy(this.document as never, level, scope);
+  }
+
+  static async #onCastFreeTheurgy(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const level = Number(target.dataset.level);
+    const scope = Adnd2eCharacterSheet.#freeTheurgyScope(target);
+    if (!level || !scope) return;
+    await castFreeTheurgy(this.document as never, level, scope);
+  }
+
+  static async #onForgetFreeTheurgy(
+    this: Adnd2eCharacterSheet,
+    _event: PointerEvent,
+    target: HTMLElement,
+  ): Promise<void> {
+    const level = Number(target.dataset.level);
+    const scope = Adnd2eCharacterSheet.#freeTheurgyScope(target);
+    if (!level || !scope) return;
+    const expended = target.dataset.expended === "true";
+    await forgetFreeTheurgy(this.document as never, level, scope, expended);
   }
 
   static async #onRestSpellcasting(this: Adnd2eCharacterSheet): Promise<void> {

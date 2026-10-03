@@ -38,7 +38,8 @@ import type { AttackRate, SpecialistWeaponClass } from "../../core/weapons/speci
 import { matchingAmmo, defaultAmmoSelection } from "../../combat/ammo";
 import type { AmmoStock } from "../../combat/ammo";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
-import { canMemorizePriestSpell } from "../../magic/priest-sphere-access";
+import { canMemorizePriestSpell, priestAccessScope, priestHasMajorAccessAtLevel } from "../../magic/priest-sphere-access";
+import { priestPoolAffords, type PriestPoolView } from "../../core/magic/priest-spell-points";
 import { magickCost, spellPointsEnabled, spellsMemorizedAtLevel } from "../../core/magic/spell-points";
 import { CONDITIONS } from "../../conditions";
 import { groupInventory } from "./grouping";
@@ -672,6 +673,8 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   const wizardSp = sc.wizard.spellPoints ?? {};
   const channellingOn = channellersEnabled(input.optionalRules);
   const wizardChannelling = sc.wizard.channelling ?? {};
+  // Sub-project 14 priest theurgies: same `?? {}` story as wizardSp.
+  const priestSp = sc.priest.spellPoints ?? {};
 
   const known: { level: number; items: SpellItemView[] }[] = [];
   for (let level = 1; level <= 9; level += 1) {
@@ -682,14 +685,18 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
       int, specialistSchool, knownAtThisLevel, castableAtThisLevel, optionalRules: input.optionalRules,
     };
     let items = levelItems.map((s) =>
-      buildSpellRow(s, sc, priestChassisId, sphereAccessOverride, learnCtx, fav, spellPointsOn, wizardSp, channellingOn, wizardChannelling),
+      buildSpellRow(
+        s, sc, priestChassisId, sphereAccessOverride, learnCtx, fav,
+        spellPointsOn, wizardSp, channellingOn, wizardChannelling, priestSp,
+      ),
     );
     items = casting ? items.map((r) => ({ ...r, canCast: false })) : items;
     if (items.length > 0) known.push({ level, items });
   }
   return {
     wizardSlots: toSlotRows(sc.wizard.slots),
-    priestSlots: toSlotRows(sc.priest.slots),
+    // Under the priest spell-points rule the classic priest slot rows are hidden: the pool replaces them.
+    priestSlots: spellPointsOn ? [] : toSlotRows(sc.priest.slots),
     specialistSchoolLabel: school ? input.config.schools[school] : null,
     known,
     orphaned: buildOrphanedSpells(input, sc),
@@ -711,7 +718,51 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
           !casting &&
           (channellingOn ? canAffordCast(wizardChannelling.current ?? 0, m.spellLevel, "free") : !m.expended),
       })),
+    priestSpellPoints:
+      spellPointsOn && typeof priestSp.remaining === "number"
+        ? { max: priestSp.sp ?? 0, spent: priestSp.spent ?? 0, remaining: priestSp.remaining }
+        : null,
+    ...buildPriestFreeTheurgy(sc, priestChassisId, sphereAccessOverride, spellPointsOn, casting !== null),
   };
+}
+
+/** Sub-project 14 priest theurgies: the free-theurgy controls. A memorize row
+ *  per level 1-7 is offered only when the pool has room for a free theurgy at
+ *  that scope; `major` also needs major access at that level (memorizeFreeTheurgy
+ *  refuses a major free theurgy otherwise). Forget and cast rows list every
+ *  memorized free theurgy, whatever the rule's state. */
+function buildPriestFreeTheurgy(
+  sc: CharacterDerivedView["spellcasting"],
+  priestChassisId: string | null,
+  sphereAccessOverride: SphereName[] | null,
+  spellPointsOn: boolean,
+  casting: boolean,
+): Pick<CharacterSheetContext["spells"], "priestFreeMemorize" | "priestFreeTheurgies"> {
+  const pool = sc.priest.spellPoints ?? {};
+  const memorized = sc.priest.memorized;
+  const poolOn = spellPointsOn && typeof pool.remaining === "number";
+  const priestFreeMemorize: CharacterSheetContext["spells"]["priestFreeMemorize"] = [];
+  if (poolOn) {
+    for (let level = 1; level <= 7; level += 1) {
+      const major =
+        priestHasMajorAccessAtLevel(priestChassisId, sphereAccessOverride, level) &&
+        priestPoolAffords(pool, memorized, level, "free", "major");
+      const universal = priestPoolAffords(pool, memorized, level, "free", "universal");
+      if (major || universal) priestFreeMemorize.push({ level, major, universal });
+    }
+  }
+  const priestFreeTheurgies: CharacterSheetContext["spells"]["priestFreeTheurgies"] = [];
+  for (const m of memorized) {
+    if (m.magickType !== "free" || (m.theurgyScope !== "major" && m.theurgyScope !== "universal")) continue;
+    priestFreeTheurgies.push({
+      level: m.spellLevel,
+      scope: m.theurgyScope,
+      scopeLabelKey: m.theurgyScope === "major" ? "ADND2E.sheet.spells.freeTheurgyMajor" : "ADND2E.sheet.spells.freeTheurgyUniversal",
+      expended: m.expended,
+      canCast: !casting && !m.expended,
+    });
+  }
+  return { priestFreeMemorize, priestFreeTheurgies };
 }
 
 /* ---------- casting (SP9a) ---------- */
@@ -767,7 +818,8 @@ function buildOrphanedSpells(
     }
   }
   for (const m of sc.priest.memorized) {
-    if (!knownIds.has(m.spellItemId)) {
+    // a free theurgy reserves a level and scope, not a spell item — never orphaned
+    if (m.spellItemId !== null && !knownIds.has(m.spellItemId)) {
       orphaned.push({ spellItemId: m.spellItemId, casterClass: "priest", spellLevel: m.spellLevel });
     }
   }
@@ -790,6 +842,7 @@ function buildSpellRow(
   wizardSp: CharacterDerivedView["spellcasting"]["wizard"]["spellPoints"],
   channellingOn: boolean,
   wizardChannelling: CharacterDerivedView["spellcasting"]["wizard"]["channelling"],
+  priestSp: PriestPoolView,
 ): SpellItemView {
   const isWizard = item.casterClass === "wizard";
   const memorizedList = isWizard ? sc.wizard.memorized : sc.priest.memorized;
@@ -805,6 +858,12 @@ function buildSpellRow(
     // Sub-project 14 Plan B: memorizing costs nothing from a channeller's
     // pool (design spec §1.1) — only the Table 17 caps above still gate it.
     hasFreeSlot = channellingOn ? atLevelOk : atLevelOk && (wizardSp.remaining ?? 0) >= magickCost(item.level, "fixed");
+  } else if (!isWizard && spellPointsOn) {
+    // Sub-project 14 priest theurgies: under the rule the pool prices a fixed
+    // theurgy at the row's Table 29 scope, with the same cap and pool check
+    // canReMemorize applies. No access scope means no row can be memorized.
+    const scope = priestAccessScope(priestChassisId, sphereAccessOverride, item.spheres as SphereName[], item.level);
+    hasFreeSlot = scope !== null && priestPoolAffords(priestSp, sc.priest.memorized, item.level, "fixed", scope);
   } else {
     const slots = isWizard ? sc.wizard.slots : sc.priest.slots;
     const slotRow = slots[item.level];

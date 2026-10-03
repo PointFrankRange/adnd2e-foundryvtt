@@ -2,6 +2,7 @@
 // remainder). Priest spell points replace the classic Table 24 slots when the
 // spell-points rule is on. Pure.
 import { assertAbilityScore, assertLevel, assertSpellLevel } from "../errors";
+import { spellsMemorizedAtLevel } from "./spell-points";
 
 const MAX_TABLE_LEVEL = 20;
 
@@ -122,4 +123,29 @@ export function priestTheurgyCost(spellLevel: number, magickType: TheurgyType, s
 /** Whether a memorized theurgy of this scope may be a free theurgy. */
 export function priestScopeAllowsFree(scope: TheurgyScope): boolean {
   return scope === "major" || scope === "universal";
+}
+
+/** The priest pool fields a memorize check reads (the derived `spellPoints`
+ *  record; every field optional because the ObjectField defaults to `{}`). */
+export interface PriestPoolView {
+  maxSpellLevel?: number;
+  maxPerLevel?: number;
+  remaining?: number;
+}
+
+/** Whether the priest pool can take one more theurgy of this type and scope at
+ *  `spellLevel`: within Table 26's max spell level, under the flat per-level
+ *  cap, and with `remaining` covering the Table 29 cost. Shared by the sheet's
+ *  row/free-theurgy eligibility and memorize's re-check so they cannot drift. */
+export function priestPoolAffords(
+  pool: PriestPoolView,
+  memorized: readonly { spellLevel: number }[],
+  spellLevel: number,
+  magickType: TheurgyType,
+  scope: TheurgyScope,
+): boolean {
+  if (typeof pool.maxSpellLevel !== "number") return false;
+  if (spellLevel > pool.maxSpellLevel) return false;
+  if (spellsMemorizedAtLevel(memorized, spellLevel) >= (pool.maxPerLevel ?? 0)) return false;
+  return (pool.remaining ?? 0) >= priestTheurgyCost(spellLevel, magickType, scope);
 }
