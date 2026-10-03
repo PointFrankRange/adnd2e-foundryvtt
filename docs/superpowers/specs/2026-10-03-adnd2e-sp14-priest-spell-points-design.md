@@ -13,6 +13,8 @@ Out (deferred):
 - Priest channelling.
 - Lifting the 3rd-level cap on minor-sphere spells (kept, per your answer).
 
+Included, not deferred: the minor-sphere cost shift (Table 29 Minor Fixed column).
+
 ## Gating
 
 Priests use the existing `spellPoints` book rule. The book makes it one optional system for priests and wizards, so no new setting. When the rule is on, a priest's classic priest slots (`priest-slots.ts`, PHB Table 24) are replaced by the SP pool, the same way Plan A replaces wizard slots. When the rule is off, nothing changes.
@@ -45,7 +47,7 @@ Priests use the existing `spellPoints` book rule. The book makes it one optional
 | 20 | 7 | 12 | 750 |
 | 21+ | 7 | 12 | +75 per level |
 
-**Table 27 (Wisdom bonus SP).** Columns are character-level bands (1–2, 3–4, 5–6, 7+), each mapping to the spell level it unlocks (1st, 2nd, 3rd, 4th). Rows: Wisdom 13→4/4/4/4; 14→8/8/8/8; 15→8/15/15/15; 16→8/20/20/20; 17→8/20/30/30; 18→8/20/30/45; 19→12/25/45/60. Below Wisdom 13 the bonus is zero. **Open:** the book's rendered table stops at Wisdom 19; the Wisdom 20+ rows are not on the pages I checked (printed pp. 91–93). See open decision 2.
+**Table 27 (Wisdom bonus SP).** Columns are character-level bands (1–2, 3–4, 5–6, 7+), each mapping to the spell level it unlocks (1st, 2nd, 3rd, 4th). Rows: Wisdom 13→4/4/4/4; 14→8/8/8/8; 15→8/15/15/15; 16→8/20/20/20; 17→8/20/30/30; 18→8/20/30/45; 19→12/25/45/60. Below Wisdom 13 the bonus is zero. Wisdom 20+ uses the Wisdom 19 row until the book's rows for 20+ are found (user decision).
 
 **Table 28 (theurgy cost, major access).** Fixed/free by spell level: orison free 1; 1st 4/8; 2nd 6/12; 3rd 10/20; 4th 15/30; 5th 22/44; 6th 30/60; 7th 40/80.
 
@@ -55,7 +57,7 @@ Priests use the existing `spellPoints` book rule. The book makes it one optional
 
 - **Fixed theurgy:** a spell chosen at memorize time, at the fixed cost for the spell's access tier.
 - **Free theurgy:** chosen at cast time. A major free theurgy lets the priest pick any spell of that level in a major sphere of access, at the major free cost. A universal free theurgy lets the priest pick any spell of that level, at the universal cost. The book's free theurgy rule is that its cost tier is set by the priest's choice, not the spell's sphere.
-- **Minor access:** minor-sphere spells keep the 3rd-level cap. See open decision 1 for their cost.
+- **Minor access:** minor-sphere spells keep the 3rd-level cap. Their fixed theurgies cost the Table 29 Minor Fixed column (one spell level higher than major). Minor access allows fixed theurgies only, never free ones.
 - **Max-per-level and max-spell-level caps** from Table 26 apply to the total of fixed and free theurgies at each level, as in Plan A.
 - **Constitution adjustment:** the Constitution hit-point adjustment is added to the total SP. A total below 4 is raised to 4 (the same rule as Plan B's `channellerMaxSp`).
 - **Recovery:** SP spent on memorize or cast return after 8 hours of rest. Memorizing takes 10 minutes of prayer per spell level and needs a quiet place (book p. 91).
@@ -74,8 +76,8 @@ Priests use the existing `spellPoints` book rule. The book makes it one optional
 - The derive and sheet paths get the same drift and coverage checks as Plan A.
 - A dev-world check: a priest with the rule on memorizes a fixed major theurgy, a free theurgy, and a minor-access spell; casts and rests; and confirms SP totals.
 
-## Open decisions
+## Decisions
 
-1. **Minor-sphere cost.** Table 29 costs a minor-sphere fixed theurgy one spell level higher. Your earlier answer deferred the "minor-sphere cost shift" and kept the 3rd-level cap. Recommendation: cost minor-access fixed theurgies from the Minor Fixed column (book-faithful, data-only, no new mechanic), and keep the cap. If you want the shift deferred, minor-access spells cost the Major Fixed column until it lands. Please confirm which.
-2. **Wisdom 20+ bonus.** The rendered book page stops at Wisdom 19. Recommendation: ship rows 13–19 and treat Wisdom 20+ as the Wisdom 19 row until the rest is confirmed. Please confirm, or point me to the page.
-3. **Gate.** Recommendation: priests piggyback on the existing `spellPoints` toggle (book's optional system). Confirm.
+1. **Minor-sphere cost shift: included, not deferred.** Minor-access fixed theurgies cost the Minor Fixed column of Table 29. The 3rd-level cap stays.
+2. **Wisdom 20+:** uses the Wisdom 19 row until the book's rows for 20+ are found.
+3. **Gate:** priests share the existing `spellPoints` toggle.
