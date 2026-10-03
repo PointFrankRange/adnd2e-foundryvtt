@@ -1,6 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { canMemorizePriestSpell } from "../../src/magic/priest-sphere-access";
+import { canMemorizePriestSpell, priestAccessScope } from "../../src/magic/priest-sphere-access";
 import type { SphereName } from "../../src/core/types";
+
+describe("priestAccessScope", () => {
+  it("returns major when any sphere is major at this level", () => {
+    expect(priestAccessScope("cleric", null, ["healing"], 5)).toBe("major");
+  });
+
+  it("returns minor for a minor-only sphere ('elemental') capped at 3rd level", () => {
+    // CLERIC_SPHERE_ACCESS: elemental is the only minor sphere for a cleric.
+    expect(priestAccessScope("cleric", null, ["elemental"], 3)).toBe("minor");
+    expect(priestAccessScope("cleric", null, ["elemental"], 4)).toBeNull();
+  });
+
+  it("returns null when no sphere grants access", () => {
+    expect(priestAccessScope(null, null, ["healing"], 1)).toBeNull();
+  });
+
+});
 
 describe("canMemorizePriestSpell", () => {
   it("null chassisId (no priest-progression class on the actor) → always false", () => {

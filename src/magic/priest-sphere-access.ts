@@ -38,7 +38,26 @@ export function canMemorizePriestSpell(
   spellSpheres: readonly SphereName[],
   spellLevel: number,
 ): boolean {
-  if (!chassisId) return false;
+  return priestAccessScope(chassisId, sphereAccessOverride, spellSpheres, spellLevel) !== null;
+}
+
+/** The Table 29 column a memorize of this spell is priced under: "major" when a
+ *  listed sphere grants major access at this level, "minor" when only minor
+ *  access applies, null when none does. Same override/chassis rules as
+ *  canMemorizePriestSpell. */
+export function priestAccessScope(
+  chassisId: string | null,
+  sphereAccessOverride: readonly SphereName[] | null,
+  spellSpheres: readonly SphereName[],
+  spellLevel: number,
+): "major" | "minor" | null {
+  if (!chassisId) return null;
   const table = effectiveSphereAccess(chassisId, sphereAccessOverride);
-  return spellSpheres.some((sphere) => canCastSphereSpell(resolveSphereAccess(table, sphere), spellLevel));
+  let best: "major" | "minor" | null = null;
+  for (const sphere of spellSpheres) {
+    const access = resolveSphereAccess(table, sphere);
+    if (access === "major" && canCastSphereSpell(access, spellLevel)) return "major";
+    if (access === "minor" && canCastSphereSpell(access, spellLevel)) best = "minor";
+  }
+  return best;
 }
