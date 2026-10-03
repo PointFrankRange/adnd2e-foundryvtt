@@ -8,7 +8,8 @@ import { classItemLevel } from "../../data/derive/class-item";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { buildCastCardContext } from "../../magic/cast-card";
 import { buildLearnSpellCardContext } from "../../magic/learn-spell-card";
-import { canMemorizePriestSpell } from "../../magic/priest-sphere-access";
+import { canMemorizePriestSpell, priestAccessScope } from "../../magic/priest-sphere-access";
+import { priestTheurgyCost, type TheurgyScope } from "../../core/magic/priest-spell-points";
 import { TEMPLATE_PATH } from "../../constants";
 import { getOptionalRules } from "../../settings";
 import { resolveMortalFatigue } from "./fatigue-actions";
@@ -29,6 +30,8 @@ export interface MemorizedEntry {
   expended: boolean;
   /** Sub-project 14 Plan A; absent means fixed magick (or the rule has never been on for this entry) */
   magickType?: "fixed" | "free";
+  /** Sub-project 14 priest theurgies: the Table 29 column this memorized theurgy is priced under; absent on wizard entries and on priest entries written with the rule off. */
+  theurgyScope?: TheurgyScope;
 }
 
 export interface SpellItemHandle {
@@ -80,6 +83,7 @@ export interface SpellcasterActor {
         memorized: MemorizedEntry[];
         slots: Record<string, { max: number; used: number }>;
         sphereAccessOverride: string[] | null;
+        spellPoints: { maxSpellLevel?: number; maxPerLevel?: number; sp?: number; spent?: number; remaining?: number };
       };
     };
   };
@@ -140,6 +144,32 @@ function canMemorizeWizardSpellPoints(actor: SpellcasterActor, spellLevel: numbe
   return canAffordMemorize(sp.sp ?? 0, sp.spent ?? 0, spellLevel, magickType);
 }
 
+/** Priest spell-points eligibility for a fixed theurgy of this access scope:
+ *  the spell's level must be within Table 26's max spell level, the flat
+ *  per-level cap must have room, and the pool's remaining SP must cover the
+ *  Table 29 cost. Same shape as canMemorizeWizardSpellPoints; the priest
+ *  pool's `spent` already prices every memorized theurgy by its own scope,
+ *  so `remaining` is the affordability figure. */
+function canMemorizePriestSpellPoints(actor: SpellcasterActor, spellLevel: number, scope: TheurgyScope): boolean {
+  const sp = actor.system.spellcasting.priest.spellPoints;
+  if (typeof sp.maxSpellLevel !== "number") return false;
+  if (spellLevel > sp.maxSpellLevel) return false;
+  const atLevel = spellsMemorizedAtLevel(actor.system.spellcasting.priest.memorized, spellLevel);
+  if (atLevel >= (sp.maxPerLevel ?? 0)) return false;
+  return (sp.remaining ?? 0) >= priestTheurgyCost(spellLevel, "fixed", scope);
+}
+
+/** The Table 29 column a priest memorize of this spell is priced under, or
+ *  null when the actor's access does not allow it at this level. */
+function priestScopeFor(actor: SpellcasterActor, spell: SpellItemHandle): TheurgyScope | null {
+  return priestAccessScope(
+    findPriestChassisId(actor),
+    actor.system.spellcasting.priest.sphereAccessOverride as SphereName[] | null,
+    spell.system.spheres as SphereName[],
+    spell.system.level,
+  );
+}
+
 /** Re-derives the same eligibility context.ts's `buildSpellRow` already
  *  computed for the render layer (already memorized / free slot at the
  *  spell's level / in-spellbook or sphere-access eligible), so memorizeSpell
@@ -149,6 +179,12 @@ function canReMemorize(actor: SpellcasterActor, spell: SpellItemHandle): boolean
   const key = casterKey(spell);
   const sc = actor.system.spellcasting[key];
   if (sc.memorized.some((m) => m.spellItemId === spell.id)) return false;
+
+  if (key === "priest" && spellPointsEnabled(getOptionalRules())) {
+    // Priest spell points: the pool prices the theurgy, so no classic slot check.
+    const scope = priestScopeFor(actor, spell);
+    return scope !== null && canMemorizePriestSpellPoints(actor, spell.system.level, scope);
+  }
 
   if (key === "wizard" && spellPointsEnabled(getOptionalRules())) {
     if (!canMemorizeWizardSpellPoints(actor, spell.system.level, "fixed")) return false;
@@ -187,8 +223,14 @@ export async function memorizeSpell(actor: SpellcasterActor, spellItemId: string
   }
   const key = casterKey(spell);
   const list = actor.system.spellcasting[key].memorized;
-  const magickType: "fixed" | undefined = key === "wizard" && spellPointsEnabled(getOptionalRules()) ? "fixed" : undefined;
-  const updated: MemorizedEntry[] = [...list, { spellItemId, spellLevel: spell.system.level, expended: false, magickType }];
+  const rulesOn = spellPointsEnabled(getOptionalRules());
+  const magickType: "fixed" | undefined = key === "wizard" && rulesOn ? "fixed" : undefined;
+  // canReMemorize guarantees a non-null scope for a priest when the rule is on.
+  const scope = key === "priest" && rulesOn ? priestScopeFor(actor, spell) : null;
+  const entry: MemorizedEntry = scope
+    ? { spellItemId, spellLevel: spell.system.level, expended: false, magickType: "fixed", theurgyScope: scope }
+    : { spellItemId, spellLevel: spell.system.level, expended: false, magickType };
+  const updated: MemorizedEntry[] = [...list, entry];
   await actor.update({ [`system.spellcasting.${key}.memorized`]: updated });
 }
 

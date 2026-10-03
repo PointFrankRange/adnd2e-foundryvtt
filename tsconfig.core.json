@@ -18,5 +18,9 @@
   // src/combat's entry above is directory-level (unlike sheets/character's
   // file-by-file listing), so this one file needs an explicit carve-out to
   // keep the rest of src/combat proven Foundry-free.
-  "exclude": ["src/combat/initiative-modifier-dialog.ts"]
+  // spell-actions.test.ts drives the Foundry-coupled memorizeSpell (it pulls
+  // src/sheets/character/spell-actions.ts and its Foundry-global imports into
+  // this type graph), so it is carved out of the directory-level tests/sheets
+  // include, the same way initiative-modifier-dialog.ts is carved out above.
+  "exclude": ["src/combat/initiative-modifier-dialog.ts", "tests/sheets/character/spell-actions.test.ts"]
 }
