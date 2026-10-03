@@ -19,6 +19,16 @@ describe("priestAccessScope", () => {
 
 });
 
+describe("priestAccessScope — major beats minor", () => {
+  it("a spell listing a minor-access sphere and a major-access sphere at the same level is priced major", () => {
+    expect(priestAccessScope("cleric", null, ["elemental", "healing"], 2)).toBe("major");
+  });
+
+  it("the sphere order does not change the result", () => {
+    expect(priestAccessScope("cleric", null, ["healing", "elemental"], 2)).toBe("major");
+  });
+});
+
 describe("canMemorizePriestSpell", () => {
   it("null chassisId (no priest-progression class on the actor) → always false", () => {
     expect(canMemorizePriestSpell(null, null, ["healing"], 1)).toBe(false);

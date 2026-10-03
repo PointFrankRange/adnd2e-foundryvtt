@@ -233,8 +233,12 @@ export async function memorizeSpell(actor: SpellcasterActor, spellItemId: string
   const list = actor.system.spellcasting[key].memorized;
   const rulesOn = spellPointsEnabled(getOptionalRules());
   const magickType: "fixed" | undefined = key === "wizard" && rulesOn ? "fixed" : undefined;
-  // canReMemorize guarantees a non-null scope for a priest when the rule is on.
+  // Fail closed: a priest entry under the rule must carry its Table 29 scope, so a null scope is refused rather than written without one.
   const scope = key === "priest" && rulesOn ? priestScopeFor(actor, spell) : null;
+  if (key === "priest" && rulesOn && scope === null) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.memorizeBlockedWarning"));
+    return;
+  }
   const entry: MemorizedEntry = scope
     ? { spellItemId, spellLevel: spell.system.level, expended: false, magickType: "fixed", theurgyScope: scope }
     : { spellItemId, spellLevel: spell.system.level, expended: false, magickType };
@@ -617,6 +621,12 @@ export async function memorizeFreeTheurgy(
   spellLevel: number,
   scope: "major" | "universal",
 ): Promise<void> {
+  // A missing scope is refused like any other blocked memorize (no write); a
+  // scope the book never allows as free (minor, junk) is a caller bug and throws.
+  if (scope === null || scope === undefined) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.memorizeBlockedWarning"));
+    return;
+  }
   if (!priestScopeAllowsFree(scope)) {
     throw new RangeError(`priest scope ${String(scope)} allows no free theurgy`);
   }
@@ -696,7 +706,17 @@ export async function castFreeTheurgy(
   }
   const rolled = await rollSpellAutomation(chosen);
   if (!rolled) return;
-  const updated = list.map((m, i) => (i === index ? { ...m, expended: true } : m));
+  // Re-read after the awaits: the dialog and the roll can outlive a concurrent
+  // memorize or forget, and writing the pre-await list back would clobber it.
+  const current = actor.system.spellcasting.priest.memorized;
+  const liveIndex = current.findIndex(
+    (m) => m.magickType === "free" && m.spellLevel === spellLevel && m.theurgyScope === scope && !m.expended,
+  );
+  if (liveIndex === -1) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
+    return;
+  }
+  const updated = current.map((m, i) => (i === liveIndex ? { ...m, expended: true } : m));
   await actor.update({ "system.spellcasting.priest.memorized": updated });
   await postCastCard(actor, chosen, rolled);
 }

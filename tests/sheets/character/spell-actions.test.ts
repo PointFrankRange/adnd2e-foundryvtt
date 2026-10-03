@@ -217,9 +217,10 @@ describe("memorizeFreeTheurgy — priest free theurgies", () => {
     expect(actor.update).not.toHaveBeenCalled();
   });
 
-  it("refuses a null scope with a RangeError rather than writing an entry without theurgyScope", async () => {
+  it.each([null, undefined])("refuses a %s scope with the blocked warning and no write (fail closed)", async (scope) => {
     const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, items: [HEAL3] });
-    await expect(memorizeFreeTheurgy(actor, 3, null as never)).rejects.toThrow(RangeError);
+    await memorizeFreeTheurgy(actor, 3, scope as never);
+    expect(warn).toHaveBeenCalled();
     expect(actor.update).not.toHaveBeenCalled();
   });
 
@@ -332,6 +333,20 @@ describe("castFreeTheurgy — priest free theurgies", () => {
     await castFreeTheurgy(actor, 3, "major");
     expect(actor.update).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalled();
+  });
+
+  it("writes the live list after the prompt and roll, keeping an entry added while the dialog was open", async () => {
+    const other: MemorizedEntry = { spellItemId: "clw-id", spellLevel: 1, expended: false, magickType: "fixed", theurgyScope: "major" };
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, priestMemorized: [freeMajor3], items: [HEAL3] });
+    prompt.mockImplementation(async () => {
+      // a concurrent memorize lands while the dialog is open
+      actor.system.spellcasting.priest.memorized = [...actor.system.spellcasting.priest.memorized, other];
+      return "heal3";
+    });
+    await castFreeTheurgy(actor, 3, "major");
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [{ ...freeMajor3, expended: true }, other],
+    });
   });
 
   it("does not prompt when no unexpended free theurgy of that scope exists", async () => {

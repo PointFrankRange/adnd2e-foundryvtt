@@ -76,7 +76,8 @@ function spellInput(
     // slots.ts itself, which stays untouched) so it's truly inert to the
     // classic path whether the spell-points rule is on or off (spec §5).
     wizardMemorized: snapshot.wizardMemorized.filter((mem) => mem.magickType !== "free"),
-    priestMemorized: snapshot.priestMemorized,
+    // Sub-project 14 priest theurgies: a free theurgy likewise never occupies a classic priest slot.
+    priestMemorized: snapshot.priestMemorized.filter((mem) => mem.magickType !== "free"),
   };
 }
 

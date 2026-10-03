@@ -21,7 +21,7 @@ Priests use the existing `spellPoints` book rule. The book makes it one optional
 
 ## Data
 
-**Table 26 (priest level → max spell level, max spells per level, SP).** Levels 1–20 are listed; each level above 21 adds 75 SP, with max spell level 7 and 12 spells per level.
+**Table 26 (priest level → max spell level, max spells per level, SP).** Levels 1–20 are listed; each level above 20 adds 75 SP (level 21 = 825), with max spell level 7 and 12 spells per level.
 
 | Priest level | Max spell level | Max per level | SP |
 |---|---|---|---|
@@ -59,20 +59,20 @@ Priests use the existing `spellPoints` book rule. The book makes it one optional
 - **Free theurgy:** chosen at cast time. A major free theurgy lets the priest pick any spell of that level in a major sphere of access, at the major free cost. A universal free theurgy lets the priest pick any spell of that level, at the universal cost. The book's free theurgy rule is that its cost tier is set by the priest's choice, not the spell's sphere.
 - **Minor access:** minor-sphere spells keep the 3rd-level cap. Their fixed theurgies cost the Table 29 Minor Fixed column (one spell level higher than major). Minor access allows fixed theurgies only, never free ones.
 - **Max-per-level and max-spell-level caps** from Table 26 apply to the total of fixed and free theurgies at each level, as in Plan A.
-- **Constitution adjustment:** the Constitution hit-point adjustment is added to the total SP (base + Wisdom bonus). If that lowers the total below 4, the adjustment is ignored (book p. 93: "he ignores the adjustments; all priests have at least 4 spell points"). This is not a floor at 4: the Wisdom bonus is kept.
+- **Constitution adjustment:** the Constitution hit-point adjustment is added to the total SP (base + Wisdom bonus). The adjustment is ignored if the total would drop below 4 (book p. 93: "he ignores the adjustments; all priests have at least 4 spell points"). This is not a floor at 4: the Wisdom bonus is kept.
 - **Recovery:** SP spent on memorize or cast return after 8 hours of rest. Memorizing takes 10 minutes of prayer per spell level and needs a quiet place (book p. 91).
 - **Tied-up SP:** an entry holds its SP until the spell is cast, the same as Plan A's tie-up rule.
 
 ## Architecture
 
-- **Pure module** `src/core/magic/priest-spell-points.ts`: the Table 26 lookup, the Table 27 bonus lookup, the Table 28/29 cost lookup, `priestSpellPointTotal`, `priestMaxSpellLevel`, `priestSpellsPerLevelCap`, and `magickCost` extended for priest access tiers. Reuses `canAffordMemorize` and `spellPointsEnabled` from `spell-points.ts`.
+- **Pure module** `src/core/magic/priest-spell-points.ts`: the Table 26 lookup, the Table 27 bonus lookup, the Table 28/29 cost lookup (`priestTheurgyCost`), the pool affordability check (`priestPoolAffords`), `priestSpellPointTotal`, `priestMaxSpellLevel`, `priestSpellsPerLevelCap`. `magickCost` is unchanged; priest pricing does not extend it. Reuses `spellsMemorizedAtLevel` and `spellPointsEnabled` from `spell-points.ts`.
 - **Derive** `src/data/derive/character/priest-spell-points.ts`: produces the same `spellPoints` shape as the wizard's derive (max, spent, remaining, max spell level, per-level caps), merged in `derive.ts`.
 - **Glue:** the priest branch in `src/sheets/character/spell-actions.ts` (memorize, cast, free-theurgy choice) and `context.ts` (the pool, bar, and per-spell cost). Reuses Plan A's SP bar and `canCast` logic.
 - **Sphere access:** `src/magic/priest-sphere-access.ts` gives `canMemorizePriestSpell` the major or minor tier for a spell, which the cost lookup reads.
 
 ## Testing
 
-- Pure tests cover every Table 26 row, every Table 27 row (Wisdom 13–19), the Constitution floor, the Table 28/29 cost columns, and the free-theurgy tiers.
+- Pure tests cover every Table 26 row, every Table 27 row (Wisdom 13–19), the Constitution floor, the Table 28/29 cost columns, the free-theurgy tiers, and the Constitution adjustment ignored when it would drop the total below 4.
 - The derive and sheet paths get the same drift and coverage checks as Plan A.
 - A dev-world check: a priest with the rule on memorizes a fixed major theurgy, a free theurgy, and a minor-access spell; casts and rests; and confirms SP totals.
 

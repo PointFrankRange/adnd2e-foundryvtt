@@ -136,6 +136,21 @@ describe("deriveCharacter — full single-class pipeline (§5.6 steps 3-10)", ()
     expect(d.spellSlots.wizard![1].max).toBe(4);
   });
 
+  it("a free priest theurgy never occupies a classic priest slot (rule off, SP14 priest)", () => {
+    const cleric5: ActorSnapshot = {
+      ...fighter7,
+      abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 16, cha: 10 },
+      classes: [{ chassisId: "cleric", specialistSchool: null, xp: 12000, hpRolls: [4, 3, 4, 2, 3], dualClassState: null, level: 5 }],
+      equippedArmor: null, equippedShield: null,
+      priestMemorized: [
+        { spellItemId: null, spellLevel: 1, magickType: "free", theurgyScope: "major" },
+        { spellItemId: "clw", spellLevel: 1, magickType: "fixed", theurgyScope: "major" },
+      ],
+    };
+    const d = deriveCharacter(cleric5, DEFAULT_OPTIONAL_RULES);
+    expect(d.spellSlots.priest![1].used).toBe(1); // only the fixed entry occupies the classic slot
+  });
+
   it("mage L5 INT 16, spellPoints rule on -> wizard spell points record (SP14a)", () => {
     const mage: ActorSnapshot = {
       ...fighter7,
