@@ -9,10 +9,11 @@ import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { buildCastCardContext } from "../../magic/cast-card";
 import { buildLearnSpellCardContext } from "../../magic/learn-spell-card";
 import { canMemorizePriestSpell, priestAccessScope } from "../../magic/priest-sphere-access";
-import { priestTheurgyCost, type TheurgyScope } from "../../core/magic/priest-spell-points";
+import { priestScopeAllowsFree, priestTheurgyCost, type TheurgyScope, type TheurgyType } from "../../core/magic/priest-spell-points";
 import { TEMPLATE_PATH } from "../../constants";
 import { getOptionalRules } from "../../settings";
 import { resolveMortalFatigue } from "./fatigue-actions";
+import { priestFreeCastEligible, promptFreeMagickSpell, type FreeMagickCastActor, type PriestFreeMagickFilter } from "./free-magick-dialog";
 
 /* ---------------------------------------------------------------------------
  * spell-actions — SP4a.
@@ -144,19 +145,25 @@ function canMemorizeWizardSpellPoints(actor: SpellcasterActor, spellLevel: numbe
   return canAffordMemorize(sp.sp ?? 0, sp.spent ?? 0, spellLevel, magickType);
 }
 
-/** Priest spell-points eligibility for a fixed theurgy of this access scope:
- *  the spell's level must be within Table 26's max spell level, the flat
- *  per-level cap must have room, and the pool's remaining SP must cover the
- *  Table 29 cost. Same shape as canMemorizeWizardSpellPoints; the priest
- *  pool's `spent` already prices every memorized theurgy by its own scope,
- *  so `remaining` is the affordability figure. */
-function canMemorizePriestSpellPoints(actor: SpellcasterActor, spellLevel: number, scope: TheurgyScope): boolean {
+/** Priest spell-points eligibility for a theurgy (fixed, or free at major /
+ *  universal scope): the spell's level must be within Table 26's max spell
+ *  level, the flat per-level cap must have room, and the pool's remaining SP
+ *  must cover the Table 29 cost for this type and scope. Same shape as
+ *  canMemorizeWizardSpellPoints; the priest pool's `spent` already prices
+ *  every memorized theurgy by its own type and scope, so `remaining` is the
+ *  affordability figure. */
+function canMemorizePriestSpellPoints(
+  actor: SpellcasterActor,
+  spellLevel: number,
+  magickType: TheurgyType,
+  scope: TheurgyScope,
+): boolean {
   const sp = actor.system.spellcasting.priest.spellPoints;
   if (typeof sp.maxSpellLevel !== "number") return false;
   if (spellLevel > sp.maxSpellLevel) return false;
   const atLevel = spellsMemorizedAtLevel(actor.system.spellcasting.priest.memorized, spellLevel);
   if (atLevel >= (sp.maxPerLevel ?? 0)) return false;
-  return (sp.remaining ?? 0) >= priestTheurgyCost(spellLevel, "fixed", scope);
+  return (sp.remaining ?? 0) >= priestTheurgyCost(spellLevel, magickType, scope);
 }
 
 /** The Table 29 column a priest memorize of this spell is priced under, or
@@ -183,7 +190,7 @@ function canReMemorize(actor: SpellcasterActor, spell: SpellItemHandle): boolean
   if (key === "priest" && spellPointsEnabled(getOptionalRules())) {
     // Priest spell points: the pool prices the theurgy, so no classic slot check.
     const scope = priestScopeFor(actor, spell);
-    return scope !== null && canMemorizePriestSpellPoints(actor, spell.system.level, scope);
+    return scope !== null && canMemorizePriestSpellPoints(actor, spell.system.level, "fixed", scope);
   }
 
   if (key === "wizard" && spellPointsEnabled(getOptionalRules())) {
@@ -594,6 +601,88 @@ export async function castFreeMagick(
   if (!rolled) return;
   const updated = list.map((m, i) => (i === index ? { ...m, expended: true } : m));
   await actor.update({ "system.spellcasting.wizard.memorized": updated });
+  await postCastCard(actor, chosen, rolled);
+}
+
+/** Sub-project 14 priest theurgies: memorizes a free theurgy — reserves a
+ *  spell LEVEL and a Table 28 column (major or universal) rather than a
+ *  specific spell; the spell is chosen when it's cast (see castFreeTheurgy).
+ *  Priced at the Table 29 free cost for that column. Throws a RangeError for
+ *  any scope the book doesn't allow as free (minor, null, or junk) before any
+ *  write. A no-op with a warning when the rule is off or the pool can't
+ *  afford another entry at that level. */
+export async function memorizeFreeTheurgy(
+  actor: SpellcasterActor,
+  spellLevel: number,
+  scope: "major" | "universal",
+): Promise<void> {
+  if (!priestScopeAllowsFree(scope)) {
+    throw new RangeError(`priest scope ${String(scope)} allows no free theurgy`);
+  }
+  if (!spellPointsEnabled(getOptionalRules()) || !canMemorizePriestSpellPoints(actor, spellLevel, "free", scope)) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.memorizeBlockedWarning"));
+    return;
+  }
+  const list = actor.system.spellcasting.priest.memorized;
+  const entry: MemorizedEntry = { spellItemId: null, spellLevel, expended: false, magickType: "free", theurgyScope: scope };
+  await actor.update({ "system.spellcasting.priest.memorized": [...list, entry] });
+}
+
+/** Forgets one free-theurgy entry at spellLevel and scope matching `expended`
+ *  — the priest sibling of forgetFreeMagick, keyed the same way so each row's
+ *  Forget button removes only the entry it was clicked from. Silent no-op if
+ *  none exist. */
+export async function forgetFreeTheurgy(
+  actor: SpellcasterActor,
+  spellLevel: number,
+  scope: "major" | "universal",
+  expended: boolean,
+): Promise<void> {
+  const list = actor.system.spellcasting.priest.memorized;
+  const index = list.findIndex(
+    (m) => m.magickType === "free" && m.spellLevel === spellLevel && m.theurgyScope === scope && m.expended === expended,
+  );
+  if (index === -1) return;
+  const updated = [...list.slice(0, index), ...list.slice(index + 1)];
+  await actor.update({ "system.spellcasting.priest.memorized": updated });
+}
+
+/** Sub-project 14 priest theurgies: casts a free theurgy of `scope` at
+ *  `spellLevel`. The spell is chosen at cast time (promptFreeMagickSpell with
+ *  the priest filter: any priest spell of the level for universal, major-access
+ *  only for major), re-checked after the prompt, its automation rolled, and
+ *  then the first unexpended matching entry is expended. Same roll-then-mark
+ *  ordering and immediate (non-Begin/Complete) cast as castFreeMagick. Priest
+ *  free theurgies never draw on channelling. */
+export async function castFreeTheurgy(
+  actor: SpellcasterActor,
+  spellLevel: number,
+  scope: "major" | "universal",
+): Promise<void> {
+  const list = actor.system.spellcasting.priest.memorized;
+  const index = list.findIndex(
+    (m) => m.magickType === "free" && m.spellLevel === spellLevel && m.theurgyScope === scope && !m.expended,
+  );
+  if (index === -1) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
+    return;
+  }
+  const filter: PriestFreeMagickFilter = {
+    scope,
+    chassisId: findPriestChassisId(actor),
+    sphereAccessOverride: actor.system.spellcasting.priest.sphereAccessOverride as SphereName[] | null,
+  };
+  const chosenId = await promptFreeMagickSpell(actor as unknown as FreeMagickCastActor, spellLevel, filter);
+  if (!chosenId) return;
+  const chosen = actor.items.get(chosenId);
+  if (!chosen || !priestFreeCastEligible(filter, chosen, spellLevel)) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
+    return;
+  }
+  const rolled = await rollSpellAutomation(chosen);
+  if (!rolled) return;
+  const updated = list.map((m, i) => (i === index ? { ...m, expended: true } : m));
+  await actor.update({ "system.spellcasting.priest.memorized": updated });
   await postCastCard(actor, chosen, rolled);
 }
 

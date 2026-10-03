@@ -1,5 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { memorizeSpell, type SpellcasterActor, type SpellItemHandle } from "../../../src/sheets/character/spell-actions";
+import {
+  castFreeTheurgy,
+  forgetFreeTheurgy,
+  memorizeFreeTheurgy,
+  memorizeSpell,
+  type MemorizedEntry,
+  type SpellcasterActor,
+  type SpellItemHandle,
+} from "../../../src/sheets/character/spell-actions";
 
 // Optional-rule toggles read through game.settings.get(SYSTEM_ID, key).
 let rules: Record<string, boolean> = {};
@@ -172,5 +180,145 @@ describe("memorizeSpell — priest spell points", () => {
     const entry = written["system.spellcasting.wizard.memorized"][0];
     expect(entry).toMatchObject({ spellItemId: "mage-1", magickType: "fixed" });
     expect(entry).not.toHaveProperty("theurgyScope");
+  });
+});
+
+// The cast dialog filters on the embedded item's document type, which the
+// shared spellItem() fixture leaves out; real spell items always carry "spell".
+const HEAL3 = { ...spellItem({ id: "heal3", name: "Heal-3", casterClass: "priest", level: 3, spheres: ["healing"] }), type: "spell" } as SpellItemHandle;
+const ELEM3 = { ...spellItem({ id: "el3", name: "Elemental-3", casterClass: "priest", level: 3, spheres: ["elemental"] }), type: "spell" } as SpellItemHandle;
+
+describe("memorizeFreeTheurgy — priest free theurgies", () => {
+  it("memorizes a major free theurgy at the Table 29 free cost", async () => {
+    // priest pool sp 40, spent 0; 3rd level major free costs 20
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, items: [HEAL3] });
+    await memorizeFreeTheurgy(actor, 3, "major");
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [
+        { spellItemId: null, spellLevel: 3, expended: false, magickType: "free", theurgyScope: "major" },
+      ],
+    });
+  });
+
+  it("memorizes a universal free theurgy at its own Table 29 cost", async () => {
+    // 3rd level universal free costs 30, which 40 SP affords
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, items: [HEAL3] });
+    await memorizeFreeTheurgy(actor, 3, "universal");
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [
+        { spellItemId: null, spellLevel: 3, expended: false, magickType: "free", theurgyScope: "universal" },
+      ],
+    });
+  });
+
+  it("refuses a minor-scope free theurgy (the book allows none)", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, items: [HEAL3] });
+    await expect(memorizeFreeTheurgy(actor, 3, "minor" as never)).rejects.toThrow(RangeError);
+    expect(actor.update).not.toHaveBeenCalled();
+  });
+
+  it("refuses a null scope with a RangeError rather than writing an entry without theurgyScope", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, items: [HEAL3] });
+    await expect(memorizeFreeTheurgy(actor, 3, null as never)).rejects.toThrow(RangeError);
+    expect(actor.update).not.toHaveBeenCalled();
+  });
+
+  it("refuses a free theurgy the pool cannot afford at the free cost", async () => {
+    // Major free 3rd level costs 20; only 15 SP remains.
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestSp: { ...affordablePool, spent: 25, remaining: 15 },
+      items: [HEAL3],
+    });
+    await memorizeFreeTheurgy(actor, 3, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
+
+  it("refuses when the flat per-level cap is full", async () => {
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestSp: { maxSpellLevel: 3, maxPerLevel: 1, sp: 40, spent: 0, remaining: 40 },
+      priestMemorized: [{ spellItemId: "heal3", spellLevel: 3, expended: false, magickType: "fixed", theurgyScope: "major" }],
+      items: [HEAL3],
+    });
+    await memorizeFreeTheurgy(actor, 3, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+  });
+
+  it("is a no-op with a warning when the spell-points rule is off", async () => {
+    rules = { spellsAndMagicEnabled: true, spellPoints: false };
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, items: [HEAL3] });
+    await memorizeFreeTheurgy(actor, 3, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
+});
+
+describe("forgetFreeTheurgy — priest free theurgies", () => {
+  it("removes only the entry matching its scope and expended state", async () => {
+    const major: MemorizedEntry = { spellItemId: null, spellLevel: 3, expended: false, magickType: "free", theurgyScope: "major" };
+    const universal: MemorizedEntry = { spellItemId: null, spellLevel: 3, expended: false, magickType: "free", theurgyScope: "universal" };
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, priestMemorized: [major, universal] });
+    await forgetFreeTheurgy(actor, 3, "universal", false);
+    expect(actor.update).toHaveBeenCalledWith({ "system.spellcasting.priest.memorized": [major] });
+  });
+});
+
+describe("castFreeTheurgy — priest free theurgies", () => {
+  let prompt: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    prompt = vi.fn(async () => "heal3");
+    vi.stubGlobal("foundry", {
+      applications: {
+        api: { DialogV2: { prompt } },
+        handlebars: { renderTemplate: vi.fn(async () => "<p>cast</p>") },
+      },
+      utils: { escapeHTML: (s: string) => s },
+    });
+    vi.stubGlobal("ChatMessage", { getSpeaker: vi.fn(() => ({})), create: vi.fn(async () => undefined) });
+  });
+
+  const freeMajor3: MemorizedEntry = { spellItemId: null, spellLevel: 3, expended: false, magickType: "free", theurgyScope: "major" };
+
+  it("prompts only major-access priest spells for a major free theurgy, then expends the entry", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, priestMemorized: [freeMajor3], items: [HEAL3, ELEM3] });
+    await castFreeTheurgy(actor, 3, "major");
+    const content = (prompt.mock.calls[0] as unknown as [{ content: string }])[0].content;
+    expect(content).toContain('value="heal3"');
+    expect(content).not.toContain('value="el3"');
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [{ ...freeMajor3, expended: true }],
+    });
+  });
+
+  it("prompts every priest spell of the level for a universal free theurgy", async () => {
+    const universal3: MemorizedEntry = { ...freeMajor3, theurgyScope: "universal" };
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, priestMemorized: [universal3], items: [HEAL3, ELEM3] });
+    await castFreeTheurgy(actor, 3, "universal");
+    const content = (prompt.mock.calls[0] as unknown as [{ content: string }])[0].content;
+    expect(content).toContain('value="heal3"');
+    expect(content).toContain('value="el3"');
+  });
+
+  it("refuses a chosen spell that is not major-access when casting a major free theurgy", async () => {
+    prompt.mockImplementation(async () => "el3");
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, priestMemorized: [freeMajor3], items: [HEAL3, ELEM3] });
+    await castFreeTheurgy(actor, 3, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
+
+  it("does not prompt when no unexpended free theurgy of that scope exists", async () => {
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestSp: affordablePool,
+      priestMemorized: [{ ...freeMajor3, expended: true }],
+      items: [HEAL3],
+    });
+    await castFreeTheurgy(actor, 3, "major");
+    expect(prompt).not.toHaveBeenCalled();
+    expect(actor.update).not.toHaveBeenCalled();
   });
 });
