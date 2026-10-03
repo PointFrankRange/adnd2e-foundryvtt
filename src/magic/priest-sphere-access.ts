@@ -61,3 +61,18 @@ export function priestAccessScope(
   }
   return best;
 }
+
+/** Whether the priest holds major access to at least one sphere at
+ *  `spellLevel`. Gates a major free theurgy at memorize time: the book allows
+ *  free theurgies only from major access, and minor access allows none. Same
+ *  override/chassis rules as canMemorizePriestSpell; false when the actor has
+ *  no priest-progression class. */
+export function priestHasMajorAccessAtLevel(
+  chassisId: string | null,
+  sphereAccessOverride: readonly SphereName[] | null,
+  spellLevel: number,
+): boolean {
+  if (!chassisId) return false;
+  const table = effectiveSphereAccess(chassisId, sphereAccessOverride);
+  return Object.values(table).some((access) => access === "major") && canCastSphereSpell("major", spellLevel);
+}

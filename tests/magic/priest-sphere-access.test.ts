@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canMemorizePriestSpell, priestAccessScope } from "../../src/magic/priest-sphere-access";
+import { canMemorizePriestSpell, priestAccessScope, priestHasMajorAccessAtLevel } from "../../src/magic/priest-sphere-access";
 import type { SphereName } from "../../src/core/types";
 
 describe("priestAccessScope", () => {
@@ -64,5 +64,27 @@ describe("canMemorizePriestSpell", () => {
     expect(canMemorizePriestSpell("cleric", ["animal"] as SphereName[], ["animal"], 7)).toBe(true);
     expect(canMemorizePriestSpell("cleric", ["animal"] as SphereName[], ["healing"], 1)).toBe(false);
     void override;
+  });
+});
+
+describe("priestHasMajorAccessAtLevel", () => {
+  it("cleric has major access at level 5 (within the 7th-level major cap) → true", () => {
+    expect(priestHasMajorAccessAtLevel("cleric", null, 5)).toBe(true);
+  });
+
+  it("cleric has no major access at level 8 (above the major cap) → false", () => {
+    expect(priestHasMajorAccessAtLevel("cleric", null, 8)).toBe(false);
+  });
+
+  it("no priest-progression class (null chassis) → false", () => {
+    expect(priestHasMajorAccessAtLevel(null, null, 1)).toBe(false);
+  });
+
+  it("an empty sphere override grants no major sphere → false", () => {
+    expect(priestHasMajorAccessAtLevel("cleric", [], 1)).toBe(false);
+  });
+
+  it("an override listing a major sphere grants major access up to the cap → true", () => {
+    expect(priestHasMajorAccessAtLevel("cleric", ["healing"], 7)).toBe(true);
   });
 });

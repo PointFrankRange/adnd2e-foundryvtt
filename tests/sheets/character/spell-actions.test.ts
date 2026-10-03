@@ -235,6 +235,30 @@ describe("memorizeFreeTheurgy — priest free theurgies", () => {
     expect(warn).toHaveBeenCalled();
   });
 
+  it("refuses a major free theurgy when the priest has no major access at that level", async () => {
+    // Major access stops at 7th level for a cleric; an 8th-level major free is not allowed.
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestSp: { maxSpellLevel: 8, maxPerLevel: 6, sp: 999, spent: 0, remaining: 999 },
+      items: [HEAL3],
+    });
+    await memorizeFreeTheurgy(actor, 8, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
+
+  it("refuses a major free theurgy when an empty sphere override grants no major sphere", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, sphereAccessOverride: [], items: [HEAL3] });
+    await memorizeFreeTheurgy(actor, 3, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+  });
+
+  it("memorizes a universal free theurgy with no access gate (same empty override)", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, sphereAccessOverride: [], items: [HEAL3] });
+    await memorizeFreeTheurgy(actor, 3, "universal");
+    expect(actor.update).toHaveBeenCalledTimes(1);
+  });
+
   it("refuses when the flat per-level cap is full", async () => {
     const actor = makeActor({
       priestChassis: "cleric",

@@ -8,7 +8,7 @@ import { classItemLevel } from "../../data/derive/class-item";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { buildCastCardContext } from "../../magic/cast-card";
 import { buildLearnSpellCardContext } from "../../magic/learn-spell-card";
-import { canMemorizePriestSpell, priestAccessScope } from "../../magic/priest-sphere-access";
+import { canMemorizePriestSpell, priestAccessScope, priestHasMajorAccessAtLevel } from "../../magic/priest-sphere-access";
 import { priestScopeAllowsFree, priestTheurgyCost, type TheurgyScope, type TheurgyType } from "../../core/magic/priest-spell-points";
 import { TEMPLATE_PATH } from "../../constants";
 import { getOptionalRules } from "../../settings";
@@ -619,7 +619,21 @@ export async function memorizeFreeTheurgy(
   if (!priestScopeAllowsFree(scope)) {
     throw new RangeError(`priest scope ${String(scope)} allows no free theurgy`);
   }
-  if (!spellPointsEnabled(getOptionalRules()) || !canMemorizePriestSpellPoints(actor, spellLevel, "free", scope)) {
+  // A major free theurgy needs major access at this level (the book allows
+  // free theurgies only from major access; minor allows none). Universal free
+  // has no access gate; its spell is chosen at cast time.
+  const majorAccessOk =
+    scope === "universal" ||
+    priestHasMajorAccessAtLevel(
+      findPriestChassisId(actor),
+      actor.system.spellcasting.priest.sphereAccessOverride as SphereName[] | null,
+      spellLevel,
+    );
+  if (
+    !majorAccessOk ||
+    !spellPointsEnabled(getOptionalRules()) ||
+    !canMemorizePriestSpellPoints(actor, spellLevel, "free", scope)
+  ) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.memorizeBlockedWarning"));
     return;
   }
