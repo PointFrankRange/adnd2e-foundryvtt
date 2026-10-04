@@ -18,6 +18,15 @@ export function isPriestSpellProgression(progressionId: SpellProgressionId | nul
   return progressionId === "priest" || progressionId === "paladin" || progressionId === "ranger";
 }
 
+/**
+ * Whether a priest-progression chassis casts from the spell-points priest pool
+ * (cleric and druid, "priest" only). Paladins and rangers have no pool: they
+ * stay on classic slots even when the spell-points rule is on.
+ */
+export function isPriestPoolProgression(progressionId: SpellProgressionId | null): boolean {
+  return progressionId === "priest";
+}
+
 const PALADIN_START = 9;
 const RANGER_START = 8;
 const RANGER_TABLE_MAX = RANGER_SPELL_PROGRESSION.length;

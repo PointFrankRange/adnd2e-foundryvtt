@@ -1,5 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { paladinSpellSlots, rangerSpellSlots, bardSpellSlots, isPriestSpellProgression } from "../../../src/core/magic/class-slots";
+import {
+  paladinSpellSlots,
+  rangerSpellSlots,
+  bardSpellSlots,
+  isPriestPoolProgression,
+  isPriestSpellProgression,
+} from "../../../src/core/magic/class-slots";
+
+describe("isPriestPoolProgression()", () => {
+  it("true only for the priest progression (cleric and druid)", () => {
+    expect(isPriestPoolProgression("priest")).toBe(true);
+  });
+  it("false for paladin, ranger, wizard, bard, and a non-caster", () => {
+    expect(isPriestPoolProgression("paladin")).toBe(false);
+    expect(isPriestPoolProgression("ranger")).toBe(false);
+    expect(isPriestPoolProgression("wizard")).toBe(false);
+    expect(isPriestPoolProgression("bard")).toBe(false);
+    expect(isPriestPoolProgression(null)).toBe(false);
+  });
+});
 
 describe("isPriestSpellProgression()", () => {
   it("true for the priest, paladin and ranger progressions", () => {
