@@ -3,6 +3,8 @@
 // engine unions — defineSchema() imports these and stays logic-free.
 import type { AbilityKey, Alignment, ArmorType, ClassGroup, ClassId, CreatureSize, EncumbranceCategory, MovementMode, NonweaponGroup, Race, SpellSchool, SphereName, WizardSchool } from "../../core/types";
 import type { DamageType, WeaponCategory, WeaponSize } from "../../core/weapons/data";
+import { TURN_ROW_IDS } from "../../core/turning";
+import type { TurnRowId } from "../../core/turning";
 import type { ClassArrangement } from "../derive/character/multiclass";
 
 export const CLASS_IDS: readonly ClassId[] = [
@@ -86,3 +88,10 @@ export {
 
 export { WEAPON_PROFICIENCY_GROUPS } from "../../core/proficiencies/weapon";
 export { SPECIALIST_WEAPON_CLASSES } from "../../core/weapons/specialist-attacks";
+
+/** The creature-type registry (SP10). Types are tags: a creature may carry several. Add new types here as data. */
+export const MONSTER_TYPE_IDS = ["undead"] as const;
+export type MonsterTypeId = (typeof MONSTER_TYPE_IDS)[number];
+
+/** A Monster NPC's Table 61 row: blank means untagged. */
+export const TURN_ROW_CHOICES: readonly ("" | TurnRowId)[] = ["", ...TURN_ROW_IDS];

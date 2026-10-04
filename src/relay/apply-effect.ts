@@ -26,6 +26,10 @@ export async function applyEffectLocally(actor: EffectTarget, request: RelayRequ
     case "condition":
       await actor.toggleStatusEffect(request.conditionId, { active: true });
       return true;
+    case "destroy":
+      await actor.update({ "system.attributes.hp.value": 0 });
+      await actor.toggleStatusEffect("dead", { active: true });
+      return true;
     case "unequip":
       // the target's FIRST equipped weapon (Plan 7d's first-member-wins rule); unarmed = no-op
       for (const item of actor.items) {

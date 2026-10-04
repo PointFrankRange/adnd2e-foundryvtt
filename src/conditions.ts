@@ -1,7 +1,7 @@
 // The status conditions the system ships (SP1). Each is also an ActiveEffect
 // document in the `conditions` compendium; the two are drift-tested. Per-condition
 // mechanical `changes` are SP3 / SP7 — this file and the pack carry id / name /
-// icon only. Twenty status conditions: 15 base + 5 fatigue (SP14c). No Foundry import — pure data.
+// icon only. Twenty-one status conditions: 15 base + 5 fatigue (SP14c) + turned (SP10). No Foundry import — pure data.
 
 export interface Condition {
   id: string;
@@ -30,6 +30,7 @@ export const CONDITIONS: readonly Condition[] = [
   { id: "heavyFatigue", name: "Heavily Fatigued", img: "icons/svg/stoned.svg" },
   { id: "severeFatigue", name: "Severely Fatigued", img: "icons/svg/frozen.svg" },
   { id: "mortalFatigue", name: "Mortally Fatigued", img: "icons/svg/death-hand.svg" },
+  { id: "turned", name: "Turned", img: "icons/svg/terror.svg" },
 ];
 
 /** The exact shape a CONFIG.statusEffects entry needs (real v14.364 fields:

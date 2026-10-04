@@ -14,6 +14,7 @@ import { registerMigrationSettings, runMigrations } from "./migrations/run";
 import { registerChatListeners } from "./chat/chat-listeners";
 import { promptInitiativeModifier } from "./combat/initiative-modifier-dialog";
 import { registerCastingHooks } from "./hooks/casting-hooks";
+import { registerTurningHooks } from "./hooks/turning-hooks";
 import { registerRelayQuery } from "./relay/relay-handler";
 
 Hooks.once("init", () => {
@@ -140,4 +141,5 @@ Hooks.once("ready", async () => {
   await runMigrations();
   registerChatListeners();
   registerCastingHooks();
+  registerTurningHooks();
 });

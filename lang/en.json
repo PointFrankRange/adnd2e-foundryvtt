@@ -65,6 +65,22 @@
       "neutral-evil": "Neutral Evil",
       "chaotic-evil": "Chaotic Evil"
     },
+    "monsterTypes": { "undead": "Undead" },
+    "turnRows": {
+      "skeleton": "Skeleton or 1 HD",
+      "zombie": "Zombie",
+      "ghoul": "Ghoul or 2 HD",
+      "shadow": "Shadow or 3-4 HD",
+      "wight": "Wight or 5 HD",
+      "ghast": "Ghast",
+      "wraith": "Wraith or 6 HD",
+      "mummy": "Mummy or 7 HD",
+      "spectre": "Spectre or 8 HD",
+      "vampire": "Vampire or 9 HD",
+      "ghost": "Ghost or 10 HD",
+      "lich": "Lich or 11+ HD",
+      "special": "Special"
+    },
     "sizes": {
       "tiny": "Tiny",
       "small": "Small",
@@ -161,6 +177,16 @@
       "doneWithFailures": "AD&D 2E: imported {created} of {total} document(s); {failed} failed — see the console."
     },
     "sheet": {
+      "turning": {
+        "title": "Turn Undead",
+        "level": "Turning level",
+        "button": "Turn Undead",
+        "attempted": "Already attempted this encounter.",
+        "reset": "Reset attempt (GM)",
+        "notTurner": "Only clerics and paladins can turn undead.",
+        "alreadyAttempted": "You have already attempted to turn undead this encounter.",
+        "noTargets": "Target the undead first (select tokens, then press T or use the target tool)."
+      },
       "title": "Character Sheet",
       "creatureTitle": "Monster NPC",
       "npcTitle": "Character NPC",
@@ -515,6 +541,8 @@
         "disposition": "Disposition"
       },
       "creature": {
+        "monsterTypes": "Types",
+        "turnRow": "Turning row (Table 61)",
         "hd": "Hit Dice",
         "hdBonus": "HD Bonus",
         "fixedHp": "Fixed HP",
@@ -559,6 +587,22 @@
       }
     },
     "chat": {
+      "turn": {
+        "title": "Turn Undead",
+        "level": "Turning level",
+        "affectedCap": "Undead affected (2d6)",
+        "bonusCap": "Bonus creatures per D* type (2d4)",
+        "noRows": "No targets.",
+        "status": {
+          "notUndead": "Not undead — unaffected",
+          "untagged": "Undead type not set — skipped",
+          "cannot": "Cannot be turned at this level",
+          "fail": "Resists the turning",
+          "turned": "Turned",
+          "destroyed": "Destroyed",
+          "unaffected": "Turned, but beyond the number affected"
+        }
+      },
       "attack": {
         "rollAttack": "Roll Attack",
         "manualAcTitle": "Target Armor Class",
@@ -788,7 +832,8 @@
         "damage": "{amount} damage",
         "healing": "{amount} healing",
         "condition": "the {condition} condition",
-        "unequip": "a disarm (unequip weapon)"
+        "unequip": "a disarm (unequip weapon)",
+        "destroy": "destruction (turned to dust)"
       }
     }
   },
