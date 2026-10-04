@@ -19,6 +19,7 @@ import {
 import { priestPoolAffords, priestScopeAllowsFree, type TheurgyScope, type TheurgyType } from "../../core/magic/priest-spell-points";
 import { TEMPLATE_PATH } from "../../constants";
 import { getOptionalRules } from "../../settings";
+import { orisonAffords, orisonCap } from "../../core/magic/priest-orisons";
 import { resolveMortalFatigue } from "./fatigue-actions";
 import { promptFreeMagickSpell, type FreeMagickCastActor } from "./free-magick-dialog";
 
@@ -119,6 +120,20 @@ function findPriestChassisId(actor: SpellcasterActor): ClassId | null {
   return null;
 }
 
+/** Finds the actor's priest-progression class item (if any) and returns its
+ *  level, derived from its xp exactly like wizardCasterLevel (classItemLevel).
+ *  Returns 0 when the actor has no priest-progression class. */
+function findPriestLevel(actor: SpellcasterActor): number {
+  for (const item of actor.items) {
+    if (item.type !== "class") continue;
+    const chassisId = item.system.chassisId as ClassId | undefined;
+    if (chassisId && isPriestSpellProgression(getChassis(chassisId).spellProgressionId)) {
+      return classItemLevel(chassisId, (item.system.xp as number | undefined) ?? 0);
+    }
+  }
+  return 0;
+}
+
 /** Whether the actor's priest chassis casts from the spell-points priest pool:
  *  the rule is on AND the chassis is cleric/druid. A paladin or ranger keeps its
  *  classic slots under the rule (see isPriestPoolProgression). */
@@ -204,6 +219,14 @@ function canReMemorize(actor: SpellcasterActor, spell: SpellItemHandle): boolean
   const sc = actor.system.spellcasting[key];
   if (sc.memorized.some((m) => m.spellItemId === spell.id)) return false;
 
+  if (key === "priest" && spell.system.level === 0) {
+    // Orisons are pool-only (classic rule exclusion): a 1 SP free theurgy under the cap.
+    if (!priestPoolOn(actor)) return false;
+    const memorizedOrisons = sc.memorized.filter((m) => m.spellLevel === 0).length;
+    const pool = actor.system.spellcasting.priest.spellPoints;
+    return orisonAffords(pool.remaining ?? 0, memorizedOrisons, orisonCap(findPriestLevel(actor)));
+  }
+
   if (key === "priest" && priestPoolOn(actor)) {
     // Priest spell points: the pool prices the theurgy, so no classic slot check.
     const scope = priestScopeFor(actor, spell);
@@ -247,6 +270,12 @@ export async function memorizeSpell(actor: SpellcasterActor, spellItemId: string
   }
   const key = casterKey(spell);
   const list = actor.system.spellcasting[key].memorized;
+  if (key === "priest" && spell.system.level === 0) {
+    // Orisons are priced at 1 SP in the pool and carry the universal scope; no Table 29 scope lookup applies.
+    const orison: MemorizedEntry = { spellItemId, spellLevel: 0, expended: false, magickType: "fixed", theurgyScope: "universal" };
+    await actor.update({ "system.spellcasting.priest.memorized": [...list, orison] });
+    return;
+  }
   const rulesOn = spellPointsEnabled(getOptionalRules());
   const magickType: "fixed" | undefined = key === "wizard" && rulesOn ? "fixed" : undefined;
   const poolOn = key === "priest" && priestPoolOn(actor);
