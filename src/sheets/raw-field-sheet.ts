@@ -348,6 +348,8 @@ const SYSTEM_CHILD_INDENT = 12;
 /** One item-sheet panel: the Details panel, a plain SchemaField group, or a nullable group. */
 interface FieldGroup {
   title: string;
+  /** a lang key for the title, when it is a translated heading rather than a schema label */
+  titleKey?: string;
   /** true for a plain heading (Details, or a non-nullable SchemaField); false for a nullable group */
   isHeader: boolean;
   /** a nullable group's "Set <label>" checkbox row (kind "nullcheck") */
@@ -369,7 +371,7 @@ const DESCRIPTION_PATH = "system.description";
 function groupFieldRows(rows: FieldRow[]): { header: FieldRow[]; description?: FieldRow; groups: FieldGroup[] } {
   const header: FieldRow[] = [];
   let description: FieldRow | undefined;
-  const details: FieldGroup = { title: "Details", isHeader: true, rows: [] };
+  const details: FieldGroup = { title: "Details", titleKey: "ADND2E.sheets.detailsTitle", isHeader: true, rows: [] };
   const groups: FieldGroup[] = [];
   let current: FieldGroup | undefined;
   for (const row of rows) {
