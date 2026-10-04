@@ -2802,11 +2802,11 @@ describe("buildCharacterSheetContext — priest spell points (SP14 priest)", () 
           { spellItemId: null, spellLevel: 3, expended: true, magickType: "free", theurgyScope: "universal" },
           { spellItemId: "clw", spellLevel: 1, expended: false, magickType: "fixed", theurgyScope: "major" },
         ],
-      }),
+      }, { spellItems: [priestSpell({ id: "heal2", level: 2, spheres: ["healing"] })] }),
     );
     expect(c.spells.priestFreeTheurgies).toEqual([
-      { level: 2, scope: "major", scopeLabelKey: "ADND2E.sheet.spells.freeTheurgyMajor", expended: false, canCast: true },
-      { level: 3, scope: "universal", scopeLabelKey: "ADND2E.sheet.spells.freeTheurgyUniversal", expended: true, canCast: false },
+      { level: 2, scope: "major", scopeLabelKey: "ADND2E.sheet.spells.freeTheurgyMajor", expended: false, canCast: true, noEligibleSpell: false },
+      { level: 3, scope: "universal", scopeLabelKey: "ADND2E.sheet.spells.freeTheurgyUniversal", expended: true, canCast: false, noEligibleSpell: false },
     ]);
   });
 
@@ -2821,6 +2821,45 @@ describe("buildCharacterSheetContext — priest spell points (SP14 priest)", () 
       ),
     );
     expect(c.spells.priestFreeTheurgies[0]!.canCast).toBe(false);
+  });
+
+  it("a free major theurgy at level 2 cannot be cast with no eligible priest spell, and can once one exists", () => {
+    const freeMajor2 = [{ spellItemId: null, spellLevel: 2, expended: false, magickType: "free" as const, theurgyScope: "major" as const }];
+    const none = buildCharacterSheetContext(priestInputWithPool({ remaining: 40, memorized: freeMajor2 }));
+    expect(none.spells.priestFreeTheurgies[0]!.canCast).toBe(false);
+    expect(none.spells.priestFreeTheurgies[0]!.noEligibleSpell).toBe(true);
+    const withOne = buildCharacterSheetContext(
+      priestInputWithPool(
+        { remaining: 40, memorized: freeMajor2 },
+        { spellItems: [priestSpell({ id: "heal2", level: 2, spheres: ["healing"] })] },
+      ),
+    );
+    expect(withOne.spells.priestFreeTheurgies[0]!.canCast).toBe(true);
+    expect(withOne.spells.priestFreeTheurgies[0]!.noEligibleSpell).toBe(false);
+  });
+
+  it("noEligibleSpell is false for an expended or mid-cast row, even with no eligible spell", () => {
+    const expended = buildCharacterSheetContext(
+      priestInputWithPool({ remaining: 40, memorized: [{ spellItemId: null, spellLevel: 2, expended: true, magickType: "free", theurgyScope: "major" }] }),
+    );
+    expect(expended.spells.priestFreeTheurgies[0]!.noEligibleSpell).toBe(false);
+    const casting = buildCharacterSheetContext(
+      priestInputWithPool(
+        { remaining: 40, memorized: [{ spellItemId: null, spellLevel: 2, expended: false, magickType: "free", theurgyScope: "major" }] },
+        { castingStatus: { spellName: "Fireball", startRound: 1, completeRound: 3, segments: null, combatRound: 1, isCasterTurn: false } },
+      ),
+    );
+    expect(casting.spells.priestFreeTheurgies[0]!.noEligibleSpell).toBe(false);
+  });
+
+  it("a free universal theurgy is castable with any priest spell of its level, even a minor-access one", () => {
+    const c = buildCharacterSheetContext(
+      priestInputWithPool(
+        { remaining: 40, memorized: [{ spellItemId: null, spellLevel: 2, expended: false, magickType: "free", theurgyScope: "universal" }] },
+        { spellItems: [priestSpell({ id: "el2", level: 2, spheres: ["elemental"] })] },
+      ),
+    );
+    expect(c.spells.priestFreeTheurgies[0]!.canCast).toBe(true);
   });
 
   it("a free theurgy entry is never reported as an orphaned spell, even though it has no spell item", () => {

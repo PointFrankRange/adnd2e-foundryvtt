@@ -481,6 +481,9 @@ export interface CharacterSheetContext {
       scopeLabelKey: string;
       expended: boolean;
       canCast: boolean;
+      /** True when the row is blocked only by the missing priest spell (no
+       *  qualifying spell for its scope and level); the template shows the reason in place of Cast. */
+      noEligibleSpell: boolean;
     }[];
   };
   features: {

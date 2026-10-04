@@ -91,7 +91,10 @@ beforeEach(() => {
   rules = { spellsAndMagicEnabled: true, spellPoints: true };
   vi.stubGlobal("game", {
     settings: { get: (_system: string, key: string) => rules[key] },
-    i18n: { localize: (key: string) => key },
+    i18n: {
+      localize: (key: string) => key,
+      format: (key: string, data: Record<string, unknown>) => `${key}|${String(data.level)}`,
+    },
   });
   warn = vi.fn();
   vi.stubGlobal("ui", { notifications: { warn } });
@@ -347,6 +350,15 @@ describe("castFreeTheurgy — priest free theurgies", () => {
     expect(actor.update).toHaveBeenCalledWith({
       "system.spellcasting.priest.memorized": [{ ...freeMajor3, expended: true }, other],
     });
+  });
+
+  it("warns the specific no-eligible-spell message and does not prompt when no priest spell qualifies", async () => {
+    // Only an elemental 3rd-level spell: minor access for a cleric, so no major free theurgy can use it.
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, priestMemorized: [freeMajor3], items: [ELEM3] });
+    await castFreeTheurgy(actor, 3, "major");
+    expect(prompt).not.toHaveBeenCalled();
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith("ADND2E.sheet.spells.noEligiblePriestSpell|3");
   });
 
   it("does not prompt when no unexpended free theurgy of that scope exists", async () => {
