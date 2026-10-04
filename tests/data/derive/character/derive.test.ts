@@ -151,6 +151,21 @@ describe("deriveCharacter — full single-class pipeline (§5.6 steps 3-10)", ()
     expect(d.spellSlots.priest![1].used).toBe(1); // only the fixed entry occupies the classic slot
   });
 
+  it("a free wizard magick never occupies a classic wizard slot (rule off, SP14a)", () => {
+    const mage5: ActorSnapshot = {
+      ...fighter7,
+      abilities: { str: 10, dex: 10, con: 10, int: 16, wis: 10, cha: 10 },
+      classes: [{ chassisId: "mage", specialistSchool: null, xp: 20000, hpRolls: [4, 3, 4, 2, 3], dualClassState: null, level: 5 }],
+      equippedArmor: null, equippedShield: null,
+      wizardMemorized: [
+        { spellItemId: null, spellLevel: 1, magickType: "free" },
+        { spellItemId: "magicMissile", spellLevel: 1, magickType: "fixed" },
+      ],
+    };
+    const d = deriveCharacter(mage5, DEFAULT_OPTIONAL_RULES);
+    expect(d.spellSlots.wizard![1].used).toBe(1); // only the fixed entry occupies the classic slot
+  });
+
   it("mage L5 INT 16, spellPoints rule on -> wizard spell points record (SP14a)", () => {
     const mage: ActorSnapshot = {
       ...fighter7,

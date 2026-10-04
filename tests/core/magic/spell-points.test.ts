@@ -141,3 +141,17 @@ describe("wizardBaseSpellPoints (Table 17 base + specialist bonus, no Int)", () 
     expect(wizardSpellPointTotal(6, 18, true)).toBe(wizardBaseSpellPoints(6, true) + 7); // Int 18 -> +7
   });
 });
+
+describe("spellsMemorizedAtLevel (per-level occupancy for the flat cap)", () => {
+  it("is 0 for an empty list", () => {
+    expect(spellsMemorizedAtLevel([], 2)).toBe(0);
+  });
+  it("counts two level-2 entries and one level-3 entry per level", () => {
+    const memorized = [{ spellLevel: 2 }, { spellLevel: 2 }, { spellLevel: 3 }];
+    expect(spellsMemorizedAtLevel(memorized, 2)).toBe(2);
+    expect(spellsMemorizedAtLevel(memorized, 3)).toBe(1);
+  });
+  it("does not count an entry at another level", () => {
+    expect(spellsMemorizedAtLevel([{ spellLevel: 4 }], 2)).toBe(0);
+  });
+});

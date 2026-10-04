@@ -55,9 +55,12 @@ export const SETTING_DESCRIPTORS: readonly SettingDescriptor[] = [
  * value, or `undefined` when unset). A stored value that is not a boolean falls
  * back to the descriptor default, so a corrupt or half-migrated world is safe.
  */
-export function readOptionalRules(get: (key: string) => unknown): OptionalRules {
+export function readOptionalRules(
+  get: (key: string) => unknown,
+  descriptors: readonly SettingDescriptor[] = SETTING_DESCRIPTORS,
+): OptionalRules {
   const bag: OptionalRules = { ...DEFAULT_OPTIONAL_RULES };
-  for (const d of SETTING_DESCRIPTORS) {
+  for (const d of descriptors) {
     if (d.optionalRulesKey === null) continue;
     const raw = get(d.key);
     bag[d.optionalRulesKey] = typeof raw === "boolean" ? raw : d.default;

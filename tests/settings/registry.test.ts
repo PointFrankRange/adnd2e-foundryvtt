@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SETTING_DESCRIPTORS, readOptionalRules } from "../../src/settings/registry";
+import { SETTING_DESCRIPTORS, readOptionalRules, type SettingDescriptor } from "../../src/settings/registry";
 import { DEFAULT_OPTIONAL_RULES } from "../../src/core/options";
 
 describe("SETTING_DESCRIPTORS", () => {
@@ -72,6 +72,15 @@ describe("readOptionalRules()", () => {
   it("reads a combatAndTactics key through, same as a core key", () => {
     const bag = readOptionalRules((key) => (key === "criticalHits" ? true : undefined));
     expect(bag.criticalHits).toBe(true);
+  });
+
+  it("skips a descriptor whose optionalRulesKey is null", () => {
+    const descriptors: readonly SettingDescriptor[] = [
+      { key: "noRulesKey", group: "core", default: false, config: false, optionalRulesKey: null },
+      { key: "criticalHits", group: "core", default: false, config: true, optionalRulesKey: "criticalHits" },
+    ];
+    const bag = readOptionalRules(() => true, descriptors);
+    expect(bag).toEqual({ ...DEFAULT_OPTIONAL_RULES, criticalHits: true });
   });
 
   it("reads a skillsAndPowers key through, same as a core key", () => {

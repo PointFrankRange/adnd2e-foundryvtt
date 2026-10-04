@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  priestMaxPerLevel, priestMaxSpellLevel, priestSpellPointBase, priestSpellPointTotal,
+  priestMaxPerLevel, priestMaxSpellLevel, priestPoolAffords, priestSpellPointBase, priestSpellPointTotal,
   priestScopeAllowsFree, priestTheurgyCost, priestWisdomBonusSp,
 } from "../../../src/core/magic/priest-spell-points";
 
@@ -91,5 +91,25 @@ describe("priest theurgy bounds and scope rules", () => {
     expect(priestScopeAllowsFree("major")).toBe(true);
     expect(priestScopeAllowsFree("universal")).toBe(true);
     expect(priestScopeAllowsFree("minor")).toBe(false);
+  });
+});
+
+describe("priestPoolAffords (shared memorize/eligibility gate)", () => {
+  const pool = { maxSpellLevel: 2, maxPerLevel: 2, remaining: 100 };
+  it("refuses when the pool has no maxSpellLevel (no priest pool yet)", () => {
+    expect(priestPoolAffords({ maxPerLevel: 2, remaining: 100 }, [], 1, "fixed", "major")).toBe(false);
+  });
+  it("refuses a spell level above the pool's maxSpellLevel", () => {
+    expect(priestPoolAffords(pool, [], 3, "fixed", "major")).toBe(false);
+  });
+  it("refuses once the flat per-level cap is reached", () => {
+    const full = [{ spellLevel: 1 }, { spellLevel: 1 }];
+    expect(priestPoolAffords(pool, full, 1, "fixed", "major")).toBe(false);
+  });
+  it("refuses when remaining SP cannot cover the theurgy cost", () => {
+    expect(priestPoolAffords({ ...pool, remaining: 0 }, [], 1, "fixed", "major")).toBe(false);
+  });
+  it("allows a theurgy that fits level, cap and remaining SP", () => {
+    expect(priestPoolAffords(pool, [], 1, "fixed", "major")).toBe(true);
   });
 });
