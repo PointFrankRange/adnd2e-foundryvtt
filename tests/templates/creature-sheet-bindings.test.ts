@@ -61,4 +61,10 @@ describe("Monster NPC sheet templates (sheet redesign R3)", () => {
     expect(TEMPLATES).not.toContain("toggleFavorite");
     expect(registered.has("toggleFavorite")).toBe(false);
   });
+
+  it("binds the monster types and the Table 61 row", () => {
+    expect(TEMPLATES).toContain('data-action="toggleMonsterType"');
+    expect(TEMPLATES).toContain('name="system.details.turning.row"');
+    expect(registered.has("toggleMonsterType")).toBe(true);
+  });
 });

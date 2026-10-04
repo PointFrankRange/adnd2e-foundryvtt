@@ -1,0 +1,11 @@
+{
+  "_id": "tUrN3dCnDxK7mP2q",
+  "_key": "!items!tUrN3dCnDxK7mP2q",
+  "name": "Turned",
+  "type": "condition",
+  "img": "icons/svg/terror.svg",
+  "system": {
+    "conditionId": "turned",
+    "description": ""
+  }
+}

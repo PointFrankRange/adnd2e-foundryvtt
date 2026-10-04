@@ -65,6 +65,22 @@
       "neutral-evil": "Neutral Evil",
       "chaotic-evil": "Chaotic Evil"
     },
+    "monsterTypes": { "undead": "Undead" },
+    "turnRows": {
+      "skeleton": "Skeleton or 1 HD",
+      "zombie": "Zombie",
+      "ghoul": "Ghoul or 2 HD",
+      "shadow": "Shadow or 3-4 HD",
+      "wight": "Wight or 5 HD",
+      "ghast": "Ghast",
+      "wraith": "Wraith or 6 HD",
+      "mummy": "Mummy or 7 HD",
+      "spectre": "Spectre or 8 HD",
+      "vampire": "Vampire or 9 HD",
+      "ghost": "Ghost or 10 HD",
+      "lich": "Lich or 11+ HD",
+      "special": "Special"
+    },
     "sizes": {
       "tiny": "Tiny",
       "small": "Small",
@@ -515,6 +531,8 @@
         "disposition": "Disposition"
       },
       "creature": {
+        "monsterTypes": "Types",
+        "turnRow": "Turning row (Table 61)",
         "hd": "Hit Dice",
         "hdBonus": "HD Bonus",
         "fixedHp": "Fixed HP",

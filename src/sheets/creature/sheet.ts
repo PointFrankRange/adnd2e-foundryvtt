@@ -1,3 +1,4 @@
+import { MONSTER_TYPE_IDS, type MonsterTypeId } from "../../data/item/choices";
 import { TEMPLATE_PATH } from "../../constants";
 import type { SaveCategory } from "../../core/types";
 import { monsterDropVerdict } from "../../combat/monster-gear";
@@ -65,6 +66,7 @@ export class Adnd2eCreatureSheet extends Base {
       toggleLock: Adnd2eCreatureSheet.#onToggleLock,
       rollAttack: Adnd2eCreatureSheet.#onRollAttack,
       rollSave: Adnd2eCreatureSheet.#onRollSave,
+      toggleMonsterType: Adnd2eCreatureSheet.#onToggleMonsterType,
       addAttack: Adnd2eCreatureSheet.#onAddAttack,
       deleteAttack: Adnd2eCreatureSheet.#onDeleteAttack,
       rollWeaponAttack: Adnd2eCreatureSheet.#onRollWeaponAttack,
@@ -124,6 +126,14 @@ export class Adnd2eCreatureSheet extends Base {
     context.classGroups = cfg.classGroups;
     context.attackTypes = cfg.attackTypes;
     context.saveModes = cfg.saveModes;
+    const types = (this.document.system as unknown as { details: { types: string[] } }).details.types;
+    context.monsterTypeRows = MONSTER_TYPE_IDS.map((id) => ({
+      id,
+      label: cfg.monsterTypes![id],
+      checked: types.includes(id),
+    }));
+    context.isUndead = types.includes("undead");
+    context.turnRows = cfg.turnRows;
     return context;
   }
 
@@ -224,6 +234,14 @@ export class Adnd2eCreatureSheet extends Base {
   static async #onRollAttack(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
     const index = target.dataset.attackIndex;
     if (index !== undefined) await rollAttack(this.document as never, Number(index));
+  }
+
+  static async #onToggleMonsterType(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const id = target.dataset.type as MonsterTypeId | undefined;
+    if (!id || !(MONSTER_TYPE_IDS as readonly string[]).includes(id)) return;
+    const current = [...(this.document.system as unknown as { details: { types: string[] } }).details.types];
+    const next = current.includes(id) ? current.filter((t) => t !== id) : [...current, id];
+    await this.document.update({ "system.details.types": next } as never);
   }
 
   static async #onRollSave(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {

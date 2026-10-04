@@ -1,6 +1,8 @@
 // Builds CONFIG.ADND2E (spec §6.1): enum -> i18n-label-key maps + coin rates.
 // Pure and framework-free — assigned to `CONFIG.ADND2E` on `init` by system.ts,
 // typed into the global scope by src/types/global.d.ts.
+import type { TurnRowId } from "./core/turning";
+import type { MonsterTypeId } from "./data/item/choices";
 import type {
   AbilityKey,
   Alignment,
@@ -69,6 +71,8 @@ export interface Adnd2eConfig {
   readonly schools: LabelMap<SpellSchool>;
   readonly spheres: LabelMap<SphereName>;
   readonly alignments: LabelMap<Alignment>;
+  readonly monsterTypes: LabelMap<MonsterTypeId>;
+  readonly turnRows: LabelMap<TurnRowId>;
   readonly sizes: LabelMap<CreatureSize>;
   readonly movementModes: LabelMap<MovementMode>;
   readonly damageTypes: LabelMap<ConfigDamageType>;
@@ -159,6 +163,22 @@ export function buildAdnd2eConfig(): Adnd2eConfig {
       "lawful-evil": "ADND2E.alignments.lawful-evil",
       "neutral-evil": "ADND2E.alignments.neutral-evil",
       "chaotic-evil": "ADND2E.alignments.chaotic-evil",
+    },
+    monsterTypes: { undead: "ADND2E.monsterTypes.undead" },
+    turnRows: {
+      skeleton: "ADND2E.turnRows.skeleton",
+      zombie: "ADND2E.turnRows.zombie",
+      ghoul: "ADND2E.turnRows.ghoul",
+      shadow: "ADND2E.turnRows.shadow",
+      wight: "ADND2E.turnRows.wight",
+      ghast: "ADND2E.turnRows.ghast",
+      wraith: "ADND2E.turnRows.wraith",
+      mummy: "ADND2E.turnRows.mummy",
+      spectre: "ADND2E.turnRows.spectre",
+      vampire: "ADND2E.turnRows.vampire",
+      ghost: "ADND2E.turnRows.ghost",
+      lich: "ADND2E.turnRows.lich",
+      special: "ADND2E.turnRows.special",
     },
     sizes: {
       tiny: "ADND2E.sizes.tiny",

@@ -1,7 +1,7 @@
 import { htmlField } from "../common/fields";
 import { deriveCreature } from "../derive/creature";
 import type { CreatureSnapshot } from "../derive/creature";
-import { ALIGNMENTS, ATTACK_TYPES, CLASS_GROUPS, CREATURE_SIZES, SAVE_MODES } from "../item/choices";
+import { ALIGNMENTS, ATTACK_TYPES, CLASS_GROUPS, CREATURE_SIZES, MONSTER_TYPE_IDS, SAVE_MODES, TURN_ROW_CHOICES } from "../item/choices";
 import { Adnd2eActorModel } from "./base-actor";
 import type { SaveCategory } from "../../core/types";
 
@@ -79,6 +79,10 @@ export class CreatureModel extends Adnd2eActorModel {
         specialAttacks: htmlField(),
         specialDefenses: htmlField(),
         description: htmlField(),
+        types: new ArrayField(new StringField({ required: true, blank: false, choices: MONSTER_TYPE_IDS }), { required: true, initial: [] }),
+        turning: new SchemaField({
+          row: new StringField({ required: true, blank: true, initial: "", choices: TURN_ROW_CHOICES }),
+        }),
       }),
     };
   }

@@ -83,6 +83,12 @@
         {{/each}}
         <label class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.saveClassGroup'}}</span><select name="system.saves.asClass.group">{{selectOptions classGroups selected=source.system.saves.asClass.group localize=true blank=""}}</select></label>
         <label class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.saveClassLevel'}}</span><input type="number" name="system.saves.asClass.level" value="{{source.system.saves.asClass.level}}" min="1"></label>
+        <div class="detail-field monster-types"><span class="cap">{{localize 'ADND2E.sheet.creature.monsterTypes'}}</span>
+          {{#each monsterTypeRows}}<label><input type="checkbox" data-action="toggleMonsterType" data-type="{{this.id}}" {{#if this.checked}}checked{{/if}}> {{localize this.label}}</label>{{/each}}
+        </div>
+        {{#if isUndead}}
+          <label class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.turnRow'}}</span><select name="system.details.turning.row">{{selectOptions turnRows selected=source.system.details.turning.row localize=true blank=""}}</select></label>
+        {{/if}}
       </div>
     </section>
   {{/if}}

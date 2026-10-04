@@ -4,9 +4,10 @@ import {
   DAMAGE_TYPES, WEAPON_SIZES, WEAPON_CATEGORIES, NONWEAPON_GROUPS, CREATURE_SIZES,
   CASTER_CLASSES, SAVING_THROW_KINDS, DUAL_CLASS_STATES, FEATURE_SOURCE_TYPES, FEATURE_ACTIVATIONS,
   ALIGNMENTS, MOVEMENT_MODES, DISPOSITIONS, SAVE_MODES, ATTACK_TYPES, ENCUMBRANCE_CATEGORIES,
-  MULTICLASS_MODES, CLASS_GROUPS,
+  MULTICLASS_MODES, CLASS_GROUPS, MONSTER_TYPE_IDS, TURN_ROW_CHOICES,
   TRAIT_EFFECT_KINDS, TRAIT_ATTACK_MODES, TRAIT_PROFICIENCY_TRACKS, TRAIT_SAVE_CATEGORIES,
 } from "../../src/data/item/choices";
+import { TURN_ROW_IDS } from "../../src/core/turning";
 
 describe("item schema choice arrays match the engine unions", () => {
   it("CLASS_IDS = the 8 ClassId", () => {
@@ -96,5 +97,14 @@ describe("trait effect choice arrays (SP8 Plan 8c)", () => {
     expect([...TRAIT_ATTACK_MODES]).toEqual(["melee", "ranged"]);
     expect([...TRAIT_PROFICIENCY_TRACKS]).toEqual(["weapon", "nonweapon"]);
     expect([...TRAIT_SAVE_CATEGORIES]).toEqual(["ppd", "rsw", "pp", "bw", "spell"]);
+  });
+});
+
+describe("monster types and turning rows", () => {
+  it("the registry ships with undead only", () => {
+    expect([...MONSTER_TYPE_IDS]).toEqual(["undead"]);
+  });
+  it("TURN_ROW_CHOICES is blank plus every Table 61 row", () => {
+    expect(TURN_ROW_CHOICES).toEqual(["", ...TURN_ROW_IDS]);
   });
 });

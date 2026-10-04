@@ -1,6 +1,6 @@
 # `conditions` pack — source manifest
 
-Twenty status conditions the system ships. Each document is an `adnd2e`-subtype
+Twenty-one status conditions the system ships. Each document is an `adnd2e`-subtype
 ActiveEffect carrying identity only — `_id`, `name`, `img`, `statuses`, and
 `system.conditionId` / `system.isCondition`. Per-condition mechanical `changes`
 are deferred to SP3 / SP7; `system.changes` is `[]` here.
@@ -37,6 +37,7 @@ No rulebook prose is stored (`system.description` is not set on these docs).
 | heavyFatigue | Heavily Fatigued | `icons/svg/stoned.svg` |
 | severeFatigue | Severely Fatigued | `icons/svg/frozen.svg` |
 | mortalFatigue | Mortally Fatigued | `icons/svg/death-hand.svg` |
+| turned | Turned | `icons/svg/terror.svg` |
 
 All icon paths resolve under Foundry core `resources/app/public/icons/svg/`
 (v14.364). `net.svg` is shared by Held / Entangled and `terror.svg` by
