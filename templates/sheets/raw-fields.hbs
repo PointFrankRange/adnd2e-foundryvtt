@@ -8,6 +8,7 @@
               <input type="text" class="raw-name" name="name" value="{{this.value}}" placeholder="{{this.label}}"
                 {{#unless @root.editable}}readonly{{/unless}}>
             </div>
+            {{#if @root.subtitle}}<div class="raw-subtitle">{{@root.subtitle}}</div>{{/if}}
           {{else}}
             <div class="form-group">
               <label>{{this.label}}</label>
@@ -20,6 +21,16 @@
         {{/each}}
       </div>
     </section>
+
+    {{#if description}}
+      <section class="kit-panel raw-description">
+        <div class="kit-bar">Description</div>
+        <div class="kit-body">
+          <textarea name="{{description.path}}" rows="12"
+            {{#unless @root.editable}}readonly{{/unless}}>{{description.value}}</textarea>
+        </div>
+      </section>
+    {{/if}}
 
     <div class="raw-groups">
       {{#each groups}}
