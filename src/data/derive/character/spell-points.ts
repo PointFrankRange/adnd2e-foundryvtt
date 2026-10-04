@@ -12,6 +12,7 @@ import {
   priestMaxPerLevel, priestMaxSpellLevel, priestSpellPointTotal, priestTheurgyCost,
   type TheurgyScope,
 } from "../../../core/magic/priest-spell-points";
+import { ORISON_COST_SP } from "../../../core/magic/priest-orisons";
 import type { ClassId } from "../../../core/types";
 import type { MemorizedEntry } from "./snapshot";
 
@@ -44,7 +45,11 @@ export function deriveSpellPoints(input: SpellPointsInput): { wizard?: SpellPoin
     const sp = priestSpellPointTotal(input.priestLevel, input.wisScore, input.conHpAdjustment);
     // Ruling 3: a legacy entry with no magickType is fixed, and with no theurgyScope is major.
     const spent = input.priestMemorized.reduce(
-      (sum, m) => sum + priestTheurgyCost(m.spellLevel, m.magickType ?? "fixed", (m.theurgyScope ?? "major") as TheurgyScope),
+      (sum, m) =>
+        sum +
+        (m.spellLevel === 0
+          ? ORISON_COST_SP
+          : priestTheurgyCost(m.spellLevel, m.magickType ?? "fixed", (m.theurgyScope ?? "major") as TheurgyScope)),
       0,
     );
     return {
