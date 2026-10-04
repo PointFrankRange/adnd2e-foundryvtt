@@ -472,6 +472,8 @@ export interface CharacterSheetContext {
     spellPoints: { max: number; spent: number; remaining: number } | null;
     /** Sub-project 14 Plan B: null when Channellers is off or the actor has no wizard levels */
     channelling: { current: number; max: number } | null;
+    /** Sub-project 14 priest channelling: the priest's channelling pool, null unless Channellers is on under the priest pool rule and a priest max is derived. */
+    priestChannelling: { current: number; max: number } | null;
     /** Sub-project 14 Plan A: one row per currently-memorized free magick, across all levels */
     freeMagicks: { level: number; expended: boolean; canCast: boolean }[];
     /** Sub-project 14 priest theurgies: the priest pool's SP bar. null when the

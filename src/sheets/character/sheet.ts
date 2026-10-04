@@ -883,9 +883,10 @@ export class Adnd2eCharacterSheet extends Base {
     await restSpellcasting(this.document as never);
   }
 
-  static async #onRecoverChannellerSp(this: Adnd2eCharacterSheet): Promise<void> {
+  static async #onRecoverChannellerSp(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const caster = target.dataset.caster === "priest" ? "priest" : "wizard";
     const result = await promptRecoverChannelling();
-    if (result) await recoverChannellerSp(this.document as never, result.activity, result.hours);
+    if (result) await recoverChannellerSp(this.document as never, caster, result.activity, result.hours);
   }
 
   static async #onRecoverFromFatigue(this: Adnd2eCharacterSheet): Promise<void> {

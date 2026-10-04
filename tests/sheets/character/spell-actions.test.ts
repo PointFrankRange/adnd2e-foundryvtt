@@ -8,6 +8,7 @@ import {
   forgetFreeTheurgy,
   memorizeFreeTheurgy,
   memorizeSpell,
+  recoverChannellerSp,
   type MemorizedEntry,
   type SpellcasterActor,
   type SpellItemHandle,
@@ -47,6 +48,7 @@ interface ActorOpts {
   priestXp?: number;
   sphereAccessOverride?: string[] | null;
   wizardSp?: Record<string, number | undefined>;
+  wizardChannelling?: { current?: number; max?: number };
   wizardSpellbookItemIds?: string[];
   items?: SpellItemHandle[];
 }
@@ -74,7 +76,7 @@ function makeActor(opts: ActorOpts = {}): SpellcasterActor {
           memorized: [],
           slots: {},
           spellPoints: opts.wizardSp ?? {},
-          channelling: {},
+          channelling: opts.wizardChannelling ?? {},
           fatigueSaveBonus: 0,
           spellbookItemIds: opts.wizardSpellbookItemIds ?? [],
         } as never,
@@ -717,5 +719,30 @@ describe("fatigue save bonus — priest banks its own counter", () => {
     expect(actor.update).toHaveBeenCalledWith({ "system.attributes.hp.value": 0 });
     expect(actor.toggleStatusEffect).toHaveBeenCalledWith("dead", { active: true });
     expect(JSON.stringify((actor.update as ReturnType<typeof vi.fn>).mock.calls)).not.toContain("fatigueSaveBonus");
+  });
+});
+
+describe("recoverChannellerSp — priest and wizard pools", () => {
+  const CHANNEL_ON = { spellsAndMagicEnabled: true, spellPoints: true, channelers: true };
+
+  it("recovers the priest pool under Table 20 and writes the priest current", async () => {
+    rules = CHANNEL_ON;
+    const actor = makeActor({ priestChannelling: { current: 10, max: 61 } });
+    await recoverChannellerSp(actor, "priest", "sleeping", 8);
+    expect(actor.update).toHaveBeenCalledWith({ "system.spellcasting.priest.channelling.current": 61 });
+  });
+
+  it("recovers the wizard pool and writes the wizard current", async () => {
+    rules = CHANNEL_ON;
+    const actor = makeActor({ wizardChannelling: { current: 10, max: 61 } });
+    await recoverChannellerSp(actor, "wizard", "sleeping", 8);
+    expect(actor.update).toHaveBeenCalledWith({ "system.spellcasting.wizard.channelling.current": 61 });
+  });
+
+  it("is a no-op with a warning when Channellers is off", async () => {
+    const actor = makeActor({ priestChannelling: { current: 10, max: 61 } });
+    await recoverChannellerSp(actor, "priest", "sleeping", 8);
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith("ADND2E.sheet.spells.channellingBlockedWarning");
   });
 });

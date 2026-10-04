@@ -684,6 +684,7 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   const wizardChannelling = sc.wizard.channelling ?? {};
   // Sub-project 14 priest theurgies: same `?? {}` story as wizardSp.
   const priestSp = sc.priest.spellPoints ?? {};
+  const priestChannelling = sc.priest.channelling ?? {};
 
   // Orisons (level 0) are listed under `orisons` below, never in `known`; the loop starts at level 1.
   const known: { level: number; items: SpellItemView[] }[] = [];
@@ -724,6 +725,10 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
     channelling:
       channellingOn && typeof wizardChannelling.max === "number"
         ? { current: wizardChannelling.current ?? 0, max: wizardChannelling.max }
+        : null,
+    priestChannelling:
+      channellingOn && priestPoolOn && typeof priestChannelling.max === "number"
+        ? { current: priestChannelling.current ?? 0, max: priestChannelling.max }
         : null,
     freeMagicks: sc.wizard.memorized
       .filter((m) => m.magickType === "free")

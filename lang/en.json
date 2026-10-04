@@ -409,6 +409,7 @@
         "freeMagickCastTitle": "Cast Free Magick — Choose a Spell",
         "freeMagickRuleOffHint": "Spell points is off — you can still forget these, but not cast or memorize new ones.",
         "channelling": "Channelling",
+        "priestChannelling": "Priest Channelling",
         "channellingRecover": "Recover",
         "channellingRecoverTitle": "Recover Spell Points",
         "channellingActivityLabel": "Activity",

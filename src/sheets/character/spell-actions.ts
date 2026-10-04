@@ -826,11 +826,13 @@ export async function castFreeTheurgy(
   await postCastCard(actor, chosen, rolled);
 }
 
-/** Sub-project 14 Plan B: Table 20 recovery. No-op with a warning if
- *  Channellers isn't active for this actor (defensive re-check, matching
- *  every other action in this file). */
+/** Sub-project 14 Plan B: Table 20 recovery, keyed by the caster's pool: the
+ *  wizard's channelling pool or the priest's (Sub-project 14 priest channelling).
+ *  No-op with a warning if Channellers isn't active for this actor (defensive
+ *  re-check, matching every other action in this file). */
 export async function recoverChannellerSp(
   actor: SpellcasterActor,
+  caster: "wizard" | "priest",
   activity: ChannellerActivity,
   hours: number,
 ): Promise<void> {
@@ -838,8 +840,8 @@ export async function recoverChannellerSp(
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.channellingBlockedWarning"));
     return;
   }
-  const { current, max } = actor.system.spellcasting.wizard.channelling;
+  const { current, max } = actor.system.spellcasting[caster].channelling;
   await actor.update({
-    "system.spellcasting.wizard.channelling.current": recoverSp(current ?? 0, max ?? 0, activity, hours),
+    [`system.spellcasting.${caster}.channelling.current`]: recoverSp(current ?? 0, max ?? 0, activity, hours),
   });
 }

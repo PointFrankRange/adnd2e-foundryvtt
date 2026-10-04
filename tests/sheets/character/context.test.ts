@@ -2787,6 +2787,13 @@ describe("buildCharacterSheetContext — priest spell points (SP14 priest)", () 
   const channelledRules = { ...priestRules, channelers: true };
   const clwMemorized = [{ spellItemId: "clw", spellLevel: 1, expended: false, magickType: "fixed", theurgyScope: "major" }];
 
+  it("shows the priest channelling pool only when Channellers is on under the priest pool rule with a derived max", () => {
+    const pool = { current: 10, max: 61 };
+    expect(buildCharacterSheetContext(priestInputWithPool({ remaining: 3, channelling: pool }, { optionalRules: channelledRules })).spells.priestChannelling).toEqual(pool);
+    expect(buildCharacterSheetContext(priestInputWithPool({ remaining: 3, channelling: pool })).spells.priestChannelling).toBeNull();
+    expect(buildCharacterSheetContext(priestInputWithPool({ remaining: 3 }, { optionalRules: channelledRules })).spells.priestChannelling).toBeNull();
+  });
+
   it("a channelling priest can memorize a theurgy the pool cannot cover (caps only)", () => {
     const c = buildCharacterSheetContext(
       priestInputWithPool({ remaining: 0, channelling: { current: 0, max: 40 } }, { optionalRules: channelledRules, spellItems: [priestSpell({})] }),

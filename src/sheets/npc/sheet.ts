@@ -483,9 +483,10 @@ export class Adnd2eNpcSheet extends Base {
   // (spells.hbs), but the Recover button was gated behind pcActions with no
   // matching action-map entry here. Reuses the exact same recoverChannellerSp/
   // promptRecoverChannelling functions the PC sheet uses.
-  static async #onRecoverChannellerSp(this: Adnd2eNpcSheet): Promise<void> {
+  static async #onRecoverChannellerSp(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const caster = target.dataset.caster === "priest" ? "priest" : "wizard";
     const result = await promptRecoverChannelling();
-    if (result) await recoverChannellerSp(this.document as never, result.activity, result.hours);
+    if (result) await recoverChannellerSp(this.document as never, caster, result.activity, result.hours);
   }
 
   // Sub-project 14 Plan C whole-branch review finding I1: a Character NPC
