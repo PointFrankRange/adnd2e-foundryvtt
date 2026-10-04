@@ -89,6 +89,8 @@
                 <button type="button" data-action="memorizeSpell" data-item-id="{{s.id}}">
                   {{localize 'ADND2E.sheet.spells.memorize'}}
                 </button>
+              {{else if s.outsideSpheres}}
+                <span class="placeholder">{{localize 'ADND2E.sheet.spells.outsideSpheres'}}</span>
               {{/if}}
               {{#if s.memorized}}
                 <button type="button" data-action="forgetSpell" data-item-id="{{s.id}}">

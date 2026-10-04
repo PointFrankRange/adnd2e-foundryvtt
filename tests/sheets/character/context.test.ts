@@ -2779,6 +2779,38 @@ describe("buildCharacterSheetContext — priest spell points (SP14 priest)", () 
     expect(c.spells.known[0]!.items[0]!.canMemorize).toBe(true);
   });
 
+  it("priest row inside the sphere access is not flagged outsideSpheres", () => {
+    const c = buildCharacterSheetContext(priestInputWithPool({ remaining: 40 }, { spellItems: [priestSpell({})] }));
+    expect(c.spells.known[0]!.items[0]!.outsideSpheres).toBe(false);
+  });
+
+  it("priest row outside the sphere access (plant, not in the cleric table) is flagged outsideSpheres", () => {
+    const c = buildCharacterSheetContext(
+      priestInputWithPool({ remaining: 40 }, { spellItems: [priestSpell({ id: "plant1", name: "Entangle", spheres: ["plant"] })] }),
+    );
+    expect(c.spells.known[0]!.items[0]!.outsideSpheres).toBe(true);
+  });
+
+  it("an already-memorized priest row is never flagged outsideSpheres", () => {
+    const c = buildCharacterSheetContext(
+      priestInputWithPool(
+        { remaining: 40, memorized: [{ spellItemId: "plant1", spellLevel: 1, expended: false, magickType: "fixed" }] },
+        { spellItems: [priestSpell({ id: "plant1", name: "Entangle", spheres: ["plant"] })] },
+      ),
+    );
+    expect(c.spells.known[0]!.items[0]!.outsideSpheres).toBe(false);
+  });
+
+  it("a wizard row is never flagged outsideSpheres (the flag is priest-only)", () => {
+    const c = buildCharacterSheetContext(
+      priestInputWithPool(
+        { remaining: 40 },
+        { spellItems: [{ ...priestSpell({ id: "plant1", name: "Entangle", spheres: ["plant"] }), casterClass: "wizard" }] },
+      ),
+    );
+    expect(c.spells.known[0]!.items[0]!.outsideSpheres).toBe(false);
+  });
+
   it("cleric under the rule still uses the pool: classic slot rows hidden, pool row shown", () => {
     const c = buildCharacterSheetContext(priestInputWithPool({ remaining: 40 }, { spellItems: [priestSpell({})] }));
     expect(c.spells.priestSlots).toEqual([]);
