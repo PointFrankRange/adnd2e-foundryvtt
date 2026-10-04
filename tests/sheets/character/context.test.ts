@@ -2794,6 +2794,15 @@ describe("buildCharacterSheetContext — priest spell points (SP14 priest)", () 
     expect(buildCharacterSheetContext(priestInputWithPool({ remaining: 3 }, { optionalRules: channelledRules })).spells.priestChannelling).toBeNull();
   });
 
+  it("under channelling the classic priest SP bar is hidden and the priest channelling bar replaces it", () => {
+    const c = buildCharacterSheetContext(
+      priestInputWithPool({ remaining: 40, channelling: { current: 30, max: 61 } }, { optionalRules: channelledRules }),
+    );
+    expect(c.spells.priestChannelling).toEqual({ current: 30, max: 61 });
+    expect(c.spells.priestSpellPoints).toBeNull();
+    expect(c.spells.priestPoolOn).toBe(true);
+  });
+
   it("a channelling priest can memorize a theurgy the pool cannot cover (caps only)", () => {
     const c = buildCharacterSheetContext(
       priestInputWithPool({ remaining: 0, channelling: { current: 0, max: 40 } }, { optionalRules: channelledRules, spellItems: [priestSpell({})] }),

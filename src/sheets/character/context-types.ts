@@ -476,8 +476,11 @@ export interface CharacterSheetContext {
     priestChannelling: { current: number; max: number } | null;
     /** Sub-project 14 Plan A: one row per currently-memorized free magick, across all levels */
     freeMagicks: { level: number; expended: boolean; canCast: boolean }[];
+    /** Sub-project 14 priest theurgies: true when the priest pool rule applies
+     *  (a cleric/druid caster with the spell-points rule on). Gates the free-theurgy section. */
+    priestPoolOn: boolean;
     /** Sub-project 14 priest theurgies: the priest pool's SP bar. null when the
-     *  rule is off or the actor has no priest-progression caster. */
+     *  rule is off, the actor has no priest-progression caster, or channelling replaces the pool. */
     priestSpellPoints: { max: number; spent: number; remaining: number } | null;
     /** Sub-project 14 priest theurgies: one row per spell level (1-7) that has a
      *  free memorize available at major and/or universal scope. Empty when the

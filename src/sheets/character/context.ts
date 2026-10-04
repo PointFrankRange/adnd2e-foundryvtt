@@ -685,6 +685,8 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   // Sub-project 14 priest theurgies: same `?? {}` story as wizardSp.
   const priestSp = sc.priest.spellPoints ?? {};
   const priestChannelling = sc.priest.channelling ?? {};
+  // Under channelling the priest's channelling pool replaces the classic SP bar, as for wizards.
+  const priestChannellingOn = channellingOn && priestPoolOn;
 
   // Orisons (level 0) are listed under `orisons` below, never in `known`; the loop starts at level 1.
   const known: { level: number; items: SpellItemView[] }[] = [];
@@ -727,7 +729,7 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
         ? { current: wizardChannelling.current ?? 0, max: wizardChannelling.max }
         : null,
     priestChannelling:
-      channellingOn && priestPoolOn && typeof priestChannelling.max === "number"
+      priestChannellingOn && typeof priestChannelling.max === "number"
         ? { current: priestChannelling.current ?? 0, max: priestChannelling.max }
         : null,
     freeMagicks: sc.wizard.memorized
@@ -739,8 +741,9 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
           !casting &&
           (channellingOn ? canAffordCast(wizardChannelling.current ?? 0, m.spellLevel, "free") : !m.expended),
       })),
+    priestPoolOn,
     priestSpellPoints:
-      priestPoolOn && typeof priestSp.remaining === "number"
+      priestPoolOn && !priestChannellingOn && typeof priestSp.remaining === "number"
         ? { max: priestSp.sp ?? 0, spent: priestSp.spent ?? 0, remaining: priestSp.remaining }
         : null,
     ...buildPriestFreeTheurgy(sc, priestChassisId, sphereAccessOverride, priestPoolOn, channellingOn, casting !== null, input.spellItems),
