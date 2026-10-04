@@ -1,10 +1,16 @@
 <div class="adnd2e raw-field-sheet scrollable">
   <div class="raw-field-list">
     {{#each rows}}
-      {{#if this.header}}
+      {{#if (eq this.kind "nullcheck")}}
+        <h3 class="raw-field-header" style="margin-left:{{this.indent}}px">
+          <label><input type="checkbox" data-null-toggle="{{this.path}}" {{#if this.value}}checked{{/if}}
+            {{#unless @root.editable}}disabled{{/unless}}> Set {{this.label}}</label>
+        </h3>
+      {{else if this.header}}
         <h3 class="raw-field-header" style="margin-left:{{this.indent}}px">{{this.label}}</h3>
       {{else}}
-        <div class="form-group" style="margin-left:{{this.indent}}px">
+        <div class="form-group" style="margin-left:{{this.indent}}px{{#if this.hidden}};display:none{{/if}}"
+          {{#if this.nullGroup}}data-null-group="{{this.nullGroup}}"{{/if}}>
           <label>{{this.label}}</label>
           <div class="form-fields">
             {{#if (eq this.kind "checkbox")}}
@@ -27,6 +33,9 @@
                   </label>
                 {{/each}}
               </details>
+            {{else if (eq this.kind "lines")}}
+              <textarea name="{{this.path}}" data-lines="{{this.lineMode}}" rows="4"
+                {{#unless @root.editable}}readonly{{/unless}}>{{this.value}}</textarea>
             {{else if (eq this.kind "json")}}
               <textarea name="{{this.path}}" data-json="true" rows="4"
                 {{#unless @root.editable}}readonly{{/unless}}>{{this.value}}</textarea>

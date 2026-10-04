@@ -1,6 +1,8 @@
 // The SP1 stub sheet (spec §4, §12.8): walks a document's `system` DataModel
 // schema and renders one input per leaf field so data can be hand-entered for
-// testing. Scalars use typed inputs; arrays/objects use a JSON textarea. No
+// testing. Scalars use typed inputs; known list/object fields (LINE_FIELDS) use a
+// one-entry-per-line textarea; a nullable group uses a "Set" checkbox that toggles
+// its children; any other array/object uses a JSON textarea. No
 // designed layout — real sheets are SP2 (PC) / SP6 (NPC/monster). Foundry-coupled
 // (the walk is `instanceof foundry.data.fields.*`); no unit tests (spec §9) —
 // verified in a linked dev world.
@@ -11,10 +13,38 @@
 // fields baked in, and saving those would corrupt `_source`. The *schema*
 // (structure) still comes from the live model — it carries no values.
 
+import { CLASS_IDS } from "../data/item/choices";
+
 const fields = foundry.data.fields;
 const { getProperty, setProperty, deleteProperty } = foundry.utils;
 
-type RowKind = "text" | "textarea" | "number" | "checkbox" | "select" | "multiselect" | "json";
+type RowKind =
+  | "text"
+  | "textarea"
+  | "number"
+  | "checkbox"
+  | "select"
+  | "multiselect"
+  | "json"
+  | "nullcheck"
+  | "lines";
+
+/** How a "lines" textarea is parsed back: one entry per line, or a structured line. */
+type LineMode = "text" | "number" | "multiclass" | "levels";
+
+/**
+ * Item fields edited as a textarea, keyed by document path. Anything not listed
+ * here keeps the generic handling (scalars, selects, multiselects, JSON fallback).
+ */
+const LINE_FIELDS: Record<string, LineMode> = {
+  "system.grantedFeatures": "text", // class, race
+  "system.bonusLanguages": "text", // race
+  "system.effectRefs": "text", // class-feature
+  "system.automation.effectRefs": "text", // spell
+  "system.hpRolls": "number", // class
+  "system.allowedMulticlass": "multiclass", // race: one "a, b" combination per line
+  "system.classLevelLimits": "levels", // race: one "classId: number" per line
+};
 
 interface FieldRow {
   /** dot-path used as the input `name` and as the update key: "name", "img", "system.<path>" */
@@ -27,6 +57,12 @@ interface FieldRow {
   choices?: { value: string; label: string; selected: boolean }[];
   /** a nullable `choices` field — its <select> gets `data-null="true"` so "" round-trips to null */
   nullable?: boolean;
+  /** a "lines" row's parser mode (copied to `data-lines` on the textarea) */
+  lineMode?: LineMode;
+  /** a child of a nullable group: the group's dot-path (its toggle is `data-null-toggle`) */
+  nullGroup?: string;
+  /** a child of a nullable group that starts hidden because the group is unset */
+  hidden?: boolean;
 }
 
 /** "chassisId" -> "Chassis Id", "hp_rolls" -> "Hp Rolls". */
@@ -69,34 +105,118 @@ function isComplexField(field: unknown): boolean {
   );
 }
 
+/** The textarea text for a LINE_FIELDS value (inverse of {@link parseLines}). */
+function formatLines(value: unknown, mode: LineMode): string {
+  if (mode === "levels") {
+    if (!value || typeof value !== "object") return "";
+    return Object.entries(value as Record<string, unknown>)
+      .map(([id, n]) => `${id}: ${String(n ?? "null")}`)
+      .join("\n");
+  }
+  if (!Array.isArray(value)) return "";
+  if (mode === "multiclass") {
+    return value.map((combo) => (Array.isArray(combo) ? combo.join(", ") : "")).join("\n");
+  }
+  return value.join("\n");
+}
+
+type ParseResult = { ok: true; value: unknown } | { ok: false };
+
+/**
+ * Parse a LINE_FIELDS textarea. Blank lines are dropped. Any unknown class id, a
+ * non-numeric number, or a malformed "classId: number" line fails the whole field
+ * (the caller then leaves the stored value untouched and reports it).
+ */
+function parseLines(text: string, mode: LineMode): ParseResult {
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  const isClassId = (id: string): boolean => (CLASS_IDS as readonly string[]).includes(id);
+  switch (mode) {
+    case "text":
+      return { ok: true, value: lines };
+    case "number": {
+      const nums = lines.map((l) => Number(l));
+      return nums.every((n) => Number.isFinite(n)) ? { ok: true, value: nums } : { ok: false };
+    }
+    case "multiclass": {
+      const combos = lines.map((l) => l.split(",").map((s) => s.trim()));
+      return combos.every((c) => c.every(isClassId)) ? { ok: true, value: combos } : { ok: false };
+    }
+    case "levels": {
+      const limits: Record<string, number | null> = {};
+      for (const line of lines) {
+        const colon = line.indexOf(":");
+        if (colon < 0) return { ok: false };
+        const id = line.slice(0, colon).trim();
+        const raw = line.slice(colon + 1).trim();
+        if (!isClassId(id)) return { ok: false };
+        if (raw === "null") {
+          limits[id] = null;
+          continue;
+        }
+        const n = Number(raw);
+        if (raw === "" || !Number.isFinite(n)) return { ok: false };
+        limits[id] = n;
+      }
+      return { ok: true, value: limits };
+    }
+  }
+}
+
+/** A child's initial value for each key of a SchemaField (what a null group shows). */
+function initialsOf(schema: foundry.data.fields.SchemaField.Any): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(schema.fields).map(([key, f]) => [
+      key,
+      (f as unknown as { getInitialValue(source: object): unknown }).getInitialValue({}),
+    ]),
+  );
+}
+
 function walk(
   schema: foundry.data.fields.SchemaField.Any,
   source: Record<string, unknown>, // the document's `_source` object
   prefix: string, // "system" or "system.<...>"
   depth: number,
   out: FieldRow[],
+  initials?: Record<string, unknown>, // a null nullable group's children show these instead
 ): void {
   for (const [key, field] of Object.entries(schema.fields)) {
     const path = `${prefix}.${key}`;
-    const value = getProperty(source, path);
+    const value = getProperty(source, path) ?? initials?.[key];
 
     if (field instanceof fields.SchemaField) {
       const nullable = (field as unknown as { nullable?: boolean }).nullable === true;
-      if (nullable && (value === null || value === undefined)) {
-        // A currently-null nullable SchemaField (e.g. weapon.range): render one JSON
-        // textarea. Recursing would emit empty number inputs that flip null -> {0,0,0}
-        // on Save. To set it, paste an object into the textarea.
-        out.push({
-          path,
-          label: humanizeKey(key),
-          indent: depth * 12,
-          kind: "json",
-          value: JSON.stringify(value ?? null, null, 2),
-        });
+      if (nullable) {
+        // A nullable group (e.g. weapon.range): a "Set" checkbox heads it. Its children
+        // always render (hidden while unset) so ticking the box needs no re-save; an
+        // unset group is saved as null, a set one as the children's object.
+        const isSet = value !== null && value !== undefined;
+        out.push({ path, label: humanizeKey(key), indent: depth * 12, kind: "nullcheck", value: isSet });
+        const start = out.length;
+        walk(field, source, path, depth + 1, out, isSet ? undefined : initialsOf(field));
+        for (const row of out.slice(start)) {
+          row.nullGroup = path;
+          row.hidden = !isSet;
+        }
       } else {
         out.push({ path, label: humanizeKey(key), indent: depth * 12, header: true });
         walk(field, source, path, depth + 1, out);
       }
+      continue;
+    }
+    const lineMode = LINE_FIELDS[path];
+    if (lineMode) {
+      out.push({
+        path,
+        label: humanizeKey(key),
+        indent: depth * 12,
+        kind: "lines",
+        lineMode,
+        value: formatLines(value, lineMode),
+      });
       continue;
     }
     if (field instanceof fields.ArrayField && isChoiceElement(field.element)) {
@@ -229,7 +349,9 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
   const Mixed = foundry.applications.api.HandlebarsApplicationMixin(Base as never);
 
   abstract class RawFieldSheet extends (Mixed as unknown as new (...args: never[]) => {
+    element: HTMLElement;
     _prepareContext(options: unknown): Promise<Record<string, unknown>>;
+    _onRender(context: unknown, options: unknown): Promise<void>;
     _processFormData(event: unknown, form: HTMLFormElement, formData: unknown): Record<string, unknown>;
     document: foundry.abstract.Document.Any;
   }) {
@@ -251,8 +373,23 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
       return context;
     }
 
+    /** Wires each nullable group's "Set" checkbox to show/hide its child rows live. */
+    override async _onRender(context: unknown, options: unknown): Promise<void> {
+      await super._onRender(context, options);
+      for (const toggle of Array.from(this.element.querySelectorAll<HTMLInputElement>("input[data-null-toggle]"))) {
+        toggle.addEventListener("change", () => {
+          for (const row of Array.from(
+            this.element.querySelectorAll<HTMLElement>(`[data-null-group="${toggle.dataset.nullToggle ?? ""}"]`),
+          )) {
+            row.style.display = toggle.checked ? "" : "none";
+          }
+        });
+      }
+    }
+
     /**
-     * Round-trips nullable `choices` <select>s ("" -> null) and JSON textareas.
+     * Round-trips nullable `choices` <select>s ("" -> null), nullable-group toggles
+     * (unchecked -> null), LINE_FIELDS textareas, and JSON textareas.
      *
      * The per-field try/catch below isolates *unparseable* textarea text only. JSON
      * that parses but fails DataModel validation still aborts the whole save inside
@@ -268,9 +405,24 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
       for (const el of Array.from(form.querySelectorAll<HTMLSelectElement>('select[data-null="true"]'))) {
         if (el.value === "") setProperty(submitData, el.name, null);
       }
+      for (const el of Array.from(form.querySelectorAll<HTMLInputElement>("input[data-null-toggle]"))) {
+        // A checked group's children already arrived as the nested object (their
+        // names are the schema keys); only an unchecked group needs forcing to null.
+        if (!el.checked && el.dataset.nullToggle) setProperty(submitData, el.dataset.nullToggle, null);
+      }
       for (const el of Array.from(form.querySelectorAll<HTMLDetailsElement>('details[data-multiselect="true"]'))) {
         const picked = Array.from(el.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked'), (i) => i.value);
         setProperty(submitData, el.dataset.path ?? "", picked);
+      }
+      for (const el of Array.from(form.querySelectorAll<HTMLTextAreaElement>("textarea[data-lines]"))) {
+        const path = el.name;
+        const parsed = parseLines(el.value, el.dataset.lines as LineMode);
+        if (parsed.ok) {
+          setProperty(submitData, path, parsed.value);
+        } else {
+          deleteProperty(submitData, path);
+          ui.notifications?.error(game.i18n!.format("ADND2E.sheets.badJson", { field: path }));
+        }
       }
       for (const el of Array.from(form.querySelectorAll<HTMLTextAreaElement>('[data-json="true"]'))) {
         const path = el.name;
