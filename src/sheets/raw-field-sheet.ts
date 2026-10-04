@@ -505,7 +505,7 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
           setProperty(submitData, path, parsed.value);
         } else {
           deleteProperty(submitData, path);
-          ui.notifications?.error(game.i18n!.format("ADND2E.sheets.badJson", { field: path }));
+          ui.notifications?.error(game.i18n!.format("ADND2E.sheets.badListEntry", { field: path }));
         }
       }
       for (const el of Array.from(form.querySelectorAll<HTMLTextAreaElement>('[data-json="true"]'))) {
