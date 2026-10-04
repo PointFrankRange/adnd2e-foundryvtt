@@ -181,3 +181,19 @@
     }
   }
 }
+
+// Item sheet checkbox dropdowns (spell schools and spheres): each box sits
+// directly before its own label, so the choice reads as one unit.
+.adnd2e.raw-field-sheet.item details.multiselect {
+  .multiselect-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin: 2px 12px 2px 0;
+    white-space: nowrap;
+  }
+  .multiselect-option input[type="checkbox"] {
+    margin: 0;
+    flex: none;
+  }
+}
