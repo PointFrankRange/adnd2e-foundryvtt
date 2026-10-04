@@ -103,6 +103,7 @@ export interface SpellcasterActor {
         sphereAccessOverride: string[] | null;
         spellPoints: { maxSpellLevel?: number; maxPerLevel?: number; sp?: number; spent?: number; remaining?: number };
         channelling: { current?: number; max?: number };
+        fatigueSaveBonus: number;
       };
     };
   };

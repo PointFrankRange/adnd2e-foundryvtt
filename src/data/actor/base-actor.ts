@@ -239,6 +239,10 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
           current: new NumberField({ required: true, integer: true, initial: 0 }),
           max: new NumberField({ required: true, nullable: true, integer: true, initial: null }),
         }),
+        /** Sub-project 14 fix round: a priest's own banked Recover-from-Fatigue
+         *  bonus (mirrors the wizard's fatigueSaveBonus; a priest-only channeller
+         *  banks here, never on the wizard's counter). */
+        fatigueSaveBonus: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       }),
     }),
     biography: htmlField(),

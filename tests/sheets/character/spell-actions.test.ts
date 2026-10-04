@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { castOrBegin } from "../../../src/sheets/character/casting-actions";
+import { recoverFromFatigue, resolveMortalFatigue } from "../../../src/sheets/character/fatigue-actions";
 import { FATIGUE_CONDITION_ID } from "../../../src/core/magic/channeller-fatigue";
 import {
   castFreeTheurgy,
@@ -39,6 +40,7 @@ interface ActorOpts {
   priestChassis?: string | null;
   priestSp?: Record<string, number | undefined>;
   priestChannelling?: { current?: number; max?: number };
+  priestFatigueSaveBonus?: number;
   priestMemorized?: SpellcasterActor["system"]["spellcasting"]["priest"]["memorized"];
   priestSlots?: Record<string, { max: number; used: number }>;
   /** XP on the priest class item; the level is derived from it (3000 XP = cleric level 3). */
@@ -82,6 +84,7 @@ function makeActor(opts: ActorOpts = {}): SpellcasterActor {
           sphereAccessOverride: opts.sphereAccessOverride ?? null,
           spellPoints: opts.priestSp ?? {},
           channelling: opts.priestChannelling ?? {},
+          fatigueSaveBonus: opts.priestFatigueSaveBonus ?? 0,
         },
       },
     },
@@ -636,5 +639,83 @@ describe("castOrBegin and fatigue — priest channelling", () => {
     });
     await castSpell(actor, "clw-id");
     expect(actor.toggleStatusEffect).toHaveBeenCalledWith(FATIGUE_CONDITION_ID.heavy, { active: true });
+  });
+});
+
+describe("fatigue save bonus — priest banks its own counter", () => {
+  const FATIGUED_RULES = {
+    spellsAndMagicEnabled: true, spellPoints: true, channelers: true, channellerFatigue: true,
+  };
+  /** The natural d20 the fake Roll returns: 1 fails the ppd save (target 12), 20 passes. */
+  let naturalD20 = 1;
+
+  class FakeRoll {
+    formula: string;
+    dice: { total: number }[];
+    total: number;
+    constructor(formula: string) {
+      this.formula = formula;
+      this.dice = [{ total: naturalD20 }];
+      this.total = naturalD20;
+    }
+    async evaluate(): Promise<this> {
+      return this;
+    }
+    async toMessage(): Promise<void> {
+      return undefined;
+    }
+  }
+
+  beforeEach(() => {
+    rules = { ...FATIGUED_RULES };
+    vi.stubGlobal("Roll", FakeRoll);
+    vi.stubGlobal("foundry", {
+      applications: { handlebars: { renderTemplate: vi.fn(async () => "<p>save</p>") } },
+    });
+    vi.stubGlobal("ChatMessage", { getSpeaker: vi.fn(() => ({})), create: vi.fn(async () => undefined) });
+    vi.stubGlobal("ui", { notifications: { warn, info: vi.fn() } });
+  });
+
+  it("a priest-only channeller's failed recover roll increments the priest counter, not the wizard's", async () => {
+    naturalD20 = 1;
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestChannelling: { current: 40, max: 40 },
+      priestFatigueSaveBonus: 2,
+    });
+    actor.statuses = new Set([FATIGUE_CONDITION_ID.heavy]);
+    await recoverFromFatigue(actor);
+    expect(actor.update).toHaveBeenCalledTimes(1);
+    expect(actor.update).toHaveBeenCalledWith({ "system.spellcasting.priest.fatigueSaveBonus": 3 });
+  });
+
+  it("a priest-only channeller's passed recover roll clears the priest counter and drops one tier", async () => {
+    naturalD20 = 20;
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestChannelling: { current: 40, max: 40 },
+      priestFatigueSaveBonus: 2,
+    });
+    actor.statuses = new Set([FATIGUE_CONDITION_ID.heavy]);
+    await recoverFromFatigue(actor);
+    expect(actor.update).toHaveBeenCalledWith({ "system.spellcasting.priest.fatigueSaveBonus": 0 });
+    expect(actor.toggleStatusEffect).toHaveBeenCalledWith(FATIGUE_CONDITION_ID.heavy, { active: false });
+  });
+
+  it("a wizard's failed recover roll still increments the wizard counter", async () => {
+    naturalD20 = 1;
+    const actor = makeActor({});
+    actor.statuses = new Set([FATIGUE_CONDITION_ID.heavy]);
+    await recoverFromFatigue(actor);
+    expect(actor.update).toHaveBeenCalledWith({ "system.spellcasting.wizard.fatigueSaveBonus": 1 });
+  });
+
+  it("a priest's mortal-tier resolution writes neither counter (the mortal save carries no bonus)", async () => {
+    naturalD20 = 1;
+    const actor = makeActor({ priestChassis: "cleric", priestChannelling: { current: 40, max: 40 }, priestFatigueSaveBonus: 2 });
+    await resolveMortalFatigue(actor);
+    expect(actor.update).toHaveBeenCalledWith({ "system.attributes.hp.value": 0 });
+    expect(actor.toggleStatusEffect).toHaveBeenCalledWith("dead", { active: true });
+    expect(JSON.stringify((actor.update as ReturnType<typeof vi.fn>).mock.calls)).not.toContain("fatigueSaveBonus");
   });
 });

@@ -68,13 +68,27 @@ export async function resolveMortalFatigue(
   ui.notifications?.info(game.i18n!.localize("ADND2E.sheet.spells.mortalFatigueSurvived"));
 }
 
+/** The caster whose banked `fatigueSaveBonus` a Recover-from-Fatigue roll uses.
+ *  A priest-only channeller (its priest channelling max derived, the wizard's
+ *  not) banks its own counter. Everyone else, including a wizard/priest
+ *  multiclass, keeps the wizard counter, exactly as before. */
+export function fatigueCasterKey(actor: SpellcasterActor): "wizard" | "priest" {
+  const priestOnly =
+    typeof actor.system.spellcasting.priest.channelling.max === "number" &&
+    typeof actor.system.spellcasting.wizard.channelling.max !== "number";
+  return priestOnly ? "priest" : "wizard";
+}
+
 /** The Recover-from-Fatigue sheet action: one saving throw using the banked
- *  `fatigueSaveBonus` counter. Success drops one tier (clearing the
- *  condition entirely from light) and resets the counter; failure increments
- *  it. No-ops with a warning if not currently fatigued or the rule is off. */
+ *  `fatigueSaveBonus` counter of `fatigueCasterKey(actor)`. Success drops one
+ *  tier (clearing the condition entirely from light) and resets the counter;
+ *  failure increments it. No-ops with a warning if not currently fatigued or
+ *  the rule is off. */
 export async function recoverFromFatigue(
   actor: SpellcasterActor,
 ): Promise<void> {
+  const caster = fatigueCasterKey(actor);
+  const counterPath = `system.spellcasting.${caster}.fatigueSaveBonus`;
   if (!channellerFatigueEnabled(getOptionalRules())) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.channellingBlockedWarning"));
     return;
@@ -84,16 +98,16 @@ export async function recoverFromFatigue(
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.fatigueRecoveryNotFatigued"));
     return;
   }
-  const bonus = actor.system.spellcasting.wizard.fatigueSaveBonus;
+  const bonus = actor.system.spellcasting[caster].fatigueSaveBonus;
   const succeeded = await rollParalyzationSave(actor, bonus);
   if (succeeded) {
     const next = nextTierDown(currentTier);
     await actor.toggleStatusEffect(FATIGUE_CONDITION_ID[currentTier], { active: false });
     if (next !== null) await actor.toggleStatusEffect(FATIGUE_CONDITION_ID[next], { active: true });
-    await actor.update({ "system.spellcasting.wizard.fatigueSaveBonus": 0 });
+    await actor.update({ [counterPath]: 0 });
     ui.notifications?.info(game.i18n!.localize("ADND2E.sheet.spells.fatigueRecoverySuccess"));
   } else {
-    await actor.update({ "system.spellcasting.wizard.fatigueSaveBonus": bonus + 1 });
+    await actor.update({ [counterPath]: bonus + 1 });
     ui.notifications?.info(game.i18n!.localize("ADND2E.sheet.spells.fatigueRecoveryFailure"));
   }
 }
