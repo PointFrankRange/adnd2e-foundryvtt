@@ -1,5 +1,37 @@
 import { describe, expect, it } from "vitest";
-import { paladinSpellSlots, rangerSpellSlots, bardSpellSlots } from "../../../src/core/magic/class-slots";
+import {
+  paladinSpellSlots,
+  rangerSpellSlots,
+  bardSpellSlots,
+  isPriestPoolProgression,
+  isPriestSpellProgression,
+} from "../../../src/core/magic/class-slots";
+
+describe("isPriestPoolProgression()", () => {
+  it("true only for the priest progression (cleric and druid)", () => {
+    expect(isPriestPoolProgression("priest")).toBe(true);
+  });
+  it("false for paladin, ranger, wizard, bard, and a non-caster", () => {
+    expect(isPriestPoolProgression("paladin")).toBe(false);
+    expect(isPriestPoolProgression("ranger")).toBe(false);
+    expect(isPriestPoolProgression("wizard")).toBe(false);
+    expect(isPriestPoolProgression("bard")).toBe(false);
+    expect(isPriestPoolProgression(null)).toBe(false);
+  });
+});
+
+describe("isPriestSpellProgression()", () => {
+  it("true for the priest, paladin and ranger progressions", () => {
+    expect(isPriestSpellProgression("priest")).toBe(true);
+    expect(isPriestSpellProgression("paladin")).toBe(true);
+    expect(isPriestSpellProgression("ranger")).toBe(true);
+  });
+  it("false for wizard, bard, and a non-caster", () => {
+    expect(isPriestSpellProgression("wizard")).toBe(false);
+    expect(isPriestSpellProgression("bard")).toBe(false);
+    expect(isPriestSpellProgression(null)).toBe(false);
+  });
+});
 
 describe("paladinSpellSlots() (PHB Table 17)", () => {
   it("no spells before level 9", () => {

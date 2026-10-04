@@ -22,6 +22,7 @@ import type {
 import { mainScoreFromSubs, SUB_ABILITIES } from "../../core/abilities/sub-abilities";
 import { applyRacialDeltas } from "../../core/abilities/racial-adjustments";
 import { getChassis } from "../../core/classes/chassis";
+import { isPriestPoolProgression, isPriestSpellProgression } from "../../core/magic/class-slots";
 import { MANEUVERS } from "../../core/combat/maneuvers";
 import { canAffordCast, channellersEnabled } from "../../core/magic/channellers";
 import { channellerFatigueEnabled, FATIGUE_CONDITION_ID, FATIGUE_RECOVERY_INTERVAL, fatigueMovementRate } from "../../core/magic/channeller-fatigue";
@@ -660,13 +661,17 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   const sc = input.derived.spellcasting;
   const school = sc.wizard.specialistSchool;
   const priestChassisId =
-    input.classItems.find((c) => getChassis(c.chassisId as ClassId).spellProgressionId === "priest")
+    input.classItems.find((c) => isPriestSpellProgression(getChassis(c.chassisId as ClassId).spellProgressionId))
       ?.chassisId ?? null;
   const sphereAccessOverride = sc.priest.sphereAccessOverride as SphereName[] | null;
   const int = input.derived.abilities.int.mods as IntelligenceModifiers;
   const specialistSchool = school as WizardSchool | null;
   const casting = buildCastingPanel(input);
   const spellPointsOn = spellPointsEnabled(input.optionalRules);
+  // The priest pool applies only to a cleric/druid chassis. A paladin or ranger
+  // keeps its classic slot table under the rule (no pool to draw on).
+  const priestPoolOn =
+    spellPointsOn && isPriestPoolProgression(priestChassisId ? getChassis(priestChassisId as ClassId).spellProgressionId : null);
   // `?? {}` handles BOTH shapes the field can take: a test fixture that omits
   // it entirely (undefined), and real system data's ObjectField default of
   // `{}` (present but empty) when the rule is off or there's no wizard caster.
@@ -687,7 +692,7 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
     let items = levelItems.map((s) =>
       buildSpellRow(
         s, sc, priestChassisId, sphereAccessOverride, learnCtx, fav,
-        spellPointsOn, wizardSp, channellingOn, wizardChannelling, priestSp,
+        spellPointsOn, wizardSp, channellingOn, wizardChannelling, priestSp, priestPoolOn,
       ),
     );
     items = casting ? items.map((r) => ({ ...r, canCast: false })) : items;
@@ -695,8 +700,8 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   }
   return {
     wizardSlots: toSlotRows(sc.wizard.slots),
-    // Under the priest spell-points rule the classic priest slot rows are hidden: the pool replaces them.
-    priestSlots: spellPointsOn ? [] : toSlotRows(sc.priest.slots),
+    // Under the priest pool rule (cleric/druid) the classic priest slot rows are hidden: the pool replaces them.
+    priestSlots: priestPoolOn ? [] : toSlotRows(sc.priest.slots),
     specialistSchoolLabel: school ? input.config.schools[school] : null,
     known,
     orphaned: buildOrphanedSpells(input, sc),
@@ -719,10 +724,10 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
           (channellingOn ? canAffordCast(wizardChannelling.current ?? 0, m.spellLevel, "free") : !m.expended),
       })),
     priestSpellPoints:
-      spellPointsOn && typeof priestSp.remaining === "number"
+      priestPoolOn && typeof priestSp.remaining === "number"
         ? { max: priestSp.sp ?? 0, spent: priestSp.spent ?? 0, remaining: priestSp.remaining }
         : null,
-    ...buildPriestFreeTheurgy(sc, priestChassisId, sphereAccessOverride, spellPointsOn, casting !== null, input.spellItems),
+    ...buildPriestFreeTheurgy(sc, priestChassisId, sphereAccessOverride, priestPoolOn, casting !== null, input.spellItems),
   };
 }
 
@@ -735,13 +740,13 @@ function buildPriestFreeTheurgy(
   sc: CharacterDerivedView["spellcasting"],
   priestChassisId: string | null,
   sphereAccessOverride: SphereName[] | null,
-  spellPointsOn: boolean,
+  priestPoolOn: boolean,
   casting: boolean,
   spellItems: SpellItemView[],
 ): Pick<CharacterSheetContext["spells"], "priestFreeMemorize" | "priestFreeTheurgies"> {
   const pool = sc.priest.spellPoints ?? {};
   const memorized = sc.priest.memorized;
-  const poolOn = spellPointsOn && typeof pool.remaining === "number";
+  const poolOn = priestPoolOn && typeof pool.remaining === "number";
   const priestFreeMemorize: CharacterSheetContext["spells"]["priestFreeMemorize"] = [];
   if (poolOn) {
     for (let level = 1; level <= 7; level += 1) {
@@ -853,6 +858,7 @@ function buildSpellRow(
   channellingOn: boolean,
   wizardChannelling: CharacterDerivedView["spellcasting"]["wizard"]["channelling"],
   priestSp: PriestPoolView,
+  priestPoolOn: boolean,
 ): SpellItemView {
   const isWizard = item.casterClass === "wizard";
   const memorizedList = isWizard ? sc.wizard.memorized : sc.priest.memorized;
@@ -868,7 +874,7 @@ function buildSpellRow(
     // Sub-project 14 Plan B: memorizing costs nothing from a channeller's
     // pool (design spec §1.1) — only the Table 17 caps above still gate it.
     hasFreeSlot = channellingOn ? atLevelOk : atLevelOk && (wizardSp.remaining ?? 0) >= magickCost(item.level, "fixed");
-  } else if (!isWizard && spellPointsOn) {
+  } else if (!isWizard && priestPoolOn) {
     // Sub-project 14 priest theurgies: under the rule the pool prices a fixed
     // theurgy at the row's Table 29 scope, with the same cap and pool check
     // canReMemorize applies. No access scope means no row can be memorized.

@@ -1,4 +1,5 @@
 import { getChassis } from "../../../core/classes/chassis";
+import { paladinSpellSlots, rangerSpellSlots } from "../../../core/magic/class-slots";
 import { priestSpellSlots } from "../../../core/magic/priest-slots";
 import { wizardSpellSlots } from "../../../core/magic/wizard-slots";
 import type { ClassId } from "../../../core/types";
@@ -32,7 +33,8 @@ function toRecord(perLevel: readonly number[], memorized: readonly MemorizedEntr
  * §5.6 step 8 — spell slots for the two full-caster progressions (Ruling CASTER1).
  * Wizard: `casterType === "wizard"` AND `spellProgressionId === "wizard"`.
  * Priest: `casterType === "priest"` AND `spellProgressionId === "priest"` (i.e.
- * Cleric / Druid). Paladin / Ranger / Bard return `{}`.
+ * Cleric / Druid). Paladin / Ranger (Table 17 / 18) take the same `priest` record,
+ * with no Wisdom bonus. Bard returns `{}`.
  */
 export function deriveSpellSlots(input: SpellSlotInput): { wizard?: SlotRecord; priest?: SlotRecord } {
   const chassis = getChassis(input.chassisId);
@@ -51,6 +53,12 @@ export function deriveSpellSlots(input: SpellSlotInput): { wizard?: SlotRecord; 
       wisdomBonusSpells: input.wisdomBonusSpells,
     });
     return { priest: toRecord(slots.perLevel, input.priestMemorized) };
+  }
+  if (chassis.casterType === "priest" && chassis.spellProgressionId === "paladin") {
+    return { priest: toRecord(paladinSpellSlots(input.level), input.priestMemorized) };
+  }
+  if (chassis.casterType === "priest" && chassis.spellProgressionId === "ranger") {
+    return { priest: toRecord(rangerSpellSlots(input.level), input.priestMemorized) };
   }
   return {};
 }

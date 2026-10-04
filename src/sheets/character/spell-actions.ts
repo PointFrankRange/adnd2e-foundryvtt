@@ -1,4 +1,5 @@
 import { getChassis } from "../../core/classes/chassis";
+import { isPriestPoolProgression, isPriestSpellProgression } from "../../core/magic/class-slots";
 import { canAffordCast, channellersEnabled, recoverSp, spendCastSp, type ChannellerActivity } from "../../core/magic/channellers";
 import { channellerFatigueEnabled, FATIGUE_CONDITION_ID, resolveCastFatigue, tierForConditionId, type FatigueTier } from "../../core/magic/channeller-fatigue";
 import { canAffordMemorize, spellPointsEnabled, spellsMemorizedAtLevel } from "../../core/magic/spell-points";
@@ -113,9 +114,18 @@ function findPriestChassisId(actor: SpellcasterActor): ClassId | null {
   for (const item of actor.items) {
     if (item.type !== "class") continue;
     const chassisId = item.system.chassisId as ClassId | undefined;
-    if (chassisId && getChassis(chassisId).spellProgressionId === "priest") return chassisId;
+    if (chassisId && isPriestSpellProgression(getChassis(chassisId).spellProgressionId)) return chassisId;
   }
   return null;
+}
+
+/** Whether the actor's priest chassis casts from the spell-points priest pool:
+ *  the rule is on AND the chassis is cleric/druid. A paladin or ranger keeps its
+ *  classic slots under the rule (see isPriestPoolProgression). */
+function priestPoolOn(actor: SpellcasterActor): boolean {
+  if (!spellPointsEnabled(getOptionalRules())) return false;
+  const chassisId = findPriestChassisId(actor);
+  return chassisId !== null && isPriestPoolProgression(getChassis(chassisId).spellProgressionId);
 }
 
 /** Finds the actor's wizard-progression class item (if any) and returns its
@@ -194,7 +204,7 @@ function canReMemorize(actor: SpellcasterActor, spell: SpellItemHandle): boolean
   const sc = actor.system.spellcasting[key];
   if (sc.memorized.some((m) => m.spellItemId === spell.id)) return false;
 
-  if (key === "priest" && spellPointsEnabled(getOptionalRules())) {
+  if (key === "priest" && priestPoolOn(actor)) {
     // Priest spell points: the pool prices the theurgy, so no classic slot check.
     const scope = priestScopeFor(actor, spell);
     return scope !== null && canMemorizePriestSpellPoints(actor, spell.system.level, "fixed", scope);
@@ -239,9 +249,10 @@ export async function memorizeSpell(actor: SpellcasterActor, spellItemId: string
   const list = actor.system.spellcasting[key].memorized;
   const rulesOn = spellPointsEnabled(getOptionalRules());
   const magickType: "fixed" | undefined = key === "wizard" && rulesOn ? "fixed" : undefined;
-  // Fail closed: a priest entry under the rule must carry its Table 29 scope, so a null scope is refused rather than written without one.
-  const scope = key === "priest" && rulesOn ? priestScopeFor(actor, spell) : null;
-  if (key === "priest" && rulesOn && scope === null) {
+  const poolOn = key === "priest" && priestPoolOn(actor);
+  // Fail closed: a pool-priced priest entry must carry its Table 29 scope, so a null scope is refused rather than written without one.
+  const scope = poolOn ? priestScopeFor(actor, spell) : null;
+  if (poolOn && scope === null) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.memorizeBlockedWarning"));
     return;
   }
@@ -648,7 +659,7 @@ export async function memorizeFreeTheurgy(
     );
   if (
     !majorAccessOk ||
-    !spellPointsEnabled(getOptionalRules()) ||
+    !priestPoolOn(actor) ||
     !canMemorizePriestSpellPoints(actor, spellLevel, "free", scope)
   ) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.memorizeBlockedWarning"));

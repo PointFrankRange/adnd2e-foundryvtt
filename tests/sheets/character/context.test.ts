@@ -2759,6 +2759,32 @@ describe("buildCharacterSheetContext — priest spell points (SP14 priest)", () 
     expect(c.spells.known[0]!.items[0]!.canMemorize).toBe(false);
   });
 
+  it("paladin under the rule keeps its classic slot table and a Memorize button (no pool)", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        classItems: [{ ...clericClass, id: "p1", name: "Paladin", chassisId: "paladin" }],
+        derived: {
+          ...input().derived,
+          spellcasting: {
+            wizard: { specialistSchool: null, slots: {}, memorized: [] },
+            priest: { slots: { "1": { max: 2, used: 0 } }, memorized: [], sphereAccessOverride: null },
+          },
+        },
+        optionalRules: priestRules,
+        spellItems: [priestSpell({})],
+      }),
+    );
+    expect(c.spells.priestSlots).toEqual([{ level: 1, max: 2, used: 0 }]);
+    expect(c.spells.priestSpellPoints).toBeNull();
+    expect(c.spells.known[0]!.items[0]!.canMemorize).toBe(true);
+  });
+
+  it("cleric under the rule still uses the pool: classic slot rows hidden, pool row shown", () => {
+    const c = buildCharacterSheetContext(priestInputWithPool({ remaining: 40 }, { spellItems: [priestSpell({})] }));
+    expect(c.spells.priestSlots).toEqual([]);
+    expect(c.spells.priestSpellPoints).toEqual({ max: 40, spent: 0, remaining: 40 });
+  });
+
   it("hides the priest classic slot rows when the rule is on", () => {
     const on = buildCharacterSheetContext(priestInputWithPool({ remaining: 40 }));
     expect(on.spells.priestSlots).toEqual([]);

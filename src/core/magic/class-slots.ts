@@ -2,12 +2,30 @@
 // spell slots. Paladin and Ranger get no Wisdom bonus spells (PHB p.28-29);
 // Bards cast wizard spells and never specialise.
 import { assertLevel, assertSpellLevel } from "../errors";
-import type { SpellSlots } from "../types";
+import type { SpellProgressionId, SpellSlots } from "../types";
 import {
   BARD_SPELL_PROGRESSION,
   PALADIN_SPELL_PROGRESSION,
   RANGER_SPELL_PROGRESSION,
 } from "./tables";
+
+/**
+ * Whether a chassis progression casts from the priest spell list (on classic
+ * slots, and with the priest sphere-access tables): cleric/druid ("priest"),
+ * paladin, and ranger. Wizard and bard are not priest progressions.
+ */
+export function isPriestSpellProgression(progressionId: SpellProgressionId | null): boolean {
+  return progressionId === "priest" || progressionId === "paladin" || progressionId === "ranger";
+}
+
+/**
+ * Whether a priest-progression chassis casts from the spell-points priest pool
+ * (cleric and druid, "priest" only). Paladins and rangers have no pool: they
+ * stay on classic slots even when the spell-points rule is on.
+ */
+export function isPriestPoolProgression(progressionId: SpellProgressionId | null): boolean {
+  return progressionId === "priest";
+}
 
 const PALADIN_START = 9;
 const RANGER_START = 8;

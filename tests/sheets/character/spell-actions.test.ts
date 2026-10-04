@@ -283,6 +283,39 @@ describe("memorizeFreeTheurgy — priest free theurgies", () => {
   });
 });
 
+// Under the rule a paladin or ranger has no pool: memorizing stays on classic slots.
+describe("memorizeSpell / memorizeFreeTheurgy — paladin and ranger under the spell-points rule", () => {
+  // Paladin: healing (major). Ranger: animal (major); healing is outside its spheres.
+  const ANIMAL1 = spellItem({ id: "ani-1", name: "Animal Friendship", casterClass: "priest", level: 1, spheres: ["animal"] });
+  it.each([
+    ["paladin", CLW],
+    ["ranger", ANIMAL1],
+  ])("%s writes a classic entry (no magickType, no theurgyScope) even with an affordable pool", async (chassis, spell) => {
+    const actor = makeActor({ priestChassis: chassis, priestSp: affordablePool, priestSlots: { 1: { max: 2, used: 0 } }, items: [spell] });
+    await memorizeSpell(actor, spell.id);
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [{ spellItemId: spell.id, spellLevel: 1, expended: false, magickType: undefined }],
+    });
+    const written = (actor.update as ReturnType<typeof vi.fn>).mock.calls[0][0] as Record<string, Array<Record<string, unknown>>>;
+    expect(written["system.spellcasting.priest.memorized"][0]).not.toHaveProperty("theurgyScope");
+    expect(written["system.spellcasting.priest.memorized"][0]!.magickType).toBeUndefined();
+  });
+
+  it("refuses a paladin memorize with no free classic slot under the rule", async () => {
+    const actor = makeActor({ priestChassis: "paladin", priestSlots: { 1: { max: 1, used: 1 } }, items: [CLW] });
+    await memorizeSpell(actor, "clw-id");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
+
+  it("refuses a paladin free theurgy under the rule (free theurgies are pool-only)", async () => {
+    const actor = makeActor({ priestChassis: "paladin", priestSp: affordablePool, items: [HEAL3] });
+    await memorizeFreeTheurgy(actor, 3, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
+});
+
 describe("forgetFreeTheurgy — priest free theurgies", () => {
   it("removes only the entry matching its scope and expended state", async () => {
     const major: MemorizedEntry = { spellItemId: null, spellLevel: 3, expended: false, magickType: "free", theurgyScope: "major" };

@@ -171,6 +171,25 @@ export const DRUID_SPHERE_ACCESS: Partial<Record<SphereName, SphereAccess>> = {
   divination: "minor",
 };
 
+/**
+ * The Paladin's priest spheres (PHB p.28): major access to combat, divination,
+ * healing, and protection. Major (not minor) because Spells & Magic lets paladins
+ * reach 4th-level spells from these spheres; the slot table already limits level.
+ */
+// prettier-ignore
+export const PALADIN_SPHERE_ACCESS: Partial<Record<SphereName, SphereAccess>> = {
+  combat: "major", divination: "major", healing: "major", protection: "major",
+};
+
+/**
+ * The Ranger's priest spheres (PHB p.28): major access to animal and plant.
+ * Major, for the same reason as the Paladin table.
+ */
+// prettier-ignore
+export const RANGER_SPHERE_ACCESS: Partial<Record<SphereName, SphereAccess>> = {
+  animal: "major", plant: "major",
+};
+
 export interface SpecialistProfile {
   school: WizardSchool;
   /** schools whose spells this specialist can never learn or cast (PHB Table 22) */
