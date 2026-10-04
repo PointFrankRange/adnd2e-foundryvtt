@@ -157,6 +157,8 @@
   // media query would size the columns to the browser instead of the sheet.
   .raw-field-list { container-type: inline-size; }
   .raw-title-row { display: flex; align-items: center; gap: 8px; }
+  .raw-subtitle { font-size: 12px; font-style: italic; color: var(--kit-muted); margin: 2px 0 4px; }
+  .raw-description textarea { width: 100%; box-sizing: border-box; min-height: 180px; resize: vertical; }
   input.raw-name {
     flex: 1; min-width: 0; font-family: Georgia, "Times New Roman", serif;
     font-size: 20px; font-weight: 700; color: var(--kit-accent-ink);
