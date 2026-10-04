@@ -24,7 +24,7 @@
 
     {{#if description}}
       <section class="kit-panel raw-description">
-        <div class="kit-bar">Description</div>
+        <div class="kit-bar">{{localize 'ADND2E.sheets.descriptionTitle'}}</div>
         <div class="kit-body">
           <textarea name="{{description.path}}" rows="12"
             {{#unless @root.editable}}readonly{{/unless}}>{{description.value}}</textarea>
@@ -37,7 +37,7 @@
         <section class="kit-panel raw-group">
           <div class="kit-bar">
             {{#if this.isHeader}}
-              {{this.title}}
+              {{#if this.titleKey}}{{localize this.titleKey}}{{else}}{{this.title}}{{/if}}
             {{else}}
               <label><input type="checkbox" data-null-toggle="{{this.toggle.path}}" {{#if this.toggle.value}}checked{{/if}}
                 {{#unless @root.editable}}disabled{{/unless}}> Set {{this.toggle.label}}</label>

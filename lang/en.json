@@ -667,7 +667,9 @@
       "rawItem": "Raw Fields (Item)",
       "rawEffect": "Raw Fields (Effect)",
       "badJson": "{field}: invalid JSON — not saved",
-      "badListEntry": "{field}: one or more entries aren't valid — not saved"
+      "badListEntry": "{field}: one or more entries aren't valid — not saved",
+      "detailsTitle": "Details",
+      "descriptionTitle": "Description"
     },
     "settings": {
       "exceptionalStrength": {
