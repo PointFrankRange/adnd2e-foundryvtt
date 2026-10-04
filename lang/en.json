@@ -370,6 +370,7 @@
         "wizardSlots": "Wizard Spell Slots",
         "priestSlots": "Priest Spell Slots",
         "specialist": "Specialist",
+        "orisons": "Orisons",
         "known": "Known Spells",
         "spellbook": "In spellbook",
         "level": "Level {level}",

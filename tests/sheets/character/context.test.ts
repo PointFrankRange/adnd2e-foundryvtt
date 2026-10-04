@@ -2732,6 +2732,39 @@ describe("buildCharacterSheetContext — priest spell points (SP14 priest)", () 
     expect(c.spells.priestFreeMemorize).toEqual([]);
   });
 
+  // A 3rd-level cleric (3000 XP): Table 26 max per level 5, so the orison cap is 10.
+  const cleric3 = { ...clericClass, xp: 3000 };
+
+  it("lists a level-0 priest spell under orisons with canMemorize while under the cap", () => {
+    const c = buildCharacterSheetContext(
+      priestInputWithPool(
+        { remaining: 5, maxPerLevel: 5 },
+        { classItems: [cleric3], spellItems: [priestSpell({ id: "o1", level: 0, name: "Alleviate" })] },
+      ),
+    );
+    expect(c.spells.orisons.map((r) => r.name)).toEqual(["Alleviate"]);
+    expect(c.spells.orisons[0]!.canMemorize).toBe(true);
+    expect(c.spells.known.flatMap((g) => g.items).some((r) => r.level === 0)).toBe(false);
+  });
+
+  it("refuses an orison once the orison cap (2 x maxPerLevel) is full, even with SP to spare", () => {
+    const full = Array.from({ length: 10 }, (_, i) => ({
+      spellItemId: `o${i}`, spellLevel: 0, expended: false, magickType: "fixed", theurgyScope: "universal",
+    }));
+    const c = buildCharacterSheetContext(
+      priestInputWithPool(
+        { remaining: 40, maxPerLevel: 5, memorized: full },
+        { classItems: [cleric3], spellItems: [priestSpell({ id: "o11", level: 0, name: "Light 11" })] },
+      ),
+    );
+    expect(c.spells.orisons[0]!.canMemorize).toBe(false);
+  });
+
+  it("shows no orisons with the rule off", () => {
+    const c = buildCharacterSheetContext(priestInputWithPool({ remaining: 5 }, { optionalRules: DEFAULT_OPTIONAL_RULES, spellItems: [priestSpell({ level: 0 })] }));
+    expect(c.spells.orisons).toEqual([]);
+  });
+
   it("shows the priest SP bar with the pool's max, spent and remaining", () => {
     const c = buildCharacterSheetContext(priestInputWithPool({ remaining: 3 }));
     expect(c.spells.priestSpellPoints).toEqual({ max: 40, spent: 37, remaining: 3 });

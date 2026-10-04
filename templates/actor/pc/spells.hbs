@@ -53,6 +53,29 @@
     </section>
   {{/if}}
 
+  {{#if adnd2e.spells.orisons.length}}
+    <section class="kit-panel">
+      <div class="kit-bar">{{localize 'ADND2E.sheet.spells.orisons'}}</div>
+      <div class="kit-body">
+        {{#each adnd2e.spells.orisons as |s|}}
+          <div class="spell-row" data-item-id="{{s.id}}">
+            <span class="name">{{s.name}}</span>
+            {{#if s.canMemorize}}
+              <button type="button" data-action="memorizeSpell" data-item-id="{{s.id}}">
+                {{localize 'ADND2E.sheet.spells.memorize'}}
+              </button>
+            {{/if}}
+            {{#if s.memorized}}
+              <button type="button" data-action="forgetSpell" data-item-id="{{s.id}}">
+                {{localize 'ADND2E.sheet.spells.forget'}}
+              </button>
+            {{/if}}
+          </div>
+        {{/each}}
+      </div>
+    </section>
+  {{/if}}
+
   <section class="kit-panel">
     <div class="kit-bar">
       {{localize 'ADND2E.sheet.spells.known'}}

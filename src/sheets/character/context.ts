@@ -42,6 +42,8 @@ import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { canMemorizePriestSpell, priestAccessScope, priestFreeCastEligible, priestHasMajorAccessAtLevel } from "../../magic/priest-sphere-access";
 import { priestPoolAffords, type PriestPoolView } from "../../core/magic/priest-spell-points";
 import { magickCost, spellPointsEnabled, spellsMemorizedAtLevel } from "../../core/magic/spell-points";
+import { orisonAffords, orisonCap } from "../../core/magic/priest-orisons";
+import { classItemLevel } from "../../data/derive/class-item";
 import { CONDITIONS } from "../../conditions";
 import { groupInventory } from "./grouping";
 import { xpToNext } from "./xp";
@@ -681,6 +683,7 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   // Sub-project 14 priest theurgies: same `?? {}` story as wizardSp.
   const priestSp = sc.priest.spellPoints ?? {};
 
+  // Orisons (level 0) are listed under `orisons` below, never in `known`; the loop starts at level 1.
   const known: { level: number; items: SpellItemView[] }[] = [];
   for (let level = 1; level <= 9; level += 1) {
     const levelItems = input.spellItems.filter((s) => s.level === level);
@@ -698,12 +701,18 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
     items = casting ? items.map((r) => ({ ...r, canCast: false })) : items;
     if (items.length > 0) known.push({ level, items });
   }
+  const orisons = priestPoolOn
+    ? buildOrisonRows(input, sc, priestChassisId, sphereAccessOverride, fav, {
+        spellPointsOn, wizardSp, channellingOn, wizardChannelling, priestSp, priestPoolOn,
+      })
+    : [];
   return {
     wizardSlots: toSlotRows(sc.wizard.slots),
     // Under the priest pool rule (cleric/druid) the classic priest slot rows are hidden: the pool replaces them.
     priestSlots: priestPoolOn ? [] : toSlotRows(sc.priest.slots),
     specialistSchoolLabel: school ? input.config.schools[school] : null,
     known,
+    orisons,
     orphaned: buildOrphanedSpells(input, sc),
     casting,
     spellPoints:
@@ -729,6 +738,51 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
         : null,
     ...buildPriestFreeTheurgy(sc, priestChassisId, sphereAccessOverride, priestPoolOn, casting !== null, input.spellItems),
   };
+}
+
+/** The orison group: each level-0 priest spell as a row whose `canMemorize` is
+ *  Task 4's orison rule (the same `orisonAffords` canReMemorize uses), with the
+ *  cap read from the priest class item's own level (classItemLevel on its xp,
+ *  as spell-actions does). The caller only invokes this under the priest pool. */
+function buildOrisonRows(
+  input: CharacterSheetInput,
+  sc: CharacterDerivedView["spellcasting"],
+  priestChassisId: string | null,
+  sphereAccessOverride: SphereName[] | null,
+  fav: FavCheck,
+  pool: {
+    spellPointsOn: boolean;
+    wizardSp: CharacterDerivedView["spellcasting"]["wizard"]["spellPoints"];
+    channellingOn: boolean;
+    wizardChannelling: CharacterDerivedView["spellcasting"]["wizard"]["channelling"];
+    priestSp: PriestPoolView;
+    priestPoolOn: boolean;
+  },
+): SpellItemView[] {
+  const priestClass = input.classItems.find((c) => c.chassisId === priestChassisId);
+  const priestLevel = priestClass ? classItemLevel(priestClass.chassisId as ClassId, priestClass.xp) : 0;
+  // Orisons are priest rows, so canLearn is always false and the learn context
+  // is never consulted; the level-0 placeholders only satisfy buildSpellRow's shape.
+  const learnCtx: LearnEligibilityContext = {
+    int: input.derived.abilities.int.mods as IntelligenceModifiers,
+    specialistSchool: sc.wizard.specialistSchool as WizardSchool | null,
+    knownAtThisLevel: 0,
+    castableAtThisLevel: false,
+    optionalRules: input.optionalRules,
+  };
+  const memorizedOrisons = sc.priest.memorized.filter((m) => m.spellLevel === 0).length;
+  return input.spellItems
+    .filter((s) => s.level === 0 && s.casterClass === "priest")
+    .map((s) => {
+      const row = buildSpellRow(
+        s, sc, priestChassisId, sphereAccessOverride, learnCtx, fav,
+        pool.spellPointsOn, pool.wizardSp, pool.channellingOn, pool.wizardChannelling, pool.priestSp, pool.priestPoolOn,
+      );
+      return {
+        ...row,
+        canMemorize: !row.memorized && orisonAffords(pool.priestSp.remaining ?? 0, memorizedOrisons, orisonCap(priestLevel)),
+      };
+    });
 }
 
 /** Sub-project 14 priest theurgies: the free-theurgy controls. A memorize row
