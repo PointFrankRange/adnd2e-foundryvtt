@@ -8,12 +8,18 @@ import { classItemLevel } from "../../data/derive/class-item";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { buildCastCardContext } from "../../magic/cast-card";
 import { buildLearnSpellCardContext } from "../../magic/learn-spell-card";
-import { canMemorizePriestSpell, priestAccessScope, priestHasMajorAccessAtLevel } from "../../magic/priest-sphere-access";
+import {
+  canMemorizePriestSpell,
+  priestAccessScope,
+  priestFreeCastEligible,
+  priestHasMajorAccessAtLevel,
+  type PriestFreeMagickFilter,
+} from "../../magic/priest-sphere-access";
 import { priestPoolAffords, priestScopeAllowsFree, type TheurgyScope, type TheurgyType } from "../../core/magic/priest-spell-points";
 import { TEMPLATE_PATH } from "../../constants";
 import { getOptionalRules } from "../../settings";
 import { resolveMortalFatigue } from "./fatigue-actions";
-import { priestFreeCastEligible, promptFreeMagickSpell, type FreeMagickCastActor, type PriestFreeMagickFilter } from "./free-magick-dialog";
+import { promptFreeMagickSpell, type FreeMagickCastActor } from "./free-magick-dialog";
 
 /* ---------------------------------------------------------------------------
  * spell-actions — SP4a.
@@ -697,10 +703,15 @@ export async function castFreeTheurgy(
     chassisId: findPriestChassisId(actor),
     sphereAccessOverride: actor.system.spellcasting.priest.sphereAccessOverride as SphereName[] | null,
   };
+  // No eligible spell at this column and level: say so specifically, before any prompt.
+  if (![...actor.items].some((i) => i.type === "spell" && priestFreeCastEligible(filter, i.system, spellLevel))) {
+    ui.notifications?.warn(game.i18n!.format("ADND2E.sheet.spells.noEligiblePriestSpell", { level: String(spellLevel) }));
+    return;
+  }
   const chosenId = await promptFreeMagickSpell(actor as unknown as FreeMagickCastActor, spellLevel, filter);
   if (!chosenId) return;
   const chosen = actor.items.get(chosenId);
-  if (!chosen || !priestFreeCastEligible(filter, chosen, spellLevel)) {
+  if (!chosen || !priestFreeCastEligible(filter, chosen.system, spellLevel)) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
     return;
   }

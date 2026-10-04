@@ -1,6 +1,35 @@
 import { describe, expect, it } from "vitest";
-import { canMemorizePriestSpell, priestAccessScope, priestHasMajorAccessAtLevel } from "../../src/magic/priest-sphere-access";
+import { canMemorizePriestSpell, priestAccessScope, priestFreeCastEligible, priestHasMajorAccessAtLevel } from "../../src/magic/priest-sphere-access";
 import type { SphereName } from "../../src/core/types";
+
+describe("priestFreeCastEligible", () => {
+  const healing2 = { casterClass: "priest", level: 2, spheres: ["healing"] };
+  const elemental2 = { casterClass: "priest", level: 2, spheres: ["elemental"] };
+  const major = { scope: "major" as const, chassisId: "cleric", sphereAccessOverride: null };
+  const universal = { scope: "universal" as const, chassisId: "cleric", sphereAccessOverride: null };
+
+  it("major scope: a priest spell with major access at the level is eligible", () => {
+    expect(priestFreeCastEligible(major, healing2, 2)).toBe(true);
+  });
+
+  it("major scope: a minor-access spell (elemental at 2nd level) is not eligible", () => {
+    expect(priestFreeCastEligible(major, elemental2, 2)).toBe(false);
+  });
+
+  it("universal scope: any priest spell of the level is eligible, with no access check", () => {
+    expect(priestFreeCastEligible(universal, elemental2, 2)).toBe(true);
+    expect(priestFreeCastEligible(universal, healing2, 2)).toBe(true);
+  });
+
+  it("rejects a spell of another level, or a non-priest spell", () => {
+    expect(priestFreeCastEligible(universal, healing2, 3)).toBe(false);
+    expect(priestFreeCastEligible(major, { ...healing2, casterClass: "wizard" }, 2)).toBe(false);
+  });
+
+  it("major scope with no priest class (null chassis) is never eligible", () => {
+    expect(priestFreeCastEligible({ ...major, chassisId: null }, healing2, 2)).toBe(false);
+  });
+});
 
 describe("priestAccessScope", () => {
   it("returns major when any sphere is major at this level", () => {

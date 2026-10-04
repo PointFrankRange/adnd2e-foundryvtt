@@ -386,6 +386,7 @@
         "orphanedEntry": "Level {level} spell (item no longer exists)",
         "memorizeBlockedWarning": "That spell can no longer be memorized — refresh the sheet.",
         "castBlockedWarning": "That spell can't be cast right now — refresh the sheet.",
+        "noEligiblePriestSpell": "No priest spell of level {level} qualifies for this free theurgy — add one to the character's spells.",
         "castRollFailedWarning": "This spell's damage/healing formula couldn't be rolled — check the item's Automation fields.",
         "learn": "Learn Spell",
         "learnBlockedWarning": "That spell can no longer be learned — refresh the sheet.",
@@ -746,7 +747,7 @@
       },
       "spellPoints": {
         "name": "Spells & Magic: Spell Points",
-        "hint": "Wizards spend a spell-point pool to memorize fixed magicks (one specific spell) or free magicks (any spell of that level, chosen when cast) instead of filling flat per-level slots for free (Player's Option: Spells & Magic)."
+        "hint": "Wizards and priests spend a spell-point pool to memorize fixed magicks or theurgies (one specific spell) or free magicks or theurgies (any spell of that level, chosen when cast) instead of filling flat per-level slots for free (Player's Option: Spells & Magic)."
       },
       "expandedCastingTime": {
         "name": "Spells & Magic: Expanded Casting Time",

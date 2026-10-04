@@ -76,3 +76,34 @@ export function priestHasMajorAccessAtLevel(
   const table = effectiveSphereAccess(chassisId, sphereAccessOverride);
   return Object.values(table).some((access) => access === "major") && canCastSphereSpell("major", spellLevel);
 }
+
+/** The priest free-theurgy filter: the Table 29 column being cast, plus what
+ *  the priest's sphere access is computed from (see priestAccessScope). */
+export interface PriestFreeMagickFilter {
+  scope: "major" | "universal";
+  chassisId: string | null;
+  sphereAccessOverride: readonly SphereName[] | null;
+}
+
+/** The spell fields the free-theurgy eligibility test reads. Both the Foundry
+ *  item's `system` and the sheet's SpellItemView satisfy it. */
+export interface PriestTheurgyCandidate {
+  casterClass?: string;
+  level?: number;
+  spheres?: readonly string[];
+}
+
+/** Whether a priest spell may be cast as a free theurgy of this column at
+ *  this spell level. Universal free: any priest spell of the level. Major
+ *  free: the spell must be major-access for this priest at that level. The
+ *  single source of truth for the cast prompt, castFreeTheurgy's re-check, and
+ *  the sheet's Cast-button flag. */
+export function priestFreeCastEligible(
+  filter: PriestFreeMagickFilter,
+  spell: PriestTheurgyCandidate,
+  spellLevel: number,
+): boolean {
+  if (spell.casterClass !== "priest" || spell.level !== spellLevel) return false;
+  if (filter.scope === "universal") return true;
+  return priestAccessScope(filter.chassisId, filter.sphereAccessOverride, (spell.spheres ?? []) as SphereName[], spellLevel) === "major";
+}

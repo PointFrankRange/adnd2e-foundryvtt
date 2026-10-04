@@ -38,7 +38,7 @@ import type { AttackRate, SpecialistWeaponClass } from "../../core/weapons/speci
 import { matchingAmmo, defaultAmmoSelection } from "../../combat/ammo";
 import type { AmmoStock } from "../../combat/ammo";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
-import { canMemorizePriestSpell, priestAccessScope, priestHasMajorAccessAtLevel } from "../../magic/priest-sphere-access";
+import { canMemorizePriestSpell, priestAccessScope, priestFreeCastEligible, priestHasMajorAccessAtLevel } from "../../magic/priest-sphere-access";
 import { priestPoolAffords, type PriestPoolView } from "../../core/magic/priest-spell-points";
 import { magickCost, spellPointsEnabled, spellsMemorizedAtLevel } from "../../core/magic/spell-points";
 import { CONDITIONS } from "../../conditions";
@@ -722,7 +722,7 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
       spellPointsOn && typeof priestSp.remaining === "number"
         ? { max: priestSp.sp ?? 0, spent: priestSp.spent ?? 0, remaining: priestSp.remaining }
         : null,
-    ...buildPriestFreeTheurgy(sc, priestChassisId, sphereAccessOverride, spellPointsOn, casting !== null),
+    ...buildPriestFreeTheurgy(sc, priestChassisId, sphereAccessOverride, spellPointsOn, casting !== null, input.spellItems),
   };
 }
 
@@ -737,6 +737,7 @@ function buildPriestFreeTheurgy(
   sphereAccessOverride: SphereName[] | null,
   spellPointsOn: boolean,
   casting: boolean,
+  spellItems: SpellItemView[],
 ): Pick<CharacterSheetContext["spells"], "priestFreeMemorize" | "priestFreeTheurgies"> {
   const pool = sc.priest.spellPoints ?? {};
   const memorized = sc.priest.memorized;
@@ -754,12 +755,24 @@ function buildPriestFreeTheurgy(
   const priestFreeTheurgies: CharacterSheetContext["spells"]["priestFreeTheurgies"] = [];
   for (const m of memorized) {
     if (m.magickType !== "free" || (m.theurgyScope !== "major" && m.theurgyScope !== "universal")) continue;
+    const scope = m.theurgyScope;
     priestFreeTheurgies.push({
       level: m.spellLevel,
       scope: m.theurgyScope,
       scopeLabelKey: m.theurgyScope === "major" ? "ADND2E.sheet.spells.freeTheurgyMajor" : "ADND2E.sheet.spells.freeTheurgyUniversal",
       expended: m.expended,
-      canCast: !casting && !m.expended,
+      // Cast is offered only when some priest spell qualifies for this column
+      // and level (the same predicate castFreeTheurgy re-checks).
+      canCast:
+        !casting &&
+        !m.expended &&
+        spellItems.some((s) =>
+          priestFreeCastEligible(
+            { scope, chassisId: priestChassisId, sphereAccessOverride },
+            s,
+            m.spellLevel,
+          ),
+        ),
     });
   }
   return { priestFreeMemorize, priestFreeTheurgies };
