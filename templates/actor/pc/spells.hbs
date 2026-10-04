@@ -197,6 +197,8 @@
               <button type="button" data-action="castFreeTheurgy" data-level="{{t.level}}" data-scope="{{t.scope}}">
                 {{localize 'ADND2E.sheet.spells.cast'}}
               </button>
+            {{else if t.noEligibleSpell}}
+              <span class="placeholder">{{localize 'ADND2E.sheet.spells.noEligiblePriestSpell' level=t.level}}</span>
             {{/if}}
             <button type="button" data-action="forgetFreeTheurgy" data-level="{{t.level}}" data-scope="{{t.scope}}" data-expended="{{t.expended}}">
               {{localize 'ADND2E.sheet.spells.forget'}}

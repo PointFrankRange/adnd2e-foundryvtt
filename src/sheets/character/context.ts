@@ -756,6 +756,9 @@ function buildPriestFreeTheurgy(
   for (const m of memorized) {
     if (m.magickType !== "free" || (m.theurgyScope !== "major" && m.theurgyScope !== "universal")) continue;
     const scope = m.theurgyScope;
+    const hasEligible = spellItems.some((s) =>
+      priestFreeCastEligible({ scope, chassisId: priestChassisId, sphereAccessOverride }, s, m.spellLevel),
+    );
     priestFreeTheurgies.push({
       level: m.spellLevel,
       scope: m.theurgyScope,
@@ -763,16 +766,10 @@ function buildPriestFreeTheurgy(
       expended: m.expended,
       // Cast is offered only when some priest spell qualifies for this column
       // and level (the same predicate castFreeTheurgy re-checks).
-      canCast:
-        !casting &&
-        !m.expended &&
-        spellItems.some((s) =>
-          priestFreeCastEligible(
-            { scope, chassisId: priestChassisId, sphereAccessOverride },
-            s,
-            m.spellLevel,
-          ),
-        ),
+      canCast: !casting && !m.expended && hasEligible,
+      // The inline reason shown in place of Cast. Only when the row is blocked
+      // by the missing spell alone (not expended, not mid-cast, rule on).
+      noEligibleSpell: poolOn && !casting && !m.expended && !hasEligible,
     });
   }
   return { priestFreeMemorize, priestFreeTheurgies };
