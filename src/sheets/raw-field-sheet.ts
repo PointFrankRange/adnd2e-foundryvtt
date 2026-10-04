@@ -355,14 +355,20 @@ interface FieldGroup {
   rows: FieldRow[];
 }
 
+/** The `system` path of the base item model's HTML description (rendered as its own panel). */
+const DESCRIPTION_PATH = "system.description";
+
 /**
  * Splits {@link buildFieldRows}' flat list for the item sheet. `header` holds the name
- * and image rows; `groups` holds one "Details" panel for the top-level fields (when any)
- * then one panel per `system` SchemaField group, in schema order. Rows deeper than a
- * group heading stay in that group with their indent and data attributes unchanged.
+ * and image rows; `description` is the `system.description` row (its own full-width
+ * panel, under the header); `groups` holds one "Details" panel for the other top-level
+ * fields (when any) then one panel per `system` SchemaField group, in schema order.
+ * Rows deeper than a group heading stay in that group with their indent and data
+ * attributes unchanged.
  */
-function groupFieldRows(rows: FieldRow[]): { header: FieldRow[]; groups: FieldGroup[] } {
+function groupFieldRows(rows: FieldRow[]): { header: FieldRow[]; description?: FieldRow; groups: FieldGroup[] } {
   const header: FieldRow[] = [];
+  let description: FieldRow | undefined;
   const details: FieldGroup = { title: "Details", isHeader: true, rows: [] };
   const groups: FieldGroup[] = [];
   let current: FieldGroup | undefined;
@@ -377,6 +383,9 @@ function groupFieldRows(rows: FieldRow[]): { header: FieldRow[]; groups: FieldGr
       } else if (row.header) {
         current = { title: row.label, isHeader: true, rows: [] };
         groups.push(current);
+      } else if (row.path === DESCRIPTION_PATH) {
+        current = undefined;
+        description = row;
       } else {
         current = undefined;
         details.rows.push(row);
@@ -385,7 +394,28 @@ function groupFieldRows(rows: FieldRow[]): { header: FieldRow[]; groups: FieldGr
       (current ?? details).rows.push(row);
     }
   }
-  return { header, groups: details.rows.length ? [details, ...groups] : groups };
+  return { header, description, groups: details.rows.length ? [details, ...groups] : groups };
+}
+
+/** Values of a choice-array field on the authored source (empty when unset). */
+function sourceList(source: Record<string, unknown>, path: string): string[] {
+  const value = getProperty(source, path);
+  return Array.isArray(value) ? value.map(String) : [];
+}
+
+/**
+ * The item sheet's subtitle: its type label, then its category where it has one (spells:
+ * schools and spheres; weapons: the proficiency group). Plain text, read from the source.
+ */
+function itemSubtitle(type: string, source: Record<string, unknown>): string {
+  let category: string[] = [];
+  if (type === "spell") category = [...sourceList(source, "system.schools"), ...sourceList(source, "system.spheres")];
+  else if (type === "weapon") {
+    const group = getProperty(source, "system.proficiencyGroup");
+    if (typeof group === "string" && group) category = [group];
+  }
+  const label = game.i18n!.localize(`TYPES.Item.${type}`);
+  return [label, category.join(", ")].filter((part) => part.length > 0).join(" · ");
 }
 
 /**
@@ -418,7 +448,12 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
         (this.document as { _source?: unknown })._source) as Record<string, unknown>;
       const grouped = groupFieldRows(buildFieldRows(this.document, source));
       context.header = grouped.header;
+      context.description = grouped.description;
       context.groups = grouped.groups;
+      context.subtitle =
+        this.document.documentName === "Item"
+          ? itemSubtitle((this.document as unknown as { type: string }).type, source)
+          : undefined;
       return context;
     }
 
