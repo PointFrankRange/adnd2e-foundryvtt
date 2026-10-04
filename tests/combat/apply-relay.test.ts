@@ -13,7 +13,7 @@ import {
 describe("constants", () => {
   it("pins the query name, conditions and apply modes", () => {
     expect(RELAY_QUERY).toBe("adnd2e.applyEffect");
-    expect([...RELAY_CONDITIONS]).toEqual(["stunned", "prone", "held"]);
+    expect([...RELAY_CONDITIONS]).toEqual(["stunned", "prone", "held", "turned"]);
     expect([...PLAYER_APPLY_MODES]).toEqual(["auto", "approve"]);
     expect(DEFAULT_PLAYER_APPLY_MODE).toBe("auto");
   });
@@ -73,5 +73,21 @@ describe("relayEffectText", () => {
     expect(relayEffectText({ kind: "healing", targetUuid: t, amount: 3 })).toEqual({ key: "ADND2E.relay.effect.healing", data: { amount: 3 } });
     expect(relayEffectText({ kind: "condition", targetUuid: t, conditionId: "held" })).toEqual({ key: "ADND2E.relay.effect.condition", data: { condition: "held" } });
     expect(relayEffectText({ kind: "unequip", targetUuid: t })).toEqual({ key: "ADND2E.relay.effect.unequip", data: {} });
+  });
+});
+
+describe("destroy requests", () => {
+  const t = "Scene.a.Token.b.Actor.c";
+  it("validates a destroy request and rejects a missing target", () => {
+    expect(validateRelayRequest({ kind: "destroy", targetUuid: t, extra: 1 })).toEqual({ kind: "destroy", targetUuid: t });
+    expect(validateRelayRequest({ kind: "destroy", targetUuid: "" })).toBeNull();
+  });
+  it("accepts the turned condition", () => {
+    expect(validateRelayRequest({ kind: "condition", targetUuid: t, conditionId: "turned" })).toEqual({
+      kind: "condition", targetUuid: t, conditionId: "turned",
+    });
+  });
+  it("names the destroy effect for the GM log", () => {
+    expect(relayEffectText({ kind: "destroy", targetUuid: t })).toEqual({ key: "ADND2E.relay.effect.destroy", data: {} });
   });
 });

@@ -1,0 +1,15 @@
+<div class="adnd2e chat-card turn-undead-roll">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} — {{localize 'ADND2E.chat.turn.title'}}</h3>
+  </header>
+  <p class="formula">{{formula}} = <strong>{{naturalD20}}</strong> ({{localize 'ADND2E.chat.turn.level'}}: {{level}})</p>
+  <p class="hint">{{localize 'ADND2E.chat.turn.affectedCap'}}: {{cap}} · {{localize 'ADND2E.chat.turn.bonusCap'}}: {{bonusCap}}</p>
+  <ul class="turn-results">
+    {{#each rows}}
+      <li class="status-{{this.status}}"><img src="{{this.img}}" alt="" width="24" height="24"> <span class="name">{{this.name}}</span> — {{localize this.statusLabel}}</li>
+    {{else}}
+      <li>{{localize 'ADND2E.chat.turn.noRows'}}</li>
+    {{/each}}
+  </ul>
+</div>

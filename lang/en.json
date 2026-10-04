@@ -577,6 +577,22 @@
       }
     },
     "chat": {
+      "turn": {
+        "title": "Turn Undead",
+        "level": "Turning level",
+        "affectedCap": "Undead affected (2d6)",
+        "bonusCap": "Bonus creatures per D* type (2d4)",
+        "noRows": "No targets.",
+        "status": {
+          "notUndead": "Not undead — unaffected",
+          "untagged": "Undead type not set — skipped",
+          "cannot": "Cannot be turned at this level",
+          "fail": "Resists the turning",
+          "turned": "Turned",
+          "destroyed": "Destroyed",
+          "unaffected": "Turned, but beyond the number affected"
+        }
+      },
       "attack": {
         "rollAttack": "Roll Attack",
         "manualAcTitle": "Target Armor Class",
@@ -806,7 +822,8 @@
         "damage": "{amount} damage",
         "healing": "{amount} healing",
         "condition": "the {condition} condition",
-        "unequip": "a disarm (unequip weapon)"
+        "unequip": "a disarm (unequip weapon)",
+        "destroy": "destruction (turned to dust)"
       }
     }
   },

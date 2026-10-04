@@ -1,3 +1,5 @@
+import type { TurnStatus } from "../core/turning";
+
 export interface ModifierLine { label: string; value: number }
 
 /* ---------- attack ---------- */
@@ -154,4 +156,29 @@ export interface ThiefSkillCardContext {
   roll: number;
   target: number;
   success: boolean;
+}
+
+/* ---------- turn undead ---------- */
+
+export interface TurnCardInput {
+  actorName: string;
+  actorImg: string;
+  naturalD20: number;
+  level: number;
+  /** the 2d6 roll: how many undead can be affected */
+  cap: number;
+  /** the 2d4 roll: extra creatures of a D* type */
+  bonusCap: number;
+  rows: { name: string; img: string; status: TurnStatus }[];
+}
+
+export interface TurnCardContext {
+  actorName: string;
+  actorImg: string;
+  formula: string;
+  naturalD20: number;
+  level: number;
+  cap: number;
+  bonusCap: number;
+  rows: { name: string; img: string; status: TurnStatus; statusLabel: string }[];
 }

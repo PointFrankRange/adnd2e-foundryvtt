@@ -6,8 +6,8 @@
 
 export const RELAY_QUERY = "adnd2e.applyEffect";
 
-/** The conditions a maneuver may relay (Plan 7d's called shots + grapple). */
-export const RELAY_CONDITIONS = ["stunned", "prone", "held"] as const;
+/** The conditions a maneuver may relay (Plan 7d's called shots + grapple, and SP10's turned). */
+export const RELAY_CONDITIONS = ["stunned", "prone", "held", "turned"] as const;
 export type RelayConditionId = (typeof RELAY_CONDITIONS)[number];
 
 export const PLAYER_APPLY_MODES = ["auto", "approve"] as const;
@@ -20,7 +20,8 @@ export type RelayRequest =
   | { kind: "damage"; targetUuid: string; amount: number }
   | { kind: "healing"; targetUuid: string; amount: number }
   | { kind: "condition"; targetUuid: string; conditionId: RelayConditionId }
-  | { kind: "unequip"; targetUuid: string };
+  | { kind: "unequip"; targetUuid: string }
+  | { kind: "destroy"; targetUuid: string };
 
 /** `changed` distinguishes "the request was processed" from "the target's
  *  state actually changed" — `unequip` against an already-unarmed target is
@@ -51,6 +52,8 @@ export function validateRelayRequest(raw: unknown): RelayRequest | null {
         : null;
     case "unequip":
       return { kind: "unequip", targetUuid };
+    case "destroy":
+      return { kind: "destroy", targetUuid };
     default:
       return null;
   }
@@ -80,5 +83,7 @@ export function relayEffectText(request: RelayRequest): { key: string; data: Rec
       return { key: "ADND2E.relay.effect.condition", data: { condition: request.conditionId } };
     case "unequip":
       return { key: "ADND2E.relay.effect.unequip", data: {} };
+    case "destroy":
+      return { key: "ADND2E.relay.effect.destroy", data: {} };
   }
 }
