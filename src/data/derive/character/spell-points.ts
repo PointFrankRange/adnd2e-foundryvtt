@@ -12,6 +12,7 @@ import {
   priestMaxPerLevel, priestMaxSpellLevel, priestSpellPointTotal, priestTheurgyCost,
   type TheurgyScope,
 } from "../../../core/magic/priest-spell-points";
+import { ORISON_COST_SP } from "../../../core/magic/priest-orisons";
 import type { ClassId } from "../../../core/types";
 import type { MemorizedEntry } from "./snapshot";
 
@@ -38,15 +39,24 @@ export interface SpellPointsInput {
   priestMemorized: readonly MemorizedEntry[];
 }
 
+/** Price one stored priest entry. An entry that cannot be priced (a stale or
+ *  corrupt combination) costs nothing, so bad stored data cannot stop the actor
+ *  from preparing; the sheet still shows the entry for the user to forget. */
+function priestEntryCost(m: MemorizedEntry): number {
+  if (m.spellLevel === 0) return ORISON_COST_SP;
+  try {
+    return priestTheurgyCost(m.spellLevel, m.magickType ?? "fixed", (m.theurgyScope ?? "major") as TheurgyScope);
+  } catch {
+    return 0;
+  }
+}
+
 export function deriveSpellPoints(input: SpellPointsInput): { wizard?: SpellPointsRecord; priest?: SpellPointsRecord } {
   const chassis = getChassis(input.chassisId);
   if (chassis.casterType === "priest" && chassis.spellProgressionId === "priest") {
     const sp = priestSpellPointTotal(input.priestLevel, input.wisScore, input.conHpAdjustment);
     // Ruling 3: a legacy entry with no magickType is fixed, and with no theurgyScope is major.
-    const spent = input.priestMemorized.reduce(
-      (sum, m) => sum + priestTheurgyCost(m.spellLevel, m.magickType ?? "fixed", (m.theurgyScope ?? "major") as TheurgyScope),
-      0,
-    );
+    const spent = input.priestMemorized.reduce((sum, m) => sum + priestEntryCost(m), 0);
     return {
       priest: {
         maxSpellLevel: priestMaxSpellLevel(input.priestLevel),

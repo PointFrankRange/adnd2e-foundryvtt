@@ -8,7 +8,8 @@ export class SpellItemModel extends Adnd2eItemModel {
     return {
       ...super.defineSchema(),
       casterClass: new StringField({ required: true, blank: false, initial: "wizard", choices: CASTER_CLASSES }),
-      level: new NumberField({ required: true, integer: true, min: 1, max: 9, initial: 1 }),
+      // 0 = an orison (priest-only, Spells & Magic Ch.6); wizard cantrips stay unsupported.
+      level: new NumberField({ required: true, integer: true, min: 0, max: 9, initial: 1 }),
       schools: new ArrayField(new StringField({ required: true, blank: false, choices: SPELL_SCHOOLS }), { required: true, initial: [] }),
       spheres: new ArrayField(new StringField({ required: true, blank: false, choices: SPHERE_NAMES }), { required: true, initial: [] }),
       range: new StringField({ required: true, blank: true, initial: "" }),

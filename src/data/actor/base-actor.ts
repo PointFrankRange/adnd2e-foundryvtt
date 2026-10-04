@@ -32,7 +32,8 @@ function memorizedSchema() {
   return new ArrayField(
     new SchemaField({
       spellItemId: new StringField({ required: true, nullable: true, blank: false }),
-      spellLevel: new NumberField({ required: true, integer: true, min: 1, max: 9 }),
+      // 0 = an orison (priest pool, Spells & Magic Ch.6); min 0 so a level-0 orison is stored as 0, not clamped to 1.
+      spellLevel: new NumberField({ required: true, integer: true, min: 0, max: 9 }),
       /** true once this memorized spell has been cast today — the slot stays
        *  occupied (see slots.ts's toRecord, which counts memorized.length
        *  regardless of expended) until a "Rest" action clears it. */

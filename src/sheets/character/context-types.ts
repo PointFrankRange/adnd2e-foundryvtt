@@ -461,6 +461,8 @@ export interface CharacterSheetContext {
     priestSlots: SlotRow[] | null;
     specialistSchoolLabel: string | null;
     known: { level: number; items: SpellItemView[] }[];
+    /** Orisons (Table 2 level-0 priest spells): listed apart from `known`. Empty unless the priest pool rule is on. */
+    orisons: SpellItemView[];
     orphaned: OrphanedSpellRow[];
     /** Sub-project 9a: the in-progress cast's panel, or null when idle/the rule is off */
     casting: CastingPanel | null;

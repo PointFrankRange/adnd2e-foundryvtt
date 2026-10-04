@@ -37,6 +37,8 @@ interface ActorOpts {
   priestSp?: Record<string, number | undefined>;
   priestMemorized?: SpellcasterActor["system"]["spellcasting"]["priest"]["memorized"];
   priestSlots?: Record<string, { max: number; used: number }>;
+  /** XP on the priest class item; the level is derived from it (3000 XP = cleric level 3). */
+  priestXp?: number;
   sphereAccessOverride?: string[] | null;
   wizardSp?: Record<string, number | undefined>;
   wizardSpellbookItemIds?: string[];
@@ -46,7 +48,7 @@ interface ActorOpts {
 function makeActor(opts: ActorOpts = {}): SpellcasterActor {
   const classItems = opts.priestChassis === null || opts.priestChassis === undefined
     ? []
-    : [{ id: "cls", type: "class", system: { chassisId: opts.priestChassis, xp: 0 } }];
+    : [{ id: "cls", type: "class", system: { chassisId: opts.priestChassis, xp: opts.priestXp ?? 0 } }];
   const spells = opts.items ?? [];
   const items = Object.assign([...classItems, ...spells], {
     get: (id: string) => spells.find((s) => s.id === id),
@@ -183,6 +185,51 @@ describe("memorizeSpell — priest spell points", () => {
     const entry = written["system.spellcasting.wizard.memorized"][0];
     expect(entry).toMatchObject({ spellItemId: "mage-1", magickType: "fixed" });
     expect(entry).not.toHaveProperty("theurgyScope");
+  });
+});
+
+describe("memorizeSpell — priest orisons", () => {
+  // A 3rd-level cleric (3000 XP): Table 26 max per level 5, so the orison cap is 10.
+  const ORISON = spellItem({ id: "o1", name: "Light", casterClass: "priest", level: 0, spheres: ["all"] });
+  const ORISON_CAP_FILL = Array.from({ length: 10 }, (_, i) => ({
+    spellItemId: `o${i}`,
+    spellLevel: 0,
+    expended: false,
+    magickType: "fixed" as const,
+    theurgyScope: "universal" as const,
+  }));
+  const orisonPool = { ...affordablePool, spent: 35, remaining: 5, maxPerLevel: 5 };
+
+  it("memorizes an orison at 1 SP under the pool and the 2 x maxPerLevel cap", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestXp: 3000, priestSp: orisonPool, items: [ORISON] });
+    await memorizeSpell(actor, "o1");
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [
+        { spellItemId: "o1", spellLevel: 0, expended: false, magickType: "fixed", theurgyScope: "universal" },
+      ],
+    });
+  });
+
+  it("refuses an orison once the orison cap is reached", async () => {
+    // o11 is not in the ten-entry fill (o0-o9), so the refusal can only come from the cap.
+    const ORISON_11 = spellItem({ id: "o11", name: "Light 11", casterClass: "priest", level: 0, spheres: ["all"] });
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestXp: 3000,
+      priestSp: orisonPool,
+      priestMemorized: ORISON_CAP_FILL,
+      items: [ORISON, ORISON_11],
+    });
+    await memorizeSpell(actor, "o11");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
+
+  it("refuses an orison when the spell-points rule is off", async () => {
+    rules = { spellsAndMagicEnabled: true, spellPoints: false };
+    const actor = makeActor({ priestChassis: "cleric", priestXp: 3000, priestSp: orisonPool, items: [ORISON] });
+    await memorizeSpell(actor, "o1");
+    expect(actor.update).not.toHaveBeenCalled();
   });
 });
 
