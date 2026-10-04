@@ -61,6 +61,9 @@ const PC_ONLY_ACTIONS = [
   // entries — the Character NPC sheet reuses that same shared PC template but its sheet.ts
   // has no matching action-map wiring for these three (that's PC-sheet-only, Task 4/5 of SP14a).
   "memorizeFreeMagick", "castFreeMagick", "forgetFreeMagick",
+  // Sub-project 14 priest theurgies: the priest free-theurgy controls in spells.hbs are gated
+  // behind `@root.pcActions` too, and only the PC sheet wires these three actions.
+  "memorizeFreeTheurgy", "castFreeTheurgy", "forgetFreeTheurgy",
   // Sub-project 14 Plan B whole-branch fix I2: recoverChannellerSp is NOT
   // PC-only — a Character NPC channeller needs to recover spell points too,
   // so the Recover button in spells.hbs is unconditional and this sheet now

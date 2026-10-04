@@ -39,6 +39,8 @@ function memorizedSchema() {
       expended: new BooleanField({ required: true, initial: false }),
       /** Sub-project 14 Plan A: which spell-point magick this is; absent for an entry created before the rule ever ran (treated as fixed, see core/magic/spell-points.ts). */
       magickType: new StringField({ required: true, nullable: true, initial: null, choices: ["fixed", "free"] }),
+      /** Sub-project 14 priest theurgies: the Table 29 column (major / minor for fixed; major / universal for free). null for wizard entries. */
+      theurgyScope: new StringField({ required: true, nullable: true, initial: null, choices: ["major", "minor", "universal"] }),
     }),
     { required: true, initial: [] },
   );
@@ -229,6 +231,8 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
         sphereAccessOverride: new ArrayField(new StringField({ required: true, blank: false, choices: SPHERE_NAMES }), { required: true, nullable: true, initial: null }),
         memorized: memorizedSchema(),
         slots: new ObjectField({ required: true, initial: {} }),
+        /** Sub-project 14 priest spell points: cached deriveSpellPoints() priest output (mirrors wizard.spellPoints; left alone when there is no priest-progression caster). */
+        spellPoints: new ObjectField({ required: true, initial: {} }),
       }),
     }),
     biography: htmlField(),
@@ -343,7 +347,7 @@ interface DerivedWriteSurface {
   proficiencies: unknown;
   thiefSkills: { total: number; spent: number; available: number; allocations: unknown };
   languagesKnown: unknown;
-  spellcasting: { wizard: { slots: unknown; spellPoints: unknown; channelling: { max: unknown } }; priest: { slots: unknown } };
+  spellcasting: { wizard: { slots: unknown; spellPoints: unknown; channelling: { max: unknown } }; priest: { slots: unknown; spellPoints: unknown } };
 }
 
 /**
@@ -394,6 +398,7 @@ export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void 
   if (derived.spellSlots.wizard) sys.spellcasting.wizard.slots = derived.spellSlots.wizard;
   if (derived.spellSlots.priest) sys.spellcasting.priest.slots = derived.spellSlots.priest;
   if (derived.spellPoints.wizard) sys.spellcasting.wizard.spellPoints = derived.spellPoints.wizard;
+  if (derived.spellPoints.priest) sys.spellcasting.priest.spellPoints = derived.spellPoints.priest;
   // channelling.current is PERSISTED — only .max is overwritten here (mirrors attributes.hp.max's own derived-overwrite pattern).
   if (derived.channelling.wizard) sys.spellcasting.wizard.channelling.max = derived.channelling.wizard.max;
 }

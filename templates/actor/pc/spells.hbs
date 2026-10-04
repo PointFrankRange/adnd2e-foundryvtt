@@ -35,6 +35,15 @@
     </section>
   {{/if}}
 
+  {{#if adnd2e.spells.priestSpellPoints}}
+    <section class="kit-panel">
+      <div class="kit-bar">{{localize 'ADND2E.sheet.spells.priestSpellPoints'}}</div>
+      <div class="kit-body">
+        <p>{{adnd2e.spells.priestSpellPoints.remaining}} / {{adnd2e.spells.priestSpellPoints.max}}</p>
+      </div>
+    </section>
+  {{/if}}
+
   {{#if adnd2e.spells.priestSlots}}
     <section class="kit-panel">
       <div class="kit-bar">{{localize 'ADND2E.sheet.spells.priestSlots'}}</div>
@@ -148,6 +157,71 @@
               {{/if}}
             </span>
             <button type="button" data-action="forgetFreeMagick" data-level="{{m.level}}" data-expended="{{m.expended}}">
+              {{localize 'ADND2E.sheet.spells.forget'}}
+            </button>
+          </div>
+        {{/each}}
+      </div>
+    </section>
+  {{/if}}
+
+  {{#if adnd2e.spells.priestSpellPoints}}
+    <section class="kit-panel">
+      <div class="kit-bar">{{localize 'ADND2E.sheet.spells.freeTheurgy'}}</div>
+      <div class="kit-body">
+        {{#each adnd2e.spells.priestFreeMemorize as |m|}}
+          <div class="spell-row">
+            <span class="name">{{localize 'ADND2E.sheet.spells.level' level=m.level}}</span>
+            {{#if m.major}}
+              <button type="button" data-action="memorizeFreeTheurgy" data-level="{{m.level}}" data-scope="major">
+                {{localize 'ADND2E.sheet.spells.freeTheurgyMemorizeMajor'}}
+              </button>
+            {{/if}}
+            {{#if m.universal}}
+              <button type="button" data-action="memorizeFreeTheurgy" data-level="{{m.level}}" data-scope="universal">
+                {{localize 'ADND2E.sheet.spells.freeTheurgyMemorizeUniversal'}}
+              </button>
+            {{/if}}
+          </div>
+        {{/each}}
+        {{#each adnd2e.spells.priestFreeTheurgies as |t|}}
+          <div class="spell-row{{#if t.expended}} expended{{/if}}">
+            <span class="name">
+              {{localize 'ADND2E.sheet.spells.freeTheurgyEntry' level=t.level}}
+              <span class="schools">{{localize t.scopeLabelKey}}</span>
+              {{#if t.expended}}
+                <span class="badge expended-badge" title="{{localize 'ADND2E.sheet.spells.expended'}}">✓</span>
+              {{/if}}
+            </span>
+            {{#if t.canCast}}
+              <button type="button" data-action="castFreeTheurgy" data-level="{{t.level}}" data-scope="{{t.scope}}">
+                {{localize 'ADND2E.sheet.spells.cast'}}
+              </button>
+            {{/if}}
+            <button type="button" data-action="forgetFreeTheurgy" data-level="{{t.level}}" data-scope="{{t.scope}}" data-expended="{{t.expended}}">
+              {{localize 'ADND2E.sheet.spells.forget'}}
+            </button>
+          </div>
+        {{else}}
+          <p class="placeholder">{{localize 'ADND2E.sheet.spells.none'}}</p>
+        {{/each}}
+      </div>
+    </section>
+  {{else if adnd2e.spells.priestFreeTheurgies.length}}
+    <section class="kit-panel">
+      <div class="kit-bar">{{localize 'ADND2E.sheet.spells.freeTheurgy'}}</div>
+      <div class="kit-body">
+        <p class="placeholder">{{localize 'ADND2E.sheet.spells.freeTheurgyRuleOffHint'}}</p>
+        {{#each adnd2e.spells.priestFreeTheurgies as |t|}}
+          <div class="spell-row{{#if t.expended}} expended{{/if}}">
+            <span class="name">
+              {{localize 'ADND2E.sheet.spells.freeTheurgyEntry' level=t.level}}
+              <span class="schools">{{localize t.scopeLabelKey}}</span>
+              {{#if t.expended}}
+                <span class="badge expended-badge" title="{{localize 'ADND2E.sheet.spells.expended'}}">✓</span>
+              {{/if}}
+            </span>
+            <button type="button" data-action="forgetFreeTheurgy" data-level="{{t.level}}" data-scope="{{t.scope}}" data-expended="{{t.expended}}">
               {{localize 'ADND2E.sheet.spells.forget'}}
             </button>
           </div>

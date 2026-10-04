@@ -37,7 +37,7 @@ export interface CharacterDerived {
   ac: { normal: number; rearAttack: number; surprised: number; shieldless: number };
   saves: Record<SaveCategory, { target: number; rollModifier: number; effectiveTarget: number }> | null;
   spellSlots: { wizard?: SlotRecord; priest?: SlotRecord };
-  spellPoints: { wizard?: SpellPointsRecord };
+  spellPoints: { wizard?: SpellPointsRecord; priest?: SpellPointsRecord };
   channelling: { wizard?: ChannellingRecord };
   proficiencies: { weapon: SlotBlock; nonweapon: SlotBlock; languagesMax: number } | null;
   thiefSkills: ThiefSkillPointBlock;
@@ -76,7 +76,8 @@ function spellInput(
     // slots.ts itself, which stays untouched) so it's truly inert to the
     // classic path whether the spell-points rule is on or off (spec §5).
     wizardMemorized: snapshot.wizardMemorized.filter((mem) => mem.magickType !== "free"),
-    priestMemorized: snapshot.priestMemorized,
+    // Sub-project 14 priest theurgies: a free theurgy likewise never occupies a classic priest slot.
+    priestMemorized: snapshot.priestMemorized.filter((mem) => mem.magickType !== "free"),
   };
 }
 
@@ -96,8 +97,8 @@ function mergeCasterSpellPoints(
   casters: readonly ClassMember[],
   snapshot: ActorSnapshot,
   abilities: DerivedAbilities,
-): { wizard?: SpellPointsRecord } {
-  let out: { wizard?: SpellPointsRecord } = {};
+): { wizard?: SpellPointsRecord; priest?: SpellPointsRecord } {
+  let out: { wizard?: SpellPointsRecord; priest?: SpellPointsRecord } = {};
   for (const c of casters) {
     out = {
       ...out,
@@ -108,6 +109,10 @@ function mergeCasterSpellPoints(
         maxSpellLevelKnown: abilities.int.maxSpellLevel,
         specialist: c.specialistSchool !== null,
         wizardMemorized: snapshot.wizardMemorized,
+        priestLevel: c.level,
+        wisScore: snapshot.abilities.wis,
+        conHpAdjustment: abilities.con.hpAdjustment,
+        priestMemorized: snapshot.priestMemorized,
       }),
     };
   }

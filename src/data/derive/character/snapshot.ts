@@ -24,6 +24,8 @@ export interface MemorizedEntry {
   spellLevel: number;
   /** Sub-project 14 Plan A; absent (fixed) for any entry created before this rule ever ran */
   magickType?: "fixed" | "free";
+  /** Sub-project 14 priest theurgies: which Table 29 column prices this entry. Absent for wizard entries. */
+  theurgyScope?: "major" | "minor" | "universal";
 }
 
 export interface EquippedArmor {

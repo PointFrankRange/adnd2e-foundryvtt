@@ -1,0 +1,363 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  castFreeTheurgy,
+  forgetFreeTheurgy,
+  memorizeFreeTheurgy,
+  memorizeSpell,
+  type MemorizedEntry,
+  type SpellcasterActor,
+  type SpellItemHandle,
+} from "../../../src/sheets/character/spell-actions";
+
+// Optional-rule toggles read through game.settings.get(SYSTEM_ID, key).
+let rules: Record<string, boolean> = {};
+let warn: ReturnType<typeof vi.fn>;
+
+function spellItem(opts: { id: string; name: string; casterClass: string; level: number; spheres: string[]; schools?: string[] }): SpellItemHandle {
+  return {
+    id: opts.id,
+    name: opts.name,
+    system: {
+      casterClass: opts.casterClass,
+      level: opts.level,
+      schools: opts.schools ?? [],
+      spheres: opts.spheres,
+      range: "",
+      duration: "",
+      castingTime: "",
+      savingThrow: "",
+      components: { v: true, s: true, m: false },
+      automation: { damage: null, healing: null },
+    },
+  };
+}
+
+interface ActorOpts {
+  priestChassis?: string | null;
+  priestSp?: Record<string, number | undefined>;
+  priestMemorized?: SpellcasterActor["system"]["spellcasting"]["priest"]["memorized"];
+  priestSlots?: Record<string, { max: number; used: number }>;
+  sphereAccessOverride?: string[] | null;
+  wizardSp?: Record<string, number | undefined>;
+  wizardSpellbookItemIds?: string[];
+  items?: SpellItemHandle[];
+}
+
+function makeActor(opts: ActorOpts = {}): SpellcasterActor {
+  const classItems = opts.priestChassis === null || opts.priestChassis === undefined
+    ? []
+    : [{ id: "cls", type: "class", system: { chassisId: opts.priestChassis, xp: 0 } }];
+  const spells = opts.items ?? [];
+  const items = Object.assign([...classItems, ...spells], {
+    get: (id: string) => spells.find((s) => s.id === id),
+  });
+  return {
+    name: "Test Priest",
+    img: "",
+    statuses: new Set<string>(),
+    system: {
+      abilities: { int: { mods: {} as never } },
+      attributes: { hp: { value: 10, max: 10 } },
+      saves: { ppd: { target: 12, rollModifier: 0 } },
+      spellcasting: {
+        wizard: {
+          specialistSchool: null,
+          memorized: [],
+          slots: {},
+          spellPoints: opts.wizardSp ?? {},
+          channelling: {},
+          fatigueSaveBonus: 0,
+          spellbookItemIds: opts.wizardSpellbookItemIds ?? [],
+        } as never,
+        priest: {
+          memorized: opts.priestMemorized ?? [],
+          slots: opts.priestSlots ?? { 1: { max: 2, used: 0 } },
+          sphereAccessOverride: opts.sphereAccessOverride ?? null,
+          spellPoints: opts.priestSp ?? {},
+        },
+      },
+    },
+    items: items as never,
+    update: vi.fn(async () => undefined),
+    toggleStatusEffect: vi.fn(async () => undefined),
+  } as unknown as SpellcasterActor;
+}
+
+const CLW = spellItem({ id: "clw-id", name: "Cure Light Wounds", casterClass: "priest", level: 1, spheres: ["healing"] });
+
+const affordablePool = { maxSpellLevel: 3, maxPerLevel: 6, sp: 40, spent: 0, remaining: 40 };
+
+beforeEach(() => {
+  rules = { spellsAndMagicEnabled: true, spellPoints: true };
+  vi.stubGlobal("game", {
+    settings: { get: (_system: string, key: string) => rules[key] },
+    i18n: { localize: (key: string) => key },
+  });
+  warn = vi.fn();
+  vi.stubGlobal("ui", { notifications: { warn } });
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+describe("memorizeSpell — priest spell points", () => {
+  it("memorizes a priest fixed theurgy when the rule is on and the pool affords it", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, items: [CLW] });
+    await memorizeSpell(actor, "clw-id");
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [
+        { spellItemId: "clw-id", spellLevel: 1, expended: false, magickType: "fixed", theurgyScope: "major" },
+      ],
+    });
+  });
+
+  it("does not consult the classic slot row when the rule is on", async () => {
+    // No slots at all: the pool alone decides eligibility.
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, priestSlots: {}, items: [CLW] });
+    await memorizeSpell(actor, "clw-id");
+    expect(actor.update).toHaveBeenCalledTimes(1);
+  });
+
+  it("refuses a priest memorize the pool cannot afford", async () => {
+    // Major fixed 1st level costs 4; only 1 SP remains.
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestSp: { ...affordablePool, spent: 39, remaining: 1 },
+      items: [CLW],
+    });
+    await memorizeSpell(actor, "clw-id");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
+
+  it("refuses a spell the priest's access does not allow at this level", async () => {
+    // Elemental is minor-only for a cleric, capped at 3rd level; a 4th-level spell is not memorizable.
+    const elemental4 = spellItem({ id: "e4", name: "Elemental 4", casterClass: "priest", level: 4, spheres: ["elemental"] });
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestSp: { ...affordablePool, maxSpellLevel: 7 },
+      items: [elemental4],
+    });
+    await memorizeSpell(actor, "e4");
+    expect(actor.update).not.toHaveBeenCalled();
+  });
+
+  it("refuses when the actor has no priest-progression class", async () => {
+    const actor = makeActor({ priestChassis: null, priestSp: affordablePool, items: [CLW] });
+    await memorizeSpell(actor, "clw-id");
+    expect(actor.update).not.toHaveBeenCalled();
+  });
+
+  it("keeps the classic priest entry shape and slot check when the rule is off", async () => {
+    rules = { spellsAndMagicEnabled: true, spellPoints: false };
+    const actor = makeActor({ priestChassis: "cleric", priestSlots: { 1: { max: 2, used: 0 } }, items: [CLW] });
+    await memorizeSpell(actor, "clw-id");
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [{ spellItemId: "clw-id", spellLevel: 1, expended: false, magickType: undefined }],
+    });
+    const written = (actor.update as ReturnType<typeof vi.fn>).mock.calls[0][0] as Record<string, Array<Record<string, unknown>>>;
+    expect(written["system.spellcasting.priest.memorized"][0]).not.toHaveProperty("theurgyScope");
+  });
+
+  it("refuses a classic priest memorize with no free slot when the rule is off", async () => {
+    rules = { spellsAndMagicEnabled: true, spellPoints: false };
+    const actor = makeActor({ priestChassis: "cleric", priestSlots: { 1: { max: 1, used: 1 } }, items: [CLW] });
+    await memorizeSpell(actor, "clw-id");
+    expect(actor.update).not.toHaveBeenCalled();
+  });
+
+  it("leaves the wizard entry shape unchanged (no theurgyScope) when the rule is on", async () => {
+    const mageSpell = spellItem({ id: "mage-1", name: "Magic Missile", casterClass: "wizard", level: 1, spheres: [], schools: ["evocation"] });
+    const actor = makeActor({
+      priestChassis: "cleric",
+      wizardSp: { maxSpellLevel: 3, maxPerLevel: 6, sp: 100, spent: 0, remaining: 100 },
+      wizardSpellbookItemIds: ["mage-1"],
+      items: [mageSpell],
+    });
+    await memorizeSpell(actor, "mage-1");
+    const written = (actor.update as ReturnType<typeof vi.fn>).mock.calls[0][0] as Record<string, Array<Record<string, unknown>>>;
+    const entry = written["system.spellcasting.wizard.memorized"][0];
+    expect(entry).toMatchObject({ spellItemId: "mage-1", magickType: "fixed" });
+    expect(entry).not.toHaveProperty("theurgyScope");
+  });
+});
+
+// The cast dialog filters on the embedded item's document type, which the
+// shared spellItem() fixture leaves out; real spell items always carry "spell".
+const HEAL3 = { ...spellItem({ id: "heal3", name: "Heal-3", casterClass: "priest", level: 3, spheres: ["healing"] }), type: "spell" } as SpellItemHandle;
+const ELEM3 = { ...spellItem({ id: "el3", name: "Elemental-3", casterClass: "priest", level: 3, spheres: ["elemental"] }), type: "spell" } as SpellItemHandle;
+
+describe("memorizeFreeTheurgy — priest free theurgies", () => {
+  it("memorizes a major free theurgy at the Table 29 free cost", async () => {
+    // priest pool sp 40, spent 0; 3rd level major free costs 20
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, items: [HEAL3] });
+    await memorizeFreeTheurgy(actor, 3, "major");
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [
+        { spellItemId: null, spellLevel: 3, expended: false, magickType: "free", theurgyScope: "major" },
+      ],
+    });
+  });
+
+  it("memorizes a universal free theurgy at its own Table 29 cost", async () => {
+    // 3rd level universal free costs 30, which 40 SP affords
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, items: [HEAL3] });
+    await memorizeFreeTheurgy(actor, 3, "universal");
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [
+        { spellItemId: null, spellLevel: 3, expended: false, magickType: "free", theurgyScope: "universal" },
+      ],
+    });
+  });
+
+  it("refuses a minor-scope free theurgy (the book allows none)", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, items: [HEAL3] });
+    await expect(memorizeFreeTheurgy(actor, 3, "minor" as never)).rejects.toThrow(RangeError);
+    expect(actor.update).not.toHaveBeenCalled();
+  });
+
+  it.each([null, undefined])("refuses a %s scope with the blocked warning and no write (fail closed)", async (scope) => {
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, items: [HEAL3] });
+    await memorizeFreeTheurgy(actor, 3, scope as never);
+    expect(warn).toHaveBeenCalled();
+    expect(actor.update).not.toHaveBeenCalled();
+  });
+
+  it("refuses a free theurgy the pool cannot afford at the free cost", async () => {
+    // Major free 3rd level costs 20; only 15 SP remains.
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestSp: { ...affordablePool, spent: 25, remaining: 15 },
+      items: [HEAL3],
+    });
+    await memorizeFreeTheurgy(actor, 3, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
+
+  it("refuses a major free theurgy when the priest has no major access at that level", async () => {
+    // Major access stops at 7th level for a cleric; an 8th-level major free is not allowed.
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestSp: { maxSpellLevel: 8, maxPerLevel: 6, sp: 999, spent: 0, remaining: 999 },
+      items: [HEAL3],
+    });
+    await memorizeFreeTheurgy(actor, 8, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
+
+  it("refuses a major free theurgy when an empty sphere override grants no major sphere", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, sphereAccessOverride: [], items: [HEAL3] });
+    await memorizeFreeTheurgy(actor, 3, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+  });
+
+  it("memorizes a universal free theurgy with no access gate (same empty override)", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, sphereAccessOverride: [], items: [HEAL3] });
+    await memorizeFreeTheurgy(actor, 3, "universal");
+    expect(actor.update).toHaveBeenCalledTimes(1);
+  });
+
+  it("refuses when the flat per-level cap is full", async () => {
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestSp: { maxSpellLevel: 3, maxPerLevel: 1, sp: 40, spent: 0, remaining: 40 },
+      priestMemorized: [{ spellItemId: "heal3", spellLevel: 3, expended: false, magickType: "fixed", theurgyScope: "major" }],
+      items: [HEAL3],
+    });
+    await memorizeFreeTheurgy(actor, 3, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+  });
+
+  it("is a no-op with a warning when the spell-points rule is off", async () => {
+    rules = { spellsAndMagicEnabled: true, spellPoints: false };
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, items: [HEAL3] });
+    await memorizeFreeTheurgy(actor, 3, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
+});
+
+describe("forgetFreeTheurgy — priest free theurgies", () => {
+  it("removes only the entry matching its scope and expended state", async () => {
+    const major: MemorizedEntry = { spellItemId: null, spellLevel: 3, expended: false, magickType: "free", theurgyScope: "major" };
+    const universal: MemorizedEntry = { spellItemId: null, spellLevel: 3, expended: false, magickType: "free", theurgyScope: "universal" };
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, priestMemorized: [major, universal] });
+    await forgetFreeTheurgy(actor, 3, "universal", false);
+    expect(actor.update).toHaveBeenCalledWith({ "system.spellcasting.priest.memorized": [major] });
+  });
+});
+
+describe("castFreeTheurgy — priest free theurgies", () => {
+  let prompt: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    prompt = vi.fn(async () => "heal3");
+    vi.stubGlobal("foundry", {
+      applications: {
+        api: { DialogV2: { prompt } },
+        handlebars: { renderTemplate: vi.fn(async () => "<p>cast</p>") },
+      },
+      utils: { escapeHTML: (s: string) => s },
+    });
+    vi.stubGlobal("ChatMessage", { getSpeaker: vi.fn(() => ({})), create: vi.fn(async () => undefined) });
+  });
+
+  const freeMajor3: MemorizedEntry = { spellItemId: null, spellLevel: 3, expended: false, magickType: "free", theurgyScope: "major" };
+
+  it("prompts only major-access priest spells for a major free theurgy, then expends the entry", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, priestMemorized: [freeMajor3], items: [HEAL3, ELEM3] });
+    await castFreeTheurgy(actor, 3, "major");
+    const content = (prompt.mock.calls[0] as unknown as [{ content: string }])[0].content;
+    expect(content).toContain('value="heal3"');
+    expect(content).not.toContain('value="el3"');
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [{ ...freeMajor3, expended: true }],
+    });
+  });
+
+  it("prompts every priest spell of the level for a universal free theurgy", async () => {
+    const universal3: MemorizedEntry = { ...freeMajor3, theurgyScope: "universal" };
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, priestMemorized: [universal3], items: [HEAL3, ELEM3] });
+    await castFreeTheurgy(actor, 3, "universal");
+    const content = (prompt.mock.calls[0] as unknown as [{ content: string }])[0].content;
+    expect(content).toContain('value="heal3"');
+    expect(content).toContain('value="el3"');
+  });
+
+  it("refuses a chosen spell that is not major-access when casting a major free theurgy", async () => {
+    prompt.mockImplementation(async () => "el3");
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, priestMemorized: [freeMajor3], items: [HEAL3, ELEM3] });
+    await castFreeTheurgy(actor, 3, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
+
+  it("writes the live list after the prompt and roll, keeping an entry added while the dialog was open", async () => {
+    const other: MemorizedEntry = { spellItemId: "clw-id", spellLevel: 1, expended: false, magickType: "fixed", theurgyScope: "major" };
+    const actor = makeActor({ priestChassis: "cleric", priestSp: affordablePool, priestMemorized: [freeMajor3], items: [HEAL3] });
+    prompt.mockImplementation(async () => {
+      // a concurrent memorize lands while the dialog is open
+      actor.system.spellcasting.priest.memorized = [...actor.system.spellcasting.priest.memorized, other];
+      return "heal3";
+    });
+    await castFreeTheurgy(actor, 3, "major");
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [{ ...freeMajor3, expended: true }, other],
+    });
+  });
+
+  it("does not prompt when no unexpended free theurgy of that scope exists", async () => {
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestSp: affordablePool,
+      priestMemorized: [{ ...freeMajor3, expended: true }],
+      items: [HEAL3],
+    });
+    await castFreeTheurgy(actor, 3, "major");
+    expect(prompt).not.toHaveBeenCalled();
+    expect(actor.update).not.toHaveBeenCalled();
+  });
+});

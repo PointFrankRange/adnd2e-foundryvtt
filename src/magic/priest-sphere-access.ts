@@ -38,7 +38,41 @@ export function canMemorizePriestSpell(
   spellSpheres: readonly SphereName[],
   spellLevel: number,
 ): boolean {
+  return priestAccessScope(chassisId, sphereAccessOverride, spellSpheres, spellLevel) !== null;
+}
+
+/** The Table 29 column a memorize of this spell is priced under: "major" when a
+ *  listed sphere grants major access at this level, "minor" when only minor
+ *  access applies, null when none does. Same override/chassis rules as
+ *  canMemorizePriestSpell. */
+export function priestAccessScope(
+  chassisId: string | null,
+  sphereAccessOverride: readonly SphereName[] | null,
+  spellSpheres: readonly SphereName[],
+  spellLevel: number,
+): "major" | "minor" | null {
+  if (!chassisId) return null;
+  const table = effectiveSphereAccess(chassisId, sphereAccessOverride);
+  let best: "major" | "minor" | null = null;
+  for (const sphere of spellSpheres) {
+    const access = resolveSphereAccess(table, sphere);
+    if (access === "major" && canCastSphereSpell(access, spellLevel)) return "major";
+    if (access === "minor" && canCastSphereSpell(access, spellLevel)) best = "minor";
+  }
+  return best;
+}
+
+/** Whether the priest holds major access to at least one sphere at
+ *  `spellLevel`. Gates a major free theurgy at memorize time: the book allows
+ *  free theurgies only from major access, and minor access allows none. Same
+ *  override/chassis rules as canMemorizePriestSpell; false when the actor has
+ *  no priest-progression class. */
+export function priestHasMajorAccessAtLevel(
+  chassisId: string | null,
+  sphereAccessOverride: readonly SphereName[] | null,
+  spellLevel: number,
+): boolean {
   if (!chassisId) return false;
   const table = effectiveSphereAccess(chassisId, sphereAccessOverride);
-  return spellSpheres.some((sphere) => canCastSphereSpell(resolveSphereAccess(table, sphere), spellLevel));
+  return Object.values(table).some((access) => access === "major") && canCastSphereSpell("major", spellLevel);
 }
