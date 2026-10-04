@@ -230,6 +230,7 @@ function walk(
         label: humanizeKey(key),
         indent: depth * 12,
         kind: "multiselect",
+        nullable: (field as unknown as { nullable?: boolean }).nullable === true,
         value: current,
         choices: choices.map((c) => ({ ...c, selected: current.includes(c.value) })),
       });
@@ -498,7 +499,9 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
       }
       for (const el of Array.from(form.querySelectorAll<HTMLDetailsElement>('details[data-multiselect="true"]'))) {
         const picked = Array.from(el.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked'), (i) => i.value);
-        setProperty(submitData, el.dataset.path ?? "", picked);
+        // A nullable list with nothing picked saves as null (unset), not [] — an empty override list means "no spheres", not "no override".
+        const nothingPicked = picked.length === 0 && el.dataset.nullable === "true";
+        setProperty(submitData, el.dataset.path ?? "", nothingPicked ? null : picked);
       }
       for (const el of Array.from(form.querySelectorAll<HTMLTextAreaElement>("textarea[data-lines]"))) {
         const path = el.name;

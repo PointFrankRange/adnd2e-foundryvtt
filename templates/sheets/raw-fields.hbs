@@ -68,7 +68,7 @@
                         {{/each}}
                       </select>
                     {{else if (eq this.kind "multiselect")}}
-                      <details class="multiselect" data-multiselect="true" data-path="{{this.path}}">
+                      <details class="multiselect" data-multiselect="true" data-path="{{this.path}}"{{#if this.nullable}} data-nullable="true"{{/if}}>
                         <summary>{{this.value.length}} selected</summary>
                         {{#each this.choices}}
                           <label class="multiselect-option">
