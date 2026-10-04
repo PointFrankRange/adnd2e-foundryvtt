@@ -22,6 +22,17 @@
   </section>
 
   {{#if @root.pcActions}}
+  {{#if @root.turning.canTurn}}
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.turning.title'}}</div>
+    <div class="kit-body">
+      <p class="hint">{{localize 'ADND2E.sheet.turning.level'}}: {{@root.turning.level}}</p>
+      <button type="button" class="kit-small" data-action="turnUndead"{{#if @root.turning.attempted}} disabled{{/if}}>{{localize 'ADND2E.sheet.turning.button'}}</button>
+      {{#if @root.turning.attempted}}<p class="hint">{{localize 'ADND2E.sheet.turning.attempted'}}</p>{{/if}}
+      {{#if @root.turning.canReset}}<button type="button" class="kit-small" data-action="resetTurnAttempt">{{localize 'ADND2E.sheet.turning.reset'}}</button>{{/if}}
+    </div>
+  </section>
+  {{/if}}
   {{#if adnd2e.traits.enabled}}
   <section class="kit-panel">
     <div class="kit-bar">{{localize 'ADND2E.sheet.traits.title'}}</div>

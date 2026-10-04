@@ -22,6 +22,7 @@ import type {
 } from "./context-types";
 import { validateItemDrop } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
+import { resetTurnAttempt, turningPanel, turnUndead } from "./turning-actions";
 import { advanceWeaponMastery, allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill } from "./proficiency-actions";
 import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "./casting-actions";
 import { castFreeMagick, castFreeTheurgy, forgetFreeMagick, forgetFreeTheurgy, forgetSpell, learnSpell, memorizeFreeMagick, memorizeFreeTheurgy, memorizeSpell, recoverChannellerSp, restSpellcasting } from "./spell-actions";
@@ -338,6 +339,8 @@ export class Adnd2eCharacterSheet extends Base {
       allocateThiefSkillPoint: Adnd2eCharacterSheet.#onAllocateThiefSkillPoint,
       deallocateThiefSkillPoint: Adnd2eCharacterSheet.#onDeallocateThiefSkillPoint,
       rollThiefSkill: Adnd2eCharacterSheet.#onRollThiefSkill,
+      turnUndead: Adnd2eCharacterSheet.#onTurnUndead,
+      resetTurnAttempt: Adnd2eCharacterSheet.#onResetTurnAttempt,
     },
   };
 
@@ -378,6 +381,7 @@ export class Adnd2eCharacterSheet extends Base {
     context.notEditable = !this.isEditable;
     context.proseDisabled = !this.isEditable || !this.#unlocked;
     context.pcActions = true;
+    context.turning = turningPanel(this.document as never);
     // The SYSTEM DataModel's own schema — distinct from `context.fields`,
     // which DocumentSheetV2._prepareContext already exposes as the actor's
     // top-level (name/img/system/…) schema. Needed so biography.hbs can
@@ -958,6 +962,15 @@ export class Adnd2eCharacterSheet extends Base {
   ): Promise<void> {
     const skill = target.dataset.skill;
     if (skill) await rollThiefSkill(this.document as never, skill as never);
+  }
+
+  static async #onTurnUndead(this: Adnd2eCharacterSheet): Promise<void> {
+    await turnUndead(this.document as never);
+    await this.render();
+  }
+
+  static async #onResetTurnAttempt(this: Adnd2eCharacterSheet): Promise<void> {
+    await resetTurnAttempt(this.document as never);
   }
 }
 

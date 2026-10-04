@@ -177,6 +177,16 @@
       "doneWithFailures": "AD&D 2E: imported {created} of {total} document(s); {failed} failed — see the console."
     },
     "sheet": {
+      "turning": {
+        "title": "Turn Undead",
+        "level": "Turning level",
+        "button": "Turn Undead",
+        "attempted": "Already attempted this encounter.",
+        "reset": "Reset attempt (GM)",
+        "notTurner": "Only clerics and paladins can turn undead.",
+        "alreadyAttempted": "You have already attempted to turn undead this encounter.",
+        "noTargets": "Target the undead first (select tokens, then press T or use the target tool)."
+      },
       "title": "Character Sheet",
       "creatureTitle": "Monster NPC",
       "npcTitle": "Character NPC",

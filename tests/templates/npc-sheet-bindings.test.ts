@@ -55,7 +55,7 @@ const NOTHING_LOST_NAMES = [
 ];
 const NOTHING_LOST_FIELDS = ['data-field="quantity"', 'data-field="location"', 'data-field="equipped"', 'data-field="identified"'];
 const PC_ONLY_ACTIONS = [
-  "awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait",
+  "awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait", "turnUndead", "resetTurnAttempt",
   // Sub-project 14 Plan A: wizard spell points' Free Magicks panel (memorize/cast/forget a
   // free magick) is gated behind `@root.pcActions` in spells.hbs, same as this list's other
   // entries — the Character NPC sheet reuses that same shared PC template but its sheet.ts
