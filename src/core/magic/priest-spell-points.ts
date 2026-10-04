@@ -167,3 +167,10 @@ export function priestPoolAffords(
   if (spellsMemorizedAtLevel(memorized, spellLevel) >= (pool.maxPerLevel ?? 0)) return false;
   return (pool.remaining ?? 0) >= priestTheurgyCost(spellLevel, magickType, scope);
 }
+
+/** The pool a channelled priest's memorize checks read. Channelled memorize
+ *  costs nothing from the pool (as for a channelling wizard), so only Table
+ *  26's caps (max spell level, per-level cap, orison cap) gate it. */
+export function priestPoolUnderChannelling(pool: PriestPoolView): PriestPoolView {
+  return { ...pool, remaining: Number.POSITIVE_INFINITY };
+}

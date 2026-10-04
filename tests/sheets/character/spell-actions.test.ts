@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { castOrBegin } from "../../../src/sheets/character/casting-actions";
+import { FATIGUE_CONDITION_ID } from "../../../src/core/magic/channeller-fatigue";
 import {
   castFreeTheurgy,
   castSpell,
@@ -56,6 +58,7 @@ function makeActor(opts: ActorOpts = {}): SpellcasterActor {
     get: (id: string) => spells.find((s) => s.id === id),
   });
   return {
+    id: "test-priest",
     name: "Test Priest",
     img: "",
     statuses: new Set<string>(),
@@ -565,5 +568,73 @@ describe("priest channelling — casts spend the priest pool", () => {
     await castFreeTheurgy(actor, 3, "major");
     expect(actor.update).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalledWith("ADND2E.sheet.spells.castBlockedWarning");
+  });
+});
+
+describe("castOrBegin and fatigue — priest channelling", () => {
+  const CHANNEL_ON = { spellsAndMagicEnabled: true, spellPoints: true, channelers: true, expandedCastingTime: true };
+  const clwRounds = { ...CLW, system: { ...CLW.system, castingTime: "1 round" } };
+  const clwEntry: MemorizedEntry = { spellItemId: "clw-id", spellLevel: 1, expended: false, magickType: "fixed", theurgyScope: "major" };
+
+  /** A started combat holding the actor: a one-round cast resolves without touching initiative. */
+  function stubCombat(): void {
+    const combatant = { id: "cbt-1", initiative: 10, update: vi.fn(async () => undefined), unsetFlag: vi.fn(async () => undefined) };
+    const combat = {
+      id: "combat-1",
+      started: true,
+      round: 1,
+      turn: 0,
+      turns: [{ id: "cbt-1" }],
+      combatant: { id: "cbt-1" },
+      getCombatantsByActor: vi.fn(() => [combatant]),
+    };
+    vi.stubGlobal("game", {
+      settings: { get: (_system: string, key: string) => rules[key] },
+      i18n: { localize: (key: string) => key, format: (key: string) => key },
+      combats: [combat],
+    });
+  }
+
+  beforeEach(() => {
+    rules = { ...CHANNEL_ON };
+    stubCombat();
+    vi.stubGlobal("foundry", {
+      applications: {
+        api: { DialogV2: { prompt: vi.fn(async () => "heal3") } },
+        handlebars: { renderTemplate: vi.fn(async () => "<p>cast</p>") },
+      },
+      utils: { escapeHTML: (s: string) => s },
+    });
+    vi.stubGlobal("ChatMessage", { getSpeaker: vi.fn(() => ({})), create: vi.fn(async () => undefined) });
+  });
+
+  it("an Expanded Casting Time begin spends the priest pool by the Table 29 cost", async () => {
+    // CLW major fixed costs 4: 40 - 4 = 36, and the entry stays unexpended while the cast is pending.
+    const actor = makeActor({ priestChassis: "cleric", priestChannelling: { current: 40 }, priestMemorized: [clwEntry], items: [clwRounds] });
+    await castOrBegin(actor as Parameters<typeof castOrBegin>[0], "clw-id");
+    expect(actor.update).toHaveBeenCalledWith(
+      expect.objectContaining({ "system.spellcasting.priest.channelling.current": 36 }),
+    );
+    expect(actor.update).toHaveBeenCalledTimes(1);
+  });
+
+  it("an Expanded Casting Time begin the priest pool cannot afford writes nothing", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestChannelling: { current: 3 }, priestMemorized: [clwEntry], items: [clwRounds] });
+    await castOrBegin(actor as Parameters<typeof castOrBegin>[0], "clw-id");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith("ADND2E.sheet.spells.castBlockedWarning");
+  });
+
+  it("a channelled priest cast over the fatigue threshold applies a fatigue condition", async () => {
+    // A 1st-level cleric's 1st-level spell is heavy fatigue on Table 21, with no HP or SP escalation at full pool.
+    rules = { ...CHANNEL_ON, channellerFatigue: true };
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestChannelling: { current: 40, max: 40 },
+      priestMemorized: [clwEntry],
+      items: [CLW],
+    });
+    await castSpell(actor, "clw-id");
+    expect(actor.toggleStatusEffect).toHaveBeenCalledWith(FATIGUE_CONDITION_ID.heavy, { active: true });
   });
 });

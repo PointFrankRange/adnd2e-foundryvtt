@@ -2,13 +2,12 @@ import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import {
   canCompleteCasting, castingPlan, expandedCastingTimeEnabled, parseCastingTime, type CastingState,
 } from "../../core/magic/casting-time";
-import { channellersEnabled } from "../../core/magic/channellers";
 import { buildCastingNoticeContext } from "../../magic/casting-card";
 import { getOptionalRules } from "../../settings";
 import type { CastingStatusInput } from "./context-types";
 import { resolveMortalFatigue } from "./fatigue-actions";
 import {
-  applyCastFatigue, casterKey, castSpell, postCastCard, rollSpellAutomation, tryChannellingSpend,
+  applyCastFatigue, casterKey, castSpell, channellingActive, postCastCard, rollSpellAutomation, tryChannellingSpend,
   type SpellcasterActor, type SpellItemHandle,
 } from "./spell-actions";
 
@@ -113,7 +112,7 @@ export async function castOrBegin(actor: CastingActor, spellItemId: string): Pro
   // any match is castable subject to affordability, checked below; the
   // classic path still requires a non-expended entry. Mirrors castSpell's own
   // lookup exactly.
-  const channelling = key === "wizard" && channellersEnabled(getOptionalRules());
+  const channelling = channellingActive(actor, key);
   const entry = channelling
     ? list.find((m) => m.spellItemId === spellItemId)
     : list.find((m) => m.spellItemId === spellItemId && !m.expended);
@@ -124,9 +123,9 @@ export async function castOrBegin(actor: CastingActor, spellItemId: string): Pro
   // Afford-check BEFORE any state is built or written — a failed check aborts
   // with no side effects, same as every other cast entry point.
   let channellingSpent: number | null = null;
-  const preDeductionSp = actor.system.spellcasting.wizard.channelling.current ?? 0;
+  const preDeductionSp = actor.system.spellcasting[key].channelling.current ?? 0;
   if (channelling) {
-    channellingSpent = tryChannellingSpend(actor, "wizard", entry.spellLevel, entry.magickType ?? "fixed", "major");
+    channellingSpent = tryChannellingSpend(actor, key, entry.spellLevel, entry.magickType ?? "fixed", entry.theurgyScope ?? "major");
     if (channellingSpent === null) return;
   }
   const casting: CastingState = {
@@ -144,7 +143,7 @@ export async function castOrBegin(actor: CastingActor, spellItemId: string): Pro
   // completeCasting/disruptCasting need no further changes either way.
   await actor.update({
     ...(channelling
-      ? { "system.spellcasting.wizard.channelling.current": channellingSpent }
+      ? { [`system.spellcasting.${key}.channelling.current`]: channellingSpent }
       : {
           [`system.spellcasting.${key}.memorized`]: list.map((m) =>
             m.spellItemId === spellItemId ? { ...m, expended: true } : m,
@@ -154,7 +153,7 @@ export async function castOrBegin(actor: CastingActor, spellItemId: string): Pro
   });
   await postNotice(actor, spell, "begin", casting);
   if (channelling) {
-    const resolvedTier = await applyCastFatigue(actor, "wizard", entry.spellLevel, preDeductionSp);
+    const resolvedTier = await applyCastFatigue(actor, key, entry.spellLevel, preDeductionSp);
     if (resolvedTier === "mortal") await resolveMortalFatigue(actor);
   }
   if (plan.mode === "segments" && plan.initiativeAdd > 0) {

@@ -143,6 +143,8 @@ export interface CharacterDerivedView {
       spellPoints?: {
         maxSpellLevel?: number; maxPerLevel?: number; sp?: number; spent?: number; remaining?: number;
       };
+      /** Sub-project 14 priest channelling. Same "?? {}" defaulting as spellPoints. */
+      channelling?: { current?: number; max?: number };
       /** `spellItemId` is null for a free theurgy (it reserves a level and scope, not a spell). */
       memorized: {
         spellItemId: string | null; spellLevel: number; expended: boolean;

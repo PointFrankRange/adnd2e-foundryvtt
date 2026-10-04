@@ -40,7 +40,9 @@ import { matchingAmmo, defaultAmmoSelection } from "../../combat/ammo";
 import type { AmmoStock } from "../../combat/ammo";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { canMemorizePriestSpell, priestAccessScope, priestFreeCastEligible, priestHasMajorAccessAtLevel } from "../../magic/priest-sphere-access";
-import { priestPoolAffords, type PriestPoolView } from "../../core/magic/priest-spell-points";
+import {
+  priestCanAffordCast, priestChannellingCost, priestPoolAffords, priestPoolUnderChannelling, type PriestPoolView,
+} from "../../core/magic/priest-spell-points";
 import { magickCost, spellPointsEnabled, spellsMemorizedAtLevel } from "../../core/magic/spell-points";
 import { orisonAffords, orisonCap } from "../../core/magic/priest-orisons";
 import { classItemLevel } from "../../data/derive/class-item";
@@ -736,7 +738,7 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
       priestPoolOn && typeof priestSp.remaining === "number"
         ? { max: priestSp.sp ?? 0, spent: priestSp.spent ?? 0, remaining: priestSp.remaining }
         : null,
-    ...buildPriestFreeTheurgy(sc, priestChassisId, sphereAccessOverride, priestPoolOn, casting !== null, input.spellItems),
+    ...buildPriestFreeTheurgy(sc, priestChassisId, sphereAccessOverride, priestPoolOn, channellingOn, casting !== null, input.spellItems),
   };
 }
 
@@ -780,7 +782,12 @@ function buildOrisonRows(
       );
       return {
         ...row,
-        canMemorize: !row.memorized && orisonAffords(pool.priestSp.remaining ?? 0, memorizedOrisons, orisonCap(priestLevel)),
+        // Channelled orisons memorize free: only the orison cap gates them (as canReMemorize does).
+        canMemorize: !row.memorized && orisonAffords(
+          pool.channellingOn ? Number.POSITIVE_INFINITY : (pool.priestSp.remaining ?? 0),
+          memorizedOrisons,
+          orisonCap(priestLevel),
+        ),
       };
     });
 }
@@ -795,19 +802,24 @@ function buildPriestFreeTheurgy(
   priestChassisId: string | null,
   sphereAccessOverride: SphereName[] | null,
   priestPoolOn: boolean,
+  channellingOn: boolean,
   casting: boolean,
   spellItems: SpellItemView[],
 ): Pick<CharacterSheetContext["spells"], "priestFreeMemorize" | "priestFreeTheurgies"> {
   const pool = sc.priest.spellPoints ?? {};
   const memorized = sc.priest.memorized;
   const poolOn = priestPoolOn && typeof pool.remaining === "number";
+  // Channelled memorize is free from the pool: only the Table 26 caps gate a free memorize row.
+  const memorizeView = poolOn && channellingOn ? priestPoolUnderChannelling(pool) : pool;
+  const channelled = poolOn && channellingOn;
+  const channelledCurrent = sc.priest.channelling?.current ?? 0;
   const priestFreeMemorize: CharacterSheetContext["spells"]["priestFreeMemorize"] = [];
   if (poolOn) {
     for (let level = 1; level <= 7; level += 1) {
       const major =
         priestHasMajorAccessAtLevel(priestChassisId, sphereAccessOverride, level) &&
-        priestPoolAffords(pool, memorized, level, "free", "major");
-      const universal = priestPoolAffords(pool, memorized, level, "free", "universal");
+        priestPoolAffords(memorizeView, memorized, level, "free", "major");
+      const universal = priestPoolAffords(memorizeView, memorized, level, "free", "universal");
       if (major || universal) priestFreeMemorize.push({ level, major, universal });
     }
   }
@@ -824,8 +836,11 @@ function buildPriestFreeTheurgy(
       scopeLabelKey: m.theurgyScope === "major" ? "ADND2E.sheet.spells.freeTheurgyMajor" : "ADND2E.sheet.spells.freeTheurgyUniversal",
       expended: m.expended,
       // Cast is offered only when some priest spell qualifies for this column
-      // and level (the same predicate castFreeTheurgy re-checks).
-      canCast: !casting && !m.expended && hasEligible,
+      // and level (the same predicate castFreeTheurgy re-checks). A channelled
+      // free theurgy is never expended, so its Cast follows live affordability instead.
+      canCast: !casting && (channelled
+        ? priestCanAffordCast(channelledCurrent, priestChannellingCost(m.spellLevel, "free", scope))
+        : !m.expended) && hasEligible,
       // The inline reason shown in place of Cast. Only when the row is blocked
       // by the missing spell alone (not expended, not mid-cast, rule on).
       noEligibleSpell: poolOn && !casting && !m.expended && !hasEligible,
@@ -919,6 +934,8 @@ function buildSpellRow(
   const entry = memorizedList.find((m) => m.spellItemId === item.id);
   const memorized = Boolean(entry);
   const expended = entry?.expended ?? false;
+  // Sub-project 14 priest channelling: the priest's casts and memorizes follow the channelling pool (spell-actions' priestChannellingOn).
+  const priestChannelling = !isWizard && channellingOn && priestPoolOn;
 
   let hasFreeSlot: boolean;
   if (isWizard && spellPointsOn && wizardSp && typeof wizardSp.maxSpellLevel === "number") {
@@ -933,7 +950,8 @@ function buildSpellRow(
     // theurgy at the row's Table 29 scope, with the same cap and pool check
     // canReMemorize applies. No access scope means no row can be memorized.
     const scope = priestAccessScope(priestChassisId, sphereAccessOverride, item.spheres as SphereName[], item.level);
-    hasFreeSlot = scope !== null && priestPoolAffords(priestSp, sc.priest.memorized, item.level, "fixed", scope);
+    const view = priestChannelling ? priestPoolUnderChannelling(priestSp) : priestSp;
+    hasFreeSlot = scope !== null && priestPoolAffords(view, sc.priest.memorized, item.level, "fixed", scope);
   } else {
     const slots = isWizard ? sc.wizard.slots : sc.priest.slots;
     const slotRow = slots[item.level];
@@ -951,6 +969,15 @@ function buildSpellRow(
     isWizard && channellingOn && entry
       ? canAffordCast(wizardChannelling?.current ?? 0, item.level, ("magickType" in entry ? entry.magickType : undefined) ?? "fixed")
       : null;
+  // A channelled priest's cast is priced as castSpell prices it: Table 29 at the
+  // entry's own scope, a level-0 orison at 1 SP (priestChannellingCost).
+  const priestEntry = priestChannelling ? sc.priest.memorized.find((m) => m.spellItemId === item.id) : undefined;
+  const canCastPriestChannelled = priestEntry
+    ? priestCanAffordCast(
+        sc.priest.channelling?.current ?? 0,
+        priestChannellingCost(priestEntry.spellLevel, priestEntry.magickType ?? "fixed", priestEntry.theurgyScope ?? "major"),
+      )
+    : null;
 
   return {
     ...item,
@@ -958,7 +985,7 @@ function buildSpellRow(
     expended,
     canMemorize: !memorized && hasFreeSlot && eligible,
     outsideSpheres: !isWizard && !memorized && priestAccessScope(priestChassisId, sphereAccessOverride, item.spheres as SphereName[], item.level) === null,
-    canCast: memorized && (canCastChannelling ?? !expended),
+    canCast: memorized && (canCastChannelling ?? canCastPriestChannelled ?? !expended),
     canLearn: isWizard && !item.inSpellbook && canLearnForRow(item, learnCtx),
     favorite: fav("spell", item.id),
   };

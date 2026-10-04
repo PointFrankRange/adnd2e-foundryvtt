@@ -20,6 +20,7 @@ import {
   priestCanAffordCast,
   priestChannellingCost,
   priestPoolAffords,
+  priestPoolUnderChannelling,
   priestScopeAllowsFree,
   priestSpendCast,
   type TheurgyScope,
@@ -158,6 +159,12 @@ function priestChannellingOn(actor: SpellcasterActor): boolean {
   return channellersEnabled(getOptionalRules()) && priestPoolOn(actor);
 }
 
+/** Whether a cast by this caster class spends from the channelling pool: a
+ *  channelling wizard (Plan B), or a channelling priest (priestChannellingOn). */
+export function channellingActive(actor: SpellcasterActor, key: "wizard" | "priest"): boolean {
+  return key === "wizard" ? channellersEnabled(getOptionalRules()) : priestChannellingOn(actor);
+}
+
 /** Finds the actor's wizard-progression class item (if any) and returns its
  *  current level, derived from its xp exactly like context.ts's own class
  *  rows are (classItemLevel). Returns 0 if no such class exists — in
@@ -206,7 +213,7 @@ function canMemorizePriestSpellPoints(
 ): boolean {
   const pool = actor.system.spellcasting.priest.spellPoints;
   // Channelled priests memorize free, as channelling wizards do: only Table 26's caps gate it.
-  const view = priestChannellingOn(actor) ? { ...pool, remaining: Number.POSITIVE_INFINITY } : pool;
+  const view = priestChannellingOn(actor) ? priestPoolUnderChannelling(pool) : pool;
   return priestPoolAffords(
     view,
     actor.system.spellcasting.priest.memorized,
@@ -435,12 +442,11 @@ export async function applyCastFatigue(
   spellLevel: number,
   preDeductionSp: number,
 ): Promise<FatigueTier | null> {
-  // Table 21 is the channelling-wizard fatigue table; priest channelling takes none.
-  if (caster === "priest" || !channellerFatigueEnabled(getOptionalRules())) return null;
+  if (!channellerFatigueEnabled(getOptionalRules())) return null;
   const currentTier = [...actor.statuses].map(tierForConditionId).find((t) => t !== null) ?? null;
-  const maxSp = actor.system.spellcasting.wizard.channelling.max ?? 0;
+  const maxSp = actor.system.spellcasting[caster].channelling.max ?? 0;
   const resolved = resolveCastFatigue({
-    casterLevel: wizardCasterLevel(actor),
+    casterLevel: caster === "wizard" ? wizardCasterLevel(actor) : findPriestLevel(actor),
     spellLevel,
     currentHp: actor.system.attributes.hp.value,
     maxHp: actor.system.attributes.hp.max,
@@ -493,7 +499,7 @@ export async function castSpell(actor: SpellcasterActor, spellItemId: string): P
   }
   const key = casterKey(spell);
   const list = actor.system.spellcasting[key].memorized;
-  const channelling = key === "wizard" ? channellersEnabled(getOptionalRules()) : priestChannellingOn(actor);
+  const channelling = channellingActive(actor, key);
   // A channelling entry is never expended (spec §2) — any match is castable
   // subject to affordability, checked below; the classic path still requires
   // a non-expended entry.
@@ -791,12 +797,15 @@ export async function castFreeTheurgy(
     return;
   }
   if (channelling) {
+    const preDeductionSp = actor.system.spellcasting.priest.channelling.current ?? 0;
     const spent = tryChannellingSpend(actor, "priest", spellLevel, "free", scope);
     if (spent === null) return;
     const rolled = await rollSpellAutomation(chosen);
     if (!rolled) return;
     await actor.update({ "system.spellcasting.priest.channelling.current": spent });
     await postCastCard(actor, chosen, rolled);
+    const resolvedTier = await applyCastFatigue(actor, "priest", spellLevel, preDeductionSp);
+    if (resolvedTier === "mortal") await resolveMortalFatigue(actor);
     return;
   }
   const rolled = await rollSpellAutomation(chosen);
