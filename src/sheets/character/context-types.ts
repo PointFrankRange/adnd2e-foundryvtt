@@ -277,6 +277,10 @@ export interface SpellItemView {
   canLearn: boolean;
   /** sheet redesign R1: true when this spell is in the actor's favorites list */
   favorite: boolean;
+  /** priest-only (optional so existing fixtures stay valid): true when this row is
+   *  not memorized and priestAccessScope finds no sphere access for it — the sheet
+   *  shows a hint in place of the Memorize button. */
+  outsideSpheres?: boolean;
 }
 export interface FeatureItemView {
   id: string; name: string; img: string;

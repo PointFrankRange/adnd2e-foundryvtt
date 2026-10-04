@@ -903,6 +903,7 @@ function buildSpellRow(
     memorized,
     expended,
     canMemorize: !memorized && hasFreeSlot && eligible,
+    outsideSpheres: !isWizard && !memorized && priestAccessScope(priestChassisId, sphereAccessOverride, item.spheres as SphereName[], item.level) === null,
     canCast: memorized && (canCastChannelling ?? !expended),
     canLearn: isWizard && !item.inSpellbook && canLearnForRow(item, learnCtx),
     favorite: fav("spell", item.id),
