@@ -46,12 +46,37 @@ describe("deriveSpellSlots", () => {
     expect(r).toEqual({});
   });
 
-  it("paladin -> {} (Ruling CASTER1)", () => {
+  it("paladin L9 (Table 17): priest level 1 max 1, no Wisdom bonus, used from priestMemorized only", () => {
     const r = deriveSpellSlots({
-      chassisId: "paladin", level: 9, maxSpellLevelKnown: null, wisdomScore: 14,
-      wisdomBonusSpells: [1, 0, 0, 0, 0, 0, 0], specialist: false, ...noMemo,
+      chassisId: "paladin", level: 9, maxSpellLevelKnown: null, wisdomScore: 18,
+      wisdomBonusSpells: [4, 3, 2, 1, 0, 0, 0], specialist: false,
+      wizardMemorized: [{ spellItemId: "w", spellLevel: 1 }],
+      priestMemorized: [{ spellItemId: "p", spellLevel: 1 }],
     });
-    expect(r).toEqual({});
+    expect(r.priest![1]).toEqual({ max: 1, used: 1 });
+    expect(r.priest![2]).toEqual({ max: 0, used: 0 });
+    expect(r.priest![4]).toEqual({ max: 0, used: 0 });
+    expect(r.wizard).toBeUndefined();
+  });
+
+  it("paladin below L9 has no priest slots", () => {
+    const r = deriveSpellSlots({
+      chassisId: "paladin", level: 8, maxSpellLevelKnown: null, wisdomScore: 10,
+      wisdomBonusSpells: [], specialist: false, ...noMemo,
+    });
+    expect(r.priest![1]).toEqual({ max: 0, used: 0 });
+  });
+
+  it("ranger L8 (Table 18): priest level 1 max 1, no Wisdom bonus", () => {
+    const r = deriveSpellSlots({
+      chassisId: "ranger", level: 8, maxSpellLevelKnown: null, wisdomScore: 18,
+      wisdomBonusSpells: [4, 3, 2, 1, 0, 0, 0], specialist: false,
+      wizardMemorized: [],
+      priestMemorized: [{ spellItemId: "p", spellLevel: 1 }],
+    });
+    expect(r.priest![1]).toEqual({ max: 1, used: 1 });
+    expect(r.priest![2]).toEqual({ max: 0, used: 0 });
+    expect(r.wizard).toBeUndefined();
   });
 
   it("bard L6 -> {}", () => {

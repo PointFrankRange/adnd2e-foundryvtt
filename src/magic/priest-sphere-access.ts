@@ -1,10 +1,14 @@
 import { canCastSphereSpell, resolveSphereAccess } from "../core/magic/spheres";
-import { CLERIC_SPHERE_ACCESS, DRUID_SPHERE_ACCESS } from "../core/magic/tables";
+import {
+  CLERIC_SPHERE_ACCESS, DRUID_SPHERE_ACCESS, PALADIN_SPHERE_ACCESS, RANGER_SPHERE_ACCESS,
+} from "../core/magic/tables";
 import type { SphereAccess, SphereName } from "../core/types";
 
 function priestSphereTableFor(chassisId: string): Partial<Record<SphereName, SphereAccess>> {
   if (chassisId === "cleric") return CLERIC_SPHERE_ACCESS;
   if (chassisId === "druid") return DRUID_SPHERE_ACCESS;
+  if (chassisId === "paladin") return PALADIN_SPHERE_ACCESS;
+  if (chassisId === "ranger") return RANGER_SPHERE_ACCESS;
   return {};
 }
 

@@ -12,6 +12,11 @@ const base = {
 };
 
 describe("deriveSpellPoints", () => {
+  it("a paladin or ranger (classic slots) gets no spell-point record", () => {
+    expect(deriveSpellPoints({ ...base, chassisId: "paladin", priestLevel: 9 })).toEqual({});
+    expect(deriveSpellPoints({ ...base, chassisId: "ranger", priestLevel: 8 })).toEqual({});
+  });
+
   it("a wizard-progression caster gets a full record", () => {
     const r = deriveSpellPoints(base);
     expect(r.wizard).toEqual({ maxSpellLevel: 3, maxPerLevel: 6, sp: 82, spent: 0, remaining: 82 });

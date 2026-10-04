@@ -127,3 +127,38 @@ describe("priestHasMajorAccessAtLevel", () => {
     expect(priestHasMajorAccessAtLevel("cleric", ["healing"], 7)).toBe(true);
   });
 });
+
+describe("paladin and ranger sphere access (major access)", () => {
+  it("paladin: healing (major) memorizable at level 4 (the 4th-level cap is not blocked)", () => {
+    expect(canMemorizePriestSpell("paladin", null, ["healing"], 4)).toBe(true);
+  });
+
+  it("paladin: plant spell is not memorizable (no access)", () => {
+    expect(canMemorizePriestSpell("paladin", null, ["plant"], 1)).toBe(false);
+  });
+
+  it("paladin: combat, divination and protection are priced major", () => {
+    expect(priestAccessScope("paladin", null, ["combat"], 2)).toBe("major");
+    expect(priestAccessScope("paladin", null, ["divination"], 2)).toBe("major");
+    expect(priestAccessScope("paladin", null, ["protection"], 2)).toBe("major");
+  });
+
+  it("ranger: animal spell memorizable at level 3", () => {
+    expect(canMemorizePriestSpell("ranger", null, ["animal"], 3)).toBe(true);
+  });
+
+  it("ranger: combat spell is not memorizable (no access)", () => {
+    expect(canMemorizePriestSpell("ranger", null, ["combat"], 1)).toBe(false);
+  });
+
+  it("paladin and ranger tables: a sphere outside the table grants no access", () => {
+    expect(canMemorizePriestSpell("ranger", null, ["healing"], 1)).toBe(false);
+    expect(canMemorizePriestSpell("paladin", null, ["animal"], 1)).toBe(false);
+  });
+
+  it("cleric results are unchanged by the new tables", () => {
+    expect(canMemorizePriestSpell("cleric", null, ["plant"], 1)).toBe(false);
+    expect(canMemorizePriestSpell("cleric", null, ["healing"], 4)).toBe(true);
+    expect(priestAccessScope("cleric", null, ["elemental"], 3)).toBe("minor");
+  });
+});

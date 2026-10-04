@@ -22,6 +22,7 @@ import type {
 import { mainScoreFromSubs, SUB_ABILITIES } from "../../core/abilities/sub-abilities";
 import { applyRacialDeltas } from "../../core/abilities/racial-adjustments";
 import { getChassis } from "../../core/classes/chassis";
+import { isPriestSpellProgression } from "../../core/magic/class-slots";
 import { MANEUVERS } from "../../core/combat/maneuvers";
 import { canAffordCast, channellersEnabled } from "../../core/magic/channellers";
 import { channellerFatigueEnabled, FATIGUE_CONDITION_ID, FATIGUE_RECOVERY_INTERVAL, fatigueMovementRate } from "../../core/magic/channeller-fatigue";
@@ -660,7 +661,7 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   const sc = input.derived.spellcasting;
   const school = sc.wizard.specialistSchool;
   const priestChassisId =
-    input.classItems.find((c) => getChassis(c.chassisId as ClassId).spellProgressionId === "priest")
+    input.classItems.find((c) => isPriestSpellProgression(getChassis(c.chassisId as ClassId).spellProgressionId))
       ?.chassisId ?? null;
   const sphereAccessOverride = sc.priest.sphereAccessOverride as SphereName[] | null;
   const int = input.derived.abilities.int.mods as IntelligenceModifiers;

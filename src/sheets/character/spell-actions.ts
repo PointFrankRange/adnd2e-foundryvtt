@@ -1,4 +1,5 @@
 import { getChassis } from "../../core/classes/chassis";
+import { isPriestSpellProgression } from "../../core/magic/class-slots";
 import { canAffordCast, channellersEnabled, recoverSp, spendCastSp, type ChannellerActivity } from "../../core/magic/channellers";
 import { channellerFatigueEnabled, FATIGUE_CONDITION_ID, resolveCastFatigue, tierForConditionId, type FatigueTier } from "../../core/magic/channeller-fatigue";
 import { canAffordMemorize, spellPointsEnabled, spellsMemorizedAtLevel } from "../../core/magic/spell-points";
@@ -113,7 +114,7 @@ function findPriestChassisId(actor: SpellcasterActor): ClassId | null {
   for (const item of actor.items) {
     if (item.type !== "class") continue;
     const chassisId = item.system.chassisId as ClassId | undefined;
-    if (chassisId && getChassis(chassisId).spellProgressionId === "priest") return chassisId;
+    if (chassisId && isPriestSpellProgression(getChassis(chassisId).spellProgressionId)) return chassisId;
   }
   return null;
 }
