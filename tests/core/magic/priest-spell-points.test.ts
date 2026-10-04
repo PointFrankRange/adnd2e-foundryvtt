@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  priestMaxPerLevel, priestMaxSpellLevel, priestPoolAffords, priestSpellPointBase, priestSpellPointTotal,
-  priestScopeAllowsFree, priestTheurgyCost, priestWisdomBonusSp,
+  priestCanAffordCast, priestChannellingCost, priestMaxPerLevel, priestMaxSpellLevel, priestPoolAffords, priestSpellPointBase,
+  priestSpellPointTotal, priestScopeAllowsFree, priestSpendCast, priestTheurgyCost, priestWisdomBonusSp,
 } from "../../../src/core/magic/priest-spell-points";
 
 describe("Table 26 priest progression", () => {
@@ -111,5 +111,22 @@ describe("priestPoolAffords (shared memorize/eligibility gate)", () => {
   });
   it("allows a theurgy that fits level, cap and remaining SP", () => {
     expect(priestPoolAffords(pool, [], 1, "fixed", "major")).toBe(true);
+  });
+});
+
+describe("priest channelling cost and pool arithmetic", () => {
+  it("prices a level-0 orison at 1 SP, and any other cast at its Table 29 cost", () => {
+    expect(priestChannellingCost(0, "fixed", "universal")).toBe(1);
+    expect(priestChannellingCost(1, "fixed", "major")).toBe(4);
+    expect(priestChannellingCost(3, "free", "major")).toBe(20);
+  });
+
+  it("affords a cast only when the pool covers its cost", () => {
+    expect(priestCanAffordCast(4, 4)).toBe(true);
+    expect(priestCanAffordCast(3, 4)).toBe(false);
+  });
+
+  it("subtracts one cast's cost from the pool", () => {
+    expect(priestSpendCast(40, 4)).toBe(36);
   });
 });

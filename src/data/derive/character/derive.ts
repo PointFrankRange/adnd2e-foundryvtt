@@ -38,7 +38,7 @@ export interface CharacterDerived {
   saves: Record<SaveCategory, { target: number; rollModifier: number; effectiveTarget: number }> | null;
   spellSlots: { wizard?: SlotRecord; priest?: SlotRecord };
   spellPoints: { wizard?: SpellPointsRecord; priest?: SpellPointsRecord };
-  channelling: { wizard?: ChannellingRecord };
+  channelling: { wizard?: ChannellingRecord; priest?: ChannellingRecord };
   proficiencies: { weapon: SlotBlock; nonweapon: SlotBlock; languagesMax: number } | null;
   thiefSkills: ThiefSkillPointBlock;
   encumbrance: {
@@ -121,9 +121,10 @@ function mergeCasterSpellPoints(
 
 function mergeCasterChannelling(
   casters: readonly ClassMember[],
+  snapshot: ActorSnapshot,
   abilities: DerivedAbilities,
-): { wizard?: ChannellingRecord } {
-  let out: { wizard?: ChannellingRecord } = {};
+): { wizard?: ChannellingRecord; priest?: ChannellingRecord } {
+  let out: { wizard?: ChannellingRecord; priest?: ChannellingRecord } = {};
   for (const c of casters) {
     out = {
       ...out,
@@ -133,6 +134,8 @@ function mergeCasterChannelling(
         specialist: c.specialistSchool !== null,
         conHpAdjustment: abilities.con.hpAdjustment,
         wisMagicalDefenseAdj: abilities.wis.magicalDefenseAdj,
+        priestLevel: c.level,
+        wisScore: snapshot.abilities.wis,
       }),
     };
   }
@@ -211,7 +214,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
       spellPoints:
         primaryMember && spellPointsEnabled(options) ? mergeCasterSpellPoints([primaryMember], snapshot, abilities) : {},
       channelling:
-        primaryMember && channellersEnabled(options) ? mergeCasterChannelling([primaryMember], abilities) : {},
+        primaryMember && channellersEnabled(options) ? mergeCasterChannelling([primaryMember], snapshot, abilities) : {},
       proficiencies: primary
         ? deriveProficiencySlots(
             { chassisId: primary.chassisId, level },
@@ -263,7 +266,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
     }),
     spellSlots: mergeCasterSlots(resolution.casters, snapshot, abilities),
     spellPoints: spellPointsEnabled(options) ? mergeCasterSpellPoints(resolution.casters, snapshot, abilities) : {},
-    channelling: channellersEnabled(options) ? mergeCasterChannelling(resolution.casters, abilities) : {},
+    channelling: channellersEnabled(options) ? mergeCasterChannelling(resolution.casters, snapshot, abilities) : {},
     proficiencies: deriveProficiencySlots(
       resolution.weaponProfSource,
       resolution.nonweaponProfSource,

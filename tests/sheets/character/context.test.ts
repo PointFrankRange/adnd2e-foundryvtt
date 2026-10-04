@@ -2696,7 +2696,7 @@ describe("buildCharacterSheetContext — priest spell points (SP14 priest)", () 
   };
   /** A L5 cleric whose priest pool has `remaining` SP left out of 40 (spent is the rest). */
   const priestInputWithPool = (
-    pool: { remaining: number; maxPerLevel?: number; memorized?: unknown[] },
+    pool: { remaining: number; maxPerLevel?: number; memorized?: unknown[]; channelling?: { current: number; max: number } },
     over: Partial<CharacterSheetInput> = {},
   ): CharacterSheetInput => {
     const base = input();
@@ -2711,6 +2711,7 @@ describe("buildCharacterSheetContext — priest spell points (SP14 priest)", () 
             spellPoints: { maxSpellLevel: 7, maxPerLevel: pool.maxPerLevel ?? 10, sp: 40, spent: 40 - pool.remaining, remaining: pool.remaining },
             memorized: (pool.memorized ?? []) as never,
             sphereAccessOverride: null,
+            channelling: pool.channelling,
           },
         },
       },
@@ -2780,6 +2781,57 @@ describe("buildCharacterSheetContext — priest spell points (SP14 priest)", () 
   it("shows the priest SP bar with the pool's max, spent and remaining", () => {
     const c = buildCharacterSheetContext(priestInputWithPool({ remaining: 3 }));
     expect(c.spells.priestSpellPoints).toEqual({ max: 40, spent: 37, remaining: 3 });
+  });
+
+  // Channellers on: a channelled priest memorizes free (caps only) and casts from channelling.current.
+  const channelledRules = { ...priestRules, channelers: true };
+  const clwMemorized = [{ spellItemId: "clw", spellLevel: 1, expended: false, magickType: "fixed", theurgyScope: "major" }];
+
+  it("shows the priest channelling pool only when Channellers is on under the priest pool rule with a derived max", () => {
+    const pool = { current: 10, max: 61 };
+    expect(buildCharacterSheetContext(priestInputWithPool({ remaining: 3, channelling: pool }, { optionalRules: channelledRules })).spells.priestChannelling).toEqual(pool);
+    expect(buildCharacterSheetContext(priestInputWithPool({ remaining: 3, channelling: pool })).spells.priestChannelling).toBeNull();
+    expect(buildCharacterSheetContext(priestInputWithPool({ remaining: 3 }, { optionalRules: channelledRules })).spells.priestChannelling).toBeNull();
+  });
+
+  it("under channelling the classic priest SP bar is hidden and the priest channelling bar replaces it", () => {
+    const c = buildCharacterSheetContext(
+      priestInputWithPool({ remaining: 40, channelling: { current: 30, max: 61 } }, { optionalRules: channelledRules }),
+    );
+    expect(c.spells.priestChannelling).toEqual({ current: 30, max: 61 });
+    expect(c.spells.priestSpellPoints).toBeNull();
+    expect(c.spells.priestPoolOn).toBe(true);
+  });
+
+  it("a channelling priest can memorize a theurgy the pool cannot cover (caps only)", () => {
+    const c = buildCharacterSheetContext(
+      priestInputWithPool({ remaining: 0, channelling: { current: 0, max: 40 } }, { optionalRules: channelledRules, spellItems: [priestSpell({})] }),
+    );
+    expect(c.spells.known[0]!.items.find((r) => r.name === "Cure Light Wounds")!.canMemorize).toBe(true);
+  });
+
+  it("a channelling priest's memorized CLW canCast is false when channelling.current is below its 4 SP cost", () => {
+    const row = (current: number) =>
+      buildCharacterSheetContext(
+        priestInputWithPool(
+          { remaining: 40, memorized: clwMemorized, channelling: { current, max: 40 } },
+          { optionalRules: channelledRules, spellItems: [priestSpell({ memorized: true })] },
+        ),
+      ).spells.known[0]!.items.find((r) => r.name === "Cure Light Wounds")!;
+    expect(row(3).canCast).toBe(false);
+    expect(row(4).canCast).toBe(true);
+  });
+
+  it("a channelling priest's memorized orison canCast follows affordability at 1 SP, and its memorize ignores the pool", () => {
+    const orison = (current: number) =>
+      buildCharacterSheetContext(
+        priestInputWithPool(
+          { remaining: 0, memorized: [{ spellItemId: "o1", spellLevel: 0, expended: false, magickType: "fixed", theurgyScope: "universal" }], channelling: { current, max: 40 } },
+          { classItems: [cleric3], optionalRules: channelledRules, spellItems: [priestSpell({ id: "o1", level: 0, name: "Alleviate" })] },
+        ),
+      ).spells.orisons[0]!;
+    expect(orison(0).canCast).toBe(false);
+    expect(orison(1).canCast).toBe(true);
   });
 
   it("disables a priest spell row the pool cannot afford (1st-level major fixed costs 4 > remaining 3)", () => {

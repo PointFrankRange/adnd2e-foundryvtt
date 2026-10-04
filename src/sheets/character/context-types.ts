@@ -143,6 +143,8 @@ export interface CharacterDerivedView {
       spellPoints?: {
         maxSpellLevel?: number; maxPerLevel?: number; sp?: number; spent?: number; remaining?: number;
       };
+      /** Sub-project 14 priest channelling. Same "?? {}" defaulting as spellPoints. */
+      channelling?: { current?: number; max?: number };
       /** `spellItemId` is null for a free theurgy (it reserves a level and scope, not a spell). */
       memorized: {
         spellItemId: string | null; spellLevel: number; expended: boolean;
@@ -470,10 +472,15 @@ export interface CharacterSheetContext {
     spellPoints: { max: number; spent: number; remaining: number } | null;
     /** Sub-project 14 Plan B: null when Channellers is off or the actor has no wizard levels */
     channelling: { current: number; max: number } | null;
+    /** Sub-project 14 priest channelling: the priest's channelling pool, null unless Channellers is on under the priest pool rule and a priest max is derived. */
+    priestChannelling: { current: number; max: number } | null;
     /** Sub-project 14 Plan A: one row per currently-memorized free magick, across all levels */
     freeMagicks: { level: number; expended: boolean; canCast: boolean }[];
+    /** Sub-project 14 priest theurgies: true when the priest pool rule applies
+     *  (a cleric/druid caster with the spell-points rule on). Gates the free-theurgy section. */
+    priestPoolOn: boolean;
     /** Sub-project 14 priest theurgies: the priest pool's SP bar. null when the
-     *  rule is off or the actor has no priest-progression caster. */
+     *  rule is off, the actor has no priest-progression caster, or channelling replaces the pool. */
     priestSpellPoints: { max: number; spent: number; remaining: number } | null;
     /** Sub-project 14 priest theurgies: one row per spell level (1-7) that has a
      *  free memorize available at major and/or universal scope. Empty when the

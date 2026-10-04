@@ -18,7 +18,7 @@
     <section class="kit-panel">
       <div class="kit-bar">
         {{localize 'ADND2E.sheet.spells.channelling'}}
-        <button type="button" class="kit-small" data-action="recoverChannellerSp" style="margin-left:auto">
+        <button type="button" class="kit-small" data-action="recoverChannellerSp" data-caster="wizard" style="margin-left:auto">
           {{localize 'ADND2E.sheet.spells.channellingRecover'}}
         </button>
       </div>
@@ -31,6 +31,20 @@
       <div class="kit-bar">{{localize 'ADND2E.sheet.spells.spellPoints'}}</div>
       <div class="kit-body">
         <p>{{adnd2e.spells.spellPoints.remaining}} / {{adnd2e.spells.spellPoints.max}}</p>
+      </div>
+    </section>
+  {{/if}}
+
+  {{#if adnd2e.spells.priestChannelling}}
+    <section class="kit-panel">
+      <div class="kit-bar">
+        {{localize 'ADND2E.sheet.spells.priestChannelling'}}
+        <button type="button" class="kit-small" data-action="recoverChannellerSp" data-caster="priest" style="margin-left:auto">
+          {{localize 'ADND2E.sheet.spells.channellingRecover'}}
+        </button>
+      </div>
+      <div class="kit-body">
+        <p>{{adnd2e.spells.priestChannelling.current}} / {{adnd2e.spells.priestChannelling.max}}</p>
       </div>
     </section>
   {{/if}}
@@ -201,7 +215,7 @@
     </section>
   {{/if}}
 
-  {{#if adnd2e.spells.priestSpellPoints}}
+  {{#if adnd2e.spells.priestPoolOn}}
     <section class="kit-panel">
       <div class="kit-bar">{{localize 'ADND2E.sheet.spells.freeTheurgy'}}</div>
       <div class="kit-body">

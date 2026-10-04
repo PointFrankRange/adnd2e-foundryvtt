@@ -16,7 +16,16 @@ import {
   priestHasMajorAccessAtLevel,
   type PriestFreeMagickFilter,
 } from "../../magic/priest-sphere-access";
-import { priestPoolAffords, priestScopeAllowsFree, type TheurgyScope, type TheurgyType } from "../../core/magic/priest-spell-points";
+import {
+  priestCanAffordCast,
+  priestChannellingCost,
+  priestPoolAffords,
+  priestPoolUnderChannelling,
+  priestScopeAllowsFree,
+  priestSpendCast,
+  type TheurgyScope,
+  type TheurgyType,
+} from "../../core/magic/priest-spell-points";
 import { TEMPLATE_PATH } from "../../constants";
 import { getOptionalRules } from "../../settings";
 import { orisonAffords, orisonCap } from "../../core/magic/priest-orisons";
@@ -93,6 +102,8 @@ export interface SpellcasterActor {
         slots: Record<string, { max: number; used: number }>;
         sphereAccessOverride: string[] | null;
         spellPoints: { maxSpellLevel?: number; maxPerLevel?: number; sp?: number; spent?: number; remaining?: number };
+        channelling: { current?: number; max?: number };
+        fatigueSaveBonus: number;
       };
     };
   };
@@ -143,6 +154,18 @@ function priestPoolOn(actor: SpellcasterActor): boolean {
   return chassisId !== null && isPriestPoolProgression(getChassis(chassisId).spellProgressionId);
 }
 
+/** Whether a priest's casts spend from the channelling pool: Channellers is on
+ *  AND the priest casts from the spell-points pool (clerics, druids). */
+function priestChannellingOn(actor: SpellcasterActor): boolean {
+  return channellersEnabled(getOptionalRules()) && priestPoolOn(actor);
+}
+
+/** Whether a cast by this caster class spends from the channelling pool: a
+ *  channelling wizard (Plan B), or a channelling priest (priestChannellingOn). */
+export function channellingActive(actor: SpellcasterActor, key: "wizard" | "priest"): boolean {
+  return key === "wizard" ? channellersEnabled(getOptionalRules()) : priestChannellingOn(actor);
+}
+
 /** Finds the actor's wizard-progression class item (if any) and returns its
  *  current level, derived from its xp exactly like context.ts's own class
  *  rows are (classItemLevel). Returns 0 if no such class exists — in
@@ -189,8 +212,11 @@ function canMemorizePriestSpellPoints(
   magickType: TheurgyType,
   scope: TheurgyScope,
 ): boolean {
+  const pool = actor.system.spellcasting.priest.spellPoints;
+  // Channelled priests memorize free, as channelling wizards do: only Table 26's caps gate it.
+  const view = priestChannellingOn(actor) ? priestPoolUnderChannelling(pool) : pool;
   return priestPoolAffords(
-    actor.system.spellcasting.priest.spellPoints,
+    view,
     actor.system.spellcasting.priest.memorized,
     spellLevel,
     magickType,
@@ -224,7 +250,9 @@ function canReMemorize(actor: SpellcasterActor, spell: SpellItemHandle): boolean
     if (!priestPoolOn(actor)) return false;
     const memorizedOrisons = sc.memorized.filter((m) => m.spellLevel === 0).length;
     const pool = actor.system.spellcasting.priest.spellPoints;
-    return orisonAffords(pool.remaining ?? 0, memorizedOrisons, orisonCap(findPriestLevel(actor)));
+    // A channelled priest memorizes orisons free too; only the orison cap gates them.
+    const remaining = priestChannellingOn(actor) ? Number.POSITIVE_INFINITY : (pool.remaining ?? 0);
+    return orisonAffords(remaining, memorizedOrisons, orisonCap(findPriestLevel(actor)));
   }
 
   if (key === "priest" && priestPoolOn(actor)) {
@@ -371,22 +399,33 @@ export async function postCastCard(
 }
 
 /** Sub-project 14 Plan B: shared per-cast afford-check for a channelling
- *  wizard, used by castSpell, castFreeMagick, and castOrBegin's begin-path
- *  (casting-actions.ts) so every cast entry point spends from the same pool
- *  the same way. Shows the blocked-cast warning and returns null if the pool
- *  can't afford it; otherwise returns the new (not-yet-persisted) current
- *  value for the caller to write via actor.update. */
+ *  caster, used by castSpell, castFreeMagick, castFreeTheurgy, and castOrBegin's
+ *  begin-path (casting-actions.ts) so every cast entry point spends from the
+ *  same pool the same way. A wizard pays Table 18 (`magickCost`); a priest pays
+ *  Table 29 (`priestChannellingCost`, orisons at 1 SP). Shows the blocked-cast
+ *  warning and returns null if the pool can't afford it; otherwise returns the
+ *  new (not-yet-persisted) current value for the caller to write via actor.update. */
 export function tryChannellingSpend(
   actor: SpellcasterActor,
+  caster: "wizard" | "priest",
   spellLevel: number,
   magickType: "fixed" | "free",
+  scope: TheurgyScope,
 ): number | null {
-  const current = actor.system.spellcasting.wizard.channelling.current ?? 0;
-  if (!canAffordCast(current, spellLevel, magickType)) {
+  const current = actor.system.spellcasting[caster].channelling.current ?? 0;
+  if (caster === "wizard") {
+    if (!canAffordCast(current, spellLevel, magickType)) {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
+      return null;
+    }
+    return spendCastSp(current, spellLevel, magickType);
+  }
+  const cost = priestChannellingCost(spellLevel, magickType, scope);
+  if (!priestCanAffordCast(current, cost)) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
     return null;
   }
-  return spendCastSp(current, spellLevel, magickType);
+  return priestSpendCast(current, cost);
 }
 
 /** Sub-project 14 Plan C: resolves and applies this cast's fatigue tier —
@@ -400,14 +439,15 @@ export function tryChannellingSpend(
  *  needs a dice roll this pure-glue function does not perform. */
 export async function applyCastFatigue(
   actor: SpellcasterActor,
+  caster: "wizard" | "priest",
   spellLevel: number,
   preDeductionSp: number,
 ): Promise<FatigueTier | null> {
   if (!channellerFatigueEnabled(getOptionalRules())) return null;
   const currentTier = [...actor.statuses].map(tierForConditionId).find((t) => t !== null) ?? null;
-  const maxSp = actor.system.spellcasting.wizard.channelling.max ?? 0;
+  const maxSp = actor.system.spellcasting[caster].channelling.max ?? 0;
   const resolved = resolveCastFatigue({
-    casterLevel: wizardCasterLevel(actor),
+    casterLevel: caster === "wizard" ? wizardCasterLevel(actor) : findPriestLevel(actor),
     spellLevel,
     currentHp: actor.system.attributes.hp.value,
     maxHp: actor.system.attributes.hp.max,
@@ -460,7 +500,7 @@ export async function castSpell(actor: SpellcasterActor, spellItemId: string): P
   }
   const key = casterKey(spell);
   const list = actor.system.spellcasting[key].memorized;
-  const channelling = key === "wizard" && channellersEnabled(getOptionalRules());
+  const channelling = channellingActive(actor, key);
   // A channelling entry is never expended (spec §2) — any match is castable
   // subject to affordability, checked below; the classic path still requires
   // a non-expended entry.
@@ -472,16 +512,16 @@ export async function castSpell(actor: SpellcasterActor, spellItemId: string): P
     return;
   }
   if (channelling) {
-    const preDeductionSp = actor.system.spellcasting.wizard.channelling.current ?? 0;
-    const spent = tryChannellingSpend(actor, entry.spellLevel, entry.magickType ?? "fixed");
+    const preDeductionSp = actor.system.spellcasting[key].channelling.current ?? 0;
+    const spent = tryChannellingSpend(actor, key, entry.spellLevel, entry.magickType ?? "fixed", entry.theurgyScope ?? "major");
     if (spent === null) return;
     const rolled = await rollSpellAutomation(spell);
     if (!rolled) return;
     await actor.update({
-      "system.spellcasting.wizard.channelling.current": spent,
+      [`system.spellcasting.${key}.channelling.current`]: spent,
     });
     await postCastCard(actor, spell, rolled);
-    const resolvedTier = await applyCastFatigue(actor, entry.spellLevel, preDeductionSp);
+    const resolvedTier = await applyCastFatigue(actor, key, entry.spellLevel, preDeductionSp);
     if (resolvedTier === "mortal") await resolveMortalFatigue(actor);
     return;
   }
@@ -636,7 +676,7 @@ export async function castFreeMagick(
   }
   if (channelling) {
     const preDeductionSp = actor.system.spellcasting.wizard.channelling.current ?? 0;
-    const spent = tryChannellingSpend(actor, spellLevel, "free");
+    const spent = tryChannellingSpend(actor, "wizard", spellLevel, "free", "major");
     if (spent === null) return;
     const rolled = await rollSpellAutomation(chosen);
     if (!rolled) return;
@@ -644,7 +684,7 @@ export async function castFreeMagick(
       "system.spellcasting.wizard.channelling.current": spent,
     });
     await postCastCard(actor, chosen, rolled);
-    const resolvedTier = await applyCastFatigue(actor, spellLevel, preDeductionSp);
+    const resolvedTier = await applyCastFatigue(actor, "wizard", spellLevel, preDeductionSp);
     if (resolvedTier === "mortal") await resolveMortalFatigue(actor);
     return;
   }
@@ -723,16 +763,18 @@ export async function forgetFreeTheurgy(
  *  the priest filter: any priest spell of the level for universal, major-access
  *  only for major), re-checked after the prompt, its automation rolled, and
  *  then the first unexpended matching entry is expended. Same roll-then-mark
- *  ordering and immediate (non-Begin/Complete) cast as castFreeMagick. Priest
- *  free theurgies never draw on channelling. */
+ *  ordering and immediate (non-Begin/Complete) cast as castFreeMagick. For a
+ *  channelling priest the entry is never expended: the cast spends from
+ *  `channelling.current` instead, as castFreeMagick does for a wizard. */
 export async function castFreeTheurgy(
   actor: SpellcasterActor,
   spellLevel: number,
   scope: "major" | "universal",
 ): Promise<void> {
+  const channelling = priestChannellingOn(actor);
   const list = actor.system.spellcasting.priest.memorized;
   const index = list.findIndex(
-    (m) => m.magickType === "free" && m.spellLevel === spellLevel && m.theurgyScope === scope && !m.expended,
+    (m) => m.magickType === "free" && m.spellLevel === spellLevel && m.theurgyScope === scope && (channelling || !m.expended),
   );
   if (index === -1) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
@@ -755,6 +797,18 @@ export async function castFreeTheurgy(
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
     return;
   }
+  if (channelling) {
+    const preDeductionSp = actor.system.spellcasting.priest.channelling.current ?? 0;
+    const spent = tryChannellingSpend(actor, "priest", spellLevel, "free", scope);
+    if (spent === null) return;
+    const rolled = await rollSpellAutomation(chosen);
+    if (!rolled) return;
+    await actor.update({ "system.spellcasting.priest.channelling.current": spent });
+    await postCastCard(actor, chosen, rolled);
+    const resolvedTier = await applyCastFatigue(actor, "priest", spellLevel, preDeductionSp);
+    if (resolvedTier === "mortal") await resolveMortalFatigue(actor);
+    return;
+  }
   const rolled = await rollSpellAutomation(chosen);
   if (!rolled) return;
   // Re-read after the awaits: the dialog and the roll can outlive a concurrent
@@ -772,11 +826,13 @@ export async function castFreeTheurgy(
   await postCastCard(actor, chosen, rolled);
 }
 
-/** Sub-project 14 Plan B: Table 20 recovery. No-op with a warning if
- *  Channellers isn't active for this actor (defensive re-check, matching
- *  every other action in this file). */
+/** Sub-project 14 Plan B: Table 20 recovery, keyed by the caster's pool: the
+ *  wizard's channelling pool or the priest's (Sub-project 14 priest channelling).
+ *  No-op with a warning if Channellers isn't active for this actor (defensive
+ *  re-check, matching every other action in this file). */
 export async function recoverChannellerSp(
   actor: SpellcasterActor,
+  caster: "wizard" | "priest",
   activity: ChannellerActivity,
   hours: number,
 ): Promise<void> {
@@ -784,8 +840,8 @@ export async function recoverChannellerSp(
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.channellingBlockedWarning"));
     return;
   }
-  const { current, max } = actor.system.spellcasting.wizard.channelling;
+  const { current, max } = actor.system.spellcasting[caster].channelling;
   await actor.update({
-    "system.spellcasting.wizard.channelling.current": recoverSp(current ?? 0, max ?? 0, activity, hours),
+    [`system.spellcasting.${caster}.channelling.current`]: recoverSp(current ?? 0, max ?? 0, activity, hours),
   });
 }

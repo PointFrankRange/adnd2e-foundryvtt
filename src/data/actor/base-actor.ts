@@ -234,6 +234,15 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
         slots: new ObjectField({ required: true, initial: {} }),
         /** Sub-project 14 priest spell points: cached deriveSpellPoints() priest output (mirrors wizard.spellPoints; left alone when there is no priest-progression caster). */
         spellPoints: new ObjectField({ required: true, initial: {} }),
+        /** Sub-project 14 priest channelling (clerics, druids): `current` is PERSISTED like the wizard's; `max` is derived-overwritten each prepare cycle from deriveChannelling's priest result (null = never derived). */
+        channelling: new SchemaField({
+          current: new NumberField({ required: true, integer: true, initial: 0 }),
+          max: new NumberField({ required: true, nullable: true, integer: true, initial: null }),
+        }),
+        /** Sub-project 14 fix round: a priest's own banked Recover-from-Fatigue
+         *  bonus (mirrors the wizard's fatigueSaveBonus; a priest-only channeller
+         *  banks here, never on the wizard's counter). */
+        fatigueSaveBonus: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       }),
     }),
     biography: htmlField(),
@@ -348,7 +357,7 @@ interface DerivedWriteSurface {
   proficiencies: unknown;
   thiefSkills: { total: number; spent: number; available: number; allocations: unknown };
   languagesKnown: unknown;
-  spellcasting: { wizard: { slots: unknown; spellPoints: unknown; channelling: { max: unknown } }; priest: { slots: unknown; spellPoints: unknown } };
+  spellcasting: { wizard: { slots: unknown; spellPoints: unknown; channelling: { max: unknown } }; priest: { slots: unknown; spellPoints: unknown; channelling: { max: unknown } } };
 }
 
 /**
@@ -402,6 +411,7 @@ export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void 
   if (derived.spellPoints.priest) sys.spellcasting.priest.spellPoints = derived.spellPoints.priest;
   // channelling.current is PERSISTED — only .max is overwritten here (mirrors attributes.hp.max's own derived-overwrite pattern).
   if (derived.channelling.wizard) sys.spellcasting.wizard.channelling.max = derived.channelling.wizard.max;
+  if (derived.channelling.priest) sys.spellcasting.priest.channelling.max = derived.channelling.priest.max;
 }
 
 export abstract class Adnd2eActorModel<

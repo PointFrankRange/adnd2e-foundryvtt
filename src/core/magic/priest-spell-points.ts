@@ -3,6 +3,7 @@
 // spell-points rule is on. Pure.
 import { assertAbilityScore, assertLevel, assertSpellLevel } from "../errors";
 import { spellsMemorizedAtLevel } from "./spell-points";
+import { ORISON_COST_SP } from "./priest-orisons";
 
 const MAX_TABLE_LEVEL = 20;
 
@@ -120,6 +121,23 @@ export function priestTheurgyCost(spellLevel: number, magickType: TheurgyType, s
   throw new RangeError(`no theurgy cost for ${magickType} ${scope}`);
 }
 
+/** Channelled cost of one priest cast: a level-0 orison costs ORISON_COST_SP
+ *  (Table 29 has no level-0 row); every other spell costs its Table 29 cost. */
+export function priestChannellingCost(spellLevel: number, magickType: TheurgyType, scope: TheurgyScope): number {
+  if (spellLevel === 0) return ORISON_COST_SP;
+  return priestTheurgyCost(spellLevel, magickType, scope);
+}
+
+/** Whether a channelled priest's pool covers one cast's Table 29 cost. */
+export function priestCanAffordCast(current: number, cost: number): boolean {
+  return cost <= current;
+}
+
+/** The pool after one channelled cast of this Table 29 cost. */
+export function priestSpendCast(current: number, cost: number): number {
+  return current - cost;
+}
+
 /** Whether a memorized theurgy of this scope may be a free theurgy. */
 export function priestScopeAllowsFree(scope: TheurgyScope): boolean {
   return scope === "major" || scope === "universal";
@@ -148,4 +166,11 @@ export function priestPoolAffords(
   if (spellLevel > pool.maxSpellLevel) return false;
   if (spellsMemorizedAtLevel(memorized, spellLevel) >= (pool.maxPerLevel ?? 0)) return false;
   return (pool.remaining ?? 0) >= priestTheurgyCost(spellLevel, magickType, scope);
+}
+
+/** The pool a channelled priest's memorize checks read. Channelled memorize
+ *  costs nothing from the pool (as for a channelling wizard), so only Table
+ *  26's caps (max spell level, per-level cap, orison cap) gate it. */
+export function priestPoolUnderChannelling(pool: PriestPoolView): PriestPoolView {
+  return { ...pool, remaining: Number.POSITIVE_INFINITY };
 }
