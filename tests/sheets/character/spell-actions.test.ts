@@ -211,14 +211,16 @@ describe("memorizeSpell — priest orisons", () => {
   });
 
   it("refuses an orison once the orison cap is reached", async () => {
+    // o11 is not in the ten-entry fill (o0-o9), so the refusal can only come from the cap.
+    const ORISON_11 = spellItem({ id: "o11", name: "Light 11", casterClass: "priest", level: 0, spheres: ["all"] });
     const actor = makeActor({
       priestChassis: "cleric",
       priestXp: 3000,
       priestSp: orisonPool,
       priestMemorized: ORISON_CAP_FILL,
-      items: [ORISON],
+      items: [ORISON, ORISON_11],
     });
-    await memorizeSpell(actor, "o1");
+    await memorizeSpell(actor, "o11");
     expect(actor.update).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalled();
   });
