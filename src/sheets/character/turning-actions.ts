@@ -37,11 +37,17 @@ export function turningPanel(actor: TurnerActor): { canTurn: boolean; level: num
   return { canTurn: level !== null, level, attempted, canReset: attempted && isGm };
 }
 
-function targetedActors(): TargetActor[] {
-  const targets = (game.user as unknown as { targets: Iterable<{ actor: TargetActor | null }> }).targets;
-  const actors: TargetActor[] = [];
-  for (const token of targets) if (token.actor) actors.push(token.actor);
-  return actors;
+interface TargetedToken {
+  name: string;
+  document?: { texture?: { src?: string | null } };
+  actor: TargetActor | null;
+}
+
+function targetedActors(): { token: TargetedToken; actor: TargetActor }[] {
+  const targets = (game.user as unknown as { targets: Iterable<TargetedToken> }).targets;
+  const found: { token: TargetedToken; actor: TargetActor }[] = [];
+  for (const token of targets) if (token.actor) found.push({ token, actor: token.actor });
+  return found;
 }
 
 export async function turnUndead(actor: TurnerActor): Promise<void> {
@@ -65,7 +71,7 @@ export async function turnUndead(actor: TurnerActor): Promise<void> {
   const bonusCap = (await new Roll("2d4").evaluate()).total;
   const naturalD20 = d20.dice[0]?.total ?? d20.total;
 
-  const turnTargets: TurnTarget[] = targets.map((t, i) => ({
+  const turnTargets: TurnTarget[] = targets.map(({ actor: t }, i) => ({
     id: String(i),
     isUndead: Boolean(t.system.details?.types?.includes("undead")),
     row: (t.system.details?.turning?.row || null) as TurnRowId | null,
@@ -80,7 +86,10 @@ export async function turnUndead(actor: TurnerActor): Promise<void> {
     level,
     cap,
     bonusCap,
-    rows: results.map((r, i) => ({ name: targets[i]!.name, img: targets[i]!.img, status: r.status })),
+    rows: results.map((r, i) => {
+      const { token, actor: ta } = targets[i]!;
+      return { name: token.name, img: token.document?.texture?.src || ta.img, status: r.status };
+    }),
   });
   const content = await foundry.applications.handlebars.renderTemplate(
     TEMPLATE_PATH("chat/turn-undead-roll.hbs"),
@@ -94,11 +103,15 @@ export async function turnUndead(actor: TurnerActor): Promise<void> {
   await actor.setFlag(SYSTEM_ID, FLAG, true);
 
   for (const [i, r] of results.entries()) {
-    const target = targets[i]!;
-    if (r.status === "turned") {
-      await requestApply(target as never, { kind: "condition", targetUuid: target.uuid, conditionId: "turned" });
-    } else if (r.status === "destroyed") {
-      await requestApply(target as never, { kind: "destroy", targetUuid: target.uuid });
+    const target = targets[i]!.actor;
+    try {
+      if (r.status === "turned") {
+        await requestApply(target as never, { kind: "condition", targetUuid: target.uuid, conditionId: "turned" });
+      } else if (r.status === "destroyed") {
+        await requestApply(target as never, { kind: "destroy", targetUuid: target.uuid });
+      }
+    } catch (err) {
+      console.error(`${SYSTEM_ID} | turn apply failed`, err);
     }
   }
 }
