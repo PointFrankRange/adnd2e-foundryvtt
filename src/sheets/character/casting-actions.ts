@@ -126,7 +126,7 @@ export async function castOrBegin(actor: CastingActor, spellItemId: string): Pro
   let channellingSpent: number | null = null;
   const preDeductionSp = actor.system.spellcasting.wizard.channelling.current ?? 0;
   if (channelling) {
-    channellingSpent = tryChannellingSpend(actor, entry.spellLevel, entry.magickType ?? "fixed");
+    channellingSpent = tryChannellingSpend(actor, "wizard", entry.spellLevel, entry.magickType ?? "fixed", "major");
     if (channellingSpent === null) return;
   }
   const casting: CastingState = {
@@ -154,7 +154,7 @@ export async function castOrBegin(actor: CastingActor, spellItemId: string): Pro
   });
   await postNotice(actor, spell, "begin", casting);
   if (channelling) {
-    const resolvedTier = await applyCastFatigue(actor, entry.spellLevel, preDeductionSp);
+    const resolvedTier = await applyCastFatigue(actor, "wizard", entry.spellLevel, preDeductionSp);
     if (resolvedTier === "mortal") await resolveMortalFatigue(actor);
   }
   if (plan.mode === "segments" && plan.initiativeAdd > 0) {

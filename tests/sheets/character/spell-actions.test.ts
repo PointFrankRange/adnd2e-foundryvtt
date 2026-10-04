@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   castFreeTheurgy,
+  castSpell,
   forgetFreeTheurgy,
   memorizeFreeTheurgy,
   memorizeSpell,
@@ -35,6 +36,7 @@ function spellItem(opts: { id: string; name: string; casterClass: string; level:
 interface ActorOpts {
   priestChassis?: string | null;
   priestSp?: Record<string, number | undefined>;
+  priestChannelling?: { current?: number; max?: number };
   priestMemorized?: SpellcasterActor["system"]["spellcasting"]["priest"]["memorized"];
   priestSlots?: Record<string, { max: number; used: number }>;
   /** XP on the priest class item; the level is derived from it (3000 XP = cleric level 3). */
@@ -76,6 +78,7 @@ function makeActor(opts: ActorOpts = {}): SpellcasterActor {
           slots: opts.priestSlots ?? { 1: { max: 2, used: 0 } },
           sphereAccessOverride: opts.sphereAccessOverride ?? null,
           spellPoints: opts.priestSp ?? {},
+          channelling: opts.priestChannelling ?? {},
         },
       },
     },
@@ -451,5 +454,116 @@ describe("castFreeTheurgy — priest free theurgies", () => {
     await castFreeTheurgy(actor, 3, "major");
     expect(prompt).not.toHaveBeenCalled();
     expect(actor.update).not.toHaveBeenCalled();
+  });
+});
+
+describe("priest channelling — casts spend the priest pool", () => {
+  const CHANNEL_ON = { spellsAndMagicEnabled: true, spellPoints: true, channelers: true };
+  const ORISON = spellItem({ id: "o1", name: "Light", casterClass: "priest", level: 0, spheres: ["all"] });
+  const clwEntry: MemorizedEntry = { spellItemId: "clw-id", spellLevel: 1, expended: false, magickType: "fixed", theurgyScope: "major" };
+  const freeMajor3: MemorizedEntry = { spellItemId: null, spellLevel: 3, expended: false, magickType: "free", theurgyScope: "major" };
+
+  beforeEach(() => {
+    rules = { ...CHANNEL_ON };
+    vi.stubGlobal("foundry", {
+      applications: {
+        api: { DialogV2: { prompt: vi.fn(async () => "heal3") } },
+        handlebars: { renderTemplate: vi.fn(async () => "<p>cast</p>") },
+      },
+      utils: { escapeHTML: (s: string) => s },
+    });
+    vi.stubGlobal("ChatMessage", { getSpeaker: vi.fn(() => ({})), create: vi.fn(async () => undefined) });
+  });
+
+  it("spends the priest pool on a channelled cast and writes the priest channelling current", async () => {
+    // CLW: priest level 1, fixed, major scope = Table 29 cost 4; 40 - 4 = 36.
+    const actor = makeActor({ priestChassis: "cleric", priestChannelling: { current: 40 }, priestMemorized: [clwEntry], items: [CLW] });
+    await castSpell(actor, "clw-id");
+    expect(actor.update).toHaveBeenCalledWith(
+      expect.objectContaining({ "system.spellcasting.priest.channelling.current": 36 }),
+    );
+    expect(actor.update).toHaveBeenCalledTimes(1);
+  });
+
+  it("refuses a channelled cast the priest pool cannot afford", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestChannelling: { current: 3 }, priestMemorized: [clwEntry], items: [CLW] });
+    await castSpell(actor, "clw-id");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith("ADND2E.sheet.spells.castBlockedWarning");
+  });
+
+  it("charges one SP for a channelled orison", async () => {
+    const orisonEntry: MemorizedEntry = { spellItemId: "o1", spellLevel: 0, expended: false, magickType: "fixed", theurgyScope: "universal" };
+    const actor = makeActor({ priestChassis: "cleric", priestChannelling: { current: 40 }, priestMemorized: [orisonEntry], items: [ORISON] });
+    await castSpell(actor, "o1");
+    expect(actor.update).toHaveBeenCalledWith(
+      expect.objectContaining({ "system.spellcasting.priest.channelling.current": 39 }),
+    );
+  });
+
+  it("casts classically and expends the entry when Channellers is off", async () => {
+    rules = { spellsAndMagicEnabled: true, spellPoints: true };
+    const actor = makeActor({ priestChassis: "cleric", priestChannelling: { current: 40 }, priestMemorized: [clwEntry], items: [CLW] });
+    await castSpell(actor, "clw-id");
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [{ ...clwEntry, expended: true }],
+    });
+  });
+
+  it("memorizes a theurgy the channelled pool cannot cover, free of SP", async () => {
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestSp: { ...affordablePool, remaining: 0, spent: 40 },
+      priestChannelling: { current: 0 },
+      items: [CLW],
+    });
+    await memorizeSpell(actor, "clw-id");
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [clwEntry],
+    });
+  });
+
+  it("memorizes a free theurgy the channelled pool cannot cover, free of SP", async () => {
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestSp: { ...affordablePool, remaining: 0, spent: 40 },
+      priestChannelling: { current: 0 },
+      items: [HEAL3],
+    });
+    await memorizeFreeTheurgy(actor, 3, "major");
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [{ ...freeMajor3, spellItemId: null }],
+    });
+  });
+
+  it("memorizes an orison the channelled pool cannot cover, still under the orison cap", async () => {
+    const actor = makeActor({
+      priestChassis: "cleric",
+      priestXp: 3000,
+      priestSp: { ...affordablePool, remaining: 0, spent: 40, maxPerLevel: 5 },
+      priestChannelling: { current: 0 },
+      items: [ORISON],
+    });
+    await memorizeSpell(actor, "o1");
+    expect(actor.update).toHaveBeenCalledWith({
+      "system.spellcasting.priest.memorized": [
+        { spellItemId: "o1", spellLevel: 0, expended: false, magickType: "fixed", theurgyScope: "universal" },
+      ],
+    });
+  });
+
+  it("spends the pool on a channelled free theurgy and leaves its entry unexpended", async () => {
+    // 3rd-level major free theurgy costs 20; 40 - 20 = 20.
+    const actor = makeActor({ priestChassis: "cleric", priestChannelling: { current: 40 }, priestMemorized: [freeMajor3], items: [HEAL3] });
+    await castFreeTheurgy(actor, 3, "major");
+    expect(actor.update).toHaveBeenCalledTimes(1);
+    expect(actor.update).toHaveBeenCalledWith({ "system.spellcasting.priest.channelling.current": 20 });
+  });
+
+  it("refuses a channelled free theurgy the pool cannot afford, after the prompt", async () => {
+    const actor = makeActor({ priestChassis: "cleric", priestChannelling: { current: 19 }, priestMemorized: [freeMajor3], items: [HEAL3] });
+    await castFreeTheurgy(actor, 3, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith("ADND2E.sheet.spells.castBlockedWarning");
   });
 });
