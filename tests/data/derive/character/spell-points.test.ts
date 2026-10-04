@@ -82,6 +82,14 @@ describe("deriveSpellPoints priest branch", () => {
     expect(out.priest?.spent).toBe(10); // Table 29 fixed major, level 3
   });
 
+  it("prices an unpriceable stored entry at 0 SP instead of throwing", () => {
+    const out = deriveSpellPoints({
+      ...priestBase,
+      priestMemorized: [{ spellItemId: "bad", spellLevel: 1, magickType: "fixed", theurgyScope: "universal" }],
+    });
+    expect(out.priest?.spent).toBe(0);
+  });
+
   it("prices a memorized orison at 1 SP", () => {
     const out = deriveSpellPoints({
       ...priestBase,
