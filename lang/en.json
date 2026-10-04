@@ -666,7 +666,8 @@
       "rawActor": "Raw Fields (Actor)",
       "rawItem": "Raw Fields (Item)",
       "rawEffect": "Raw Fields (Effect)",
-      "badJson": "{field}: invalid JSON — not saved"
+      "badJson": "{field}: invalid JSON — not saved",
+      "badListEntry": "{field}: one or more entries aren't valid — not saved"
     },
     "settings": {
       "exceptionalStrength": {
