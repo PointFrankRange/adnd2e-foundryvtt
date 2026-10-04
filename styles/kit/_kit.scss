@@ -1,4 +1,7 @@
-.adnd2e.pc-sheet {
+// Shared kit rules: the actor sheets (.pc-sheet) and the item sheet root
+// (.raw-field-sheet.item — the .item class keeps the actor fallback out).
+.adnd2e.pc-sheet,
+.adnd2e.raw-field-sheet.item {
   .window-content {
     background-color: var(--kit-bg);
     background-image: var(--kit-bg-image);
@@ -144,5 +147,35 @@
   .item-controls {
     display: inline-flex; gap: 2px; margin-left: auto;
     .item-control { background: none; border: none; width: auto; padding: 0 3px; color: var(--kit-accent-ink); }
+  }
+}
+
+// Item sheet layout (raw-fields.hbs). Kept apart from the shared rules above so
+// the actor sheets' output is untouched.
+.adnd2e.raw-field-sheet.item {
+  // container, not viewport, query: the sheet is a resizable window, so a
+  // media query would size the columns to the browser instead of the sheet.
+  .raw-field-list { container-type: inline-size; }
+  .raw-title-row { display: flex; align-items: center; gap: 8px; }
+  input.raw-name {
+    flex: 1; min-width: 0; font-family: Georgia, "Times New Roman", serif;
+    font-size: 20px; font-weight: 700; color: var(--kit-accent-ink);
+    background: var(--kit-field-bg); border: 1px solid var(--kit-field-border); padding: 2px 6px;
+  }
+  .raw-groups { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 8px; align-items: start; }
+  @container (min-width: 640px) {
+    .raw-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  .raw-group { min-width: 0; }
+  .kit-bar label { display: inline-flex; align-items: center; gap: 4px; }
+  .raw-field-header { font-size: 12px; font-weight: 700; color: var(--kit-accent-ink); margin: 6px 0 2px; }
+  .form-group {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px;
+    padding: 2px 0; border-bottom: 1px solid var(--kit-row-rule);
+    > label { flex: 0 1 40%; min-width: 110px; font-weight: 700; color: var(--kit-muted); }
+    .form-fields { flex: 1 1 140px; min-width: 0; }
+    .form-fields > input:not([type="checkbox"]), .form-fields > select, .form-fields > textarea {
+      width: 100%; box-sizing: border-box;
+    }
   }
 }

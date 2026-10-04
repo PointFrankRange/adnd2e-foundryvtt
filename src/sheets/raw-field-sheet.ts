@@ -3,7 +3,8 @@
 // testing. Scalars use typed inputs; known list/object fields (LINE_FIELDS) use a
 // one-entry-per-line textarea; a nullable group uses a "Set" checkbox that toggles
 // its children; any other array/object uses a JSON textarea. No
-// designed layout — real sheets are SP2 (PC) / SP6 (NPC/monster). Foundry-coupled
+// designed layout — real sheets are SP2 (PC) / SP6 (NPC/monster); item sheets are
+// grouped into kit panels (groupFieldRows). Foundry-coupled
 // (the walk is `instanceof foundry.data.fields.*`); no unit tests (spec §9) —
 // verified in a linked dev world.
 //
@@ -341,6 +342,52 @@ function buildFieldRows(
   return rows;
 }
 
+/** indent of a child of `system` (walk depth 1 x 12px): the rows that head a panel */
+const SYSTEM_CHILD_INDENT = 12;
+
+/** One item-sheet panel: the Details panel, a plain SchemaField group, or a nullable group. */
+interface FieldGroup {
+  title: string;
+  /** true for a plain heading (Details, or a non-nullable SchemaField); false for a nullable group */
+  isHeader: boolean;
+  /** a nullable group's "Set <label>" checkbox row (kind "nullcheck") */
+  toggle?: FieldRow;
+  rows: FieldRow[];
+}
+
+/**
+ * Splits {@link buildFieldRows}' flat list for the item sheet. `header` holds the name
+ * and image rows; `groups` holds one "Details" panel for the top-level fields (when any)
+ * then one panel per `system` SchemaField group, in schema order. Rows deeper than a
+ * group heading stay in that group with their indent and data attributes unchanged.
+ */
+function groupFieldRows(rows: FieldRow[]): { header: FieldRow[]; groups: FieldGroup[] } {
+  const header: FieldRow[] = [];
+  const details: FieldGroup = { title: "Details", isHeader: true, rows: [] };
+  const groups: FieldGroup[] = [];
+  let current: FieldGroup | undefined;
+  for (const row of rows) {
+    if (row.indent === 0) {
+      if (row.header) continue; // the "System" root heading: the panels replace it
+      header.push(row);
+    } else if (row.indent === SYSTEM_CHILD_INDENT) {
+      if (row.kind === "nullcheck") {
+        current = { title: row.label, isHeader: false, toggle: row, rows: [] };
+        groups.push(current);
+      } else if (row.header) {
+        current = { title: row.label, isHeader: true, rows: [] };
+        groups.push(current);
+      } else {
+        current = undefined;
+        details.rows.push(row);
+      }
+    } else {
+      (current ?? details).rows.push(row);
+    }
+  }
+  return { header, groups: details.rows.length ? [details, ...groups] : groups };
+}
+
 /**
  * Adds raw-field rendering + JSON-textarea round-tripping to any v14 DocumentSheetV2
  * subclass (ActorSheetV2 / ItemSheetV2 / ActiveEffectConfig).
@@ -369,7 +416,9 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
       const context = await super._prepareContext(options);
       const source = (context.source ??
         (this.document as { _source?: unknown })._source) as Record<string, unknown>;
-      context.rows = buildFieldRows(this.document, source);
+      const grouped = groupFieldRows(buildFieldRows(this.document, source));
+      context.header = grouped.header;
+      context.groups = grouped.groups;
       return context;
     }
 
