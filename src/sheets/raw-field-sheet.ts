@@ -14,7 +14,7 @@
 const fields = foundry.data.fields;
 const { getProperty, setProperty, deleteProperty } = foundry.utils;
 
-type RowKind = "text" | "textarea" | "number" | "checkbox" | "select" | "json";
+type RowKind = "text" | "textarea" | "number" | "checkbox" | "select" | "multiselect" | "json";
 
 interface FieldRow {
   /** dot-path used as the input `name` and as the update key: "name", "img", "system.<path>" */
@@ -49,6 +49,11 @@ function toChoiceRows(raw: unknown, current: unknown): FieldRow["choices"] {
     entries = Object.entries(resolved as Record<string, unknown>).map(([k, v]) => [k, String(v)]);
   } else return undefined;
   return entries.map(([value, label]) => ({ value, label, selected: value === String(current ?? "") }));
+}
+
+/** True for a StringField whose entries are a fixed choice list (a multi-select candidate). */
+function isChoiceElement(element: unknown): boolean {
+  return element instanceof fields.StringField && Boolean((element as unknown as { choices?: unknown }).choices);
 }
 
 /** True for a field that should be rendered as a single JSON textarea (not walked). */
@@ -92,6 +97,21 @@ function walk(
         out.push({ path, label: humanizeKey(key), indent: depth * 12, header: true });
         walk(field, source, path, depth + 1, out);
       }
+      continue;
+    }
+    if (field instanceof fields.ArrayField && isChoiceElement(field.element)) {
+      // e.g. spell schools/spheres: a fixed choice list per entry. Render a
+      // multi-select instead of a JSON textarea so a typo cannot abort the save.
+      const current = Array.isArray(value) ? value.map(String) : [];
+      const choices = toChoiceRows((field.element as unknown as { choices?: unknown }).choices, undefined) ?? [];
+      out.push({
+        path,
+        label: humanizeKey(key),
+        indent: depth * 12,
+        kind: "multiselect",
+        value: current,
+        choices: choices.map((c) => ({ ...c, selected: current.includes(c.value) })),
+      });
       continue;
     }
     if (isComplexField(field)) {
@@ -247,6 +267,9 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
       const submitData = super._processFormData(event, form, formData);
       for (const el of Array.from(form.querySelectorAll<HTMLSelectElement>('select[data-null="true"]'))) {
         if (el.value === "") setProperty(submitData, el.name, null);
+      }
+      for (const el of Array.from(form.querySelectorAll<HTMLSelectElement>('select[data-multiselect="true"]'))) {
+        setProperty(submitData, el.name, Array.from(el.selectedOptions, (o) => o.value));
       }
       for (const el of Array.from(form.querySelectorAll<HTMLTextAreaElement>('[data-json="true"]'))) {
         const path = el.name;

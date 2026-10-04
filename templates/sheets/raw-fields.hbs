@@ -17,6 +17,13 @@
                   <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
                 {{/each}}
               </select>
+            {{else if (eq this.kind "multiselect")}}
+              <select multiple size="{{this.choices.length}}" name="{{this.path}}" data-multiselect="true"
+                {{#unless @root.editable}}disabled{{/unless}}>
+                {{#each this.choices}}
+                  <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+                {{/each}}
+              </select>
             {{else if (eq this.kind "json")}}
               <textarea name="{{this.path}}" data-json="true" rows="4"
                 {{#unless @root.editable}}readonly{{/unless}}>{{this.value}}</textarea>
