@@ -2760,6 +2760,18 @@ describe("buildCharacterSheetContext — priest spell points (SP14 priest)", () 
     expect(c.spells.orisons[0]!.canMemorize).toBe(false);
   });
 
+  it("a memorized, unexpended orison can be cast; once expended it cannot", () => {
+    const memorizedOrison = (expended: boolean) =>
+      buildCharacterSheetContext(
+        priestInputWithPool(
+          { remaining: 40, memorized: [{ spellItemId: "o1", spellLevel: 0, expended, magickType: "fixed" }] },
+          { classItems: [cleric3], spellItems: [priestSpell({ id: "o1", level: 0, name: "Alleviate" })] },
+        ),
+      ).spells.orisons[0]!;
+    expect(memorizedOrison(false)).toMatchObject({ memorized: true, expended: false, canCast: true });
+    expect(memorizedOrison(true)).toMatchObject({ memorized: true, expended: true, canCast: false });
+  });
+
   it("shows no orisons with the rule off", () => {
     const c = buildCharacterSheetContext(priestInputWithPool({ remaining: 5 }, { optionalRules: DEFAULT_OPTIONAL_RULES, spellItems: [priestSpell({ level: 0 })] }));
     expect(c.spells.orisons).toEqual([]);

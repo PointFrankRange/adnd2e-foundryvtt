@@ -58,8 +58,13 @@
       <div class="kit-bar">{{localize 'ADND2E.sheet.spells.orisons'}}</div>
       <div class="kit-body">
         {{#each adnd2e.spells.orisons as |s|}}
-          <div class="spell-row" data-item-id="{{s.id}}">
-            <span class="name">{{s.name}}</span>
+          <div class="spell-row{{#if s.expended}} expended{{/if}}" data-item-id="{{s.id}}">
+            <span class="name">
+              {{s.name}}
+              {{#if s.expended}}
+                <span class="badge expended-badge" title="{{localize 'ADND2E.sheet.spells.expended'}}">✓</span>
+              {{/if}}
+            </span>
             {{#if s.canMemorize}}
               <button type="button" data-action="memorizeSpell" data-item-id="{{s.id}}">
                 {{localize 'ADND2E.sheet.spells.memorize'}}
@@ -68,6 +73,11 @@
             {{#if s.memorized}}
               <button type="button" data-action="forgetSpell" data-item-id="{{s.id}}">
                 {{localize 'ADND2E.sheet.spells.forget'}}
+              </button>
+            {{/if}}
+            {{#if s.canCast}}
+              <button type="button" data-action="castSpell" data-item-id="{{s.id}}">
+                {{localize 'ADND2E.sheet.spells.cast'}}
               </button>
             {{/if}}
           </div>
