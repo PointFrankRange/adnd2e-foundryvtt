@@ -18,12 +18,15 @@
                 {{/each}}
               </select>
             {{else if (eq this.kind "multiselect")}}
-              <select multiple size="{{this.choices.length}}" name="{{this.path}}" data-multiselect="true"
-                {{#unless @root.editable}}disabled{{/unless}}>
+              <details class="multiselect" data-multiselect="true" data-path="{{this.path}}">
+                <summary>{{this.value.length}} selected</summary>
                 {{#each this.choices}}
-                  <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+                  <label class="multiselect-option">
+                    <input type="checkbox" value="{{this.value}}" {{#if this.selected}}checked{{/if}}
+                      {{#unless @root.editable}}disabled{{/unless}}> {{this.label}}
+                  </label>
                 {{/each}}
-              </select>
+              </details>
             {{else if (eq this.kind "json")}}
               <textarea name="{{this.path}}" data-json="true" rows="4"
                 {{#unless @root.editable}}readonly{{/unless}}>{{this.value}}</textarea>

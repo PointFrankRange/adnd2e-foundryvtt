@@ -268,8 +268,9 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
       for (const el of Array.from(form.querySelectorAll<HTMLSelectElement>('select[data-null="true"]'))) {
         if (el.value === "") setProperty(submitData, el.name, null);
       }
-      for (const el of Array.from(form.querySelectorAll<HTMLSelectElement>('select[data-multiselect="true"]'))) {
-        setProperty(submitData, el.name, Array.from(el.selectedOptions, (o) => o.value));
+      for (const el of Array.from(form.querySelectorAll<HTMLDetailsElement>('details[data-multiselect="true"]'))) {
+        const picked = Array.from(el.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked'), (i) => i.value);
+        setProperty(submitData, el.dataset.path ?? "", picked);
       }
       for (const el of Array.from(form.querySelectorAll<HTMLTextAreaElement>('[data-json="true"]'))) {
         const path = el.name;
