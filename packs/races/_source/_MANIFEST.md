@@ -104,3 +104,24 @@ Mage —, so gnome `mage` = 15 is really the illusionist cap.
 | gnome | `icons/svg/burrow.svg` |
 | half-elf | `icons/svg/mystery-man-black.svg` |
 | halfling | `icons/svg/house.svg` |
+
+## Dwarf subraces (SP12 Plan A)
+
+Source: *The Complete Book of Dwarves* (PHBR6) ch. 4, pp. 28-36, read from the text layer;
+the subrace thieving-skill table was read from the page image. Six `race` items, each with
+`raceId: "dwarf"` (the PHB dwarf's `allowedClasses` / `allowedMulticlass` copied) and a
+`subrace` block (ability adjustments and min-max, thieving adjustments, Constitution-save
+adjustment, XP surcharge percent):
+
+| file | name | notes |
+|------|------|-------|
+| `hill-dwarf.json` | Hill Dwarf | |
+| `mountain-dwarf.json` | Mountain Dwarf | |
+| `deep-dwarf.json` | Deep Dwarf | +10% XP, Con-save +1 |
+| `duergar.json` | Duergar | +20% XP |
+| `sundered-dwarf.json` | Sundered Dwarf | |
+| `gully-dwarf.json` | Gully Dwarf | |
+
+Mechanical values only are shipped; special advantages and drawbacks (enmities, innate
+powers, light penalties, claustrophobia, groveling, magic-item failure) are display labels in
+`grantedFeatures` only.

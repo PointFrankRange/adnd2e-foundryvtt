@@ -1,0 +1,92 @@
+{
+  "_id": "kDwarfGully00001",
+  "_key": "!items!kDwarfGully00001",
+  "name": "Gully Dwarf",
+  "type": "race",
+  "img": "icons/svg/mountain.svg",
+  "system": {
+    "description": "",
+    "raceId": "dwarf",
+    "size": "small",
+    "baseMovement": 6,
+    "infravision": 60,
+    "classLevelLimits": {
+      "cleric": 8,
+      "fighter": 8,
+      "thief": 16
+    },
+    "allowedClasses": [
+      "cleric",
+      "fighter",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "fighter",
+        "cleric"
+      ]
+    ],
+    "bonusLanguages": [
+      "gnome",
+      "orc",
+      "goblin"
+    ],
+    "grantedFeatures": [
+      "Gully: groveling",
+      "Gully: magic items fail 40%"
+    ],
+    "subrace": {
+      "id": "gully-dwarf",
+      "abilityAdjustments": {
+        "str": 1,
+        "dex": 1,
+        "con": 0,
+        "int": 0,
+        "wis": 0,
+        "cha": -2
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 6,
+          "max": 18
+        },
+        "dex": {
+          "min": 6,
+          "max": 18
+        },
+        "con": {
+          "min": 8,
+          "max": 16
+        },
+        "int": {
+          "min": 3,
+          "max": 12
+        },
+        "wis": {
+          "min": 3,
+          "max": 14
+        },
+        "cha": {
+          "min": 3,
+          "max": 12
+        }
+      },
+      "thiefAdjustments": {
+        "pick-pockets": 10,
+        "open-locks": -5,
+        "find-remove-traps": 5,
+        "move-silently": 0,
+        "hide-in-shadows": -5,
+        "detect-noise": 0,
+        "climb-walls": -5,
+        "read-languages": -25
+      },
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0
+    }
+  }
+}

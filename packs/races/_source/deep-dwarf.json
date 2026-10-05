@@ -1,0 +1,96 @@
+{
+  "_id": "kDwarfDeep000001",
+  "_key": "!items!kDwarfDeep000001",
+  "name": "Deep Dwarf",
+  "type": "race",
+  "img": "icons/svg/mountain.svg",
+  "system": {
+    "description": "",
+    "raceId": "dwarf",
+    "size": "small",
+    "baseMovement": 6,
+    "infravision": 90,
+    "classLevelLimits": {
+      "cleric": 12,
+      "fighter": 14,
+      "thief": 10
+    },
+    "allowedClasses": [
+      "cleric",
+      "fighter",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "fighter",
+        "cleric"
+      ]
+    ],
+    "bonusLanguages": [
+      "duergar",
+      "drow",
+      "illithid",
+      "kua-toa",
+      "troll",
+      "troglodyte",
+      "svirfneblin",
+      "undercommon"
+    ],
+    "grantedFeatures": [
+      "Deep dwarf: -1 in bright light"
+    ],
+    "subrace": {
+      "id": "deep-dwarf",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 0,
+        "con": 2,
+        "int": 0,
+        "wis": 0,
+        "cha": -2
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 8,
+          "max": 18
+        },
+        "dex": {
+          "min": 3,
+          "max": 16
+        },
+        "con": {
+          "min": 13,
+          "max": 19
+        },
+        "int": {
+          "min": 3,
+          "max": 18
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 15
+        }
+      },
+      "thiefAdjustments": {
+        "pick-pockets": 5,
+        "open-locks": 0,
+        "find-remove-traps": 10,
+        "move-silently": 0,
+        "hide-in-shadows": 5,
+        "detect-noise": 0,
+        "climb-walls": -10,
+        "read-languages": -15
+      },
+      "conSaveBonusAdjustment": 1,
+      "xpModifierPercent": 10
+    }
+  }
+}
