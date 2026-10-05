@@ -22,5 +22,7 @@
   // src/sheets/character/spell-actions.ts and its Foundry-global imports into
   // this type graph), so it is carved out of the directory-level tests/sheets
   // include, the same way initiative-modifier-dialog.ts is carved out above.
-  "exclude": ["src/combat/initiative-modifier-dialog.ts", "tests/sheets/character/spell-actions.test.ts"]
+  // kit-power-actions.test.ts (SP11 Plan B) drives the Foundry-coupled
+  // usePower/resetPower glue, so it is carved out the same way.
+  "exclude": ["src/combat/initiative-modifier-dialog.ts", "tests/sheets/character/spell-actions.test.ts", "tests/sheets/character/kit-power-actions.test.ts"]
 }
