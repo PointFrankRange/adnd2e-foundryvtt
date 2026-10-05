@@ -4,6 +4,7 @@
 import type {
   ActorSnapshot, ClassEntry, DualClassState, EquippedArmor, EquippedShield, MemorizedEntry,
 } from "../derive/character";
+import { normalizeSubrace, type RawSubrace } from "../../core/races";
 import type { ClassId, Race, ThiefSkill, WizardSchool } from "../../core/types";
 import { toTraitEntries } from "../derive/character";
 import { activeKitEntries } from "../derive/character/kits";
@@ -21,6 +22,7 @@ interface ClassItemSystem {
 interface RaceItemSystem {
   raceId: Race;
   baseMovement?: number;
+  subrace?: RawSubrace;
 }
 interface ArmorItemSystem {
   isShield: boolean;
@@ -117,6 +119,7 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
     },
     exceptionalStrengthPercentile: a.str.exceptional,
     race: raceItem ? (raceItem.system as RaceItemSystem).raceId : null,
+    raceLayer: raceItem ? normalizeSubrace((raceItem.system as RaceItemSystem).subrace) : null,
     classes,
     equippedArmor,
     equippedShield,

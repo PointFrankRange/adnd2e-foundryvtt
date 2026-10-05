@@ -34,4 +34,14 @@ describe("deriveSaves", () => {
     expect(s.bw.target).toBe(13);
     expect(s.bw.rollModifier).toBe(2); // breath weapon: -(-2)
   });
+  it("a subrace Constitution-save adjustment raises the racial bonus only for a race that qualifies (SP12 Plan A)", () => {
+    const input = { groups: [{ group: "warrior" as const, level: 3 }], race: "dwarf" as const, con: 15, wisMagicalDefenseAdj: 0, dexDefensiveAdj: 0 };
+    const plain = deriveSaves(input);
+    const deep = deriveSaves({ ...input, racialSaveAdjustment: 1 });
+    expect(deep.rsw.rollModifier).toBe(plain.rsw.rollModifier + 1);
+    expect(deep.spell.rollModifier).toBe(plain.spell.rollModifier + 1);
+    expect(deep.pp.rollModifier).toBe(plain.pp.rollModifier); // paralysis is not a racial-bonus save
+    const human = deriveSaves({ ...input, race: "human", racialSaveAdjustment: 1 });
+    expect(human.rsw.rollModifier).toBe(0);
+  });
 });

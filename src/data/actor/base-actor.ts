@@ -5,6 +5,7 @@ import { ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, ENCUMBRANCE_CATEGORIES, MULTICLASS
 import { applyRacialDeltas, mainScoreFromSubs, subAbilitiesEnabled } from "../../core/abilities";
 import { THIEF_SKILLS } from "../../core/proficiencies/thief-skills";
 import type { AbilityScores, Race } from "../../core/types";
+import { normalizeSubrace, effectiveAbilityAdjustments, type RawSubrace } from "../../core/races";
 import { DEFAULT_CHARACTER_POINT_POOL } from "../../core/skills/character-points";
 import { abilityScoreWithBonus } from "../../core/skills/traits";
 import { deriveCharacter, resolveTraitTotals, toTraitEntries } from "../derive/character";
@@ -313,12 +314,13 @@ export function applySubAbilityScores(model: foundry.abstract.TypeDataModel.Any)
 export function applyRacialAdjustment(model: foundry.abstract.TypeDataModel.Any): void {
   const sys = model as unknown as {
     abilities: Record<string, { score: number }>;
-    parent: { items: Iterable<{ type: string; system: { raceId?: Race } }> };
+    parent: { items: Iterable<{ type: string; system: { raceId?: Race; subrace?: RawSubrace } }> };
   };
   const raceItem = [...sys.parent.items].find((i) => i.type === "race");
   if (!raceItem) return;
   const raw = Object.fromEntries(ABILITY_KEYS.map((k) => [k, sys.abilities[k].score])) as unknown as AbilityScores;
-  const adj = applyRacialDeltas(raw, raceItem.system.raceId as Race);
+  const race = raceItem.system.raceId as Race;
+  const adj = applyRacialDeltas(raw, race, effectiveAbilityAdjustments(race, normalizeSubrace(raceItem.system.subrace)));
   for (const k of ABILITY_KEYS) sys.abilities[k].score = Math.max(1, adj[k]);
 }
 
