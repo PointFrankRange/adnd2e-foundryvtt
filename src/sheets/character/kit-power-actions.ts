@@ -34,7 +34,7 @@ function findPower(actor: KitPowerActor, kitId: string, powerId: string) {
 }
 
 /** The level of the kit's class (1 when unknown), for level-scaled uses. */
-function classLevelOf(actor: KitPowerActor, chassisId: string): number {
+export function classLevelOf(actor: KitPowerActor, chassisId: string): number {
   return actor.system.classes?.find((c) => c.chassisId === chassisId)?.level ?? 1;
 }
 

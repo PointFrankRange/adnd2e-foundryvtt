@@ -84,7 +84,7 @@ function spellInput(
   };
 }
 
-/** SP11 Plan C: drops classes whose kit switched casting off — the single choke point for slots, spell points and channelling. */
+/** SP11 Plan C: drops classes whose kit switched casting off â€” the single choke point for slots, spell points and channelling. */
 function enabledCasters(casters: readonly ClassMember[], snapshot: ActorSnapshot): ClassMember[] {
   return casters.filter((m) => !snapshot.classes.some((c) => c.chassisId === m.chassisId && c.castingDisabled));
 }

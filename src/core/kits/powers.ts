@@ -19,7 +19,7 @@ export interface PowerBracket {
 export interface KitPower {
   id: string;
   name: string;
-  /** 0 ⇔ at-will. */
+  /** Flat uses per `per`. Stored as 0 for an at-will power and for a scaled one (which takes its uses from `usesByLevel` via `powerUses`). */
   uses: number;
   per: PowerFrequency;
   scope: string;
@@ -72,7 +72,8 @@ function normalizeBrackets(raw: unknown): PowerBracket[] {
 }
 
 /** Lenient read, like a malformed trait effect: a bad power is dropped (inert).
- *  Afterwards at-will ⇔ `per === "at-will"` ⇔ `uses === 0`. */
+ *  Afterwards at-will ⇔ `per === "at-will"` (a flat `uses: 0` is coerced to at-will);
+ *  a scaled power stores `uses: 0` and takes its uses from `usesByLevel` via `powerUses`. */
 export function normalizePowers(raw: readonly RawPower[]): KitPower[] {
   const seen = new Set<string>();
   const out: KitPower[] = [];

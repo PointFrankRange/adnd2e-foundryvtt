@@ -338,7 +338,7 @@ describe("deriveCharacter — dual-class (§5.6 step 1)", () => {
   });
 });
 
-describe("deriveCharacter � kit casting override (SP11 Plan C)", () => {
+describe("deriveCharacter — kit casting override (SP11 Plan C)", () => {
   const paladin = { ...fighterClass, chassisId: "paladin" as const, level: 10, xp: 600000 };
   const rules = { ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true, channelers: true };
   it("a level-10 Paladin has priest slots by default", () => {

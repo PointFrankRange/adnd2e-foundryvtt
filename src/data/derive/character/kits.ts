@@ -76,7 +76,7 @@ export function casterTypesDisabled(
 ): { wizard: boolean; priest: boolean } {
   const result = { wizard: false, priest: false };
   for (const type of ["wizard", "priest"] as const) {
-    const ofType = classes.filter((c) => getChassis(c.chassisId as ClassId).casterType === type);
+    const ofType = classes.filter((c) => getChassis(c.chassisId as ClassId)?.casterType === type);
     result[type] = ofType.length > 0 && ofType.every((c) => c.castingDisabled === true);
   }
   return result;

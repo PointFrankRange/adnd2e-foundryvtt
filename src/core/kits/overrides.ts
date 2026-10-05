@@ -22,8 +22,12 @@ export interface KitOverrides {
   removedAbilities: string[];
 }
 
-export const INHERIT_TURNING: TurningRule = { mode: "inherit", offset: 0 };
-export const NO_OVERRIDES: KitOverrides = { casting: "inherit", turning: INHERIT_TURNING, removedAbilities: [] };
+export const INHERIT_TURNING: TurningRule = Object.freeze({ mode: "inherit", offset: 0 } as const);
+export const NO_OVERRIDES: KitOverrides = {
+  casting: "inherit",
+  turning: INHERIT_TURNING,
+  removedAbilities: Object.freeze([]) as unknown as string[],
+};
 
 export interface RawOverrides {
   casting?: unknown;

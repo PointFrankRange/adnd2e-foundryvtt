@@ -3264,5 +3264,9 @@ describe("buildCharacterSheetContext — kit disables casting (SP11 Plan C)", ()
     expect(absent.spells.priestPoolOn).toBe(true);
     expect(absent.spells.freeMagicks[0]!.canCast).toBe(true);
     expect(absent.spells.orisons.length).toBe(1);
+    // Non-vacuous baseline: the same fixture's known rows ARE actionable without the kit.
+    const rows = absent.spells.known.flatMap((g) => g.items);
+    expect(rows.some((r) => r.casterClass === "priest" && (r.canMemorize || r.canCast))).toBe(true);
+    expect(rows.some((r) => r.casterClass === "wizard" && (r.canMemorize || r.canCast || r.canLearn))).toBe(true);
   });
 });

@@ -1,6 +1,6 @@
 import { activeKitEntries, casterTypesDisabled, toKitEntries } from "../../data/derive/character/kits";
 import { buildPowerRows, kitForbidsProficiency, kitQualifies, kitXpPercentFor, resolveKitOverrides, type KitQualifications, type PowerUsage } from "../../core/kits";
-import { resetKitPowers, resetPower, usePower } from "./kit-power-actions";
+import { classLevelOf, resetKitPowers, resetPower, usePower } from "./kit-power-actions";
 import { ABILITY_KEYS } from "../../data/item/choices";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
@@ -396,28 +396,28 @@ export class Adnd2eCharacterSheet extends Base {
     context.kits = activeKitEntries(
       (this.document as unknown as { items: Iterable<{ id: string; name: string; type: string; system: unknown }> }).items,
     ).map((k) => {
-      const classLevel = ((this.document as unknown as { system: { classes?: { chassisId: string; level: number }[] } }).system.classes ?? []).find((c) => c.chassisId === k.chassisId)?.level ?? 1;
+      const classLevel = classLevelOf(this.document as never, k.chassisId);
       return {
-      id: k.id,
-      name: k.name,
-      chassisId: k.chassisId,
-      xpModifierPercent: k.xpModifierPercent,
-      effects: k.effects.map((e) => ({
-        kindKey: `ADND2E.sheet.kits.effectKinds.${e.kind}`,
-        targetKey: e.kind === "bonusHp" ? "" : traitTargetKey(e, { abilities: kitCfg.abilities, saves: kitCfg.saves }),
-        amount: e.amount > 0 ? `+${e.amount}` : String(e.amount),
-      })),
-      grantedFeatures: k.grantedFeatures,
-      powers: buildPowerRows(k.id, k.powers, kitUsage, classLevel).map((p) => ({ ...p, perKey: `ADND2E.sheet.kits.per.${p.per}` })),
-      overrides: {
-        castingDisabled: k.overrides.casting === "none",
-        turningKey: k.overrides.turning.mode === "inherit" ? "" : `ADND2E.sheet.kits.turning.${k.overrides.turning.mode}`,
-        turningOffsetLabel:
-          k.overrides.turning.mode === "offset"
-            ? (k.overrides.turning.offset >= 0 ? `+${k.overrides.turning.offset}` : String(k.overrides.turning.offset))
-            : "",
-        removedAbilities: k.overrides.removedAbilities,
-      },
+        id: k.id,
+        name: k.name,
+        chassisId: k.chassisId,
+        xpModifierPercent: k.xpModifierPercent,
+        effects: k.effects.map((e) => ({
+          kindKey: `ADND2E.sheet.kits.effectKinds.${e.kind}`,
+          targetKey: e.kind === "bonusHp" ? "" : traitTargetKey(e, { abilities: kitCfg.abilities, saves: kitCfg.saves }),
+          amount: e.amount > 0 ? `+${e.amount}` : String(e.amount),
+        })),
+        grantedFeatures: k.grantedFeatures,
+        powers: buildPowerRows(k.id, k.powers, kitUsage, classLevel).map((p) => ({ ...p, perKey: `ADND2E.sheet.kits.per.${p.per}` })),
+        overrides: {
+          castingDisabled: k.overrides.casting === "none",
+          turningKey: k.overrides.turning.mode === "inherit" ? "" : `ADND2E.sheet.kits.turning.${k.overrides.turning.mode}`,
+          turningOffsetLabel:
+            k.overrides.turning.mode === "offset"
+              ? (k.overrides.turning.offset >= 0 ? `+${k.overrides.turning.offset}` : String(k.overrides.turning.offset))
+              : "",
+          removedAbilities: k.overrides.removedAbilities,
+        },
       };
     });
     // The SYSTEM DataModel's own schema — distinct from `context.fields`,
@@ -635,7 +635,7 @@ export class Adnd2eCharacterSheet extends Base {
           kitForbidsProficiency(k.forbiddenWeaponProficiencies, dropped.system?.weaponOrGroup ?? ""),
         ),
       };
-    } else if (dropped.type === "spell") {
+    } else if (dropped.type === "spell" && isNewDrop) {
       const key = dropped.system?.casterClass === "priest" ? "priest" : "wizard";
       const kits = activeKitEntries(existing);
       kitInputs = {

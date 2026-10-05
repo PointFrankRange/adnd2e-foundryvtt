@@ -19,7 +19,7 @@
       "weapons": { "mode": "inherit", "names": [] }
     },
     "forbiddenWeaponProficiencies": [],
-    "grantedFeatures": [],
+    "grantedFeatures": ["Paralysis immunity (undead), 95%"],
     "powers": [
       {
         "id": "dispel-evil", "name": "Dispel Evil", "uses": 0, "per": "day", "scope": "", "params": [],
