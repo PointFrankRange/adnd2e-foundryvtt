@@ -17,6 +17,8 @@ export interface ClassEntry {
   level: number;
   /** SP11: the owning kit's XP modifier percent (absent = 0) */
   xpModifierPercent?: number;
+  /** SP11 Plan C: the owning kit switches this class's spellcasting off (absent = false) */
+  castingDisabled?: boolean;
 }
 
 export interface MemorizedEntry {

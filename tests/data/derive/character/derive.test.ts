@@ -337,3 +337,35 @@ describe("deriveCharacter — dual-class (§5.6 step 1)", () => {
     expect(d.saves!.ppd.target).toBe(11); // warrior band minLevel 5
   });
 });
+
+describe("deriveCharacter — kit casting override (SP11 Plan C)", () => {
+  const paladin = { ...fighterClass, chassisId: "paladin" as const, level: 10, xp: 600000 };
+  const rules = { ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true, channelers: true };
+  it("a level-10 Paladin has priest slots by default", () => {
+    const d = deriveCharacter({ ...base, classes: [paladin] }, DEFAULT_OPTIONAL_RULES);
+    expect(d.spellSlots.priest).toBeDefined();
+    expect(d.castingDisabled).toEqual({ wizard: false, priest: false });
+  });
+  it("with the kit's casting disabled the Paladin derives no slots, spell points or channelling", () => {
+    const d = deriveCharacter({ ...base, classes: [{ ...paladin, castingDisabled: true }] }, rules);
+    expect(d.spellSlots).toEqual({});
+    expect(d.spellPoints).toEqual({});
+    expect(d.channelling).toEqual({});
+    expect(d.castingDisabled).toEqual({ wizard: false, priest: true });
+  });
+  it("a Cleric with casting disabled also derives no spell points or channelling (rules on)", () => {
+    const cleric = { ...fighterClass, chassisId: "cleric" as const, level: 5 };
+    const on = deriveCharacter({ ...base, classes: [cleric] }, rules);
+    expect(on.spellPoints.priest).toBeDefined();
+    expect(on.channelling.priest).toBeDefined();
+    const d = deriveCharacter({ ...base, classes: [{ ...cleric, castingDisabled: true }] }, rules);
+    expect(d.spellPoints).toEqual({});
+    expect(d.channelling).toEqual({});
+  });
+  it("a multiclass actor drops only the disabled caster", () => {
+    const mage = { ...fighterClass, chassisId: "mage" as const, level: 5, xp: 0 };
+    const d = deriveCharacter({ ...base, classes: [{ ...mage, castingDisabled: true }, fighterClass] }, rules);
+    expect(d.spellSlots.wizard).toBeUndefined();
+    expect(d.castingDisabled.wizard).toBe(true);
+  });
+});

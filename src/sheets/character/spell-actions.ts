@@ -6,8 +6,8 @@ import { canAffordMemorize, spellPointsEnabled, spellsMemorizedAtLevel } from ".
 import { canLearnSpell, learnSpellRoll } from "../../core/magic/spellbook";
 import type { ClassId, IntelligenceModifiers, SphereName, WizardSchool } from "../../core/types";
 import { classItemLevel } from "../../data/derive/class-item";
-import { activeKitEntries } from "../../data/derive/character/kits";
-import { kitXpPercentFor } from "../../core/kits";
+import { activeKitEntries, casterTypesDisabled } from "../../data/derive/character/kits";
+import { kitXpPercentFor, resolveKitOverrides } from "../../core/kits";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { buildCastCardContext } from "../../magic/cast-card";
 import { buildLearnSpellCardContext } from "../../magic/learn-spell-card";
@@ -116,6 +116,23 @@ export interface SpellcasterActor {
 
 export function casterKey(spell: SpellItemHandle): "wizard" | "priest" {
   return spell.system.casterClass === "priest" ? "priest" : "wizard";
+}
+
+/** SP11 Plan C: true when a kit has switched off this caster type's casting. Defensive re-check behind the hidden UI, same role as the other guards in this file. */
+export function castingBlockedByKit(actor: SpellcasterActor, key: "wizard" | "priest"): boolean {
+  const items = [...actor.items] as unknown as { id?: string; name?: string; type: string; system: unknown }[];
+  const kits = activeKitEntries(items);
+  const classes = items
+    .filter((i) => i.type === "class")
+    .map((i) => {
+      const chassisId = (i.system as { chassisId: string }).chassisId;
+      return { chassisId, castingDisabled: resolveKitOverrides(kits, chassisId).castingDisabled };
+    });
+  return casterTypesDisabled(classes)[key];
+}
+
+function warnKitCasting(): void {
+  ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.kitCastingDisabledWarning"));
 }
 
 /** Finds the actor's priest-progression class item (if any) and returns its
@@ -294,6 +311,10 @@ function canReMemorize(actor: SpellcasterActor, spell: SpellItemHandle): boolean
  *  gets a toast instead of silence. */
 export async function memorizeSpell(actor: SpellcasterActor, spellItemId: string): Promise<void> {
   const spell = actor.items.get(spellItemId);
+  if (spell && castingBlockedByKit(actor, casterKey(spell))) {
+    warnKitCasting();
+    return;
+  }
   if (!spell || !canReMemorize(actor, spell)) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.memorizeBlockedWarning"));
     return;
@@ -496,6 +517,10 @@ export async function applyCastFatigue(
  *  persisted only once the roll succeeds, same ordering as the classic path). */
 export async function castSpell(actor: SpellcasterActor, spellItemId: string): Promise<void> {
   const spell = actor.items.get(spellItemId);
+  if (spell && castingBlockedByKit(actor, casterKey(spell))) {
+    warnKitCasting();
+    return;
+  }
   if (!spell) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.castBlockedWarning"));
     return;
@@ -545,6 +570,10 @@ export async function castSpell(actor: SpellcasterActor, spellItemId: string): P
  *  cooldown/retry-limit is tracked (spec §2's Learn Spell decision row). */
 export async function learnSpell(actor: SpellcasterActor, spellItemId: string): Promise<void> {
   const spell = actor.items.get(spellItemId);
+  if (spell && castingBlockedByKit(actor, casterKey(spell))) {
+    warnKitCasting();
+    return;
+  }
   if (
     !spell ||
     spell.system.casterClass !== "wizard" ||
@@ -617,6 +646,10 @@ export async function learnSpell(actor: SpellcasterActor, spellItemId: string): 
  *  (see castFreeMagick). Wizard-only. A no-op with a warning when the rule is
  *  off, or the wizard can't fit/afford another entry at that level. */
 export async function memorizeFreeMagick(actor: SpellcasterActor, spellLevel: number): Promise<void> {
+  if (castingBlockedByKit(actor, "wizard")) {
+    warnKitCasting();
+    return;
+  }
   if (!spellPointsEnabled(getOptionalRules()) || !canMemorizeWizardSpellPoints(actor, spellLevel, "free")) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.memorizeBlockedWarning"));
     return;
@@ -661,6 +694,10 @@ export async function castFreeMagick(
   spellLevel: number,
   chosenSpellItemId: string,
 ): Promise<void> {
+  if (castingBlockedByKit(actor, "wizard")) {
+    warnKitCasting();
+    return;
+  }
   const list = actor.system.spellcasting.wizard.memorized;
   const channelling = channellersEnabled(getOptionalRules());
   const index = channelling
@@ -709,6 +746,10 @@ export async function memorizeFreeTheurgy(
   spellLevel: number,
   scope: "major" | "universal",
 ): Promise<void> {
+  if (castingBlockedByKit(actor, "priest")) {
+    warnKitCasting();
+    return;
+  }
   // A missing scope is refused like any other blocked memorize (no write); a
   // scope the book never allows as free (minor, junk) is a caller bug and throws.
   if (scope === null || scope === undefined) {
@@ -773,6 +814,10 @@ export async function castFreeTheurgy(
   spellLevel: number,
   scope: "major" | "universal",
 ): Promise<void> {
+  if (castingBlockedByKit(actor, "priest")) {
+    warnKitCasting();
+    return;
+  }
   const channelling = priestChannellingOn(actor);
   const list = actor.system.spellcasting.priest.memorized;
   const index = list.findIndex(

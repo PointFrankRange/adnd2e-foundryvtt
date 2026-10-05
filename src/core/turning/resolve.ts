@@ -1,18 +1,22 @@
 import { TURN_TABLE, levelColumn, type TurnRowId } from "./table";
+import { INHERIT_TURNING, effectiveTurnerLevel, type TurningRule } from "../kits/overrides";
 
 export type TurnOutcome = "cannot" | "fail" | "turned" | "destroyed" | "destroyed-bonus";
 
-/** A cleric turns at class level, a paladin two levels lower (PHB p. 103); no other class turns. */
-export function turnerLevel(chassisId: string, level: number): number | null {
+/** A cleric turns at class level, a paladin two levels lower (PHB p. 103); no other class turns. A kit's turning rule (SP11 Plan C) may change that. */
+export function turnerLevel(chassisId: string, level: number, rule: TurningRule = INHERIT_TURNING): number | null {
   const effective = chassisId === "cleric" ? level : chassisId === "paladin" ? level - 2 : null;
-  return effective !== null && effective >= 1 ? effective : null;
+  const base = effective !== null && effective >= 1 ? effective : null;
+  return effectiveTurnerLevel(base, level, rule);
 }
 
 /** The best turning level across an actor's classes, or null when none can turn. */
-export function turnerLevelFor(classes: readonly { chassisId: string; level: number }[]): number | null {
+export function turnerLevelFor(
+  classes: readonly { chassisId: string; level: number; turning?: TurningRule }[],
+): number | null {
   let best: number | null = null;
   for (const c of classes) {
-    const level = turnerLevel(c.chassisId, c.level);
+    const level = turnerLevel(c.chassisId, c.level, c.turning);
     if (level !== null && (best === null || level > best)) best = level;
   }
   return best;

@@ -1,0 +1,45 @@
+{
+  "_id": "kSampleGhosthnt1",
+  "_key": "!items!kSampleGhosthnt1",
+  "name": "Sample Ghosthunter",
+  "type": "kit",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "",
+    "chassisId": "paladin",
+    "qualifications": {
+      "abilityMinimums": { "str": 0, "dex": 0, "con": 0, "int": 0, "wis": 0, "cha": 0 },
+      "races": [],
+      "alignments": []
+    },
+    "xpModifierPercent": 0,
+    "effects": [],
+    "equipment": {
+      "armor": { "mode": "inherit", "names": [] },
+      "weapons": { "mode": "inherit", "names": [] }
+    },
+    "forbiddenWeaponProficiencies": [],
+    "grantedFeatures": ["Paralysis immunity (undead), 95%"],
+    "powers": [
+      {
+        "id": "dispel-evil", "name": "Dispel Evil", "uses": 0, "per": "day", "scope": "", "params": [],
+        "usesByLevel": [
+          { "minLevel": 1, "uses": 0 }, { "minLevel": 5, "uses": 1 }, { "minLevel": 10, "uses": 2 },
+          { "minLevel": 15, "uses": 3 }, { "minLevel": 20, "uses": 4 }
+        ]
+      },
+      {
+        "id": "remove-paralysis", "name": "Remove Paralysis", "uses": 0, "per": "day", "scope": "", "params": [],
+        "usesByLevel": [
+          { "minLevel": 1, "uses": 3 }, { "minLevel": 5, "uses": 4 }, { "minLevel": 10, "uses": 5 },
+          { "minLevel": 15, "uses": 6 }, { "minLevel": 20, "uses": 7 }
+        ]
+      }
+    ],
+    "overrides": {
+      "casting": "none",
+      "turning": { "mode": "offset", "offset": 0 },
+      "removedAbilities": ["Laying on hands", "Immunity to disease", "Curing diseases"]
+    }
+  }
+}

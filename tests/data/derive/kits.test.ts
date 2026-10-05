@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activeKitEntries, toKitEntries } from "../../../src/data/derive/character/kits";
+import { activeKitEntries, casterTypesDisabled, toKitEntries } from "../../../src/data/derive/character/kits";
 import { resolveTraitTotals } from "../../../src/data/derive/character/traits";
 import { deriveClassLevels } from "../../../src/data/derive/character/levels";
 import { classItemCanLevelUp, classItemLevel } from "../../../src/data/derive/class-item";
@@ -22,7 +22,8 @@ const kitItem = (over: Record<string, unknown> = {}) => ({
     equipment: { armor: { mode: "inherit", names: [] }, weapons: { mode: "inherit", names: [] } },
     forbiddenWeaponProficiencies: [],
     grantedFeatures: ["Stance"],
-    powers: [{ id: "shape", name: "Shapechange", uses: 2, per: "day", scope: "mammals", params: [] }, { id: "bad id", name: "X", uses: 1, per: "day" }],
+    powers: [{ id: "shape", name: "Shapechange", uses: 2, per: "day", scope: "mammals", params: [], usesByLevel: [{ minLevel: 5, uses: 1 }, { minLevel: 1, uses: 0 }] }, { id: "bad id", name: "X", uses: 1, per: "day" }],
+    overrides: { casting: "none", turning: { mode: "offset", offset: 0 }, removedAbilities: ["Laying on hands", ""] },
     ...over,
   },
 });
@@ -37,7 +38,13 @@ describe("toKitEntries / activeKitEntries", () => {
     expect(k!.xpModifierPercent).toBe(25);
     expect(k!.effects).toEqual([{ kind: "attackBonus", mode: "melee", amount: 2 }]);
     expect(k!.grantedFeatures).toEqual(["Stance"]);
-    expect(k!.powers).toEqual([{ id: "shape", name: "Shapechange", uses: 2, per: "day", scope: "mammals", params: [] }]);
+    expect(k!.powers).toEqual([{ id: "shape", name: "Shapechange", uses: 0, per: "day", scope: "mammals", params: [], usesByLevel: [{ minLevel: 1, uses: 0 }, { minLevel: 5, uses: 1 }] }]);
+    expect(k!.overrides).toEqual({ casting: "none", turning: { mode: "offset", offset: 0 }, removedAbilities: ["Laying on hands"] });
+  });
+  it("a kit item with no overrides field reads as no overrides", () => {
+    const item = kitItem();
+    delete (item.system as Record<string, unknown>).overrides;
+    expect(toKitEntries([item])[0]!.overrides).toEqual({ casting: "inherit", turning: { mode: "inherit", offset: 0 }, removedAbilities: [] });
   });
   it("a kit item with no powers field reads as no powers", () => {
     const item = kitItem();
@@ -75,5 +82,20 @@ describe("the XP modifier delays levels", () => {
     const entry = { chassisId: "fighter" as const, specialistSchool: null, xp: level2, hpRolls: [1], dualClassState: null, level: 1 };
     expect(deriveClassLevels([{ ...entry, xpModifierPercent: 25 }])[0]).toEqual({ chassisId: "fighter", level: 1, canLevelUp: false });
     expect(deriveClassLevels([entry])[0]).toEqual({ chassisId: "fighter", level: 2, canLevelUp: true });
+  });
+});
+
+describe("casterTypesDisabled (SP11 Plan C)", () => {
+  it("a type is off only when every class of that caster type has casting disabled", () => {
+    expect(casterTypesDisabled([{ chassisId: "paladin", castingDisabled: true }])).toEqual({ wizard: false, priest: true });
+    expect(casterTypesDisabled([{ chassisId: "paladin" }])).toEqual({ wizard: false, priest: false });
+    expect(casterTypesDisabled([{ chassisId: "mage", castingDisabled: true }, { chassisId: "cleric" }])).toEqual({ wizard: true, priest: false });
+    expect(
+      casterTypesDisabled([{ chassisId: "cleric", castingDisabled: true }, { chassisId: "paladin" }]),
+    ).toEqual({ wizard: false, priest: false });
+  });
+  it("non-casters and no classes never disable anything", () => {
+    expect(casterTypesDisabled([{ chassisId: "fighter", castingDisabled: true }])).toEqual({ wizard: false, priest: false });
+    expect(casterTypesDisabled([])).toEqual({ wizard: false, priest: false });
   });
 });

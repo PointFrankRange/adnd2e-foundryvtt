@@ -1,6 +1,8 @@
 import { buildTurnCardContext } from "../../combat/turn-card";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
+import { resolveKitOverrides } from "../../core/kits";
 import { resolveAttempt, turnerLevelFor, type TurnRowId, type TurnTarget } from "../../core/turning";
+import { activeKitEntries } from "../../data/derive/character/kits";
 import { requestApply } from "../../relay/relay-client";
 
 /* Turn Undead (SP10, PHB p. 103). Foundry glue: reads the user's targeted
@@ -14,6 +16,7 @@ interface TurnerActor {
   img: string;
   isOwner: boolean;
   system: { classes: { chassisId: string; level: number }[] };
+  items: Iterable<{ id: string; name: string; type: string; system: unknown }>;
   getFlag(scope: string, key: string): unknown;
   setFlag(scope: string, key: string, value: unknown): Promise<unknown>;
   unsetFlag(scope: string, key: string): Promise<unknown>;
@@ -30,8 +33,14 @@ interface TargetActor {
   };
 }
 
+/** The actor's classes with each class's kit turning rule (SP11 Plan C). */
+function turnClasses(actor: TurnerActor): { chassisId: string; level: number; turning: ReturnType<typeof resolveKitOverrides>["turning"] }[] {
+  const kits = activeKitEntries(actor.items);
+  return actor.system.classes.map((c) => ({ ...c, turning: resolveKitOverrides(kits, c.chassisId).turning }));
+}
+
 export function turningPanel(actor: TurnerActor): { canTurn: boolean; level: number | null; attempted: boolean; canReset: boolean } {
-  const level = turnerLevelFor(actor.system.classes);
+  const level = turnerLevelFor(turnClasses(actor));
   const attempted = Boolean(actor.getFlag(SYSTEM_ID, FLAG));
   const isGm = Boolean((game.user as unknown as { isGM?: boolean } | null)?.isGM);
   return { canTurn: level !== null, level, attempted, canReset: attempted && isGm };
@@ -51,7 +60,7 @@ function targetedActors(): { token: TargetedToken; actor: TargetActor }[] {
 }
 
 export async function turnUndead(actor: TurnerActor): Promise<void> {
-  const level = turnerLevelFor(actor.system.classes);
+  const level = turnerLevelFor(turnClasses(actor));
   if (level === null) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.turning.notTurner"));
     return;

@@ -110,3 +110,22 @@ describe("resetKitPowers", () => {
     expect(updates).toEqual([]);
   });
 });
+
+describe("usePower with a level-scaled power (SP11 Plan C)", () => {
+  const scaled = { id: "dispel-evil", name: "Dispel Evil", uses: 0, per: "day", scope: "", params: [], usesByLevel: [{ minLevel: 1, uses: 0 }, { minLevel: 5, uses: 1 }] };
+  it("is refused (warn, no write) below the first bracket and works at the level that unlocks it", async () => {
+    const low = actor({}, [scaled]);
+    low.a.system.classes = [{ chassisId: "fighter", level: 4 }];
+    await usePower(low.a, "k1", "dispel-evil");
+    expect(low.updates).toEqual([]);
+    expect(warn).toHaveBeenCalledTimes(1);
+
+    const high = actor({}, [scaled]);
+    high.a.system.classes = [{ chassisId: "fighter", level: 5 }];
+    await usePower(high.a, "k1", "dispel-evil");
+    expect(high.updates).toEqual([{ "system.kitPowers.k1:dispel-evil": { used: 1 } }]);
+    high.a.system.kitPowers = { "k1:dispel-evil": { used: 1 } }; // the fake update() does not persist
+    await usePower(high.a, "k1", "dispel-evil");
+    expect(high.updates).toHaveLength(1);
+  });
+});

@@ -7,6 +7,7 @@ import {
   normalizePowers,
   powerKey,
   powerRemaining,
+  powerUses,
   resetKeys,
   spendPower,
   usageResetUpdate,
@@ -16,10 +17,10 @@ import {
   type KitPower,
 } from "../../../src/core/kits";
 
-const daily: KitPower = { id: "shape", name: "Shapechange", uses: 2, per: "day", scope: "mammals", params: [{ key: "duration", value: "1 hour" }] };
-const weekly: KitPower = { id: "rally", name: "Rally", uses: 1, per: "week", scope: "", params: [] };
-const fight: KitPower = { id: "feint", name: "Feint", uses: 3, per: "encounter", scope: "", params: [] };
-const free: KitPower = { id: "sense", name: "Sense", uses: 0, per: "at-will", scope: "", params: [] };
+const daily: KitPower = { id: "shape", name: "Shapechange", uses: 2, per: "day", scope: "mammals", params: [{ key: "duration", value: "1 hour" }], usesByLevel: [] };
+const weekly: KitPower = { id: "rally", name: "Rally", uses: 1, per: "week", scope: "", params: [], usesByLevel: [] };
+const fight: KitPower = { id: "feint", name: "Feint", uses: 3, per: "encounter", scope: "", params: [], usesByLevel: [] };
+const free: KitPower = { id: "sense", name: "Sense", uses: 0, per: "at-will", scope: "", params: [], usesByLevel: [] };
 
 describe("POWER_FREQUENCIES", () => {
   it("lists the four frequencies", () => {
@@ -109,10 +110,10 @@ describe("buildPowerRows", () => {
     const rows = buildPowerRows("k1", [daily, weekly, free], usage);
     expect(rows[0]).toEqual({
       id: "shape", name: "Shapechange", per: "day", atWill: false, uses: 2, used: 2, remaining: 0,
-      scope: "mammals", params: [{ key: "duration", value: "1 hour" }], canUse: false, canReset: true,
+      scope: "mammals", params: [{ key: "duration", value: "1 hour" }], canUse: false, canReset: true, locked: false,
     });
-    expect(rows[1]).toMatchObject({ id: "rally", remaining: 1, canUse: true, canReset: false });
-    expect(rows[2]).toMatchObject({ id: "sense", atWill: true, remaining: null, canUse: true, canReset: false });
+    expect(rows[1]).toMatchObject({ id: "rally", remaining: 1, canUse: true, canReset: false, locked: false });
+    expect(rows[2]).toMatchObject({ id: "sense", atWill: true, remaining: null, canUse: true, canReset: false, locked: false });
   });
 });
 
@@ -160,5 +161,52 @@ describe("buildPowerUseCardContext", () => {
     const ctx = buildPowerUseCardContext({ actorName: "Tam", actorImg: "a.png", power: free, remaining: null });
     expect(ctx.atWill).toBe(true);
     expect(ctx.perKey).toBe("ADND2E.sheet.kits.per.at-will");
+  });
+});
+
+const dispel: KitPower = {
+  id: "dispel-evil", name: "Dispel Evil", uses: 0, per: "day", scope: "", params: [],
+  usesByLevel: [{ minLevel: 1, uses: 0 }, { minLevel: 5, uses: 1 }, { minLevel: 10, uses: 2 }, { minLevel: 15, uses: 3 }, { minLevel: 20, uses: 4 }],
+};
+
+describe("level-scaled uses (SP11 Plan C)", () => {
+  it("powerUses picks the highest bracket at or below the level, 0 below the first, and the flat uses with no table", () => {
+    expect([1, 4, 5, 9, 10, 14, 15, 19, 20, 25].map((l) => powerUses(dispel, l))).toEqual([0, 0, 1, 1, 2, 2, 3, 3, 4, 4]);
+    expect(powerUses({ ...dispel, usesByLevel: [{ minLevel: 5, uses: 1 }] }, 3)).toBe(0);
+    expect(powerUses(daily, 12)).toBe(2);
+  });
+  it("remaining / canUse / spend follow the level; a scaled power at 0 uses is locked, not at-will", () => {
+    expect(powerRemaining(dispel, 0, 4)).toBe(0);
+    expect(canUsePower(dispel, 0, 4)).toBe(false);
+    expect(powerRemaining(dispel, 0, 5)).toBe(1);
+    expect(canUsePower(dispel, 0, 5)).toBe(true);
+    expect(spendPower(dispel, 0, 5)).toBe(1);
+    expect(spendPower(dispel, 1, 5)).toBe(1);
+    expect(spendPower(dispel, 0, 4)).toBe(0);
+    expect(powerRemaining(dispel, 3, 10)).toBe(0);
+  });
+  it("buildPowerRows resolves uses at the class level and flags a locked row", () => {
+    const [row4] = buildPowerRows("k1", [dispel], {}, 4);
+    expect(row4).toMatchObject({ uses: 0, remaining: 0, canUse: false, locked: true, atWill: false, per: "day" });
+    const [row10] = buildPowerRows("k1", [dispel], { "k1:dispel-evil": { used: 1 } }, 10);
+    expect(row10).toMatchObject({ uses: 2, used: 1, remaining: 1, canUse: true, locked: false, canReset: true });
+    const [flat] = buildPowerRows("k1", [daily], {});
+    expect(flat).toMatchObject({ uses: 2, locked: false });
+  });
+  it("normalizePowers keeps a scaled power's per, sorts brackets, drops bad ones, and rejects scaled at-will", () => {
+    const [p] = normalizePowers([
+      {
+        id: "dispel-evil", name: "Dispel Evil", uses: 9, per: "day",
+        usesByLevel: [{ minLevel: 5, uses: 1 }, { minLevel: 1, uses: 0 }, { minLevel: 5, uses: 9 }, { minLevel: 0, uses: 1 }, { minLevel: 2.5, uses: 1 }, { minLevel: 3, uses: -1 }, null, { minLevel: "x", uses: 1 }],
+      },
+    ]);
+    expect(p).toMatchObject({ id: "dispel-evil", per: "day", uses: 0 });
+    expect(p!.usesByLevel).toEqual([{ minLevel: 1, uses: 0 }, { minLevel: 5, uses: 1 }]);
+    expect(normalizePowers([{ id: "x", name: "X", per: "at-will", usesByLevel: [{ minLevel: 1, uses: 1 }] }])).toEqual([]);
+    expect(normalizePowers([{ id: "y", name: "Y", uses: 2, per: "day", usesByLevel: "nope" }])[0]!.usesByLevel).toEqual([]);
+  });
+  it("the use card shows the resolved uses when given", () => {
+    expect(buildPowerUseCardContext({ actorName: "T", actorImg: "i", power: dispel, remaining: 0, uses: 1 }).uses).toBe(1);
+    expect(buildPowerUseCardContext({ actorName: "T", actorImg: "i", power: daily, remaining: 1 }).uses).toBe(2);
   });
 });

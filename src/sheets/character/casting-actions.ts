@@ -7,7 +7,7 @@ import { getOptionalRules } from "../../settings";
 import type { CastingStatusInput } from "./context-types";
 import { resolveMortalFatigue } from "./fatigue-actions";
 import {
-  applyCastFatigue, casterKey, castSpell, channellingActive, postCastCard, rollSpellAutomation, tryChannellingSpend,
+  applyCastFatigue, casterKey, castingBlockedByKit, castSpell, channellingActive, postCastCard, rollSpellAutomation, tryChannellingSpend,
   type SpellcasterActor, type SpellItemHandle,
 } from "./spell-actions";
 
@@ -96,6 +96,11 @@ async function clearCombatantFlag(combatId: string, actor: unknown): Promise<voi
  *  further down. */
 export async function castOrBegin(actor: CastingActor, spellItemId: string): Promise<void> {
   const spell = actor.items.get(spellItemId);
+  // SP11 Plan C: a kit that switches this caster type off blocks the cast before any state is read or written.
+  if (spell && castingBlockedByKit(actor, casterKey(spell))) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.spells.kitCastingDisabledWarning"));
+    return;
+  }
   const ctx = expandedCastingTimeEnabled(getOptionalRules()) && spell ? findCombat(actor) : null;
   const plan = ctx && spell ? castingPlan(parseCastingTime(spell.system.castingTime), ctx.combat.round) : { mode: "immediate" as const };
   if (!ctx || !spell || plan.mode === "immediate") {

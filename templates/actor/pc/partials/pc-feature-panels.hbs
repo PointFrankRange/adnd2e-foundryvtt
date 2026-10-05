@@ -44,6 +44,9 @@
           <span class="effect">{{#if k.xpModifierPercent}}{{localize 'ADND2E.sheet.kits.xp'}} {{k.xpModifierPercent}}%{{/if}}</span>
           {{#each k.effects as |e|}}<span class="effect">{{localize e.kindKey}}{{#if e.targetKey}} {{localize e.targetKey}}{{/if}} {{e.amount}}</span>{{/each}}
           {{#if k.grantedFeatures.length}}<span class="effect">{{localize 'ADND2E.sheet.kits.features'}}: {{#each k.grantedFeatures}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</span>{{/if}}
+          {{#if k.overrides.castingDisabled}}<span class="effect">{{localize 'ADND2E.sheet.kits.castingDisabled'}}</span>{{/if}}
+          {{#if k.overrides.turningKey}}<span class="effect">{{localize k.overrides.turningKey}}{{#if k.overrides.turningOffsetLabel}} {{k.overrides.turningOffsetLabel}}{{/if}}</span>{{/if}}
+          {{#if k.overrides.removedAbilities.length}}<span class="effect">{{localize 'ADND2E.sheet.kits.removed'}}: {{#each k.overrides.removedAbilities}}<s class="removed">{{this}}</s>{{#unless @last}}, {{/unless}}{{/each}}</span>{{/if}}
           {{#if k.powers.length}}
             <div class="kit-powers">
               <h5 class="kit-subhead">{{localize 'ADND2E.sheet.kits.powers'}}</h5>

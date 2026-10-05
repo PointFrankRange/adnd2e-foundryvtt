@@ -49,6 +49,8 @@ export interface DropCheckInput {
   kitQualifies?: KitQualifyVerdict;
   /** weaponProficiency drops: true when an owned kit forbids the dropped proficiency */
   kitForbidsProficiency?: boolean;
+  /** spell drops: true when the owning kit switches that caster type's casting off (SP11 Plan C) */
+  kitDisablesCasting?: boolean;
 }
 
 export interface DropVerdict {
@@ -101,6 +103,9 @@ export function validateItemDrop(input: DropCheckInput): DropVerdict {
     if ((input.existingKitChassisIds ?? []).includes(chassis)) return { ok: false, reason: "ADND2E.sheet.drop.kitDuplicate" };
     if (input.kitQualifies && !input.kitQualifies.ok) return { ok: false, reason: input.kitQualifies.reason };
     return { ok: true };
+  }
+  if (input.dropType === "spell" && input.kitDisablesCasting) {
+    return { ok: false, reason: "ADND2E.sheet.drop.kitCastingDisabled" };
   }
   return { ok: true };
 }

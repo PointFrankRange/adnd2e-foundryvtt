@@ -4,6 +4,7 @@ import {
   canUsePower,
   powerKey,
   powerRemaining,
+  powerUses,
   resetKeys,
   spendPower,
   usageResetUpdate,
@@ -22,7 +23,7 @@ export interface KitPowerActor {
   name: string;
   img: string;
   items: Iterable<{ id: string; name: string; type: string; system: unknown }>;
-  system: { kitPowers?: PowerUsage };
+  system: { kitPowers?: PowerUsage; classes?: { chassisId: string; level: number }[] };
   update(data: Record<string, unknown>): Promise<unknown>;
 }
 
@@ -32,6 +33,11 @@ function findPower(actor: KitPowerActor, kitId: string, powerId: string) {
   return kit && power ? { kit, power } : null;
 }
 
+/** The level of the kit's class (1 when unknown), for level-scaled uses. */
+export function classLevelOf(actor: KitPowerActor, chassisId: string): number {
+  return actor.system.classes?.find((c) => c.chassisId === chassisId)?.level ?? 1;
+}
+
 const usageOf = (actor: KitPowerActor): PowerUsage => actor.system.kitPowers ?? {};
 
 /** Spends one use (at-will powers are free) and posts the chat card. */
@@ -39,19 +45,21 @@ export async function usePower(actor: KitPowerActor, kitId: string, powerId: str
   const found = findPower(actor, kitId, powerId);
   if (!found) return;
   const { power } = found;
+  const level = classLevelOf(actor, found.kit.chassisId);
   const used = usedCount(usageOf(actor), kitId, powerId);
-  if (!canUsePower(power, used)) {
+  if (!canUsePower(power, used, level)) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.kits.noUsesLeft"));
     return;
   }
-  const next = spendPower(power, used);
+  const next = spendPower(power, used, level);
   if (next !== used) await actor.update(usageSpendUpdate(powerKey(kitId, powerId), next));
 
   const context = buildPowerUseCardContext({
     actorName: actor.name,
     actorImg: actor.img,
     power,
-    remaining: powerRemaining(power, next),
+    remaining: powerRemaining(power, next, level),
+    uses: powerUses(power, level),
   });
   const content = await foundry.applications.handlebars.renderTemplate(
     TEMPLATE_PATH("chat/kit-power-use.hbs"),

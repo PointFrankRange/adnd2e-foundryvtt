@@ -1,6 +1,6 @@
-import { activeKitEntries, toKitEntries } from "../../data/derive/character/kits";
-import { buildPowerRows, kitForbidsProficiency, kitQualifies, kitXpPercentFor, type KitQualifications, type PowerUsage } from "../../core/kits";
-import { resetKitPowers, resetPower, usePower } from "./kit-power-actions";
+import { activeKitEntries, casterTypesDisabled, toKitEntries } from "../../data/derive/character/kits";
+import { buildPowerRows, kitForbidsProficiency, kitQualifies, kitXpPercentFor, resolveKitOverrides, type KitQualifications, type PowerUsage } from "../../core/kits";
+import { classLevelOf, resetKitPowers, resetPower, usePower } from "./kit-power-actions";
 import { ABILITY_KEYS } from "../../data/item/choices";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
@@ -395,19 +395,31 @@ export class Adnd2eCharacterSheet extends Base {
     const kitUsage = (this.document as unknown as { system: { kitPowers?: PowerUsage } }).system.kitPowers ?? {};
     context.kits = activeKitEntries(
       (this.document as unknown as { items: Iterable<{ id: string; name: string; type: string; system: unknown }> }).items,
-    ).map((k) => ({
-      id: k.id,
-      name: k.name,
-      chassisId: k.chassisId,
-      xpModifierPercent: k.xpModifierPercent,
-      effects: k.effects.map((e) => ({
-        kindKey: `ADND2E.sheet.kits.effectKinds.${e.kind}`,
-        targetKey: e.kind === "bonusHp" ? "" : traitTargetKey(e, { abilities: kitCfg.abilities, saves: kitCfg.saves }),
-        amount: e.amount > 0 ? `+${e.amount}` : String(e.amount),
-      })),
-      grantedFeatures: k.grantedFeatures,
-      powers: buildPowerRows(k.id, k.powers, kitUsage).map((p) => ({ ...p, perKey: `ADND2E.sheet.kits.per.${p.per}` })),
-    }));
+    ).map((k) => {
+      const classLevel = classLevelOf(this.document as never, k.chassisId);
+      return {
+        id: k.id,
+        name: k.name,
+        chassisId: k.chassisId,
+        xpModifierPercent: k.xpModifierPercent,
+        effects: k.effects.map((e) => ({
+          kindKey: `ADND2E.sheet.kits.effectKinds.${e.kind}`,
+          targetKey: e.kind === "bonusHp" ? "" : traitTargetKey(e, { abilities: kitCfg.abilities, saves: kitCfg.saves }),
+          amount: e.amount > 0 ? `+${e.amount}` : String(e.amount),
+        })),
+        grantedFeatures: k.grantedFeatures,
+        powers: buildPowerRows(k.id, k.powers, kitUsage, classLevel).map((p) => ({ ...p, perKey: `ADND2E.sheet.kits.per.${p.per}` })),
+        overrides: {
+          castingDisabled: k.overrides.casting === "none",
+          turningKey: k.overrides.turning.mode === "inherit" ? "" : `ADND2E.sheet.kits.turning.${k.overrides.turning.mode}`,
+          turningOffsetLabel:
+            k.overrides.turning.mode === "offset"
+              ? (k.overrides.turning.offset >= 0 ? `+${k.overrides.turning.offset}` : String(k.overrides.turning.offset))
+              : "",
+          removedAbilities: k.overrides.removedAbilities,
+        },
+      };
+    });
     // The SYSTEM DataModel's own schema — distinct from `context.fields`,
     // which DocumentSheetV2._prepareContext already exposes as the actor's
     // top-level (name/img/system/…) schema. Needed so biography.hbs can
@@ -509,6 +521,9 @@ export class Adnd2eCharacterSheet extends Base {
       source: actor._source,
       derived: actor.system as never,
       classItems,
+      castingDisabled: casterTypesDisabled(
+        classItems.map((c) => ({ chassisId: c.chassisId, castingDisabled: resolveKitOverrides(kitEntries, c.chassisId).castingDisabled })),
+      ),
       raceItem,
       physicalItems,
       proficiencyItems: { weapon: weaponProfs, nonweapon: nonweaponProfs },
@@ -556,7 +571,7 @@ export class Adnd2eCharacterSheet extends Base {
     const existing = [...actor.items];
     const dropped = item as unknown as {
       id: string; name: string; type: string;
-      system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; weaponOrGroup?: string; isGroup?: boolean };
+      system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; weaponOrGroup?: string; isGroup?: boolean; casterClass?: string };
     };
     const isNewDrop =
       (item as unknown as { parent?: { uuid?: string } }).parent?.uuid !==
@@ -619,6 +634,16 @@ export class Adnd2eCharacterSheet extends Base {
         kitForbidsProficiency: activeKitEntries(existing).some((k) =>
           kitForbidsProficiency(k.forbiddenWeaponProficiencies, dropped.system?.weaponOrGroup ?? ""),
         ),
+      };
+    } else if (dropped.type === "spell" && isNewDrop) {
+      const key = dropped.system?.casterClass === "priest" ? "priest" : "wizard";
+      const kits = activeKitEntries(existing);
+      kitInputs = {
+        kitDisablesCasting: casterTypesDisabled(
+          existing
+            .filter((i) => i.type === "class")
+            .map((i) => ({ chassisId: i.system.chassisId ?? "", castingDisabled: resolveKitOverrides(kits, i.system.chassisId ?? "").castingDisabled })),
+        )[key],
       };
     }
 

@@ -143,3 +143,19 @@ describe("resolveAttempt", () => {
     expect(result.map((r) => r.status)).toEqual(["unaffected", "destroyed", "destroyed"]);
   });
 });
+
+describe("turnerLevel with a kit turning rule (SP11 Plan C)", () => {
+  it("offset 0 turns as a cleric of the same level (Ghosthunter)", () => {
+    expect(turnerLevel("paladin", 5, { mode: "offset", offset: 0 })).toBe(5);
+    expect(turnerLevel("paladin", 5)).toBe(3);
+  });
+  it("none and a too-negative offset cannot turn; a non-turner with an offset can", () => {
+    expect(turnerLevel("cleric", 7, { mode: "none", offset: 0 })).toBeNull();
+    expect(turnerLevel("paladin", 3, { mode: "offset", offset: -3 })).toBeNull();
+    expect(turnerLevel("fighter", 4, { mode: "offset", offset: 0 })).toBe(4);
+  });
+  it("turnerLevelFor honours each class's own rule", () => {
+    expect(turnerLevelFor([{ chassisId: "paladin", level: 6, turning: { mode: "offset", offset: 0 } }])).toBe(6);
+    expect(turnerLevelFor([{ chassisId: "paladin", level: 6 }])).toBe(4);
+  });
+});
