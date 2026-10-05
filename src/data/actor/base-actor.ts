@@ -198,8 +198,8 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
       henchmen: new StringField({ required: true, blank: true, initial: "" }),
       followers: new StringField({ required: true, blank: true, initial: "" }),
     }),
-    /** SP11 Plan B: kit-power use counts, keyed "<kitItemId>:<powerId>" → { used }. PERSISTED, never touched by prepareDerivedData (like channelling.current); only Use / Reset / kit deletion write it. An ObjectField with initial {} makes "no usage" an empty object. */
-    kitPowers: new ObjectField({ required: true, initial: {} }),
+    /** SP11 Plan B: kit-power use counts, keyed "<kitItemId>:<powerId>" → { used }. PERSISTED, never touched by prepareDerivedData (like channelling.current); only Use / Reset / kit deletion write it. An ObjectField with initial {} makes "no usage" an empty object. The initial MUST be a function: an object-literal initial is a single object shared by every model (getInitialValue does not clone) and is mutated in place by merge-style updates, leaking one actor's counters onto the others. */
+    kitPowers: new ObjectField({ required: true, initial: () => ({}) }),
     spellcasting: new SchemaField({
       wizard: new SchemaField({
         specialistSchool: new StringField({ required: true, nullable: true, initial: null, choices: WIZARD_SCHOOLS }),
