@@ -3270,3 +3270,43 @@ describe("buildCharacterSheetContext — kit disables casting (SP11 Plan C)", ()
     expect(rows.some((r) => r.casterClass === "wizard" && (r.canMemorize || r.canCast || r.canLearn))).toBe(true);
   });
 });
+
+describe("buildCharacterSheetContext — subrace layer (SP12 Plan A)", () => {
+  const dwarfRaceView = {
+    id: "r1", name: "Dwarf", img: "", raceId: "dwarf", size: "M",
+    baseMovement: 12, infravision: 60, grantedFeatures: [], bonusLanguages: [],
+  } as never;
+  const thiefClass = {
+    id: "c1", name: "Thief", img: "", chassisId: "thief", hitDie: 6,
+    xp: 0, level: 1, canLevelUp: false, dualClassState: null, specialistSchool: null,
+  };
+  const baseLayer = { id: "x", abilityAdjustments: null, abilityRanges: null, thiefAdjustments: null, conSaveBonusAdjustment: 0, xpModifierPercent: 0 };
+
+  it("the racial ability delta uses the subrace layer's adjustments (SP12 Plan A)", () => {
+    const deepLayer = { ...baseLayer, id: "deep-dwarf", abilityAdjustments: { con: 2, cha: -2 }, conSaveBonusAdjustment: 1, xpModifierPercent: 10 };
+    const withLayer = buildCharacterSheetContext(input({ raceItem: { ...(dwarfRaceView as object), subrace: deepLayer } as never }));
+    const plain = buildCharacterSheetContext(input({ raceItem: dwarfRaceView }));
+    expect(withLayer.abilities.find((a) => a.key === "con")!.racialDelta).toBe(2);
+    expect(plain.abilities.find((a) => a.key === "con")!.racialDelta).toBe(1);
+    expect(withLayer.abilities.find((a) => a.key === "cha")!.racialDelta).toBe(-2);
+  });
+
+  it("the thieving skill base uses the subrace thief table when present (SP12 Plan A)", () => {
+    const thiefTable = { "pick-pockets": 5, "open-locks": 0, "find-remove-traps": 0, "move-silently": 0, "hide-in-shadows": 0, "detect-noise": 0, "climb-walls": 0, "read-languages": 0 };
+    const rowBase = (raceItem: unknown) =>
+      buildCharacterSheetContext(input({ classItems: [thiefClass], raceItem: raceItem as never }))
+        .skills.thief!.items.find((r) => r.skill === "pick-pockets")!.base;
+    const plain = rowBase(dwarfRaceView);
+    const layered = rowBase({ ...(dwarfRaceView as object), subrace: { ...baseLayer, id: "deep-dwarf", thiefAdjustments: thiefTable } });
+    expect(layered - plain).toBe(5);
+  });
+
+  it("features.racialXpPercent carries the subrace XP surcharge, 0 otherwise", () => {
+    const layer = { ...baseLayer, id: "duergar", xpModifierPercent: 20 };
+    const feat = (raceItem: unknown) => buildCharacterSheetContext(input({ raceItem: raceItem as never })).features;
+    expect(feat({ ...(dwarfRaceView as object), subrace: layer })).toMatchObject({ racialXpPercent: 20, racialXpLabel: "+20%" });
+    expect(feat({ ...(dwarfRaceView as object), subrace: { ...layer, xpModifierPercent: -10 } })).toMatchObject({ racialXpPercent: -10, racialXpLabel: "-10%" });
+    expect(feat(dwarfRaceView)).toMatchObject({ racialXpPercent: 0, racialXpLabel: "" });
+    expect(feat(null)).toMatchObject({ racialXpPercent: 0, racialXpLabel: "" });
+  });
+});

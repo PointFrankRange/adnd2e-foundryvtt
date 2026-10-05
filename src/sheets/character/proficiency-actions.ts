@@ -1,4 +1,5 @@
 import { getChassis } from "../../core/classes/chassis";
+import { normalizeSubrace, type RawSubrace } from "../../core/races";
 import { nonweaponCheck } from "../../core/proficiencies/nonweapon";
 import { canWeaponSpecialize, categoryForProficiencyGroup } from "../../core/proficiencies/weapon";
 import { weaponMasteryTierCost } from "../../core/proficiencies/weapon-mastery";
@@ -263,6 +264,15 @@ function resolveActorRace(actor: ThiefSkillsActor): Race {
   return "human";
 }
 
+/** SP12 Plan A: the race item's subrace thieving-skill table, or undefined (use the base race's). */
+function resolveActorRacialThiefAdjustments(actor: ThiefSkillsActor): Readonly<Record<ThiefSkill, number>> | undefined {
+  for (const item of actor.items) {
+    if (item.type !== "race") continue;
+    return normalizeSubrace((item.system as { subrace?: RawSubrace }).subrace).thiefAdjustments ?? undefined;
+  }
+  return undefined;
+}
+
 /** Resolves the actor's level in its primary thief/bard class, for the
  *  per-skill cap and (thief only) backstab multiplier. */
 function primaryClassLevel(actor: ThiefSkillsActor): number {
@@ -342,6 +352,7 @@ export async function rollThiefSkill(actor: ThiefSkillsActor, skill: ThiefSkill)
   const naturalD100 = roll.dice[0]?.total ?? 0;
   const checkInput = {
     race: resolveActorRace(actor),
+    racialAdjustments: resolveActorRacialThiefAdjustments(actor),
     dexterity: actor.system.abilities.dex.score,
     armor: classification.category,
     allocatedPoints: allocated,

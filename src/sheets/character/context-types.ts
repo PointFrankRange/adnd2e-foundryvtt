@@ -3,6 +3,7 @@ import type {
   StrengthModifiers, ThiefSkill, WisdomModifiers,
 } from "../../core/types";
 import type { OptionalRules } from "../../core/options";
+import type { SubraceLayer } from "../../core/races";
 import type { FatigueTier } from "../../core/magic/channeller-fatigue";
 import type { SubAbilityId } from "../../core/abilities/sub-abilities";
 import type { CharacterPointLedger } from "../../core/skills/character-points";
@@ -177,6 +178,8 @@ export interface RaceItemView {
   id: string; name: string; img: string;
   raceId: string; size: string; baseMovement: number; infravision: number;
   grantedFeatures: string[]; bonusLanguages: string[];
+  /** SP12 Plan A: the subrace layer (null/absent = the plain base race) */
+  subrace?: SubraceLayer | null;
 }
 
 export interface PhysicalItemView {
@@ -508,6 +511,10 @@ export interface CharacterSheetContext {
   features: {
     groups: { sourceType: string; sourceTypeLabel: string; items: FeatureItemView[] }[];
     racialAbilities: string[];
+    /** SP12 Plan A: the subrace XP-per-level surcharge percent (0 = none) */
+    racialXpPercent: number;
+    /** the same as a display string: "+20%", "-10%", or "" when 0 */
+    racialXpLabel: string;
     languagesMax: number;
     resources: { reputation: string; henchmen: string; followers: string };
   };

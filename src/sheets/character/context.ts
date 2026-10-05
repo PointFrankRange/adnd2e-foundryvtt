@@ -21,6 +21,7 @@ import type {
 } from "./context-types";
 import { mainScoreFromSubs, SUB_ABILITIES } from "../../core/abilities/sub-abilities";
 import { applyRacialDeltas } from "../../core/abilities/racial-adjustments";
+import { effectiveAbilityAdjustments, effectiveThiefAdjustments } from "../../core/races";
 import { getChassis } from "../../core/classes/chassis";
 import { isPriestPoolProgression, isPriestSpellProgression } from "../../core/magic/class-slots";
 import { MANEUVERS } from "../../core/combat/maneuvers";
@@ -179,7 +180,7 @@ function buildAbilities(input: CharacterSheetInput): AbilityRow[] {
     }),
   ) as unknown as AbilityScores;
   const race = (input.raceItem?.raceId ?? "human") as Race;
-  const postRacial = applyRacialDeltas(scores, race);
+  const postRacial = applyRacialDeltas(scores, race, effectiveAbilityAdjustments(race, input.raceItem?.subrace));
 
   return ABILITY_KEYS.map((key) => {
     const authored = src.system.abilities[key];
@@ -563,7 +564,7 @@ function buildThiefSkills(input: CharacterSheetInput, fav: FavCheck): CharacterS
   const items: ThiefSkillRow[] = access.map((skill) => {
     const allocation = input.thiefSkillAllocations.find((a) => a.skill === skill);
     const allocated = allocation?.allocatedPoints ?? 0;
-    const ctx = { race, dexterity: dexScore, armor: armorCategory as never };
+    const ctx = { race, dexterity: dexScore, armor: armorCategory as never, racialAdjustments: effectiveThiefAdjustments(race, input.raceItem?.subrace) };
     const base = isThiefClass ? thiefSkillBaseScore(skill, ctx) : bardSkillBaseScore(skill as BardSkill, ctx);
     const effective = isThiefClass
       ? resolveThiefSkill(skill, { ...ctx, allocatedPoints: allocated })
@@ -1054,9 +1055,12 @@ function buildFeatures(input: CharacterSheetInput): CharacterSheetContext["featu
         items: [f],
       });
   }
+  const racialXp = input.raceItem?.subrace?.xpModifierPercent ?? 0;
   return {
     groups,
     racialAbilities: input.raceItem?.grantedFeatures ?? [],
+    racialXpPercent: racialXp,
+    racialXpLabel: racialXp === 0 ? "" : `${racialXp > 0 ? "+" : ""}${racialXp}%`,
     languagesMax: input.derived.languagesKnown.max,
     resources: src.system.resources,
   };
