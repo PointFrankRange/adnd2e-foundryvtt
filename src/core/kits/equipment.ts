@@ -48,6 +48,11 @@ export function baseArmorRule(allowed: "any" | "none" | readonly string[]): { ru
   return armorRuleFromNames(allowed);
 }
 
+/** "staff" and "quarterstaff" are the same weapon (the chassis data says staff, the items say Quarterstaff). */
+function expandWeaponName(key: string): string[] {
+  return key === "staff" || key === "quarterstaff" ? ["staff", "quarterstaff"] : [key];
+}
+
 /** Names -> a restricted weapon rule. The token "blunt" sets the blunt flag; every other token is a weapon name. */
 export function weaponRuleFromNames(names: readonly string[]): RestrictedWeaponRule {
   const out: string[] = [];
@@ -55,7 +60,7 @@ export function weaponRuleFromNames(names: readonly string[]): RestrictedWeaponR
   for (const name of names) {
     const key = name.trim().toLowerCase();
     if (key === "blunt") blunt = true;
-    else if (key) out.push(key);
+    else if (key) out.push(...expandWeaponName(key));
   }
   return { any: false, names: out, blunt };
 }
@@ -68,7 +73,7 @@ export function baseWeaponRule(allowed: BaseWeaponsAllowed): { rule: WeaponRule;
   if (allowed === "any") return { rule: { any: true }, unmappedCategories: [] };
   const categories = (allowed.categories ?? []).map((c) => c.toLowerCase());
   return {
-    rule: { any: false, names: (allowed.names ?? []).map((n) => n.trim().toLowerCase()), blunt: categories.includes("blunt") },
+    rule: { any: false, names: (allowed.names ?? []).flatMap((n) => expandWeaponName(n.trim().toLowerCase())), blunt: categories.includes("blunt") },
     unmappedCategories: categories.filter((c) => c !== "blunt"),
   };
 }
@@ -103,7 +108,8 @@ export function weaponPermitted(
   if (rule.any) return true;
   const key = (weapon.baseWeaponName || weapon.name).trim().toLowerCase();
   if (rule.names.includes(key)) return true;
-  return rule.blunt && (weapon.damageType?.includes("bludgeoning") ?? false);
+  // A null damage type is unknown (never set): permit it under the blunt rule rather than warn.
+  return rule.blunt && (weapon.damageType === null || weapon.damageType.includes("bludgeoning"));
 }
 
 /** Multiclass: permitted when any of the actor's class rules permits it. No classes = no restriction. */

@@ -42,7 +42,7 @@
           <span class="name">{{k.name}}</span>
           <span class="cost">{{k.chassisId}}</span>
           <span class="effect">{{#if k.xpModifierPercent}}{{localize 'ADND2E.sheet.kits.xp'}} {{k.xpModifierPercent}}%{{/if}}</span>
-          {{#each k.effects as |e|}}<span class="effect">{{localize e.kindKey}} {{e.target}} {{e.amount}}</span>{{/each}}
+          {{#each k.effects as |e|}}<span class="effect">{{localize e.kindKey}}{{#if e.targetKey}} {{localize e.targetKey}}{{/if}} {{e.amount}}</span>{{/each}}
           {{#if k.grantedFeatures.length}}<span class="effect">{{localize 'ADND2E.sheet.kits.features'}}: {{#each k.grantedFeatures}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</span>{{/if}}
           {{#if @root.adnd2e.lock.unlocked}}{{> adnd2e.item-controls id=k.id deletable=true}}{{/if}}
         </div>

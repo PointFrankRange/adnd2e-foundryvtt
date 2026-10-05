@@ -1065,7 +1065,7 @@ function signedAmount(n: number): string {
   return n > 0 ? `+${n}` : String(n);
 }
 
-function traitTargetKey(effect: TraitEffect, config: CharacterSheetInput["config"]): string {
+export function traitTargetKey(effect: TraitEffect, config: Pick<CharacterSheetInput["config"], "abilities" | "saves">): string {
   switch (effect.kind) {
     case "abilityBonus":
       return config.abilities[effect.ability];

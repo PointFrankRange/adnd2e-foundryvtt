@@ -11,7 +11,7 @@ import type { AbilityKey, Alignment, ArmorType, ClassId, NonweaponGroup, Race, S
 import { getOptionalRules } from "../../settings";
 import { tierForConditionId } from "../../core/magic/channeller-fatigue";
 import { rollAttack, rollSave } from "./combat-rolls";
-import { buildCharacterSheetContext } from "./context";
+import { buildCharacterSheetContext, traitTargetKey } from "./context";
 import type {
   ClassItemView,
   CharacterSheetInput,
@@ -386,7 +386,8 @@ export class Adnd2eCharacterSheet extends Base {
     context.proseDisabled = !this.isEditable || !this.#unlocked;
     context.pcActions = true;
     context.turning = turningPanel(this.document as never);
-    context.kits = toKitEntries(
+    const kitCfg = (CONFIG as unknown as { ADND2E: Record<string, Record<string, string>> }).ADND2E;
+    context.kits = activeKitEntries(
       (this.document as unknown as { items: Iterable<{ id: string; name: string; type: string; system: unknown }> }).items,
     ).map((k) => ({
       id: k.id,
@@ -395,7 +396,7 @@ export class Adnd2eCharacterSheet extends Base {
       xpModifierPercent: k.xpModifierPercent,
       effects: k.effects.map((e) => ({
         kindKey: `ADND2E.sheet.kits.effectKinds.${e.kind}`,
-        target: "ability" in e ? e.ability.toUpperCase() : "save" in e ? e.save.toUpperCase() : "mode" in e ? e.mode : "track" in e ? e.track : "",
+        targetKey: e.kind === "bonusHp" ? "" : traitTargetKey(e, { abilities: kitCfg.abilities, saves: kitCfg.saves }),
         amount: e.amount > 0 ? `+${e.amount}` : String(e.amount),
       })),
       grantedFeatures: k.grantedFeatures,
@@ -565,6 +566,11 @@ export class Adnd2eCharacterSheet extends Base {
     // excluding unconditionally would silently exclude the very duplicate
     // this check exists to catch (confirmed by dev-world testing: it did).
     const others = isNewDrop ? existing : existing.filter((i) => i.id !== dropped.id);
+    // Kits are PC-only; this sheet can also be opened on a Character NPC.
+    if (dropped.type === "kit" && (this.document as unknown as { type: string }).type === "npc") {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.drop.kitsPcOnly"));
+      return null;
+    }
     // Re-sorting an already-owned trait is not a purchase — never validated.
     if (dropped.type === "trait" && !isNewDrop) return super._onDropItem(event, item);
     if (dropped.type === "kit" && !isNewDrop) return super._onDropItem(event, item);

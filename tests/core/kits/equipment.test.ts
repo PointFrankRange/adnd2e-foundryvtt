@@ -63,7 +63,15 @@ describe("baseWeaponRule / weaponPermitted", () => {
     expect(weaponPermitted(blunt, { name: "Mace", baseWeaponName: "", damageType: "bludgeoning" })).toBe(true);
     expect(weaponPermitted(blunt, { name: "Flail", baseWeaponName: "", damageType: "piercing-bludgeoning" })).toBe(true);
     expect(weaponPermitted(blunt, { name: "Sword", baseWeaponName: "", damageType: "slashing" })).toBe(false);
-    expect(weaponPermitted(blunt, { name: "Rock", baseWeaponName: "", damageType: null })).toBe(false);
+    // a null damage type is unknown (never set), so it is permitted rather than warned
+    expect(weaponPermitted(blunt, { name: "Rock", baseWeaponName: "", damageType: null })).toBe(true);
+    expect(weaponPermitted(blunt, { name: "Scimitar", baseWeaponName: "", damageType: "slashing" })).toBe(false);
+  });
+  it("staff and quarterstaff are the same weapon", () => {
+    expect(weaponPermitted(mage, { name: "Quarterstaff", baseWeaponName: "", damageType: "bludgeoning" })).toBe(true);
+    expect(weaponPermitted(mage, { name: "Staff", baseWeaponName: "", damageType: "bludgeoning" })).toBe(true);
+    const viaKit = resolveWeaponRule(baseWeaponRule({ names: ["dagger"] }).rule, { mode: "extend", names: ["Staff"] });
+    expect(weaponPermitted(viaKit, { name: "Quarterstaff", baseWeaponName: "", damageType: null })).toBe(true);
   });
   it("any permits everything", () => {
     expect(weaponPermitted(baseWeaponRule("any").rule, { name: "x", baseWeaponName: "", damageType: null })).toBe(true);
