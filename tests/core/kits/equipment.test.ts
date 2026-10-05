@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  armorRuleFromNames, weaponRuleFromNames,
   ARMOR_TYPE_IDS, armorPermitted, armorPermittedByAny, baseArmorRule, baseWeaponRule, resolveArmorRule,
   resolveWeaponRule, weaponPermitted, weaponPermittedByAny,
 } from "../../../src/core/kits";
@@ -113,5 +114,22 @@ describe("permittedByAny (multiclass)", () => {
   it("is permitted if any class permits it", () => {
     expect(armorPermittedByAny([mage, cleric], { armorType: "plate-mail", isShield: false })).toBe(true);
     expect(armorPermittedByAny([mage], { armorType: "plate-mail", isShield: false })).toBe(false);
+  });
+});
+
+describe("name-list edge cases", () => {
+  it("armorRuleFromNames de-duplicates repeated armor types", () => {
+    expect(armorRuleFromNames(["Leather", "leather"]).rule.types).toEqual(["leather"]);
+  });
+  it("weaponRuleFromNames ignores blank tokens", () => {
+    expect(weaponRuleFromNames(["  ", "Dagger"]).names).toEqual(["dagger"]);
+  });
+  it("resolveWeaponRule: replace swaps from any, extend leaves any alone", () => {
+    const any = baseWeaponRule("any").rule;
+    const replaced = resolveWeaponRule(any, { mode: "replace", names: ["Dagger"] });
+    expect(weaponPermitted(replaced, { name: "Dagger", baseWeaponName: "", damageType: null })).toBe(true);
+    expect(weaponPermitted(replaced, { name: "Axe", baseWeaponName: "", damageType: null })).toBe(false);
+    expect(resolveWeaponRule(any, { mode: "extend", names: ["Dagger"] })).toBe(any);
+    expect(resolveWeaponRule(any, { mode: "inherit", names: ["Dagger"] })).toBe(any);
   });
 });
