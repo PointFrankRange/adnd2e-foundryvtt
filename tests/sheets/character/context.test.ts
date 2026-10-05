@@ -3181,3 +3181,88 @@ describe("buildCharacterSheetContext — Channellers fatigue (SP14c)", () => {
     expect(c.vitals.canRecoverFatigue).toBe(true);
   });
 });
+
+describe("buildCharacterSheetContext — kit disables casting (SP11 Plan C)", () => {
+  const priestRules = { ...DEFAULT_OPTIONAL_RULES, spellsAndMagicEnabled: true, spellPoints: true };
+  const clericClass = {
+    id: "c1", name: "Cleric", img: "", chassisId: "cleric", hitDie: 8,
+    xp: 3000, level: 3, canLevelUp: false, dualClassState: null, specialistSchool: null,
+  };
+  const row = (over: Partial<SpellItemView>): SpellItemView => ({
+    id: "s", name: "Spell", img: "", casterClass: "wizard", level: 1,
+    schools: [], spheres: ["healing"], range: "", castingTime: "", savingThrow: "none",
+    inSpellbook: true, memorized: false, expended: false, canMemorize: false, canCast: false, canLearn: false,
+    favorite: false,
+    ...over,
+  });
+  const build = (castingDisabled?: { wizard: boolean; priest: boolean }) => {
+    const base = input();
+    return buildCharacterSheetContext(
+      input({
+        classItems: [clericClass],
+        derived: {
+          ...base.derived,
+          spellcasting: {
+            wizard: {
+              specialistSchool: null,
+              slots: { "1": { max: 2, used: 0 } },
+              spellPoints: { maxSpellLevel: 2, maxPerLevel: 3, sp: 15, spent: 0, remaining: 15 },
+              memorized: [
+                { spellItemId: "w1", spellLevel: 1, expended: false, magickType: "fixed" as const },
+                { spellItemId: null, spellLevel: 2, expended: false, magickType: "free" as const },
+              ],
+            },
+            priest: {
+              slots: { "1": { max: 2, used: 0 } },
+              spellPoints: { maxSpellLevel: 7, maxPerLevel: 5, sp: 40, spent: 0, remaining: 40 },
+              memorized: [{ spellItemId: "p1", spellLevel: 1, expended: false, magickType: "fixed" as const, theurgyScope: "major" as const }],
+              sphereAccessOverride: null,
+            },
+          },
+        } as never,
+        optionalRules: priestRules,
+        spellItems: [
+          row({ id: "w1", casterClass: "wizard", schools: ["invocation"], spheres: [] }),
+          row({ id: "p1", casterClass: "priest" }),
+          row({ id: "o1", casterClass: "priest", level: 0, name: "Alleviate" }),
+        ],
+        ...(castingDisabled ? { castingDisabled } : {}),
+      }),
+    );
+  };
+
+  it("priest disabled: every priest row is inert and the priest slots, orisons and pool are gone", () => {
+    const c = build({ wizard: false, priest: true });
+    const priestRows = c.spells.known.flatMap((g) => g.items).filter((r) => r.casterClass === "priest");
+    expect(priestRows.length).toBeGreaterThan(0);
+    for (const r of priestRows) {
+      expect(r.canMemorize).toBe(false);
+      expect(r.canCast).toBe(false);
+      expect(r.canLearn).toBe(false);
+    }
+    expect(c.spells.priestSlots).toEqual([]);
+    expect(c.spells.orisons).toEqual([]);
+    expect(c.spells.priestPoolOn).toBe(false);
+  });
+
+  it("wizard disabled: free magicks cannot be cast and wizard rows and slots are inert", () => {
+    const c = build({ wizard: true, priest: false });
+    expect(c.spells.freeMagicks.length).toBeGreaterThan(0);
+    for (const f of c.spells.freeMagicks) expect(f.canCast).toBe(false);
+    for (const r of c.spells.known.flatMap((g) => g.items).filter((r) => r.casterClass === "wizard")) {
+      expect(r.canMemorize).toBe(false);
+      expect(r.canCast).toBe(false);
+      expect(r.canLearn).toBe(false);
+    }
+    expect(c.spells.wizardSlots).toEqual([]);
+  });
+
+  it("castingDisabled absent leaves the output unchanged", () => {
+    const absent = build();
+    const none = build({ wizard: false, priest: false });
+    expect(absent.spells).toEqual(none.spells);
+    expect(absent.spells.priestPoolOn).toBe(true);
+    expect(absent.spells.freeMagicks[0]!.canCast).toBe(true);
+    expect(absent.spells.orisons.length).toBe(1);
+  });
+});

@@ -1,5 +1,5 @@
-import { activeKitEntries, toKitEntries } from "../../data/derive/character/kits";
-import { buildPowerRows, kitForbidsProficiency, kitQualifies, kitXpPercentFor, type KitQualifications, type PowerUsage } from "../../core/kits";
+import { activeKitEntries, casterTypesDisabled, toKitEntries } from "../../data/derive/character/kits";
+import { buildPowerRows, kitForbidsProficiency, kitQualifies, kitXpPercentFor, resolveKitOverrides, type KitQualifications, type PowerUsage } from "../../core/kits";
 import { resetKitPowers, resetPower, usePower } from "./kit-power-actions";
 import { ABILITY_KEYS } from "../../data/item/choices";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
@@ -509,6 +509,9 @@ export class Adnd2eCharacterSheet extends Base {
       source: actor._source,
       derived: actor.system as never,
       classItems,
+      castingDisabled: casterTypesDisabled(
+        classItems.map((c) => ({ chassisId: c.chassisId, castingDisabled: resolveKitOverrides(kitEntries, c.chassisId).castingDisabled })),
+      ),
       raceItem,
       physicalItems,
       proficiencyItems: { weapon: weaponProfs, nonweapon: nonweaponProfs },
@@ -556,7 +559,7 @@ export class Adnd2eCharacterSheet extends Base {
     const existing = [...actor.items];
     const dropped = item as unknown as {
       id: string; name: string; type: string;
-      system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; weaponOrGroup?: string; isGroup?: boolean };
+      system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; weaponOrGroup?: string; isGroup?: boolean; casterClass?: string };
     };
     const isNewDrop =
       (item as unknown as { parent?: { uuid?: string } }).parent?.uuid !==
@@ -619,6 +622,16 @@ export class Adnd2eCharacterSheet extends Base {
         kitForbidsProficiency: activeKitEntries(existing).some((k) =>
           kitForbidsProficiency(k.forbiddenWeaponProficiencies, dropped.system?.weaponOrGroup ?? ""),
         ),
+      };
+    } else if (dropped.type === "spell") {
+      const key = dropped.system?.casterClass === "priest" ? "priest" : "wizard";
+      const kits = activeKitEntries(existing);
+      kitInputs = {
+        kitDisablesCasting: casterTypesDisabled(
+          existing
+            .filter((i) => i.type === "class")
+            .map((i) => ({ chassisId: i.system.chassisId ?? "", castingDisabled: resolveKitOverrides(kits, i.system.chassisId ?? "").castingDisabled })),
+        )[key],
       };
     }
 

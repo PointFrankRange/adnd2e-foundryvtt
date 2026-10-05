@@ -359,6 +359,7 @@
         "kitAbility": "The character doesn't meet this kit's ability score minimums.",
         "kitRace": "The character's race doesn't qualify for this kit.",
         "kitAlignment": "The character's alignment doesn't qualify for this kit.",
+        "kitCastingDisabled": "That class's kit disables spellcasting.",
         "kitForbiddenProficiency": "A kit this character has forbids that weapon proficiency.",
         "kitsPcOnly": "Kits can only be added to a player character sheet.",
         "monsterRejects": "A Monster NPC can carry weapons, armor, equipment and spells — not classes, races, proficiencies, traits or class features."
@@ -428,6 +429,7 @@
         }
       },
       "spells": {
+        "kitCastingDisabledWarning": "Your kit disables this class's spellcasting.",
         "wizardSlots": "Wizard Spell Slots",
         "priestSlots": "Priest Spell Slots",
         "specialist": "Specialist",

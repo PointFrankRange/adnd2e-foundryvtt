@@ -803,3 +803,12 @@ describe("lang/en.json — SP11 Plan B (kit powers)", () => {
     }
   });
 });
+
+describe("lang/en.json — SP11 Plan C (kit casting off)", () => {
+  it("resolves the kit-casting-disabled keys", () => {
+    for (const key of ["ADND2E.sheet.drop.kitCastingDisabled", "ADND2E.sheet.spells.kitCastingDisabledWarning"]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

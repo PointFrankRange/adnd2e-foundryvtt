@@ -207,3 +207,12 @@ describe("kit-forbidden weapon proficiencies (SP11)", () => {
     ).toEqual({ ok: true });
   });
 });
+
+describe("kit-disabled casting drops (SP11 Plan C)", () => {
+  it("refuses a spell drop when the owning kit disables that caster type's casting (SP11 Plan C)", () => {
+    const base = { dropType: "spell", hasRace: false, existingChassisIds: ["paladin"] };
+    expect(validateItemDrop({ ...base, kitDisablesCasting: true })).toEqual({ ok: false, reason: "ADND2E.sheet.drop.kitCastingDisabled" });
+    expect(validateItemDrop({ ...base, kitDisablesCasting: false })).toEqual({ ok: true });
+    expect(validateItemDrop(base)).toEqual({ ok: true });
+  });
+});

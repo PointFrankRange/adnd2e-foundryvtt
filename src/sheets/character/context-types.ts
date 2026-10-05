@@ -39,6 +39,8 @@ export interface CharacterSheetInput {
    *  consumed by several builders (Learn Spell's per-level cap, combat maneuver
    *  and weapon-mastery gating, ...) */
   optionalRules: OptionalRules;
+  /** SP11 Plan C: caster types a kit switched off (absent = none) */
+  castingDisabled?: { wizard: boolean; priest: boolean };
   /** Sub-project 8 Plan 8a: true ONLY when this sheet renders the sub-score
    *  inputs (the PC sheet, with `subAbilitiesEnabled(rules)` true). Optional so
    *  every other consumer of this builder — notably the NPC sheet, which shares

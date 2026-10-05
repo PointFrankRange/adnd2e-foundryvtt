@@ -3,7 +3,11 @@ import { castOrBegin } from "../../../src/sheets/character/casting-actions";
 import { recoverFromFatigue, resolveMortalFatigue } from "../../../src/sheets/character/fatigue-actions";
 import { FATIGUE_CONDITION_ID } from "../../../src/core/magic/channeller-fatigue";
 import {
+  castFreeMagick,
   castFreeTheurgy,
+  castingBlockedByKit,
+  learnSpell,
+  memorizeFreeMagick,
   castSpell,
   forgetFreeTheurgy,
   memorizeFreeTheurgy,
@@ -744,5 +748,65 @@ describe("recoverChannellerSp — priest and wizard pools", () => {
     await recoverChannellerSp(actor, "priest", "sleeping", 8);
     expect(actor.update).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalledWith("ADND2E.sheet.spells.channellingBlockedWarning");
+  });
+});
+
+describe("kit-disabled casting (SP11 Plan C)", () => {
+  const kit = (casting: string) => ({
+    id: "k1", name: "Kit", type: "kit",
+    system: {
+      chassisId: "paladin",
+      qualifications: { abilityMinimums: {}, races: [], alignments: [] },
+      xpModifierPercent: 0,
+      effects: [],
+      equipment: { armor: { mode: "inherit", names: [] }, weapons: { mode: "inherit", names: [] } },
+      forbiddenWeaponProficiencies: [],
+      grantedFeatures: [],
+      powers: [],
+      overrides: { casting, turning: { mode: "inherit", offset: 0 }, removedAbilities: [] },
+    },
+  });
+  const paladinActor = (casting: string, memorized: SpellcasterActor["system"]["spellcasting"]["priest"]["memorized"] = []) => {
+    const actor = makeActor({ priestChassis: "paladin", priestXp: 3000, items: [CLW], priestMemorized: memorized });
+    // append the paladin's kit beside its class and spell items (makeActor builds `items` as an array with a `get`)
+    (actor.items as unknown as unknown[]).push(kit(casting));
+    return actor;
+  };
+
+  it("memorizeSpell, castSpell, learnSpell and castOrBegin are blocked with a toast and no write when the kit casting is none", async () => {
+    const mem = [{ spellItemId: "clw-id", spellLevel: 1, expended: false, magickType: "fixed" as const }];
+    const actor = paladinActor("none", mem);
+    await memorizeSpell(actor, "clw-id");
+    await castSpell(actor, "clw-id");
+    await learnSpell(actor, "clw-id");
+    await castOrBegin(actor as never, "clw-id");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledTimes(4);
+    expect(warn).toHaveBeenCalledWith("ADND2E.sheet.spells.kitCastingDisabledWarning");
+  });
+
+  it("the free magick and free theurgy actions are blocked too", async () => {
+    const actor = paladinActor("none");
+    await memorizeFreeMagick(actor, 1);
+    await castFreeMagick(actor, 1, "clw-id");
+    await memorizeFreeTheurgy(actor, 1, "major");
+    await castFreeTheurgy(actor, 1, "major");
+    expect(actor.update).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledTimes(4);
+    expect(warn).toHaveBeenCalledWith("ADND2E.sheet.spells.kitCastingDisabledWarning");
+  });
+
+  it("the same calls work with the kit's casting inherit", async () => {
+    const actor = paladinActor("inherit");
+    await memorizeSpell(actor, "clw-id");
+    expect(warn).not.toHaveBeenCalledWith("ADND2E.sheet.spells.kitCastingDisabledWarning");
+    expect(actor.update).toHaveBeenCalledTimes(1);
+  });
+
+  it("castingBlockedByKit reports the priest side blocked and the wizard side not", () => {
+    const actor = paladinActor("none");
+    expect(castingBlockedByKit(actor, "priest")).toBe(true);
+    expect(castingBlockedByKit(actor, "wizard")).toBe(false);
+    expect(castingBlockedByKit(paladinActor("inherit"), "priest")).toBe(false);
   });
 });

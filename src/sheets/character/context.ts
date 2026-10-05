@@ -663,6 +663,7 @@ function buildWeaponProfRow(
 
 function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetContext["spells"] {
   const sc = input.derived.spellcasting;
+  const off = input.castingDisabled ?? { wizard: false, priest: false };
   const school = sc.wizard.specialistSchool;
   const priestChassisId =
     input.classItems.find((c) => isPriestSpellProgression(getChassis(c.chassisId as ClassId).spellProgressionId))
@@ -675,7 +676,7 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   // The priest pool applies only to a cleric/druid chassis. A paladin or ranger
   // keeps its classic slot table under the rule (no pool to draw on).
   const priestPoolOn =
-    spellPointsOn && isPriestPoolProgression(priestChassisId ? getChassis(priestChassisId as ClassId).spellProgressionId : null);
+    !off.priest && spellPointsOn && isPriestPoolProgression(priestChassisId ? getChassis(priestChassisId as ClassId).spellProgressionId : null);
   // `?? {}` handles BOTH shapes the field can take: a test fixture that omits
   // it entirely (undefined), and real system data's ObjectField default of
   // `{}` (present but empty) when the rule is off or there's no wizard caster.
@@ -704,6 +705,7 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
       ),
     );
     items = casting ? items.map((r) => ({ ...r, canCast: false })) : items;
+    items = items.map((r) => (off[r.casterClass === "priest" ? "priest" : "wizard"] ? { ...r, canMemorize: false, canCast: false, canLearn: false } : r));
     if (items.length > 0) known.push({ level, items });
   }
   const orisons = priestPoolOn
@@ -712,9 +714,9 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
       })
     : [];
   return {
-    wizardSlots: toSlotRows(sc.wizard.slots),
+    wizardSlots: off.wizard ? [] : toSlotRows(sc.wizard.slots),
     // Under the priest pool rule (cleric/druid) the classic priest slot rows are hidden: the pool replaces them.
-    priestSlots: priestPoolOn ? [] : toSlotRows(sc.priest.slots),
+    priestSlots: priestPoolOn || off.priest ? [] : toSlotRows(sc.priest.slots),
     specialistSchoolLabel: school ? input.config.schools[school] : null,
     known,
     orisons,
@@ -738,6 +740,7 @@ function buildSpells(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
         level: m.spellLevel,
         expended: m.expended,
         canCast:
+          !off.wizard &&
           !casting &&
           (channellingOn ? canAffordCast(wizardChannelling.current ?? 0, m.spellLevel, "free") : !m.expended),
       })),
