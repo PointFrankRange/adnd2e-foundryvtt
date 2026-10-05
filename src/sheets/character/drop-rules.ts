@@ -1,3 +1,4 @@
+import type { KitQualifyVerdict } from "../../core/kits";
 import { canAffordTrait } from "../../core/skills/character-points";
 
 export interface DropCheckInput {
@@ -40,6 +41,14 @@ export interface DropCheckInput {
   availableCp?: number | null;
   /** disadvantage refund already counted against the cap */
   refundedSoFar?: number;
+  /** kit drops: the kit's class chassis */
+  dropKitChassisId?: string;
+  /** chassis of every `kit` item already on the actor */
+  existingKitChassisIds?: readonly string[];
+  /** kit drops: the pure qualification verdict, computed by the sheet */
+  kitQualifies?: KitQualifyVerdict;
+  /** weaponProficiency drops: true when an owned kit forbids the dropped proficiency */
+  kitForbidsProficiency?: boolean;
 }
 
 export interface DropVerdict {
@@ -58,6 +67,7 @@ export function validateItemDrop(input: DropCheckInput): DropVerdict {
     return dup ? { ok: false, reason: "ADND2E.sheet.drop.duplicateClass" } : { ok: true };
   }
   if (input.dropType === "weaponProficiency") {
+    if (input.kitForbidsProficiency) return { ok: false, reason: "ADND2E.sheet.drop.kitForbiddenProficiency" };
     const dup = (input.existingWeaponProfs ?? []).some(
       (p) => p.weaponOrGroup === input.dropWeaponOrGroup && p.isGroup === (input.dropIsGroup ?? false),
     );
@@ -84,6 +94,13 @@ export function validateItemDrop(input: DropCheckInput): DropVerdict {
       refundedSoFar: input.refundedSoFar ?? 0,
     });
     return verdict.ok ? { ok: true } : { ok: false, reason: verdict.reason };
+  }
+  if (input.dropType === "kit") {
+    const chassis = input.dropKitChassisId ?? "";
+    if (!input.existingChassisIds.includes(chassis)) return { ok: false, reason: "ADND2E.sheet.drop.kitNoClass" };
+    if ((input.existingKitChassisIds ?? []).includes(chassis)) return { ok: false, reason: "ADND2E.sheet.drop.kitDuplicate" };
+    if (input.kitQualifies && !input.kitQualifies.ok) return { ok: false, reason: input.kitQualifies.reason };
+    return { ok: true };
   }
   return { ok: true };
 }

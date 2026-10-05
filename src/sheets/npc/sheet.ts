@@ -325,6 +325,10 @@ export class Adnd2eNpcSheet extends Base {
       ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.drop.traitsPcOnly"));
       return null;
     }
+    if (dropped.type === "kit") {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.drop.kitsPcOnly"));
+      return null;
+    }
 
     let dropSlotCost: number | undefined;
     if (dropped.type === "weaponProficiency") {

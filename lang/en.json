@@ -326,6 +326,13 @@
         "insufficientCp": "Not enough character points for that trait.",
         "traitsDisabled": "Traits are only used while the Skills & Powers character-point build rule is on.",
         "traitsPcOnly": "Traits can only be added to a player character's sheet.",
+        "kitNoClass": "This kit modifies a class the character doesn't have.",
+        "kitDuplicate": "That class already has a kit.",
+        "kitAbility": "The character doesn't meet this kit's ability score minimums.",
+        "kitRace": "The character's race doesn't qualify for this kit.",
+        "kitAlignment": "The character's alignment doesn't qualify for this kit.",
+        "kitForbiddenProficiency": "A kit this character has forbids that weapon proficiency.",
+        "kitsPcOnly": "Kits can only be added to a player character sheet.",
         "monsterRejects": "A Monster NPC can carry weapons, armor, equipment and spells — not classes, races, proficiencies, traits or class features."
       },
       "xp": {

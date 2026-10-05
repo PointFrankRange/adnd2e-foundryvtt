@@ -1,12 +1,13 @@
-import { activeKitEntries } from "../../data/derive/character/kits";
-import { kitXpPercentFor } from "../../core/kits";
+import { activeKitEntries, toKitEntries } from "../../data/derive/character/kits";
+import { kitForbidsProficiency, kitQualifies, kitXpPercentFor, type KitQualifications } from "../../core/kits";
+import { ABILITY_KEYS } from "../../data/item/choices";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
 import { getChassis } from "../../core/classes/chassis";
 import type { ManeuverId } from "../../core/combat/maneuvers";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
 import type { RawTraitEffect } from "../../core/skills/traits";
-import type { ArmorType, ClassId, NonweaponGroup, SaveCategory, ThiefSkill } from "../../core/types";
+import type { AbilityKey, Alignment, ArmorType, ClassId, NonweaponGroup, Race, SaveCategory, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
 import { tierForConditionId } from "../../core/magic/channeller-fatigue";
 import { rollAttack, rollSave } from "./combat-rolls";
@@ -22,7 +23,7 @@ import type {
   TraitItemView,
   WeaponProfView,
 } from "./context-types";
-import { validateItemDrop } from "./drop-rules";
+import { validateItemDrop, type DropCheckInput } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
 import { resetTurnAttempt, turningPanel, turnUndead } from "./turning-actions";
 import { advanceWeaponMastery, allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill } from "./proficiency-actions";
@@ -550,6 +551,7 @@ export class Adnd2eCharacterSheet extends Base {
     const others = isNewDrop ? existing : existing.filter((i) => i.id !== dropped.id);
     // Re-sorting an already-owned trait is not a purchase — never validated.
     if (dropped.type === "trait" && !isNewDrop) return super._onDropItem(event, item);
+    if (dropped.type === "kit" && !isNewDrop) return super._onDropItem(event, item);
     // Re-derived from the actor's CURRENT authored state + settings at drop time.
     const traitInputs: Partial<TraitDropInputs> =
       dropped.type === "trait" ? traitDropInputs(this.document as never, dropped as never) : {};
@@ -565,6 +567,30 @@ export class Adnd2eCharacterSheet extends Base {
         ? nonweaponSlotCost(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", firstClassId as never)
         : (dropped.system.slotCost ?? 1);
       availableSlots = actor.system.proficiencies.nonweapon.available;
+    }
+
+    let kitInputs: Partial<DropCheckInput> = {};
+    if (dropped.type === "kit") {
+      const sys = dropped.system as unknown as { chassisId: string; qualifications: KitQualifications };
+      const a = this.document as unknown as {
+        system: { abilities: Record<AbilityKey, { score: number }>; details: { alignment: Alignment } };
+      };
+      const raceItem = existing.find((i) => i.type === "race");
+      kitInputs = {
+        dropKitChassisId: sys.chassisId,
+        existingKitChassisIds: toKitEntries(others).map((k) => k.chassisId),
+        kitQualifies: kitQualifies(sys.qualifications, {
+          abilities: Object.fromEntries(ABILITY_KEYS.map((k) => [k, a.system.abilities[k].score])) as Record<AbilityKey, number>,
+          race: ((raceItem?.system as unknown as { raceId?: Race } | undefined)?.raceId ?? null) as Race | null,
+          alignment: a.system.details.alignment,
+        }),
+      };
+    } else if (dropped.type === "weaponProficiency") {
+      kitInputs = {
+        kitForbidsProficiency: activeKitEntries(existing).some((k) =>
+          kitForbidsProficiency(k.forbiddenWeaponProficiencies, dropped.system?.weaponOrGroup ?? ""),
+        ),
+      };
     }
 
     const verdict = validateItemDrop({
@@ -585,6 +611,7 @@ export class Adnd2eCharacterSheet extends Base {
       dropNonweaponName: dropped.name,
       existingNonweaponNames: others.filter((i) => i.type === "nonweaponProficiency").map((i) => i.name),
       ...traitInputs,
+      ...kitInputs,
     });
     if (!verdict.ok) {
       ui.notifications?.warn(game.i18n!.localize(verdict.reason!));
