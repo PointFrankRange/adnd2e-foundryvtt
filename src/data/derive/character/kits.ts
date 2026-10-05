@@ -1,4 +1,6 @@
 import { normalizeOverrides, normalizePowers, type KitOverrides, type RawOverrides, type EquipmentOverride, type KitPower, type KitQualifications, type RawPower } from "../../../core/kits";
+import { getChassis } from "../../../core/classes/chassis";
+import type { ClassId } from "../../../core/types";
 import { toTraitEffect, type RawTraitEffect, type TraitEffect } from "../../../core/skills/traits";
 
 /* SP11 Plan A: the owned `kit` items as plain entries. Pure. */
@@ -66,4 +68,16 @@ export function activeKitEntries(items: Iterable<ItemLike>): KitEntry[] {
     all.filter((i) => i.type === "class").map((i) => (i.system as { chassisId: string }).chassisId),
   );
   return toKitEntries(all).filter((k) => chassisIds.has(k.chassisId));
+}
+
+/** SP11 Plan C: which caster types a kit has switched off. A type is off when the actor has at least one class of that caster type and every such class has `castingDisabled`. */
+export function casterTypesDisabled(
+  classes: readonly { chassisId: string; castingDisabled?: boolean }[],
+): { wizard: boolean; priest: boolean } {
+  const result = { wizard: false, priest: false };
+  for (const type of ["wizard", "priest"] as const) {
+    const ofType = classes.filter((c) => getChassis(c.chassisId as ClassId).casterType === type);
+    result[type] = ofType.length > 0 && ofType.every((c) => c.castingDisabled === true);
+  }
+  return result;
 }

@@ -7,7 +7,7 @@ import type {
 import type { ClassId, Race, ThiefSkill, WizardSchool } from "../../core/types";
 import { toTraitEntries } from "../derive/character";
 import { activeKitEntries } from "../derive/character/kits";
-import { kitXpPercentFor } from "../../core/kits";
+import { kitXpPercentFor, resolveKitOverrides } from "../../core/kits";
 import { containerAdjustedCarriedWeight } from "../derive/character/container-weight";
 
 interface ClassItemSystem {
@@ -68,6 +68,7 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
         dualClassState: s.dualClassState,
         level: s.level ?? 1,
         xpModifierPercent: kitXpPercentFor(kitEntries, s.chassisId),
+        castingDisabled: resolveKitOverrides(kitEntries, s.chassisId).castingDisabled,
       };
     });
 

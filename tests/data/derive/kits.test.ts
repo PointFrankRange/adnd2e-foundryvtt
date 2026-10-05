@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activeKitEntries, toKitEntries } from "../../../src/data/derive/character/kits";
+import { activeKitEntries, casterTypesDisabled, toKitEntries } from "../../../src/data/derive/character/kits";
 import { resolveTraitTotals } from "../../../src/data/derive/character/traits";
 import { deriveClassLevels } from "../../../src/data/derive/character/levels";
 import { classItemCanLevelUp, classItemLevel } from "../../../src/data/derive/class-item";
@@ -82,5 +82,20 @@ describe("the XP modifier delays levels", () => {
     const entry = { chassisId: "fighter" as const, specialistSchool: null, xp: level2, hpRolls: [1], dualClassState: null, level: 1 };
     expect(deriveClassLevels([{ ...entry, xpModifierPercent: 25 }])[0]).toEqual({ chassisId: "fighter", level: 1, canLevelUp: false });
     expect(deriveClassLevels([entry])[0]).toEqual({ chassisId: "fighter", level: 2, canLevelUp: true });
+  });
+});
+
+describe("casterTypesDisabled (SP11 Plan C)", () => {
+  it("a type is off only when every class of that caster type has casting disabled", () => {
+    expect(casterTypesDisabled([{ chassisId: "paladin", castingDisabled: true }])).toEqual({ wizard: false, priest: true });
+    expect(casterTypesDisabled([{ chassisId: "paladin" }])).toEqual({ wizard: false, priest: false });
+    expect(casterTypesDisabled([{ chassisId: "mage", castingDisabled: true }, { chassisId: "cleric" }])).toEqual({ wizard: true, priest: false });
+    expect(
+      casterTypesDisabled([{ chassisId: "cleric", castingDisabled: true }, { chassisId: "paladin" }]),
+    ).toEqual({ wizard: false, priest: false });
+  });
+  it("non-casters and no classes never disable anything", () => {
+    expect(casterTypesDisabled([{ chassisId: "fighter", castingDisabled: true }])).toEqual({ wizard: false, priest: false });
+    expect(casterTypesDisabled([])).toEqual({ wizard: false, priest: false });
   });
 });

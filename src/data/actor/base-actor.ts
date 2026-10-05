@@ -416,6 +416,13 @@ export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void 
   // channelling.current is PERSISTED — only .max is overwritten here (mirrors attributes.hp.max's own derived-overwrite pattern).
   if (derived.channelling.wizard) sys.spellcasting.wizard.channelling.max = derived.channelling.wizard.max;
   if (derived.channelling.priest) sys.spellcasting.priest.channelling.max = derived.channelling.priest.max;
+  // SP11 Plan C: a kit that switches casting off must also CLEAR the cached derived records (the writes above only run when something was derived, so stale values would otherwise linger).
+  for (const key of ["wizard", "priest"] as const) {
+    if (!derived.castingDisabled[key]) continue;
+    sys.spellcasting[key].slots = {};
+    sys.spellcasting[key].spellPoints = {};
+    sys.spellcasting[key].channelling.max = null;
+  }
 }
 
 export abstract class Adnd2eActorModel<

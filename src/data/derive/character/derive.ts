@@ -14,6 +14,7 @@ import type {
 } from "../../../core/classes/multiclass";
 import type { ActorSnapshot } from "./snapshot";
 import { applyTraitEffects, resolveTraitTotals } from "./traits";
+import { casterTypesDisabled } from "./kits";
 import { deriveClassLevels } from "./levels";
 import { characterHpMax } from "./hp";
 import { deriveThac0 } from "./thac0";
@@ -39,6 +40,8 @@ export interface CharacterDerived {
   spellSlots: { wizard?: SlotRecord; priest?: SlotRecord };
   spellPoints: { wizard?: SpellPointsRecord; priest?: SpellPointsRecord };
   channelling: { wizard?: ChannellingRecord; priest?: ChannellingRecord };
+  /** SP11 Plan C: caster types a kit has switched off (deriveAndCache clears their cached slots / spell points / channelling max) */
+  castingDisabled: { wizard: boolean; priest: boolean };
   proficiencies: { weapon: SlotBlock; nonweapon: SlotBlock; languagesMax: number } | null;
   thiefSkills: ThiefSkillPointBlock;
   encumbrance: {
@@ -81,13 +84,18 @@ function spellInput(
   };
 }
 
+/** SP11 Plan C: drops classes whose kit switched casting off — the single choke point for slots, spell points and channelling. */
+function enabledCasters(casters: readonly ClassMember[], snapshot: ActorSnapshot): ClassMember[] {
+  return casters.filter((m) => !snapshot.classes.some((c) => c.chassisId === m.chassisId && c.castingDisabled));
+}
+
 function mergeCasterSlots(
   casters: readonly ClassMember[],
   snapshot: ActorSnapshot,
   abilities: DerivedAbilities,
 ): { wizard?: SlotRecord; priest?: SlotRecord } {
   let out: { wizard?: SlotRecord; priest?: SlotRecord } = {};
-  for (const c of casters) {
+  for (const c of enabledCasters(casters, snapshot)) {
     out = { ...out, ...deriveSpellSlots(spellInput(c, snapshot, abilities)) };
   }
   return out;
@@ -99,7 +107,7 @@ function mergeCasterSpellPoints(
   abilities: DerivedAbilities,
 ): { wizard?: SpellPointsRecord; priest?: SpellPointsRecord } {
   let out: { wizard?: SpellPointsRecord; priest?: SpellPointsRecord } = {};
-  for (const c of casters) {
+  for (const c of enabledCasters(casters, snapshot)) {
     out = {
       ...out,
       ...deriveSpellPoints({
@@ -125,7 +133,7 @@ function mergeCasterChannelling(
   abilities: DerivedAbilities,
 ): { wizard?: ChannellingRecord; priest?: ChannellingRecord } {
   let out: { wizard?: ChannellingRecord; priest?: ChannellingRecord } = {};
-  for (const c of casters) {
+  for (const c of enabledCasters(casters, snapshot)) {
     out = {
       ...out,
       ...deriveChannelling({
@@ -215,6 +223,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
         primaryMember && spellPointsEnabled(options) ? mergeCasterSpellPoints([primaryMember], snapshot, abilities) : {},
       channelling:
         primaryMember && channellersEnabled(options) ? mergeCasterChannelling([primaryMember], snapshot, abilities) : {},
+      castingDisabled: casterTypesDisabled(snapshot.classes),
       proficiencies: primary
         ? deriveProficiencySlots(
             { chassisId: primary.chassisId, level },
@@ -267,6 +276,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
     spellSlots: mergeCasterSlots(resolution.casters, snapshot, abilities),
     spellPoints: spellPointsEnabled(options) ? mergeCasterSpellPoints(resolution.casters, snapshot, abilities) : {},
     channelling: channellersEnabled(options) ? mergeCasterChannelling(resolution.casters, snapshot, abilities) : {},
+    castingDisabled: casterTypesDisabled(snapshot.classes),
     proficiencies: deriveProficiencySlots(
       resolution.weaponProfSource,
       resolution.nonweaponProfSource,
