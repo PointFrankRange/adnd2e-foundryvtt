@@ -386,6 +386,20 @@ export class Adnd2eCharacterSheet extends Base {
     context.proseDisabled = !this.isEditable || !this.#unlocked;
     context.pcActions = true;
     context.turning = turningPanel(this.document as never);
+    context.kits = toKitEntries(
+      (this.document as unknown as { items: Iterable<{ id: string; name: string; type: string; system: unknown }> }).items,
+    ).map((k) => ({
+      id: k.id,
+      name: k.name,
+      chassisId: k.chassisId,
+      xpModifierPercent: k.xpModifierPercent,
+      effects: k.effects.map((e) => ({
+        kindKey: `ADND2E.sheet.kits.effectKinds.${e.kind}`,
+        target: "ability" in e ? e.ability.toUpperCase() : "save" in e ? e.save.toUpperCase() : "mode" in e ? e.mode : "track" in e ? e.track : "",
+        amount: e.amount > 0 ? `+${e.amount}` : String(e.amount),
+      })),
+      grantedFeatures: k.grantedFeatures,
+    }));
     // The SYSTEM DataModel's own schema — distinct from `context.fields`,
     // which DocumentSheetV2._prepareContext already exposes as the actor's
     // top-level (name/img/system/…) schema. Needed so biography.hbs can

@@ -19,6 +19,7 @@ export function actorEquipmentRules(items: Iterable<ItemLike>): { armor: ArmorRu
     if (item.type !== "class") continue;
     const chassisId = (item.system as { chassisId: ClassId }).chassisId;
     const chassis = getChassis(chassisId);
+    if (!chassis) continue;
     const kit = kits.find((k) => k.chassisId === chassisId);
     const baseArmor = baseArmorRule(chassis.armorAllowed).rule;
     const baseWeapons = baseWeaponRule(chassis.weaponsAllowed).rule;

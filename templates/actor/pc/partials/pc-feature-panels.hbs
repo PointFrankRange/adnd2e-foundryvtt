@@ -33,6 +33,23 @@
     </div>
   </section>
   {{/if}}
+  {{#if @root.kits.length}}
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.kits.title'}}</div>
+    <div class="kit-body">
+      {{#each @root.kits as |k|}}
+        <div class="trait-row" data-item-id="{{k.id}}">
+          <span class="name">{{k.name}}</span>
+          <span class="cost">{{k.chassisId}}</span>
+          <span class="effect">{{#if k.xpModifierPercent}}{{localize 'ADND2E.sheet.kits.xp'}} {{k.xpModifierPercent}}%{{/if}}</span>
+          {{#each k.effects as |e|}}<span class="effect">{{localize e.kindKey}} {{e.target}} {{e.amount}}</span>{{/each}}
+          {{#if k.grantedFeatures.length}}<span class="effect">{{localize 'ADND2E.sheet.kits.features'}}: {{#each k.grantedFeatures}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</span>{{/if}}
+          {{#if @root.adnd2e.lock.unlocked}}{{> adnd2e.item-controls id=k.id deletable=true}}{{/if}}
+        </div>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
   {{#if adnd2e.traits.enabled}}
   <section class="kit-panel">
     <div class="kit-bar">{{localize 'ADND2E.sheet.traits.title'}}</div>

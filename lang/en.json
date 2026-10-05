@@ -253,6 +253,18 @@
         "maxHenchmen": { "short": "Hench", "long": "Maximum Henchmen" },
         "loyaltyBase": { "short": "Loyal", "long": "Loyalty Base" }
       },
+      "kits": {
+        "title": "Kits",
+        "xp": "XP per level",
+        "features": "Granted features",
+        "effectKinds": {
+          "abilityBonus": "Ability",
+          "saveBonus": "Save",
+          "attackBonus": "To-hit",
+          "proficiencySlots": "Proficiency slots",
+          "bonusHp": "Bonus HP"
+        }
+      },
       "traits": {
         "title": "Character Points & Traits",
         "pool": "Pool",
