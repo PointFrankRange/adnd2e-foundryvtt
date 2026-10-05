@@ -1,5 +1,6 @@
-import { activeKitEntries, casterTypesDisabled, toKitEntries } from "../../data/derive/character/kits";
+import { activeKitEntries, casterTypesDisabled, raceXpPercentOf, toKitEntries } from "../../data/derive/character/kits";
 import { buildPowerRows, kitForbidsProficiency, kitQualifies, kitXpPercentFor, resolveKitOverrides, type KitQualifications, type PowerUsage } from "../../core/kits";
+import { combineXpPercent } from "../../core/races";
 import { classLevelOf, resetKitPowers, resetPower, usePower } from "./kit-power-actions";
 import { ABILITY_KEYS } from "../../data/item/choices";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
@@ -480,7 +481,7 @@ export class Adnd2eCharacterSheet extends Base {
         case "class":
           {
             const view = toClassView(it);
-            classItems.push({ ...view, xpModifierPercent: kitXpPercentFor(kitEntries, view.chassisId) });
+            classItems.push({ ...view, xpModifierPercent: combineXpPercent(kitXpPercentFor(kitEntries, view.chassisId), raceXpPercentOf(items)) });
           }
           break;
         case "race":

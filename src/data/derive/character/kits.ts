@@ -1,4 +1,5 @@
-import { normalizeOverrides, normalizePowers, type KitOverrides, type RawOverrides, type EquipmentOverride, type KitPower, type KitQualifications, type RawPower } from "../../../core/kits";
+import { combineXpPercent, normalizeSubrace, type RawSubrace } from "../../../core/races";
+import { kitXpPercentFor, normalizeOverrides, normalizePowers, type KitOverrides, type RawOverrides, type EquipmentOverride, type KitPower, type KitQualifications, type RawPower } from "../../../core/kits";
 import { getChassis } from "../../../core/classes/chassis";
 import type { ClassId } from "../../../core/types";
 import { toTraitEffect, type RawTraitEffect, type TraitEffect } from "../../../core/skills/traits";
@@ -80,4 +81,18 @@ export function casterTypesDisabled(
     result[type] = ofType.length > 0 && ofType.every((c) => c.castingDisabled === true);
   }
   return result;
+}
+
+/** SP12 Plan A: the first race item's subrace XP surcharge percent (0 with none). */
+export function raceXpPercentOf(items: Iterable<{ type: string; system: unknown }>): number {
+  for (const item of items) {
+    if (item.type === "race") return normalizeSubrace((item.system as { subrace?: RawSubrace }).subrace).xpModifierPercent;
+  }
+  return 0;
+}
+
+/** SP12 Plan A: the XP-per-level percentage for a class — its kit's percent plus the race's subrace surcharge. The single helper behind every level lookup. */
+export function actorXpPercentFor(items: Iterable<ItemLike>, chassisId: string): number {
+  const all = [...items];
+  return combineXpPercent(kitXpPercentFor(activeKitEntries(all), chassisId), raceXpPercentOf(all));
 }

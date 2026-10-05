@@ -4,7 +4,7 @@
 import type {
   ActorSnapshot, ClassEntry, DualClassState, EquippedArmor, EquippedShield, MemorizedEntry,
 } from "../derive/character";
-import { normalizeSubrace, type RawSubrace } from "../../core/races";
+import { combineXpPercent, normalizeSubrace, type RawSubrace } from "../../core/races";
 import type { ClassId, Race, ThiefSkill, WizardSchool } from "../../core/types";
 import { toTraitEntries } from "../derive/character";
 import { activeKitEntries } from "../derive/character/kits";
@@ -58,6 +58,7 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
   const raceItem = items.find((i) => i.type === "race");
 
   const kitEntries = activeKitEntries(items);
+  const racePercent = raceItem ? normalizeSubrace((raceItem.system as RaceItemSystem).subrace).xpModifierPercent : 0;
   const classes: ClassEntry[] = items
     .filter((i) => i.type === "class")
     .map((i) => {
@@ -69,7 +70,7 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
         hpRolls: s.hpRolls,
         dualClassState: s.dualClassState,
         level: s.level ?? 1,
-        xpModifierPercent: kitXpPercentFor(kitEntries, s.chassisId),
+        xpModifierPercent: combineXpPercent(kitXpPercentFor(kitEntries, s.chassisId), racePercent),
         castingDisabled: resolveKitOverrides(kitEntries, s.chassisId).castingDisabled,
       };
     });

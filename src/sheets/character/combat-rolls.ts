@@ -19,8 +19,7 @@ import { weaponMasteryEffect } from "../../core/proficiencies/weapon-mastery";
 import { canBackstab } from "../../core/weapons/backstab";
 import { backstabMultiplier } from "../../core/proficiencies/thief-skills";
 import { classItemLevel } from "../../data/derive/class-item";
-import { activeKitEntries } from "../../data/derive/character/kits";
-import { kitXpPercentFor } from "../../core/kits";
+import { actorXpPercentFor } from "../../data/derive/character/kits";
 import { criticalSeverity, fumbleSeverity } from "../../combat/critical";
 import { toArmorGroup, weaponVsArmorModifier } from "../../combat/weapon-vs-armor";
 import { getOptionalRules } from "../../settings";
@@ -210,7 +209,7 @@ function resolveProficiencyModifier(actor: AttackerActor, weapon: WeaponItemHand
  *  `primaryClassLevel`, kept as an independent re-derivation per this
  *  plan's established duplicate-re-validation pattern. */
 function resolveThiefBackstabInfo(actor: AttackerActor): { isThief: boolean; thiefLevel: number } {
-  const percent = kitXpPercentFor(activeKitEntries(actor.items), "thief");
+  const percent = actorXpPercentFor(actor.items, "thief");
   for (const item of actor.items) {
     if (item.type !== "class") continue;
     const s = item.system as { chassisId?: string; xp?: number };
