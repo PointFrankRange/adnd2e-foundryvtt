@@ -24,22 +24,29 @@ const KEYS: AbilityKey[] = ["str", "dex", "con", "int", "wis", "cha"];
 
 // Adds the racial deltas but does NOT clamp — the delta is all that changes.
 // Use this on every derive (magic items can push STR to 19-25; drain can drop scores).
-export function applyRacialDeltas(raw: AbilityScores, race: Race): AbilityScores {
-  const deltas = RACIAL_ABILITY_ADJUSTMENTS[race];
+export function applyRacialDeltas(
+  raw: AbilityScores,
+  race: Race,
+  adjustments: Partial<Record<AbilityKey, number>> = RACIAL_ABILITY_ADJUSTMENTS[race],
+): AbilityScores {
   const out = {} as AbilityScores;
   for (const k of KEYS) {
-    out[k] = raw[k] + (deltas[k] ?? 0);
+    out[k] = raw[k] + (adjustments[k] ?? 0);
   }
   return out;
 }
 
 // Character-creation rule: adds the racial deltas AND clamps to Table 7 min/max.
-export function applyRacialAdjustments(raw: AbilityScores, race: Race): AbilityScores {
-  const limits = RACIAL_ABILITY_LIMITS[race];
-  const deltaed = applyRacialDeltas(raw, race);
+export function applyRacialAdjustments(
+  raw: AbilityScores,
+  race: Race,
+  adjustments?: Partial<Record<AbilityKey, number>>,
+  ranges: Record<AbilityKey, [number, number]> = RACIAL_ABILITY_LIMITS[race],
+): AbilityScores {
+  const deltaed = applyRacialDeltas(raw, race, adjustments);
   const out = {} as AbilityScores;
   for (const k of KEYS) {
-    const [lo, hi] = limits[k];
+    const [lo, hi] = ranges[k];
     out[k] = Math.min(hi, Math.max(lo, deltaed[k]));
   }
   return out;

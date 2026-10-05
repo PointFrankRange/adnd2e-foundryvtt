@@ -274,6 +274,17 @@ describe("thiefSkillBaseScore()", () => {
       thiefSkillBaseScore("pick-pockets", { race: "human", dexterity: 9, armor: "padded-studded" }),
     ).toBe(15 - 15 - 30); // 15 base, DEX 9 -15, armor -30 = -30
   });
+
+  it("an explicit racialAdjustments table replaces the race lookup (SP12 Plan A)", () => {
+    const deepDwarf = { "pick-pockets": 5, "open-locks": 0, "find-remove-traps": 10, "move-silently": 0, "hide-in-shadows": 5, "detect-noise": 0, "climb-walls": -10, "read-languages": -15 };
+    const ctx = { race: "dwarf" as const, dexterity: 13, armor: "none" as const };
+    expect(thiefSkillBaseScore("pick-pockets", { ...ctx, racialAdjustments: deepDwarf })).toBe(
+      thiefSkillBaseScore("pick-pockets", ctx) + 5, // PHB dwarf pick pockets is 0, the override is +5
+    );
+    expect(thiefSkillBaseScore("open-locks", { ...ctx, racialAdjustments: deepDwarf })).toBe(
+      thiefSkillBaseScore("open-locks", ctx) - 10, // PHB dwarf +10 -> override 0
+    );
+  });
 });
 
 describe("resolveThiefSkill()", () => {
@@ -380,6 +391,13 @@ describe("bard thieving skills (PHB Table 33)", () => {
     expect(
       bardSkillBaseScore("pick-pockets", { race: "human", dexterity: 9, armor: "padded-studded" }),
     ).toBe(-35);
+  });
+  it("an explicit racialAdjustments table replaces the race lookup in bardSkillBaseScore (SP12 Plan A)", () => {
+    const deepDwarf = { "pick-pockets": 5, "open-locks": 0, "find-remove-traps": 10, "move-silently": 0, "hide-in-shadows": 5, "detect-noise": 0, "climb-walls": -10, "read-languages": -15 };
+    const ctx = { race: "dwarf" as const, dexterity: 13, armor: "none" as const };
+    expect(bardSkillBaseScore("pick-pockets", { ...ctx, racialAdjustments: deepDwarf })).toBe(
+      bardSkillBaseScore("pick-pockets", ctx) + 5, // PHB dwarf pick pockets is 0, the override is +5
+    );
   });
   it("rejects a bad level", () => {
     expect(() => bardSkillPointsAvailable(0)).toThrow(RangeError);

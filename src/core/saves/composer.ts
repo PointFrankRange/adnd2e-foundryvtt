@@ -20,6 +20,8 @@ export interface SaveTargetInput {
   dexDefensiveAdj: number;
   tags?: readonly SaveEffectTag[];
   situationalModifier?: number;
+  /** SP12 Plan A subrace Constitution-save adjustment */
+  racialSaveAdjustment?: number;
 }
 
 export interface SaveTargetBestInput {
@@ -32,6 +34,8 @@ export interface SaveTargetBestInput {
   dexDefensiveAdj: number;
   tags?: readonly SaveEffectTag[];
   situationalModifier?: number;
+  /** SP12 Plan A subrace Constitution-save adjustment */
+  racialSaveAdjustment?: number;
 }
 
 export interface SaveTargetResult {
@@ -60,7 +64,7 @@ export function saveTargetBest(input: SaveTargetBestInput): SaveTargetResult {
   const base = Math.min(
     ...input.groups.map((g) => saveBaseTarget(g.group, g.level, input.category)),
   );
-  const racialConBonus = racialSaveBonus(input.race, input.category, input.con, tags);
+  const racialConBonus = racialSaveBonus(input.race, input.category, input.con, tags, input.racialSaveAdjustment ?? 0);
   const wisdomMagicalDefense = tags.includes("mind-affecting") ? input.wisMagicalDefenseAdj : 0;
   const dexterityDefensive =
     tags.includes("dodgeable") || input.category === "bw" ? -input.dexDefensiveAdj : 0;
@@ -89,5 +93,6 @@ export function saveTarget(input: SaveTargetInput): SaveTargetResult {
     dexDefensiveAdj: input.dexDefensiveAdj,
     tags: input.tags,
     situationalModifier: input.situationalModifier,
+    racialSaveAdjustment: input.racialSaveAdjustment,
   });
 }

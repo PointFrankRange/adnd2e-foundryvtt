@@ -35,19 +35,22 @@ const RACIAL_SAVE_CATEGORIES: Record<Race, ReadonlySet<SaveCategory | "poison">>
  * The PHB Table 9 bonus this race gets on a saving throw of this category, or 0
  * if the race does not qualify. Dwarves/halflings: rod-staff-wand, spell, and
  * poison (a `ppd` save tagged "poison"). Gnomes: rod-staff-wand and spell only.
+ * `extra` is a subrace's Constitution-save adjustment (SP12 Plan A), added only where
+ * the race qualifies.
  */
 export function racialSaveBonus(
   race: Race,
   category: SaveCategory,
   con: number,
   tags: readonly SaveEffectTag[] = [],
+  extra = 0,
 ): number {
   assertAbilityScore(con, "con");
   const applicable = RACIAL_SAVE_CATEGORIES[race];
   const matches =
     applicable.has(category) ||
     (category === "ppd" && tags.includes("poison") && applicable.has("poison"));
-  return matches ? racialConSaveBonus(con) : 0;
+  return matches ? racialConSaveBonus(con) + extra : 0;
 }
 
 /**

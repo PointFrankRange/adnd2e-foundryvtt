@@ -86,6 +86,19 @@ describe("saveTarget()", () => {
   it("rejects invalid CON even for a non-qualifying race (via racialSaveBonus)", () => {
     expect(() => saveTarget({ ...base, category: "spell", con: 999 })).toThrow(RangeError);
   });
+
+  it("racialSaveAdjustment adds to the racial CON bonus where the race qualifies (SP12 Plan A)", () => {
+    const r = saveTarget({
+      group: "warrior", level: 3, category: "spell", race: "dwarf", con: 15,
+      wisMagicalDefenseAdj: 0, dexDefensiveAdj: 0,
+    });
+    expect(r.breakdown.racialConBonus).toBe(4);
+    const rWithAdj = saveTarget({
+      group: "warrior", level: 3, category: "spell", race: "dwarf", con: 15,
+      wisMagicalDefenseAdj: 0, dexDefensiveAdj: 0, racialSaveAdjustment: 1,
+    });
+    expect(rWithAdj.breakdown.racialConBonus).toBe(5);
+  });
 });
 
 describe("saveTargetBest", () => {
