@@ -168,3 +168,42 @@ describe("validateItemDrop — trait drops (SP8 Plan 8c)", () => {
     expect(validateItemDrop({ ...trait, availableCp: 0 })).toEqual({ ok: true });
   });
 });
+
+describe("kit drops (SP11)", () => {
+  const base = { hasRace: true, existingChassisIds: ["fighter"], dropType: "kit", dropKitChassisId: "fighter" };
+  it("accepts a qualifying kit for an owned class", () => {
+    expect(validateItemDrop({ ...base, existingKitChassisIds: [], kitQualifies: { ok: true } })).toEqual({ ok: true });
+  });
+  it("rejects a kit whose class the actor does not have", () => {
+    expect(validateItemDrop({ ...base, dropKitChassisId: "mage" })).toEqual({ ok: false, reason: "ADND2E.sheet.drop.kitNoClass" });
+  });
+  it("rejects a second kit for the same class", () => {
+    expect(validateItemDrop({ ...base, existingKitChassisIds: ["fighter"], kitQualifies: { ok: true } })).toEqual({
+      ok: false, reason: "ADND2E.sheet.drop.kitDuplicate",
+    });
+  });
+  it("rejects unmet qualifications with that reason", () => {
+    expect(validateItemDrop({ ...base, existingKitChassisIds: [], kitQualifies: { ok: false, reason: "ADND2E.sheet.drop.kitAbility" } })).toEqual({
+      ok: false, reason: "ADND2E.sheet.drop.kitAbility",
+    });
+  });
+});
+
+describe("kit-forbidden weapon proficiencies (SP11)", () => {
+  it("rejects a forbidden proficiency before slot checks", () => {
+    expect(
+      validateItemDrop({
+        dropType: "weaponProficiency", hasRace: true, existingChassisIds: ["mage"], dropWeaponOrGroup: "Long Bow",
+        dropIsGroup: false, dropSlotCost: 1, availableSlots: 5, kitForbidsProficiency: true,
+      }),
+    ).toEqual({ ok: false, reason: "ADND2E.sheet.drop.kitForbiddenProficiency" });
+  });
+  it("is unaffected when no kit forbids it", () => {
+    expect(
+      validateItemDrop({
+        dropType: "weaponProficiency", hasRace: true, existingChassisIds: ["mage"], dropWeaponOrGroup: "Dagger",
+        dropIsGroup: false, dropSlotCost: 1, availableSlots: 5,
+      }),
+    ).toEqual({ ok: true });
+  });
+});

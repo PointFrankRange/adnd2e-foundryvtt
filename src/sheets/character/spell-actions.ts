@@ -6,6 +6,8 @@ import { canAffordMemorize, spellPointsEnabled, spellsMemorizedAtLevel } from ".
 import { canLearnSpell, learnSpellRoll } from "../../core/magic/spellbook";
 import type { ClassId, IntelligenceModifiers, SphereName, WizardSchool } from "../../core/types";
 import { classItemLevel } from "../../data/derive/class-item";
+import { activeKitEntries } from "../../data/derive/character/kits";
+import { kitXpPercentFor } from "../../core/kits";
 import { WIZARD_SCHOOLS } from "../../data/item/choices";
 import { buildCastCardContext } from "../../magic/cast-card";
 import { buildLearnSpellCardContext } from "../../magic/learn-spell-card";
@@ -139,7 +141,7 @@ function findPriestLevel(actor: SpellcasterActor): number {
     if (item.type !== "class") continue;
     const chassisId = item.system.chassisId as ClassId | undefined;
     if (chassisId && isPriestSpellProgression(getChassis(chassisId).spellProgressionId)) {
-      return classItemLevel(chassisId, (item.system.xp as number | undefined) ?? 0);
+      return classItemLevel(chassisId, (item.system.xp as number | undefined) ?? 0, kitXpPercentFor(activeKitEntries(actor.items), chassisId));
     }
   }
   return 0;
@@ -176,7 +178,7 @@ function wizardCasterLevel(actor: SpellcasterActor): number {
     if (item.type !== "class") continue;
     const chassisId = item.system.chassisId as ClassId | undefined;
     if (chassisId && getChassis(chassisId).spellProgressionId === "wizard") {
-      return classItemLevel(chassisId, (item.system.xp as number | undefined) ?? 0);
+      return classItemLevel(chassisId, (item.system.xp as number | undefined) ?? 0, kitXpPercentFor(activeKitEntries(actor.items), chassisId));
     }
   }
   return 0;

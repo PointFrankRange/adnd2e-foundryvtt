@@ -14,7 +14,7 @@ describe("monsterDropVerdict", () => {
     expect([...MONSTER_ITEM_TYPES]).toEqual(["weapon", "armor", "equipment", "ammo", "spell"]);
     for (const t of MONSTER_ITEM_TYPES) expect(monsterDropVerdict(t)).toEqual({ ok: true });
   });
-  it.each(["class", "race", "weaponProficiency", "nonweaponProficiency", "trait", "classFeature", "condition", "bogus"])(
+  it.each(["class", "race", "weaponProficiency", "nonweaponProficiency", "trait", "kit", "classFeature", "condition", "bogus"])(
     "rejects %s",
     (t) => {
       expect(monsterDropVerdict(t)).toEqual({ ok: false, reason: "ADND2E.sheet.drop.monsterRejects" });

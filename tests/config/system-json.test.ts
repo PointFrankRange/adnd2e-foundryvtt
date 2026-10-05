@@ -14,10 +14,10 @@ describe("system.json documentTypes", () => {
     );
   });
 
-  it("declares the twelve Item subtypes (camelCase, no hyphens)", () => {
+  it("declares the thirteen Item subtypes (camelCase, no hyphens)", () => {
     expect(Object.keys(manifest.documentTypes.Item).sort()).toEqual(
       [
-        "ammo", "armor", "class", "classFeature", "condition", "equipment", "nonweaponProficiency",
+        "ammo", "armor", "class", "classFeature", "condition", "equipment", "kit", "nonweaponProficiency",
         "race", "spell", "trait", "weapon", "weaponProficiency",
       ].sort(),
     );
@@ -41,10 +41,10 @@ describe("system.json packFolders", () => {
     }
   });
 
-  it("ships the 7 Item compendium packs", () => {
-    expect(manifest.packs ?? []).toHaveLength(7);
+  it("ships the 8 Item compendium packs", () => {
+    expect(manifest.packs ?? []).toHaveLength(8);
     const names = (manifest.packs ?? []).map((p: unknown) => (p as Record<string, unknown>).name).sort();
-    expect(names).toEqual(["classes", "conditions", "nonweapon-proficiencies", "races", "traits", "weapon-proficiencies", "weapon-proficiency-groups"]);
+    expect(names).toEqual(["classes", "conditions", "kits", "nonweapon-proficiencies", "races", "traits", "weapon-proficiencies", "weapon-proficiency-groups"]);
   });
 });
 

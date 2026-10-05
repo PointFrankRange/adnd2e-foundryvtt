@@ -7,7 +7,7 @@ export function deriveClassLevels(
   classes: readonly ClassEntry[],
 ): { chassisId: ClassId; level: number; canLevelUp: boolean }[] {
   return classes.map((c) => {
-    const level = classItemLevel(c.chassisId, c.xp);
-    return { chassisId: c.chassisId, level, canLevelUp: classItemCanLevelUp(c.chassisId, c.xp, c.hpRolls.length) };
+    const level = classItemLevel(c.chassisId, c.xp, c.xpModifierPercent ?? 0);
+    return { chassisId: c.chassisId, level, canLevelUp: classItemCanLevelUp(c.chassisId, c.xp, c.hpRolls.length, c.xpModifierPercent ?? 0) };
   });
 }

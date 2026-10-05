@@ -1,14 +1,17 @@
+import { activeKitEntries, toKitEntries } from "../../data/derive/character/kits";
+import { kitForbidsProficiency, kitQualifies, kitXpPercentFor, type KitQualifications } from "../../core/kits";
+import { ABILITY_KEYS } from "../../data/item/choices";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
 import { getChassis } from "../../core/classes/chassis";
 import type { ManeuverId } from "../../core/combat/maneuvers";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
 import type { RawTraitEffect } from "../../core/skills/traits";
-import type { ArmorType, ClassId, NonweaponGroup, SaveCategory, ThiefSkill } from "../../core/types";
+import type { AbilityKey, Alignment, ArmorType, ClassId, NonweaponGroup, Race, SaveCategory, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
 import { tierForConditionId } from "../../core/magic/channeller-fatigue";
 import { rollAttack, rollSave } from "./combat-rolls";
-import { buildCharacterSheetContext } from "./context";
+import { buildCharacterSheetContext, traitTargetKey } from "./context";
 import type {
   ClassItemView,
   CharacterSheetInput,
@@ -20,7 +23,7 @@ import type {
   TraitItemView,
   WeaponProfView,
 } from "./context-types";
-import { validateItemDrop } from "./drop-rules";
+import { validateItemDrop, type DropCheckInput } from "./drop-rules";
 import { rollHitPoints } from "./hp-roll";
 import { resetTurnAttempt, turningPanel, turnUndead } from "./turning-actions";
 import { advanceWeaponMastery, allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill } from "./proficiency-actions";
@@ -33,6 +36,7 @@ import { seedSubAbilities } from "./sub-ability-actions";
 import { removeTrait, traitDropInputs, traitRefundCapped, type TraitDropInputs } from "./trait-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
 import { awardXpSplit } from "./xp";
+import { actorEquipmentRules, itemNotPermitted } from "../../data/derive/character/equipment-rules";
 import { bindSheetKit, clearSheetKit } from "../kit-dom";
 import { toggleFavoriteFlag } from "../kit-actions";
 
@@ -382,6 +386,21 @@ export class Adnd2eCharacterSheet extends Base {
     context.proseDisabled = !this.isEditable || !this.#unlocked;
     context.pcActions = true;
     context.turning = turningPanel(this.document as never);
+    const kitCfg = (CONFIG as unknown as { ADND2E: Record<string, Record<string, string>> }).ADND2E;
+    context.kits = activeKitEntries(
+      (this.document as unknown as { items: Iterable<{ id: string; name: string; type: string; system: unknown }> }).items,
+    ).map((k) => ({
+      id: k.id,
+      name: k.name,
+      chassisId: k.chassisId,
+      xpModifierPercent: k.xpModifierPercent,
+      effects: k.effects.map((e) => ({
+        kindKey: `ADND2E.sheet.kits.effectKinds.${e.kind}`,
+        targetKey: e.kind === "bonusHp" ? "" : traitTargetKey(e, { abilities: kitCfg.abilities, saves: kitCfg.saves }),
+        amount: e.amount > 0 ? `+${e.amount}` : String(e.amount),
+      })),
+      grantedFeatures: k.grantedFeatures,
+    }));
     // The SYSTEM DataModel's own schema — distinct from `context.fields`,
     // which DocumentSheetV2._prepareContext already exposes as the actor's
     // top-level (name/img/system/…) schema. Needed so biography.hbs can
@@ -426,6 +445,7 @@ export class Adnd2eCharacterSheet extends Base {
         ?.wizard?.spellbookItemIds ?? [],
     );
 
+    const kitEntries = activeKitEntries(items);
     const classItems: ClassItemView[] = [];
     let raceItem: RaceItemView | null = null;
     const physicalItems: PhysicalItemView[] = [];
@@ -435,10 +455,14 @@ export class Adnd2eCharacterSheet extends Base {
     const featureItems: FeatureItemView[] = [];
     const traitItems: TraitItemView[] = [];
 
+    const equipmentRules = actorEquipmentRules(items);
     for (const it of items) {
       switch (it.type) {
         case "class":
-          classItems.push(toClassView(it));
+          {
+            const view = toClassView(it);
+            classItems.push({ ...view, xpModifierPercent: kitXpPercentFor(kitEntries, view.chassisId) });
+          }
           break;
         case "race":
           raceItem ??= toRaceView(it);
@@ -447,7 +471,7 @@ export class Adnd2eCharacterSheet extends Base {
         case "armor":
         case "equipment":
         case "ammo":
-          physicalItems.push(toPhysicalView(it));
+          physicalItems.push({ ...toPhysicalView(it), restricted: Boolean((it.system as { equipped?: boolean }).equipped) && itemNotPermitted(equipmentRules, it) });
           break;
         case "weaponProficiency":
           weaponProfs.push(toWeaponProfView(it));
@@ -542,8 +566,14 @@ export class Adnd2eCharacterSheet extends Base {
     // excluding unconditionally would silently exclude the very duplicate
     // this check exists to catch (confirmed by dev-world testing: it did).
     const others = isNewDrop ? existing : existing.filter((i) => i.id !== dropped.id);
+    // Kits are PC-only; this sheet can also be opened on a Character NPC.
+    if (dropped.type === "kit" && (this.document as unknown as { type: string }).type === "npc") {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.drop.kitsPcOnly"));
+      return null;
+    }
     // Re-sorting an already-owned trait is not a purchase — never validated.
     if (dropped.type === "trait" && !isNewDrop) return super._onDropItem(event, item);
+    if (dropped.type === "kit" && !isNewDrop) return super._onDropItem(event, item);
     // Re-derived from the actor's CURRENT authored state + settings at drop time.
     const traitInputs: Partial<TraitDropInputs> =
       dropped.type === "trait" ? traitDropInputs(this.document as never, dropped as never) : {};
@@ -559,6 +589,30 @@ export class Adnd2eCharacterSheet extends Base {
         ? nonweaponSlotCost(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", firstClassId as never)
         : (dropped.system.slotCost ?? 1);
       availableSlots = actor.system.proficiencies.nonweapon.available;
+    }
+
+    let kitInputs: Partial<DropCheckInput> = {};
+    if (dropped.type === "kit") {
+      const sys = dropped.system as unknown as { chassisId: string; qualifications: KitQualifications };
+      const a = this.document as unknown as {
+        system: { abilities: Record<AbilityKey, { score: number }>; details: { alignment: Alignment } };
+      };
+      const raceItem = existing.find((i) => i.type === "race");
+      kitInputs = {
+        dropKitChassisId: sys.chassisId,
+        existingKitChassisIds: toKitEntries(others).map((k) => k.chassisId),
+        kitQualifies: kitQualifies(sys.qualifications, {
+          abilities: Object.fromEntries(ABILITY_KEYS.map((k) => [k, a.system.abilities[k].score])) as Record<AbilityKey, number>,
+          race: ((raceItem?.system as unknown as { raceId?: Race } | undefined)?.raceId ?? null) as Race | null,
+          alignment: a.system.details.alignment,
+        }),
+      };
+    } else if (dropped.type === "weaponProficiency") {
+      kitInputs = {
+        kitForbidsProficiency: activeKitEntries(existing).some((k) =>
+          kitForbidsProficiency(k.forbiddenWeaponProficiencies, dropped.system?.weaponOrGroup ?? ""),
+        ),
+      };
     }
 
     const verdict = validateItemDrop({
@@ -579,6 +633,7 @@ export class Adnd2eCharacterSheet extends Base {
       dropNonweaponName: dropped.name,
       existingNonweaponNames: others.filter((i) => i.type === "nonweaponProficiency").map((i) => i.name),
       ...traitInputs,
+      ...kitInputs,
     });
     if (!verdict.ok) {
       ui.notifications?.warn(game.i18n!.localize(verdict.reason!));

@@ -10,7 +10,7 @@
     {{#each section.rows as |r|}}
       <div class="kit-row" data-kit-row data-kit-name="{{r.item.name}}" data-item-id="{{r.item.id}}">
         <div class="kit-cells">
-          <span class="kit-name" data-kit-expand>{{#if r.item.img}}<img src="{{r.item.img}}" alt="">{{/if}}{{r.item.name}}</span>
+          <span class="kit-name" data-kit-expand>{{#if r.item.img}}<img src="{{r.item.img}}" alt="">{{/if}}{{r.item.name}}{{#if r.item.restricted}} <span class="kit-warn" title="{{localize 'ADND2E.sheet.equipment.notPermittedTip'}}">⚠</span>{{/if}}</span>
           <span>{{#if r.item.weapon}}{{adnd2eOrDash r.item.weapon.damageVsSM}} / {{adnd2eOrDash r.item.weapon.damageVsL}}{{/if}}</span>
           <span>{{r.item.totalWeight}}</span>
           <span>{{#if @root.adnd2e.lock.unlocked}}<input type="number" min="0" value="{{r.item.quantity}}" data-item-id="{{r.item.id}}" data-field="quantity" style="width:40px">{{else}}{{r.item.quantity}}{{/if}}</span>

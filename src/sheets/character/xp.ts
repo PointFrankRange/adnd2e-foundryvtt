@@ -1,5 +1,6 @@
 import { getChassis } from "../../core/classes/chassis";
 import { levelForXp, xpForLevel } from "../../core/classes/progression";
+import { scaleChassisXp } from "../../core/kits";
 import type { ClassId } from "../../core/types";
 
 export interface XpProgress {
@@ -14,8 +15,8 @@ export interface XpProgress {
 }
 
 /** Level + progress-to-next for an embedded class item's own xp total. */
-export function xpToNext(chassisId: ClassId, xp: number): XpProgress {
-  const chassis = getChassis(chassisId);
+export function xpToNext(chassisId: ClassId, xp: number, xpModifierPercent = 0): XpProgress {
+  const chassis = scaleChassisXp(getChassis(chassisId), xpModifierPercent);
   const level = levelForXp(chassis, xp);
   const bandStart = xpForLevel(chassis, level);
   // `next` is null once we are past the class's defined xp table (its top

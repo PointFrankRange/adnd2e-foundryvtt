@@ -12,3 +12,4 @@ export * from "./skills";
 export * from "./encumbrance";
 export * from "./weapons";
 export * from "./turning";
+export * from "./kits";

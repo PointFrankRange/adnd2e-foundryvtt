@@ -1,0 +1,26 @@
+{
+  "_id": "kSampleZealot003",
+  "_key": "!items!kSampleZealot003",
+  "name": "Sample Zealot",
+  "type": "kit",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "",
+    "chassisId": "cleric",
+    "qualifications": {
+      "abilityMinimums": { "str": 0, "dex": 0, "con": 0, "int": 0, "wis": 13, "cha": 0 },
+      "races": ["human", "half-elf"],
+      "alignments": ["lawful-good", "neutral-good"]
+    },
+    "xpModifierPercent": 20,
+    "effects": [
+      { "kind": "bonusHp", "ability": "", "save": "", "mode": "", "track": "", "amount": 2 }
+    ],
+    "equipment": {
+      "armor": { "mode": "inherit", "names": [] },
+      "weapons": { "mode": "extend", "names": ["spear"] }
+    },
+    "forbiddenWeaponProficiencies": [],
+    "grantedFeatures": []
+  }
+}

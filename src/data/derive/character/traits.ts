@@ -7,7 +7,7 @@
 import type { OptionalRules } from "../../../core/options";
 import { characterPointBuildEnabled } from "../../../core/skills/character-points";
 import {
-  toTraitEffect, traitEffectTotals, TRAIT_SAVE_CATEGORIES, type RawTraitEffect, type TraitTotals,
+  toTraitEffect, traitEffectTotals, TRAIT_SAVE_CATEGORIES, type RawTraitEffect, type TraitEffect, type TraitTotals,
 } from "../../../core/skills/traits";
 import type { CharacterDerived } from "./derive";
 import type { SlotBlock } from "./proficiencies";
@@ -25,12 +25,14 @@ export function toTraitEntries(items: Iterable<{ type: string; system: unknown }
   return out;
 }
 
-/** THE derive-side gate: all-zero totals while the rule is off, else the reduced trait effects. */
+/** THE derive-side gate for traits: all-zero trait totals while the rule is off. Kit effects (SP11) are NOT gated and are always added. */
 export function resolveTraitTotals(
   traits: readonly TraitEntry[],
   rules: Pick<OptionalRules, "skillsAndPowersEnabled" | "characterPointBuild">,
+  kitEffects: readonly TraitEffect[] = [],
 ): TraitTotals {
-  return traitEffectTotals(characterPointBuildEnabled(rules) ? traits.map((t) => t.effect) : []);
+  const gated = characterPointBuildEnabled(rules) ? traits.map((t) => t.effect) : [];
+  return traitEffectTotals([...gated, ...kitEffects]);
 }
 
 /**

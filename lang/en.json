@@ -177,6 +177,10 @@
       "doneWithFailures": "AD&D 2E: imported {created} of {total} document(s); {failed} failed — see the console."
     },
     "sheet": {
+      "equipment": {
+        "notPermitted": "{item} isn't permitted for this character's class or kit. It still equips — the GM decides.",
+        "notPermittedTip": "Not permitted for this character's class or kit"
+      },
       "turning": {
         "title": "Turn Undead",
         "level": "Turning level",
@@ -248,6 +252,18 @@
         "spellImmunityFromScore": { "short": "Sp Imm", "long": "Spell Immunity" },
         "maxHenchmen": { "short": "Hench", "long": "Maximum Henchmen" },
         "loyaltyBase": { "short": "Loyal", "long": "Loyalty Base" }
+      },
+      "kits": {
+        "title": "Kits",
+        "xp": "XP per level",
+        "features": "Granted features",
+        "effectKinds": {
+          "abilityBonus": "Ability",
+          "saveBonus": "Save",
+          "attackBonus": "To-hit",
+          "proficiencySlots": "Proficiency slots",
+          "bonusHp": "Bonus HP"
+        }
       },
       "traits": {
         "title": "Character Points & Traits",
@@ -326,6 +342,13 @@
         "insufficientCp": "Not enough character points for that trait.",
         "traitsDisabled": "Traits are only used while the Skills & Powers character-point build rule is on.",
         "traitsPcOnly": "Traits can only be added to a player character's sheet.",
+        "kitNoClass": "This kit modifies a class the character doesn't have.",
+        "kitDuplicate": "That class already has a kit.",
+        "kitAbility": "The character doesn't meet this kit's ability score minimums.",
+        "kitRace": "The character's race doesn't qualify for this kit.",
+        "kitAlignment": "The character's alignment doesn't qualify for this kit.",
+        "kitForbiddenProficiency": "A kit this character has forbids that weapon proficiency.",
+        "kitsPcOnly": "Kits can only be added to a player character sheet.",
         "monsterRejects": "A Monster NPC can carry weapons, armor, equipment and spells — not classes, races, proficiencies, traits or class features."
       },
       "xp": {
@@ -855,7 +878,8 @@
       "nonweaponProficiency": "Non-Weapon Proficiency",
       "classFeature": "Class Feature",
       "condition": "Condition",
-      "trait": "Trait"
+      "trait": "Trait",
+      "kit": "Kit"
     },
     "ActiveEffect": {
       "adnd2e": "AD&D 2E Effect"
