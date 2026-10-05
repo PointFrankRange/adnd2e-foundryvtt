@@ -11,6 +11,11 @@ export interface PowerParam {
   value: string;
 }
 
+export interface PowerBracket {
+  minLevel: number;
+  uses: number;
+}
+
 export interface KitPower {
   id: string;
   name: string;
@@ -19,6 +24,7 @@ export interface KitPower {
   per: PowerFrequency;
   scope: string;
   params: PowerParam[];
+  usesByLevel: PowerBracket[];
 }
 
 export type PowerUsage = Record<string, { used: number }>;
@@ -30,6 +36,7 @@ export interface RawPower {
   per?: unknown;
   scope?: unknown;
   params?: unknown;
+  usesByLevel?: unknown;
 }
 
 /** Slug ids: no "." (they appear in dotted update paths) and no ":" (the key separator). */
@@ -50,6 +57,20 @@ function normalizeParams(raw: unknown): PowerParam[] {
   return out;
 }
 
+function normalizeBrackets(raw: unknown): PowerBracket[] {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<number>();
+  const out: PowerBracket[] = [];
+  for (const b of raw as { minLevel?: unknown; uses?: unknown }[]) {
+    if (!b || typeof b.minLevel !== "number" || !Number.isInteger(b.minLevel) || b.minLevel < 1) continue;
+    if (typeof b.uses !== "number" || !Number.isInteger(b.uses) || b.uses < 0) continue;
+    if (seen.has(b.minLevel)) continue;
+    seen.add(b.minLevel);
+    out.push({ minLevel: b.minLevel, uses: b.uses });
+  }
+  return out.sort((a, b) => a.minLevel - b.minLevel);
+}
+
 /** Lenient read, like a malformed trait effect: a bad power is dropped (inert).
  *  Afterwards at-will ⇔ `per === "at-will"` ⇔ `uses === 0`. */
 export function normalizePowers(raw: readonly RawPower[]): KitPower[] {
@@ -59,16 +80,20 @@ export function normalizePowers(raw: readonly RawPower[]): KitPower[] {
     if (typeof p.id !== "string" || !SLUG.test(p.id) || seen.has(p.id)) continue;
     if (typeof p.name !== "string" || p.name === "") continue;
     if (!(POWER_FREQUENCIES as readonly unknown[]).includes(p.per)) continue;
+    const usesByLevel = normalizeBrackets(p.usesByLevel);
+    if (usesByLevel.length > 0 && p.per === "at-will") continue;
     seen.add(p.id);
+    const scaled = usesByLevel.length > 0;
     const finite = typeof p.uses === "number" && Number.isInteger(p.uses) && p.uses > 0;
-    const atWill = !finite || p.per === "at-will";
+    const atWill = !scaled && (!finite || p.per === "at-will");
     out.push({
       id: p.id,
       name: p.name,
-      uses: atWill ? 0 : (p.uses as number),
+      uses: atWill || scaled ? 0 : (p.uses as number),
       per: atWill ? "at-will" : (p.per as PowerFrequency),
       scope: typeof p.scope === "string" ? p.scope : "",
       params: normalizeParams(p.params),
+      usesByLevel,
     });
   }
   return out;
@@ -79,18 +104,26 @@ export function usedCount(usage: PowerUsage, kitId: string, powerId: string): nu
   return typeof n === "number" && n > 0 ? n : 0;
 }
 
-export function powerRemaining(power: KitPower, used: number): number | null {
-  return power.per === "at-will" ? null : Math.max(0, power.uses - used);
+/** The uses available at this class level: the highest `usesByLevel` bracket at or below it (0 below the first), or the flat `uses` with no table. */
+export function powerUses(power: KitPower, classLevel: number): number {
+  if (power.usesByLevel.length === 0) return power.uses;
+  let uses = 0;
+  for (const b of power.usesByLevel) if (b.minLevel <= classLevel) uses = b.uses;
+  return uses;
 }
 
-export function canUsePower(power: KitPower, used: number): boolean {
-  const remaining = powerRemaining(power, used);
+export function powerRemaining(power: KitPower, used: number, classLevel = 1): number | null {
+  return power.per === "at-will" ? null : Math.max(0, powerUses(power, classLevel) - used);
+}
+
+export function canUsePower(power: KitPower, used: number, classLevel = 1): boolean {
+  const remaining = powerRemaining(power, used, classLevel);
   return remaining === null || remaining > 0;
 }
 
 /** The new `used` count after one use; at-will powers are never counted. */
-export function spendPower(power: KitPower, used: number): number {
-  return power.per === "at-will" || !canUsePower(power, used) ? used : used + 1;
+export function spendPower(power: KitPower, used: number, classLevel = 1): number {
+  return power.per === "at-will" || !canUsePower(power, used, classLevel) ? used : used + 1;
 }
 
 export interface PowerRow {
@@ -105,23 +138,26 @@ export interface PowerRow {
   params: PowerParam[];
   canUse: boolean;
   canReset: boolean;
+  locked: boolean;
 }
 
-export function buildPowerRows(kitId: string, powers: readonly KitPower[], usage: PowerUsage): PowerRow[] {
+export function buildPowerRows(kitId: string, powers: readonly KitPower[], usage: PowerUsage, classLevel = 1): PowerRow[] {
   return powers.map((p) => {
     const used = usedCount(usage, kitId, p.id);
+    const uses = powerUses(p, classLevel);
     return {
       id: p.id,
       name: p.name,
       per: p.per,
       atWill: p.per === "at-will",
-      uses: p.uses,
+      uses,
       used,
-      remaining: powerRemaining(p, used),
+      remaining: powerRemaining(p, used, classLevel),
       scope: p.scope,
       params: p.params,
-      canUse: canUsePower(p, used),
+      canUse: canUsePower(p, used, classLevel),
       canReset: p.per !== "at-will" && used > 0,
+      locked: p.per !== "at-will" && uses === 0,
     };
   });
 }
@@ -166,6 +202,8 @@ export interface PowerUseCardInput {
   power: KitPower;
   /** Remaining uses AFTER this use; null for at-will. */
   remaining: number | null;
+  /** resolved uses at the class level; defaults to the power's flat uses */
+  uses?: number;
 }
 
 export interface PowerUseCardContext {
@@ -190,7 +228,7 @@ export function buildPowerUseCardContext(input: PowerUseCardInput): PowerUseCard
     params: power.params,
     atWill: power.per === "at-will",
     remaining: input.remaining,
-    uses: power.uses,
+    uses: input.uses ?? power.uses,
     perKey: `ADND2E.sheet.kits.per.${power.per}`,
   };
 }
