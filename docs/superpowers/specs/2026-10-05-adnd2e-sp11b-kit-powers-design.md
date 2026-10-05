@@ -23,7 +23,7 @@ Date: 2026-10-05. Source: the 2026-09 mechanics review, Tier 0 ("Generic charact
 - `scope`: string, may be blank (e.g. "mammals").
 - `params`: array of `{ key, value }` string pairs.
 
-Normalization is lenient on read: a power with a blank id, a duplicate id, or an invalid `per` is dropped (inert), like a malformed kit effect. `uses: 0` with a non-`at-will` `per` is treated as at-will.
+The schema itself rejects an invalid `per` (a `choices` field) or a negative/non-integer `uses`, so such a kit fails import as a per-document failure. Normalization is lenient on read for what the schema allows: a power with a blank, non-slug or duplicate id, or a blank name, is dropped (inert), like a malformed kit effect. Ids are lowercase slugs (`a-z`, `0-9`, `-`). `uses: 0` with a non-`at-will` `per` is treated as at-will.
 
 ## Per-actor tracking
 
@@ -64,4 +64,4 @@ Normalization is lenient on read: a power with a blank id, a duplicate id, or an
 
 - Pure tests: remaining/can-use/spend for finite and at-will powers; reset by `per`; row building including params; lenient-read drops (blank id, duplicate id, invalid `per`); stale-key handling.
 - Schema, drift and lang tests; the pack builds; `npm run test:coverage` (100% gate) before the PR.
-- Dev-world check, **including a non-GM player seat**: use a power to zero (button disables); reset one power; New day and New encounter; the spell Rest button resets day powers; delete the kit and confirm stale counters are gone; import a kit with an invalid `per`; Character NPC sheet if included.
+- Dev-world check, **including a non-GM player seat**: use a power to zero (button disables); reset one power; New day and New encounter; the spell Rest button resets day powers; delete the kit and confirm stale counters are gone; import a kit with a duplicate or non-slug power id (that power is hidden) and one with an invalid `per` (the import reports a per-document failure); Character NPC sheet if included.

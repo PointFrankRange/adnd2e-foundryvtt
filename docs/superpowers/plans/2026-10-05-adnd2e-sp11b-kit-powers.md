@@ -1045,7 +1045,7 @@ Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
   5. Use Riposte Reserve (3/encounter) on a fighter; **New encounter** resets it; **New day** does not.
   6. As a non-GM player seat: Use, Reset, New day all work and the chat card posts.
   7. Delete the kit (🗑) → its counters are gone (`actor.system.kitPowers` has no `<kitId>:` keys), no console errors; re-adding the kit shows fresh counts.
-  8. Import a kit whose power has an invalid `per` or a duplicate id → that power is simply not shown; the rest of the kit works.
+  8. Import a kit whose power has a duplicate id or a non-slug id such as `"Bad Id"` → that power is simply not shown; the rest of the kit works. Separately import one with `per: "yearly"` → the import reports a per-document failure without aborting the batch.
   9. The Character NPC and Monster NPC sheets still open without errors (they don't show the Kits panel).
 
 - [ ] **Step 4: Push and open the PR** (branch-finishing preference: always push + PR, never ask). PR body ends with `🤖 Generated with [Claude Code](https://claude.com/claude-code)`. Do NOT retry `gh pr merge` if blocked — ask the user to merge.

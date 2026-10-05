@@ -7,3 +7,5 @@ Three SAMPLE character kits that exercise the kit engine (SP11 Plan A). Plan B a
 | kSampleDuelist01 | Sample Duelist | fighter | ability minimum, XP modifier, an attack effect, armor `replace`, a tracked power |
 | kSampleHedgeMg02 | Sample Hedge Mage | mage | a save effect, armor and weapon `extend`, a forbidden proficiency |
 | kSampleZealot003 | Sample Zealot | cleric | race and alignment gates, bonus HP, weapon `extend`, a tracked power |
+
+Power ids (kit `powers[].id`) must be lowercase slugs (`a-z`, `0-9`, `-`) and unique within the kit; a power with any other id is silently hidden.
