@@ -21,6 +21,9 @@
       "weapons": { "mode": "inherit", "names": [] }
     },
     "forbiddenWeaponProficiencies": [],
-    "grantedFeatures": ["Sample Duelist Stance"]
+    "grantedFeatures": ["Sample Duelist Stance"],
+    "powers": [
+      { "id": "riposte-reserve", "name": "Riposte Reserve", "uses": 3, "per": "encounter", "scope": "melee", "params": [] }
+    ]
   }
 }
