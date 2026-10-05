@@ -479,12 +479,13 @@ export class Adnd2eCharacterSheet extends Base {
     const traitItems: TraitItemView[] = [];
 
     const equipmentRules = actorEquipmentRules(items);
+    const raceXpPct = raceXpPercentOf(items);
     for (const it of items) {
       switch (it.type) {
         case "class":
           {
             const view = toClassView(it);
-            classItems.push({ ...view, xpModifierPercent: combineXpPercent(kitXpPercentFor(kitEntries, view.chassisId), raceXpPercentOf(items)) });
+            classItems.push({ ...view, xpModifierPercent: combineXpPercent(kitXpPercentFor(kitEntries, view.chassisId), raceXpPct) });
           }
           break;
         case "race":
@@ -687,11 +688,12 @@ export class Adnd2eCharacterSheet extends Base {
       const a = this.document as unknown as { system: { abilities: Record<AbilityKey, { score: number }> } };
       const raw = Object.fromEntries(ABILITY_KEYS.map((k) => [k, a.system.abilities[k].score])) as unknown as AbilityScores;
       const adjusted = applyRacialDeltas(raw, raceId, effectiveAbilityAdjustments(raceId, layer));
+      // Approximation: this uses the prepared ability scores, which may already include trait/effect modifiers. It only warns, never blocks.
       const problems = abilityRangeProblems(adjusted, effectiveAbilityRanges(raceId, layer));
       if (problems.length > 0) {
         ui.notifications?.warn(
           game.i18n!.format("ADND2E.sheet.drop.subraceRangeWarning", {
-            abilities: problems.map((k) => (CONFIG as unknown as { ADND2E: { abilities: Record<string, string> } }).ADND2E.abilities[k]).join(", "),
+            abilities: problems.map((k) => game.i18n!.localize((CONFIG as unknown as { ADND2E: { abilities: Record<string, string> } }).ADND2E.abilities[k]!)).join(", "),
           }),
         );
       }

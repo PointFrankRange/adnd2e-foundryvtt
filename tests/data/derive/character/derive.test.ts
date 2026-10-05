@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { deriveCharacter } from "../../../../src/data/derive/character/derive";
 import type { ActorSnapshot } from "../../../../src/data/derive/character/snapshot";
 import { DEFAULT_OPTIONAL_RULES } from "../../../../src/core/options";
+import { normalizeSubrace } from "../../../../src/core/races";
 
 const base: ActorSnapshot = {
   abilities: { str: 12, dex: 12, con: 12, int: 12, wis: 12, cha: 12 },
@@ -386,5 +387,7 @@ describe("deriveCharacter — subrace layer (SP12 Plan A)", () => {
   it("no layer or the inherit layer leaves the derive unchanged", () => {
     const plain = deriveCharacter(dwarfFighter, DEFAULT_OPTIONAL_RULES);
     expect(deriveCharacter({ ...dwarfFighter, raceLayer: null }, DEFAULT_OPTIONAL_RULES)).toEqual(plain);
+    expect(deriveCharacter({ ...dwarfFighter, raceLayer: normalizeSubrace({}) }, DEFAULT_OPTIONAL_RULES)).toEqual(plain);
+    expect(deriveCharacter({ ...dwarfFighter }, DEFAULT_OPTIONAL_RULES)).toEqual(plain);
   });
 });

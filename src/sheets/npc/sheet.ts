@@ -1,4 +1,5 @@
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
+import { actorXpPercentFor } from "../../data/derive/character/kits";
 import type { ManeuverId } from "../../core/combat/maneuvers";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
 import type { NonweaponGroup, ThiefSkill } from "../../core/types";
@@ -226,7 +227,10 @@ export class Adnd2eNpcSheet extends Base {
     for (const it of items) {
       switch (it.type) {
         case "class":
-          classItems.push(toClassView(it));
+          {
+            const view = toClassView(it);
+            classItems.push({ ...view, xpModifierPercent: actorXpPercentFor(items, view.chassisId) });
+          }
           break;
         case "race":
           raceItem ??= toRaceView(it);

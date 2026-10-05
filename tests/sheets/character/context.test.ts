@@ -3301,6 +3301,11 @@ describe("buildCharacterSheetContext — subrace layer (SP12 Plan A)", () => {
     expect(layered - plain).toBe(5);
   });
 
+  it("a class view's xpModifierPercent scales the header threshold (SP12 Plan A)", () => {
+    const next = (pct: number) => buildCharacterSheetContext(input({ classItems: [{ ...thiefClass, xpModifierPercent: pct }] as never })).classes[0]!.nextThreshold;
+    expect(next(20)).toBe(Math.ceil(next(0)! * 1.2));
+  });
+
   it("features.racialXpPercent carries the subrace XP surcharge, 0 otherwise", () => {
     const layer = { ...baseLayer, id: "duergar", xpModifierPercent: 20 };
     const feat = (raceItem: unknown) => buildCharacterSheetContext(input({ raceItem: raceItem as never })).features;

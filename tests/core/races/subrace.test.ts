@@ -108,6 +108,7 @@ describe("combineXpPercent", () => {
   it("adds the kit and race surcharges", () => {
     expect(combineXpPercent(10, 20)).toBe(30);
     expect(combineXpPercent(0, 0)).toBe(0);
+    expect(combineXpPercent(-90, -20)).toBe(-90);
     expect(combineXpPercent(-10, 10)).toBe(0);
   });
 });

@@ -104,7 +104,7 @@ export function abilityRangeProblems(scores: AbilityScores, ranges: AbilityRange
   return ABILITIES.filter((k) => scores[k] < ranges[k][0] || scores[k] > ranges[k][1]);
 }
 
-/** A kit's XP percentage plus the subrace's: surcharges add. */
+/** A kit's XP percentage plus the subrace's: surcharges add, clamped at -90 (each input is schema-bounded at -90 but their sum is not). */
 export function combineXpPercent(kitPercent: number, racePercent: number): number {
-  return kitPercent + racePercent;
+  return Math.max(-90, kitPercent + racePercent);
 }

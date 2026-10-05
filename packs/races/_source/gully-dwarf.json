@@ -37,7 +37,7 @@
     ],
     "grantedFeatures": [
       "Gully: groveling",
-      "Gully: magic items fail 40%"
+      "Gully: magic items may fail"
     ],
     "subrace": {
       "id": "gully-dwarf",
