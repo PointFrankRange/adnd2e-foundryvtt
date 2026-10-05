@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { CLASS_IDS, RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
-import { EQUIPMENT_MODES, normalizePowers } from "../../src/core/kits";
+import { EQUIPMENT_MODES, normalizePowers, normalizeOverrides, powerUses, TURNING_MODES, CASTING_MODES } from "../../src/core/kits";
 import { TRAITS, toTraitEffect, type RawTraitEffect } from "../../src/core/skills/traits";
 
 const ROOT = path.resolve(__dirname, "..", "..");
@@ -172,10 +172,10 @@ describe("traits pack content (drift-tested against the pure TRAITS table)", () 
 describe("kits pack content", () => {
   const items = docs("kits");
 
-  it("has three uniquely named and identified kit Items", () => {
-    expect(items).toHaveLength(3);
-    expect(new Set(items.map((d) => d._id)).size).toBe(3);
-    expect(new Set(items.map((d) => d.name)).size).toBe(3);
+  it("has four uniquely named and identified kit Items", () => {
+    expect(items).toHaveLength(4);
+    expect(new Set(items.map((d) => d._id)).size).toBe(4);
+    expect(new Set(items.map((d) => d.name)).size).toBe(4);
     for (const d of items) {
       expect(d.type, String(d.name)).toBe("kit");
       expect(String(d._id)).toHaveLength(16);
@@ -219,5 +219,22 @@ describe("kits pack content", () => {
     }
     expect(finite).toBeGreaterThan(0);
     expect(atWill).toBeGreaterThan(0);
+  });
+
+  it("the Sample Ghosthunter exercises casting-off, turning offset, removed abilities and level-scaled powers", () => {
+    const ghost = items.find((d) => d.name === "Sample Ghosthunter");
+    expect(ghost).toBeDefined();
+    const s = sys(ghost!) as { chassisId: string; overrides: unknown; powers: unknown[] };
+    expect(s.chassisId).toBe("paladin");
+    const o = normalizeOverrides(s.overrides as never);
+    expect(o).toEqual({ casting: "none", turning: { mode: "offset", offset: 0 }, removedAbilities: ["Laying on hands", "Immunity to disease", "Curing diseases"] });
+    expect(CASTING_MODES as readonly string[]).toContain(o.casting);
+    expect(TURNING_MODES as readonly string[]).toContain(o.turning.mode);
+    const powers = normalizePowers(s.powers as never);
+    expect(powers).toHaveLength(s.powers.length);
+    const dispel = powers.find((p) => p.id === "dispel-evil")!;
+    const remove = powers.find((p) => p.id === "remove-paralysis")!;
+    expect([1, 5, 10, 15, 20].map((l) => powerUses(dispel, l))).toEqual([0, 1, 2, 3, 4]);
+    expect([1, 5, 10, 15, 20].map((l) => powerUses(remove, l))).toEqual([3, 4, 5, 6, 7]);
   });
 });
