@@ -36,6 +36,7 @@ import { seedSubAbilities } from "./sub-ability-actions";
 import { removeTrait, traitDropInputs, traitRefundCapped, type TraitDropInputs } from "./trait-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
 import { awardXpSplit } from "./xp";
+import { actorEquipmentRules, itemNotPermitted } from "../../data/derive/character/equipment-rules";
 import { bindSheetKit, clearSheetKit } from "../kit-dom";
 import { toggleFavoriteFlag } from "../kit-actions";
 
@@ -439,6 +440,7 @@ export class Adnd2eCharacterSheet extends Base {
     const featureItems: FeatureItemView[] = [];
     const traitItems: TraitItemView[] = [];
 
+    const equipmentRules = actorEquipmentRules(items);
     for (const it of items) {
       switch (it.type) {
         case "class":
@@ -454,7 +456,7 @@ export class Adnd2eCharacterSheet extends Base {
         case "armor":
         case "equipment":
         case "ammo":
-          physicalItems.push(toPhysicalView(it));
+          physicalItems.push({ ...toPhysicalView(it), restricted: Boolean((it.system as { equipped?: boolean }).equipped) && itemNotPermitted(equipmentRules, it) });
           break;
         case "weaponProficiency":
           weaponProfs.push(toWeaponProfView(it));

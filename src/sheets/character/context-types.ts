@@ -181,6 +181,8 @@ export interface PhysicalItemView {
   id: string; name: string; img: string; type: "weapon" | "armor" | "equipment" | "ammo";
   quantity: number; weight: number; totalWeight: number;
   location: string; equipped: boolean; identified: boolean; magicBonus: number;
+  /** SP11: equipped but not permitted by the class or kit — shows a warning mark (never set on unequipped items) */
+  restricted?: boolean;
   /** equipment only */
   isContainer: boolean; capacity: number | null; contentsWeightMultiplier: number;
   /** weapon only — pre-derived display strings */

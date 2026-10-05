@@ -177,6 +177,10 @@
       "doneWithFailures": "AD&D 2E: imported {created} of {total} document(s); {failed} failed — see the console."
     },
     "sheet": {
+      "equipment": {
+        "notPermitted": "{item} isn't permitted for this character's class or kit. It still equips — the GM decides.",
+        "notPermittedTip": "Not permitted for this character's class or kit"
+      },
       "turning": {
         "title": "Turn Undead",
         "level": "Turning level",
