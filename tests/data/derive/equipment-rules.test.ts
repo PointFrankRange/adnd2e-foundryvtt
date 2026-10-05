@@ -45,4 +45,14 @@ describe("actorEquipmentRules / itemNotPermitted", () => {
     const rules = actorEquipmentRules([cls("mage")]);
     expect(itemNotPermitted(rules, { type: "equipment", system: {} })).toBe(false);
   });
+  it("a class item with an unknown chassis is ignored rather than throwing", () => {
+    const rules = actorEquipmentRules([cls("not-a-class")]);
+    expect(rules.armor).toEqual([]);
+    expect(itemNotPermitted(rules, armor("plate-mail"))).toBe(false);
+  });
+  it("a weapon item with no display name is matched by its base weapon name", () => {
+    const rules = actorEquipmentRules([cls("mage")]);
+    expect(itemNotPermitted(rules, { type: "weapon", system: { baseWeaponName: "Dagger", damageType: null } })).toBe(false);
+    expect(itemNotPermitted(rules, { type: "weapon", system: { baseWeaponName: "", damageType: null } })).toBe(true);
+  });
 });
