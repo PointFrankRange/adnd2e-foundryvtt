@@ -1,6 +1,6 @@
 import { Adnd2eItemModel } from "./base-item";
 import {
-  ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, KIT_EQUIPMENT_MODES, RACE_IDS, TRAIT_ATTACK_MODES, TRAIT_EFFECT_KINDS,
+  ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, KIT_EQUIPMENT_MODES, KIT_POWER_FREQUENCIES, RACE_IDS, TRAIT_ATTACK_MODES, TRAIT_EFFECT_KINDS,
   TRAIT_PROFICIENCY_TRACKS, TRAIT_SAVE_CATEGORIES,
 } from "./choices";
 
@@ -24,7 +24,7 @@ const equipmentOverride = () =>
  * malformed effect is inert). Equipment overrides: `inherit` keeps the class
  * rule, `replace` swaps it, `extend` adds to it; armor names are armor type
  * names ("studded leather", "shield"), weapon names are weapon names plus the
- * token "blunt".
+ * token "blunt". Plan B adds `powers`.
  */
 export class KitItemModel extends Adnd2eItemModel {
   static override defineSchema(): foundry.data.fields.DataSchema {
@@ -55,6 +55,24 @@ export class KitItemModel extends Adnd2eItemModel {
       equipment: new SchemaField({ armor: equipmentOverride(), weapons: equipmentOverride() }),
       forbiddenWeaponProficiencies: names(),
       grantedFeatures: names(),
+      /** SP11 Plan B: tracked powers. Definition only — use counts live on the actor (`system.kitPowers`). `toKitEntries` reads this leniently (a malformed power is dropped). */
+      powers: new ArrayField(
+        new SchemaField({
+          id: new StringField({ required: true, blank: true, initial: "" }),
+          name: new StringField({ required: true, blank: true, initial: "" }),
+          uses: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+          per: new StringField({ required: true, blank: false, initial: "day", choices: KIT_POWER_FREQUENCIES }),
+          scope: new StringField({ required: true, blank: true, initial: "" }),
+          params: new ArrayField(
+            new SchemaField({
+              key: new StringField({ required: true, blank: true, initial: "" }),
+              value: new StringField({ required: true, blank: true, initial: "" }),
+            }),
+            { required: true, initial: [] },
+          ),
+        }),
+        { required: true, initial: [] },
+      ),
     };
   }
 }

@@ -22,6 +22,7 @@ const kitItem = (over: Record<string, unknown> = {}) => ({
     equipment: { armor: { mode: "inherit", names: [] }, weapons: { mode: "inherit", names: [] } },
     forbiddenWeaponProficiencies: [],
     grantedFeatures: ["Stance"],
+    powers: [{ id: "shape", name: "Shapechange", uses: 2, per: "day", scope: "mammals", params: [] }, { id: "bad id", name: "X", uses: 1, per: "day" }],
     ...over,
   },
 });
@@ -36,6 +37,12 @@ describe("toKitEntries / activeKitEntries", () => {
     expect(k!.xpModifierPercent).toBe(25);
     expect(k!.effects).toEqual([{ kind: "attackBonus", mode: "melee", amount: 2 }]);
     expect(k!.grantedFeatures).toEqual(["Stance"]);
+    expect(k!.powers).toEqual([{ id: "shape", name: "Shapechange", uses: 2, per: "day", scope: "mammals", params: [] }]);
+  });
+  it("a kit item with no powers field reads as no powers", () => {
+    const item = kitItem();
+    delete (item.system as Record<string, unknown>).powers;
+    expect(toKitEntries([item])[0]!.powers).toEqual([]);
   });
   it("only kits whose class the actor owns are active", () => {
     expect(activeKitEntries([kitItem(), classItem("fighter")])).toHaveLength(1);
