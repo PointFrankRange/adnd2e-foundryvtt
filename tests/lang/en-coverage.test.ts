@@ -812,3 +812,17 @@ describe("lang/en.json — SP11 Plan C (kit casting off)", () => {
     }
   });
 });
+
+describe("lang/en.json — SP11 Plan C (kits panel overrides)", () => {
+  it("resolves the kit override display keys", () => {
+    for (const key of [
+      "ADND2E.sheet.kits.castingDisabled",
+      "ADND2E.sheet.kits.removed",
+      "ADND2E.sheet.kits.turning.offset",
+      "ADND2E.sheet.kits.turning.none",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

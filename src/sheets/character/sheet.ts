@@ -395,7 +395,9 @@ export class Adnd2eCharacterSheet extends Base {
     const kitUsage = (this.document as unknown as { system: { kitPowers?: PowerUsage } }).system.kitPowers ?? {};
     context.kits = activeKitEntries(
       (this.document as unknown as { items: Iterable<{ id: string; name: string; type: string; system: unknown }> }).items,
-    ).map((k) => ({
+    ).map((k) => {
+      const classLevel = ((this.document as unknown as { system: { classes?: { chassisId: string; level: number }[] } }).system.classes ?? []).find((c) => c.chassisId === k.chassisId)?.level ?? 1;
+      return {
       id: k.id,
       name: k.name,
       chassisId: k.chassisId,
@@ -406,8 +408,18 @@ export class Adnd2eCharacterSheet extends Base {
         amount: e.amount > 0 ? `+${e.amount}` : String(e.amount),
       })),
       grantedFeatures: k.grantedFeatures,
-      powers: buildPowerRows(k.id, k.powers, kitUsage).map((p) => ({ ...p, perKey: `ADND2E.sheet.kits.per.${p.per}` })),
-    }));
+      powers: buildPowerRows(k.id, k.powers, kitUsage, classLevel).map((p) => ({ ...p, perKey: `ADND2E.sheet.kits.per.${p.per}` })),
+      overrides: {
+        castingDisabled: k.overrides.casting === "none",
+        turningKey: k.overrides.turning.mode === "inherit" ? "" : `ADND2E.sheet.kits.turning.${k.overrides.turning.mode}`,
+        turningOffsetLabel:
+          k.overrides.turning.mode === "offset"
+            ? (k.overrides.turning.offset >= 0 ? `+${k.overrides.turning.offset}` : String(k.overrides.turning.offset))
+            : "",
+        removedAbilities: k.overrides.removedAbilities,
+      },
+      };
+    });
     // The SYSTEM DataModel's own schema — distinct from `context.fields`,
     // which DocumentSheetV2._prepareContext already exposes as the actor's
     // top-level (name/img/system/…) schema. Needed so biography.hbs can

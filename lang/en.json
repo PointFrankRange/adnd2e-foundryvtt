@@ -263,6 +263,12 @@
         "newDay": "New day",
         "newEncounter": "New encounter",
         "noUsesLeft": "No uses of that power remain.",
+        "castingDisabled": "Spellcasting disabled",
+        "removed": "Removed abilities",
+        "turning": {
+          "offset": "Turning level",
+          "none": "Cannot turn undead"
+        },
         "per": {
           "day": "per day",
           "week": "per week",
