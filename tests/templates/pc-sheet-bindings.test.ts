@@ -62,7 +62,7 @@ describe("PC sheet templates (sheet redesign R1)", () => {
   });
 });
 
-const PC_ONLY_ACTIONS = ["awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait"];
+const PC_ONLY_ACTIONS = ["awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait", "useKitPower", "resetKitPower", "newDayKitPowers", "newEncounterKitPowers"];
 
 describe("PC-only actions (sheet redesign R2)", () => {
   it("every PC template that renders a PC-only action gates it on @root.pcActions", () => {

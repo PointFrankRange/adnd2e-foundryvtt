@@ -87,6 +87,7 @@ export {
 } from "../../core/skills/traits";
 
 export { EQUIPMENT_MODES as KIT_EQUIPMENT_MODES } from "../../core/kits";
+export { POWER_FREQUENCIES as KIT_POWER_FREQUENCIES } from "../../core/kits";
 export { WEAPON_PROFICIENCY_GROUPS } from "../../core/proficiencies/weapon";
 export { SPECIALIST_WEAPON_CLASSES } from "../../core/weapons/specialist-attacks";
 

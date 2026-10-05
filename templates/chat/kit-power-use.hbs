@@ -1,0 +1,9 @@
+<div class="adnd2e chat-card kit-power-use">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} — {{powerName}}</h3>
+  </header>
+  {{#if scope}}<p class="scope">{{scope}}</p>{{/if}}
+  {{#each params}}<p class="param"><strong>{{this.key}}:</strong> {{this.value}}</p>{{/each}}
+  <p class="hint">{{#if atWill}}{{localize 'ADND2E.sheet.kits.per.at-will'}}{{else}}{{localize 'ADND2E.chat.kitPower.remaining'}}: {{remaining}} / {{uses}} {{localize perKey}}{{/if}}</p>
+</div>

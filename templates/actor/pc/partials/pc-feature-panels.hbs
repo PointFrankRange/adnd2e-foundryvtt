@@ -44,9 +44,26 @@
           <span class="effect">{{#if k.xpModifierPercent}}{{localize 'ADND2E.sheet.kits.xp'}} {{k.xpModifierPercent}}%{{/if}}</span>
           {{#each k.effects as |e|}}<span class="effect">{{localize e.kindKey}}{{#if e.targetKey}} {{localize e.targetKey}}{{/if}} {{e.amount}}</span>{{/each}}
           {{#if k.grantedFeatures.length}}<span class="effect">{{localize 'ADND2E.sheet.kits.features'}}: {{#each k.grantedFeatures}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</span>{{/if}}
+          {{#if k.powers.length}}
+            <div class="kit-powers">
+              <h5 class="kit-subhead">{{localize 'ADND2E.sheet.kits.powers'}}</h5>
+              {{#each k.powers as |p|}}
+                <div class="power-row" data-power-id="{{p.id}}">
+                  <span class="name">{{p.name}}</span>
+                  {{#if p.atWill}}<span class="uses">{{localize 'ADND2E.sheet.kits.per.at-will'}}</span>{{else}}<span class="uses">{{p.remaining}} / {{p.uses}} {{localize p.perKey}}</span>{{/if}}
+                  {{#if p.scope}}<span class="effect">{{p.scope}}</span>{{/if}}
+                  {{#each p.params as |q|}}<span class="effect">{{q.key}}: {{q.value}}</span>{{/each}}
+                  <button type="button" class="kit-small" data-action="useKitPower" data-kit-id="{{k.id}}" data-power-id="{{p.id}}"{{#unless p.canUse}} disabled{{/unless}}>{{localize 'ADND2E.sheet.kits.use'}}</button>
+                  {{#if p.canReset}}<button type="button" class="kit-small" data-action="resetKitPower" data-kit-id="{{k.id}}" data-power-id="{{p.id}}">{{localize 'ADND2E.sheet.kits.resetPower'}}</button>{{/if}}
+                </div>
+              {{/each}}
+            </div>
+          {{/if}}
           {{#if @root.adnd2e.lock.unlocked}}{{> adnd2e.item-controls id=k.id deletable=true}}{{/if}}
         </div>
       {{/each}}
+      <button type="button" class="kit-small" data-action="newDayKitPowers">{{localize 'ADND2E.sheet.kits.newDay'}}</button>
+      <button type="button" class="kit-small" data-action="newEncounterKitPowers">{{localize 'ADND2E.sheet.kits.newEncounter'}}</button>
     </div>
   </section>
   {{/if}}

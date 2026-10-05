@@ -1,5 +1,6 @@
 import { activeKitEntries, toKitEntries } from "../../data/derive/character/kits";
-import { kitForbidsProficiency, kitQualifies, kitXpPercentFor, type KitQualifications } from "../../core/kits";
+import { buildPowerRows, kitForbidsProficiency, kitQualifies, kitXpPercentFor, type KitQualifications, type PowerUsage } from "../../core/kits";
+import { resetKitPowers, resetPower, usePower } from "./kit-power-actions";
 import { ABILITY_KEYS } from "../../data/item/choices";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
@@ -345,6 +346,10 @@ export class Adnd2eCharacterSheet extends Base {
       rollThiefSkill: Adnd2eCharacterSheet.#onRollThiefSkill,
       turnUndead: Adnd2eCharacterSheet.#onTurnUndead,
       resetTurnAttempt: Adnd2eCharacterSheet.#onResetTurnAttempt,
+      useKitPower: Adnd2eCharacterSheet.#onUseKitPower,
+      resetKitPower: Adnd2eCharacterSheet.#onResetKitPower,
+      newDayKitPowers: Adnd2eCharacterSheet.#onNewDayKitPowers,
+      newEncounterKitPowers: Adnd2eCharacterSheet.#onNewEncounterKitPowers,
     },
   };
 
@@ -387,6 +392,7 @@ export class Adnd2eCharacterSheet extends Base {
     context.pcActions = true;
     context.turning = turningPanel(this.document as never);
     const kitCfg = (CONFIG as unknown as { ADND2E: Record<string, Record<string, string>> }).ADND2E;
+    const kitUsage = (this.document as unknown as { system: { kitPowers?: PowerUsage } }).system.kitPowers ?? {};
     context.kits = activeKitEntries(
       (this.document as unknown as { items: Iterable<{ id: string; name: string; type: string; system: unknown }> }).items,
     ).map((k) => ({
@@ -400,6 +406,7 @@ export class Adnd2eCharacterSheet extends Base {
         amount: e.amount > 0 ? `+${e.amount}` : String(e.amount),
       })),
       grantedFeatures: k.grantedFeatures,
+      powers: buildPowerRows(k.id, k.powers, kitUsage).map((p) => ({ ...p, perKey: `ADND2E.sheet.kits.per.${p.per}` })),
     }));
     // The SYSTEM DataModel's own schema — distinct from `context.fields`,
     // which DocumentSheetV2._prepareContext already exposes as the actor's
@@ -940,6 +947,25 @@ export class Adnd2eCharacterSheet extends Base {
 
   static async #onRestSpellcasting(this: Adnd2eCharacterSheet): Promise<void> {
     await restSpellcasting(this.document as never);
+    await resetKitPowers(this.document as never, "day");
+  }
+
+  static async #onUseKitPower(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const { kitId, powerId } = target.dataset;
+    if (kitId && powerId && this.isEditable) await usePower(this.document as never, kitId, powerId);
+  }
+
+  static async #onResetKitPower(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const { kitId, powerId } = target.dataset;
+    if (kitId && powerId && this.isEditable) await resetPower(this.document as never, kitId, powerId);
+  }
+
+  static async #onNewDayKitPowers(this: Adnd2eCharacterSheet): Promise<void> {
+    if (this.isEditable) await resetKitPowers(this.document as never, "day");
+  }
+
+  static async #onNewEncounterKitPowers(this: Adnd2eCharacterSheet): Promise<void> {
+    if (this.isEditable) await resetKitPowers(this.document as never, "encounter");
   }
 
   static async #onRecoverChannellerSp(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {

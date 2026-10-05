@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { CLASS_IDS, RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
-import { EQUIPMENT_MODES } from "../../src/core/kits";
+import { EQUIPMENT_MODES, normalizePowers } from "../../src/core/kits";
 import { TRAITS, toTraitEffect, type RawTraitEffect } from "../../src/core/skills/traits";
 
 const ROOT = path.resolve(__dirname, "..", "..");
@@ -202,5 +202,22 @@ describe("kits pack content", () => {
       expect(EQUIPMENT_MODES as readonly string[]).toContain(s.equipment.armor.mode);
       expect(EQUIPMENT_MODES as readonly string[]).toContain(s.equipment.weapons.mode);
     }
+  });
+
+  it("every kit's powers are well-formed and at least one kit ships a finite and an at-will power", () => {
+    let finite = 0;
+    let atWill = 0;
+    for (const d of items) {
+      const raw = (sys(d) as { powers: { id: string }[] }).powers;
+      expect(Array.isArray(raw), String(d.name)).toBe(true);
+      const kept = normalizePowers(raw);
+      expect(kept, `${String(d.name)} has a malformed or duplicate power`).toHaveLength(raw.length);
+      for (const p of kept) {
+        if (p.per === "at-will") atWill++;
+        else finite++;
+      }
+    }
+    expect(finite).toBeGreaterThan(0);
+    expect(atWill).toBeGreaterThan(0);
   });
 });

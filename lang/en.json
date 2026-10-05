@@ -257,6 +257,18 @@
         "title": "Kits",
         "xp": "XP per level",
         "features": "Granted features",
+        "powers": "Powers",
+        "use": "Use",
+        "resetPower": "Reset",
+        "newDay": "New day",
+        "newEncounter": "New encounter",
+        "noUsesLeft": "No uses of that power remain.",
+        "per": {
+          "day": "per day",
+          "week": "per week",
+          "encounter": "per encounter",
+          "at-will": "at will"
+        },
         "effectKinds": {
           "abilityBonus": "Ability",
           "saveBonus": "Save",
@@ -610,6 +622,10 @@
       }
     },
     "chat": {
+      "kitPower": {
+        "title": "Kit power",
+        "remaining": "Remaining"
+      },
       "turn": {
         "title": "Turn Undead",
         "level": "Turning level",

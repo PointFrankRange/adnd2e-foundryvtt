@@ -1,3 +1,4 @@
+import { usagePruneUpdate, type PowerUsage } from "../core/kits";
 import { spellDeletionUpdate, type SpellcastingSource } from "../magic/spell-cleanup";
 import { disruptCasting } from "./character/casting-actions";
 import { containerContentsReset } from "./character/grouping";
@@ -14,6 +15,7 @@ import { containerContentsReset } from "./character/grouping";
  *    `spellDeletionUpdate`); an in-progress cast of it is cancelled through
  *    `disruptCasting` (silently), which also clears the combatant's pending
  *    casting-time initiative flag;
+ *  - a kit: its kit-power use counters are pruned (pure `usagePruneUpdate`);
  *  - a container: its contents move back to loose (pure `containerContentsReset`).
  * Every write targets the actor whose sheet the user is editing (the handlers
  * require `isEditable`) or that actor's own combatant.
@@ -60,6 +62,12 @@ export async function deleteOwnedItem(actor: ItemOwner, itemId: string): Promise
     delete update[CASTING_KEY];
     if (Object.keys(update).length > 0) await actor.update(update);
     if (cancelCast) await disruptCasting(actor as never, { announce: false });
+  }
+
+  if (item.type === "kit") {
+    const usage = (actor.system as { kitPowers?: PowerUsage }).kitPowers ?? {};
+    const prune = usagePruneUpdate(usage, item.id);
+    if (Object.keys(prune).length > 0) await actor.update(prune);
   }
 
   const contents = containerContentsReset(

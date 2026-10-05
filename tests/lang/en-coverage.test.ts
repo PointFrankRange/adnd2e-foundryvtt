@@ -781,3 +781,25 @@ describe("lang/en.json — SP14c fatigue strings", () => {
     }
   });
 });
+
+describe("lang/en.json — SP11 Plan B (kit powers)", () => {
+  it("resolves the kit-power sheet and chat keys", () => {
+    for (const key of [
+      "ADND2E.sheet.kits.powers",
+      "ADND2E.sheet.kits.use",
+      "ADND2E.sheet.kits.resetPower",
+      "ADND2E.sheet.kits.newDay",
+      "ADND2E.sheet.kits.newEncounter",
+      "ADND2E.sheet.kits.noUsesLeft",
+      "ADND2E.sheet.kits.per.day",
+      "ADND2E.sheet.kits.per.week",
+      "ADND2E.sheet.kits.per.encounter",
+      "ADND2E.sheet.kits.per.at-will",
+      "ADND2E.chat.kitPower.title",
+      "ADND2E.chat.kitPower.remaining",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

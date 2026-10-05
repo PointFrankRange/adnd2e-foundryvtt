@@ -21,6 +21,10 @@
       "weapons": { "mode": "extend", "names": ["spear"] }
     },
     "forbiddenWeaponProficiencies": [],
-    "grantedFeatures": []
+    "grantedFeatures": [],
+    "powers": [
+      { "id": "zealous-shape", "name": "Zealous Shape", "uses": 2, "per": "day", "scope": "mammals", "params": [{ "key": "duration", "value": "1 hour" }] },
+      { "id": "sense-faith", "name": "Sense Faith", "uses": 0, "per": "at-will", "scope": "", "params": [] }
+    ]
   }
 }

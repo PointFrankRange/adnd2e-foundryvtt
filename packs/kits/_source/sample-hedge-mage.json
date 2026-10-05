@@ -21,6 +21,7 @@
       "weapons": { "mode": "extend", "names": ["short sword"] }
     },
     "forbiddenWeaponProficiencies": ["Long Bow"],
-    "grantedFeatures": []
+    "grantedFeatures": [],
+    "powers": []
   }
 }
