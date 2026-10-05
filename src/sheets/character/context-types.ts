@@ -167,6 +167,8 @@ export interface ClassItemView {
   xp: number; level: number; canLevelUp: boolean;
   dualClassState: "primary" | "active" | null;
   specialistSchool: string | null;
+  /** SP11: the owning kit's XP modifier percent (absent = 0) */
+  xpModifierPercent?: number;
 }
 
 export interface RaceItemView {

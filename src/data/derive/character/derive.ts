@@ -290,5 +290,5 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
  * this equals the base pipeline exactly.
  */
 export function deriveCharacter(snapshot: ActorSnapshot, options: OptionalRules): CharacterDerived {
-  return applyTraitEffects(deriveCharacterBase(snapshot, options), resolveTraitTotals(snapshot.traits, options));
+  return applyTraitEffects(deriveCharacterBase(snapshot, options), resolveTraitTotals(snapshot.traits, options, snapshot.kitEffects ?? []));
 }

@@ -1,3 +1,5 @@
+import { activeKitEntries } from "../../data/derive/character/kits";
+import { kitXpPercentFor } from "../../core/kits";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
 import { getChassis } from "../../core/classes/chassis";
@@ -426,6 +428,7 @@ export class Adnd2eCharacterSheet extends Base {
         ?.wizard?.spellbookItemIds ?? [],
     );
 
+    const kitEntries = activeKitEntries(items);
     const classItems: ClassItemView[] = [];
     let raceItem: RaceItemView | null = null;
     const physicalItems: PhysicalItemView[] = [];
@@ -438,7 +441,10 @@ export class Adnd2eCharacterSheet extends Base {
     for (const it of items) {
       switch (it.type) {
         case "class":
-          classItems.push(toClassView(it));
+          {
+            const view = toClassView(it);
+            classItems.push({ ...view, xpModifierPercent: kitXpPercentFor(kitEntries, view.chassisId) });
+          }
           break;
         case "race":
           raceItem ??= toRaceView(it);

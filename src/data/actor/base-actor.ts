@@ -8,6 +8,7 @@ import type { AbilityScores, Race } from "../../core/types";
 import { DEFAULT_CHARACTER_POINT_POOL } from "../../core/skills/character-points";
 import { abilityScoreWithBonus } from "../../core/skills/traits";
 import { deriveCharacter, resolveTraitTotals, toTraitEntries } from "../derive/character";
+import { activeKitEntries } from "../derive/character/kits";
 import { getOptionalRules } from "../../settings";
 import { snapshotActor } from "./snapshot";
 
@@ -335,7 +336,8 @@ export function applyTraitAbilityBonuses(model: foundry.abstract.TypeDataModel.A
     abilities: Record<string, { score: number }>;
     parent: { items: Iterable<{ type: string; system: unknown }> };
   };
-  const totals = resolveTraitTotals(toTraitEntries(sys.parent.items), getOptionalRules());
+  const items = [...sys.parent.items];
+  const totals = resolveTraitTotals(toTraitEntries(items), getOptionalRules(), activeKitEntries(items).flatMap((k) => k.effects));
   for (const k of ABILITY_KEYS) {
     sys.abilities[k].score = abilityScoreWithBonus(sys.abilities[k].score, totals.abilityBonus[k]);
   }

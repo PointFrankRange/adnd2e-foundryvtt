@@ -6,6 +6,8 @@ import type {
 } from "../derive/character";
 import type { ClassId, Race, ThiefSkill, WizardSchool } from "../../core/types";
 import { toTraitEntries } from "../derive/character";
+import { activeKitEntries } from "../derive/character/kits";
+import { kitXpPercentFor } from "../../core/kits";
 import { containerAdjustedCarriedWeight } from "../derive/character/container-weight";
 
 interface ClassItemSystem {
@@ -53,6 +55,7 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
   const items = [...doc.items];
   const raceItem = items.find((i) => i.type === "race");
 
+  const kitEntries = activeKitEntries(items);
   const classes: ClassEntry[] = items
     .filter((i) => i.type === "class")
     .map((i) => {
@@ -64,6 +67,7 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
         hpRolls: s.hpRolls,
         dualClassState: s.dualClassState,
         level: s.level ?? 1,
+        xpModifierPercent: kitXpPercentFor(kitEntries, s.chassisId),
       };
     });
 
@@ -123,6 +127,7 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
     baseMovement: raceItem ? ((raceItem.system as RaceItemSystem).baseMovement ?? 12) : 12,
     thiefSkillAllocations,
     traits: toTraitEntries(items),
+    kitEffects: kitEntries.flatMap((k) => k.effects),
     isCasting: Boolean(doc.system.options?.spellsAndMagic?.casting),
   };
 }

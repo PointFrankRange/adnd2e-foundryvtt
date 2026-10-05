@@ -1,5 +1,7 @@
 import { CLASS_IDS, DUAL_CLASS_STATES, WIZARD_SCHOOLS } from "./choices";
 import { classItemCanLevelUp, classItemLevel } from "../derive/class-item";
+import { activeKitEntries } from "../derive/character/kits";
+import { kitXpPercentFor } from "../../core/kits";
 import { Adnd2eItemModel } from "./base-item";
 import type { ClassId } from "../../core/types";
 
@@ -27,7 +29,9 @@ export class ClassItemModel extends Adnd2eItemModel {
       level?: number;
       canLevelUp?: boolean;
     };
-    sys.level = classItemLevel(sys.chassisId, sys.xp);
-    sys.canLevelUp = classItemCanLevelUp(sys.chassisId, sys.xp, sys.hpRolls.length);
+    const actor = (this as unknown as { parent?: { parent?: { items?: Iterable<{ type: string; system: unknown }> } } }).parent?.parent;
+    const percent = kitXpPercentFor(activeKitEntries(actor?.items ?? []), sys.chassisId);
+    sys.level = classItemLevel(sys.chassisId, sys.xp, percent);
+    sys.canLevelUp = classItemCanLevelUp(sys.chassisId, sys.xp, sys.hpRolls.length, percent);
   }
 }

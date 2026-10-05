@@ -317,7 +317,7 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
 
 function buildClasses(input: CharacterSheetInput): ClassRow[] {
   return input.classItems.map((c) => {
-    const progress = xpToNext(c.chassisId as ClassId, c.xp);
+    const progress = xpToNext(c.chassisId as ClassId, c.xp, c.xpModifierPercent ?? 0);
     return {
       id: c.id,
       name: c.name,
@@ -770,7 +770,7 @@ function buildOrisonRows(
   },
 ): SpellItemView[] {
   const priestClass = input.classItems.find((c) => c.chassisId === priestChassisId);
-  const priestLevel = priestClass ? classItemLevel(priestClass.chassisId as ClassId, priestClass.xp) : 0;
+  const priestLevel = priestClass ? classItemLevel(priestClass.chassisId as ClassId, priestClass.xp, priestClass.xpModifierPercent ?? 0) : 0;
   // Orisons are priest rows, so canLearn is always false and the learn context
   // is never consulted; the level-0 placeholders only satisfy buildSpellRow's shape.
   const learnCtx: LearnEligibilityContext = {

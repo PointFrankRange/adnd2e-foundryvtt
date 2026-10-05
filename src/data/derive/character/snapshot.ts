@@ -15,6 +15,8 @@ export interface ClassEntry {
   dualClassState: DualClassState | null;
   /** the class item's own derived level (`system.level`) */
   level: number;
+  /** SP11: the owning kit's XP modifier percent (absent = 0) */
+  xpModifierPercent?: number;
 }
 
 export interface MemorizedEntry {
@@ -71,6 +73,8 @@ export interface ActorSnapshot {
   thiefSkillAllocations: readonly { skill: ThiefSkill; allocatedPoints: number }[];
   /** every owned `trait` item whose stored effect is well-formed, in item order — applied only while the character-point build rule is on */
   traits: readonly TraitEntry[];
+  /** SP11: the effects of every active kit — applied regardless of the character-point rule (absent = none) */
+  kitEffects?: readonly TraitEffect[];
   /** true while `system.options.spellsAndMagic.casting` is set — honoured only while the casting-time rule is on */
   isCasting: boolean;
 }
