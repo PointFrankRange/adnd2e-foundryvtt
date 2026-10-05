@@ -1,6 +1,6 @@
 import { Adnd2eItemModel } from "./base-item";
 import {
-  ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, KIT_EQUIPMENT_MODES, KIT_POWER_FREQUENCIES, RACE_IDS, TRAIT_ATTACK_MODES, TRAIT_EFFECT_KINDS,
+  ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, KIT_CASTING_MODES, KIT_EQUIPMENT_MODES, KIT_POWER_FREQUENCIES, KIT_TURNING_MODES, RACE_IDS, TRAIT_ATTACK_MODES, TRAIT_EFFECT_KINDS,
   TRAIT_PROFICIENCY_TRACKS, TRAIT_SAVE_CATEGORIES,
 } from "./choices";
 
@@ -24,7 +24,7 @@ const equipmentOverride = () =>
  * malformed effect is inert). Equipment overrides: `inherit` keeps the class
  * rule, `replace` swaps it, `extend` adds to it; armor names are armor type
  * names ("studded leather", "shield"), weapon names are weapon names plus the
- * token "blunt". Plan B adds `powers`.
+ * token "blunt". Plan B adds `powers`. Plan C adds `overrides` and per-power `usesByLevel`.
  */
 export class KitItemModel extends Adnd2eItemModel {
   static override defineSchema(): foundry.data.fields.DataSchema {
@@ -70,9 +70,26 @@ export class KitItemModel extends Adnd2eItemModel {
             }),
             { required: true, initial: [] },
           ),
+          /** SP11 Plan C: level brackets for the uses per `per`; empty = the flat `uses`. A scaled power is never at-will. */
+          usesByLevel: new ArrayField(
+            new SchemaField({
+              minLevel: new NumberField({ required: true, integer: true, min: 1, initial: 1 }),
+              uses: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+            }),
+            { required: true, initial: [] },
+          ),
         }),
         { required: true, initial: [] },
       ),
+      /** SP11 Plan C: overrides of the base class. `toKitEntries` reads this leniently via `normalizeOverrides`. */
+      overrides: new SchemaField({
+        casting: new StringField({ required: true, blank: false, initial: "inherit", choices: KIT_CASTING_MODES }),
+        turning: new SchemaField({
+          mode: new StringField({ required: true, blank: false, initial: "inherit", choices: KIT_TURNING_MODES }),
+          offset: new NumberField({ required: true, integer: true, initial: 0 }),
+        }),
+        removedAbilities: names(),
+      }),
     };
   }
 }

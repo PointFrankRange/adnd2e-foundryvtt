@@ -1,4 +1,4 @@
-import { normalizePowers, type EquipmentOverride, type KitPower, type KitQualifications, type RawPower } from "../../../core/kits";
+import { normalizeOverrides, normalizePowers, type KitOverrides, type RawOverrides, type EquipmentOverride, type KitPower, type KitQualifications, type RawPower } from "../../../core/kits";
 import { toTraitEffect, type RawTraitEffect, type TraitEffect } from "../../../core/skills/traits";
 
 /* SP11 Plan A: the owned `kit` items as plain entries. Pure. */
@@ -14,6 +14,7 @@ export interface KitEntry {
   forbiddenWeaponProficiencies: string[];
   grantedFeatures: string[];
   powers: KitPower[];
+  overrides: KitOverrides;
 }
 
 interface KitSystem {
@@ -25,6 +26,7 @@ interface KitSystem {
   forbiddenWeaponProficiencies: string[];
   grantedFeatures: string[];
   powers?: RawPower[];
+  overrides?: RawOverrides;
 }
 
 type ItemLike = { id?: string; name?: string; type: string; system: unknown };
@@ -51,6 +53,7 @@ export function toKitEntries(items: Iterable<ItemLike>): KitEntry[] {
       forbiddenWeaponProficiencies: [...s.forbiddenWeaponProficiencies],
       grantedFeatures: [...s.grantedFeatures],
       powers: normalizePowers(s.powers ?? []),
+      overrides: normalizeOverrides(s.overrides),
     });
   }
   return out;

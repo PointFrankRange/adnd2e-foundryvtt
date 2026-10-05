@@ -22,7 +22,8 @@ const kitItem = (over: Record<string, unknown> = {}) => ({
     equipment: { armor: { mode: "inherit", names: [] }, weapons: { mode: "inherit", names: [] } },
     forbiddenWeaponProficiencies: [],
     grantedFeatures: ["Stance"],
-    powers: [{ id: "shape", name: "Shapechange", uses: 2, per: "day", scope: "mammals", params: [] }, { id: "bad id", name: "X", uses: 1, per: "day" }],
+    powers: [{ id: "shape", name: "Shapechange", uses: 2, per: "day", scope: "mammals", params: [], usesByLevel: [{ minLevel: 5, uses: 1 }, { minLevel: 1, uses: 0 }] }, { id: "bad id", name: "X", uses: 1, per: "day" }],
+    overrides: { casting: "none", turning: { mode: "offset", offset: 0 }, removedAbilities: ["Laying on hands", ""] },
     ...over,
   },
 });
@@ -37,7 +38,13 @@ describe("toKitEntries / activeKitEntries", () => {
     expect(k!.xpModifierPercent).toBe(25);
     expect(k!.effects).toEqual([{ kind: "attackBonus", mode: "melee", amount: 2 }]);
     expect(k!.grantedFeatures).toEqual(["Stance"]);
-    expect(k!.powers).toEqual([{ id: "shape", name: "Shapechange", uses: 2, per: "day", scope: "mammals", params: [] }]);
+    expect(k!.powers).toEqual([{ id: "shape", name: "Shapechange", uses: 0, per: "day", scope: "mammals", params: [], usesByLevel: [{ minLevel: 1, uses: 0 }, { minLevel: 5, uses: 1 }] }]);
+    expect(k!.overrides).toEqual({ casting: "none", turning: { mode: "offset", offset: 0 }, removedAbilities: ["Laying on hands"] });
+  });
+  it("a kit item with no overrides field reads as no overrides", () => {
+    const item = kitItem();
+    delete (item.system as Record<string, unknown>).overrides;
+    expect(toKitEntries([item])[0]!.overrides).toEqual({ casting: "inherit", turning: { mode: "inherit", offset: 0 }, removedAbilities: [] });
   });
   it("a kit item with no powers field reads as no powers", () => {
     const item = kitItem();
