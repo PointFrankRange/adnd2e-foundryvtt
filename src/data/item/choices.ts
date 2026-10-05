@@ -86,6 +86,7 @@ export {
   TRAIT_EFFECT_KINDS, TRAIT_ATTACK_MODES, TRAIT_PROFICIENCY_TRACKS, TRAIT_SAVE_CATEGORIES,
 } from "../../core/skills/traits";
 
+export { EQUIPMENT_MODES as KIT_EQUIPMENT_MODES } from "../../core/kits";
 export { WEAPON_PROFICIENCY_GROUPS } from "../../core/proficiencies/weapon";
 export { SPECIALIST_WEAPON_CLASSES } from "../../core/weapons/specialist-attacks";
 

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { CLASS_IDS, RACE_IDS, ABILITY_KEYS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
+import { CLASS_IDS, RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
+import { EQUIPMENT_MODES } from "../../src/core/kits";
 import { TRAITS, toTraitEffect, type RawTraitEffect } from "../../src/core/skills/traits";
 
 const ROOT = path.resolve(__dirname, "..", "..");
@@ -164,6 +165,42 @@ describe("traits pack content (drift-tested against the pure TRAITS table)", () 
     for (const d of items) {
       const e = sys(d).effect as Record<string, unknown>;
       expect(Object.keys(e).sort(), String(d.name)).toEqual(["ability", "amount", "kind", "mode", "save", "track"]);
+    }
+  });
+});
+
+describe("kits pack content", () => {
+  const items = docs("kits");
+
+  it("has three uniquely named and identified kit Items", () => {
+    expect(items).toHaveLength(3);
+    expect(new Set(items.map((d) => d._id)).size).toBe(3);
+    expect(new Set(items.map((d) => d.name)).size).toBe(3);
+    for (const d of items) {
+      expect(d.type, String(d.name)).toBe("kit");
+      expect(String(d._id)).toHaveLength(16);
+      expect(String(d._key)).toBe(`!items!${String(d._id)}`);
+      expect(String(d.name).startsWith("Sample"), String(d.name)).toBe(true);
+    }
+  });
+
+  it("every kit is well-formed against the schema vocabularies", () => {
+    for (const d of items) {
+      const s = sys(d) as {
+        chassisId: string;
+        qualifications: { abilityMinimums: Record<string, number>; races: string[]; alignments: string[] };
+        xpModifierPercent: number;
+        effects: RawTraitEffect[];
+        equipment: { armor: { mode: string; names: string[] }; weapons: { mode: string; names: string[] } };
+      };
+      expect(CLASS_IDS as readonly string[], String(d.name)).toContain(s.chassisId);
+      expect(Object.keys(s.qualifications.abilityMinimums).sort()).toEqual([...ABILITY_KEYS].sort());
+      for (const r of s.qualifications.races) expect(RACE_IDS as readonly string[]).toContain(r);
+      for (const a of s.qualifications.alignments) expect(ALIGNMENTS as readonly string[]).toContain(a);
+      expect(Number.isInteger(s.xpModifierPercent)).toBe(true);
+      for (const e of s.effects) expect(toTraitEffect(e), String(d.name)).not.toBeNull();
+      expect(EQUIPMENT_MODES as readonly string[]).toContain(s.equipment.armor.mode);
+      expect(EQUIPMENT_MODES as readonly string[]).toContain(s.equipment.weapons.mode);
     }
   });
 });

@@ -1,0 +1,26 @@
+{
+  "_id": "kSampleHedgeMg02",
+  "_key": "!items!kSampleHedgeMg02",
+  "name": "Sample Hedge Mage",
+  "type": "kit",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "",
+    "chassisId": "mage",
+    "qualifications": {
+      "abilityMinimums": { "str": 0, "dex": 0, "con": 12, "int": 0, "wis": 0, "cha": 0 },
+      "races": [],
+      "alignments": []
+    },
+    "xpModifierPercent": 0,
+    "effects": [
+      { "kind": "saveBonus", "ability": "", "save": "spell", "mode": "", "track": "", "amount": 1 }
+    ],
+    "equipment": {
+      "armor": { "mode": "extend", "names": ["leather"] },
+      "weapons": { "mode": "extend", "names": ["short sword"] }
+    },
+    "forbiddenWeaponProficiencies": ["Long Bow"],
+    "grantedFeatures": []
+  }
+}

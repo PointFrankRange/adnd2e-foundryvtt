@@ -1,4 +1,4 @@
-// The twelve Item sub-types this system registers (must equal system.json
+// The thirteen Item sub-types this system registers (must equal system.json
 // documentTypes.Item — asserted in tests/data/subtypes.test.ts).
 export type ItemSubtype =
   | "class"
@@ -12,7 +12,8 @@ export type ItemSubtype =
   | "nonweaponProficiency"
   | "classFeature"
   | "condition"
-  | "trait";
+  | "trait"
+  | "kit";
 
 export const ITEM_SUBTYPES: readonly ItemSubtype[] = [
   "class",
@@ -27,4 +28,5 @@ export const ITEM_SUBTYPES: readonly ItemSubtype[] = [
   "classFeature",
   "condition",
   "trait",
+  "kit",
 ];
