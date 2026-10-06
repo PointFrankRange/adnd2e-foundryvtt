@@ -1,6 +1,6 @@
-import { activeKitEntries, casterTypesDisabled, raceXpPercentOf, toKitEntries } from "../../data/derive/character/kits";
-import { buildPowerRows, kitForbidsProficiency, kitQualifies, kitXpPercentFor, resolveKitOverrides, type KitQualifications, type PowerUsage } from "../../core/kits";
-import { abilityRangeProblems, combineXpPercent, effectiveAbilityAdjustments, effectiveAbilityRanges, normalizeSubrace, type RawSubrace } from "../../core/races";
+import { abilityScoresOf, activeKitEntries, actorLevelRulesFor, casterTypesDisabled, toKitEntries } from "../../data/derive/character/kits";
+import { buildPowerRows, kitForbidsProficiency, kitQualifies, resolveKitOverrides, type KitQualifications, type PowerUsage } from "../../core/kits";
+import { abilityRangeProblems, effectiveAbilityAdjustments, effectiveAbilityRanges, normalizeSubrace, type RawSubrace } from "../../core/races";
 import { applyRacialDeltas } from "../../core/abilities/racial-adjustments";
 import { classLevelOf, resetKitPowers, resetPower, usePower } from "./kit-power-actions";
 import { ABILITY_KEYS } from "../../data/item/choices";
@@ -479,13 +479,13 @@ export class Adnd2eCharacterSheet extends Base {
     const traitItems: TraitItemView[] = [];
 
     const equipmentRules = actorEquipmentRules(items);
-    const raceXpPct = raceXpPercentOf(items);
     for (const it of items) {
       switch (it.type) {
         case "class":
           {
             const view = toClassView(it);
-            classItems.push({ ...view, xpModifierPercent: combineXpPercent(kitXpPercentFor(kitEntries, view.chassisId), raceXpPct) });
+            const lr = actorLevelRulesFor(items, view.chassisId, getOptionalRules(), abilityScoresOf(actor.system));
+            classItems.push({ ...view, xpModifierPercent: lr.xpPercent, levelLimit: lr.rules.limit, beyondMultiplier: lr.rules.beyondMultiplier });
           }
           break;
         case "race":

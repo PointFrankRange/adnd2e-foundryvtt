@@ -3,7 +3,7 @@
 import { SYSTEM_ID } from "../constants";
 import { DEFAULT_PLAYER_APPLY_MODE, PLAYER_APPLY_MODES, type PlayerApplyMode } from "../combat/apply-relay";
 import type { OptionalRules } from "../core/options";
-import { readOptionalRules, SETTING_DESCRIPTORS } from "./registry";
+import { EXCEED_LEVEL_LIMIT_CHOICES, readOptionalRules, SETTING_DESCRIPTORS } from "./registry";
 
 // SETTING_DESCRIPTORS[n].key is typed `string` in the pure registry, but every
 // value is one of the 22 suffixes augmented into `SettingConfig` by
@@ -33,6 +33,17 @@ export function registerSettings(): void {
     type: String,
     choices: Object.fromEntries(PLAYER_APPLY_MODES.map((m) => [m, `ADND2E.settings.playerAppliedEffects.${m}`])),
     default: DEFAULT_PLAYER_APPLY_MODE,
+  } as never);
+
+  game.settings!.register(SYSTEM_ID, "exceedLevelLimits" as SettingKey, {
+    name: "ADND2E.settings.exceedLevelLimits.name",
+    hint: "ADND2E.settings.exceedLevelLimits.hint",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: Object.fromEntries(EXCEED_LEVEL_LIMIT_CHOICES.map((c) => [c, `ADND2E.settings.exceedLevelLimits.${c}`])),
+    default: "off",
+    requiresReload: true,
   } as never);
 }
 

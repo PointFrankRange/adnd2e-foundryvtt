@@ -1,4 +1,5 @@
 import { classItemCanLevelUp, classItemLevel } from "../class-item";
+import { levelRulesOf } from "../../../core/classes/level-limits";
 import type { ClassEntry } from "./snapshot";
 import type { ClassId } from "../../../core/types";
 
@@ -7,7 +8,9 @@ export function deriveClassLevels(
   classes: readonly ClassEntry[],
 ): { chassisId: ClassId; level: number; canLevelUp: boolean }[] {
   return classes.map((c) => {
-    const level = classItemLevel(c.chassisId, c.xp, c.xpModifierPercent ?? 0);
-    return { chassisId: c.chassisId, level, canLevelUp: classItemCanLevelUp(c.chassisId, c.xp, c.hpRolls.length, c.xpModifierPercent ?? 0) };
+    const rules = levelRulesOf({ levelLimit: c.levelLimit, beyondMultiplier: c.beyondMultiplier });
+    const percent = c.xpModifierPercent ?? 0;
+    const level = classItemLevel(c.chassisId, c.xp, percent, rules);
+    return { chassisId: c.chassisId, level, canLevelUp: classItemCanLevelUp(c.chassisId, c.xp, c.hpRolls.length, percent, rules) };
   });
 }

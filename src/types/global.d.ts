@@ -58,6 +58,9 @@ declare global {
     "adnd2e.nonweaponProficienciesUsed": boolean;
     "adnd2e.weaponProficienciesUsed": boolean;
     "adnd2e.multiclassHpAveraging": boolean;
+    "adnd2e.racialLevelLimits": boolean;
+    "adnd2e.primeRequisiteBonusLevels": boolean;
+    "adnd2e.exceedLevelLimits": string;
     // combatAndTactics — reserved for Sub-project 7
     "adnd2e.combatAndTacticsEnabled": boolean;
     "adnd2e.criticalHits": boolean;

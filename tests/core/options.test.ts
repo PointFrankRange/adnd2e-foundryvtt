@@ -3,7 +3,7 @@ import { DEFAULT_OPTIONAL_RULES } from "../../src/core/options";
 import type { OptionalRules } from "../../src/core/options";
 
 describe("DEFAULT_OPTIONAL_RULES", () => {
-  it("has exactly the twenty-three core, combatAndTactics, skillsAndPowers and spellsAndMagic toggles", () => {
+  it("has exactly the twenty-six core, combatAndTactics, skillsAndPowers, spellsAndMagic and level-limit toggles", () => {
     expect(Object.keys(DEFAULT_OPTIONAL_RULES).sort()).toEqual(
       [
         "armorTypeVsWeaponType",
@@ -15,11 +15,14 @@ describe("DEFAULT_OPTIONAL_RULES", () => {
         "combatManeuvers",
         "criticalHits",
         "exceptionalStrength",
+        "exceedLevelLimits",
         "expandedCastingTime",
         "expandedProficiencies",
         "maxSpellsPerLevel",
         "multiclassHpAveraging",
         "nonweaponProficienciesUsed",
+        "primeRequisiteBonusLevels",
+        "racialLevelLimits",
         "skillsAndPowersEnabled",
         "spellFailureFromWisdom",
         "spellPoints",
@@ -33,7 +36,7 @@ describe("DEFAULT_OPTIONAL_RULES", () => {
     );
   });
 
-  it("every value is a boolean and matches the documented default", () => {
+  it("every value is a boolean/number and matches the documented default", () => {
     const expected: OptionalRules = {
       exceptionalStrength: true,
       maxSpellsPerLevel: false,
@@ -58,6 +61,9 @@ describe("DEFAULT_OPTIONAL_RULES", () => {
       spellPoints: false,
       channelers: false,
       channellerFatigue: false,
+      racialLevelLimits: true,
+      exceedLevelLimits: 0,
+      primeRequisiteBonusLevels: false,
     };
     expect(DEFAULT_OPTIONAL_RULES).toEqual(expected);
   });

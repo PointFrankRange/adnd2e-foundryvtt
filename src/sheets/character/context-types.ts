@@ -172,6 +172,10 @@ export interface ClassItemView {
   specialistSchool: string | null;
   /** SP11: the owning kit's XP modifier percent (absent = 0) */
   xpModifierPercent?: number;
+  /** SP13: the racial level limit for this class (absent/null = unlimited) */
+  levelLimit?: number | null;
+  /** SP13: 0 = hard limit; 2-4 = each level beyond it costs that many times the XP */
+  beyondMultiplier?: number;
 }
 
 export interface RaceItemView {
@@ -363,6 +367,8 @@ export interface SaveRow {
 export interface ClassRow {
   id: string; name: string; chassisId: string; level: number;
   xp: number; xpToNextLevel: number | null; xpPct: number; nextThreshold: number | null;
+  /** SP13: at a hard racial level limit */
+  atLimit: boolean;
   canLevelUp: boolean; hitDie: number;
   isDualPrimary: boolean; isDualActive: boolean; specialistSchool: string | null;
 }

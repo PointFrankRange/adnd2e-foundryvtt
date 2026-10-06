@@ -374,7 +374,8 @@ interface DerivedWriteSurface {
  */
 export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void {
   const parent = (model as unknown as { parent: Actor.Implementation }).parent;
-  const derived = deriveCharacter(snapshotActor(parent), getOptionalRules());
+  const options = getOptionalRules();
+  const derived = deriveCharacter(snapshotActor(parent, options), options);
   const sys = model as unknown as DerivedWriteSurface;
 
   for (const k of ABILITY_KEYS) sys.abilities[k].mods = derived.abilities[k];

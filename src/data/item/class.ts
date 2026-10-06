@@ -1,6 +1,8 @@
 import { CLASS_IDS, DUAL_CLASS_STATES, WIZARD_SCHOOLS } from "./choices";
 import { classItemCanLevelUp, classItemLevel } from "../derive/class-item";
-import { actorXpPercentFor } from "../derive/character/kits";
+import { abilityScoresOf, actorLevelRulesFor } from "../derive/character/kits";
+import { NO_LEVEL_RULES } from "../../core/classes/level-limits";
+import { getOptionalRules } from "../../settings";
 import { Adnd2eItemModel } from "./base-item";
 import type { ClassId } from "../../core/types";
 
@@ -28,9 +30,12 @@ export class ClassItemModel extends Adnd2eItemModel {
       level?: number;
       canLevelUp?: boolean;
     };
-    const actor = (this as unknown as { parent?: { parent?: { items?: Iterable<{ type: string; system: unknown }> } } }).parent?.parent;
-    const percent = actorXpPercentFor(actor?.items ?? [], sys.chassisId);
-    sys.level = classItemLevel(sys.chassisId, sys.xp, percent);
-    sys.canLevelUp = classItemCanLevelUp(sys.chassisId, sys.xp, sys.hpRolls.length, percent);
+    const actorDoc = (this as unknown as { parent?: { parent?: { items?: Iterable<{ type: string; system: unknown }>; system?: { abilities?: Record<string, { score?: unknown } | undefined> } } } }).parent?.parent;
+    // The actor's prepareBaseData (racial + trait ability adjustments) runs before its embedded items prepare, so the scores seen here are post-racial.
+    const { xpPercent, rules } = actorDoc
+      ? actorLevelRulesFor(actorDoc.items ?? [], sys.chassisId, getOptionalRules(), abilityScoresOf(actorDoc.system))
+      : { xpPercent: 0, rules: NO_LEVEL_RULES };
+    sys.level = classItemLevel(sys.chassisId, sys.xp, xpPercent, rules);
+    sys.canLevelUp = classItemCanLevelUp(sys.chassisId, sys.xp, sys.hpRolls.length, xpPercent, rules);
   }
 }

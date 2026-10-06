@@ -2,3 +2,4 @@ export * from "./chassis";
 export * from "./progression";
 export * from "./thac0";
 export * from "./ranger";
+export * from "./level-limits";

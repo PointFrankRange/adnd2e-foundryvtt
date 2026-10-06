@@ -26,6 +26,16 @@ describe("xpToNext", () => {
   });
 });
 
+describe("xpToNext level rules (SP13)", () => {
+  it("honors level rules and reports atLimit", () => {
+    expect(xpToNext("fighter", 2_000_000, 0, { limit: 15, beyondMultiplier: 0 })).toEqual({ level: 15, next: null, toNextLevel: null, pct: 1, atLimit: true });
+    expect(xpToNext("fighter", 2_000_000, 0, { limit: 15, beyondMultiplier: 2 })).toMatchObject({ level: 15, next: 2_250_000, atLimit: false });
+    expect(xpToNext("fighter", 8000)).toMatchObject({ level: 4, next: 16000, atLimit: false });
+    expect(xpToNext("fighter", 1_900_000, 10, { limit: 15, beyondMultiplier: 0 }).atLimit).toBe(false);
+    expect(xpToNext("fighter", 2_000_000, 10, { limit: 15, beyondMultiplier: 0 }).atLimit).toBe(true);
+  });
+});
+
 describe("awardXpSplit", () => {
   it("divides evenly and floors", () => {
     expect(awardXpSplit(3000, 2)).toBe(1500);

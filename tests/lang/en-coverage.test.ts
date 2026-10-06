@@ -835,3 +835,24 @@ describe("lang/en.json — SP12 Plan A (subrace)", () => {
     }
   });
 });
+
+describe("lang/en.json — SP13 level-limit settings and sheet keys", () => {
+  it("resolves the level-limit settings name and hint keys", () => {
+    for (const key of [
+      "ADND2E.settings.racialLevelLimits.name",
+      "ADND2E.settings.racialLevelLimits.hint",
+      "ADND2E.settings.primeRequisiteBonusLevels.name",
+      "ADND2E.settings.primeRequisiteBonusLevels.hint",
+      "ADND2E.settings.exceedLevelLimits.name",
+      "ADND2E.settings.exceedLevelLimits.hint",
+      "ADND2E.settings.exceedLevelLimits.off",
+      "ADND2E.settings.exceedLevelLimits.x2",
+      "ADND2E.settings.exceedLevelLimits.x3",
+      "ADND2E.settings.exceedLevelLimits.x4",
+      "ADND2E.sheet.xp.atLimit",
+    ]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

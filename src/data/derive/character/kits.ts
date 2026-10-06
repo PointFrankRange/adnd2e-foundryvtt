@@ -1,7 +1,9 @@
 import { combineXpPercent, normalizeSubrace, type RawSubrace } from "../../../core/races";
 import { kitXpPercentFor, normalizeOverrides, normalizePowers, type KitOverrides, type RawOverrides, type EquipmentOverride, type KitPower, type KitQualifications, type RawPower } from "../../../core/kits";
 import { getChassis } from "../../../core/classes/chassis";
-import type { ClassId } from "../../../core/types";
+import { bonusLevels, NO_LEVEL_RULES, type LevelRules } from "../../../core/classes/level-limits";
+import type { OptionalRules } from "../../../core/options";
+import type { AbilityKey, ClassId } from "../../../core/types";
 import { toTraitEffect, type RawTraitEffect, type TraitEffect } from "../../../core/skills/traits";
 
 /* SP11 Plan A: the owned `kit` items as plain entries. Pure. */
@@ -95,4 +97,43 @@ export function raceXpPercentOf(items: Iterable<{ type: string; system: unknown 
 export function actorXpPercentFor(items: Iterable<ItemLike>, chassisId: string): number {
   const all = [...items];
   return combineXpPercent(kitXpPercentFor(activeKitEntries(all), chassisId), raceXpPercentOf(all));
+}
+
+const ABILITY_KEYS: readonly AbilityKey[] = ["str", "dex", "con", "int", "wis", "cha"];
+
+/** SP13: an actor's PREPARED ability scores (post-racial) from `system.abilities`, ignoring missing/non-numeric entries. */
+export function abilityScoresOf(
+  system: { abilities?: Record<string, { score?: unknown } | undefined> } | null | undefined,
+): Partial<Record<AbilityKey, number>> {
+  const out: Partial<Record<AbilityKey, number>> = {};
+  for (const k of ABILITY_KEYS) {
+    const score = system?.abilities?.[k]?.score;
+    if (typeof score === "number") out[k] = score;
+  }
+  return out;
+}
+
+/**
+ * SP13: the XP-per-level percentage AND the racial level rules for a class. The limit is the first race item's
+ * `classLevelLimits[chassisId]` (missing/null = unlimited); with the bonus-levels option on and exactly one class,
+ * the limit grows by `bonusLevels(lowest prime requisite score)`. The single helper behind every level lookup.
+ */
+export function actorLevelRulesFor(
+  items: Iterable<ItemLike>,
+  chassisId: string,
+  options: OptionalRules,
+  scores: Partial<Record<AbilityKey, number>> = {},
+): { xpPercent: number; rules: LevelRules } {
+  const all = [...items];
+  const xpPercent = actorXpPercentFor(all, chassisId);
+  if (!options.racialLevelLimits) return { xpPercent, rules: NO_LEVEL_RULES };
+  const race = all.find((i) => i.type === "race");
+  const raw = (race?.system as { classLevelLimits?: Record<string, unknown> } | undefined)?.classLevelLimits?.[chassisId];
+  const base = typeof raw === "number" && Number.isInteger(raw) && raw >= 1 ? raw : null; // 0, negative or fractional limits are ignored (unlimited), never crash the derive
+  let limit = base;
+  if (base !== null && options.primeRequisiteBonusLevels && all.filter((i) => i.type === "class").length === 1) {
+    const prime = (getChassis(chassisId as ClassId)?.primeRequisites ?? []).map((k) => scores[k]);
+    if (prime.length > 0 && prime.every((s): s is number => typeof s === "number")) limit = base + bonusLevels(Math.min(...prime));
+  }
+  return { xpPercent, rules: { limit, beyondMultiplier: options.exceedLevelLimits } };
 }
