@@ -1,7 +1,7 @@
 {
   "_id": "kHalfStoutCon001",
   "_key": "!items!kHalfStoutCon001",
-  "name": "Stout (Constitution)",
+  "name": "Halfling, Stout (Constitution)",
   "type": "race",
   "img": "icons/svg/house.svg",
   "system": {
@@ -34,6 +34,7 @@
     ],
     "subrace": {
       "id": "stout-con",
+      "displayName": "Stout (Constitution)",
       "abilityAdjustments": {
         "str": -1,
         "dex": 0,

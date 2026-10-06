@@ -24,6 +24,8 @@ export class RaceItemModel extends Adnd2eItemModel {
       /** SP12 Plan A: a subrace layer over `raceId` (the base PHB race). Every nullable field defaults to null = inherit the base race's table; existing race items need no migration. */
       subrace: new SchemaField({
         id: new StringField({ required: true, blank: true, initial: "" }),
+        /** The name the character sheet shows for this subrace; blank = the item's own name. */
+        displayName: new StringField({ required: true, blank: true, initial: "" }),
         abilityAdjustments: new SchemaField(
           Object.fromEntries(ABILITY_KEYS.map((k) => [k, new NumberField({ required: true, integer: true, initial: 0 })])),
           { required: true, nullable: true, initial: null },

@@ -1,7 +1,7 @@
 {
   "_id": "kGnomeTinker0001",
   "_key": "!items!kGnomeTinker0001",
-  "name": "Tinker Gnome",
+  "name": "Gnome, Tinker",
   "type": "race",
   "img": "icons/svg/burrow.svg",
   "system": {
@@ -57,6 +57,7 @@
     ],
     "subrace": {
       "id": "tinker-gnome",
+      "displayName": "Tinker Gnome",
       "abilityAdjustments": {
         "str": -1,
         "dex": 2,

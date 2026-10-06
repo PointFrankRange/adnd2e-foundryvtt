@@ -1,7 +1,7 @@
 {
   "_id": "kDwarfSunder0001",
   "_key": "!items!kDwarfSunder0001",
-  "name": "Sundered Dwarf",
+  "name": "Dwarf, Sundered",
   "type": "race",
   "img": "icons/svg/mountain.svg",
   "system": {
@@ -44,6 +44,7 @@
     ],
     "subrace": {
       "id": "sundered-dwarf",
+      "displayName": "Sundered Dwarf",
       "abilityAdjustments": {
         "str": 1,
         "dex": 0,

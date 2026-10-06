@@ -1,7 +1,7 @@
 {
   "_id": "kElfHigh00000001",
   "_key": "!items!kElfHigh00000001",
-  "name": "High Elf",
+  "name": "Elf, High",
   "type": "race",
   "img": "icons/svg/oak.svg",
   "system": {
@@ -56,6 +56,7 @@
     "grantedFeatures": [],
     "subrace": {
       "id": "high-elf",
+      "displayName": "High Elf",
       "abilityAdjustments": {
         "str": 0,
         "dex": 1,

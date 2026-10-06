@@ -52,6 +52,27 @@ describe("races pack content", () => {
     expect(subs.filter((d) => sys(d).raceId === "gnome")).toHaveLength(4);
     expect(subs.filter((d) => sys(d).raceId === "halfling")).toHaveLength(7);
   });
+  it("race compendium names sort each PHB race first, then its subraces", () => {
+    const sub = (d: (typeof items)[number]) => sys(d).subrace as { id?: string; displayName?: string } | undefined;
+    const TITLE: Record<string, string> = { dwarf: "Dwarf", elf: "Elf", gnome: "Gnome", halfling: "Halfling" };
+    for (const d of items.filter((i) => sub(i)?.id)) {
+      expect(d.name as string, d.name as string).toMatch(new RegExp(`^${TITLE[sys(d).raceId as string]}, .+`));
+      expect((sub(d)?.displayName ?? "").trim(), d.name as string).not.toBe("");
+    }
+    const phb = items.filter((i) => !sub(i)?.id);
+    expect(phb.map((d) => d.name).sort()).toEqual(["Dwarf", "Elf", "Gnome", "Half-Elf", "Halfling", "Human"]);
+    for (const d of phb) expect(sub(d)?.displayName ?? "", d.name as string).toBe("");
+    const names = items.map((d) => d.name as string).sort((a, b) => a.localeCompare(b));
+    expect(new Set(names).size).toBe(names.length);
+    for (const base of ["Dwarf", "Elf", "Gnome", "Halfling"]) {
+      const at = names.indexOf(base);
+      let end = at + 1;
+      while (end < names.length && names[end]!.startsWith(`${base}, `)) end++;
+      const subs = items.filter((i) => i.name !== base && (sys(i).raceId as string) === base.toLowerCase() && sub(i)?.id).map((d) => d.name as string);
+      expect(subs.length, base).toBeGreaterThan(0);
+      expect(names.slice(at + 1, end).sort(), base).toEqual(subs.sort());
+    }
+  });
   const DWARF = {
     "hill-dwarf":     { adj: { con: 1, cha: -1 }, ranges: [[8,18],[3,17],[11,18],[3,18],[3,18],[3,17]], infra: 60,  xp: 0,  conSave: 0, limits: { fighter: 15, cleric: 10, thief: 12 }, thief: [0, 10, 15, 0, 0, 0, -10, -5] },
     "mountain-dwarf":{ adj: { con: 1, cha: -1 }, ranges: [[8,18],[3,17],[11,19],[3,18],[3,18],[3,16]], infra: 60,  xp: 0,  conSave: 0, limits: { fighter: 16, cleric: 10, thief: 12 }, thief: [0, 10, 15, 0, 0, 0, -10, -5] },

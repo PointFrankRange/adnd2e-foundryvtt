@@ -1,7 +1,7 @@
 {
   "_id": "kElfDrow00000001",
   "_key": "!items!kElfDrow00000001",
-  "name": "Drow",
+  "name": "Elf, Drow",
   "type": "race",
   "img": "icons/svg/oak.svg",
   "system": {
@@ -64,6 +64,7 @@
     ],
     "subrace": {
       "id": "drow",
+      "displayName": "Drow",
       "abilityAdjustments": {
         "str": 0,
         "dex": 2,

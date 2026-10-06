@@ -1,7 +1,7 @@
 {
   "_id": "kElfGrey00000001",
   "_key": "!items!kElfGrey00000001",
-  "name": "Grey Elf",
+  "name": "Elf, Grey",
   "type": "race",
   "img": "icons/svg/oak.svg",
   "system": {
@@ -52,6 +52,7 @@
     ],
     "subrace": {
       "id": "grey-elf",
+      "displayName": "Grey Elf",
       "abilityAdjustments": {
         "str": -1,
         "dex": 1,

@@ -1,7 +1,7 @@
 {
   "_id": "kDwarfDeep000001",
   "_key": "!items!kDwarfDeep000001",
-  "name": "Deep Dwarf",
+  "name": "Dwarf, Deep",
   "type": "race",
   "img": "icons/svg/mountain.svg",
   "system": {
@@ -45,6 +45,7 @@
     ],
     "subrace": {
       "id": "deep-dwarf",
+      "displayName": "Deep Dwarf",
       "abilityAdjustments": {
         "str": 0,
         "dex": 0,

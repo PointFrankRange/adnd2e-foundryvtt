@@ -126,3 +126,9 @@ export function abilityRangeProblems(scores: AbilityScores, ranges: AbilityRange
 export function combineXpPercent(kitPercent: number, racePercent: number): number {
   return Math.max(-90, kitPercent + racePercent);
 }
+
+/** The race name the character sheet shows: the subrace's display name when set, else the item's own name. */
+export function raceDisplayName(itemName: string, rawSubrace: { displayName?: unknown } | null | undefined): string {
+  const d = rawSubrace?.displayName;
+  return typeof d === "string" && d.trim() !== "" ? d : itemName;
+}

@@ -1,7 +1,7 @@
 {
   "_id": "kDwarfMount00001",
   "_key": "!items!kDwarfMount00001",
-  "name": "Mountain Dwarf",
+  "name": "Dwarf, Mountain",
   "type": "race",
   "img": "icons/svg/mountain.svg",
   "system": {
@@ -41,6 +41,7 @@
     "grantedFeatures": [],
     "subrace": {
       "id": "mountain-dwarf",
+      "displayName": "Mountain Dwarf",
       "abilityAdjustments": {
         "str": 0,
         "dex": 0,

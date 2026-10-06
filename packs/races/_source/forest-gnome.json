@@ -1,7 +1,7 @@
 {
   "_id": "kGnomeForest0001",
   "_key": "!items!kGnomeForest0001",
-  "name": "Forest Gnome",
+  "name": "Gnome, Forest",
   "type": "race",
   "img": "icons/svg/burrow.svg",
   "system": {
@@ -61,6 +61,7 @@
     ],
     "subrace": {
       "id": "forest-gnome",
+      "displayName": "Forest Gnome",
       "abilityAdjustments": {
         "str": -1,
         "dex": 1,

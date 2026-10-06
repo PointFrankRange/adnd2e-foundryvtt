@@ -1,7 +1,7 @@
 {
   "_id": "kHalfTallWis0001",
   "_key": "!items!kHalfTallWis0001",
-  "name": "Tallfellow (Wisdom)",
+  "name": "Halfling, Tallfellow (Wisdom)",
   "type": "race",
   "img": "icons/svg/house.svg",
   "system": {
@@ -35,6 +35,7 @@
     ],
     "subrace": {
       "id": "tallfellow-wis",
+      "displayName": "Tallfellow (Wisdom)",
       "abilityAdjustments": {
         "str": -1,
         "dex": 0,

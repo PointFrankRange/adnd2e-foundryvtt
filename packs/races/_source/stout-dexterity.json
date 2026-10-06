@@ -1,7 +1,7 @@
 {
   "_id": "kHalfStoutDex001",
   "_key": "!items!kHalfStoutDex001",
-  "name": "Stout (Dexterity)",
+  "name": "Halfling, Stout (Dexterity)",
   "type": "race",
   "img": "icons/svg/house.svg",
   "system": {
@@ -34,6 +34,7 @@
     ],
     "subrace": {
       "id": "stout-dex",
+      "displayName": "Stout (Dexterity)",
       "abilityAdjustments": {
         "str": -1,
         "dex": 1,
