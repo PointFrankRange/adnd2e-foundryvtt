@@ -276,7 +276,11 @@ export async function attackMode(actor: PsionicActor, powerId: string, deps: Par
   contest.applied = true; // the update below records the tangents; the result hook must skip this card
   const update: Record<string, unknown> = { "system.psionics.psp": contest.remaining };
   if (outcome.tangentsGained > 0) update["system.psionics.contacts"] = recordTangents(actor.system.psionics.contacts, target.uuid, target.name, outcome.tangentsGained);
-  else if (switched.length !== actor.system.psionics.contacts.length) update["system.psionics.contacts"] = switched;
+  else {
+    // computed AFTER the dice awaits so a concurrently applied pending result is not overwritten with a stale list
+    const switchedNow = switchTarget(actor.system.psionics.contacts, target.uuid);
+    if (switchedNow.length !== actor.system.psionics.contacts.length) update["system.psionics.contacts"] = switchedNow;
+  }
   await actor.update(update);
   await postContestCard(contest, speaker);
 }
