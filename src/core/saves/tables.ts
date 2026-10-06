@@ -42,6 +42,14 @@ export const SAVE_MATRICES: Record<ClassGroup, readonly SaveBand[]> = {
     band(15, 4, 6, 5, 4, 7),
     band(17, 3, 5, 4, 4, 6),
   ],
+  psionicist: [
+    band(1, 13, 15, 10, 16, 15),
+    band(5, 12, 13, 9, 15, 14),
+    band(9, 11, 11, 8, 13, 12),
+    band(13, 10, 9, 7, 12, 11),
+    band(17, 9, 7, 6, 11, 9),
+    band(21, 8, 5, 5, 9, 7),
+  ],
   wizard: [
     band(1, 14, 11, 13, 15, 12),
     band(6, 13, 9, 11, 13, 10),

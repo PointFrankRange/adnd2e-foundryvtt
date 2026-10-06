@@ -9,7 +9,7 @@ export interface AbilityScores {
   cha: number;
 }
 
-export type ClassGroup = "warrior" | "wizard" | "priest" | "rogue";
+export type ClassGroup = "warrior" | "wizard" | "priest" | "rogue" | "psionicist";
 
 /** A class group paired with a level — the unit of a best-of THAC0 / save lookup. */
 export interface GroupLevel {
@@ -86,7 +86,8 @@ export type ClassId =
   | "paladin"
   | "ranger"
   | "druid"
-  | "bard";
+  | "bard"
+  | "psionicist";
 
 /** Which spell-slot table a caster class uses (PHB Tables 21/24/17/18/32). */
 export type SpellProgressionId = "wizard" | "priest" | "paladin" | "ranger" | "bard";

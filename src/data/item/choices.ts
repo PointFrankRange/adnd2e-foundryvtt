@@ -8,7 +8,7 @@ import type { TurnRowId } from "../../core/turning";
 import type { ClassArrangement } from "../derive/character/multiclass";
 
 export const CLASS_IDS: readonly ClassId[] = [
-  "fighter", "mage", "cleric", "thief", "paladin", "ranger", "druid", "bard",
+  "fighter", "mage", "cleric", "thief", "paladin", "ranger", "druid", "bard", "psionicist",
 ];
 
 export const RACE_IDS: readonly Race[] = [
@@ -50,7 +50,7 @@ export const NONWEAPON_GROUPS: readonly NonweaponGroup[] = [
 ];
 
 /** The four class groups (= core `ClassGroup`). */
-export const CLASS_GROUPS: readonly ClassGroup[] = ["warrior", "wizard", "priest", "rogue"];
+export const CLASS_GROUPS: readonly ClassGroup[] = ["warrior", "wizard", "priest", "rogue", "psionicist"];
 
 export const CREATURE_SIZES: readonly CreatureSize[] = [
   "tiny", "small", "medium", "large", "huge", "gargantuan",

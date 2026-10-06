@@ -11,6 +11,7 @@ const RATE: Record<ClassGroup, readonly [number, number]> = {
   priest: [2, 3],
   rogue: [1, 2],
   wizard: [1, 3],
+  psionicist: [1, 2],
 };
 
 export function thac0(group: ClassGroup, level: number): number {

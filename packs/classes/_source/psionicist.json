@@ -1,0 +1,17 @@
+{
+  "_id": "ClsPsionicist000",
+  "_key": "!items!ClsPsionicist000",
+  "name": "Psionicist",
+  "type": "class",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "",
+    "chassisId": "psionicist",
+    "specialistSchool": null,
+    "kit": null,
+    "grantedFeatures": [],
+    "xp": 0,
+    "hpRolls": [],
+    "dualClassState": null
+  }
+}

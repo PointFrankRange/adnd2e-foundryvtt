@@ -4,7 +4,7 @@ import type { ClassGroup, SaveCategory } from "../../../core/types";
 import type { CreatureDerived, CreatureSnapshot } from "./snapshot";
 
 const CATEGORIES: readonly SaveCategory[] = ["ppd", "rsw", "pp", "bw", "spell"];
-const CLASS_GROUPS: readonly ClassGroup[] = ["warrior", "wizard", "priest", "rogue"];
+const CLASS_GROUPS: readonly ClassGroup[] = ["warrior", "wizard", "priest", "rogue", "psionicist"];
 
 /** §5.3 — the derived values for a monster. Monsters state AC directly, so it is not here. */
 export function deriveCreature(snapshot: CreatureSnapshot): CreatureDerived {

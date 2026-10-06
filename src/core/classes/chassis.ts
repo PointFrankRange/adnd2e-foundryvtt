@@ -34,12 +34,22 @@ const PALADIN_RANGER_XP: readonly number[] = [
 const DRUID_XP: readonly number[] = [
   0, 2000, 4000, 7500, 12500, 20000, 35000, 60000, 90000, 125000, 200000, 300000, 750000, 1500000,
 ];
+// PHBR5 Table 2: PSIONICIST EXPERIENCE LEVELS.
+// prettier-ignore
+const PSIONICIST_XP: readonly number[] = [
+  0, 2200, 4400, 8800, 16500, 30000, 55000, 100000, 200000, 400000,
+  600000, 800000, 1000000, 1200000, 1500000, 1800000, 2100000, 2400000, 2700000, 3000000,
+];
 // Bard uses the Table 25 Thief/Bard column — identical to THIEF_XP.
 
 const MAGE_WEAPONS = ["dagger", "staff", "dart", "knife", "sling"] as const;
 const THIEF_WEAPONS = [
   "club", "dagger", "dart", "hand crossbow", "knife", "lasso", "short bow", "sling",
   "broad sword", "long sword", "short sword", "staff",
+] as const;
+const PSIONICIST_WEAPONS = [
+  "short bow", "hand crossbow", "light crossbow", "dagger", "dirk", "knife", "club", "hand axe", "throwing axe",
+  "horseman's mace", "horseman's pick", "scimitar", "spear", "short sword", "war hammer",
 ] as const;
 const DRUID_WEAPONS = [
   "club", "sickle", "dart", "spear", "dagger", "scimitar", "sling", "staff",
@@ -254,6 +264,31 @@ export const BARD: ClassChassis = {
   thiefSkillAccess: ["pick-pockets", "climb-walls", "detect-noise", "read-languages"],
 };
 
+export const PSIONICIST: ClassChassis = {
+  id: "psionicist",
+  name: "Psionicist",
+  group: "psionicist",
+  hitDie: 6,
+  hpAfterNameLevel: 2,
+  conBonusCutoffLevel: 9,
+  primeRequisites: ["con", "wis"],
+  abilityMinimums: { con: 11, int: 12, wis: 15 },
+  xpThresholds: PSIONICIST_XP,
+  xpPerLevelBeyond20: 300000,
+  weaponProficiencies: { initial: 2, levelsPerSlot: 5 },
+  nonweaponProficiencies: { initial: 3, levelsPerSlot: 3 },
+  nonProficiencyPenalty: -4,
+  casterType: null,
+  armorAllowed: ["padded", "leather", "studded leather", "hide"],
+  weaponsAllowed: { names: [...PSIONICIST_WEAPONS] },
+  weaponSpecializationAllowed: false,
+  raceLevelLimits: {},
+  maxLevel: null,
+  spellStartLevel: null,
+  spellProgressionId: null,
+  thiefSkillAccess: null,
+};
+
 const BY_ID: Record<ClassId, ClassChassis> = {
   fighter: FIGHTER,
   mage: MAGE,
@@ -263,6 +298,7 @@ const BY_ID: Record<ClassId, ClassChassis> = {
   ranger: RANGER,
   druid: DRUID,
   bard: BARD,
+  psionicist: PSIONICIST,
 };
 
 export function getChassis(id: ClassId): ClassChassis {

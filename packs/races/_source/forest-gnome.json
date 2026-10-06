@@ -14,13 +14,15 @@
       "fighter": 11,
       "thief": 13,
       "cleric": 9,
-      "mage": 15
+      "mage": 15,
+      "psionicist": 9
     },
     "allowedClasses": [
       "fighter",
       "thief",
       "cleric",
-      "mage"
+      "mage",
+      "psionicist"
     ],
     "allowedMulticlass": [
       [

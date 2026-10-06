@@ -10,9 +10,9 @@
     "size": "small",
     "baseMovement": 6,
     "infravision": 60,
-    "classLevelLimits": { "cleric": 8, "fighter": 9, "thief": 15 },
-    "allowedClasses": ["cleric", "fighter", "thief"],
-    "allowedMulticlass": [["fighter", "thief"]],
+    "classLevelLimits": { "cleric": 8, "fighter": 9, "thief": 15, "psionicist": 10 },
+    "allowedClasses": ["cleric", "fighter", "thief", "psionicist"],
+    "allowedMulticlass": [["fighter", "thief"], ["fighter", "psionicist"], ["thief", "psionicist"]],
     "bonusLanguages": ["dwarf", "elf", "gnome", "goblin", "orc"],
     "grantedFeatures": []
   }

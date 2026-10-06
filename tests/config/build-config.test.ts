@@ -23,7 +23,7 @@ describe("buildAdnd2eConfig()", () => {
   it("ability, save and class-group keysets match the engine unions", () => {
     expect(Object.keys(cfg.abilities).sort()).toEqual(["cha", "con", "dex", "int", "str", "wis"]);
     expect(Object.keys(cfg.saves).sort()).toEqual(["bw", "pp", "ppd", "rsw", "spell"]);
-    expect(Object.keys(cfg.classGroups).sort()).toEqual(["priest", "rogue", "warrior", "wizard"]);
+    expect(Object.keys(cfg.classGroups).sort()).toEqual(["priest", "psionicist", "rogue", "warrior", "wizard"]);
   });
 
   it("schools = the 8 specialist schools + lesser-divination + wild", () => {

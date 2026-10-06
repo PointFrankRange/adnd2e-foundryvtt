@@ -22,7 +22,8 @@
       "warrior": "Warrior",
       "wizard": "Wizard",
       "priest": "Priest",
-      "rogue": "Rogue"
+      "rogue": "Rogue",
+      "psionicist": "Psionicist"
     },
     "schools": {
       "abjuration": "Abjuration",
