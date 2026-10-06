@@ -50,7 +50,6 @@ describe("canLearn", () => {
 describe("canRelearn", () => {
   it("spends one slot of the same kind from the table budget (devotions)", () => {
     const known = [...many(2, "clairsentience", "devotion")];
-    known[0] = { ...known[0]!, scoreBonus: 0 };
     expect(canRelearn(known, known[0]!.id, 1)).toEqual({ ok: true }); // 2 known of 3 allowed
     const full = [...many(3, "clairsentience", "devotion")];
     expect(canRelearn(full, full[0]!.id, 1)).toEqual({ ok: false, reason: "no-budget" });
@@ -62,6 +61,27 @@ describe("canRelearn", () => {
     expect(canRelearn(science, science[0]!.id, 3)).toEqual({ ok: true }); // 1 known of 2 allowed at level 3
     const two = [...many(2, "clairsentience", "science"), ...many(7, "clairsentience", "devotion")];
     expect(canRelearn(two, two[0]!.id, 3)).toEqual({ ok: false, reason: "no-budget" }); // 2 known of 2 allowed at level 3
+  });
+  it("relearned points count against the budget (known 2 + 1 relearned = 3 slots used at level 1)", () => {
+    const known = [p("clairsentience", "devotion", 1), p("clairsentience", "devotion")];
+    expect(canRelearn(known, known[1]!.id, 1)).toEqual({ ok: false, reason: "no-budget" });
+    expect(canLearn(known, { discipline: "clairsentience", kind: "devotion" }, 1)).toEqual({ ok: false, reason: "devotion-limit" });
+    const none = [p("clairsentience", "devotion"), p("clairsentience", "devotion")];
+    expect(canRelearn(none, none[1]!.id, 1)).toEqual({ ok: true });
+    expect(canLearn(none, { discipline: "clairsentience", kind: "devotion" }, 1)).toEqual({ ok: true });
+  });
+  it("defense modes do not hold a discipline slot or use science or devotion slots", () => {
+    const known = [p("telepathy", "defense")];
+    expect(canLearn(known, { discipline: "clairsentience", kind: "devotion" }, 1)).toEqual({ ok: true });
+    const full = [...many(3, "clairsentience", "devotion"), p("telepathy", "defense")];
+    expect(canLearn(full, { discipline: "clairsentience", kind: "science" }, 1)).toEqual({ ok: true });
+  });
+  it("another discipline can hold at most (primary - 1) sciences (primary 3 sciences, 7 devotions)", () => {
+    const primary = [...many(3, "clairsentience", "science"), ...many(7, "clairsentience", "devotion")];
+    const two = [...many(1, "psychokinesis", "science"), ...many(5, "psychokinesis", "devotion")];
+    expect(canLearn([...primary, ...two], { discipline: "psychokinesis", kind: "science" }, 12)).toEqual({ ok: true }); // 2nd science, 5 devotions >= 4
+    const three = [...many(2, "psychokinesis", "science"), ...many(7, "psychokinesis", "devotion")];
+    expect(canLearn([...primary, ...three], { discipline: "psychokinesis", kind: "science" }, 18)).toEqual({ ok: false, reason: "primary-cap" });
   });
   it("an unknown id is refused", () => {
     expect(canRelearn([], "nope", 1)).toEqual({ ok: false, reason: "no-budget" });
