@@ -33,6 +33,11 @@ describe("actorLevelRulesFor", () => {
       xpPercent: 10, rules: { limit: null, beyondMultiplier: 0 },
     });
   });
+  it("a non-positive-integer limit on the race item is ignored (unlimited), never crashing the derive", () => {
+    for (const bad of [0, -1, 12.5]) {
+      expect(actorLevelRulesFor([race({ fighter: bad }), cls("fighter")], "fighter", on).rules.limit, String(bad)).toBeNull();
+    }
+  });
   it("an unknown chassis id with a race limit and the bonus setting on stays at the base limit", () => {
     const bonus = { ...on, primeRequisiteBonusLevels: true };
     expect(actorLevelRulesFor([race({ mystery: 9 }), cls("mystery")], "mystery", bonus, { str: 18 }).rules.limit).toBe(9);

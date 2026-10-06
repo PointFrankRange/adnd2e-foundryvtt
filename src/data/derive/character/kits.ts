@@ -129,7 +129,7 @@ export function actorLevelRulesFor(
   if (!options.racialLevelLimits) return { xpPercent, rules: NO_LEVEL_RULES };
   const race = all.find((i) => i.type === "race");
   const raw = (race?.system as { classLevelLimits?: Record<string, unknown> } | undefined)?.classLevelLimits?.[chassisId];
-  const base = typeof raw === "number" ? raw : null;
+  const base = typeof raw === "number" && Number.isInteger(raw) && raw >= 1 ? raw : null; // 0, negative or fractional limits are ignored (unlimited), never crash the derive
   let limit = base;
   if (base !== null && options.primeRequisiteBonusLevels && all.filter((i) => i.type === "class").length === 1) {
     const prime = (getChassis(chassisId as ClassId)?.primeRequisites ?? []).map((k) => scores[k]);
