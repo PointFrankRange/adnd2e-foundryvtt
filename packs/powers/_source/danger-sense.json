@@ -17,6 +17,8 @@
     "range": "special",
     "preparation": "0",
     "areaOfEffect": "10 yds.",
-    "scoreBonus": 0
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
   }
 }

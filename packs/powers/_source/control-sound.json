@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrControlso125",
+  "_key": "!items!kPwrControlso125",
+  "name": "Control Sound",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Alters, layers or muffles sounds that already exist so they seem to be something else.",
+    "discipline": "psychokinesis",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": -5,
+    "initialCost": 5,
+    "costNote": "",
+    "maintenanceCost": 2,
+    "maintenanceUnit": "round",
+    "range": "100 yds.",
+    "preparation": "0",
+    "areaOfEffect": "na",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

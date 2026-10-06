@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrMindbar00196",
+  "_key": "!items!kPwrMindbar00196",
+  "name": "Mind Bar",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Gives strong resistance to mind-affecting magic and bars telepathic powers from the psionicist's mind.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": -2,
+    "initialCost": 6,
+    "costNote": "",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

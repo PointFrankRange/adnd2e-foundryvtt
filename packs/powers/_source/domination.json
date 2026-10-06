@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrDominatio172",
+  "_key": "!items!kPwrDominatio172",
+  "name": "Domination",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Plants commands directly in one victim's mind so the subject obeys the psionicist's will.",
+    "discipline": "telepathy",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 0,
+    "costNote": "contact; maint. varies",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "30 yds.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

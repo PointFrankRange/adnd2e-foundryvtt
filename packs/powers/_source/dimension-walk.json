@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrDimension167",
+  "_key": "!items!kPwrDimension167",
+  "name": "Dimension Walk",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets the user step through a series of linked locations to cover ground quickly.",
+    "discipline": "psychoportation",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -2,
+    "initialCost": 8,
+    "costNote": "",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "turn",
+    "range": "na",
+    "preparation": "2",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrSendthoug204",
+  "_key": "!items!kPwrSendthoug204",
+  "name": "Send Thoughts",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Sends a one-way message to a contacted mind, or distracts a target such as a spellcaster.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": -1,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 2,
+    "maintenanceUnit": "round",
+    "range": "unlim.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

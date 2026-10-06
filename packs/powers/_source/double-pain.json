@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrDoublepai150",
+  "_key": "!items!kPwrDoublepai150",
+  "name": "Double Pain",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist magnifies a touched person's pain so damage seems doubled, and the victim may pass out as a result.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -3,
+    "initialCost": 7,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "touch",
+    "preparation": "0",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

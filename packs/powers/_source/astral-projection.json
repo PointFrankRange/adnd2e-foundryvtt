@@ -14,9 +14,11 @@
     "costNote": "",
     "maintenanceCost": 2,
     "maintenanceUnit": "hour",
-    "range": "-",
+    "range": "na",
     "preparation": "1",
     "areaOfEffect": "personal",
-    "scoreBonus": 0
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
   }
 }

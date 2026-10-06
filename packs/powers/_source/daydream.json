@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrDaydream0186",
+  "_key": "!items!kPwrDaydream0186",
+  "name": "Daydream",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets the victim's mind wander so that they notice little around them and are easy to slip past.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": 0,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "unlim.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

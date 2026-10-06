@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrSwitchper180",
+  "_key": "!items!kPwrSwitchper180",
+  "name": "Switch Personality",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Trades minds with another person so that each occupies the other's body.",
+    "discipline": "telepathy",
+    "kind": "science",
+    "abilityKey": "con",
+    "abilityModifier": -4,
+    "initialCost": 0,
+    "costNote": "contact +30",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "touch",
+    "preparation": "3",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

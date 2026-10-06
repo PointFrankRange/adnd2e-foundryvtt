@@ -17,6 +17,10 @@
     "range": "30 yds.",
     "preparation": "0",
     "areaOfEffect": "1 item, 1 lb.",
-    "scoreBonus": 0
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis"
+    ],
+    "minLevel": 0
   }
 }

@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrIntensify221",
+  "_key": "!items!kPwrIntensify221",
+  "name": "Intensify",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Boosts one of the user's mental abilities for psionic use by draining the other two.",
+    "discipline": "metapsionics",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 5,
+    "costNote": "5/increase; score is the affected ability -3; maint. 1/rnd.",
+    "maintenanceCost": 1,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "1/increase",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 3
+  }
+}

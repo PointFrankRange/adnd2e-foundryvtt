@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrCreateobj116",
+  "_key": "!items!kPwrCreateobj116",
+  "name": "Create Object",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Builds a solid object out of nothing but concentrated mental force, which lasts only as long as it is maintained.",
+    "discipline": "psychokinesis",
+    "kind": "science",
+    "abilityKey": "int",
+    "abilityModifier": -4,
+    "initialCost": 16,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "20 yds.",
+    "preparation": "0",
+    "areaOfEffect": "special",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis"
+    ],
+    "minLevel": 0
+  }
+}

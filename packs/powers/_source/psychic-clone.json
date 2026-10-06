@@ -1,0 +1,28 @@
+{
+  "_id": "kPwrPsychiccl213",
+  "_key": "!items!kPwrPsychiccl213",
+  "name": "Psychic Clone",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Sends out an insubstantial double that carries the user's powers while the real body lies helpless.",
+    "discipline": "metapsionics",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -8,
+    "initialCost": 50,
+    "costNote": "",
+    "maintenanceCost": 5,
+    "maintenanceUnit": "round",
+    "range": "60 feet",
+    "preparation": "10 rnds.",
+    "areaOfEffect": "special",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Clairaudience",
+      "Clairvoyance",
+      "Psychic Messenger"
+    ],
+    "minLevel": 5
+  }
+}

@@ -17,6 +17,8 @@
     "range": "unlimited",
     "preparation": "0",
     "areaOfEffect": "special",
-    "scoreBonus": 0
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
   }
 }

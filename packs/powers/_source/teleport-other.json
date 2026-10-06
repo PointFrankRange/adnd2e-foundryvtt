@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrTeleporto166",
+  "_key": "!items!kPwrTeleporto166",
+  "name": "Teleport Other",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Moves another character across distance in the way Teleport moves the user, who stays behind.",
+    "discipline": "psychoportation",
+    "kind": "science",
+    "abilityKey": "int",
+    "abilityModifier": -2,
+    "initialCost": 20,
+    "costNote": "20+",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "10 yds.",
+    "preparation": "0",
+    "areaOfEffect": "na",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Teleport"
+    ],
+    "minLevel": 0
+  }
+}

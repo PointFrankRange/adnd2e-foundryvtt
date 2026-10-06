@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrTelekines120",
+  "_key": "!items!kPwrTelekines120",
+  "name": "Telekinesis",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Moves an unattended object through the air by will alone, at a price that rises with the object's weight.",
+    "discipline": "psychokinesis",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 3,
+    "costNote": "3+; maint. 1+",
+    "maintenanceCost": 1,
+    "maintenanceUnit": "round",
+    "range": "30 yds.",
+    "preparation": "0",
+    "areaOfEffect": "single item",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

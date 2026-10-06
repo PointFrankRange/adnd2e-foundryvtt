@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrEctoplasm151",
+  "_key": "!items!kPwrEctoplasm151",
+  "name": "Ectoplasmic Form",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist becomes a smoky, insubstantial ectoplasm and walks through solid matter at his normal movement rate.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -4,
+    "initialCost": 9,
+    "costNote": "",
+    "maintenanceCost": 9,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "1",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

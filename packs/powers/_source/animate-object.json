@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrAnimateob121",
+  "_key": "!items!kPwrAnimateob121",
+  "name": "Animate Object",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Gives lifeless objects clumsy motion as though puppeted, with harder materials being harder to animate.",
+    "discipline": "psychokinesis",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": -3,
+    "initialCost": 8,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "50 yds.",
+    "preparation": "0",
+    "areaOfEffect": "1 object, 100 lbs.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis"
+    ],
+    "minLevel": 0
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrEmpathy00187",
+  "_key": "!items!kPwrEmpathy00187",
+  "name": "Empathy",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Reads the basic emotions, needs and drives of the minds within a small area.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": 0,
+    "initialCost": 0,
+    "costNote": "contact (or 1)",
+    "maintenanceCost": 1,
+    "maintenanceUnit": "round",
+    "range": "unlim.",
+    "preparation": "0",
+    "areaOfEffect": "20' x 20' x 20'",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

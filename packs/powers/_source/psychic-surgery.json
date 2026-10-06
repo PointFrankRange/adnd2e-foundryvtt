@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrPsychicsu214",
+  "_key": "!items!kPwrPsychicsu214",
+  "name": "Psychic Surgery",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets a telepath mend psychic injuries and ailments in another creature, or lock a telepathic effect in place.",
+    "discipline": "metapsionics",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -5,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 10,
+    "maintenanceUnit": "turn",
+    "range": "touch",
+    "preparation": "10",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

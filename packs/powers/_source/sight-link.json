@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrSightlink205",
+  "_key": "!items!kPwrSightlink205",
+  "name": "Sight Link",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets the psionicist see through the eyes of a contacted creature.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -3,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 5,
+    "maintenanceUnit": "turn",
+    "range": "unlim.",
+    "preparation": "1",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

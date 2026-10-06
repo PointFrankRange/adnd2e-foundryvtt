@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrTeleportt169",
+  "_key": "!items!kPwrTeleportt169",
+  "name": "Teleport Trigger",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Sets up a programmed condition that instantly whisks the user to a chosen destination when it occurs.",
+    "discipline": "psychoportation",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": 1,
+    "initialCost": 0,
+    "costNote": "",
+    "maintenanceCost": 2,
+    "maintenanceUnit": "hour",
+    "range": "infinite",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Teleport"
+    ],
+    "minLevel": 0
+  }
+}

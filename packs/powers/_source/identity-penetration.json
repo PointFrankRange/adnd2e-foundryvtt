@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrIdentityp190",
+  "_key": "!items!kPwrIdentityp190",
+  "name": "Identity Penetration",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Reveals a target's true identity despite polymorphs, illusions or disguises.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 6,
+    "maintenanceUnit": "round",
+    "range": "unlim.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

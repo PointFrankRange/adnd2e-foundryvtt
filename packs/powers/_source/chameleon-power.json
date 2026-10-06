@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrChameleon147",
+  "_key": "!items!kPwrChameleon147",
+  "name": "Chameleon Power",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist's skin, clothing and gear automatically take on the coloring of his surroundings, making him hard to spot.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -1,
+    "initialCost": 6,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

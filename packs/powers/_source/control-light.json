@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrControlli124",
+  "_key": "!items!kPwrControlli124",
+  "name": "Control Light",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Brightens, dims, deepens or stretches the light and shadow already present in an area.",
+    "discipline": "psychokinesis",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": 0,
+    "initialCost": 12,
+    "costNote": "",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "25 yds.",
+    "preparation": "0",
+    "areaOfEffect": "400 sq. ft.",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

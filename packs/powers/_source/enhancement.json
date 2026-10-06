@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrEnhanceme219",
+  "_key": "!items!kPwrEnhanceme219",
+  "name": "Enhancement",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Sharpens the user's skill in one chosen discipline at a small cost to the others.",
+    "discipline": "metapsionics",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 30,
+    "costNote": "",
+    "maintenanceCost": 8,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "5",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 6
+  }
+}

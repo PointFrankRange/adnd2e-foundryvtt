@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrBanishmen163",
+  "_key": "!items!kPwrBanishmen163",
+  "name": "Banishment",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Sends an unwilling creature into a barren pocket dimension and keeps it there for as long as the power is sustained.",
+    "discipline": "psychoportation",
+    "kind": "science",
+    "abilityKey": "int",
+    "abilityModifier": -1,
+    "initialCost": 30,
+    "costNote": "",
+    "maintenanceCost": 10,
+    "maintenanceUnit": "round",
+    "range": "5 yds.",
+    "preparation": "0",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Teleport"
+    ],
+    "minLevel": 0
+  }
+}

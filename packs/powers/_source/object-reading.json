@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrObjectrea103",
+  "_key": "!items!kPwrObjectrea103",
+  "name": "Object Reading",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Reveals impressions left on a held object by its former owners, with a better result giving more detail.",
+    "discipline": "clairsentience",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -5,
+    "initialCost": 16,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "1",
+    "areaOfEffect": "touch",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

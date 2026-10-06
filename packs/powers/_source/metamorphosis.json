@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrMetamorph137",
+  "_key": "!items!kPwrMetamorph137",
+  "name": "Metamorphosis",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist reshapes himself into any object or creature of about his own mass, taking on its form and physical attacks.",
+    "discipline": "psychometabolism",
+    "kind": "science",
+    "abilityKey": "con",
+    "abilityModifier": -6,
+    "initialCost": 21,
+    "costNote": "",
+    "maintenanceCost": 1,
+    "maintenanceUnit": "turn",
+    "range": "0",
+    "preparation": "5",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

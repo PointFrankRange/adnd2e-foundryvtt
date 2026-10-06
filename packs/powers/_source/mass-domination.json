@@ -1,0 +1,28 @@
+{
+  "_id": "kPwrMassdomin175",
+  "_key": "!items!kPwrMassdomin175",
+  "name": "Mass Domination",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Extends domination so that up to five contacted creatures are controlled at the same time.",
+    "discipline": "telepathy",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -6,
+    "initialCost": 0,
+    "costNote": "contact; maint. varies",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "40 yds.",
+    "preparation": "2",
+    "areaOfEffect": "up to 5 creatures",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact",
+      "Domination"
+    ],
+    "minLevel": 0
+  }
+}

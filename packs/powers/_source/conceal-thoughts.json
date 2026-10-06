@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrConcealth184",
+  "_key": "!items!kPwrConcealth184",
+  "name": "Conceal Thoughts",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Shields the psionicist's mind against readers and probers of thoughts, both psionic and magical.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": 0,
+    "initialCost": 5,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "3 yds.",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

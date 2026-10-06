@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrTimeshift170",
+  "_key": "!items!kPwrTimeshift170",
+  "name": "Time Shift",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Sends the user a few rounds ahead in time so he can watch events unfold before time catches up.",
+    "discipline": "psychoportation",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": 0,
+    "initialCost": 16,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Teleport"
+    ],
+    "minLevel": 0
+  }
+}

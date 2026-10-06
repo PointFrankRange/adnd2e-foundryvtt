@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrReduction160",
+  "_key": "!items!kPwrReduction160",
+  "name": "Reduction",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist shrinks his body along any dimension, halving it repeatedly once it is down to about a foot.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -2,
+    "initialCost": 0,
+    "costNote": "varies",
+    "maintenanceCost": 1,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

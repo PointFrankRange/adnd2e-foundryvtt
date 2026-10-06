@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrInflictpa192",
+  "_key": "!items!kPwrInflictpa192",
+  "name": "Inflict Pain",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Causes agonizing pain that leaves no marks and can distract or incapacitate a victim.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -4,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 2,
+    "maintenanceUnit": "round",
+    "range": "touch",
+    "preparation": "1",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

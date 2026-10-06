@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrFlesharmo154",
+  "_key": "!items!kPwrFlesharmo154",
+  "name": "Flesh Armor",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist's skin hardens into invisible, weightless armor whose quality depends on his power check.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -3,
+    "initialCost": 8,
+    "costNote": "",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

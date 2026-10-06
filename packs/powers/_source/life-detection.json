@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrLifedetec195",
+  "_key": "!items!kPwrLifedetec195",
+  "name": "Life Detection",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Senses living, thinking creatures within range and reveals roughly where they are.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": -2,
+    "initialCost": 3,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "100 yds.",
+    "preparation": "0",
+    "areaOfEffect": "varies",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

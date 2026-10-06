@@ -5,7 +5,7 @@
   "type": "power",
   "img": "icons/svg/aura.svg",
   "system": {
-    "description": "Focuses the user's mind and body to strike with greater skill in a fight.",
+    "description": "Enters a trance before psionic combat that sharpens telepathic powers but leaves the body open to automatic melee hits.",
     "discipline": "metapsionics",
     "kind": "devotion",
     "abilityKey": "wis",
@@ -17,6 +17,8 @@
     "range": "0",
     "preparation": "1",
     "areaOfEffect": "personal",
-    "scoreBonus": 0
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 3
   }
 }

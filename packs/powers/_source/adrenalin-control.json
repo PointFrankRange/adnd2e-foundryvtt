@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrAdrenalin140",
+  "_key": "!items!kPwrAdrenalin140",
+  "name": "Adrenalin Control",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist floods his body with adrenalin to gain a few temporary points to add to Strength, Dexterity or Constitution.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -3,
+    "initialCost": 8,
+    "costNote": "",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrLifedrain136",
+  "_key": "!items!kPwrLifedrain136",
+  "name": "Life Draining",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "By touch the psionicist drains hit points from a victim and adds them to his own, even beyond his normal total for a time.",
+    "discipline": "psychometabolism",
+    "kind": "science",
+    "abilityKey": "con",
+    "abilityModifier": -3,
+    "initialCost": 11,
+    "costNote": "",
+    "maintenanceCost": 5,
+    "maintenanceUnit": "round",
+    "range": "touch",
+    "preparation": "0",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

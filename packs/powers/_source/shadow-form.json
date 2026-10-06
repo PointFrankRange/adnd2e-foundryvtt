@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrShadowfor138",
+  "_key": "!items!kPwrShadowfor138",
+  "name": "Shadow-form",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist turns himself and a little equipment into living shadow able to slip through darkness but not harm the physical world.",
+    "discipline": "psychometabolism",
+    "kind": "science",
+    "abilityKey": "con",
+    "abilityModifier": -6,
+    "initialCost": 12,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

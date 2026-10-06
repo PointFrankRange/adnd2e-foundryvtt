@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrPsychiccr200",
+  "_key": "!items!kPwrPsychiccr200",
+  "name": "Psychic Crush",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Overloads the neurons of a contacted mind in an attack that can cause real hit point loss.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 7,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "50 yds.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink"
+    ],
+    "minLevel": 0
+  }
+}

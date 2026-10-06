@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrPhobiaamp198",
+  "_key": "!items!kPwrPhobiaamp198",
+  "name": "Phobia Amplification",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Finds a victim's deepest fear and magnifies it until it overwhelms them.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -2,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "unlim.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

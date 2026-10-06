@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrGird00000220",
+  "_key": "!items!kPwrGird00000220",
+  "name": "Gird",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Locks another active power into the user's mind so it keeps running without concentration.",
+    "discipline": "metapsionics",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": -3,
+    "initialCost": 0,
+    "costNote": "maint. 2 x maint.",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 3
+  }
+}

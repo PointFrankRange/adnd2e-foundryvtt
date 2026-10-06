@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrBodycontr142",
+  "_key": "!items!kPwrBodycontr142",
+  "name": "Body Control",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist adapts his body to a single hostile environment such as water, heat or cold so that it no longer harms him.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -4,
+    "initialCost": 7,
+    "costNote": "",
+    "maintenanceCost": 5,
+    "maintenanceUnit": "turn",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

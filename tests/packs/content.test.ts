@@ -374,10 +374,19 @@ describe("powers pack content", () => {
   const kindOf = (d: Record<string, unknown>) => String(sys(d).kind);
   const discOf = (d: Record<string, unknown>) => String(sys(d).discipline);
 
-  it("has 23 uniquely named and identified power Items", () => {
-    expect(items).toHaveLength(23);
-    expect(new Set(items.map((d) => d._id)).size).toBe(23);
-    expect(new Set(items.map((d) => d.name)).size).toBe(23);
+  it("review fixes: Receptacle has no hard prerequisite (the book allows a valuable gem instead of Empower); the book spells the power Telempathic Projection", () => {
+    const byName = (n: string) => items.find((d) => d.name === n);
+    expect(sys(byName("Receptacle")!).prerequisites).toEqual([]);
+    expect(byName("Telempathic Projection")).toBeDefined();
+    expect(byName("Telepathic Projection")).toBeUndefined();
+    expect(sys(byName("Telempathic Projection")!).prerequisites).toEqual(["Mindlink", "Contact"]);
+  });
+
+  it("has 153 uniquely named and identified power Items (the book's Summary of Powers)", () => {
+    expect(items).toHaveLength(153);
+    expect(new Set(items.map((d) => d._id)).size).toBe(153);
+    expect(new Set(items.map((d) => d.name)).size).toBe(153);
+    expect(new Set(items.map((d) => d._key)).size).toBe(153);
     for (const d of items) {
       expect(d.type, String(d.name)).toBe("power");
       expect(String(d._id)).toMatch(/^[A-Za-z0-9]{16}$/);
@@ -412,6 +421,98 @@ describe("powers pack content", () => {
       const inDisc = items.filter((d) => discOf(d) === disc && kindOf(d) !== "defense");
       expect(inDisc.filter((d) => kindOf(d) === "science").length, disc).toBeGreaterThanOrEqual(1);
       expect(inDisc.filter((d) => kindOf(d) === "devotion").length, disc).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it("pins the exact science and devotion counts per discipline", () => {
+    const counts: Record<string, [number, number]> = {
+      clairsentience: [6, 12],
+      psychokinesis: [6, 14],
+      psychometabolism: [7, 26],
+      psychoportation: [5, 7],
+      telepathy: [10, 32],
+      metapsionics: [7, 16],
+    };
+    let sciences = 0;
+    let devotions = 0;
+    for (const [disc, [sci, dev]] of Object.entries(counts)) {
+      expect(items.filter((d) => discOf(d) === disc && kindOf(d) === "science"), disc).toHaveLength(sci);
+      expect(items.filter((d) => discOf(d) === disc && kindOf(d) === "devotion"), disc).toHaveLength(dev);
+      sciences += sci;
+      devotions += dev;
+    }
+    expect(sciences).toBe(41);
+    expect(devotions).toBe(107);
+    expect(sciences + devotions + 5).toBe(153);
+  });
+
+  it("every prerequisite names another power in the pack, never itself, and there are no cycles", () => {
+    const byName = new Map(items.map((d) => [String(d.name).toLowerCase(), d]));
+    const prereqs = (d: Record<string, unknown>) => sys(d).prerequisites as string[];
+    for (const d of items) {
+      expect(Array.isArray(sys(d).prerequisites), String(d.name)).toBe(true);
+      for (const p of prereqs(d)) {
+        expect(typeof p, String(d.name)).toBe("string");
+        expect(byName.has(p.toLowerCase()), `${String(d.name)} -> ${p}`).toBe(true);
+        expect(p.toLowerCase(), String(d.name)).not.toBe(String(d.name).toLowerCase());
+      }
+    }
+    const state = new Map<string, number>();
+    const visit = (name: string): void => {
+      const s = state.get(name);
+      expect(s, `cycle through ${name}`).not.toBe(1);
+      if (s === 2) return;
+      state.set(name, 1);
+      for (const p of prereqs(byName.get(name) as Record<string, unknown>)) visit(p.toLowerCase());
+      state.set(name, 2);
+    };
+    for (const name of byName.keys()) visit(name);
+  });
+
+  it("every minLevel is an integer 0..20, ids are 16 alphanumerics and all strings are ASCII", () => {
+    for (const d of items) {
+      const n = String(d.name);
+      const lvl = sys(d).minLevel as number;
+      expect(Number.isInteger(lvl), n).toBe(true);
+      expect(lvl, n).toBeGreaterThanOrEqual(0);
+      expect(lvl, n).toBeLessThanOrEqual(20);
+      expect(String(d._id), n).toMatch(/^[A-Za-z0-9]{16}$/);
+      expect(JSON.stringify(d), n).toMatch(/^[\x20-\x7e]*$/);
+    }
+  });
+
+  // Every value below was read from the book page images (Summary of Powers, PDF pages 128-130, and the
+  // chapter stat blocks), independently of the pack data. A book "telepathy" prerequisite names the
+  // discipline, not a power, so it is not modelled.
+  it("spot-pins 18 powers across all six disciplines against the book", () => {
+    type Pin = { disc: string; kind: string; key: string; mod: number; ic: number; note: string; mc: number; unit: string; range: string; prep: string; area: string; pre: string[]; lvl: number };
+    const pins: Record<string, Pin> = {
+      "Aura Sight": { disc: "clairsentience", kind: "science", key: "wis", mod: -5, ic: 9, note: "", mc: 9, unit: "round", range: "50 yds.", prep: "0", area: "personal", pre: [], lvl: 0 },
+      Clairvoyance: { disc: "clairsentience", kind: "science", key: "wis", mod: -4, ic: 7, note: "", mc: 4, unit: "round", range: "unlimited", prep: "0", area: "special", pre: [], lvl: 0 },
+      Telekinesis: { disc: "psychokinesis", kind: "science", key: "wis", mod: -3, ic: 3, note: "3+; maint. 1+", mc: 1, unit: "round", range: "30 yds.", prep: "0", area: "single item", pre: [], lvl: 0 },
+      Disintegrate: { disc: "psychokinesis", kind: "science", key: "wis", mod: -4, ic: 40, note: "", mc: 0, unit: "none", range: "50 yds.", prep: "0", area: "1 item, 8 cu. ft.", pre: ["Telekinesis", "Soften"], lvl: 0 },
+      Detonate: { disc: "psychokinesis", kind: "science", key: "con", mod: -3, ic: 18, note: "", mc: 0, unit: "none", range: "60 yds.", prep: "0", area: "1 item, 8 cu. ft.", pre: ["Telekinesis", "Molecular Agitation"], lvl: 0 },
+      "Death Field": { disc: "psychometabolism", kind: "science", key: "con", mod: -8, ic: 40, note: "", mc: 0, unit: "none", range: "0", prep: "3", area: "20-yd. rad.", pre: [], lvl: 0 },
+      "Complete Healing": { disc: "psychometabolism", kind: "science", key: "con", mod: 0, ic: 30, note: "", mc: 0, unit: "none", range: "0", prep: "24 hrs.", area: "personal", pre: [], lvl: 0 },
+      "Probability Travel": { disc: "psychoportation", kind: "science", key: "int", mod: 0, ic: 20, note: "", mc: 8, unit: "hour", range: "unlimited", prep: "2", area: "individual +", pre: [], lvl: 0 },
+      Teleport: { disc: "psychoportation", kind: "science", key: "int", mod: 0, ic: 10, note: "10+", mc: 0, unit: "none", range: "infinite", prep: "0", area: "personal", pre: [], lvl: 0 },
+      "Teleport Other": { disc: "psychoportation", kind: "science", key: "int", mod: -2, ic: 20, note: "20+", mc: 0, unit: "none", range: "10 yds.", prep: "0", area: "na", pre: ["Teleport"], lvl: 0 },
+      "Mass Domination": { disc: "telepathy", kind: "science", key: "wis", mod: -6, ic: 0, note: "contact; maint. varies", mc: 0, unit: "none", range: "40 yds.", prep: "2", area: "up to 5 creatures", pre: ["Mindlink", "Contact", "Domination"], lvl: 0 },
+      "Psychic Crush": { disc: "telepathy", kind: "devotion", key: "wis", mod: -4, ic: 7, note: "", mc: 0, unit: "none", range: "50 yds.", prep: "0", area: "individ.", pre: ["Mindlink"], lvl: 0 },
+      "Ego Whip": { disc: "telepathy", kind: "devotion", key: "wis", mod: -3, ic: 4, note: "", mc: 0, unit: "none", range: "40/80/120 yds.", prep: "0", area: "individual", pre: ["Mindlink", "Contact"], lvl: 0 },
+      "Mind Blank": { disc: "telepathy", kind: "defense", key: "wis", mod: -7, ic: 0, note: "", mc: 0, unit: "none", range: "0", prep: "0", area: "personal", pre: [], lvl: 0 },
+      "Aura Alteration": { disc: "metapsionics", kind: "science", key: "wis", mod: -4, ic: 10, note: "", mc: 0, unit: "none", range: "touch", prep: "5", area: "individual", pre: ["Psychic Surgery"], lvl: 5 },
+      Cannibalize: { disc: "metapsionics", kind: "devotion", key: "con", mod: 0, ic: 0, note: "", mc: 0, unit: "none", range: "0", prep: "0", area: "personal", pre: [], lvl: 5 },
+      Retrospection: { disc: "metapsionics", kind: "devotion", key: "wis", mod: -4, ic: 120, note: "", mc: 0, unit: "none", range: "0", prep: "10", area: "personal", pre: ["Convergence"], lvl: 7 },
+      Splice: { disc: "metapsionics", kind: "devotion", key: "int", mod: 0, ic: 5, note: "5 x # spliced; score Int -(2 x # spliced); maint. # spliced/rnd.", mc: 0, unit: "none", range: "0", prep: "# spliced", area: "personal", pre: [], lvl: 2 },
+    };
+    for (const [name, p] of Object.entries(pins)) {
+      const doc = items.find((d) => d.name === name);
+      expect(doc, name).toBeDefined();
+      expect(sys(doc as Record<string, unknown>), name).toMatchObject({
+        discipline: p.disc, kind: p.kind, abilityKey: p.key, abilityModifier: p.mod, initialCost: p.ic, costNote: p.note,
+        maintenanceCost: p.mc, maintenanceUnit: p.unit, range: p.range, preparation: p.prep, areaOfEffect: p.area, prerequisites: p.pre, minLevel: p.lvl,
+      });
     }
   });
 

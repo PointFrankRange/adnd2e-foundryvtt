@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrTimespace171",
+  "_key": "!items!kPwrTimespace171",
+  "name": "Time/Space Anchor",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Stops unwanted teleportation of the psionicist and those he protects within a small area while it is maintained, without preventing the psionicist from teleporting away himself.",
+    "discipline": "psychoportation",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": 0,
+    "initialCost": 5,
+    "costNote": "",
+    "maintenanceCost": 1,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "3 yds.",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrControlwi126",
+  "_key": "!items!kPwrControlwi126",
+  "name": "Control Wind",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Strengthens, weakens or redirects existing wind across a wide stretch of open ground.",
+    "discipline": "psychokinesis",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -4,
+    "initialCost": 16,
+    "costNote": "",
+    "maintenanceCost": 10,
+    "maintenanceUnit": "round",
+    "range": "500 yds.",
+    "preparation": "2",
+    "areaOfEffect": "1,000 yds.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis"
+    ],
+    "minLevel": 0
+  }
+}

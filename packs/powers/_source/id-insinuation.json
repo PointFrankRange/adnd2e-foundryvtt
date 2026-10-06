@@ -17,6 +17,11 @@
     "range": "60/120/180 yds.",
     "preparation": "0",
     "areaOfEffect": "individual",
-    "scoreBonus": 0
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
   }
 }

@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrPoisonsen112",
+  "_key": "!items!kPwrPoisonsen112",
+  "name": "Poison Sense",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Detects whether poison is present within a short distance of the user, without identifying it.",
+    "discipline": "clairsentience",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": 0,
+    "initialCost": 1,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "1-yd. rad.",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

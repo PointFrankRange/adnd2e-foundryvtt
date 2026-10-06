@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrEmpower00212",
+  "_key": "!items!kPwrEmpower00212",
+  "name": "Empower",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Imbues a newly made item of high quality with lasting psionic ability and a will of its own.",
+    "discipline": "metapsionics",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -12,
+    "initialCost": 0,
+    "costNote": "varies",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "touch",
+    "preparation": "0",
+    "areaOfEffect": "1 item",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 10
+  }
+}

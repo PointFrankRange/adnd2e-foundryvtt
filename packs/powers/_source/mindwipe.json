@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrMindwipe0177",
+  "_key": "!items!kPwrMindwipe0177",
+  "name": "Mindwipe",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Seals off pieces of a subject's mind, steadily draining their intellect, wisdom and level.",
+    "discipline": "telepathy",
+    "kind": "science",
+    "abilityKey": "int",
+    "abilityModifier": -6,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 8,
+    "maintenanceUnit": "round",
+    "range": "touch",
+    "preparation": "1",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

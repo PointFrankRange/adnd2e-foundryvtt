@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrKnowlocat111",
+  "_key": "!items!kPwrKnowlocat111",
+  "name": "Know Location",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Gives the user a general answer about where in the world or planes the user currently is.",
+    "discipline": "clairsentience",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": 0,
+    "initialCost": 10,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "5",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

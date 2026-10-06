@@ -17,6 +17,8 @@
     "range": "0",
     "preparation": "0",
     "areaOfEffect": "3-yd. radius",
-    "scoreBonus": 0
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
   }
 }

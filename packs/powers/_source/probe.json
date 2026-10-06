@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrProbe0000178",
+  "_key": "!items!kPwrProbe0000178",
+  "name": "Probe",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Digs through a subject's deep memories to extract the answers to questions.",
+    "discipline": "telepathy",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -5,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 9,
+    "maintenanceUnit": "round",
+    "range": "2 yds.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "ESP",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

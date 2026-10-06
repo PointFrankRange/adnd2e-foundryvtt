@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrMolecular119",
+  "_key": "!items!kPwrMolecular119",
+  "name": "Molecular Rearrangement",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Slowly reshapes the structure of an item into another material, with a chance that the result is flawed.",
+    "discipline": "psychokinesis",
+    "kind": "science",
+    "abilityKey": "int",
+    "abilityModifier": -5,
+    "initialCost": 20,
+    "costNote": "",
+    "maintenanceCost": 10,
+    "maintenanceUnit": "hour",
+    "range": "2 yds.",
+    "preparation": "2 hrs.",
+    "areaOfEffect": "1 item",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis",
+      "Molecular Manipulation"
+    ],
+    "minLevel": 0
+  }
+}

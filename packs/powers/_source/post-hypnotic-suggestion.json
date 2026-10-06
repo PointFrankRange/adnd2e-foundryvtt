@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrPosthypno199",
+  "_key": "!items!kPwrPosthypno199",
+  "name": "Post-Hypnotic Suggestion",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Plants a reasonable instruction in a creature's mind to be carried out when a chosen trigger occurs.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": -3,
+    "initialCost": 0,
+    "costNote": "contact; maint. 1/level or hit die",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "unlim.",
+    "preparation": "0",
+    "areaOfEffect": "1 creature",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

@@ -16,7 +16,9 @@
     "maintenanceUnit": "round",
     "range": "50 yds. +",
     "preparation": "0",
-    "areaOfEffect": "-",
-    "scoreBonus": 0
+    "areaOfEffect": "na",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
   }
 }

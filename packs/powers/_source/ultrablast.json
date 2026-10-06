@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrUltrablas216",
+  "_key": "!items!kPwrUltrablas216",
+  "name": "Ultrablast",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Releases a violent psionic shockwave that harms the minds of everything nearby.",
+    "discipline": "metapsionics",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -10,
+    "initialCost": 75,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "3",
+    "areaOfEffect": "50 ft. rad.",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 10
+  }
+}

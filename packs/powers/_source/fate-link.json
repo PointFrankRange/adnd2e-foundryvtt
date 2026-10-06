@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrFatelink0174",
+  "_key": "!items!kPwrFatelink0174",
+  "name": "Fate Link",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Ties the user's fate to another creature so that pain and hit point loss are shared between them.",
+    "discipline": "telepathy",
+    "kind": "science",
+    "abilityKey": "con",
+    "abilityModifier": -5,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 5,
+    "maintenanceUnit": "turn",
+    "range": "2 mi.",
+    "preparation": "1",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

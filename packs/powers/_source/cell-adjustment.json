@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrCelladjus146",
+  "_key": "!items!kPwrCelladjus146",
+  "name": "Cell Adjustment",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist heals wounds and cures mundane diseases in a touched subject, spending a variable number of points per round.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -3,
+    "initialCost": 5,
+    "costNote": "up to 20/round",
+    "maintenanceCost": 20,
+    "maintenanceUnit": "round",
+    "range": "touch",
+    "preparation": "0",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

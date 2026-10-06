@@ -2,8 +2,42 @@ import { describe, expect, it } from "vitest";
 import { canLearn, canRelearn, primaryDiscipline, type KnownPower } from "../../../src/core/psionics";
 
 let n = 0;
-const p = (discipline: KnownPower["discipline"], kind: KnownPower["kind"], scoreBonus = 0): KnownPower => ({ id: `p${n++}`, discipline, kind, scoreBonus });
+const p = (discipline: KnownPower["discipline"], kind: KnownPower["kind"], scoreBonus = 0, name?: string): KnownPower => {
+  const id = `p${n++}`;
+  return { id, name: name ?? `Power ${id}`, discipline, kind, scoreBonus };
+};
 const many = (count: number, d: KnownPower["discipline"], k: KnownPower["kind"]) => Array.from({ length: count }, () => p(d, k));
+
+describe("canLearn prerequisites and minimum level", () => {
+  const cand = (over: Record<string, unknown> = {}) => ({ discipline: "psychokinesis" as const, kind: "devotion" as const, ...over });
+  it("refuses until the named prerequisite is known (case and whitespace tolerant)", () => {
+    const need = cand({ prerequisites: ["Telekinesis"] });
+    expect(canLearn([], need, 5)).toEqual({ ok: false, reason: "prerequisite" });
+    expect(canLearn([p("psychokinesis", "science", 0, "Soften")], need, 5)).toEqual({ ok: false, reason: "prerequisite" });
+    for (const name of ["Telekinesis", "telekinesis", "  TELEKINESIS "]) {
+      expect(canLearn([p("psychokinesis", "science", 0, name)], need, 5)).toEqual({ ok: true });
+    }
+  });
+  it("needs every listed prerequisite", () => {
+    const need = cand({ prerequisites: ["Telekinesis", "Soften"] });
+    expect(canLearn([p("psychokinesis", "devotion", 0, "Soften")], need, 5)).toEqual({ ok: false, reason: "prerequisite" });
+    expect(canLearn([p("psychokinesis", "devotion", 0, "Soften"), p("psychokinesis", "devotion", 0, "Telekinesis")], need, 5)).toEqual({ ok: true });
+  });
+  it("a defense mode counts as a known power by name", () => {
+    expect(canLearn([p("telepathy", "defense", 0, "Mind Blank")], cand({ prerequisites: ["mind blank"] }), 5)).toEqual({ ok: true });
+  });
+  it("refuses a power above the character's level", () => {
+    expect(canLearn([], cand({ minLevel: 5 }), 4)).toEqual({ ok: false, reason: "min-level" });
+    expect(canLearn([], cand({ minLevel: 5 }), 5)).toEqual({ ok: true });
+  });
+  it("reports min-level before prerequisite", () => {
+    expect(canLearn([], cand({ minLevel: 9, prerequisites: ["X"] }), 4)).toEqual({ ok: false, reason: "min-level" });
+  });
+  it("defaults (no fields, empty list, level 0) behave as before", () => {
+    expect(canLearn([], cand(), 1)).toEqual({ ok: true });
+    expect(canLearn([], cand({ prerequisites: [], minLevel: 0 }), 1)).toEqual({ ok: true });
+  });
+});
 
 describe("primaryDiscipline", () => {
   it("is the discipline of the first science or devotion; defense modes never set it", () => {

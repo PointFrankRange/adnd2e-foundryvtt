@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrHearlight109",
+  "_key": "!items!kPwrHearlight109",
+  "name": "Hear Light",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Converts light into sound so that a blinded user can still perceive images by hearing them.",
+    "discipline": "clairsentience",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 6,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "special",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

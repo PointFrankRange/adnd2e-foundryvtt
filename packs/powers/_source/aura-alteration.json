@@ -17,6 +17,10 @@
     "range": "touch",
     "preparation": "5",
     "areaOfEffect": "individual",
-    "scoreBonus": 0
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Psychic Surgery"
+    ],
+    "minLevel": 5
   }
 }

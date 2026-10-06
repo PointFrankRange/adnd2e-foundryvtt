@@ -17,6 +17,10 @@
     "range": "80 yds.",
     "preparation": "0",
     "areaOfEffect": "individual",
-    "scoreBonus": 0
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis"
+    ],
+    "minLevel": 0
   }
 }

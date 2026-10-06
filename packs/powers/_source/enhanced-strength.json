@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrEnhanceds152",
+  "_key": "!items!kPwrEnhanceds152",
+  "name": "Enhanced Strength",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist spends points to raise his Strength score, up to a ceiling, while paying upkeep for each point added.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 0,
+    "costNote": "varies; maint. varies",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

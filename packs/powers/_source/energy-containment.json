@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrEnergycon135",
+  "_key": "!items!kPwrEnergycon135",
+  "name": "Energy Containment",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist absorbs harmful energy attacks and releases it harmlessly as light, making energy saves automatically safer.",
+    "discipline": "psychometabolism",
+    "kind": "science",
+    "abilityKey": "con",
+    "abilityModifier": -2,
+    "initialCost": 10,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

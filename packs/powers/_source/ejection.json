@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrEjection0173",
+  "_key": "!items!kPwrEjection0173",
+  "name": "Ejection",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Expels an unwanted mind from contact with the user, at a risky price in PSPs and side effects.",
+    "discipline": "telepathy",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 0,
+    "costNote": "varies",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

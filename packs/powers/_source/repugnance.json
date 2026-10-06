@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrRepugnanc203",
+  "_key": "!items!kPwrRepugnanc203",
+  "name": "Repugnance",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Makes a victim loathe a chosen person, place or object and want to destroy it.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -5,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 8,
+    "maintenanceUnit": "round",
+    "range": "200 yds.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

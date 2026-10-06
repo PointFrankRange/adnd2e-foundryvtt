@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrTruehear0210",
+  "_key": "!items!kPwrTruehear0210",
+  "name": "Truehear",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Tells whether the people within hearing are deliberately lying.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": 0,
+    "initialCost": 4,
+    "costNote": "",
+    "maintenanceCost": 2,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "hearing",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink"
+    ],
+    "minLevel": 0
+  }
+}

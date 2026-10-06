@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrAppraise0211",
+  "_key": "!items!kPwrAppraise0211",
+  "name": "Appraise",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Estimates how likely a planned course of action is to succeed before the psionicist commits to it.",
+    "discipline": "metapsionics",
+    "kind": "science",
+    "abilityKey": "int",
+    "abilityModifier": -4,
+    "initialCost": 14,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

@@ -16,7 +16,11 @@
     "maintenanceUnit": "none",
     "range": "200 yds.",
     "preparation": "0",
-    "areaOfEffect": "-",
-    "scoreBonus": 0
+    "areaOfEffect": "na",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis"
+    ],
+    "minLevel": 0
   }
 }

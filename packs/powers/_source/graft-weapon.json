@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrGraftweap155",
+  "_key": "!items!kPwrGraftweap155",
+  "name": "Graft Weapon",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist fuses a held melee weapon to his arm, gaining a modest bonus to attack and damage with it.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -5,
+    "initialCost": 10,
+    "costNote": "",
+    "maintenanceCost": 1,
+    "maintenanceUnit": "round",
+    "range": "touch",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

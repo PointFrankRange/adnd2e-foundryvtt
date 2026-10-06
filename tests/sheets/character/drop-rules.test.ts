@@ -228,6 +228,15 @@ describe("checkPowerDrop (SP15)", () => {
     const a = psi(1, [dev("a"), dev("b"), dev("c")]); // 3 devotions = the level 1 total
     expect(checkPowerDrop(a, dev("d"))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.learn.devotion-limit" });
   });
+  it("maps prerequisite and min-level refusals to their lang keys, reading the fields leniently", () => {
+    const tk = { id: "t", name: "Telekinesis", type: "power", system: { discipline: "psychokinesis", kind: "devotion", scoreBonus: 0 } };
+    const cand = (system: Record<string, unknown>) => ({ type: "power", name: "Disintegrate", system: { discipline: "psychokinesis", kind: "devotion", ...system } });
+    expect(checkPowerDrop(psi(5), cand({ prerequisites: ["telekinesis"] }))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.learn.prerequisite" });
+    expect(checkPowerDrop(psi(5, [tk]), cand({ prerequisites: ["telekinesis"] }))).toEqual({ ok: true });
+    expect(checkPowerDrop(psi(5), cand({ minLevel: 6 }))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.learn.min-level" });
+    expect(checkPowerDrop(psi(5), cand({ prerequisites: "telekinesis", minLevel: "9" }))).toEqual({ ok: true });
+    expect(checkPowerDrop(psi(5, [{ id: "n", type: "power", system: { discipline: "psychokinesis", kind: "devotion" } }]), cand({ prerequisites: ["x"] }))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.learn.prerequisite" });
+  });
   it("allows a legal drop", () => {
     expect(checkPowerDrop(psi(1, [dev("a")]), dev("b"))).toEqual({ ok: true });
   });

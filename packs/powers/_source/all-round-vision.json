@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrAllroundv106",
+  "_key": "!items!kPwrAllroundv106",
+  "name": "All-Round Vision",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Gives the user sight in every direction at once, at the cost of weakness against gaze attacks.",
+    "discipline": "clairsentience",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 6,
+    "costNote": "",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}
