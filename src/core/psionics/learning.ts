@@ -3,6 +3,8 @@ import type { Discipline, PowerKind } from "./tables";
 
 export interface KnownPower {
   id: string;
+  /** the power's name, matched (case-insensitively) against other powers' prerequisites */
+  name: string;
   discipline: Discipline;
   kind: PowerKind;
   /** points added by relearning (each spends one slot of its kind) */
@@ -16,7 +18,9 @@ export type LearnProblem =
   | "defense-limit"
   | "devotion-ratio"
   | "primary-cap"
-  | "no-budget";
+  | "no-budget"
+  | "prerequisite"
+  | "min-level";
 
 export type LearnResult = { ok: true } | { ok: false; reason: LearnProblem };
 
@@ -34,10 +38,17 @@ export function primaryDiscipline(known: readonly KnownPower[]): Discipline | nu
   return known.find((k) => k.kind !== "defense")?.discipline ?? null;
 }
 
-/** Checks the Table 4 totals and the two learning rules (p.12) for adding one power. A science is added only after the devotions for it exist. */
-export function canLearn(known: readonly KnownPower[], candidate: { discipline: Discipline; kind: PowerKind }, level: number): LearnResult {
+/** Checks a power's own level and prerequisite requirements, the Table 4 totals and the two learning rules (p.12) for adding one power. A science is added only after the devotions for it exist. */
+export function canLearn(
+  known: readonly KnownPower[],
+  candidate: { discipline: Discipline; kind: PowerKind; prerequisites?: readonly string[]; minLevel?: number },
+  level: number,
+): LearnResult {
   const row = powerProgression(level);
   const { discipline, kind } = candidate;
+  if ((candidate.minLevel ?? 0) > level) return no("min-level");
+  const knownNames = new Set(known.map((k) => k.name.trim().toLowerCase()));
+  if ((candidate.prerequisites ?? []).some((p) => !knownNames.has(p.trim().toLowerCase()))) return no("prerequisite");
   if (kind === "defense") return slotsUsed(known, "defense") + 1 > row.defenseModes ? no("defense-limit") : OK;
   const heldDisciplines = new Set(known.filter((k) => k.kind !== "defense").map((k) => k.discipline));
   if (!heldDisciplines.has(discipline) && heldDisciplines.size + 1 > row.disciplines) return no("discipline-access");

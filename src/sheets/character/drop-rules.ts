@@ -128,7 +128,17 @@ export function checkPowerDrop(actor: PowerDropActor, item: { type: string; name
   const name = (item.name ?? "").trim().toLowerCase();
   if (name !== "" && owned.some((i) => (i.name ?? "").trim().toLowerCase() === name)) return { ok: false, messageKey: "ADND2E.sheet.psionics.alreadyKnown" };
   const known: KnownPower[] = owned
-    .map((i) => ({ id: i.id, discipline: i.system.discipline as Discipline, kind: i.system.kind as PowerKind, scoreBonus: Number(i.system.scoreBonus ?? 0) }));
-  const verdict = canLearn(known, { discipline: item.system.discipline as Discipline, kind: item.system.kind as PowerKind }, level);
+    .map((i) => ({ id: i.id, name: i.name ?? "", discipline: i.system.discipline as Discipline, kind: i.system.kind as PowerKind, scoreBonus: Number(i.system.scoreBonus ?? 0) }));
+  const { prerequisites, minLevel } = item.system;
+  const verdict = canLearn(
+    known,
+    {
+      discipline: item.system.discipline as Discipline,
+      kind: item.system.kind as PowerKind,
+      prerequisites: Array.isArray(prerequisites) ? prerequisites.map(String) : [],
+      minLevel: typeof minLevel === "number" ? minLevel : 0,
+    },
+    level,
+  );
   return verdict.ok ? { ok: true } : { ok: false, messageKey: `ADND2E.sheet.psionics.learn.${verdict.reason}` };
 }

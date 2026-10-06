@@ -1,7 +1,7 @@
 import { Adnd2eItemModel } from "./base-item";
 import { ABILITY_KEYS, POWER_DISCIPLINES, POWER_KINDS, POWER_MAINTENANCE_UNITS } from "./choices";
 
-const { StringField, NumberField } = foundry.data.fields;
+const { StringField, NumberField, ArrayField } = foundry.data.fields;
 
 /** SP15 Plan A: a psionic power (PHBR5 "Summary of Powers"). The check, cost and maintenance are automated; the effect is descriptive text. */
 export class PowerItemModel extends Adnd2eItemModel {
@@ -19,6 +19,8 @@ export class PowerItemModel extends Adnd2eItemModel {
       range: new StringField({ required: true, blank: true, initial: "" }),
       preparation: new StringField({ required: true, blank: true, initial: "" }),
       areaOfEffect: new StringField({ required: true, blank: true, initial: "" }),
+      prerequisites: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: () => [] }),
+      minLevel: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       scoreBonus: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
     };
   }

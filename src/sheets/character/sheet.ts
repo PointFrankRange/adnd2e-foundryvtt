@@ -27,7 +27,7 @@ import type {
   WeaponProfView,
 } from "./context-types";
 import { checkPowerDrop, validateItemDrop, type DropCheckInput } from "./drop-rules";
-import { endPower, payMaintenance, relearnPower, rest as psionicRest, usePower as usePsionicPower } from "./psionic-actions";
+import { adjustPsp, endPower, payMaintenance, relearnPower, rest as psionicRest, usePower as usePsionicPower } from "./psionic-actions";
 import type { PsionicPowerItem } from "./context-types";
 import { rollHitPoints } from "./hp-roll";
 import { resetTurnAttempt, turningPanel, turnUndead } from "./turning-actions";
@@ -361,6 +361,7 @@ export class Adnd2eCharacterSheet extends Base {
       usePsionicPower: Adnd2eCharacterSheet.#onUsePsionicPower,
       relearnPsionicPower: Adnd2eCharacterSheet.#onRelearnPsionicPower,
       psionicRest: Adnd2eCharacterSheet.#onPsionicRest,
+      adjustPsionicPsp: Adnd2eCharacterSheet.#onAdjustPsionicPsp,
       payPsionicMaintenance: Adnd2eCharacterSheet.#onPayPsionicMaintenance,
       endPsionicPower: Adnd2eCharacterSheet.#onEndPsionicPower,
     },
@@ -1173,6 +1174,16 @@ export class Adnd2eCharacterSheet extends Base {
     const activity = this.element.querySelector<HTMLSelectElement>("[data-psionic-activity]")?.value ?? "rest";
     const hours = Math.max(0, Math.floor(Number(this.element.querySelector<HTMLInputElement>("[data-psionic-hours]")?.value) || 0));
     if (hours > 0) await psionicRest(this.document as never, activity as never, hours);
+  }
+
+  static async #onAdjustPsionicPsp(this: Adnd2eCharacterSheet): Promise<void> {
+    if (!this.isEditable) return;
+    const input = this.element.querySelector<HTMLInputElement>("[data-psionic-adjust]");
+    const delta = Number(input?.value);
+    if (Number.isInteger(delta) && delta !== 0) {
+      await adjustPsp(this.document as never, delta);
+      if (input) input.value = "";
+    }
   }
 
   static async #onPayPsionicMaintenance(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {

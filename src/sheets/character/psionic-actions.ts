@@ -60,6 +60,7 @@ const findPower = (actor: PsionicActor, id: string): PsionicItem | undefined => 
 export function knownPowers(actor: PsionicActor): KnownPower[] {
   return powerItems(actor).map((i) => ({
     id: i.id,
+    name: i.name,
     discipline: i.system.discipline as Discipline,
     kind: i.system.kind as PowerKind,
     scoreBonus: Number(i.system.scoreBonus ?? 0),
@@ -170,6 +171,20 @@ export async function payMaintenance(actor: PsionicActor, powerId: string | null
   const update: Record<string, unknown> = { "system.psionics.psp": pool };
   if (ended.size > 0) update["system.psionics.maintained"] = maintained.filter((m) => !ended.has(m.powerId));
   await actor.update(update);
+}
+
+/** Adds (positive) or spends (negative) PSPs by hand, for variable costs. A pool that reaches the maximum is stored as null (full). */
+export async function adjustPsp(actor: PsionicActor, delta: number): Promise<void> {
+  if (!requirePsionicist(actor)) return;
+  if (!Number.isInteger(delta) || delta === 0) return;
+  const { max } = actor.system.psionics;
+  const pool = currentPsp(actor);
+  if (delta < 0 && pool < -delta) {
+    warn("ADND2E.sheet.psionics.notEnoughPsp");
+    return;
+  }
+  const next = Math.min(pool + delta, max);
+  await actor.update({ "system.psionics.psp": next >= max ? null : next });
 }
 
 /** Ends a maintained power without paying. */

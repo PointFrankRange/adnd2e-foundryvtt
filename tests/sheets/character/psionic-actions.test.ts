@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  adjustPsp,
   currentPsp,
   endPower,
   knownPowers,
@@ -195,7 +196,7 @@ describe("relearnPower", () => {
 describe("knownPowers", () => {
   it("maps owned power items and skips other types", () => {
     const { a } = actor({ items: [power("p1", { scoreBonus: 2 }), { id: "x", name: "x", type: "weapon", system: {} }] });
-    expect(knownPowers(a)).toEqual([{ id: "p1", discipline: "telepathy", kind: "devotion", scoreBonus: 2 }]);
+    expect(knownPowers(a)).toEqual([{ id: "p1", name: "Power p1", discipline: "telepathy", kind: "devotion", scoreBonus: 2 }]);
   });
   it("defaults a missing scoreBonus to 0", () => {
     const { a } = actor({ items: [{ id: "p", name: "p", type: "power", system: { discipline: "telepathy", kind: "devotion" } }] });
@@ -280,6 +281,50 @@ describe("payMaintenance", () => {
     const none = actor({ level: 0 });
     await payMaintenance(none.a, null);
     expect(none.updates).toEqual([]);
+  });
+});
+
+describe("adjustPsp", () => {
+  it("adds PSPs below the maximum", async () => {
+    const { a, updates } = actor({ psp: 20, max: 40 });
+    await adjustPsp(a, 10);
+    expect(updates).toEqual([{ "system.psionics.psp": 30 }]);
+  });
+  it("stores null when a gain reaches or passes the maximum", async () => {
+    const exact = actor({ psp: 30, max: 40 });
+    await adjustPsp(exact.a, 10);
+    expect(exact.updates).toEqual([{ "system.psionics.psp": null }]);
+    const over = actor({ psp: 30, max: 40 });
+    await adjustPsp(over.a, 99);
+    expect(over.updates).toEqual([{ "system.psionics.psp": null }]);
+  });
+  it("spends PSPs, treating a null pool as the maximum", async () => {
+    const { a, updates } = actor({ psp: 30, max: 40 });
+    await adjustPsp(a, -10);
+    expect(updates).toEqual([{ "system.psionics.psp": 20 }]);
+    const full = actor({ psp: null, max: 40 });
+    await adjustPsp(full.a, -5);
+    expect(full.updates).toEqual([{ "system.psionics.psp": 35 }]);
+    const all = actor({ psp: 10, max: 40 });
+    await adjustPsp(all.a, -10);
+    expect(all.updates).toEqual([{ "system.psionics.psp": 0 }]);
+  });
+  it("refuses to spend more than the pool, with no write", async () => {
+    const { a, updates } = actor({ psp: 5 });
+    await adjustPsp(a, -6);
+    expect(updates).toEqual([]);
+    expect(warn).toHaveBeenCalledWith("ADND2E.sheet.psionics.notEnoughPsp");
+  });
+  it("ignores zero and non-integer amounts", async () => {
+    const { a, updates } = actor();
+    for (const d of [0, 1.5, NaN]) await adjustPsp(a, d);
+    expect(updates).toEqual([]);
+  });
+  it("refuses a non-psionicist", async () => {
+    const none = actor({ level: 0 });
+    await adjustPsp(none.a, 5);
+    expect(none.updates).toEqual([]);
+    expect(warn).toHaveBeenCalledWith("ADND2E.sheet.psionics.noClass");
   });
 });
 

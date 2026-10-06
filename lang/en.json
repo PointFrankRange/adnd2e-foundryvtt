@@ -219,6 +219,8 @@
         "restBlocked": "You cannot recover PSPs while maintaining a power.",
         "maintenanceEnded": "{power} ended: not enough PSPs to maintain it.",
         "relearned": "{power} relearned: its score rises by 1.",
+        "adjust": "Adjust PSPs",
+        "adjustHint": "Enter a positive number to gain PSPs or a negative number to spend them.",
         "learn": {
           "discipline-access": "You cannot learn a power from another discipline yet.",
           "science-limit": "You have no science slots left.",
@@ -226,7 +228,9 @@
           "defense-limit": "You have no defense mode slots left.",
           "devotion-ratio": "A science needs two devotions in its discipline first.",
           "primary-cap": "Outside your primary discipline you must know fewer powers of that kind.",
-          "no-budget": "You have no slots left to relearn that power."
+          "no-budget": "You have no slots left to relearn that power.",
+          "prerequisite": "You must know the prerequisite powers first.",
+          "min-level": "You are not a high enough level for this power."
         }
       },
       "equipment": {

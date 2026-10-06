@@ -21,6 +21,11 @@ describe("PowerItemModel schema (source-pinned)", () => {
     for (const f of ["abilityModifier", "initialCost", "maintenanceCost", "scoreBonus"]) expect(line(f), f).toContain("initial: 0");
     expect(line("maintenanceUnit")).toContain('initial: "none"');
   });
+  it("models prerequisites as a factory-initial string array and minLevel as a non-negative integer", () => {
+    expect(line("prerequisites")).toContain("new ArrayField(new StringField({ required: true, blank: false })");
+    expect(line("prerequisites")).toContain("initial: () => []");
+    expect(line("minLevel")).toMatch(/integer: true, min: 0, initial: 0/);
+  });
   it("constrains the choice fields to the exported vocabularies", () => {
     expect(line("discipline")).toContain("choices: POWER_DISCIPLINES");
     expect(line("kind")).toContain("choices: POWER_KINDS");

@@ -110,7 +110,7 @@ const PSIONIC_ACTIVITIES = ["hard", "light", "rest", "sleep"] as const;
 export function buildPsionicsView(input: PsionicsInput | null | undefined): PsionicsView | null {
   if (!input) return null;
   const psp = Math.min(input.psp ?? input.max, input.max);
-  const known: KnownPower[] = input.powers.map((p) => ({ id: p.id, discipline: p.discipline, kind: p.kind, scoreBonus: p.scoreBonus }));
+  const known: KnownPower[] = input.powers.map((p) => ({ id: p.id, name: p.name, discipline: p.discipline, kind: p.kind, scoreBonus: p.scoreBonus }));
   const row = powerProgression(input.level);
   const toRow = (p: PsionicsInput["powers"][number]): PsionicPowerRow => ({
     id: p.id,

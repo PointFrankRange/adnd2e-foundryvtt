@@ -3363,6 +3363,7 @@ describe("buildPsionicsView (SP15 Plan A)", () => {
     expect(v.primary).toBe("telepathy");
     expect(v.level).toBe(5);
     expect(v.activities).toEqual(["hard", "light", "rest", "sleep"]);
+    expect(v.groups[1]!.powers[0]!.canRelearn).toBe(true); // known powers are built with their names
   });
 
   it("canUse follows the pool; a missing ability counts as 0", () => {
