@@ -21,3 +21,13 @@ describe("ObjectField initial must not be a shared literal", () => {
     expect(line).toContain("initial: () =>");
   });
 });
+
+describe("SP15 psionics.maintained initial", () => {
+  it("is declared with a function initial, not a shared array literal", () => {
+    const at = SRC.indexOf("maintained: new ArrayField");
+    expect(at).toBeGreaterThan(-1);
+    const body = SRC.slice(at, at + 400);
+    expect(body).toMatch(/initial:\s*\(\)\s*=>\s*\[\]/);
+    expect(body).not.toMatch(/initial:\s*\[/);
+  });
+});

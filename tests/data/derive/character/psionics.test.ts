@@ -26,6 +26,7 @@ describe("derivePsionics", () => {
       scores,
     });
     expect(d?.level).toBe(5);
+    expect(d?.max).toBe(73); // the fighter's level 9 never enters the PSP formula
   });
 });
 
@@ -53,14 +54,18 @@ describe("deriveCharacter psionics", () => {
   });
 
   it("gives a psionicist a max PSP from the prepared scores", () => {
-    const d = deriveCharacter(snap("psionicist", 0), DEFAULT_OPTIONAL_RULES);
-    expect(d.psionics?.level).toBe(d.classes[0].level);
-    expect(d.psionics?.max).toBeGreaterThan(0);
+    // 16,500 XP is level 5 (Table 2); Wis 17 / Con 16 / Int 12 -> 25 + 4 x 12 = 73
+    const d = deriveCharacter(snap("psionicist", 16500), DEFAULT_OPTIONAL_RULES);
+    expect(d.classes[0].level).toBe(5);
+    expect(d.psionics?.level).toBe(5);
+    expect(d.psionics?.max).toBe(73);
+    expect(deriveCharacter(snap("psionicist", 0), DEFAULT_OPTIONAL_RULES).psionics?.max).toBe(25);
   });
 
   it("derives psionics in the multiclass path too", () => {
     const s = snap("psionicist", 0);
     const m: ActorSnapshot = { ...s, classes: [...s.classes, { ...s.classes[0], chassisId: "fighter" }] };
-    expect(deriveCharacter(m, DEFAULT_OPTIONAL_RULES).psionics).not.toBeNull();
+    const m2: ActorSnapshot = { ...m, classes: [{ ...m.classes[0], xp: 16500 }, { ...m.classes[1], xp: 99_000_000 }] };
+    expect(deriveCharacter(m2, DEFAULT_OPTIONAL_RULES).psionics?.max).toBe(73);
   });
 });
