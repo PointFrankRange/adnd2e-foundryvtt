@@ -49,6 +49,13 @@ describe("resolveContest: the book's example (attack score 15, defense score 12)
     expect(resolveContest({ attackRoll: 1, attackScore: -3, defenseRoll: 18, defenseScore: 12 })).toEqual({ attackSuccess: true, winner: "attacker", reason: "attacker-only" });
     expect(resolveContest({ attackRoll: 20, attackScore: 30, defenseRoll: null, defenseScore: 5 })).toEqual({ attackSuccess: false, winner: "defender", reason: "attack-failed" });
   });
+  it("boundary: an attack roll equal to the defense score is NOT automatic (the defense roll is still needed); one above is", () => {
+    expect(needsDefenseRoll(12, 15, 12)).toBe(true);
+    expect(needsDefenseRoll(13, 15, 12)).toBe(false);
+    expect(resolveContest({ attackRoll: 12, attackScore: 15, defenseRoll: 11, defenseScore: 12 })).toEqual({ attackSuccess: true, winner: "attacker", reason: "higher" });
+    expect(resolveContest({ attackRoll: 13, attackScore: 15, defenseRoll: null, defenseScore: 12 })).toEqual({ attackSuccess: true, winner: "attacker", reason: "automatic" });
+    expect(() => resolveContest({ attackRoll: 12, attackScore: 15, defenseRoll: null, defenseScore: 12 })).toThrow();
+  });
   it("unopposed: no defender at all", () => {
     expect(resolveContest({ attackRoll: 10, attackScore: 12, defenseRoll: null, defenseScore: null })).toEqual({ attackSuccess: true, winner: "attacker", reason: "unopposed" });
     expect(resolveContest({ attackRoll: 13, attackScore: 12, defenseRoll: null, defenseScore: null })).toEqual({ attackSuccess: false, winner: "defender", reason: "attack-failed" });
@@ -63,6 +70,7 @@ describe("maintainedCheck (p.24): +1 to the score; a failed check counts as a su
   it("applies the bonus and the failure rule", () => {
     expect(maintainedCheck(10, 9)).toEqual({ result: "success", success: true, special: true, roll: 10, score: 10 });
     expect(maintainedCheck(15, 9)).toEqual({ result: "minimum-success", success: true, special: false, roll: 1, score: 10 });
+    expect(maintainedCheck(20, 30)).toEqual({ result: "minimum-success", success: true, special: false, roll: 1, score: 31 }); // a natural 20 is ignored too
   });
 });
 
