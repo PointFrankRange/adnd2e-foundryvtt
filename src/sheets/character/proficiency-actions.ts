@@ -8,7 +8,7 @@ import type { AbilityKey, ArmorType, BardSkill, ClassId, Race, ThiefSkill } from
 import { buildNonweaponCheckCardContext } from "../../combat/nonweapon-check-card";
 import { buildThiefSkillCardContext } from "../../combat/thief-skill-card";
 import { classItemLevel } from "../../data/derive/class-item";
-import { actorXpPercentFor } from "../../data/derive/character/kits";
+import { abilityScoresOf, actorLevelRulesFor } from "../../data/derive/character/kits";
 import { getOptionalRules } from "../../settings";
 import { TEMPLATE_PATH } from "../../constants";
 
@@ -280,7 +280,8 @@ function primaryClassLevel(actor: ThiefSkillsActor): number {
     if (item.type !== "class") continue;
     const s = item.system as { chassisId?: string; xp?: number };
     if (s.chassisId === "thief" || s.chassisId === "bard") {
-      return classItemLevel(s.chassisId as ClassId, s.xp ?? 0, actorXpPercentFor(actor.items, s.chassisId));
+      const { xpPercent, rules } = actorLevelRulesFor(actor.items, s.chassisId, getOptionalRules(), abilityScoresOf((actor as unknown as { system?: never }).system));
+      return classItemLevel(s.chassisId as ClassId, s.xp ?? 0, xpPercent, rules);
     }
   }
   return 0;

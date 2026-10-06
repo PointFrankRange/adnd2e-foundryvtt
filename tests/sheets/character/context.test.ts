@@ -3301,6 +3301,14 @@ describe("buildCharacterSheetContext — subrace layer (SP12 Plan A)", () => {
     expect(layered - plain).toBe(5);
   });
 
+  it("a class view with a hard level limit shows atLimit, no next threshold, and the capped bar (SP13)", () => {
+    const base = { ...thiefClass, name: "Fighter", chassisId: "fighter", xp: 2_000_000 };
+    const rowFor = (view: object) => buildCharacterSheetContext(input({ classItems: [view] as never })).classes[0]!;
+    expect(rowFor({ ...base, levelLimit: 15, beyondMultiplier: 0 })).toMatchObject({ atLimit: true, nextThreshold: null, xpPct: 1 });
+    expect(rowFor({ ...base, levelLimit: 15, beyondMultiplier: 2 })).toMatchObject({ atLimit: false, nextThreshold: 2_250_000 });
+    expect(rowFor(base).atLimit).toBe(false);
+  });
+
   it("a class view's xpModifierPercent scales the header threshold (SP12 Plan A)", () => {
     const next = (pct: number) => buildCharacterSheetContext(input({ classItems: [{ ...thiefClass, xpModifierPercent: pct }] as never })).classes[0]!.nextThreshold;
     expect(next(20)).toBe(Math.ceil(next(0)! * 1.2));

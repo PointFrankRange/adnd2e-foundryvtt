@@ -50,6 +50,7 @@ import { classItemLevel } from "../../data/derive/class-item";
 import { CONDITIONS } from "../../conditions";
 import { groupInventory } from "./grouping";
 import { xpToNext } from "./xp";
+import { levelRulesOf } from "../../core/classes/level-limits";
 import { buildFavoriteRows, isFavorite, normalizeFavorites, type FavoriteKind } from "../kit/favorites";
 import { lockState } from "../kit/lock";
 import { buildInventorySections } from "../kit/inventory-sections";
@@ -318,7 +319,7 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
 
 function buildClasses(input: CharacterSheetInput): ClassRow[] {
   return input.classItems.map((c) => {
-    const progress = xpToNext(c.chassisId as ClassId, c.xp, c.xpModifierPercent ?? 0);
+    const progress = xpToNext(c.chassisId as ClassId, c.xp, c.xpModifierPercent ?? 0, levelRulesOf(c));
     return {
       id: c.id,
       name: c.name,
@@ -328,6 +329,7 @@ function buildClasses(input: CharacterSheetInput): ClassRow[] {
       xpToNextLevel: progress.toNextLevel,
       xpPct: progress.pct,
       nextThreshold: progress.next,
+      atLimit: progress.atLimit,
       canLevelUp: c.canLevelUp,
       hitDie: c.hitDie,
       isDualPrimary: c.dualClassState === "primary",
@@ -774,7 +776,7 @@ function buildOrisonRows(
   },
 ): SpellItemView[] {
   const priestClass = input.classItems.find((c) => c.chassisId === priestChassisId);
-  const priestLevel = priestClass ? classItemLevel(priestClass.chassisId as ClassId, priestClass.xp, priestClass.xpModifierPercent ?? 0) : 0;
+  const priestLevel = priestClass ? classItemLevel(priestClass.chassisId as ClassId, priestClass.xp, priestClass.xpModifierPercent ?? 0, levelRulesOf(priestClass)) : 0;
   // Orisons are priest rows, so canLearn is always false and the learn context
   // is never consulted; the level-0 placeholders only satisfy buildSpellRow's shape.
   const learnCtx: LearnEligibilityContext = {

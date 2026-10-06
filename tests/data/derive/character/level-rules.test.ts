@@ -33,6 +33,10 @@ describe("actorLevelRulesFor", () => {
       xpPercent: 10, rules: { limit: null, beyondMultiplier: 0 },
     });
   });
+  it("an unknown chassis id with a race limit and the bonus setting on stays at the base limit", () => {
+    const bonus = { ...on, primeRequisiteBonusLevels: true };
+    expect(actorLevelRulesFor([race({ mystery: 9 }), cls("mystery")], "mystery", bonus, { str: 18 }).rules.limit).toBe(9);
+  });
   it("passes the exceed multiplier through", () => {
     expect(actorLevelRulesFor([race({ fighter: 15 }), cls("fighter")], "fighter", { ...on, exceedLevelLimits: 3 }).rules).toEqual({ limit: 15, beyondMultiplier: 3 });
   });

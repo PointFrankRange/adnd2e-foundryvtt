@@ -132,7 +132,7 @@ export function actorLevelRulesFor(
   const base = typeof raw === "number" ? raw : null;
   let limit = base;
   if (base !== null && options.primeRequisiteBonusLevels && all.filter((i) => i.type === "class").length === 1) {
-    const prime = getChassis(chassisId as ClassId).primeRequisites.map((k) => scores[k]);
+    const prime = (getChassis(chassisId as ClassId)?.primeRequisites ?? []).map((k) => scores[k]);
     if (prime.length > 0 && prime.every((s): s is number => typeof s === "number")) limit = base + bonusLevels(Math.min(...prime));
   }
   return { xpPercent, rules: { limit, beyondMultiplier: options.exceedLevelLimits } };

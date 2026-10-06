@@ -5,6 +5,7 @@
     {{#if c.isDualActive}}<span class="badge dual-active">{{localize 'ADND2E.sheet.dualClass.toggle'}}</span>{{/if}}
   </span>
   <span class="level">L{{c.level}}</span>
+  {{#if c.atLimit}}<span class="level-limit">({{localize 'ADND2E.sheet.xp.atLimit'}})</span>{{/if}}
   <span class="hit-die">d{{c.hitDie}}</span>
   {{#if c.specialistSchool}}<span class="specialist">{{c.specialistSchool}}</span>{{/if}}
   <span class="xp">{{c.xp}}{{#if c.nextThreshold}} / {{c.nextThreshold}}{{/if}} <span class="pct">{{adnd2ePct c.xpPct}}</span> <progress value="{{c.xpPct}}" max="1"></progress></span>
