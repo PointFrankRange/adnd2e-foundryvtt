@@ -147,3 +147,29 @@ Half-elves have no adjustments in the book, so the PHB Half-Elf is unchanged (no
 Mechanical values only are shipped; special abilities and drawbacks (spell-likes, magic
 resistance, light penalties, reaction modifiers, library access) are display labels in
 `grantedFeatures` only.
+
+## Gnome and halfling subraces (SP12 Plan C)
+
+Source: *The Complete Book of Gnomes and Halflings* (PHBR9) ch. 2, pp. 20-37 and 66-77, read from
+the text layer and, for the Tallfellow table, the page image. Eleven `race` items (four gnome,
+seven halfling), each with the base race's `raceId` and a `subrace` block (ability adjustments and
+min-max; `thiefAdjustments: null`, `conSaveBonusAdjustment: 0`, `xpModifierPercent: 0`). The PHB
+gnome's/halfling's `allowedClasses`, `allowedMulticlass` and `classLevelLimits` are copied; the
+book gives subraces no limits or class lists of their own.
+
+| file | name | notes |
+|------|------|-------|
+| `rock-gnome.json` | Rock Gnome | shipped because its Intelligence and Wisdom ranges differ from the PHB gnome (Int 7-19 and Wis 3-17 versus 6-18 and 3-18); its infravision (60) is the same |
+| `deep-gnome.json` | Deep Gnome | infravision 120; flat save bonus +3 on all saves (+2 instead vs poison) |
+| `tinker-gnome.json` | Tinker Gnome | |
+| `forest-gnome.json` | Forest Gnome | infravision 0 |
+| `hairfoot.json` | Hairfoot | shipped because ranges and infravision differ from the PHB halfling |
+| `stout-dexterity.json`, `stout-constitution.json` | Stout | "either/or" adjustment: one item per choice |
+| `tallfellow-dexterity.json`, `tallfellow-wisdom.json` | Tallfellow | "either/or" adjustment: one item per choice |
+| `furchin.json` | Furchin | |
+| `kender.json` | Kender | infravision 30 |
+
+The Deep Gnome's flat saving-throw bonus is the subrace block's `flatSaveBonus`
+(`{ "all": 3, "poison": 2 }`); every other subrace has `flatSaveBonus: null`. The Athasian halfling
+is deliberately not shipped (Dark Sun content is planned separately). Specials are display labels in
+`grantedFeatures` only.

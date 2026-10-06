@@ -1,0 +1,111 @@
+{
+  "_id": "kGnomeDeep000001",
+  "_key": "!items!kGnomeDeep000001",
+  "name": "Deep Gnome",
+  "type": "race",
+  "img": "icons/svg/burrow.svg",
+  "system": {
+    "description": "",
+    "raceId": "gnome",
+    "size": "small",
+    "baseMovement": 6,
+    "infravision": 120,
+    "classLevelLimits": {
+      "fighter": 11,
+      "thief": 13,
+      "cleric": 9,
+      "mage": 15
+    },
+    "allowedClasses": [
+      "fighter",
+      "thief",
+      "cleric",
+      "mage"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "cleric"
+      ],
+      [
+        "fighter",
+        "mage"
+      ],
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "cleric",
+        "mage"
+      ],
+      [
+        "cleric",
+        "thief"
+      ],
+      [
+        "mage",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "gnome common",
+      "underworld common",
+      "drow",
+      "kuo-toan",
+      "earth elemental"
+    ],
+    "grantedFeatures": [
+      "Deep gnome: magic resistance",
+      "Deep gnome: innate illusions",
+      "Deep gnome: freeze in place",
+      "Deep gnome: surprise bonuses",
+      "Deep gnome: improving armor class",
+      "Deep gnome: stun darts"
+    ],
+    "subrace": {
+      "id": "deep-gnome",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 1,
+        "con": 0,
+        "int": -1,
+        "wis": 1,
+        "cha": -2
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 6,
+          "max": 18
+        },
+        "dex": {
+          "min": 6,
+          "max": 19
+        },
+        "con": {
+          "min": 6,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 17
+        },
+        "wis": {
+          "min": 4,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 16
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": {
+        "all": 3,
+        "poison": 2
+      }
+    }
+  }
+}

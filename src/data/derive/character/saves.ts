@@ -15,6 +15,8 @@ export interface SavesInput {
   dexDefensiveAdj: number;
   /** SP12 Plan A: a subrace's Constitution-save adjustment */
   racialSaveAdjustment?: number;
+  /** SP12 Plan C: a subrace's flat saving-throw bonus (replaces the Constitution-based bonus) */
+  racialFlatSaveBonus?: { all: number; poison: number } | null;
 }
 
 /**
@@ -35,6 +37,7 @@ export function deriveSaves(
       wisMagicalDefenseAdj: input.wisMagicalDefenseAdj,
       dexDefensiveAdj: input.dexDefensiveAdj,
       racialSaveAdjustment: input.racialSaveAdjustment,
+      racialFlatSaveBonus: input.racialFlatSaveBonus,
     });
     out[category] = { target: r.target, rollModifier: r.rollModifier, effectiveTarget: r.effectiveTarget };
   }

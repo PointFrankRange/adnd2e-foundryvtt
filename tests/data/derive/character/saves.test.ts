@@ -44,4 +44,13 @@ describe("deriveSaves", () => {
     const human = deriveSaves({ ...input, race: "human", racialSaveAdjustment: 1 });
     expect(human.rsw.rollModifier).toBe(0);
   });
+  it("a flat racial save bonus replaces the Constitution bonus on every category (SP12 Plan C)", () => {
+    const input = { groups: [{ group: "warrior" as const, level: 3 }], race: "gnome" as const, con: 15, wisMagicalDefenseAdj: 0, dexDefensiveAdj: 0 };
+    const plain = deriveSaves(input);
+    expect(plain.rsw.rollModifier).toBe(4);
+    expect(plain.spell.rollModifier).toBe(4);
+    expect(plain.pp.rollModifier).toBe(0);
+    const deep = deriveSaves({ ...input, racialFlatSaveBonus: { all: 3, poison: 2 } });
+    for (const category of ["ppd", "rsw", "pp", "bw", "spell"] as const) expect(deep[category].rollModifier, category).toBe(3);
+  });
 });

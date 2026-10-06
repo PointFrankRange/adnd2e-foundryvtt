@@ -46,6 +46,14 @@ export class RaceItemModel extends Adnd2eItemModel {
         ),
         conSaveBonusAdjustment: new NumberField({ required: true, integer: true, initial: 0 }),
         xpModifierPercent: new NumberField({ required: true, integer: true, min: -90, initial: 0 }),
+        /** SP12 Plan C: a flat saving-throw bonus that REPLACES the race's Constitution-based bonus (Deep Gnome: all 3, poison 2); null = none. Nullable SchemaField, same precedent as abilityAdjustments. */
+        flatSaveBonus: new SchemaField(
+          {
+            all: new NumberField({ required: true, integer: true, initial: 0 }),
+            poison: new NumberField({ required: true, integer: true, initial: 0 }),
+          },
+          { required: true, nullable: true, initial: null },
+        ),
       }),
     };
   }

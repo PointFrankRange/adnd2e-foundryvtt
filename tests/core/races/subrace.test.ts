@@ -23,7 +23,7 @@ describe("NO_SUBRACE", () => {
   it("is the inherit-everything layer", () => {
     expect(NO_SUBRACE).toEqual({
       id: "", abilityAdjustments: null, abilityRanges: null, thiefAdjustments: null,
-      conSaveBonusAdjustment: 0, xpModifierPercent: 0,
+      conSaveBonusAdjustment: 0, xpModifierPercent: 0, flatSaveBonus: null,
     });
   });
 });
@@ -45,6 +45,7 @@ describe("normalizeSubrace", () => {
       thiefAdjustments: thief,
       conSaveBonusAdjustment: 1,
       xpModifierPercent: 10,
+      flatSaveBonus: { all: 3, poison: 2 },
     });
     expect(layer.id).toBe("deep-dwarf");
     expect(layer.abilityAdjustments).toEqual({ con: 2, cha: -2 });
@@ -52,6 +53,7 @@ describe("normalizeSubrace", () => {
     expect(layer.thiefAdjustments).toEqual(thief);
     expect(layer.conSaveBonusAdjustment).toBe(1);
     expect(layer.xpModifierPercent).toBe(10);
+    expect(layer.flatSaveBonus).toEqual({ all: 3, poison: 2 });
   });
   it("treats malformed fields as inherit/0", () => {
     const layer = normalizeSubrace({
@@ -65,6 +67,13 @@ describe("normalizeSubrace", () => {
     expect(layer).toEqual(NO_SUBRACE);
     // a non-object adjustment value, non-integer entries and a missing ability are ignored; ranges need all six abilities
     expect(normalizeSubrace({ abilityAdjustments: { con: 1.5, cha: 2, bogus: 3 } }).abilityAdjustments).toEqual({ cha: 2 });
+  });
+  it("reads flatSaveBonus leniently: both integers or null", () => {
+    expect(normalizeSubrace({ flatSaveBonus: { all: 3, poison: 2 } }).flatSaveBonus).toEqual({ all: 3, poison: 2 });
+    expect(normalizeSubrace({ flatSaveBonus: { all: 0, poison: 0 } }).flatSaveBonus).toEqual({ all: 0, poison: 0 });
+    for (const bad of [undefined, null, "x", 7, {}, { all: 3 }, { poison: 2 }, { all: 3, poison: "2" }, { all: 3.5, poison: 2 }]) {
+      expect(normalizeSubrace({ flatSaveBonus: bad }).flatSaveBonus, JSON.stringify(bad)).toBeNull();
+    }
   });
 });
 

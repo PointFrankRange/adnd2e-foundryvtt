@@ -1,0 +1,104 @@
+{
+  "_id": "kGnomeForest0001",
+  "_key": "!items!kGnomeForest0001",
+  "name": "Forest Gnome",
+  "type": "race",
+  "img": "icons/svg/burrow.svg",
+  "system": {
+    "description": "",
+    "raceId": "gnome",
+    "size": "small",
+    "baseMovement": 6,
+    "infravision": 0,
+    "classLevelLimits": {
+      "fighter": 11,
+      "thief": 13,
+      "cleric": 9,
+      "mage": 15
+    },
+    "allowedClasses": [
+      "fighter",
+      "thief",
+      "cleric",
+      "mage"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "cleric"
+      ],
+      [
+        "fighter",
+        "mage"
+      ],
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "cleric",
+        "mage"
+      ],
+      [
+        "cleric",
+        "thief"
+      ],
+      [
+        "mage",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "gnome common",
+      "elf",
+      "treant",
+      "forest mammal"
+    ],
+    "grantedFeatures": [
+      "Forest gnome: pass without trace",
+      "Forest gnome: hide in woods",
+      "Forest gnome: armor class bonus vs larger foes"
+    ],
+    "subrace": {
+      "id": "forest-gnome",
+      "abilityAdjustments": {
+        "str": -1,
+        "dex": 1,
+        "con": 0,
+        "int": -1,
+        "wis": 1,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 3,
+          "max": 17
+        },
+        "dex": {
+          "min": 8,
+          "max": 19
+        },
+        "con": {
+          "min": 8,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 17
+        },
+        "wis": {
+          "min": 6,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

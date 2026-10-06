@@ -145,3 +145,17 @@ describe("saveTargetBest", () => {
     expect(viaTarget).toEqual(viaBest);
   });
 });
+
+describe("saveTargetBest with a flat racial bonus (SP12 Plan C)", () => {
+  const base = { groups: [{ group: "warrior" as const, level: 3 }], category: "rsw" as const, race: "gnome" as const, con: 14, wisMagicalDefenseAdj: 0, dexDefensiveAdj: 0 };
+  it("replaces the Constitution bonus in the breakdown and the roll modifier", () => {
+    expect(saveTargetBest(base).breakdown.racialConBonus).toBe(4);
+    const flat = saveTargetBest({ ...base, racialFlatSaveBonus: { all: 3, poison: 2 } });
+    expect(flat.breakdown.racialConBonus).toBe(3);
+    expect(flat.rollModifier).toBe(3);
+  });
+  it("uses the poison value for a poison-tagged paralysis/poison save", () => {
+    const r = saveTargetBest({ ...base, category: "ppd", tags: ["poison"], racialFlatSaveBonus: { all: 3, poison: 2 } });
+    expect(r.breakdown.racialConBonus).toBe(2);
+  });
+});

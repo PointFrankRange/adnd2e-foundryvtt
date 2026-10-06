@@ -1,0 +1,102 @@
+{
+  "_id": "kGnomeRock000001",
+  "_key": "!items!kGnomeRock000001",
+  "name": "Rock Gnome",
+  "type": "race",
+  "img": "icons/svg/burrow.svg",
+  "system": {
+    "description": "",
+    "raceId": "gnome",
+    "size": "small",
+    "baseMovement": 6,
+    "infravision": 60,
+    "classLevelLimits": {
+      "fighter": 11,
+      "thief": 13,
+      "cleric": 9,
+      "mage": 15
+    },
+    "allowedClasses": [
+      "fighter",
+      "thief",
+      "cleric",
+      "mage"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "cleric"
+      ],
+      [
+        "fighter",
+        "mage"
+      ],
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "cleric",
+        "mage"
+      ],
+      [
+        "cleric",
+        "thief"
+      ],
+      [
+        "mage",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "common",
+      "dwarf",
+      "halfling",
+      "kobold",
+      "goblin",
+      "burrowing animal"
+    ],
+    "grantedFeatures": [],
+    "subrace": {
+      "id": "rock-gnome",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 0,
+        "con": 0,
+        "int": 1,
+        "wis": -1,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 6,
+          "max": 18
+        },
+        "dex": {
+          "min": 3,
+          "max": 18
+        },
+        "con": {
+          "min": 8,
+          "max": 18
+        },
+        "int": {
+          "min": 7,
+          "max": 19
+        },
+        "wis": {
+          "min": 3,
+          "max": 17
+        },
+        "cha": {
+          "min": 3,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}
