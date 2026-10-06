@@ -862,11 +862,11 @@ describe("lang/en.json - SP15 psionics", () => {
     const keys = [
       ...["roll", "special", "cost", "remaining"].map((k) => `ADND2E.chat.psionic.${k}`),
       ...["success", "minimum-success", "failure", "automatic-failure"].map((k) => `ADND2E.chat.psionic.result.${k}`),
-      ...["noClass", "notEnoughPsp", "restBlocked", "maintenanceEnded", "relearned"].map((k) => `ADND2E.sheet.psionics.${k}`),
+      ...["noClass", "notEnoughPsp", "restBlocked", "maintenanceEnded", "relearned", "alreadyKnown", "pcOnly"].map((k) => `ADND2E.sheet.psionics.${k}`),
       "ADND2E.sheet.tabs.psionics",
       ...["title", "psp", "rest", "hours", "maintained", "payMaintenance", "payAll", "end", "use", "relearn", "score", "cost", "maintenance", "primary", "defense", "noPowers"].map((k) => `ADND2E.sheet.psionics.${k}`),
       ...["hard", "light", "rest", "sleep"].map((k) => `ADND2E.sheet.psionics.activity.${k}`),
-      ...["round", "turn", "hour"].map((k) => `ADND2E.sheet.psionics.unit.${k}`),
+      ...["round", "turn", "hour", "none"].map((k) => `ADND2E.sheet.psionics.unit.${k}`),
       ...["science", "devotion", "defense"].map((k) => `ADND2E.sheet.psionics.kind.${k}`),
       ...["clairsentience", "psychokinesis", "psychometabolism", "psychoportation", "telepathy", "metapsionics"].map((k) => `ADND2E.sheet.psionics.discipline.${k}`),
       ...["disciplines", "sciences", "devotions", "defenseModes"].map((k) => `ADND2E.sheet.psionics.problem.${k}`),

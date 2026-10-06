@@ -395,10 +395,9 @@ export class Adnd2eCharacterSheet extends Base {
     },
   };
 
-  /** SP15: the Psionics tab and part exist only for an actor with a psionicist class entry. */
+  /** SP15: the Psionics tab and part exist only while the derived psionic level is above 0 (an active psionicist class). */
   #hasPsionics(): boolean {
-    const classes = (this.document as unknown as { system: { classes?: { chassisId: string }[] } }).system.classes ?? [];
-    return classes.some((c) => c.chassisId === "psionicist");
+    return ((this.document as unknown as { system: { psionics?: { level: number } } }).system.psionics?.level ?? 0) > 0;
   }
 
   override _configureRenderParts(options: unknown): Record<string, unknown> {
@@ -784,6 +783,8 @@ export class Adnd2eCharacterSheet extends Base {
         void this.#onItemFieldChange(el);
       });
     }
+    // v14 never removes a part that is no longer configured: drop a stale Psionics section
+    if (!this.#hasPsionics()) this.element.querySelector('[data-application-part="psionics"]')?.remove();
     bindSheetKit(this.element, this.#sheetKitKey);
   }
 

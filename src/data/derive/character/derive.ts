@@ -172,10 +172,11 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
   const classLevels = deriveClassLevels(snapshot.classes);
   const thiefSkills = deriveThiefSkillPoints(snapshot.classes, snapshot.thiefSkillAllocations);
   const levels = classLevels.map((c) => c.level);
-  const psionics = derivePsionics({
-    classes: classLevels,
-    scores: { wis: snapshot.abilities.wis, int: snapshot.abilities.int, con: snapshot.abilities.con },
-  });
+  const psionicsOf = (inPlay: typeof classLevels): DerivedPsionics | null =>
+    derivePsionics({
+      classes: inPlay,
+      scores: { wis: snapshot.abilities.wis, int: snapshot.abilities.int, con: snapshot.abilities.con },
+    });
   const mode = classifyArrangement(snapshot.classes);
   const race = snapshot.race ?? "human";
 
@@ -232,7 +233,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
         primaryMember && spellPointsEnabled(options) ? mergeCasterSpellPoints([primaryMember], snapshot, abilities) : {},
       channelling:
         primaryMember && channellersEnabled(options) ? mergeCasterChannelling([primaryMember], snapshot, abilities) : {},
-      psionics,
+      psionics: psionicsOf(classLevels),
       castingDisabled: casterTypesDisabled(snapshot.classes),
       proficiencies: primary
         ? deriveProficiencySlots(
@@ -288,7 +289,12 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
     spellSlots: mergeCasterSlots(resolution.casters, snapshot, abilities),
     spellPoints: spellPointsEnabled(options) ? mergeCasterSpellPoints(resolution.casters, snapshot, abilities) : {},
     channelling: channellersEnabled(options) ? mergeCasterChannelling(resolution.casters, snapshot, abilities) : {},
-    psionics,
+    // a dormant dual-class psionicist has no psionics (like a dormant caster): only the classes in play count
+    psionics: psionicsOf(
+      dualClass.dormantChassisId !== null && !dualClass.surpassed
+        ? classLevels.filter((c) => c.chassisId !== dualClass.dormantChassisId)
+        : classLevels,
+    ),
     castingDisabled: casterTypesDisabled(snapshot.classes),
     proficiencies: deriveProficiencySlots(
       resolution.weaponProfSource,

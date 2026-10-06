@@ -62,6 +62,33 @@ describe("deriveCharacter psionics", () => {
     expect(deriveCharacter(snap("psionicist", 0), DEFAULT_OPTIONAL_RULES).psionics?.max).toBe(25);
   });
 
+  it("a dormant dual-class psionicist has no psionics; the active psionicist and a surpassed one do", () => {
+    const base = snap("psionicist", 0);
+    const dual = (dormantXp: number, activeXp: number): ActorSnapshot => ({
+      ...base,
+      classes: [
+        { ...base.classes[0], chassisId: "psionicist", xp: dormantXp, dualClassState: "primary" as never },
+        { ...base.classes[0], chassisId: "fighter", xp: activeXp, dualClassState: "active" as never },
+      ],
+    });
+    const dormant = deriveCharacter(dual(16500, 0), DEFAULT_OPTIONAL_RULES);
+    expect(dormant.multiclass.dualClass.dormantChassisId).toBe("psionicist");
+    expect(dormant.multiclass.dualClass.surpassed).toBe(false);
+    expect(dormant.psionics).toBeNull();
+    const surpassed = deriveCharacter(dual(0, 99_000_000), DEFAULT_OPTIONAL_RULES);
+    expect(surpassed.multiclass.dualClass.surpassed).toBe(true);
+    expect(surpassed.psionics?.max).toBe(25);
+    // the psionicist as the ACTIVE class of a dual-class is unaffected
+    const active: ActorSnapshot = {
+      ...base,
+      classes: [
+        { ...base.classes[0], chassisId: "fighter", xp: 16000, dualClassState: "primary" as never },
+        { ...base.classes[0], chassisId: "psionicist", xp: 16500, dualClassState: "active" as never },
+      ],
+    };
+    expect(deriveCharacter(active, DEFAULT_OPTIONAL_RULES).psionics?.max).toBe(73);
+  });
+
   it("derives psionics in the multiclass path too", () => {
     const s = snap("psionicist", 0);
     const m: ActorSnapshot = { ...s, classes: [...s.classes, { ...s.classes[0], chassisId: "fighter" }] };

@@ -13,7 +13,7 @@ describe("Psionicist chassis (PHBR5 Table 2, 7-10)", () => {
       weaponProficiencies: { initial: 2, levelsPerSlot: 5 }, nonweaponProficiencies: { initial: 3, levelsPerSlot: 3 },
       nonProficiencyPenalty: -4, casterType: null, maxLevel: null, thiefSkillAccess: null,
     });
-    expect(PSIONICIST.armorAllowed).toEqual(["padded", "leather", "studded leather", "hide"]);
+    expect(PSIONICIST.armorAllowed).toEqual(["padded", "leather", "studded leather", "hide", "shield"]);
   });
   it("Table 2 experience", () => {
     const want = [0, 2200, 4400, 8800, 16500, 30000, 55000, 100000, 200000, 400000, 600000, 800000, 1000000, 1200000, 1500000, 1800000, 2100000, 2400000, 2700000, 3000000];

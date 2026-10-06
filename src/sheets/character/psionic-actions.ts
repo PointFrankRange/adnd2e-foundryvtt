@@ -21,8 +21,8 @@ export interface PsionicActor {
   items: Iterable<PsionicItem>;
   system: {
     abilities: Record<string, { score: number }>;
+    /** `level` is the derived cache: 0 = no active psionicist class */
     psionics: { psp: number | null; maintained: { powerId: string }[]; max: number; level: number };
-    classes: { chassisId: string; level: number }[];
   };
   update(data: Record<string, unknown>): Promise<unknown>;
 }
@@ -50,7 +50,7 @@ export function currentPsp(actor: PsionicActor): number {
   return Math.min(psp ?? max, max);
 }
 
-const isPsionicist = (actor: PsionicActor): boolean => actor.system.classes.some((c) => c.chassisId === "psionicist");
+const isPsionicist = (actor: PsionicActor): boolean => actor.system.psionics.level > 0;
 
 const powerItems = (actor: PsionicActor): PsionicItem[] => [...actor.items].filter((i) => i.type === "power");
 
@@ -66,7 +66,7 @@ export function knownPowers(actor: PsionicActor): KnownPower[] {
   }));
 }
 
-/** Refuses (toast) an actor with no psionicist class entry. */
+/** Refuses (toast) an actor with no active psionicist class (derived psionic level 0). */
 function requirePsionicist(actor: PsionicActor): boolean {
   if (isPsionicist(actor)) return true;
   warn("ADND2E.sheet.psionics.noClass");
@@ -136,7 +136,10 @@ export async function rest(actor: PsionicActor, activity: RecoveryActivity, hour
     warn("ADND2E.sheet.psionics.restBlocked");
     return;
   }
-  const update: Record<string, unknown> = { "system.psionics.psp": applyRecovery(currentPsp(actor), actor.system.psionics.max, activity, hours) };
+  const { max } = actor.system.psionics;
+  const recovered = applyRecovery(currentPsp(actor), max, activity, hours);
+  // a full pool is stored as null so a later level-up's larger maximum is full too
+  const update: Record<string, unknown> = { "system.psionics.psp": recovered >= max ? null : recovered };
   // an entry whose power item was deleted must not block rest: prune it in the same write
   if (maintained.length > 0) update["system.psionics.maintained"] = [];
   await actor.update(update);

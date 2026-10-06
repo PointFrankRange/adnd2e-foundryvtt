@@ -195,8 +195,10 @@
         "maintenance": "Maintenance",
         "primary": "Primary discipline",
         "defense": "Defense modes",
+        "alreadyKnown": "You already know this power; relearn it to raise its score instead.",
+        "pcOnly": "Psionic powers can only be learned on the full character sheet.",
         "noPowers": "No powers yet. Drag a power onto the sheet to learn it.",
-        "unit": { "round": "round", "turn": "turn", "hour": "hour" },
+        "unit": { "round": "round", "turn": "turn", "hour": "hour", "none": "-" },
         "kind": { "science": "Science", "devotion": "Devotion", "defense": "Defense" },
         "discipline": {
           "clairsentience": "Clairsentience",

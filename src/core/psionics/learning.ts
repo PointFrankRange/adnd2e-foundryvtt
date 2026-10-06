@@ -52,8 +52,8 @@ export function canLearn(known: readonly KnownPower[], candidate: { discipline: 
 /** Relearning raises one known power's score by 1 and spends one slot of its kind from the Table 4 budget. */
 export function canRelearn(known: readonly KnownPower[], id: string, level: number): LearnResult {
   const power = known.find((k) => k.id === id);
-  if (!power) return no("no-budget");
+  if (!power || power.kind === "defense") return no("no-budget"); // only sciences and devotions can be relearned
   const row = powerProgression(level);
-  const allowed = power.kind === "science" ? row.sciences : power.kind === "devotion" ? row.devotions : row.defenseModes;
+  const allowed = power.kind === "science" ? row.sciences : row.devotions;
   return slotsUsed(known, power.kind) + 1 > allowed ? no("no-budget") : OK;
 }

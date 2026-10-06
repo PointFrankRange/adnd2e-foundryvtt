@@ -48,6 +48,12 @@ describe("canLearn", () => {
 });
 
 describe("canRelearn", () => {
+  it("refuses a defense mode (only sciences and devotions can be relearned), even with budget to spare", () => {
+    const known = [p("telepathy", "defense")];
+    expect(canRelearn(known, known[0]!.id, 5)).toEqual({ ok: false, reason: "no-budget" }); // 1 known of 5 allowed
+    const full = [...many(5, "telepathy", "defense")];
+    expect(canRelearn(full, full[0]!.id, 5)).toEqual({ ok: false, reason: "no-budget" });
+  });
   it("spends one slot of the same kind from the table budget (devotions)", () => {
     const known = [...many(2, "clairsentience", "devotion")];
     expect(canRelearn(known, known[0]!.id, 1)).toEqual({ ok: true }); // 2 known of 3 allowed
@@ -85,11 +91,5 @@ describe("canRelearn", () => {
   });
   it("an unknown id is refused", () => {
     expect(canRelearn([], "nope", 1)).toEqual({ ok: false, reason: "no-budget" });
-  });
-  it("handles relearning defense modes", () => {
-    const known = [p("telepathy", "defense")];
-    expect(canRelearn(known, known[0]!.id, 5)).toEqual({ ok: true }); // 1 known of 5 allowed
-    const full = [...many(5, "telepathy", "defense")];
-    expect(canRelearn(full, full[0]!.id, 5)).toEqual({ ok: false, reason: "no-budget" }); // 5 known of 5 allowed
   });
 });

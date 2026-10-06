@@ -44,7 +44,7 @@ const power = (id: string, over: Record<string, unknown> = {}) => {
   };
 };
 
-function actor(opts: { psp?: number | null; maintained?: string[]; items?: unknown[]; classes?: { chassisId: string; level: number }[]; max?: number; level?: number } = {}) {
+function actor(opts: { psp?: number | null; maintained?: string[]; items?: unknown[]; max?: number; level?: number } = {}) {
   const updates: Record<string, unknown>[] = [];
   const a: PsionicActor = {
     name: "Tam", img: "t.png",
@@ -52,7 +52,6 @@ function actor(opts: { psp?: number | null; maintained?: string[]; items?: unkno
     system: {
       abilities: { wis: { score: 14 } },
       psionics: { psp: opts.psp === undefined ? 20 : opts.psp, maintained: (opts.maintained ?? []).map((powerId) => ({ powerId })), max: opts.max ?? 40, level: opts.level ?? 3 },
-      classes: opts.classes ?? [{ chassisId: "psionicist", level: 3 }],
     },
     update: async (d) => void updates.push(d),
   };
@@ -130,7 +129,7 @@ describe("usePower", () => {
     expect(updates).toEqual([{ "system.psionics.psp": 16 }]);
   });
   it("refuses an actor with no psionicist class, and ignores an unknown power", async () => {
-    const none = actor({ classes: [{ chassisId: "fighter", level: 3 }] });
+    const none = actor({ level: 0 });
     await usePower(none.a, "p1", async () => 5);
     expect(none.updates).toEqual([]);
     expect(warn).toHaveBeenCalledWith("ADND2E.sheet.psionics.noClass");
@@ -178,7 +177,7 @@ describe("relearnPower", () => {
     expect(warn).toHaveBeenCalledWith("ADND2E.sheet.psionics.learn.no-budget");
   });
   it("refuses a non-psionicist and ignores an unknown power", async () => {
-    const none = actor({ classes: [] });
+    const none = actor({ level: 0 });
     await relearnPower(none.a, "p1");
     expect(warn).toHaveBeenCalledWith("ADND2E.sheet.psionics.noClass");
     const p = power("p1");
@@ -210,6 +209,17 @@ describe("rest", () => {
     await rest(a, "sleep", 2);
     expect(updates).toEqual([{ "system.psionics.psp": 34 }]);
   });
+  it("writes the number below max, and null (full) when the recovered total reaches or passes max", async () => {
+    const below = actor({ psp: 10, max: 40 });
+    await rest(below.a, "sleep", 1); // 10 + 12 = 22
+    expect(below.updates).toEqual([{ "system.psionics.psp": 22 }]);
+    const exact = actor({ psp: 28, max: 40 });
+    await rest(exact.a, "sleep", 1); // 28 + 12 = 40 = max
+    expect(exact.updates).toEqual([{ "system.psionics.psp": null }]);
+    const over = actor({ psp: 30, max: 40 });
+    await rest(over.a, "sleep", 2); // capped at max
+    expect(over.updates).toEqual([{ "system.psionics.psp": null }]);
+  });
   it("is refused while a power is maintained", async () => {
     const { a, updates } = actor({ psp: 10, maintained: ["p1"] });
     await rest(a, "sleep", 2);
@@ -222,8 +232,17 @@ describe("rest", () => {
     expect(updates).toEqual([{ "system.psionics.psp": 34, "system.psionics.maintained": [] }]);
     expect(warn).not.toHaveBeenCalled();
   });
+  it("refuses a dormant dual-class psionicist (derived level 0) exactly like no class", async () => {
+    const { a, updates } = actor({ level: 0, max: 0 });
+    await usePower(a, "p1", async () => 5);
+    await rest(a, "sleep", 2);
+    expect(updates).toEqual([]);
+    expect(warn).toHaveBeenCalledTimes(2);
+    expect(warn).toHaveBeenNthCalledWith(1, "ADND2E.sheet.psionics.noClass");
+    expect(warn).toHaveBeenNthCalledWith(2, "ADND2E.sheet.psionics.noClass");
+  });
   it("refuses a non-psionicist", async () => {
-    const { a, updates } = actor({ classes: [] });
+    const { a, updates } = actor({ level: 0 });
     await rest(a, "sleep", 2);
     expect(updates).toEqual([]);
   });
@@ -258,7 +277,7 @@ describe("payMaintenance", () => {
     const { a, updates } = actor({ items: items(), maintained: ["p1"] });
     await payMaintenance(a, "p2");
     expect(updates).toEqual([]);
-    const none = actor({ classes: [] });
+    const none = actor({ level: 0 });
     await payMaintenance(none.a, null);
     expect(none.updates).toEqual([]);
   });
@@ -274,7 +293,7 @@ describe("endPower", () => {
     const { a, updates } = actor({ maintained: ["p2"] });
     await endPower(a, "p1");
     expect(updates).toEqual([]);
-    const none = actor({ classes: [], maintained: ["p1"] });
+    const none = actor({ level: 0, maintained: ["p1"] });
     await endPower(none.a, "p1");
     expect(none.updates).toEqual([]);
   });

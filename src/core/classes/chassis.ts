@@ -279,7 +279,7 @@ export const PSIONICIST: ClassChassis = {
   nonweaponProficiencies: { initial: 3, levelsPerSlot: 3 },
   nonProficiencyPenalty: -4,
   casterType: null,
-  armorAllowed: ["padded", "leather", "studded leather", "hide"],
+  armorAllowed: ["padded", "leather", "studded leather", "hide", "shield"],
   weaponsAllowed: { names: [...PSIONICIST_WEAPONS] },
   weaponSpecializationAllowed: false,
   raceLevelLimits: {},
