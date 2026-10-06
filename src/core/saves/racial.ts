@@ -53,6 +53,29 @@ export function racialSaveBonus(
   return matches ? racialConSaveBonus(con) + extra : 0;
 }
 
+export interface RacialSaveModifierInput {
+  race: Race;
+  category: SaveCategory;
+  con: number;
+  tags?: readonly SaveEffectTag[];
+  /** a subrace's Constitution-save adjustment (SP12 Plan A) */
+  conAdjustment?: number;
+  /** a subrace's flat bonus (SP12 Plan C): when set it REPLACES the Constitution-based bonus */
+  flat?: { all: number; poison: number } | null;
+}
+
+/**
+ * The racial saving-throw modifier, decided in one place (SP12 Plan C). A flat bonus (Deep Gnome)
+ * applies to every category — `poison` for a poison-tagged paralysis/poison save — and replaces the
+ * Constitution-based bonus; with no flat bonus this is exactly `racialSaveBonus`.
+ */
+export function racialSaveModifier(input: RacialSaveModifierInput): number {
+  assertAbilityScore(input.con, "con");
+  const tags = input.tags ?? [];
+  if (input.flat) return input.category === "ppd" && tags.includes("poison") ? input.flat.poison : input.flat.all;
+  return racialSaveBonus(input.race, input.category, input.con, tags, input.conAdjustment ?? 0);
+}
+
 /**
  * Percentage chance to ignore a *sleep* or *charm* effect entirely (elf 90,
  * half-elf 30, others 0). Roll d100 BEFORE the saving throw; on `roll <= result`

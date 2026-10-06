@@ -5,7 +5,7 @@
 // the winning base. See references/research-notes.md §"PLAN 1b.3".
 import type { ClassGroup, GroupLevel, Race, SaveCategory, SaveEffectTag } from "../types";
 import { saveBaseTarget } from "./index";
-import { racialSaveBonus } from "./racial";
+import { racialSaveModifier } from "./racial";
 
 export interface SaveTargetInput {
   group: ClassGroup;
@@ -22,6 +22,8 @@ export interface SaveTargetInput {
   situationalModifier?: number;
   /** SP12 Plan A subrace Constitution-save adjustment */
   racialSaveAdjustment?: number;
+  /** SP12 Plan C: a subrace's flat save bonus (replaces the Constitution-based bonus) */
+  racialFlatSaveBonus?: { all: number; poison: number } | null;
 }
 
 export interface SaveTargetBestInput {
@@ -36,6 +38,8 @@ export interface SaveTargetBestInput {
   situationalModifier?: number;
   /** SP12 Plan A subrace Constitution-save adjustment */
   racialSaveAdjustment?: number;
+  /** SP12 Plan C: a subrace's flat save bonus (replaces the Constitution-based bonus) */
+  racialFlatSaveBonus?: { all: number; poison: number } | null;
 }
 
 export interface SaveTargetResult {
@@ -47,6 +51,7 @@ export interface SaveTargetResult {
   effectiveTarget: number;
   breakdown: {
     base: number;
+    /** the racial saving-throw modifier (the Constitution-based bonus, or a subrace's flat bonus) */
     racialConBonus: number;
     wisdomMagicalDefense: number;
     dexterityDefensive: number;
@@ -64,7 +69,14 @@ export function saveTargetBest(input: SaveTargetBestInput): SaveTargetResult {
   const base = Math.min(
     ...input.groups.map((g) => saveBaseTarget(g.group, g.level, input.category)),
   );
-  const racialConBonus = racialSaveBonus(input.race, input.category, input.con, tags, input.racialSaveAdjustment ?? 0);
+  const racialConBonus = racialSaveModifier({
+    race: input.race,
+    category: input.category,
+    con: input.con,
+    tags,
+    conAdjustment: input.racialSaveAdjustment ?? 0,
+    flat: input.racialFlatSaveBonus ?? null,
+  });
   const wisdomMagicalDefense = tags.includes("mind-affecting") ? input.wisMagicalDefenseAdj : 0;
   const dexterityDefensive =
     tags.includes("dodgeable") || input.category === "bw" ? -input.dexDefensiveAdj : 0;
@@ -94,5 +106,6 @@ export function saveTarget(input: SaveTargetInput): SaveTargetResult {
     tags: input.tags,
     situationalModifier: input.situationalModifier,
     racialSaveAdjustment: input.racialSaveAdjustment,
+    racialFlatSaveBonus: input.racialFlatSaveBonus,
   });
 }

@@ -9,6 +9,13 @@ export type AbilityAdjustments = Partial<Record<AbilityKey, number>>;
 export type AbilityRanges = Record<AbilityKey, [number, number]>;
 export type ThiefAdjustments = Readonly<Record<ThiefSkill, number>>;
 
+export interface FlatSaveBonus {
+  /** every saving throw */
+  all: number;
+  /** a poison-tagged paralysis/poison save */
+  poison: number;
+}
+
 export interface SubraceLayer {
   /** blank = no subrace */
   id: string;
@@ -19,6 +26,8 @@ export interface SubraceLayer {
   conSaveBonusAdjustment: number;
   /** additional XP cost per level, percent (+10 = 10% more) */
   xpModifierPercent: number;
+  /** SP12 Plan C: a flat saving-throw bonus that REPLACES the race's Constitution-based bonus (Deep Gnome +3 all, +2 poison); null = none */
+  flatSaveBonus: FlatSaveBonus | null;
 }
 
 export const NO_SUBRACE: SubraceLayer = Object.freeze({
@@ -28,6 +37,7 @@ export const NO_SUBRACE: SubraceLayer = Object.freeze({
   thiefAdjustments: null,
   conSaveBonusAdjustment: 0,
   xpModifierPercent: 0,
+  flatSaveBonus: null,
 }) as SubraceLayer;
 
 export interface RawSubrace {
@@ -37,6 +47,7 @@ export interface RawSubrace {
   thiefAdjustments?: unknown;
   conSaveBonusAdjustment?: unknown;
   xpModifierPercent?: unknown;
+  flatSaveBonus?: unknown;
 }
 
 const ABILITIES: readonly AbilityKey[] = ["str", "dex", "con", "int", "wis", "cha"];
@@ -75,6 +86,12 @@ function normalizeThief(raw: unknown): ThiefAdjustments | null {
   return out;
 }
 
+function normalizeFlatSaveBonus(raw: unknown): FlatSaveBonus | null {
+  if (!raw || typeof raw !== "object") return null;
+  const { all, poison } = raw as { all?: unknown; poison?: unknown };
+  return isInt(all) && isInt(poison) ? { all, poison } : null;
+}
+
 /** Lenient read: anything malformed falls back to "inherit"/0. Zero adjustments are dropped, so `{con:2,cha:-2}` round-trips from the six-integer schema form. */
 export function normalizeSubrace(raw: RawSubrace | null | undefined): SubraceLayer {
   return {
@@ -84,6 +101,7 @@ export function normalizeSubrace(raw: RawSubrace | null | undefined): SubraceLay
     thiefAdjustments: normalizeThief(raw?.thiefAdjustments),
     conSaveBonusAdjustment: isInt(raw?.conSaveBonusAdjustment) ? raw.conSaveBonusAdjustment : 0,
     xpModifierPercent: isInt(raw?.xpModifierPercent) ? raw.xpModifierPercent : 0,
+    flatSaveBonus: normalizeFlatSaveBonus(raw?.flatSaveBonus),
   };
 }
 

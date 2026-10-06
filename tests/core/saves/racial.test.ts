@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { racialConSaveBonus, racialSaveBonus, sleepCharmResistance } from "../../../src/core/saves/racial";
+import { racialConSaveBonus, racialSaveBonus, racialSaveModifier, sleepCharmResistance } from "../../../src/core/saves/racial";
 import type { Race, SaveCategory } from "../../../src/core/types";
 
 describe("racialConSaveBonus", () => {
@@ -85,5 +85,38 @@ describe("sleepCharmResistance", () => {
     expect(sleepCharmResistance("dwarf")).toBe(0);
     expect(sleepCharmResistance("gnome")).toBe(0);
     expect(sleepCharmResistance("halfling")).toBe(0);
+  });
+});
+
+describe("racialSaveModifier (SP12 Plan C)", () => {
+  const flat = { all: 3, poison: 2 };
+  const CATEGORIES = ["ppd", "rsw", "pp", "bw", "spell"] as const;
+  const RACES = ["human", "dwarf", "elf", "gnome", "half-elf", "halfling"] as const;
+  it("a flat bonus is `all` for every category, whatever the race or Constitution", () => {
+    for (const race of RACES) for (const category of CATEGORIES) {
+      expect(racialSaveModifier({ race, category, con: 3, flat }), `${race} ${category}`).toBe(3);
+      expect(racialSaveModifier({ race, category, con: 18, flat }), `${race} ${category}`).toBe(3);
+    }
+  });
+  it("a poison-tagged paralysis/poison save uses the poison value; the tag changes nothing else", () => {
+    expect(racialSaveModifier({ race: "gnome", category: "ppd", con: 12, tags: ["poison"], flat })).toBe(2);
+    expect(racialSaveModifier({ race: "gnome", category: "rsw", con: 12, tags: ["poison"], flat })).toBe(3);
+    expect(racialSaveModifier({ race: "gnome", category: "pp", con: 12, tags: ["poison"], flat })).toBe(3);
+  });
+  it("a flat bonus REPLACES the Constitution bonus (a gnome with CON 14 would otherwise get +4)", () => {
+    expect(racialSaveBonus("gnome", "rsw", 14)).toBe(4);
+    expect(racialSaveModifier({ race: "gnome", category: "rsw", con: 14, flat })).toBe(3);
+  });
+  it("with no flat bonus it equals racialSaveBonus, including the Constitution adjustment", () => {
+    for (const race of RACES) for (const category of CATEGORIES) for (const tags of [[], ["poison"]] as const) for (const adj of [0, 1]) {
+      expect(racialSaveModifier({ race, category, con: 14, tags, conAdjustment: adj, flat: null }), `${race} ${category}`)
+        .toBe(racialSaveBonus(race, category, 14, tags, adj));
+      expect(racialSaveModifier({ race, category, con: 14, tags, conAdjustment: adj }))
+        .toBe(racialSaveBonus(race, category, 14, tags, adj));
+    }
+  });
+  it("still validates the Constitution score on both paths", () => {
+    expect(() => racialSaveModifier({ race: "dwarf", category: "rsw", con: 0, flat })).toThrow();
+    expect(() => racialSaveModifier({ race: "dwarf", category: "rsw", con: 0 })).toThrow();
   });
 });
