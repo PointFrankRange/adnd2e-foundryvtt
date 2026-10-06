@@ -2,6 +2,7 @@ import type {
   ArmorType, CharismaModifiers, ConstitutionModifiers, DexterityModifiers, IntelligenceModifiers,
   StrengthModifiers, ThiefSkill, WisdomModifiers,
 } from "../../core/types";
+import type { Contact } from "../../core/psionics/combat";
 import type { Discipline, PowerKind, PowerProgressionRow, RecoveryActivity } from "../../core/psionics";
 import type { OptionalRules } from "../../core/options";
 import type { SubraceLayer } from "../../core/races";
@@ -89,6 +90,10 @@ export interface PsionicsInput {
   max: number;
   level: number;
   maintained: { powerId: string }[];
+  /** SP15 Plan C: the raised defense-mode power id ("" = none) */
+  activeDefense: string;
+  /** SP15 Plan C: open psychic contacts */
+  contacts: Contact[];
   /** prepared ability scores keyed str..cha */
   abilityScores: Record<string, number>;
   powers: PsionicPowerItem[];
@@ -109,6 +114,8 @@ export interface PsionicPowerRow {
   scoreBonus: number;
   canUse: boolean;
   canRelearn: boolean;
+  /** SP15 Plan C: a psionic attack mode (gets an Attack button) */
+  isAttackMode: boolean;
 }
 
 export interface PsionicsView {
@@ -121,6 +128,13 @@ export interface PsionicsView {
   maintained: { powerId: string; name: string; cost: number; unit: string }[];
   groups: { discipline: Discipline; powers: PsionicPowerRow[] }[];
   defense: PsionicPowerRow[];
+  /** SP15 Plan C: psionic combat state */
+  combat: {
+    activeDefense: { id: string; name: string } | null;
+    defenses: { id: string; name: string }[];
+    contacts: { target: string; name: string; tangents: number; full: boolean }[];
+    hasUpkeep: boolean;
+  };
   /** i18n keys of over-budget warnings */
   problems: string[];
 }

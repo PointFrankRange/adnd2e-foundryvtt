@@ -28,6 +28,8 @@ import type {
 } from "./context-types";
 import { checkPowerDrop, validateItemDrop, type DropCheckInput } from "./drop-rules";
 import { adjustPsp, endPower, payMaintenance, relearnPower, rest as psionicRest, usePower as usePsionicPower } from "./psionic-actions";
+import type { Contact } from "../../core/psionics/combat";
+import { attackMode, dropDefense, endContactAction, payUpkeep, raiseDefense } from "./psionic-combat";
 import type { PsionicPowerItem } from "./context-types";
 import { rollHitPoints } from "./hp-roll";
 import { resetTurnAttempt, turningPanel, turnUndead } from "./turning-actions";
@@ -364,6 +366,11 @@ export class Adnd2eCharacterSheet extends Base {
       adjustPsionicPsp: Adnd2eCharacterSheet.#onAdjustPsionicPsp,
       payPsionicMaintenance: Adnd2eCharacterSheet.#onPayPsionicMaintenance,
       endPsionicPower: Adnd2eCharacterSheet.#onEndPsionicPower,
+      psionicRaiseDefense: Adnd2eCharacterSheet.#onPsionicRaiseDefense,
+      psionicDropDefense: Adnd2eCharacterSheet.#onPsionicDropDefense,
+      psionicAttack: Adnd2eCharacterSheet.#onPsionicAttack,
+      psionicPayUpkeep: Adnd2eCharacterSheet.#onPsionicPayUpkeep,
+      psionicEndContact: Adnd2eCharacterSheet.#onPsionicEndContact,
     },
   };
 
@@ -550,7 +557,7 @@ export class Adnd2eCharacterSheet extends Base {
     }
 
     const rules = getOptionalRules();
-    const psionicSys = (actor.system as { psionics: { psp: number | null; max: number; level: number; maintained: { powerId: string }[] }; abilities: Record<string, { score: number }> }); 
+    const psionicSys = (actor.system as { psionics: { psp: number | null; max: number; level: number; maintained: { powerId: string }[]; activeDefense: string; contacts: Contact[] }; abilities: Record<string, { score: number }> }); 
     const actorStatuses = (this.document as unknown as { statuses: ReadonlySet<string> }).statuses;
     const fatigueTier = [...actorStatuses].map(tierForConditionId).find((t) => t !== null) ?? null;
     return {
@@ -596,6 +603,8 @@ export class Adnd2eCharacterSheet extends Base {
             max: psionicSys.psionics.max,
             level: psionicSys.psionics.level,
             maintained: psionicSys.psionics.maintained,
+            activeDefense: psionicSys.psionics.activeDefense ?? "",
+            contacts: psionicSys.psionics.contacts ?? [],
             abilityScores: Object.fromEntries(Object.entries(psionicSys.abilities).map(([k, v]) => [k, v.score])),
             powers: items.filter((i) => i.type === "power").map((i) => ({ id: i.id, name: i.name, ...(i.system as Omit<PsionicPowerItem, "id" | "name">) })),
           }
@@ -1194,6 +1203,30 @@ export class Adnd2eCharacterSheet extends Base {
   static async #onEndPsionicPower(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
     const { powerId } = target.dataset;
     if (powerId && this.isEditable) await endPower(this.document as never, powerId);
+  }
+
+  static async #onPsionicRaiseDefense(this: Adnd2eCharacterSheet): Promise<void> {
+    if (!this.isEditable) return;
+    const id = this.element.querySelector<HTMLSelectElement>("[data-psionic-defense]")?.value;
+    if (id) await raiseDefense(this.document as never, id);
+  }
+
+  static async #onPsionicDropDefense(this: Adnd2eCharacterSheet): Promise<void> {
+    if (this.isEditable) await dropDefense(this.document as never);
+  }
+
+  static async #onPsionicAttack(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const { powerId } = target.dataset;
+    if (powerId && this.isEditable) await attackMode(this.document as never, powerId);
+  }
+
+  static async #onPsionicPayUpkeep(this: Adnd2eCharacterSheet): Promise<void> {
+    if (this.isEditable) await payUpkeep(this.document as never);
+  }
+
+  static async #onPsionicEndContact(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const { target: contact } = target.dataset;
+    if (contact && this.isEditable) await endContactAction(this.document as never, contact);
   }
 }
 

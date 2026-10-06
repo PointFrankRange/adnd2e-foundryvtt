@@ -62,7 +62,7 @@ describe("PC sheet templates (sheet redesign R1)", () => {
   });
 });
 
-const PC_ONLY_ACTIONS = ["awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait", "useKitPower", "resetKitPower", "newDayKitPowers", "newEncounterKitPowers", "usePsionicPower", "relearnPsionicPower", "psionicRest", "adjustPsionicPsp", "payPsionicMaintenance", "endPsionicPower"];
+const PC_ONLY_ACTIONS = ["awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait", "useKitPower", "resetKitPower", "newDayKitPowers", "newEncounterKitPowers", "usePsionicPower", "relearnPsionicPower", "psionicRest", "adjustPsionicPsp", "payPsionicMaintenance", "endPsionicPower", "psionicRaiseDefense", "psionicDropDefense", "psionicAttack", "psionicPayUpkeep", "psionicEndContact"];
 
 describe("PC-only actions (sheet redesign R2)", () => {
   it("every PC template that renders a PC-only action gates it on @root.pcActions", () => {
@@ -97,6 +97,23 @@ describe("Psionics tab (SP15 Plan A)", () => {
   });
   it("rest inputs carry no name= (they must not be submitted as actor data)", () => {
     const panel = readFileSync(path.join(PC_DIR, "partials", "pc-psionics-panels.hbs"), "utf8");
+    expect(panel).not.toMatch(/name="/);
+  });
+});
+
+describe("Psionic combat panel (SP15 Plan C)", () => {
+  const COMBAT_ACTIONS = ["psionicRaiseDefense", "psionicDropDefense", "psionicAttack", "psionicPayUpkeep", "psionicEndContact"];
+  it("every combat action is rendered by a template, registered on the sheet and PC-only", () => {
+    for (const a of COMBAT_ACTIONS) {
+      expect(TEMPLATES, a).toContain(`data-action="${a}"`);
+      expect(SHEET, a).toContain(`${a}: Adnd2eCharacterSheet.#on`);
+      expect(PC_ONLY_ACTIONS, a).toContain(a);
+    }
+  });
+  it("the defense select is read by data attribute and carries no name=", () => {
+    const panel = readFileSync(path.join(PC_DIR, "partials", "pc-psionics-panels.hbs"), "utf8");
+    expect(panel).toContain("data-psionic-defense");
+    expect(SHEET).toContain("[data-psionic-defense]");
     expect(panel).not.toMatch(/name="/);
   });
 });

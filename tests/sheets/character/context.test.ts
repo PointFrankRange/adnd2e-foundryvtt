@@ -3332,6 +3332,7 @@ describe("buildPsionicsView (SP15 Plan A)", () => {
   });
   const base = (over: Record<string, unknown> = {}) => ({
     psp: null as number | null, max: 73, level: 5, maintained: [] as { powerId: string }[],
+    activeDefense: "", contacts: [] as { target: string; name: string; tangents: number }[],
     abilityScores: { wis: 17, con: 16, int: 12 },
     powers: [
       pw({ id: "a", discipline: "telepathy", abilityModifier: -3, scoreBonus: 1, maintenanceCost: 2, maintenanceUnit: "round", costNote: "per target", range: "30 yds" }),
@@ -3395,6 +3396,32 @@ describe("buildPsionicsView (SP15 Plan A)", () => {
       "ADND2E.sheet.psionics.problem.defenseModes",
     ]);
     expect(over.groups.every((g) => g.powers.every((p) => !p.canRelearn))).toBe(true);
+  });
+
+  it("combat block: no defense raised, the defenses on offer, no contacts", () => {
+    const withDefenses = base({ powers: [pw({ id: "mb", name: "Mind Blank", kind: "defense" }), pw({ id: "x", name: "Homemade", kind: "defense" }), pw({ id: "mt", name: "Mind Thrust", kind: "devotion" })] });
+    expect(buildPsionicsView(withDefenses)!.combat).toEqual({ activeDefense: null, defenses: [{ id: "mb", name: "Mind Blank" }], contacts: [], hasUpkeep: false });
+  });
+
+  it("combat block: a raised defense resolves to its name; a stale or non-defense id resolves to null", () => {
+    const powers = [pw({ id: "mb", name: "Mind Blank", kind: "defense" }), pw({ id: "mt", name: "Mind Thrust", kind: "devotion" })];
+    expect(buildPsionicsView(base({ powers, activeDefense: "mb" }))!.combat.activeDefense).toEqual({ id: "mb", name: "Mind Blank" });
+    expect(buildPsionicsView(base({ powers, activeDefense: "gone" }))!.combat.activeDefense).toBeNull();
+    expect(buildPsionicsView(base({ powers, activeDefense: "mt" }))!.combat.activeDefense).toBeNull();
+  });
+
+  it("combat block: contacts flag full at 3 tangents; upkeep only with a partial tangent", () => {
+    const full = buildPsionicsView(base({ contacts: [{ target: "t1", name: "Orc", tangents: 3 }] }))!.combat;
+    expect(full.contacts).toEqual([{ target: "t1", name: "Orc", tangents: 3, full: true }]);
+    expect(full.hasUpkeep).toBe(false);
+    const partial = buildPsionicsView(base({ contacts: [{ target: "t1", name: "Orc", tangents: 3 }, { target: "t2", name: "Elf", tangents: 1 }] }))!.combat;
+    expect(partial.contacts.map((c) => c.full)).toEqual([true, false]);
+    expect(partial.hasUpkeep).toBe(true);
+  });
+
+  it("isAttackMode is true for Mind Thrust and false for Contact", () => {
+    const v = buildPsionicsView(base({ powers: [pw({ id: "mt", name: "Mind Thrust" }), pw({ id: "ct", name: "Contact" })] }))!;
+    expect(v.groups[0]!.powers.map((p) => [p.name, p.isAttackMode])).toEqual([["Mind Thrust", true], ["Contact", false]]);
   });
 
   it("the tab list contains the psionics tab only when the view is non-null", () => {
