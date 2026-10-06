@@ -5,7 +5,7 @@
   "type": "power",
   "img": "icons/svg/aura.svg",
   "system": {
-    "description": "Stores psionic strength in a prepared vessel or gem to be drawn on later; the book also allows a prepared valuable gem in place of the prerequisite.",
+    "description": "Stores psionic strength in a prepared vessel to be drawn on later; a character without the Empower science may use a prepared valuable gem instead.",
     "discipline": "metapsionics",
     "kind": "devotion",
     "abilityKey": "wis",
@@ -18,9 +18,7 @@
     "preparation": "1 rnd./point",
     "areaOfEffect": "1 item",
     "scoreBonus": 0,
-    "prerequisites": [
-      "Empower"
-    ],
+    "prerequisites": [],
     "minLevel": 0
   }
 }

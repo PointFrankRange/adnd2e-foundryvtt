@@ -16,7 +16,7 @@
     "maintenanceUnit": "round",
     "range": "0",
     "preparation": "1",
-    "areaOfEffect": "101 ft. rad.",
+    "areaOfEffect": "100-ft. radius",
     "scoreBonus": 0,
     "prerequisites": [],
     "minLevel": 3

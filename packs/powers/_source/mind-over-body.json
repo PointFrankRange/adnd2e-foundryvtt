@@ -5,7 +5,7 @@
   "type": "power",
   "img": "icons/svg/aura.svg",
   "system": {
-    "description": "The psionicist suppresses his need for food, water and sleep in exchange for an hour of meditation each day.",
+    "description": "By meditating for an hour each day, the psionicist can go without eating, drinking or sleeping.",
     "discipline": "psychometabolism",
     "kind": "devotion",
     "abilityKey": "wis",

@@ -5,7 +5,7 @@
   "type": "power",
   "img": "icons/svg/aura.svg",
   "system": {
-    "description": "Blocks teleportation and similar travel into or out of a small area while it is maintained.",
+    "description": "Stops unwanted teleportation of the psionicist and those he protects within a small area while it is maintained, without preventing the psionicist from teleporting away himself.",
     "discipline": "psychoportation",
     "kind": "devotion",
     "abilityKey": "int",

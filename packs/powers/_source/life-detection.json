@@ -5,7 +5,7 @@
   "type": "power",
   "img": "icons/svg/aura.svg",
   "system": {
-    "description": "Scans like radar for the presence of living, thinking creatures within range.",
+    "description": "Senses living, thinking creatures within range and reveals roughly where they are.",
     "discipline": "telepathy",
     "kind": "devotion",
     "abilityKey": "int",

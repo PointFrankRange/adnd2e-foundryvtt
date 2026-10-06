@@ -374,6 +374,14 @@ describe("powers pack content", () => {
   const kindOf = (d: Record<string, unknown>) => String(sys(d).kind);
   const discOf = (d: Record<string, unknown>) => String(sys(d).discipline);
 
+  it("review fixes: Receptacle has no hard prerequisite (the book allows a valuable gem instead of Empower); the book spells the power Telempathic Projection", () => {
+    const byName = (n: string) => items.find((d) => d.name === n);
+    expect(sys(byName("Receptacle")!).prerequisites).toEqual([]);
+    expect(byName("Telempathic Projection")).toBeDefined();
+    expect(byName("Telepathic Projection")).toBeUndefined();
+    expect(sys(byName("Telempathic Projection")!).prerequisites).toEqual(["Mindlink", "Contact"]);
+  });
+
   it("has 153 uniquely named and identified power Items (the book's Summary of Powers)", () => {
     expect(items).toHaveLength(153);
     expect(new Set(items.map((d) => d._id)).size).toBe(153);

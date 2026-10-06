@@ -5,7 +5,7 @@
   "type": "power",
   "img": "icons/svg/aura.svg",
   "system": {
-    "description": "The psionicist anchors himself to the fabric of the universe so that only overwhelming force can shift him.",
+    "description": "Roots the psionicist in place so that only overwhelming force can shift him.",
     "discipline": "psychometabolism",
     "kind": "devotion",
     "abilityKey": "con",

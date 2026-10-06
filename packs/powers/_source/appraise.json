@@ -5,7 +5,7 @@
   "type": "power",
   "img": "icons/svg/aura.svg",
   "system": {
-    "description": "Lets the user gauge another psionic character's strengths and weaknesses at a glance.",
+    "description": "Estimates how likely a planned course of action is to succeed before the psionicist commits to it.",
     "discipline": "metapsionics",
     "kind": "science",
     "abilityKey": "int",
