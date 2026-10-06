@@ -201,6 +201,13 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
     }),
     /** SP11 Plan B: kit-power use counts, keyed "<kitItemId>:<powerId>" → { used }. PERSISTED, never touched by prepareDerivedData (like channelling.current); only Use / Reset / kit deletion write it. An ObjectField with initial {} makes "no usage" an empty object. The initial MUST be a function: an object-literal initial is a single object shared by every model (getInitialValue does not clone) and is mutated in place by merge-style updates, leaking one actor's counters onto the others. */
     kitPowers: new ObjectField({ required: true, initial: () => ({}) }),
+    /** SP15 Plan A: psionics state. `psp` is PERSISTED (null = full, i.e. never spent); `maintained` is the ongoing powers; `max`/`level` are derived caches written by deriveAndCache. `maintained` initial MUST be a function (shared-literal gotcha, see kitPowers). */
+    psionics: new SchemaField({
+      psp: new NumberField({ required: true, nullable: true, integer: true, min: 0, initial: null }),
+      maintained: new ArrayField(new SchemaField({ powerId: new StringField({ required: true, blank: false }) }), { required: true, initial: () => [] }),
+      max: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+      level: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+    }),
     spellcasting: new SchemaField({
       wizard: new SchemaField({
         specialistSchool: new StringField({ required: true, nullable: true, initial: null, choices: WIZARD_SCHOOLS }),
@@ -363,6 +370,7 @@ interface DerivedWriteSurface {
   proficiencies: unknown;
   thiefSkills: { total: number; spent: number; available: number; allocations: unknown };
   languagesKnown: unknown;
+  psionics: { max: number; level: number };
   spellcasting: { wizard: { slots: unknown; spellPoints: unknown; channelling: { max: unknown } }; priest: { slots: unknown; spellPoints: unknown; channelling: { max: unknown } } };
 }
 
@@ -419,6 +427,8 @@ export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void 
   // channelling.current is PERSISTED — only .max is overwritten here (mirrors attributes.hp.max's own derived-overwrite pattern).
   if (derived.channelling.wizard) sys.spellcasting.wizard.channelling.max = derived.channelling.wizard.max;
   if (derived.channelling.priest) sys.spellcasting.priest.channelling.max = derived.channelling.priest.max;
+  sys.psionics.max = derived.psionics?.max ?? 0;
+  sys.psionics.level = derived.psionics?.level ?? 0;
   // SP11 Plan C: a kit that switches casting off must also CLEAR the cached derived records (the writes above only run when something was derived, so stale values would otherwise linger).
   for (const key of ["wizard", "priest"] as const) {
     if (!derived.castingDisabled[key]) continue;

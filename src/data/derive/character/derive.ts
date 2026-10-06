@@ -23,6 +23,7 @@ import { deriveSaves } from "./saves";
 import { deriveSpellSlots, type SlotRecord } from "./slots";
 import { deriveSpellPoints, type SpellPointsRecord } from "./spell-points";
 import { deriveChannelling, type ChannellingRecord } from "./channellers";
+import { derivePsionics, type DerivedPsionics } from "./psionics";
 import { deriveProficiencySlots, type SlotBlock } from "./proficiencies";
 import { deriveThiefSkillPoints, type ThiefSkillPointBlock } from "./thief-skills";
 import { deriveEncumbrance } from "./encumbrance";
@@ -40,6 +41,8 @@ export interface CharacterDerived {
   spellSlots: { wizard?: SlotRecord; priest?: SlotRecord };
   spellPoints: { wizard?: SpellPointsRecord; priest?: SpellPointsRecord };
   channelling: { wizard?: ChannellingRecord; priest?: ChannellingRecord };
+  /** SP15: the psionicist block (null without a psionicist class entry) */
+  psionics: DerivedPsionics | null;
   /** SP11 Plan C: caster types a kit has switched off (deriveAndCache clears their cached slots / spell points / channelling max) */
   castingDisabled: { wizard: boolean; priest: boolean };
   proficiencies: { weapon: SlotBlock; nonweapon: SlotBlock; languagesMax: number } | null;
@@ -169,6 +172,10 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
   const classLevels = deriveClassLevels(snapshot.classes);
   const thiefSkills = deriveThiefSkillPoints(snapshot.classes, snapshot.thiefSkillAllocations);
   const levels = classLevels.map((c) => c.level);
+  const psionics = derivePsionics({
+    classes: classLevels,
+    scores: { wis: snapshot.abilities.wis, int: snapshot.abilities.int, con: snapshot.abilities.con },
+  });
   const mode = classifyArrangement(snapshot.classes);
   const race = snapshot.race ?? "human";
 
@@ -225,6 +232,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
         primaryMember && spellPointsEnabled(options) ? mergeCasterSpellPoints([primaryMember], snapshot, abilities) : {},
       channelling:
         primaryMember && channellersEnabled(options) ? mergeCasterChannelling([primaryMember], snapshot, abilities) : {},
+      psionics,
       castingDisabled: casterTypesDisabled(snapshot.classes),
       proficiencies: primary
         ? deriveProficiencySlots(
@@ -280,6 +288,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
     spellSlots: mergeCasterSlots(resolution.casters, snapshot, abilities),
     spellPoints: spellPointsEnabled(options) ? mergeCasterSpellPoints(resolution.casters, snapshot, abilities) : {},
     channelling: channellersEnabled(options) ? mergeCasterChannelling(resolution.casters, snapshot, abilities) : {},
+    psionics,
     castingDisabled: casterTypesDisabled(snapshot.classes),
     proficiencies: deriveProficiencySlots(
       resolution.weaponProfSource,
