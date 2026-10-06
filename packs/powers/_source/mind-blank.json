@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrMindBlank021",
+  "_key": "!items!kPwrMindBlank021",
+  "name": "Mind Blank",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Shuts the user's mind completely so that mind-affecting powers find nothing to grip.",
+    "discipline": "telepathy",
+    "kind": "defense",
+    "abilityKey": "wis",
+    "abilityModifier": -7,
+    "initialCost": 0,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0
+  }
+}

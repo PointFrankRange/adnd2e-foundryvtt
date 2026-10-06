@@ -923,7 +923,8 @@
       "classFeature": "Class Feature",
       "condition": "Condition",
       "trait": "Trait",
-      "kit": "Kit"
+      "kit": "Kit",
+      "power": "Psionic Power"
     },
     "ActiveEffect": {
       "adnd2e": "AD&D 2E Effect"

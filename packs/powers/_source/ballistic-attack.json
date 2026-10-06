@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrBallistic005",
+  "_key": "!items!kPwrBallistic005",
+  "name": "Ballistic Attack",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Flings a small object at a target with the user's mind.",
+    "discipline": "psychokinesis",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -2,
+    "initialCost": 5,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "30 yds.",
+    "preparation": "0",
+    "areaOfEffect": "1 item, 1 lb.",
+    "scoreBonus": 0
+  }
+}

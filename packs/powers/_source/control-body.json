@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrControlBo006",
+  "_key": "!items!kPwrControlBo006",
+  "name": "Control Body",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Puppets the limbs of another creature, forcing it to move as the user wills.",
+    "discipline": "psychokinesis",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -2,
+    "initialCost": 8,
+    "costNote": "",
+    "maintenanceCost": 8,
+    "maintenanceUnit": "round",
+    "range": "80 yds.",
+    "preparation": "0",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0
+  }
+}

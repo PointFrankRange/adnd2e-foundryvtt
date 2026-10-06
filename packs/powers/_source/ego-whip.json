@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrEgoWhip00014",
+  "_key": "!items!kPwrEgoWhip00014",
+  "name": "Ego Whip",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lashes a target's mind so that it reels and may be stunned.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 4,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "40/80/120 yds.",
+    "preparation": "0",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0
+  }
+}

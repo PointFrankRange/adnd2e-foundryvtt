@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrFeelLight003",
+  "_key": "!items!kPwrFeelLight003",
+  "name": "Feel Light",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets the user perceive light and shapes through touch alone, even when blind.",
+    "discipline": "clairsentience",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 7,
+    "costNote": "",
+    "maintenanceCost": 5,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "special",
+    "scoreBonus": 0
+  }
+}

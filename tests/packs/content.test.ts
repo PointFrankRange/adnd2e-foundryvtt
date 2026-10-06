@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { CLASS_IDS, RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
+import { POWER_DISCIPLINES, POWER_KINDS, POWER_MAINTENANCE_UNITS, CLASS_IDS, RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
 import { EQUIPMENT_MODES, normalizePowers, normalizeOverrides, powerUses, TURNING_MODES, CASTING_MODES } from "../../src/core/kits";
 import { normalizeSubrace } from "../../src/core/races";
 import { THIEF_SKILLS } from "../../src/core/proficiencies/thief-skills";
@@ -366,5 +366,60 @@ describe("kits pack content", () => {
     const remove = powers.find((p) => p.id === "remove-paralysis")!;
     expect([1, 5, 10, 15, 20].map((l) => powerUses(dispel, l))).toEqual([0, 1, 2, 3, 4]);
     expect([1, 5, 10, 15, 20].map((l) => powerUses(remove, l))).toEqual([3, 4, 5, 6, 7]);
+  });
+});
+
+describe("powers pack content", () => {
+  const items = docs("powers");
+  const kindOf = (d: Record<string, unknown>) => String(sys(d).kind);
+  const discOf = (d: Record<string, unknown>) => String(sys(d).discipline);
+
+  it("has 23 uniquely named and identified power Items", () => {
+    expect(items).toHaveLength(23);
+    expect(new Set(items.map((d) => d._id)).size).toBe(23);
+    expect(new Set(items.map((d) => d.name)).size).toBe(23);
+    for (const d of items) {
+      expect(d.type, String(d.name)).toBe("power");
+      expect(String(d._id)).toMatch(/^[A-Za-z0-9]{16}$/);
+      expect(String(d._key)).toBe(`!items!${String(d._id)}`);
+    }
+  });
+
+  it("every power is well-formed against the schema vocabularies", () => {
+    for (const d of items) {
+      const s = sys(d);
+      const n = String(d.name);
+      expect(POWER_DISCIPLINES as readonly string[], n).toContain(s.discipline);
+      expect(POWER_KINDS, n).toContain(s.kind);
+      expect(POWER_MAINTENANCE_UNITS, n).toContain(s.maintenanceUnit);
+      expect(ABILITY_KEYS as readonly string[], n).toContain(s.abilityKey);
+      for (const k of ["abilityModifier", "initialCost", "maintenanceCost", "scoreBonus"]) expect(Number.isInteger(s[k]), n + k).toBe(true);
+      expect(s.initialCost as number, n).toBeGreaterThanOrEqual(0);
+      expect(s.maintenanceCost as number, n).toBeGreaterThanOrEqual(0);
+      expect(String(s.description).length, n).toBeGreaterThan(0);
+      expect(s.maintenanceCost === 0 ? s.maintenanceUnit === "none" : s.maintenanceUnit !== "none", n).toBe(true);
+    }
+  });
+
+  it("has exactly 5 defense powers, all telepathy", () => {
+    const defense = items.filter((d) => kindOf(d) === "defense");
+    expect(defense).toHaveLength(5);
+    for (const d of defense) expect(discOf(d)).toBe("telepathy");
+  });
+
+  it("every non-defense discipline has at least one science and two devotions", () => {
+    for (const disc of POWER_DISCIPLINES) {
+      const inDisc = items.filter((d) => discOf(d) === disc && kindOf(d) !== "defense");
+      expect(inDisc.filter((d) => kindOf(d) === "science").length, disc).toBeGreaterThanOrEqual(1);
+      expect(inDisc.filter((d) => kindOf(d) === "devotion").length, disc).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it("pins the headline data (Teleport variable cost, Mind Blank free, Clairvoyance)", () => {
+    const by = (n: string) => sys(items.find((d) => d.name === n) as Record<string, unknown>);
+    expect(by("Teleport")).toMatchObject({ initialCost: 10, costNote: "10+", discipline: "psychoportation", kind: "science" });
+    expect(by("Mind Blank")).toMatchObject({ initialCost: 0, maintenanceCost: 0, maintenanceUnit: "none", abilityModifier: -7 });
+    expect(by("Clairvoyance")).toMatchObject({ abilityKey: "wis", abilityModifier: -4, initialCost: 7, maintenanceCost: 4, maintenanceUnit: "round", range: "unlimited" });
+    expect(by("Complete Healing")).toMatchObject({ initialCost: 30, preparation: "24 hrs.", abilityKey: "con", abilityModifier: 0 });
   });
 });

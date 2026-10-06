@@ -98,3 +98,8 @@ export type MonsterTypeId = (typeof MONSTER_TYPE_IDS)[number];
 
 /** A Monster NPC's Table 61 row: blank means untagged. */
 export const TURN_ROW_CHOICES: readonly ("" | TurnRowId)[] = ["", ...TURN_ROW_IDS];
+
+/** SP15 Plan A: psionic powers. */
+export { DISCIPLINES as POWER_DISCIPLINES } from "../../core/psionics";
+export const POWER_KINDS: readonly string[] = ["science", "devotion", "defense"];
+export const POWER_MAINTENANCE_UNITS: readonly string[] = ["none", "round", "turn", "hour"];

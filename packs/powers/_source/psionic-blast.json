@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrPsionicBl013",
+  "_key": "!items!kPwrPsionicBl013",
+  "name": "Psionic Blast",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Strikes a foe with a bolt of raw mental energy that can stun or kill.",
+    "discipline": "telepathy",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -5,
+    "initialCost": 10,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "20/40/60 yds.",
+    "preparation": "0",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0
+  }
+}

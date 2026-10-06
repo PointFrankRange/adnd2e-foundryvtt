@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrDangerSen002",
+  "_key": "!items!kPwrDangerSen002",
+  "name": "Danger Sense",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Warns the user of threats to life that lurk nearby.",
+    "discipline": "clairsentience",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 4,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "turn",
+    "range": "special",
+    "preparation": "0",
+    "areaOfEffect": "10 yds.",
+    "scoreBonus": 0
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrBodyEquil009",
+  "_key": "!items!kPwrBodyEquil009",
+  "name": "Body Equilibrium",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets the user walk on water, mud or other fragile surfaces without sinking.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -3,
+    "initialCost": 2,
+    "costNote": "",
+    "maintenanceCost": 2,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0
+  }
+}
