@@ -231,7 +231,8 @@
           "noUpkeep": "No tangents to maintain.",
           "tangentsBroken": "Not enough PSPs: your tangents are broken.",
           "noTarget": "Target a token first.",
-          "selfTarget": "You cannot attack yourself."
+          "selfTarget": "You cannot attack yourself.",
+          "alreadyFullContact": "You already have full contact with that target."
         },
         "noClass": "Only a psionicist can do that.",
         "notEnoughPsp": "Not enough PSPs to use that power.",

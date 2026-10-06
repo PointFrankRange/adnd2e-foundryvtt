@@ -96,10 +96,15 @@ export interface Contact { target: string; name: string; tangents: number }
 export const isFullContact = (c: Contact): boolean => c.tangents >= FULL_CONTACT;
 export const tangentsOn = (contacts: readonly Contact[], target: string): number => contacts.find((c) => c.target === target)?.tangents ?? 0;
 
+/** Attacking a different target breaks the partial tangents held on any other target (p.27); full contacts and the attacked target's own contact are kept. */
+export function switchTarget(contacts: readonly Contact[], target: string): Contact[] {
+  return contacts.filter((c) => c.target === target || isFullContact(c)).map((c) => ({ ...c }));
+}
+
 /** Adds tangents on one target (capped at full contact); partial tangents on any other target are broken (p.26-27), full contacts are kept. */
 export function recordTangents(contacts: readonly Contact[], target: string, name: string, count: number): Contact[] {
   if (count <= 0) return contacts.map((c) => ({ ...c }));
-  const kept = contacts.filter((c) => c.target === target || isFullContact(c)).map((c) => ({ ...c }));
+  const kept = switchTarget(contacts, target);
   const mine = kept.find((c) => c.target === target);
   if (mine) mine.tangents = Math.min(FULL_CONTACT, mine.tangents + count);
   else kept.push({ target, name, tangents: Math.min(FULL_CONTACT, count) });

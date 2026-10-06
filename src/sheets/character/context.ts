@@ -133,7 +133,7 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
     const p = byId.get(m.powerId);
     return p ? [{ powerId: p.id, name: p.name, cost: p.maintenanceCost, unit: p.maintenanceUnit }] : []; // an orphan entry (its power item is gone) is skipped
   });
-  const defenses = input.powers.filter((p) => p.kind === "defense" && isDefenseMode(p.name)).map((p) => ({ id: p.id, name: p.name }));
+  const defenses = input.powers.filter((p) => p.kind === "defense" && isDefenseMode(p.name)).map((p) => ({ id: p.id, name: p.name, selected: p.id === input.activeDefense }));
   const used = (kind: PsionicPowerRow["kind"]): number => known.filter((k) => k.kind === kind).reduce((n, k) => n + 1 + k.scoreBonus, 0);
   const disciplinesHeld = new Set(known.filter((k) => k.kind !== "defense").map((k) => k.discipline)).size;
   const problems = [
@@ -156,7 +156,7 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
     })).filter((g) => g.powers.length > 0),
     defense: input.powers.filter((p) => p.kind === "defense").map(toRow),
     combat: {
-      activeDefense: defenses.find((d) => d.id === input.activeDefense) ?? null, // a stale or non-defense id resolves to none
+      activeDefense: defenses.filter((d) => d.selected).map((d) => ({ id: d.id, name: d.name }))[0] ?? null, // a stale or non-defense id resolves to none
       defenses,
       contacts: input.contacts.map((c) => ({ target: c.target, name: c.name, tangents: c.tangents, full: c.tangents >= FULL_CONTACT })),
       hasUpkeep: upkeepDue(input.contacts) > 0,

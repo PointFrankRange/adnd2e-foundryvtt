@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   ATTACK_MODES, DEFENSE_MODES, FULL_CONTACT, attackModifier, breakTangents, endContact, isAttackMode, isDefenseMode, isFullContact,
-  maintainedCheck, needsDefenseRoll, recordTangents, resolveContest, resolveSeries, tangentsOn, upkeepDue, type Contact,
+  maintainedCheck, needsDefenseRoll, recordTangents, resolveContest, resolveSeries, switchTarget, tangentsOn, upkeepDue, type Contact,
 } from "../../../src/core/psionics";
 
 describe("Table 14 (PHBR5 p.26)", () => {
@@ -104,6 +104,13 @@ describe("resolveSeries (the one-two punch)", () => {
 
 describe("contacts", () => {
   const c = (target: string, tangents: number): Contact => ({ target, name: target.toUpperCase(), tangents });
+  it("switchTarget drops partial tangents on other targets, keeping full contacts and the attacked target (as copies)", () => {
+    const cs: Contact[] = [{ target: "b", name: "B", tangents: 2 }, { target: "d", name: "D", tangents: 3 }, { target: "c", name: "C", tangents: 1 }];
+    const out = switchTarget(cs, "c");
+    expect(out).toEqual([{ target: "d", name: "D", tangents: 3 }, { target: "c", name: "C", tangents: 1 }]);
+    expect(out[0]).not.toBe(cs[1]);
+    expect(switchTarget([], "x")).toEqual([]);
+  });
   it("recordTangents adds, caps at 3 and reaches full contact", () => {
     expect(recordTangents([], "a", "A", 2)).toEqual([{ target: "a", name: "A", tangents: 2 }]);
     expect(recordTangents([c("a", 2)], "a", "A", 5)[0]!.tangents).toBe(FULL_CONTACT);

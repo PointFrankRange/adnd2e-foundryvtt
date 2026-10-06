@@ -34,7 +34,7 @@
       {{/if}}
       {{#if adnd2e.psionics.combat.defenses.length}}
       <select data-psionic-defense>
-        {{#each adnd2e.psionics.combat.defenses as |d|}}<option value="{{d.id}}">{{d.name}}</option>{{/each}}
+        {{#each adnd2e.psionics.combat.defenses as |d|}}<option value="{{d.id}}"{{#if d.selected}} selected{{/if}}>{{d.name}}</option>{{/each}}
       </select>
       <button type="button" class="kit-small" data-action="psionicRaiseDefense">{{localize 'ADND2E.sheet.psionics.combat.raise'}}</button>
       {{/if}}

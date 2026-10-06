@@ -124,7 +124,10 @@ function wirePsionicContest(message: { id: string; getFlag(s: string, k: string)
   const isOwner = (uuid: string): boolean => Boolean((foundry.utils.fromUuidSync(uuid) as { isOwner?: boolean } | null)?.isOwner);
   const rollButton = html.querySelector<HTMLButtonElement>('[data-action="psionicRollDefense"]');
   if (rollButton) {
-    if (isGm || isOwner(contest.targetActorUuid)) rollButton.addEventListener("click", () => void rollDefense(message.id));
+    if (isGm || isOwner(contest.targetActorUuid)) rollButton.addEventListener("click", () => {
+        rollButton.disabled = true;
+        void rollDefense(message.id);
+      });
     else rollButton.remove();
   }
   const recordButton = html.querySelector<HTMLButtonElement>('[data-action="psionicRecordTangent"]');

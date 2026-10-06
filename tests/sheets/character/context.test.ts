@@ -3400,12 +3400,13 @@ describe("buildPsionicsView (SP15 Plan A)", () => {
 
   it("combat block: no defense raised, the defenses on offer, no contacts", () => {
     const withDefenses = base({ powers: [pw({ id: "mb", name: "Mind Blank", kind: "defense" }), pw({ id: "x", name: "Homemade", kind: "defense" }), pw({ id: "mt", name: "Mind Thrust", kind: "devotion" })] });
-    expect(buildPsionicsView(withDefenses)!.combat).toEqual({ activeDefense: null, defenses: [{ id: "mb", name: "Mind Blank" }], contacts: [], hasUpkeep: false });
+    expect(buildPsionicsView(withDefenses)!.combat).toEqual({ activeDefense: null, defenses: [{ id: "mb", name: "Mind Blank", selected: false }], contacts: [], hasUpkeep: false });
   });
 
   it("combat block: a raised defense resolves to its name; a stale or non-defense id resolves to null", () => {
     const powers = [pw({ id: "mb", name: "Mind Blank", kind: "defense" }), pw({ id: "mt", name: "Mind Thrust", kind: "devotion" })];
     expect(buildPsionicsView(base({ powers, activeDefense: "mb" }))!.combat.activeDefense).toEqual({ id: "mb", name: "Mind Blank" });
+    expect(buildPsionicsView(base({ powers, activeDefense: "mb" }))!.combat.defenses).toEqual([{ id: "mb", name: "Mind Blank", selected: true }]);
     expect(buildPsionicsView(base({ powers, activeDefense: "gone" }))!.combat.activeDefense).toBeNull();
     expect(buildPsionicsView(base({ powers, activeDefense: "mt" }))!.combat.activeDefense).toBeNull();
   });

@@ -315,12 +315,15 @@ describe("attackMode - the pending path", () => {
     expect(created[0]!.flags.adnd2e.psionicContest.state).toBe("resolved");
   });
 
-  it("with the starting full contact no attack is made: no pending card, half cost", async () => {
+  it("with the starting full contact the attack is refused before rolling (info toast, no write, no card)", async () => {
     const { a, updates } = attacker({ contacts: [{ target: "Actor.tgt", name: "Orc", tangents: 3 }] });
     const t = target({ defense: ts, wis: 14 });
-    await attackMode(a, "mt", { roll: queue(10, 12), targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
-    expect(updates).toEqual([{ "system.psionics.psp": 19 }]);
-    expect(created[0]!.flags.adnd2e.psionicContest.state).toBe("resolved");
+    let rolled = 0;
+    await attackMode(a, "mt", { roll: async () => (rolled++, 10), targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
+    expect(updates).toEqual([]);
+    expect(created).toEqual([]);
+    expect(rolled).toBe(0);
+    expect(info).toHaveBeenCalledWith("ADND2E.sheet.psionics.combat.alreadyFullContact:{}");
   });
 
   it("pending with the starting full contact and a defense never happens; pending cost with one failure and one success is full", async () => {
@@ -337,6 +340,33 @@ describe("attackMode - the pending path", () => {
     const t = target({ defense: ts, wis: 14 });
     await attackMode(a, "mt", { roll: queue(12, 5), targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
     expect(created[0]!.flags.adnd2e.psionicContest.state).toBe("resolved");
+  });
+});
+
+describe("attackMode - switching targets breaks the old partial tangents (p.27)", () => {
+  const held = [{ target: "Actor.b", name: "Bo", tangents: 2 }, { target: "Actor.d", name: "Di", tangents: 3 }];
+  it("immediate path: both attacks fail on a new target -> B's partial tangents go in the same write as the PSP", async () => {
+    const { a, updates } = attacker({ contacts: held });
+    await attackMode(a, "mt", { roll: queue(19, 20), targets: () => [target().like], hasOnlineOwner: () => false, userId: "u-att" });
+    expect(updates).toEqual([{ "system.psionics.psp": 19, "system.psionics.contacts": [{ target: "Actor.d", name: "Di", tangents: 3 }] }]);
+  });
+  it("pending path: the old partials are broken at attack time", async () => {
+    const { a, updates } = attacker({ contacts: held });
+    const t = target({ defense: ts, wis: 14 });
+    await attackMode(a, "mt", { roll: queue(10, 12), targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
+    expect(created[0]!.flags.adnd2e.psionicContest.state).toBe("pending");
+    expect(updates).toEqual([{ "system.psionics.psp": 18, "system.psionics.contacts": [{ target: "Actor.d", name: "Di", tangents: 3 }] }]);
+  });
+  it("the same target keeps its tangents (no contacts write when both attacks fail)", async () => {
+    const { a, updates } = attacker({ contacts: [{ target: "Actor.tgt", name: "Orc", tangents: 2 }, held[1]!] });
+    await attackMode(a, "mt", { roll: queue(19, 20), targets: () => [target().like], hasOnlineOwner: () => false, userId: "u-att" });
+    expect(updates).toEqual([{ "system.psionics.psp": 19 }]);
+  });
+  it("a later applyContestTangents still records tangents on the attacked target", async () => {
+    const writes: Record<string, unknown>[] = [];
+    uuidMap["Actor.att"] = { isOwner: true, getFlag: () => [], update: async (d: Record<string, unknown>) => void writes.push(d), system: { psionics: { contacts: [{ target: "Actor.d", name: "Di", tangents: 3 }] } } };
+    expect(await applyContestTangents({ id: "sw1", attackerActorUuid: "Actor.att", targetActorUuid: "Actor.tgt", targetName: "Orc", outcome: { tangentsGained: 1, steps: [], fullContact: false, anySuccess: true } } as never)).toBe(true);
+    expect(writes[0]!["system.psionics.contacts"]).toEqual([{ target: "Actor.d", name: "Di", tangents: 3 }, { target: "Actor.tgt", name: "Orc", tangents: 1 }]);
   });
 });
 
@@ -493,6 +523,25 @@ describe("rollDefense", () => {
     expect(created).toEqual([]);
   });
 
+  it("two concurrent calls on one pending message post exactly one resolved card", async () => {
+    pendingMessage();
+    defender(true);
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    const slow = async () => (await gate, 4);
+    const first = rollDefense("m1", { roll: slow });
+    const second = rollDefense("m1", { roll: slow });
+    release();
+    await Promise.all([first, second]);
+    expect(created).toHaveLength(1);
+    expect(warn).toHaveBeenCalledWith("ADND2E.chat.psionicContest.alreadyAnswered");
+    // the in-flight guard is released afterwards (a failed roll can be retried)
+    await rollDefense("m1", { roll: async () => { throw new Error("boom"); } }).catch(() => undefined);
+    expect(created).toHaveLength(1);
+    await rollDefense("m1", { roll: queue(4) });
+    expect(created).toHaveLength(2);
+  });
+
   it("rolls with the default d20 roller", async () => {
     pendingMessage();
     defender(true);
@@ -537,6 +586,38 @@ describe("applyContestTangents", () => {
     uuidMap["Actor.att"] = { isOwner: true, getFlag: () => undefined, update: async (d: Record<string, unknown>) => void updates.push(d), system: { psionics: { contacts: [] } } };
     expect(await applyContestTangents(resolved(1))).toBe(true);
     expect((updates[0] as Record<string, unknown>)["flags.adnd2e.psionicApplied"]).toEqual(["cid5"]);
+  });
+  it("serializes concurrent calls: the same contest id applies once; two ids both record (no lost update)", async () => {
+    const state = { contacts: [] as unknown[], applied: [] as string[], writes: 0 };
+    uuidMap["Actor.att"] = {
+      isOwner: true,
+      getFlag: () => state.applied,
+      system: { get psionics() { return { contacts: state.contacts }; } },
+      update: async (d: Record<string, unknown>) => {
+        await Promise.resolve();
+        state.writes++;
+        state.contacts = d["system.psionics.contacts"] as unknown[];
+        state.applied = d["flags.adnd2e.psionicApplied"] as string[];
+      },
+    };
+    const same = await Promise.all([applyContestTangents(resolved(1)), applyContestTangents(resolved(1))]);
+    expect(same).toEqual([true, false]);
+    expect(state.writes).toBe(1);
+    const other = { ...(resolved(1) as object), id: "cid6" } as never;
+    const both = await Promise.all([applyContestTangents(other), applyContestTangents({ ...(resolved(1) as object), id: "cid7" } as never)]);
+    expect(both).toEqual([true, true]);
+    expect(state.contacts).toEqual([{ target: "Actor.tgt", name: "Orc", tangents: 3 }]);
+    expect(state.applied).toEqual(["cid5", "cid6", "cid7"]);
+  });
+  it("a rejected write does not poison the next call for the same actor", async () => {
+    let calls = 0;
+    const updates: unknown[] = [];
+    uuidMap["Actor.att"] = { isOwner: true, getFlag: () => [], system: { psionics: { contacts: [] } }, update: async (d: unknown) => { if (calls++ === 0) throw new Error("nope"); updates.push(d); } };
+    const bad = applyContestTangents(resolved(1));
+    const good = applyContestTangents({ ...(resolved(1) as object), id: "cid8" } as never);
+    await expect(bad).rejects.toThrow("nope");
+    expect(await good).toBe(true);
+    expect(updates).toHaveLength(1);
   });
   it("does nothing for no tangents gained, a missing actor, a non-owner, or no outcome", async () => {
     owned();

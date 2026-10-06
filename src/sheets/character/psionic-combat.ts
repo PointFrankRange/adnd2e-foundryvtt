@@ -1,7 +1,7 @@
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { checkCost, powerScore, rollPowerCheck } from "../../core/psionics";
 import {
-  FULL_CONTACT, attackModifier, breakTangents, endContact, isAttackMode, isDefenseMode, needsDefenseRoll, recordTangents, resolveContest, resolveSeries, tangentsOn, upkeepDue,
+  FULL_CONTACT, attackModifier, breakTangents, endContact, isAttackMode, isDefenseMode, needsDefenseRoll, recordTangents, resolveContest, resolveSeries, switchTarget, tangentsOn, upkeepDue,
   type AttackStep, type SeriesOutcome,
 } from "../../core/psionics/combat";
 import { currentPsp, findPower, info, requirePsionicist, rollD20, warn, type PsionicActor, type PsionicItem, type PsionicRoll } from "./psionic-actions";
@@ -215,6 +215,10 @@ export async function attackMode(actor: PsionicActor, powerId: string, deps: Par
     warn("ADND2E.sheet.psionics.combat.selfTarget");
     return;
   }
+  if (tangentsOn(actor.system.psionics.contacts, target.uuid) >= FULL_CONTACT) {
+    info("ADND2E.sheet.psionics.combat.alreadyFullContact");
+    return;
+  }
   const cost = Number(power.system.initialCost ?? 0);
   const pool = currentPsp(actor);
   if (pool < cost) {
@@ -250,12 +254,16 @@ export async function attackMode(actor: PsionicActor, powerId: string, deps: Par
   };
   const speaker = ChatMessage.getSpeaker({ actor: actor as never });
 
+  const switched = switchTarget(actor.system.psionics.contacts, target.uuid); // p.27: a different target breaks the old partial tangents
+
   const pending = defense !== null && defenseRollNeeded(steps, defenseScore, starting) && (deps.hasOnlineOwner ?? defaultHasOnlineOwner)(target.actor);
   if (pending) {
     const anySuccess = starting < FULL_CONTACT && steps.some((s) => rollPowerCheck(s.roll, s.score).success);
     contest.paid = checkCost(cost, anySuccess);
     contest.remaining = pool - contest.paid;
-    await actor.update({ "system.psionics.psp": contest.remaining });
+    const pendingUpdate: Record<string, unknown> = { "system.psionics.psp": contest.remaining };
+    if (switched.length !== actor.system.psionics.contacts.length) pendingUpdate["system.psionics.contacts"] = switched;
+    await actor.update(pendingUpdate);
     await postContestCard(contest, speaker);
     return;
   }
@@ -268,9 +276,13 @@ export async function attackMode(actor: PsionicActor, powerId: string, deps: Par
   contest.applied = true; // the update below records the tangents; the result hook must skip this card
   const update: Record<string, unknown> = { "system.psionics.psp": contest.remaining };
   if (outcome.tangentsGained > 0) update["system.psionics.contacts"] = recordTangents(actor.system.psionics.contacts, target.uuid, target.name, outcome.tangentsGained);
+  else if (switched.length !== actor.system.psionics.contacts.length) update["system.psionics.contacts"] = switched;
   await actor.update(update);
   await postContestCard(contest, speaker);
 }
+
+/** Contest ids whose defense roll is in flight in this client (a double click must not answer twice). */
+const answering = new Set<string>();
 
 /** The defender's "Roll defense" button on a pending card: rolls, posts the resolved card. Refuses a non-owner non-GM and a second answer. */
 export async function rollDefense(messageId: string, deps: { roll?: PsionicRoll } = {}): Promise<void> {
@@ -289,18 +301,37 @@ export async function rollDefense(messageId: string, deps: { roll?: PsionicRoll 
     const f = m.getFlag(SYSTEM_ID, "psionicContest") as ContestFlag | undefined;
     return f?.id === contest.id && f.state === "resolved";
   });
-  if (answered) {
+  if (answered || answering.has(contest.id)) {
     warn("ADND2E.chat.psionicContest.alreadyAnswered");
     return;
   }
-  const defenseRolls = await rollDefenses(contest.steps, contest.defense.score, contest.startingTangents, deps.roll ?? rollD20);
-  const outcome = resolveSeries(contest.steps, contest.defense.score, defenseRolls, contest.startingTangents);
-  const speaker = targetActor ? ChatMessage.getSpeaker({ actor: targetActor as never }) : { alias: contest.targetName };
-  await postContestCard({ ...contest, state: "resolved", outcome, applied: false }, speaker);
+  answering.add(contest.id); // synchronously, before the first await
+  try {
+    const defenseRolls = await rollDefenses(contest.steps, contest.defense.score, contest.startingTangents, deps.roll ?? rollD20);
+    const outcome = resolveSeries(contest.steps, contest.defense.score, defenseRolls, contest.startingTangents);
+    const speaker = targetActor ? ChatMessage.getSpeaker({ actor: targetActor as never }) : { alias: contest.targetName };
+    await postContestCard({ ...contest, state: "resolved", outcome, applied: false }, speaker);
+  } finally {
+    answering.delete(contest.id);
+  }
 }
 
+/** Per-attacker promise chains: contact writes for one actor run one at a time. */
+const applyChains = new Map<string, Promise<unknown>>();
+
 /** Records a resolved contest's tangents on the attacker's actor, once per contest id. Returns whether it wrote. */
-export async function applyContestTangents(contest: ContestFlag): Promise<boolean> {
+export function applyContestTangents(contest: ContestFlag): Promise<boolean> {
+  const key = contest.attackerActorUuid;
+  const task = (applyChains.get(key) ?? Promise.resolve()).then(() => applyContestTangentsNow(contest));
+  const tail = task.catch(() => undefined); // a rejected write must not poison later calls
+  applyChains.set(key, tail);
+  void tail.then(() => {
+    if (applyChains.get(key) === tail) applyChains.delete(key);
+  });
+  return task;
+}
+
+async function applyContestTangentsNow(contest: ContestFlag): Promise<boolean> {
   const gained = contest.outcome?.tangentsGained ?? 0;
   if (gained <= 0) return false;
   const actor = foundry.utils.fromUuidSync(contest.attackerActorUuid) as (PsionicActor & { isOwner: boolean; getFlag(s: string, k: string): unknown }) | null;

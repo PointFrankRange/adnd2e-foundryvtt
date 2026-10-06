@@ -131,7 +131,7 @@ export interface PsionicsView {
   /** SP15 Plan C: psionic combat state */
   combat: {
     activeDefense: { id: string; name: string } | null;
-    defenses: { id: string; name: string }[];
+    defenses: { id: string; name: string; selected: boolean }[];
     contacts: { target: string; name: string; tangents: number; full: boolean }[];
     hasUpkeep: boolean;
   };
