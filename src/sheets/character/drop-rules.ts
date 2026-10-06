@@ -1,4 +1,5 @@
 import type { KitQualifyVerdict } from "../../core/kits";
+import { canLearn, type Discipline, type KnownPower, type PowerKind } from "../../core/psionics";
 import { canAffordTrait } from "../../core/skills/character-points";
 
 export interface DropCheckInput {
@@ -108,4 +109,23 @@ export function validateItemDrop(input: DropCheckInput): DropVerdict {
     return { ok: false, reason: "ADND2E.sheet.drop.kitCastingDisabled" };
   }
   return { ok: true };
+}
+
+export interface PowerDropActor {
+  system: { classes: { chassisId: string; level: number }[] };
+  items: Iterable<{ id: string; type: string; system: Record<string, unknown> }>;
+}
+
+export type PowerDropVerdict = { ok: true } | { ok: false; messageKey: string };
+
+/** SP15: a `power` item may be dropped only on a psionicist, and only when the Table 4 totals and the learning rules allow it. Any other item type is not this rule's business. */
+export function checkPowerDrop(actor: PowerDropActor, item: { type: string; system: Record<string, unknown> }): PowerDropVerdict {
+  if (item.type !== "power") return { ok: true };
+  const entry = actor.system.classes.find((c) => c.chassisId === "psionicist");
+  if (!entry) return { ok: false, messageKey: "ADND2E.sheet.psionics.noClass" };
+  const known: KnownPower[] = [...actor.items]
+    .filter((i) => i.type === "power")
+    .map((i) => ({ id: i.id, discipline: i.system.discipline as Discipline, kind: i.system.kind as PowerKind, scoreBonus: Number(i.system.scoreBonus ?? 0) }));
+  const verdict = canLearn(known, { discipline: item.system.discipline as Discipline, kind: item.system.kind as PowerKind }, entry.level);
+  return verdict.ok ? { ok: true } : { ok: false, messageKey: `ADND2E.sheet.psionics.learn.${verdict.reason}` };
 }

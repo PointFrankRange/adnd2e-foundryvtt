@@ -178,6 +178,22 @@
       "doneWithFailures": "AD&D 2E: imported {created} of {total} document(s); {failed} failed — see the console."
     },
     "sheet": {
+      "psionics": {
+        "noClass": "Only a psionicist can do that.",
+        "notEnoughPsp": "Not enough PSPs to use that power.",
+        "restBlocked": "You cannot recover PSPs while maintaining a power.",
+        "maintenanceEnded": "{power} ended: not enough PSPs to maintain it.",
+        "relearned": "{power} relearned: its score rises by 1.",
+        "learn": {
+          "discipline-access": "You cannot learn a power from another discipline yet.",
+          "science-limit": "You have no science slots left.",
+          "devotion-limit": "You have no devotion slots left.",
+          "defense-limit": "You have no defense mode slots left.",
+          "devotion-ratio": "A science needs two devotions in its discipline first.",
+          "primary-cap": "Outside your primary discipline you must know fewer powers of that kind.",
+          "no-budget": "You have no slots left to relearn that power."
+        }
+      },
       "equipment": {
         "notPermitted": "{item} isn't permitted for this character's class or kit. It still equips — the GM decides.",
         "notPermittedTip": "Not permitted for this character's class or kit"
@@ -634,6 +650,18 @@
       }
     },
     "chat": {
+      "psionic": {
+        "roll": "Power check",
+        "special": "The roll equals the power score exactly: a special success.",
+        "cost": "PSPs spent",
+        "remaining": "Remaining",
+        "result": {
+          "success": "Success",
+          "minimum-success": "Minimum success",
+          "failure": "Failure",
+          "automatic-failure": "Automatic failure"
+        }
+      },
       "kitPower": {
         "title": "Kit power",
         "remaining": "Remaining"

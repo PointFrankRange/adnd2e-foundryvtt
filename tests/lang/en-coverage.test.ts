@@ -856,3 +856,18 @@ describe("lang/en.json — SP13 level-limit settings and sheet keys", () => {
     }
   });
 });
+
+describe("lang/en.json - SP15 psionics", () => {
+  it("resolves the psionic chat and sheet keys", () => {
+    const keys = [
+      ...["roll", "special", "cost", "remaining"].map((k) => `ADND2E.chat.psionic.${k}`),
+      ...["success", "minimum-success", "failure", "automatic-failure"].map((k) => `ADND2E.chat.psionic.result.${k}`),
+      ...["noClass", "notEnoughPsp", "restBlocked", "maintenanceEnded", "relearned"].map((k) => `ADND2E.sheet.psionics.${k}`),
+      ...["discipline-access", "science-limit", "devotion-limit", "defense-limit", "devotion-ratio", "primary-cap", "no-budget"].map((k) => `ADND2E.sheet.psionics.learn.${k}`),
+    ];
+    for (const key of keys) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
