@@ -1,0 +1,99 @@
+{
+  "_id": "kElfSylvan000001",
+  "_key": "!items!kElfSylvan000001",
+  "name": "Sylvan Elf",
+  "type": "race",
+  "img": "icons/svg/oak.svg",
+  "system": {
+    "description": "",
+    "raceId": "elf",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 60,
+    "classLevelLimits": {
+      "cleric": 12,
+      "fighter": 12,
+      "mage": 15,
+      "thief": 12,
+      "ranger": 15
+    },
+    "allowedClasses": [
+      "cleric",
+      "fighter",
+      "mage",
+      "thief",
+      "ranger"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "mage"
+      ],
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "mage",
+        "thief"
+      ],
+      [
+        "fighter",
+        "mage",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "elvish",
+      "centaur",
+      "pixie",
+      "dryad",
+      "treant",
+      "woodland creatures"
+    ],
+    "grantedFeatures": [
+      "Sylvan: woodland affinity",
+      "Sylvan: no secret-door bonus"
+    ],
+    "subrace": {
+      "id": "sylvan-elf",
+      "abilityAdjustments": {
+        "str": 1,
+        "dex": 1,
+        "con": -1,
+        "int": 0,
+        "wis": 0,
+        "cha": -1
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 6,
+          "max": 19
+        },
+        "dex": {
+          "min": 6,
+          "max": 19
+        },
+        "con": {
+          "min": 7,
+          "max": 17
+        },
+        "int": {
+          "min": 8,
+          "max": 18
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 7,
+          "max": 17
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0
+    }
+  }
+}

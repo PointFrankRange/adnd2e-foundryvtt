@@ -1,0 +1,99 @@
+{
+  "_id": "kElfAquatic00001",
+  "_key": "!items!kElfAquatic00001",
+  "name": "Aquatic Elf",
+  "type": "race",
+  "img": "icons/svg/oak.svg",
+  "system": {
+    "description": "",
+    "raceId": "elf",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 360,
+    "classLevelLimits": {
+      "cleric": 12,
+      "fighter": 12,
+      "mage": 15,
+      "thief": 12,
+      "ranger": 15
+    },
+    "allowedClasses": [
+      "cleric",
+      "fighter",
+      "mage",
+      "thief",
+      "ranger"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "mage"
+      ],
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "mage",
+        "thief"
+      ],
+      [
+        "fighter",
+        "mage",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "kuo-toa",
+      "sahuagin",
+      "dolphin",
+      "merman",
+      "abovesea common",
+      "undersea common"
+    ],
+    "grantedFeatures": [
+      "Aquatic: breathes water (gills)",
+      "Aquatic: no bow bonus"
+    ],
+    "subrace": {
+      "id": "aquatic-elf",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 1,
+        "con": 0,
+        "int": -1,
+        "wis": 0,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 3,
+          "max": 18
+        },
+        "dex": {
+          "min": 6,
+          "max": 19
+        },
+        "con": {
+          "min": 8,
+          "max": 18
+        },
+        "int": {
+          "min": 7,
+          "max": 17
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 8,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0
+    }
+  }
+}

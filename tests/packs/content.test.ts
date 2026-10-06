@@ -42,12 +42,13 @@ describe("classes pack content", () => {
 
 describe("races pack content", () => {
   const items = docs("races");
-  it("has the 6 PHB races plus the 6 dwarf subraces", () => {
-    expect(items).toHaveLength(12);
+  it("has the 6 PHB races plus the 6 dwarf and 5 elf subraces", () => {
+    expect(items).toHaveLength(17);
     expect(new Set(items.map((d) => sys(d).raceId))).toEqual(new Set(RACE_IDS));
     const subs = items.filter((d) => (sys(d).subrace as { id?: string } | undefined)?.id);
-    expect(subs).toHaveLength(6);
-    for (const d of subs) expect(sys(d).raceId).toBe("dwarf");
+    expect(subs).toHaveLength(11);
+    expect(subs.filter((d) => sys(d).raceId === "dwarf")).toHaveLength(6);
+    expect(subs.filter((d) => sys(d).raceId === "elf")).toHaveLength(5);
   });
   const DWARF = {
     "hill-dwarf":     { adj: { con: 1, cha: -1 }, ranges: [[8,18],[3,17],[11,18],[3,18],[3,18],[3,17]], infra: 60,  xp: 0,  conSave: 0, limits: { fighter: 15, cleric: 10, thief: 12 }, thief: [0, 10, 15, 0, 0, 0, -10, -5] },
@@ -59,7 +60,7 @@ describe("races pack content", () => {
   } as const;
 
   it("every dwarf subrace matches The Complete Book of Dwarves (PHBR6 ch. 4)", () => {
-    const subraces = items.filter((d) => (sys(d).subrace as { id?: string } | undefined)?.id);
+    const subraces = items.filter((d) => (sys(d).subrace as { id?: string } | undefined)?.id && sys(d).raceId === "dwarf");
     expect(subraces.map((d) => (sys(d).subrace as { id: string }).id).sort()).toEqual(Object.keys(DWARF).sort());
     for (const d of subraces) {
       const id = (sys(d).subrace as { id: keyof typeof DWARF }).id;
@@ -76,6 +77,36 @@ describe("races pack content", () => {
       expect(sys(d).size, id).toBe("small");
       expect(sys(d).baseMovement, id).toBe(6);
       expect(sys(d).description, id).toBe("");
+    }
+  });
+  const ELF = {
+    "aquatic-elf": { adj: { dex: 1, int: -1 }, ranges: [[3,18],[6,19],[8,18],[7,17],[3,18],[8,18]], infra: 360, xp: 0 },
+    "drow":        { adj: { dex: 2, int: 1, con: -1, cha: -2 }, ranges: [[3,18],[8,20],[7,17],[9,19],[3,18],[6,16]], infra: 90, xp: 20 },
+    "grey-elf":    { adj: { str: -1, dex: 1, con: -2, int: 2 }, ranges: [[3,17],[7,19],[5,16],[8,20],[3,18],[8,18]], infra: 60, xp: 15 },
+    "high-elf":    { adj: { dex: 1, con: -1 }, ranges: [[3,18],[6,19],[7,17],[8,18],[3,18],[8,18]], infra: 60, xp: 0 },
+    "sylvan-elf":  { adj: { str: 1, dex: 1, con: -1, cha: -1 }, ranges: [[6,19],[6,19],[7,17],[8,18],[3,18],[7,17]], infra: 60, xp: 0 },
+  } as const;
+
+  it("every elf subrace matches The Complete Book of Elves (PHBR8 ch. 10)", () => {
+    const subraces = items.filter((d) => (sys(d).subrace as { id?: string } | undefined)?.id && sys(d).raceId === "elf");
+    expect(subraces.map((d) => (sys(d).subrace as { id: string }).id).sort()).toEqual(Object.keys(ELF).sort());
+    const phbElf = items.find((d) => sys(d).raceId === "elf" && !(sys(d).subrace as { id?: string } | undefined)?.id)!;
+    for (const d of subraces) {
+      const id = (sys(d).subrace as { id: keyof typeof ELF }).id;
+      const want = ELF[id];
+      const layer = normalizeSubrace(sys(d).subrace as never);
+      expect(layer.abilityAdjustments, id).toEqual(want.adj);
+      expect(ABILITY_KEYS.map((k) => layer.abilityRanges![k]), id).toEqual(want.ranges);
+      expect(layer.xpModifierPercent, id).toBe(want.xp);
+      expect(layer.conSaveBonusAdjustment, id).toBe(0);
+      expect(layer.thiefAdjustments, id).toBeNull();
+      expect(sys(d).infravision, id).toBe(want.infra);
+      expect(sys(d).size, id).toBe("medium");
+      expect(sys(d).baseMovement, id).toBe(12);
+      expect(sys(d).description, id).toBe("");
+      expect(sys(d).classLevelLimits, id).toEqual(sys(phbElf).classLevelLimits);
+      expect(sys(d).allowedClasses, id).toEqual(sys(phbElf).allowedClasses);
+      expect(sys(d).allowedMulticlass, id).toEqual(sys(phbElf).allowedMulticlass);
     }
   });
   it("race documents have unique names and 16-character ids", () => {

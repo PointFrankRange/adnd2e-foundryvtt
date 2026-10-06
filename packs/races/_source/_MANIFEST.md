@@ -125,3 +125,25 @@ adjustment, XP surcharge percent):
 Mechanical values only are shipped; special advantages and drawbacks (enmities, innate
 powers, light penalties, claustrophobia, groveling, magic-item failure) are display labels in
 `grantedFeatures` only.
+
+## Elf subraces (SP12 Plan B)
+
+Source: *The Complete Book of Elves* (PHBR8) ch. 10 "Character Creation and Kits", "The Elf
+Subraces", pp. 76-82, read from the text layer and page images. Five `race` items, each with
+`raceId: "elf"` (the PHB elf's `allowedClasses`, `allowedMulticlass` and `classLevelLimits`
+copied; the book gives subraces no limits of their own) and a `subrace` block (ability
+adjustments and min-max, XP surcharge percent; `thiefAdjustments: null` inherits the PHB elf's
+table):
+
+| file | name | notes |
+|------|------|-------|
+| `aquatic-elf.json` | Aquatic Elf | infravision 360 |
+| `drow.json` | Drow | +20% XP, infravision 90 |
+| `grey-elf.json` | Grey Elf | +15% XP |
+| `high-elf.json` | High Elf | |
+| `sylvan-elf.json` | Sylvan Elf | |
+
+Half-elves have no adjustments in the book, so the PHB Half-Elf is unchanged (no new item).
+Mechanical values only are shipped; special abilities and drawbacks (spell-likes, magic
+resistance, light penalties, reaction modifiers, library access) are display labels in
+`grantedFeatures` only.
