@@ -57,6 +57,12 @@ export interface OptionalRules {
   channelers: boolean;
   /** Sub-project 14 Plan C: Table 21 spell fatigue for channelling wizards (pp.82-84). */
   channellerFatigue: boolean;
+  /** Sub-project 13: enforce the racial class level limits carried by the race item (core 2E rule; ON by default). */
+  racialLevelLimits: boolean;
+  /** Sub-project 13: exceeding a racial level limit costs this many times the XP per level (0 = off, or 2, 3, 4). Only meaningful with racialLevelLimits on. */
+  exceedLevelLimits: 0 | 2 | 3 | 4;
+  /** Sub-project 13: bonus levels past a racial limit from a high prime requisite (single-class; Complete Book of Dwarves table). */
+  primeRequisiteBonusLevels: boolean;
 }
 
 export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
@@ -83,4 +89,7 @@ export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
   spellPoints: false,
   channelers: false,
   channellerFatigue: false,
+  racialLevelLimits: true,
+  exceedLevelLimits: 0,
+  primeRequisiteBonusLevels: false,
 };

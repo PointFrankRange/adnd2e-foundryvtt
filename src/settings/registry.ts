@@ -30,6 +30,8 @@ export const SETTING_DESCRIPTORS: readonly SettingDescriptor[] = [
   { key: "nonweaponProficienciesUsed", group: "core", default: true, config: true, optionalRulesKey: "nonweaponProficienciesUsed" },
   { key: "weaponProficienciesUsed", group: "core", default: true, config: true, optionalRulesKey: "weaponProficienciesUsed" },
   { key: "multiclassHpAveraging", group: "core", default: true, config: true, optionalRulesKey: "multiclassHpAveraging" },
+  { key: "racialLevelLimits", group: "core", default: true, config: true, optionalRulesKey: "racialLevelLimits", requiresReload: true },
+  { key: "primeRequisiteBonusLevels", group: "core", default: false, config: true, optionalRulesKey: "primeRequisiteBonusLevels", requiresReload: true },
   // --- combatAndTactics: Sub-project 7 ---
   { key: "combatAndTacticsEnabled", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "combatAndTacticsEnabled" },
   { key: "criticalHits", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "criticalHits" },
@@ -50,6 +52,10 @@ export const SETTING_DESCRIPTORS: readonly SettingDescriptor[] = [
   { key: "channellerFatigue", group: "spellsAndMagic", default: false, config: true, optionalRulesKey: "channellerFatigue", requiresReload: true },
 ];
 
+/** SP13: the exceedLevelLimits choice setting (a String choice, registered separately in src/settings/index.ts like playerAppliedEffects). */
+export const EXCEED_LEVEL_LIMIT_CHOICES = ["off", "x2", "x3", "x4"] as const;
+const EXCEED_MULTIPLIERS: Readonly<Record<(typeof EXCEED_LEVEL_LIMIT_CHOICES)[number], 0 | 2 | 3 | 4>> = { off: 0, x2: 2, x3: 3, x4: 4 };
+
 /**
  * Build the typed `OptionalRules` bag from a raw getter (setting key -> stored
  * value, or `undefined` when unset). A stored value that is not a boolean falls
@@ -63,7 +69,13 @@ export function readOptionalRules(
   for (const d of descriptors) {
     if (d.optionalRulesKey === null) continue;
     const raw = get(d.key);
-    bag[d.optionalRulesKey] = typeof raw === "boolean" ? raw : d.default;
+    const key = d.optionalRulesKey as keyof Omit<OptionalRules, "exceedLevelLimits">;
+    (bag[key] as unknown) = typeof raw === "boolean" ? raw : d.default;
   }
+  const exceed = get("exceedLevelLimits");
+  bag.exceedLevelLimits =
+    typeof exceed === "string" && Object.prototype.hasOwnProperty.call(EXCEED_MULTIPLIERS, exceed)
+      ? EXCEED_MULTIPLIERS[exceed as keyof typeof EXCEED_MULTIPLIERS]
+      : 0;
   return bag;
 }

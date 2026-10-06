@@ -377,7 +377,8 @@
         "rollHp": "Roll HP",
         "takeAverage": "Take Average",
         "hpRollFlavor": "1d{die} hit points for {name} ({con} CON)",
-        "hpAverageFlavor": "Took the average: {result} (d{die}), {con} CON"
+        "hpAverageFlavor": "Took the average: {result} (d{die}), {con} CON",
+        "atLimit": "limit"
       },
       "dualClass": {
         "toggle": "Dual-class",
@@ -865,6 +866,22 @@
         "hint": "When a player applies damage, healing or a maneuver effect to a token they don't own, the active GM's client applies it. Choose whether that happens automatically or waits for the GM to approve each one. Requires a GM to be connected.",
         "auto": "Apply automatically",
         "approve": "GM must approve"
+      },
+      "racialLevelLimits": {
+        "name": "Racial level limits",
+        "hint": "Enforce the class level limits listed on a character's race (PHB / DMG): a character cannot advance past their race's maximum level for a class."
+      },
+      "exceedLevelLimits": {
+        "name": "Exceeding level limits",
+        "hint": "Let characters advance past their racial level limit by earning this many times the normal experience for each level beyond it (cumulative with a race's own experience cost). Needs racial level limits on.",
+        "off": "Off (limits are hard)",
+        "x2": "Double experience",
+        "x3": "Triple experience",
+        "x4": "Quadruple experience"
+      },
+      "primeRequisiteBonusLevels": {
+        "name": "Bonus levels for high prime requisites",
+        "hint": "A single-classed character with a high prime requisite may exceed the racial limit by 1 level (score 14-15), 2 (16-17), 3 (18) or 4 (19+). Needs racial level limits on."
       }
     },
     "relay": {
