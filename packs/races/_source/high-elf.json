@@ -15,14 +15,16 @@
       "fighter": 12,
       "mage": 15,
       "thief": 12,
-      "ranger": 15
+      "ranger": 15,
+      "psionicist": 7
     },
     "allowedClasses": [
       "cleric",
       "fighter",
       "mage",
       "thief",
-      "ranger"
+      "ranger",
+      "psionicist"
     ],
     "allowedMulticlass": [
       [

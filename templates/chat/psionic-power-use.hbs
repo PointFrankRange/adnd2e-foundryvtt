@@ -1,0 +1,9 @@
+<div class="adnd2e chat-card psionic-power-use">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} - {{powerName}}</h3>
+  </header>
+  <p class="check"><strong>{{localize 'ADND2E.chat.psionic.roll'}}:</strong> {{roll}} / {{score}} - {{localize resultKey}}</p>
+  {{#if special}}<p class="hint">{{localize 'ADND2E.chat.psionic.special'}}</p>{{/if}}
+  <p class="cost">{{localize 'ADND2E.chat.psionic.cost'}}: {{cost}} - {{localize 'ADND2E.chat.psionic.remaining'}}: {{remaining}} / {{max}}</p>
+</div>

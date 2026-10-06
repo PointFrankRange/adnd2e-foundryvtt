@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { CLASS_IDS, RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
+import { POWER_DISCIPLINES, POWER_KINDS, POWER_MAINTENANCE_UNITS, CLASS_IDS, RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
 import { EQUIPMENT_MODES, normalizePowers, normalizeOverrides, powerUses, TURNING_MODES, CASTING_MODES } from "../../src/core/kits";
 import { normalizeSubrace } from "../../src/core/races";
 import { THIEF_SKILLS } from "../../src/core/proficiencies/thief-skills";
@@ -18,8 +18,8 @@ const sys = (d: Record<string, unknown>) => d.system as Record<string, unknown>;
 
 describe("classes pack content", () => {
   const items = docs("classes");
-  it("has 16 documents: 8 chassis + 8 wizard specialists", () => {
-    expect(items).toHaveLength(16);
+  it("has 17 documents: 9 chassis + 8 wizard specialists", () => {
+    expect(items).toHaveLength(17);
     expect(items.every((d) => d.type === "class")).toBe(true);
   });
   it("every chassisId is a valid ClassId", () => {
@@ -53,12 +53,12 @@ describe("races pack content", () => {
     expect(subs.filter((d) => sys(d).raceId === "halfling")).toHaveLength(7);
   });
   const DWARF = {
-    "hill-dwarf":     { adj: { con: 1, cha: -1 }, ranges: [[8,18],[3,17],[11,18],[3,18],[3,18],[3,17]], infra: 60,  xp: 0,  conSave: 0, limits: { fighter: 15, cleric: 10, thief: 12 }, thief: [0, 10, 15, 0, 0, 0, -10, -5] },
-    "mountain-dwarf":{ adj: { con: 1, cha: -1 }, ranges: [[8,18],[3,17],[11,19],[3,18],[3,18],[3,16]], infra: 60,  xp: 0,  conSave: 0, limits: { fighter: 16, cleric: 10, thief: 12 }, thief: [0, 10, 15, 0, 0, 0, -10, -5] },
-    "deep-dwarf":    { adj: { con: 2, cha: -2 }, ranges: [[8,18],[3,16],[13,19],[3,18],[3,18],[3,15]], infra: 90,  xp: 10, conSave: 1, limits: { fighter: 14, cleric: 12, thief: 10 }, thief: [5, 0, 10, 0, 5, 0, -10, -15] },
-    "duergar":       { adj: { con: 1, cha: -2 }, ranges: [[8,18],[3,17],[11,18],[3,16],[3,18],[3,15]], infra: 120, xp: 20, conSave: 0, limits: { fighter: 12, cleric: 12, thief: 14 }, thief: [5, 0, 10, 10, 5, 10, -10, -15] },
-    "sundered-dwarf":{ adj: { str: 1, con: 1, cha: -1 }, ranges: [[8,18],[3,17],[11,18],[3,16],[3,18],[3,16]], infra: 30, xp: 0, conSave: 0, limits: { fighter: 14, cleric: 10, thief: 15 }, thief: [0, 5, 10, 5, 5, 0, 0, -10] },
-    "gully-dwarf":   { adj: { str: 1, dex: 1, cha: -2 }, ranges: [[6,18],[6,18],[8,16],[3,12],[3,14],[3,12]], infra: 60, xp: 0, conSave: 0, limits: { fighter: 8, cleric: 8, thief: 16 }, thief: [10, -5, 5, 0, -5, 0, -5, -25] },
+    "hill-dwarf":     { adj: { con: 1, cha: -1 }, ranges: [[8,18],[3,17],[11,18],[3,18],[3,18],[3,17]], infra: 60,  xp: 0,  conSave: 0, limits: { fighter: 15, cleric: 10, thief: 12, psionicist: 8 }, thief: [0, 10, 15, 0, 0, 0, -10, -5] },
+    "mountain-dwarf":{ adj: { con: 1, cha: -1 }, ranges: [[8,18],[3,17],[11,19],[3,18],[3,18],[3,16]], infra: 60,  xp: 0,  conSave: 0, limits: { fighter: 16, cleric: 10, thief: 12, psionicist: 8 }, thief: [0, 10, 15, 0, 0, 0, -10, -5] },
+    "deep-dwarf":    { adj: { con: 2, cha: -2 }, ranges: [[8,18],[3,16],[13,19],[3,18],[3,18],[3,15]], infra: 90,  xp: 10, conSave: 1, limits: { fighter: 14, cleric: 12, thief: 10, psionicist: 8 }, thief: [5, 0, 10, 0, 5, 0, -10, -15] },
+    "duergar":       { adj: { con: 1, cha: -2 }, ranges: [[8,18],[3,17],[11,18],[3,16],[3,18],[3,15]], infra: 120, xp: 20, conSave: 0, limits: { fighter: 12, cleric: 12, thief: 14, psionicist: 8 }, thief: [5, 0, 10, 10, 5, 10, -10, -15] },
+    "sundered-dwarf":{ adj: { str: 1, con: 1, cha: -1 }, ranges: [[8,18],[3,17],[11,18],[3,16],[3,18],[3,16]], infra: 30, xp: 0, conSave: 0, limits: { fighter: 14, cleric: 10, thief: 15, psionicist: 8 }, thief: [0, 5, 10, 5, 5, 0, 0, -10] },
+    "gully-dwarf":   { adj: { str: 1, dex: 1, cha: -2 }, ranges: [[6,18],[6,18],[8,16],[3,12],[3,14],[3,12]], infra: 60, xp: 0, conSave: 0, limits: { fighter: 8, cleric: 8, thief: 16, psionicist: 8 }, thief: [10, -5, 5, 0, -5, 0, -5, -25] },
   } as const;
 
   it("every dwarf subrace matches The Complete Book of Dwarves (PHBR6 ch. 4)", () => {
@@ -366,5 +366,60 @@ describe("kits pack content", () => {
     const remove = powers.find((p) => p.id === "remove-paralysis")!;
     expect([1, 5, 10, 15, 20].map((l) => powerUses(dispel, l))).toEqual([0, 1, 2, 3, 4]);
     expect([1, 5, 10, 15, 20].map((l) => powerUses(remove, l))).toEqual([3, 4, 5, 6, 7]);
+  });
+});
+
+describe("powers pack content", () => {
+  const items = docs("powers");
+  const kindOf = (d: Record<string, unknown>) => String(sys(d).kind);
+  const discOf = (d: Record<string, unknown>) => String(sys(d).discipline);
+
+  it("has 23 uniquely named and identified power Items", () => {
+    expect(items).toHaveLength(23);
+    expect(new Set(items.map((d) => d._id)).size).toBe(23);
+    expect(new Set(items.map((d) => d.name)).size).toBe(23);
+    for (const d of items) {
+      expect(d.type, String(d.name)).toBe("power");
+      expect(String(d._id)).toMatch(/^[A-Za-z0-9]{16}$/);
+      expect(String(d._key)).toBe(`!items!${String(d._id)}`);
+    }
+  });
+
+  it("every power is well-formed against the schema vocabularies", () => {
+    for (const d of items) {
+      const s = sys(d);
+      const n = String(d.name);
+      expect(POWER_DISCIPLINES as readonly string[], n).toContain(s.discipline);
+      expect(POWER_KINDS, n).toContain(s.kind);
+      expect(POWER_MAINTENANCE_UNITS, n).toContain(s.maintenanceUnit);
+      expect(ABILITY_KEYS as readonly string[], n).toContain(s.abilityKey);
+      for (const k of ["abilityModifier", "initialCost", "maintenanceCost", "scoreBonus"]) expect(Number.isInteger(s[k]), n + k).toBe(true);
+      expect(s.initialCost as number, n).toBeGreaterThanOrEqual(0);
+      expect(s.maintenanceCost as number, n).toBeGreaterThanOrEqual(0);
+      expect(String(s.description).length, n).toBeGreaterThan(0);
+      expect(s.maintenanceCost === 0 ? s.maintenanceUnit === "none" : s.maintenanceUnit !== "none", n).toBe(true);
+    }
+  });
+
+  it("has exactly 5 defense powers, all telepathy", () => {
+    const defense = items.filter((d) => kindOf(d) === "defense");
+    expect(defense).toHaveLength(5);
+    for (const d of defense) expect(discOf(d)).toBe("telepathy");
+  });
+
+  it("every non-defense discipline has at least one science and two devotions", () => {
+    for (const disc of POWER_DISCIPLINES) {
+      const inDisc = items.filter((d) => discOf(d) === disc && kindOf(d) !== "defense");
+      expect(inDisc.filter((d) => kindOf(d) === "science").length, disc).toBeGreaterThanOrEqual(1);
+      expect(inDisc.filter((d) => kindOf(d) === "devotion").length, disc).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it("pins the headline data (Teleport variable cost, Mind Blank free, Clairvoyance)", () => {
+    const by = (n: string) => sys(items.find((d) => d.name === n) as Record<string, unknown>);
+    expect(by("Teleport")).toMatchObject({ initialCost: 10, costNote: "10+", discipline: "psychoportation", kind: "science" });
+    expect(by("Mind Blank")).toMatchObject({ initialCost: 0, maintenanceCost: 0, maintenanceUnit: "none", abilityModifier: -7 });
+    expect(by("Clairvoyance")).toMatchObject({ abilityKey: "wis", abilityModifier: -4, initialCost: 7, maintenanceCost: 4, maintenanceUnit: "round", range: "unlimited" });
+    expect(by("Complete Healing")).toMatchObject({ initialCost: 30, preparation: "24 hrs.", abilityKey: "con", abilityModifier: 0 });
   });
 });

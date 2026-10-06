@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrClairvoya001",
+  "_key": "!items!kPwrClairvoya001",
+  "name": "Clairvoyance",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets the user see and hear a distant place the user has visited before.",
+    "discipline": "clairsentience",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 7,
+    "costNote": "",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "unlimited",
+    "preparation": "0",
+    "areaOfEffect": "special",
+    "scoreBonus": 0
+  }
+}

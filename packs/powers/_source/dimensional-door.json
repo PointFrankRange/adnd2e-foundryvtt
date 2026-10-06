@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrDimension012",
+  "_key": "!items!kPwrDimension012",
+  "name": "Dimensional Door",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Opens a brief doorway that lets the user step from one spot to another nearby.",
+    "discipline": "psychoportation",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -1,
+    "initialCost": 4,
+    "costNote": "",
+    "maintenanceCost": 2,
+    "maintenanceUnit": "round",
+    "range": "50 yds. +",
+    "preparation": "0",
+    "areaOfEffect": "-",
+    "scoreBonus": 0
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrAuraAlter016",
+  "_key": "!items!kPwrAuraAlter016",
+  "name": "Aura Alteration",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Reshapes the psychic aura of a creature so that it reads as something else.",
+    "discipline": "metapsionics",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 10,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "touch",
+    "preparation": "5",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0
+  }
+}

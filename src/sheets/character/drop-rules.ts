@@ -1,4 +1,5 @@
 import type { KitQualifyVerdict } from "../../core/kits";
+import { canLearn, type Discipline, type KnownPower, type PowerKind } from "../../core/psionics";
 import { canAffordTrait } from "../../core/skills/character-points";
 
 export interface DropCheckInput {
@@ -108,4 +109,26 @@ export function validateItemDrop(input: DropCheckInput): DropVerdict {
     return { ok: false, reason: "ADND2E.sheet.drop.kitCastingDisabled" };
   }
   return { ok: true };
+}
+
+export interface PowerDropActor {
+  /** the derived psionic level cache (0 = no psionics, e.g. no psionicist class or one that is dormant in a dual-class) */
+  system: { psionics: { level: number } };
+  items: Iterable<{ id: string; name?: string; type: string; system: Record<string, unknown> }>;
+}
+
+export type PowerDropVerdict = { ok: true } | { ok: false; messageKey: string };
+
+/** SP15: a `power` item may be dropped only on a psionicist, and only when the Table 4 totals and the learning rules allow it. Any other item type is not this rule's business. */
+export function checkPowerDrop(actor: PowerDropActor, item: { type: string; name?: string; system: Record<string, unknown> }): PowerDropVerdict {
+  if (item.type !== "power") return { ok: true };
+  const level = actor.system.psionics.level;
+  if (level <= 0) return { ok: false, messageKey: "ADND2E.sheet.psionics.noClass" };
+  const owned = [...actor.items].filter((i) => i.type === "power");
+  const name = (item.name ?? "").trim().toLowerCase();
+  if (name !== "" && owned.some((i) => (i.name ?? "").trim().toLowerCase() === name)) return { ok: false, messageKey: "ADND2E.sheet.psionics.alreadyKnown" };
+  const known: KnownPower[] = owned
+    .map((i) => ({ id: i.id, discipline: i.system.discipline as Discipline, kind: i.system.kind as PowerKind, scoreBonus: Number(i.system.scoreBonus ?? 0) }));
+  const verdict = canLearn(known, { discipline: item.system.discipline as Discipline, kind: item.system.kind as PowerKind }, level);
+  return verdict.ok ? { ok: true } : { ok: false, messageKey: `ADND2E.sheet.psionics.learn.${verdict.reason}` };
 }

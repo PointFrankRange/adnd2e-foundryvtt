@@ -122,6 +122,7 @@ export function buildAdnd2eConfig(): Adnd2eConfig {
       wizard: "ADND2E.classGroups.wizard",
       priest: "ADND2E.classGroups.priest",
       rogue: "ADND2E.classGroups.rogue",
+      psionicist: "ADND2E.classGroups.psionicist",
     },
     schools: {
       abjuration: "ADND2E.schools.abjuration",

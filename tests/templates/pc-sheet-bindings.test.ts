@@ -62,7 +62,7 @@ describe("PC sheet templates (sheet redesign R1)", () => {
   });
 });
 
-const PC_ONLY_ACTIONS = ["awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait", "useKitPower", "resetKitPower", "newDayKitPowers", "newEncounterKitPowers"];
+const PC_ONLY_ACTIONS = ["awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait", "useKitPower", "resetKitPower", "newDayKitPowers", "newEncounterKitPowers", "usePsionicPower", "relearnPsionicPower", "psionicRest", "payPsionicMaintenance", "endPsionicPower"];
 
 describe("PC-only actions (sheet redesign R2)", () => {
   it("every PC template that renders a PC-only action gates it on @root.pcActions", () => {
@@ -74,5 +74,24 @@ describe("PC-only actions (sheet redesign R2)", () => {
   });
   it("the PC sheet sets pcActions", () => {
     expect(SHEET).toMatch(/context\.pcActions = true;/);
+  });
+});
+
+describe("Psionics tab (SP15 Plan A)", () => {
+  const psionicsTemplate = readFileSync(path.join(PC_DIR, "psionics.hbs"), "utf8");
+  it("every psionic action is rendered by a template and registered on the sheet", () => {
+    for (const a of ["usePsionicPower", "relearnPsionicPower", "psionicRest", "payPsionicMaintenance", "endPsionicPower"]) {
+      expect(TEMPLATES, a).toContain(`data-action="${a}"`);
+      expect(SHEET, a).toContain(`${a}: Adnd2eCharacterSheet.#on`);
+    }
+  });
+  it("the part and tab are declared, and the section is the psionics tab", () => {
+    expect(SHEET).toContain('psionics: { template: TP("psionics.hbs")');
+    expect(SHEET).toContain('{ id: "psionics", icon:');
+    expect(psionicsTemplate).toContain('data-tab="{{tab.id}}"');
+  });
+  it("rest inputs carry no name= (they must not be submitted as actor data)", () => {
+    const panel = readFileSync(path.join(PC_DIR, "partials", "pc-psionics-panels.hbs"), "utf8");
+    expect(panel).not.toMatch(/name="/);
   });
 });

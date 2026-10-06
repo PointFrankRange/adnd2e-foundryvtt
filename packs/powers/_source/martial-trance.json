@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrMartialTr018",
+  "_key": "!items!kPwrMartialTr018",
+  "name": "Martial Trance",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Focuses the user's mind and body to strike with greater skill in a fight.",
+    "discipline": "metapsionics",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 7,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "1",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0
+  }
+}

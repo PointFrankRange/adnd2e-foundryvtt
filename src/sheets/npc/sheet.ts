@@ -334,6 +334,11 @@ export class Adnd2eNpcSheet extends Base {
       ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.drop.kitsPcOnly"));
       return null;
     }
+    // SP15: this sheet has no Psionics tab, so a power would be learned invisibly
+    if (dropped.type === "power") {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.psionics.pcOnly"));
+      return null;
+    }
 
     let dropSlotCost: number | undefined;
     if (dropped.type === "weaponProficiency") {

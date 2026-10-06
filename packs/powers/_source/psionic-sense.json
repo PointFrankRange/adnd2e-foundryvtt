@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrPsionicSe017",
+  "_key": "!items!kPwrPsionicSe017",
+  "name": "Psionic Sense",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Detects the use of psionic powers by others in the surrounding area.",
+    "discipline": "metapsionics",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 4,
+    "costNote": "",
+    "maintenanceCost": 1,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "200-yd. radius",
+    "scoreBonus": 0
+  }
+}

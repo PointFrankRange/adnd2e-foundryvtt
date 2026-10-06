@@ -2,6 +2,7 @@ import type {
   ArmorType, CharismaModifiers, ConstitutionModifiers, DexterityModifiers, IntelligenceModifiers,
   StrengthModifiers, ThiefSkill, WisdomModifiers,
 } from "../../core/types";
+import type { Discipline, PowerKind, PowerProgressionRow, RecoveryActivity } from "../../core/psionics";
 import type { OptionalRules } from "../../core/options";
 import type { SubraceLayer } from "../../core/races";
 import type { FatigueTier } from "../../core/magic/channeller-fatigue";
@@ -62,6 +63,66 @@ export interface CharacterSheetInput {
   unlocked?: boolean;
   /** raw flags.adnd2e.favorites */
   favorites?: unknown;
+  /** SP15 Plan A: the psionic state, or null/absent when the actor has no psionicist class entry */
+  psionics?: PsionicsInput | null;
+}
+
+/** SP15 Plan A: one owned `power` item as the Psionics view reads it. */
+export interface PsionicPowerItem {
+  id: string;
+  name: string;
+  discipline: Discipline;
+  kind: PowerKind;
+  abilityKey: string;
+  abilityModifier: number;
+  initialCost: number;
+  costNote: string;
+  maintenanceCost: number;
+  maintenanceUnit: "none" | "round" | "turn" | "hour";
+  range: string;
+  scoreBonus: number;
+}
+
+export interface PsionicsInput {
+  /** persisted pool; null = full */
+  psp: number | null;
+  max: number;
+  level: number;
+  maintained: { powerId: string }[];
+  /** prepared ability scores keyed str..cha */
+  abilityScores: Record<string, number>;
+  powers: PsionicPowerItem[];
+}
+
+export interface PsionicPowerRow {
+  id: string;
+  name: string;
+  kind: PowerKind;
+  /** ability score + ability modifier + relearn bonus */
+  score: number;
+  cost: number;
+  costNote: string;
+  maintenance: number;
+  /** "none" when the power is not maintained */
+  unit: string;
+  range: string;
+  scoreBonus: number;
+  canUse: boolean;
+  canRelearn: boolean;
+}
+
+export interface PsionicsView {
+  psp: number;
+  max: number;
+  level: number;
+  row: PowerProgressionRow;
+  primary: Discipline | null;
+  activities: RecoveryActivity[];
+  maintained: { powerId: string; name: string; cost: number; unit: string }[];
+  groups: { discipline: Discipline; powers: PsionicPowerRow[] }[];
+  defense: PsionicPowerRow[];
+  /** i18n keys of over-budget warnings */
+  problems: string[];
 }
 
 /** Sub-project 9a: the in-progress cast, assembled by sheet.ts ONLY while the casting-time rule is on. */
@@ -537,6 +598,8 @@ export interface CharacterSheetContext {
   };
   biography: { detailFields: string[]; showGmNotes: boolean };
   tabs: TabDescriptor[];
+  /** SP15 Plan A: null without a psionicist class entry (the Psionics tab is then absent) */
+  psionics: PsionicsView | null;
   /** sheet redesign R1: the sheet's edit lock */
   lock: LockState;
   /** sheet redesign R1: the Favorites panel */

@@ -12,6 +12,7 @@ import { ClassFeatureItemModel } from "./class-feature";
 import { ConditionItemModel } from "./condition";
 import { TraitItemModel } from "./trait";
 import { KitItemModel } from "./kit";
+import { PowerItemModel } from "./power";
 
 export {
   ClassItemModel,
@@ -27,6 +28,7 @@ export {
   ConditionItemModel,
   TraitItemModel,
   KitItemModel,
+  PowerItemModel,
 };
 
 /** Registered on `CONFIG.Item.dataModels` in the init hook. Keys ≡ `ITEM_SUBTYPES`. */
@@ -47,4 +49,5 @@ export const ITEM_DATA_MODELS: Record<
   condition: ConditionItemModel,
   trait: TraitItemModel,
   kit: KitItemModel,
+  power: PowerItemModel,
 };

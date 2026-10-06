@@ -11,7 +11,7 @@
     "baseMovement": 12,
     "infravision": 0,
     "classLevelLimits": {},
-    "allowedClasses": ["fighter", "paladin", "ranger", "mage", "cleric", "druid", "thief", "bard"],
+    "allowedClasses": ["fighter", "paladin", "ranger", "mage", "cleric", "druid", "thief", "bard", "psionicist"],
     "allowedMulticlass": [],
     "bonusLanguages": [],
     "grantedFeatures": []

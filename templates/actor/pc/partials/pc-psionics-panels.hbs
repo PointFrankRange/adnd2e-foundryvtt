@@ -1,0 +1,60 @@
+{{#if @root.pcActions}}{{#if adnd2e.psionics}}
+<section class="kit-panel">
+  <div class="kit-bar">{{localize 'ADND2E.sheet.psionics.title'}}</div>
+  <div class="kit-body">
+    <p><strong>{{localize 'ADND2E.sheet.psionics.psp'}}:</strong> {{adnd2e.psionics.psp}} / {{adnd2e.psionics.max}}</p>
+    {{#if adnd2e.psionics.primary}}<p class="hint">{{localize 'ADND2E.sheet.psionics.primary'}}: {{localize (concat 'ADND2E.sheet.psionics.discipline.' adnd2e.psionics.primary)}}</p>{{/if}}
+    {{#each adnd2e.psionics.problems as |key|}}<p class="hint warning">{{localize key}}</p>{{/each}}
+    <div class="psionic-rest">
+      <label>{{localize 'ADND2E.sheet.psionics.rest'}}
+        <select data-psionic-activity>
+          {{#each adnd2e.psionics.activities as |act|}}<option value="{{act}}"{{#if (eq act "rest")}} selected{{/if}}>{{localize (concat 'ADND2E.sheet.psionics.activity.' act)}}</option>{{/each}}
+        </select>
+      </label>
+      <label>{{localize 'ADND2E.sheet.psionics.hours'}} <input type="number" data-psionic-hours value="1" min="1" step="1"></label>
+      <button type="button" class="kit-small" data-action="psionicRest">{{localize 'ADND2E.sheet.psionics.rest'}}</button>
+    </div>
+  </div>
+</section>
+
+{{#if adnd2e.psionics.maintained.length}}
+<section class="kit-panel">
+  <div class="kit-bar">
+    {{localize 'ADND2E.sheet.psionics.maintained'}}
+    <button type="button" class="kit-small" data-action="payPsionicMaintenance" style="margin-left:auto">{{localize 'ADND2E.sheet.psionics.payAll'}}</button>
+  </div>
+  <div class="kit-body">
+    {{#each adnd2e.psionics.maintained as |m|}}
+      <div class="power-row" data-power-id="{{m.powerId}}">
+        <span class="name">{{m.name}}</span>
+        <span class="effect">{{m.cost}} / {{localize (concat 'ADND2E.sheet.psionics.unit.' m.unit)}}</span>
+        <button type="button" class="kit-small" data-action="payPsionicMaintenance" data-power-id="{{m.powerId}}">{{localize 'ADND2E.sheet.psionics.payMaintenance'}}</button>
+        <button type="button" class="kit-small" data-action="endPsionicPower" data-power-id="{{m.powerId}}">{{localize 'ADND2E.sheet.psionics.end'}}</button>
+      </div>
+    {{/each}}
+  </div>
+</section>
+{{/if}}
+
+{{#each adnd2e.psionics.groups as |g|}}
+<section class="kit-panel">
+  <div class="kit-bar">{{localize (concat 'ADND2E.sheet.psionics.discipline.' g.discipline)}}</div>
+  <div class="kit-body">
+    {{#each g.powers as |p|}}{{> adnd2e.pc-psionic-power-row p=p}}{{/each}}
+  </div>
+</section>
+{{/each}}
+
+{{#if adnd2e.psionics.defense.length}}
+<section class="kit-panel">
+  <div class="kit-bar">{{localize 'ADND2E.sheet.psionics.defense'}}</div>
+  <div class="kit-body">
+    {{#each adnd2e.psionics.defense as |p|}}{{> adnd2e.pc-psionic-power-row p=p}}{{/each}}
+  </div>
+</section>
+{{/if}}
+
+{{#unless adnd2e.psionics.groups.length}}{{#unless adnd2e.psionics.defense.length}}
+<section class="kit-panel"><div class="kit-body"><p class="placeholder">{{localize 'ADND2E.sheet.psionics.noPowers'}}</p></div></section>
+{{/unless}}{{/unless}}
+{{/if}}{{/if}}

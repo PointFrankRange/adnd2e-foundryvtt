@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrAstralPro011",
+  "_key": "!items!kPwrAstralPro011",
+  "name": "Astral Projection",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Sends the user's spirit out of the body to roam the astral plane.",
+    "discipline": "psychoportation",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": 0,
+    "initialCost": 6,
+    "costNote": "",
+    "maintenanceCost": 2,
+    "maintenanceUnit": "hour",
+    "range": "-",
+    "preparation": "1",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0
+  }
+}

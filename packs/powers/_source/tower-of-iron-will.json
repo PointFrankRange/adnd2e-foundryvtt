@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrTowerofIr023",
+  "_key": "!items!kPwrTowerofIr023",
+  "name": "Tower of Iron Will",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Stands against mental attacks with an unyielding fortress of resolve.",
+    "discipline": "telepathy",
+    "kind": "defense",
+    "abilityKey": "wis",
+    "abilityModifier": -2,
+    "initialCost": 6,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "1 yd.",
+    "scoreBonus": 0
+  }
+}

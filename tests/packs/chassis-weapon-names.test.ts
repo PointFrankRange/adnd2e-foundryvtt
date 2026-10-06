@@ -7,7 +7,8 @@ import { CLASS_IDS } from "../../src/data/item/choices";
 // Lives here (not tests/core) because the core tsconfig has no node types.
 describe("chassis weapon names match the weapon-proficiency pack", () => {
   // Names with no pack entry (explicitly accepted); "staff" is the quarterstaff alias.
-  const NO_PACK_ENTRY = ["lasso", "sickle"];
+  // "dirk", "throwing axe" and "war hammer" are the Psionicist list (PHBR5); the pack has no such entries.
+  const NO_PACK_ENTRY = ["lasso", "sickle", "dirk", "throwing axe", "war hammer"];
   it("every chassis weapon name is a pack weapon name, the staff alias, or an allow-listed name", () => {
     const dir = path.resolve(__dirname, "..", "..", "packs", "weapon-proficiencies", "_source");
     const packNames = new Set(

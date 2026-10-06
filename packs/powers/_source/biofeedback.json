@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrBiofeedba008",
+  "_key": "!items!kPwrBiofeedba008",
+  "name": "Biofeedback",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Dulls the pain of blows so the user suffers less harm from attacks.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -2,
+    "initialCost": 6,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0
+  }
+}

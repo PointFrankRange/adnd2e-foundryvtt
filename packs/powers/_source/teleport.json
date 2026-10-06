@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrTeleport0010",
+  "_key": "!items!kPwrTeleport0010",
+  "name": "Teleport",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Instantly carries the user across any distance to a chosen place, at a cost that grows with the risk.",
+    "discipline": "psychoportation",
+    "kind": "science",
+    "abilityKey": "int",
+    "abilityModifier": 0,
+    "initialCost": 10,
+    "costNote": "10+",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "infinite",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0
+  }
+}

@@ -8,6 +8,8 @@ const TABLE_53: Record<ClassGroup, number[]> = {
   rogue:   [20, 20, 19, 19, 18, 18, 17, 17, 16, 16, 15, 15, 14, 14, 13, 13, 12, 12, 11, 11],
   warrior: [20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
   wizard:  [20, 20, 20, 19, 19, 19, 18, 18, 18, 17, 17, 17, 16, 16, 16, 15, 15, 15, 14, 14],
+  // PHBR5 Table 7 (the psionicist advances at the rogue rate)
+  psionicist: [20, 20, 19, 19, 18, 18, 17, 17, 16, 16, 15, 15, 14, 14, 13, 13, 12, 12, 11, 11],
 };
 
 describe("thac0()", () => {
@@ -20,7 +22,7 @@ describe("thac0()", () => {
   });
 
   it("all 1st-level characters have THAC0 20", () => {
-    for (const g of ["priest", "rogue", "warrior", "wizard"] as ClassGroup[]) {
+    for (const g of ["priest", "rogue", "warrior", "wizard", "psionicist"] as ClassGroup[]) {
       expect(thac0(g, 1)).toBe(20);
     }
   });

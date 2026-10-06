@@ -13,17 +13,27 @@
     "classLevelLimits": {
       "cleric": 8,
       "fighter": 9,
-      "thief": 15
+      "thief": 15,
+      "psionicist": 10
     },
     "allowedClasses": [
       "cleric",
       "fighter",
-      "thief"
+      "thief",
+      "psionicist"
     ],
     "allowedMulticlass": [
       [
         "fighter",
         "thief"
+      ],
+      [
+        "fighter",
+        "psionicist"
+      ],
+      [
+        "thief",
+        "psionicist"
       ]
     ],
     "bonusLanguages": [

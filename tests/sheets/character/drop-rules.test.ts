@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateItemDrop } from "../../../src/sheets/character/drop-rules";
+import { checkPowerDrop, validateItemDrop } from "../../../src/sheets/character/drop-rules";
 
 describe("validateItemDrop", () => {
   it("allows a race when the actor has none", () => {
@@ -214,5 +214,40 @@ describe("kit-disabled casting drops (SP11 Plan C)", () => {
     expect(validateItemDrop({ ...base, kitDisablesCasting: true })).toEqual({ ok: false, reason: "ADND2E.sheet.drop.kitCastingDisabled" });
     expect(validateItemDrop({ ...base, kitDisablesCasting: false })).toEqual({ ok: true });
     expect(validateItemDrop(base)).toEqual({ ok: true });
+  });
+});
+
+describe("checkPowerDrop (SP15)", () => {
+  const dev = (id: string, discipline = "telepathy", kind = "devotion") => ({ id, name: `Power ${id}`, type: "power", system: { discipline, kind, scoreBonus: 0 } });
+  const psi = (level: number, items: unknown[] = []) => ({ system: { psionics: { level } }, items: items as never });
+  it("refuses an actor with no psionicist class", () => {
+    const a = { system: { psionics: { level: 0 } }, items: [] };
+    expect(checkPowerDrop(a, dev("n"))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.noClass" });
+  });
+  it("refuses with the canLearn reason mapped to a lang key", () => {
+    const a = psi(1, [dev("a"), dev("b"), dev("c")]); // 3 devotions = the level 1 total
+    expect(checkPowerDrop(a, dev("d"))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.learn.devotion-limit" });
+  });
+  it("allows a legal drop", () => {
+    expect(checkPowerDrop(psi(1, [dev("a")]), dev("b"))).toEqual({ ok: true });
+  });
+  it("ignores items that are not powers", () => {
+    const a = { system: { psionics: { level: 0 } }, items: [] };
+    expect(checkPowerDrop(a, { type: "weapon", system: {} })).toEqual({ ok: true });
+  });
+  it("refuses a dormant dual-class psionicist (derived level 0) with the noClass message", () => {
+    expect(checkPowerDrop(psi(0, [dev("a")]), dev("b"))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.noClass" });
+  });
+  it("refuses a power the actor already owns (same name, case-insensitive), and allows a different one", () => {
+    const clair = (id: string, name: string) => ({ id, name, type: "power", system: { discipline: "clairsentience", kind: "devotion", scoreBonus: 0 } });
+    const a = psi(1, [clair("a", "Clairvoyance")]);
+    expect(checkPowerDrop(a, clair("x", "Clairvoyance"))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.alreadyKnown" });
+    expect(checkPowerDrop(a, clair("x", "  clairVOYance "))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.alreadyKnown" });
+    expect(checkPowerDrop(a, clair("x", "Danger Sense"))).toEqual({ ok: true });
+    expect(checkPowerDrop(a, { type: "power", system: { discipline: "clairsentience", kind: "devotion" } })).toEqual({ ok: true });
+  });
+  it("counts only owned power items, with their score bonus", () => {
+    const owned = [{ ...dev("a"), system: { discipline: "telepathy", kind: "devotion" } }, { id: "w", type: "weapon", system: {} }];
+    expect(checkPowerDrop(psi(1, owned), dev("b"))).toEqual({ ok: true });
   });
 });

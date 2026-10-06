@@ -15,6 +15,7 @@ export const CLASS_PROFICIENCY_GROUPS: Readonly<Record<ClassId, readonly Nonweap
   ranger:  ["warrior", "general"],
   druid:   ["priest", "general"],
   bard:    ["rogue", "general"],
+  psionicist: ["general"],
 };
 
 /**

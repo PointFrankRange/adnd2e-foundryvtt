@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrIdInsinua015",
+  "_key": "!items!kPwrIdInsinua015",
+  "name": "Id Insinuation",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Floods a target with base urges, leaving it dazed and unable to act well.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 5,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "60/120/180 yds.",
+    "preparation": "0",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrThoughtSh022",
+  "_key": "!items!kPwrThoughtSh022",
+  "name": "Thought Shield",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Guards the user against a mental assault with a cheap, light screen of will.",
+    "discipline": "telepathy",
+    "kind": "defense",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 1,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0
+  }
+}

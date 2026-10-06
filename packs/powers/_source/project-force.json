@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrProjectFo004",
+  "_key": "!items!kPwrProjectFo004",
+  "name": "Project Force",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Hurls an unseen blow of mental force at a distant target.",
+    "discipline": "psychokinesis",
+    "kind": "science",
+    "abilityKey": "con",
+    "abilityModifier": -2,
+    "initialCost": 10,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "200 yds.",
+    "preparation": "0",
+    "areaOfEffect": "-",
+    "scoreBonus": 0
+  }
+}

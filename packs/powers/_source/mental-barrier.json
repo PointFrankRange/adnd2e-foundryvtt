@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrMentalBar020",
+  "_key": "!items!kPwrMentalBar020",
+  "name": "Mental Barrier",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Shields the user from mental assaults with a quick wall of thought.",
+    "discipline": "telepathy",
+    "kind": "defense",
+    "abilityKey": "wis",
+    "abilityModifier": -2,
+    "initialCost": 3,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0
+  }
+}

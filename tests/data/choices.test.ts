@@ -10,9 +10,9 @@ import {
 import { TURN_ROW_IDS } from "../../src/core/turning";
 
 describe("item schema choice arrays match the engine unions", () => {
-  it("CLASS_IDS = the 8 ClassId", () => {
+  it("CLASS_IDS = the 9 ClassId", () => {
     expect([...CLASS_IDS].sort()).toEqual(
-      ["bard", "cleric", "druid", "fighter", "mage", "paladin", "ranger", "thief"],
+      ["bard", "cleric", "druid", "fighter", "mage", "paladin", "psionicist", "ranger", "thief"],
     );
   });
   it("RACE_IDS = the 6 Race", () => {
@@ -86,8 +86,8 @@ describe("actor schema choice arrays", () => {
   it("MULTICLASS_MODES = the three ClassArrangement members", () => {
     expect([...MULTICLASS_MODES].sort()).toEqual(["dualclass", "multiclass", "single"]);
   });
-  it("CLASS_GROUPS = the four core ClassGroup members", () => {
-    expect([...CLASS_GROUPS].sort()).toEqual(["priest", "rogue", "warrior", "wizard"]);
+  it("CLASS_GROUPS = the five ClassGroup members", () => {
+    expect([...CLASS_GROUPS].sort()).toEqual(["priest", "psionicist", "rogue", "warrior", "wizard"]);
   });
 });
 

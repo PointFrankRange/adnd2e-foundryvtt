@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrCompleteH007",
+  "_key": "!items!kPwrCompleteH007",
+  "name": "Complete Healing",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Puts the user into a deep trance that mends all wounds and ailments.",
+    "discipline": "psychometabolism",
+    "kind": "science",
+    "abilityKey": "con",
+    "abilityModifier": 0,
+    "initialCost": 30,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "24 hrs.",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0
+  }
+}

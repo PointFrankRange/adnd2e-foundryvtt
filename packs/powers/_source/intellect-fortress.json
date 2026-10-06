@@ -1,0 +1,22 @@
+{
+  "_id": "kPwrIntellect019",
+  "_key": "!items!kPwrIntellect019",
+  "name": "Intellect Fortress",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Raises a protective dome of will that turns away mental attacks within it.",
+    "discipline": "telepathy",
+    "kind": "defense",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 4,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "3-yd. radius",
+    "scoreBonus": 0
+  }
+}
