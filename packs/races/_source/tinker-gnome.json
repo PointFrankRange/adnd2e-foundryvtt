@@ -1,0 +1,100 @@
+{
+  "_id": "kGnomeTinker0001",
+  "_key": "!items!kGnomeTinker0001",
+  "name": "Tinker Gnome",
+  "type": "race",
+  "img": "icons/svg/burrow.svg",
+  "system": {
+    "description": "",
+    "raceId": "gnome",
+    "size": "small",
+    "baseMovement": 6,
+    "infravision": 60,
+    "classLevelLimits": {
+      "fighter": 11,
+      "thief": 13,
+      "cleric": 9,
+      "mage": 15
+    },
+    "allowedClasses": [
+      "fighter",
+      "thief",
+      "cleric",
+      "mage"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "cleric"
+      ],
+      [
+        "fighter",
+        "mage"
+      ],
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "cleric",
+        "mage"
+      ],
+      [
+        "cleric",
+        "thief"
+      ],
+      [
+        "mage",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "gnome common",
+      "any human language"
+    ],
+    "grantedFeatures": [
+      "Tinker: unreliable inventions"
+    ],
+    "subrace": {
+      "id": "tinker-gnome",
+      "abilityAdjustments": {
+        "str": -1,
+        "dex": 2,
+        "con": 0,
+        "int": 0,
+        "wis": -1,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 6,
+          "max": 18
+        },
+        "dex": {
+          "min": 8,
+          "max": 18
+        },
+        "con": {
+          "min": 8,
+          "max": 18
+        },
+        "int": {
+          "min": 8,
+          "max": 18
+        },
+        "wis": {
+          "min": 3,
+          "max": 12
+        },
+        "cha": {
+          "min": 3,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

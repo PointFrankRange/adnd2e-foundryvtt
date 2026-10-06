@@ -42,13 +42,15 @@ describe("classes pack content", () => {
 
 describe("races pack content", () => {
   const items = docs("races");
-  it("has the 6 PHB races plus the 6 dwarf and 5 elf subraces", () => {
-    expect(items).toHaveLength(17);
+  it("has the 6 PHB races plus the 6 dwarf, 5 elf, 4 gnome and 7 halfling subraces", () => {
+    expect(items).toHaveLength(28);
     expect(new Set(items.map((d) => sys(d).raceId))).toEqual(new Set(RACE_IDS));
     const subs = items.filter((d) => (sys(d).subrace as { id?: string } | undefined)?.id);
-    expect(subs).toHaveLength(11);
+    expect(subs).toHaveLength(22);
     expect(subs.filter((d) => sys(d).raceId === "dwarf")).toHaveLength(6);
     expect(subs.filter((d) => sys(d).raceId === "elf")).toHaveLength(5);
+    expect(subs.filter((d) => sys(d).raceId === "gnome")).toHaveLength(4);
+    expect(subs.filter((d) => sys(d).raceId === "halfling")).toHaveLength(7);
   });
   const DWARF = {
     "hill-dwarf":     { adj: { con: 1, cha: -1 }, ranges: [[8,18],[3,17],[11,18],[3,18],[3,18],[3,17]], infra: 60,  xp: 0,  conSave: 0, limits: { fighter: 15, cleric: 10, thief: 12 }, thief: [0, 10, 15, 0, 0, 0, -10, -5] },
@@ -69,6 +71,7 @@ describe("races pack content", () => {
       expect(sys(d).raceId, id).toBe("dwarf");
       expect(layer.abilityAdjustments, id).toEqual(want.adj);
       expect(ABILITY_KEYS.map((k) => layer.abilityRanges![k]), id).toEqual(want.ranges);
+      expect(layer.flatSaveBonus).toBeNull();
       expect(layer.xpModifierPercent, id).toBe(want.xp);
       expect(layer.conSaveBonusAdjustment, id).toBe(want.conSave);
       expect(THIEF_SKILLS.map((s) => layer.thiefAdjustments![s]), id).toEqual(want.thief);
@@ -97,6 +100,7 @@ describe("races pack content", () => {
       const layer = normalizeSubrace(sys(d).subrace as never);
       expect(layer.abilityAdjustments, id).toEqual(want.adj);
       expect(ABILITY_KEYS.map((k) => layer.abilityRanges![k]), id).toEqual(want.ranges);
+      expect(layer.flatSaveBonus).toBeNull();
       expect(layer.xpModifierPercent, id).toBe(want.xp);
       expect(layer.conSaveBonusAdjustment, id).toBe(0);
       expect(layer.thiefAdjustments, id).toBeNull();
@@ -107,6 +111,60 @@ describe("races pack content", () => {
       expect(sys(d).classLevelLimits, id).toEqual(sys(phbElf).classLevelLimits);
       expect(sys(d).allowedClasses, id).toEqual(sys(phbElf).allowedClasses);
       expect(sys(d).allowedMulticlass, id).toEqual(sys(phbElf).allowedMulticlass);
+    }
+  });
+  const SMALL = {
+    "rock-gnome":     { race: "gnome", adj: { int: 1, wis: -1 }, ranges: [[6,18],[3,18],[8,18],[7,19],[3,17],[3,18]], infra: 60, flat: null,
+                        langs: ["common", "dwarf", "halfling", "kobold", "goblin", "burrowing animal"], features: [] },
+    "deep-gnome":     { race: "gnome", adj: { dex: 1, wis: 1, int: -1, cha: -2 }, ranges: [[6,18],[6,19],[6,18],[3,17],[4,18],[3,16]], infra: 120, flat: { all: 3, poison: 2 },
+                        langs: ["gnome common", "underworld common", "drow", "kuo-toan", "earth elemental"],
+                        features: ["Deep gnome: magic resistance", "Deep gnome: innate illusions", "Deep gnome: freeze in place", "Deep gnome: surprise bonuses", "Deep gnome: improving armor class", "Deep gnome: stun darts"] },
+    "tinker-gnome":   { race: "gnome", adj: { dex: 2, str: -1, wis: -1 }, ranges: [[6,18],[8,18],[8,18],[8,18],[3,12],[3,18]], infra: 60, flat: null,
+                        langs: ["gnome common", "any human language"], features: ["Tinker: unreliable inventions"] },
+    "forest-gnome":   { race: "gnome", adj: { dex: 1, wis: 1, str: -1, int: -1 }, ranges: [[3,17],[8,19],[8,18],[3,17],[6,18],[3,18]], infra: 0, flat: null,
+                        langs: ["gnome common", "elf", "treant", "forest mammal"],
+                        features: ["Forest gnome: pass without trace", "Forest gnome: hide in woods", "Forest gnome: armor class bonus vs larger foes"] },
+    "hairfoot":       { race: "halfling", adj: { str: -1, dex: 1 }, ranges: [[3,17],[8,19],[10,18],[6,18],[3,18],[7,18]], infra: 0, flat: null,
+                        langs: ["any human language"], features: ["Hairfoot: reaction bonus with humans"] },
+    "stout-dex":      { race: "halfling", adj: { str: -1, dex: 1 }, ranges: [[5,17],[8,19],[10,19],[6,18],[3,18],[5,18]], infra: 60, flat: null,
+                        langs: ["dwarvish"], features: ["Stout: underground detection"] },
+    "stout-con":      { race: "halfling", adj: { str: -1, con: 1 }, ranges: [[5,17],[8,19],[10,19],[6,18],[3,18],[5,18]], infra: 60, flat: null,
+                        langs: ["dwarvish"], features: ["Stout: underground detection"] },
+    "tallfellow-dex": { race: "halfling", adj: { str: -1, dex: 1 }, ranges: [[3,17],[8,19],[10,18],[6,18],[7,19],[5,18]], infra: 0, flat: null,
+                        langs: ["elvish"], features: ["Tallfellow: secret door detection", "Tallfellow: woodland surprise bonus"] },
+    "tallfellow-wis": { race: "halfling", adj: { str: -1, wis: 1 }, ranges: [[3,17],[8,19],[10,18],[6,18],[7,19],[5,18]], infra: 0, flat: null,
+                        langs: ["elvish"], features: ["Tallfellow: secret door detection", "Tallfellow: woodland surprise bonus"] },
+    "furchin":        { race: "halfling", adj: { con: 1, dex: 1, str: -1, wis: -1 }, ranges: [[3,17],[8,19],[10,19],[6,18],[3,17],[7,18]], infra: 0, flat: null,
+                        langs: ["dwarvish"], features: ["Furchin: cold-weather survival", "Furchin: cold save bonus", "Furchin: armor class bonus vs larger foes"] },
+    "kender":         { race: "halfling", adj: { dex: 2, str: -1 }, ranges: [[6,16],[8,19],[10,18],[6,18],[3,16],[6,18]], infra: 30, flat: null,
+                        langs: ["krynn common"], features: ["Kender: fearless", "Kender: the taunt", "Kender: natural thieving talent"] },
+  } as const;
+
+  it("every gnome and halfling subrace matches The Complete Book of Gnomes and Halflings (PHBR9)", () => {
+    const subs = items.filter((d) => ["gnome", "halfling"].includes(String(sys(d).raceId)) && (sys(d).subrace as { id?: string } | undefined)?.id);
+    expect(subs.map((d) => (sys(d).subrace as { id: string }).id).sort()).toEqual(Object.keys(SMALL).sort());
+    for (const d of subs) {
+      const id = (sys(d).subrace as { id: keyof typeof SMALL }).id;
+      const want = SMALL[id];
+      const layer = normalizeSubrace(sys(d).subrace as never);
+      const phb = items.find((p) => sys(p).raceId === want.race && !(sys(p).subrace as { id?: string } | undefined)?.id)!;
+      expect(sys(d).raceId, id).toBe(want.race);
+      expect(layer.abilityAdjustments, id).toEqual(want.adj);
+      expect(ABILITY_KEYS.map((k) => layer.abilityRanges![k]), id).toEqual(want.ranges);
+      expect(layer.flatSaveBonus, id).toEqual(want.flat);
+      expect(layer.xpModifierPercent, id).toBe(0);
+      expect(layer.conSaveBonusAdjustment, id).toBe(0);
+      expect(layer.thiefAdjustments, id).toBeNull();
+      expect(sys(d).infravision, id).toBe(want.infra);
+      expect(sys(d).bonusLanguages, id).toEqual(want.langs);
+      expect(sys(d).grantedFeatures, id).toEqual(want.features);
+      expect(sys(d).size, id).toBe("small");
+      expect(sys(d).baseMovement, id).toBe(6);
+      expect(sys(d).description, id).toBe("");
+      // the book gives subraces no limits or class lists of their own: copied from the PHB item
+      expect(sys(d).classLevelLimits, id).toEqual(sys(phb).classLevelLimits);
+      expect(sys(d).allowedClasses, id).toEqual(sys(phb).allowedClasses);
+      expect(sys(d).allowedMulticlass, id).toEqual(sys(phb).allowedMulticlass);
     }
   });
   it("race documents have unique names and 16-character ids", () => {
