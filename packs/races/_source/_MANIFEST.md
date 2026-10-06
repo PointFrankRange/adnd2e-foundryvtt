@@ -159,8 +159,8 @@ book gives subraces no limits or class lists of their own.
 
 | file | name | notes |
 |------|------|-------|
-| `rock-gnome.json` | Rock Gnome | shipped because ranges and infravision differ from the PHB gnome |
-| `deep-gnome.json` | Deep Gnome | infravision 120; flat save bonus +3 all, +2 more vs poison |
+| `rock-gnome.json` | Rock Gnome | shipped because its Intelligence and Wisdom ranges differ from the PHB gnome (Int 7-19 and Wis 3-17 versus 6-18 and 3-18); its infravision (60) is the same |
+| `deep-gnome.json` | Deep Gnome | infravision 120; flat save bonus +3 on all saves (+2 instead vs poison) |
 | `tinker-gnome.json` | Tinker Gnome | |
 | `forest-gnome.json` | Forest Gnome | infravision 0 |
 | `hairfoot.json` | Hairfoot | shipped because ranges and infravision differ from the PHB halfling |
