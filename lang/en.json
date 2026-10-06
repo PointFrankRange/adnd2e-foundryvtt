@@ -214,6 +214,23 @@
           "devotions": "You know more devotions than your level allows.",
           "defenseModes": "You know more defense modes than your level allows."
         },
+        "combat": {
+          "title": "Psionic combat",
+          "defense": "Active defense",
+          "noDefense": "None raised",
+          "raise": "Raise",
+          "drop": "Drop",
+          "contacts": "Contacts",
+          "noContacts": "No contacts",
+          "fullContact": "Full contact",
+          "tangents": "{n} tangent(s)",
+          "payUpkeep": "Pay upkeep",
+          "end": "End",
+          "attack": "Attack",
+          "alreadyRaised": "That defense mode is already raised.",
+          "noUpkeep": "No tangents to maintain.",
+          "tangentsBroken": "Not enough PSPs: your tangents are broken."
+        },
         "noClass": "Only a psionicist can do that.",
         "notEnoughPsp": "Not enough PSPs to use that power.",
         "restBlocked": "You cannot recover PSPs while maintaining a power.",

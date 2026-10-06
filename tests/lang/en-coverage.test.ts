@@ -870,6 +870,7 @@ describe("lang/en.json - SP15 psionics", () => {
       ...["science", "devotion", "defense"].map((k) => `ADND2E.sheet.psionics.kind.${k}`),
       ...["clairsentience", "psychokinesis", "psychometabolism", "psychoportation", "telepathy", "metapsionics"].map((k) => `ADND2E.sheet.psionics.discipline.${k}`),
       ...["disciplines", "sciences", "devotions", "defenseModes"].map((k) => `ADND2E.sheet.psionics.problem.${k}`),
+      ...["title", "defense", "noDefense", "raise", "drop", "contacts", "noContacts", "fullContact", "tangents", "payUpkeep", "end", "attack", "alreadyRaised", "noUpkeep", "tangentsBroken"].map((k) => `ADND2E.sheet.psionics.combat.${k}`),
       ...["discipline-access", "science-limit", "devotion-limit", "defense-limit", "devotion-ratio", "primary-cap", "no-budget", "prerequisite", "min-level"].map((k) => `ADND2E.sheet.psionics.learn.${k}`),
     ];
     for (const key of keys) {

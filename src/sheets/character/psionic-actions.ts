@@ -1,4 +1,5 @@
 import { TEMPLATE_PATH } from "../../constants";
+import type { Contact } from "../../core/psionics/combat";
 import { applyRecovery, canRelearn, checkCost, powerScore, rollPowerCheck, type Discipline, type KnownPower, type PowerKind, type RecoveryActivity } from "../../core/psionics";
 
 /* SP15 Plan A - psionic power actions. Foundry glue only; the rules live in
@@ -22,7 +23,7 @@ export interface PsionicActor {
   system: {
     abilities: Record<string, { score: number }>;
     /** `level` is the derived cache: 0 = no active psionicist class */
-    psionics: { psp: number | null; maintained: { powerId: string }[]; max: number; level: number };
+    psionics: { psp: number | null; maintained: { powerId: string }[]; activeDefense: string; contacts: Contact[]; max: number; level: number };
   };
   update(data: Record<string, unknown>): Promise<unknown>;
 }
@@ -35,12 +36,12 @@ const rollD20: PsionicRoll = async () => {
   return d20.dice[0]?.total ?? d20.total;
 };
 
-const warn = (key: string, data?: Record<string, unknown>): void => {
+export const warn = (key: string, data?: Record<string, unknown>): void => {
   const i18n = game.i18n!;
   ui.notifications?.warn(data ? i18n.format(key, data as Record<string, string>) : i18n.localize(key));
 };
 
-const info = (key: string, data: Record<string, unknown>): void => {
+export const info = (key: string, data: Record<string, unknown> = {}): void => {
   ui.notifications?.info(game.i18n!.format(key, data as Record<string, string>));
 };
 
@@ -52,9 +53,9 @@ export function currentPsp(actor: PsionicActor): number {
 
 const isPsionicist = (actor: PsionicActor): boolean => actor.system.psionics.level > 0;
 
-const powerItems = (actor: PsionicActor): PsionicItem[] => [...actor.items].filter((i) => i.type === "power");
+export const powerItems = (actor: PsionicActor): PsionicItem[] => [...actor.items].filter((i) => i.type === "power");
 
-const findPower = (actor: PsionicActor, id: string): PsionicItem | undefined => powerItems(actor).find((i) => i.id === id);
+export const findPower = (actor: PsionicActor, id: string): PsionicItem | undefined => powerItems(actor).find((i) => i.id === id);
 
 /** The actor's owned powers as the learning rules see them. */
 export function knownPowers(actor: PsionicActor): KnownPower[] {
@@ -68,7 +69,7 @@ export function knownPowers(actor: PsionicActor): KnownPower[] {
 }
 
 /** Refuses (toast) an actor with no active psionicist class (derived psionic level 0). */
-function requirePsionicist(actor: PsionicActor): boolean {
+export function requirePsionicist(actor: PsionicActor): boolean {
   if (isPsionicist(actor)) return true;
   warn("ADND2E.sheet.psionics.noClass");
   return false;

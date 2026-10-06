@@ -205,6 +205,16 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
     psionics: new SchemaField({
       psp: new NumberField({ required: true, nullable: true, integer: true, min: 0, initial: null }),
       maintained: new ArrayField(new SchemaField({ powerId: new StringField({ required: true, blank: false }) }), { required: true, initial: () => [] }),
+      /** SP15 Plan C: the raised defense mode (an owned defense power item id, blank = none) and the attacker's psychic contacts (tangents per target). `contacts` initial MUST be a function (shared-literal gotcha, see kitPowers). */
+      activeDefense: new StringField({ required: true, blank: true, initial: "" }),
+      contacts: new ArrayField(
+        new SchemaField({
+          target: new StringField({ required: true, blank: false }),
+          name: new StringField({ required: true, blank: true, initial: "" }),
+          tangents: new NumberField({ required: true, integer: true, min: 0, max: 3, initial: 0 }),
+        }),
+        { required: true, initial: () => [] },
+      ),
       max: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       level: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
     }),
