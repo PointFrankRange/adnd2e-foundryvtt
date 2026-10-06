@@ -226,7 +226,7 @@
           "science-limit": "You have no science slots left.",
           "devotion-limit": "You have no devotion slots left.",
           "defense-limit": "You have no defense mode slots left.",
-          "devotion-ratio": "A science needs two devotions in its discipline first.",
+          "devotion-ratio": "A science needs twice as many devotions as sciences in its discipline first (two devotions for each science you would then know).",
           "primary-cap": "Outside your primary discipline you must know fewer powers of that kind.",
           "no-budget": "You have no slots left to relearn that power.",
           "prerequisite": "You must know the prerequisite powers first.",
