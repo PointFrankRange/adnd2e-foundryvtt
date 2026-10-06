@@ -417,6 +417,9 @@ export class Adnd2eCharacterSheet extends Base {
   #unlocked = false;
 
   override async _prepareContext(options: unknown): Promise<Record<string, unknown>> {
+    // the Psionics tab vanishes when the psionicist class is removed: do not leave it as the active tab
+    const groups = (this as unknown as { tabGroups?: Record<string, string> }).tabGroups;
+    if (groups && groups.primary === "psionics" && !this.#hasPsionics()) groups.primary = "main";
     const context = await super._prepareContext(options);
     context.adnd2e = buildCharacterSheetContext(this.#buildInput());
     context.editable = this.isEditable;

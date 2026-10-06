@@ -216,6 +216,12 @@ describe("rest", () => {
     expect(updates).toEqual([]);
     expect(warn).toHaveBeenCalledWith("ADND2E.sheet.psionics.restBlocked");
   });
+  it("an orphan maintained entry (its power item is gone) does not block rest and is pruned in the same write", async () => {
+    const { a, updates } = actor({ psp: 10, max: 40, items: [], maintained: ["ghost"] });
+    await rest(a, "sleep", 2);
+    expect(updates).toEqual([{ "system.psionics.psp": 34, "system.psionics.maintained": [] }]);
+    expect(warn).not.toHaveBeenCalled();
+  });
   it("refuses a non-psionicist", async () => {
     const { a, updates } = actor({ classes: [] });
     await rest(a, "sleep", 2);
