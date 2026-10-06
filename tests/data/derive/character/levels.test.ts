@@ -18,4 +18,12 @@ describe("deriveClassLevels", () => {
   it("empty class list -> empty", () => {
     expect(deriveClassLevels([])).toEqual([]);
   });
+
+  it("deriveClassLevels honors a class entry's level limit and beyond-limit multiplier (SP13)", () => {
+    const entry = { chassisId: "fighter" as const, specialistSchool: null, xp: 5_000_000, hpRolls: [] as number[], dualClassState: null, level: 1 };
+    expect(deriveClassLevels([entry])[0]!.level).toBeGreaterThan(15);
+    expect(deriveClassLevels([{ ...entry, levelLimit: 15, beyondMultiplier: 0 }])[0]).toMatchObject({ level: 15, canLevelUp: true });
+    expect(deriveClassLevels([{ ...entry, xp: 2_250_000, levelLimit: 15, beyondMultiplier: 2 }])[0]!.level).toBe(16);
+    expect(deriveClassLevels([{ ...entry, hpRolls: new Array(15).fill(5), levelLimit: 15, beyondMultiplier: 0 }])[0]!.canLevelUp).toBe(false);
+  });
 });

@@ -20,6 +20,10 @@ export interface ClassEntry {
   xpModifierPercent?: number;
   /** SP11 Plan C: the owning kit switches this class's spellcasting off (absent = false) */
   castingDisabled?: boolean;
+  /** SP13: the racial level limit for this class (absent/null = unlimited) */
+  levelLimit?: number | null;
+  /** SP13: 0 = the limit is hard; 2-4 = each level beyond it costs that many times the XP */
+  beyondMultiplier?: number;
 }
 
 export interface MemorizedEntry {

@@ -4,11 +4,13 @@
 import type {
   ActorSnapshot, ClassEntry, DualClassState, EquippedArmor, EquippedShield, MemorizedEntry,
 } from "../derive/character";
-import { combineXpPercent, normalizeSubrace, type RawSubrace } from "../../core/races";
+import { normalizeSubrace, type RawSubrace } from "../../core/races";
+import type { OptionalRules } from "../../core/options";
+import { getOptionalRules } from "../../settings";
 import type { ClassId, Race, ThiefSkill, WizardSchool } from "../../core/types";
 import { toTraitEntries } from "../derive/character";
-import { activeKitEntries } from "../derive/character/kits";
-import { kitXpPercentFor, resolveKitOverrides } from "../../core/kits";
+import { abilityScoresOf, actorLevelRulesFor, activeKitEntries } from "../derive/character/kits";
+import { resolveKitOverrides } from "../../core/kits";
 import { containerAdjustedCarriedWeight } from "../derive/character/container-weight";
 
 interface ClassItemSystem {
@@ -42,7 +44,7 @@ interface ThiefSkillsSystem {
   allocations: readonly { skill: ThiefSkill; allocatedPoints: number }[];
 }
 
-export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
+export function snapshotActor(actor: Actor.Implementation, options: OptionalRules = getOptionalRules()): ActorSnapshot {
   // Ruling S2 shim — named actor Schema types land in Plan 1c.3b; until then the
   // Foundry Actor's `system` is `UnknownSystem`. Task 5 hardens the walk below.
   const doc = actor as unknown as {
@@ -58,11 +60,12 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
   const raceItem = items.find((i) => i.type === "race");
 
   const kitEntries = activeKitEntries(items);
-  const racePercent = raceItem ? normalizeSubrace((raceItem.system as RaceItemSystem).subrace).xpModifierPercent : 0;
+  const scores = abilityScoresOf(doc.system);
   const classes: ClassEntry[] = items
     .filter((i) => i.type === "class")
     .map((i) => {
       const s = i.system as ClassItemSystem;
+      const lr = actorLevelRulesFor(items, s.chassisId, options, scores);
       return {
         chassisId: s.chassisId,
         specialistSchool: s.specialistSchool,
@@ -70,7 +73,9 @@ export function snapshotActor(actor: Actor.Implementation): ActorSnapshot {
         hpRolls: s.hpRolls,
         dualClassState: s.dualClassState,
         level: s.level ?? 1,
-        xpModifierPercent: combineXpPercent(kitXpPercentFor(kitEntries, s.chassisId), racePercent),
+        xpModifierPercent: lr.xpPercent,
+        levelLimit: lr.rules.limit,
+        beyondMultiplier: lr.rules.beyondMultiplier,
         castingDisabled: resolveKitOverrides(kitEntries, s.chassisId).castingDisabled,
       };
     });
