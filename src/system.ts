@@ -15,6 +15,7 @@ import { registerChatListeners } from "./chat/chat-listeners";
 import { promptInitiativeModifier } from "./combat/initiative-modifier-dialog";
 import { registerCastingHooks } from "./hooks/casting-hooks";
 import { registerEquipmentHooks } from "./hooks/equipment-hooks";
+import { registerPsionicHooks } from "./hooks/psionic-hooks";
 import { registerTurningHooks } from "./hooks/turning-hooks";
 import { registerRelayQuery } from "./relay/relay-handler";
 
@@ -144,4 +145,5 @@ Hooks.once("ready", async () => {
   registerCastingHooks();
   registerEquipmentHooks();
   registerTurningHooks();
+  registerPsionicHooks();
 });

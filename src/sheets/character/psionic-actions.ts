@@ -17,6 +17,7 @@ export interface PsionicItem {
 }
 
 export interface PsionicActor {
+  uuid?: string;
   name: string;
   img: string;
   items: Iterable<PsionicItem>;
@@ -31,7 +32,7 @@ export interface PsionicActor {
 export type PsionicRoll = () => Promise<number>;
 
 /** The natural d20 of a fresh roll (the helper turning-actions uses). */
-const rollD20: PsionicRoll = async () => {
+export const rollD20: PsionicRoll = async () => {
   const d20 = await new Roll("1d20").evaluate();
   return d20.dice[0]?.total ?? d20.total;
 };

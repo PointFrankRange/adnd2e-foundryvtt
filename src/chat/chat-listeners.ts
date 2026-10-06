@@ -2,8 +2,9 @@ import { buildDamageCardContext } from "../combat/damage-card";
 import { pickDamageDice } from "../combat/damage-dice";
 import { damageModifiers } from "../core/combat/damage";
 import { damageFormula } from "../core/dice/formula";
-import { TEMPLATE_PATH } from "../constants";
+import { SYSTEM_ID, TEMPLATE_PATH } from "../constants";
 import { requestApply } from "../relay/relay-client";
+import { applyContestTangents, rollDefense, type ContestFlag } from "../sheets/character/psionic-combat";
 import type { EffectTarget } from "../relay/apply-effect";
 
 /* ---------------------------------------------------------------------------
@@ -113,10 +114,36 @@ async function onApplyCastEffect(button: HTMLButtonElement): Promise<void> {
   }
 }
 
+/** Psionic contest cards (SP15 Plan C): the defender's Roll defense button is hidden from
+ *  anyone who is not a GM or an owner of the target actor (rollDefense re-checks and is
+ *  authoritative); the Record tangent button is hidden from non-owners of the attacker. */
+function wirePsionicContest(message: { id: string; getFlag(s: string, k: string): unknown }, html: HTMLElement): void {
+  const contest = message.getFlag(SYSTEM_ID, "psionicContest") as ContestFlag | undefined;
+  if (!contest) return;
+  const isGm = Boolean(game.user?.isGM);
+  const isOwner = (uuid: string): boolean => Boolean((foundry.utils.fromUuidSync(uuid) as { isOwner?: boolean } | null)?.isOwner);
+  const rollButton = html.querySelector<HTMLButtonElement>('[data-action="psionicRollDefense"]');
+  if (rollButton) {
+    if (isGm || isOwner(contest.targetActorUuid)) rollButton.addEventListener("click", () => void rollDefense(message.id));
+    else rollButton.remove();
+  }
+  const recordButton = html.querySelector<HTMLButtonElement>('[data-action="psionicRecordTangent"]');
+  if (recordButton) {
+    if (isGm || isOwner(contest.attackerActorUuid)) {
+      recordButton.addEventListener("click", () => {
+        void applyContestTangents(contest).then((wrote) => {
+          if (!wrote) ui.notifications?.info(game.i18n!.localize("ADND2E.chat.psionicContest.alreadyRecorded"));
+        });
+      });
+    } else recordButton.remove();
+  }
+}
+
 /** Wires the "Roll Damage" / "Apply Damage" buttons on SP3's chat cards. Call
  *  once from the `ready` hook. */
 export function registerChatListeners(): void {
-  Hooks.on("renderChatMessageHTML", (_message: unknown, html: HTMLElement) => {
+  Hooks.on("renderChatMessageHTML", (message: unknown, html: HTMLElement) => {
+    wirePsionicContest(message as { id: string; getFlag(s: string, k: string): unknown }, html);
     html.querySelector<HTMLButtonElement>('[data-action="rollDamage"]')?.addEventListener("click", (ev) => {
       void onRollDamage(ev.currentTarget as HTMLButtonElement);
     });

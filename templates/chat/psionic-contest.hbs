@@ -1,0 +1,34 @@
+<div class="adnd2e chat-card psionic-contest">
+  <header>
+    <img src="{{attackerImg}}" alt="{{attackerName}}">
+    <h3>{{attackerName}} - {{powerName}}</h3>
+  </header>
+  <p class="target">{{localize 'ADND2E.chat.psionicContest.against' target=targetName}}</p>
+  {{#each steps}}
+  <div class="step">
+    {{#if notMade}}
+    <p class="hint">{{n}}. {{localize 'ADND2E.chat.psionicContest.notMade'}}</p>
+    {{else}}
+    <p class="check"><strong>{{n}}. {{localize 'ADND2E.chat.psionicContest.attackRoll'}}:</strong> {{roll}} / {{score}}{{#if ../modifierText}} ({{../modifierText}}){{/if}} - {{localize attackResultKey}}</p>
+    {{#if hasDefenseRoll}}
+    <p class="check"><strong>{{localize 'ADND2E.chat.psionicContest.defenseRoll'}}:</strong> {{defenseRoll}} / {{../defenseScore}} ({{../defenseName}})</p>
+    {{/if}}
+    {{#if resolved}}
+    <p class="result">{{localize winnerKey}} - {{localize reasonKey}}</p>
+    {{/if}}
+    {{/if}}
+  </div>
+  {{/each}}
+  {{#if undefended}}<p class="hint">{{localize 'ADND2E.chat.psionicContest.undefended'}}</p>{{else}}<p class="hint">{{defenseName}} ({{defenseScore}})</p>{{/if}}
+  {{#if pending}}
+  <p class="hint">{{localize 'ADND2E.chat.psionicContest.awaiting'}}</p>
+  <button type="button" data-action="psionicRollDefense">{{localize 'ADND2E.chat.psionicContest.rollDefense'}}</button>
+  {{/if}}
+  <p class="cost">{{localize 'ADND2E.chat.psionicContest.paid'}}: {{paid}} - {{localize 'ADND2E.chat.psionic.remaining'}}: {{remaining}} / {{max}}</p>
+  {{#if showTangents}}
+  <p class="tangents"><strong>{{localize 'ADND2E.chat.psionicContest.tangents'}}:</strong> {{tangentText}}</p>
+  {{/if}}
+  {{#if showRecord}}
+  <button type="button" data-action="psionicRecordTangent">{{localize 'ADND2E.chat.psionicContest.recordTangent'}}</button>
+  {{/if}}
+</div>
