@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_OPTIONAL_RULES } from "../../../src/core/options";
-import { buildCharacterSheetContext } from "../../../src/sheets/character/context";
+import { buildCharacterSheetContext, buildPsionicsView } from "../../../src/sheets/character/context";
 import type {
   CastingStatusInput,
   CharacterSheetInput,
   FeatureItemView,
+  PsionicPowerItem,
   NwpView,
   PhysicalItemView,
   SpellItemView,
@@ -3321,5 +3322,86 @@ describe("buildCharacterSheetContext — subrace layer (SP12 Plan A)", () => {
     expect(feat({ ...(dwarfRaceView as object), subrace: { ...layer, xpModifierPercent: -10 } })).toMatchObject({ racialXpPercent: -10, racialXpLabel: "-10%" });
     expect(feat(dwarfRaceView)).toMatchObject({ racialXpPercent: 0, racialXpLabel: "" });
     expect(feat(null)).toMatchObject({ racialXpPercent: 0, racialXpLabel: "" });
+  });
+});
+
+describe("buildPsionicsView (SP15 Plan A)", () => {
+  const pw = (over: Partial<PsionicPowerItem> & { id: string }): PsionicPowerItem => ({
+    name: over.id, discipline: "telepathy", kind: "devotion", abilityKey: "wis", abilityModifier: -3, initialCost: 5,
+    costNote: "", maintenanceCost: 0, maintenanceUnit: "none", range: "", scoreBonus: 0, ...over,
+  });
+  const base = (over: Record<string, unknown> = {}) => ({
+    psp: null as number | null, max: 73, level: 5, maintained: [] as { powerId: string }[],
+    abilityScores: { wis: 17, con: 16, int: 12 },
+    powers: [
+      pw({ id: "a", discipline: "telepathy", abilityModifier: -3, scoreBonus: 1, maintenanceCost: 2, maintenanceUnit: "round", costNote: "per target", range: "30 yds" }),
+      pw({ id: "b", discipline: "clairsentience", kind: "science", abilityKey: "int", abilityModifier: 0, initialCost: 20 }),
+      pw({ id: "c", discipline: "telepathy", kind: "defense", abilityKey: "con", abilityModifier: 1 }),
+    ],
+    ...over,
+  });
+
+  it("is null without a psionicist (null or absent input)", () => {
+    expect(buildPsionicsView(null)).toBeNull();
+    expect(buildPsionicsView(undefined)).toBeNull();
+  });
+
+  it("full pool when psp is null, the stored value when set, clamped to max", () => {
+    expect(buildPsionicsView(base())!.psp).toBe(73);
+    expect(buildPsionicsView(base({ psp: 40 }))!.psp).toBe(40);
+    expect(buildPsionicsView(base({ psp: 999 }))!.psp).toBe(73);
+  });
+
+  it("scores are ability + modifier + relearn bonus; groups follow discipline order and defense is separate", () => {
+    const v = buildPsionicsView(base())!;
+    expect(v.groups.map((g) => g.discipline)).toEqual(["clairsentience", "telepathy"]);
+    expect(v.groups[1]!.powers.map((p) => [p.id, p.score, p.cost, p.costNote, p.maintenance, p.unit, p.range, p.scoreBonus])).toEqual([
+      ["a", 15, 5, "per target", 2, "round", "30 yds", 1],
+    ]);
+    expect(v.groups[0]!.powers[0]!.score).toBe(12);
+    expect(v.defense.map((p) => [p.id, p.score])).toEqual([["c", 17]]);
+    expect(v.primary).toBe("telepathy");
+    expect(v.level).toBe(5);
+    expect(v.activities).toEqual(["hard", "light", "rest", "sleep"]);
+  });
+
+  it("canUse follows the pool; a missing ability counts as 0", () => {
+    const v = buildPsionicsView(base({ psp: 4, powers: [pw({ id: "x", abilityKey: "zzz", abilityModifier: 2 })] }))!;
+    expect(v.groups[0]!.powers[0]).toMatchObject({ canUse: false, score: 2 });
+  });
+
+  it("joins maintained entries to power names and skips an orphan", () => {
+    const v = buildPsionicsView(base({ maintained: [{ powerId: "a" }, { powerId: "gone" }] }))!;
+    expect(v.maintained).toEqual([{ powerId: "a", name: "a", cost: 2, unit: "round" }]);
+  });
+
+  it("flags every over-budget total and only relearn within budget", () => {
+    const fine = buildPsionicsView(base({ level: 5 }))!;
+    expect(fine.problems).toEqual([]);
+    expect(fine.groups[0]!.powers[0]!.canRelearn).toBe(true);
+    const over = buildPsionicsView({
+      ...base({ level: 1 }),
+      powers: [
+        ...["d1", "d2", "d3", "d4"].map((id, i) => pw({ id, discipline: (["telepathy", "clairsentience", "psychokinesis", "psychometabolism"] as const)[i]! })),
+        pw({ id: "s1", kind: "science" }), pw({ id: "s2", kind: "science" }),
+        pw({ id: "f1", kind: "defense" }), pw({ id: "f2", kind: "defense" }), pw({ id: "f3", kind: "defense" }), pw({ id: "f4", kind: "defense" }),
+      ],
+    })!;
+    expect(over.problems).toEqual([
+      "ADND2E.sheet.psionics.problem.disciplines",
+      "ADND2E.sheet.psionics.problem.sciences",
+      "ADND2E.sheet.psionics.problem.devotions",
+      "ADND2E.sheet.psionics.problem.defenseModes",
+    ]);
+    expect(over.groups.every((g) => g.powers.every((p) => !p.canRelearn))).toBe(true);
+  });
+
+  it("the tab list contains the psionics tab only when the view is non-null", () => {
+    const withTab = buildCharacterSheetContext(input({ psionics: base() }));
+    expect(withTab.tabs.map((t) => t.id)).toEqual(["main", "inventory", "proficiencies", "spells", "psionics", "features", "journal"]);
+    expect(withTab.psionics!.max).toBe(73);
+    const without = buildCharacterSheetContext(input());
+    expect(without.psionics).toBeNull();
+    expect(without.tabs.map((t) => t.id)).not.toContain("psionics");
   });
 });

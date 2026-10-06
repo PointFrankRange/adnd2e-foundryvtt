@@ -14,6 +14,9 @@ import type {
   SaveRow,
   SlotRow,
   SpellItemView,
+  PsionicPowerRow,
+  PsionicsInput,
+  PsionicsView,
   TabDescriptor,
   ThiefSkillRow,
   TraitRow,
@@ -50,6 +53,7 @@ import { classItemLevel } from "../../data/derive/class-item";
 import { CONDITIONS } from "../../conditions";
 import { groupInventory } from "./grouping";
 import { xpToNext } from "./xp";
+import { canRelearn, DISCIPLINES, powerProgression, powerScore, primaryDiscipline, type KnownPower } from "../../core/psionics";
 import { levelRulesOf } from "../../core/classes/level-limits";
 import { buildFavoriteRows, isFavorite, normalizeFavorites, type FavoriteKind } from "../kit/favorites";
 import { lockState } from "../kit/lock";
@@ -97,6 +101,60 @@ const TABS_DEF: readonly TabDescriptor[] = [
   { id: "features", label: "ADND2E.sheet.tabs.features", icon: "fa-solid fa-star" },
   { id: "journal", label: "ADND2E.sheet.tabs.journal", icon: "fa-solid fa-book" },
 ];
+
+const PSIONICS_TAB: TabDescriptor = { id: "psionics", label: "ADND2E.sheet.tabs.psionics", icon: "fa-solid fa-brain" };
+
+const PSIONIC_ACTIVITIES = ["hard", "light", "rest", "sleep"] as const;
+
+/** SP15 Plan A: the Psionics tab view; null when the actor has no psionicist class (input null/absent). */
+export function buildPsionicsView(input: PsionicsInput | null | undefined): PsionicsView | null {
+  if (!input) return null;
+  const psp = Math.min(input.psp ?? input.max, input.max);
+  const known: KnownPower[] = input.powers.map((p) => ({ id: p.id, discipline: p.discipline, kind: p.kind, scoreBonus: p.scoreBonus }));
+  const row = powerProgression(input.level);
+  const toRow = (p: PsionicsInput["powers"][number]): PsionicPowerRow => ({
+    id: p.id,
+    name: p.name,
+    kind: p.kind,
+    score: powerScore(input.abilityScores[p.abilityKey] ?? 0, p.abilityModifier + p.scoreBonus),
+    cost: p.initialCost,
+    costNote: p.costNote,
+    maintenance: p.maintenanceCost,
+    unit: p.maintenanceUnit,
+    range: p.range,
+    scoreBonus: p.scoreBonus,
+    canUse: psp >= p.initialCost,
+    canRelearn: canRelearn(known, p.id, input.level).ok,
+  });
+  const byId = new Map(input.powers.map((p) => [p.id, p]));
+  const maintained = input.maintained.flatMap((m) => {
+    const p = byId.get(m.powerId);
+    return p ? [{ powerId: p.id, name: p.name, cost: p.maintenanceCost, unit: p.maintenanceUnit }] : []; // an orphan entry (its power item is gone) is skipped
+  });
+  const used = (kind: PsionicPowerRow["kind"]): number => known.filter((k) => k.kind === kind).reduce((n, k) => n + 1 + k.scoreBonus, 0);
+  const disciplinesHeld = new Set(known.filter((k) => k.kind !== "defense").map((k) => k.discipline)).size;
+  const problems = [
+    ...(disciplinesHeld > row.disciplines ? ["ADND2E.sheet.psionics.problem.disciplines"] : []),
+    ...(used("science") > row.sciences ? ["ADND2E.sheet.psionics.problem.sciences"] : []),
+    ...(used("devotion") > row.devotions ? ["ADND2E.sheet.psionics.problem.devotions"] : []),
+    ...(used("defense") > row.defenseModes ? ["ADND2E.sheet.psionics.problem.defenseModes"] : []),
+  ];
+  return {
+    psp,
+    max: input.max,
+    level: input.level,
+    row,
+    primary: primaryDiscipline(known),
+    activities: [...PSIONIC_ACTIVITIES],
+    maintained,
+    groups: DISCIPLINES.map((discipline) => ({
+      discipline,
+      powers: input.powers.filter((p) => p.discipline === discipline && p.kind !== "defense").map(toRow),
+    })).filter((g) => g.powers.length > 0),
+    defense: input.powers.filter((p) => p.kind === "defense").map(toRow),
+    problems,
+  };
+}
 
 /** Shape of `input.source._source.system` that the builder actually touches. */
 interface SourceView {
@@ -1134,6 +1192,7 @@ export function buildCharacterSheetContext(input: CharacterSheetInput): Characte
   const skills = buildSkills(input, fav);
   const spells = buildSpells(input, fav);
   const thiefArmorDisabled = skills.thief?.armorDisabled ?? false;
+  const psionics = buildPsionicsView(input.psionics);
 
   return {
     identity: buildIdentity(input),
@@ -1152,7 +1211,8 @@ export function buildCharacterSheetContext(input: CharacterSheetInput): Characte
       detailFields: [...DETAIL_FIELDS],
       showGmNotes: input.perms.isGM,
     },
-    tabs: [...TABS_DEF],
+    tabs: psionics ? [...TABS_DEF.slice(0, 4), PSIONICS_TAB, ...TABS_DEF.slice(4)] : [...TABS_DEF],
+    psionics,
     lock: lockState(input.perms.editable, input.unlocked === true),
     favorites: {
       canFavorite: input.perms.isOwner,

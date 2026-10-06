@@ -26,7 +26,9 @@ import type {
   TraitItemView,
   WeaponProfView,
 } from "./context-types";
-import { validateItemDrop, type DropCheckInput } from "./drop-rules";
+import { checkPowerDrop, validateItemDrop, type DropCheckInput } from "./drop-rules";
+import { endPower, payMaintenance, relearnPower, rest as psionicRest, usePower as usePsionicPower } from "./psionic-actions";
+import type { PsionicPowerItem } from "./context-types";
 import { rollHitPoints } from "./hp-roll";
 import { resetTurnAttempt, turningPanel, turnUndead } from "./turning-actions";
 import { advanceWeaponMastery, allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill } from "./proficiency-actions";
@@ -74,6 +76,8 @@ const Base = HandlebarsApplicationMixin(ActorSheetV2 as never) as unknown as new
     options: unknown,
   ): Promise<Record<string, unknown>>;
   _onDropItem(event: DragEvent, item: Item.Implementation): Promise<unknown>;
+  _configureRenderParts(options: unknown): Record<string, unknown>;
+  _getTabsConfig(group: string): { tabs: { id: string }[] } | null;
   _onRender(context: unknown, options: unknown): Promise<void>;
   // Not awaited by the close process (client/applications/api/application.mjs:1808-1823:
   // `_preClose` is async/awaited; `_onClose` is sync and fired-and-forgotten via `_doEvent`).
@@ -354,6 +358,11 @@ export class Adnd2eCharacterSheet extends Base {
       resetKitPower: Adnd2eCharacterSheet.#onResetKitPower,
       newDayKitPowers: Adnd2eCharacterSheet.#onNewDayKitPowers,
       newEncounterKitPowers: Adnd2eCharacterSheet.#onNewEncounterKitPowers,
+      usePsionicPower: Adnd2eCharacterSheet.#onUsePsionicPower,
+      relearnPsionicPower: Adnd2eCharacterSheet.#onRelearnPsionicPower,
+      psionicRest: Adnd2eCharacterSheet.#onPsionicRest,
+      payPsionicMaintenance: Adnd2eCharacterSheet.#onPayPsionicMaintenance,
+      endPsionicPower: Adnd2eCharacterSheet.#onEndPsionicPower,
     },
   };
 
@@ -365,6 +374,7 @@ export class Adnd2eCharacterSheet extends Base {
     inventory: { template: TP("inventory.hbs"), scrollable: [""] },
     proficiencies: { template: TP("proficiencies.hbs"), scrollable: [""] },
     spells: { template: TP("spells.hbs"), scrollable: [""] },
+    psionics: { template: TP("psionics.hbs"), scrollable: [""] },
     features: { template: TP("features.hbs"), scrollable: [""] },
     journal: { template: TP("journal.hbs"), scrollable: [""] },
   };
@@ -378,11 +388,30 @@ export class Adnd2eCharacterSheet extends Base {
         { id: "inventory", icon: "fa-solid fa-box-open" },
         { id: "proficiencies", icon: "fa-solid fa-hand-fist" },
         { id: "spells", icon: "fa-solid fa-wand-sparkles" },
+        { id: "psionics", icon: "fa-solid fa-brain" },
         { id: "features", icon: "fa-solid fa-star" },
         { id: "journal", icon: "fa-solid fa-book" },
       ],
     },
   };
+
+  /** SP15: the Psionics tab and part exist only for an actor with a psionicist class entry. */
+  #hasPsionics(): boolean {
+    const classes = (this.document as unknown as { system: { classes?: { chassisId: string }[] } }).system.classes ?? [];
+    return classes.some((c) => c.chassisId === "psionicist");
+  }
+
+  override _configureRenderParts(options: unknown): Record<string, unknown> {
+    const parts = super._configureRenderParts(options);
+    if (!this.#hasPsionics()) delete parts.psionics;
+    return parts;
+  }
+
+  override _getTabsConfig(group: string): { tabs: { id: string }[] } | null {
+    const cfg = super._getTabsConfig(group);
+    if (!cfg || this.#hasPsionics()) return cfg;
+    return { ...cfg, tabs: cfg.tabs.filter((t) => t.id !== "psionics") };
+  }
 
   /** sheet redesign R1: the viewer's unlock state — never persisted, opens locked. */
   #unlocked = false;
@@ -518,6 +547,7 @@ export class Adnd2eCharacterSheet extends Base {
     }
 
     const rules = getOptionalRules();
+    const psionicSys = (actor.system as { psionics: { psp: number | null; max: number; level: number; maintained: { powerId: string }[] }; abilities: Record<string, { score: number }> }); 
     const actorStatuses = (this.document as unknown as { statuses: ReadonlySet<string> }).statuses;
     const fatigueTier = [...actorStatuses].map(tierForConditionId).find((t) => t !== null) ?? null;
     return {
@@ -557,6 +587,16 @@ export class Adnd2eCharacterSheet extends Base {
       subAbilityUi: subAbilitiesEnabled(rules),
       castingStatus: readCastingStatus(this.document as never),
       fatigueTier,
+      psionics: this.#hasPsionics()
+        ? {
+            psp: psionicSys.psionics.psp,
+            max: psionicSys.psionics.max,
+            level: psionicSys.psionics.level,
+            maintained: psionicSys.psionics.maintained,
+            abilityScores: Object.fromEntries(Object.entries(psionicSys.abilities).map(([k, v]) => [k, v.score])),
+            powers: items.filter((i) => i.type === "power").map((i) => ({ id: i.id, name: i.name, ...(i.system as Omit<PsionicPowerItem, "id" | "name">) })),
+          }
+        : null,
       unlocked: this.#unlocked,
       favorites: (this.document as unknown as { getFlag(scope: string, key: string): unknown }).getFlag(
         SYSTEM_ID,
@@ -650,6 +690,14 @@ export class Adnd2eCharacterSheet extends Base {
             .map((i) => ({ chassisId: i.system.chassisId ?? "", castingDisabled: resolveKitOverrides(kits, i.system.chassisId ?? "").castingDisabled })),
         )[key],
       };
+    }
+
+    if (dropped.type === "power" && isNewDrop) {
+      const powerVerdict = checkPowerDrop(this.document as never, dropped as never);
+      if (!powerVerdict.ok) {
+        ui.notifications?.warn(game.i18n!.localize(powerVerdict.messageKey));
+        return null;
+      }
     }
 
     const verdict = validateItemDrop({
@@ -1104,6 +1152,33 @@ export class Adnd2eCharacterSheet extends Base {
 
   static async #onResetTurnAttempt(this: Adnd2eCharacterSheet): Promise<void> {
     await resetTurnAttempt(this.document as never);
+  }
+
+  static async #onUsePsionicPower(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const { powerId } = target.dataset;
+    if (powerId && this.isEditable) await usePsionicPower(this.document as never, powerId);
+  }
+
+  static async #onRelearnPsionicPower(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const { powerId } = target.dataset;
+    if (powerId && this.isEditable) await relearnPower(this.document as never, powerId);
+  }
+
+  static async #onPsionicRest(this: Adnd2eCharacterSheet): Promise<void> {
+    if (!this.isEditable) return;
+    const activity = this.element.querySelector<HTMLSelectElement>("[data-psionic-activity]")?.value ?? "rest";
+    const hours = Math.max(0, Math.floor(Number(this.element.querySelector<HTMLInputElement>("[data-psionic-hours]")?.value) || 0));
+    if (hours > 0) await psionicRest(this.document as never, activity as never, hours);
+  }
+
+  static async #onPayPsionicMaintenance(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    // no data-power-id = pay every maintained power
+    if (this.isEditable) await payMaintenance(this.document as never, target.dataset.powerId ?? null);
+  }
+
+  static async #onEndPsionicPower(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const { powerId } = target.dataset;
+    if (powerId && this.isEditable) await endPower(this.document as never, powerId);
   }
 }
 

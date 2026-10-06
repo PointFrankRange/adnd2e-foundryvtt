@@ -13,13 +13,15 @@ import {
 const created: { content: unknown }[] = [];
 const rendered: Record<string, unknown>[] = [];
 let warn: ReturnType<typeof vi.fn>;
+let info: ReturnType<typeof vi.fn>;
 
 beforeEach(() => {
   created.length = 0;
   rendered.length = 0;
   warn = vi.fn();
+  info = vi.fn();
   (globalThis as Record<string, unknown>).game = { i18n: { localize: (k: string) => k, format: (k: string, d: Record<string, string>) => `${k}:${JSON.stringify(d)}` } };
-  (globalThis as Record<string, unknown>).ui = { notifications: { warn } };
+  (globalThis as Record<string, unknown>).ui = { notifications: { warn, info } };
   (globalThis as Record<string, unknown>).ChatMessage = {
     getSpeaker: () => ({ alias: "Tam" }),
     create: async (data: { content: unknown }) => created.push(data),
@@ -163,7 +165,8 @@ describe("relearnPower", () => {
     const { a } = actor({ items: [p], level: 3 });
     await relearnPower(a, "p1");
     expect(p.updates).toEqual([{ "system.scoreBonus": 2 }]);
-    expect(warn).toHaveBeenCalledWith('ADND2E.sheet.psionics.relearned:{"power":"Power p1"}');
+    expect(info).toHaveBeenCalledWith('ADND2E.sheet.psionics.relearned:{"power":"Power p1"}');
+    expect(warn).not.toHaveBeenCalled();
   });
   it("refuses with the learn reason when no budget remains", async () => {
     const p = power("p1");

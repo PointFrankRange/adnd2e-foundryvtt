@@ -12,6 +12,8 @@ const PARTIALS = [
   "actor/pc/partials/pc-main-panels.hbs",
   "actor/pc/partials/pc-proficiency-panels.hbs",
   "actor/pc/partials/pc-feature-panels.hbs",
+  "actor/pc/partials/pc-psionics-panels.hbs",
+  "actor/pc/partials/pc-psionic-power-row.hbs",
   "actor/pc/partials/pc-journal-panels.hbs",
 ];
 

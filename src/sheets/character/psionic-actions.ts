@@ -40,6 +40,10 @@ const warn = (key: string, data?: Record<string, unknown>): void => {
   ui.notifications?.warn(data ? i18n.format(key, data as Record<string, string>) : i18n.localize(key));
 };
 
+const info = (key: string, data: Record<string, unknown>): void => {
+  ui.notifications?.info(game.i18n!.format(key, data as Record<string, string>));
+};
+
 /** The effective current PSP: `psp ?? max`, clamped to the maximum. */
 export function currentPsp(actor: PsionicActor): number {
   const { psp, max } = actor.system.psionics;
@@ -121,18 +125,21 @@ export async function relearnPower(actor: PsionicActor, powerId: string): Promis
     return;
   }
   await power.update?.({ "system.scoreBonus": Number(power.system.scoreBonus ?? 0) + 1 });
-  warn("ADND2E.sheet.psionics.relearned", { power: power.name });
+  info("ADND2E.sheet.psionics.relearned", { power: power.name });
 }
 
-/** Recovers PSPs for `hours` hours of one activity; refused while a power is maintained. */
+/** Recovers PSPs for `hours` hours of one activity; refused while a power is maintained (entries whose power item is gone are pruned, not counted). */
 export async function rest(actor: PsionicActor, activity: RecoveryActivity, hours: number): Promise<void> {
   if (!requirePsionicist(actor)) return;
-  if (actor.system.psionics.maintained.length > 0) {
+  const maintained = actor.system.psionics.maintained;
+  if (maintained.some((m) => findPower(actor, m.powerId))) {
     warn("ADND2E.sheet.psionics.restBlocked");
     return;
   }
-  const next = applyRecovery(currentPsp(actor), actor.system.psionics.max, activity, hours);
-  await actor.update({ "system.psionics.psp": next });
+  const update: Record<string, unknown> = { "system.psionics.psp": applyRecovery(currentPsp(actor), actor.system.psionics.max, activity, hours) };
+  // an entry whose power item was deleted must not block rest: prune it in the same write
+  if (maintained.length > 0) update["system.psionics.maintained"] = [];
+  await actor.update(update);
 }
 
 /** Pays one unit of maintenance for one maintained power (null = every one, in list order); an unaffordable power ends. */

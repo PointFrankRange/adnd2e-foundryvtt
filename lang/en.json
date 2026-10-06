@@ -179,6 +179,39 @@
     },
     "sheet": {
       "psionics": {
+        "title": "Psionics",
+        "psp": "PSPs",
+        "rest": "Rest",
+        "hours": "Hours",
+        "activity": { "hard": "Hard labor", "light": "Light activity", "rest": "Resting", "sleep": "Sleeping" },
+        "maintained": "Maintained powers",
+        "payMaintenance": "Pay",
+        "payAll": "Pay all",
+        "end": "End",
+        "use": "Use",
+        "relearn": "Relearn",
+        "score": "Score",
+        "cost": "Cost",
+        "maintenance": "Maintenance",
+        "primary": "Primary discipline",
+        "defense": "Defense modes",
+        "noPowers": "No powers yet. Drag a power onto the sheet to learn it.",
+        "unit": { "round": "round", "turn": "turn", "hour": "hour" },
+        "kind": { "science": "Science", "devotion": "Devotion", "defense": "Defense" },
+        "discipline": {
+          "clairsentience": "Clairsentience",
+          "psychokinesis": "Psychokinesis",
+          "psychometabolism": "Psychometabolism",
+          "psychoportation": "Psychoportation",
+          "telepathy": "Telepathy",
+          "metapsionics": "Metapsionics"
+        },
+        "problem": {
+          "disciplines": "You know powers from more disciplines than your level allows.",
+          "sciences": "You know more sciences than your level allows.",
+          "devotions": "You know more devotions than your level allows.",
+          "defenseModes": "You know more defense modes than your level allows."
+        },
         "noClass": "Only a psionicist can do that.",
         "notEnoughPsp": "Not enough PSPs to use that power.",
         "restBlocked": "You cannot recover PSPs while maintaining a power.",
@@ -326,6 +359,7 @@
         "biography": "Biography",
         "proficiencies": "Proficiencies",
         "journal": "Journal",
+        "psionics": "Psionics",
         "statBlock": "Stat Block",
         "gear": "Gear",
         "notes": "Notes"
