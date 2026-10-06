@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrAnimatesh122",
+  "_key": "!items!kPwrAnimatesh122",
+  "name": "Animate Shadow",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets a shadow move and behave independently of whatever casts it, useful only as a distraction.",
+    "discipline": "psychokinesis",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 7,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "40 yds.",
+    "preparation": "0",
+    "areaOfEffect": "100 sq. ft.",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

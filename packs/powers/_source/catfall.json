@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrCatfall00144",
+  "_key": "!items!kPwrCatfall00144",
+  "name": "Catfall",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist twists like a cat to land gracefully, halving fall damage and leaping safely from moderate heights.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "dex",
+    "abilityModifier": -2,
+    "initialCost": 4,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

@@ -17,6 +17,8 @@
     "range": "infinite",
     "preparation": "0",
     "areaOfEffect": "personal",
-    "scoreBonus": 0
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
   }
 }

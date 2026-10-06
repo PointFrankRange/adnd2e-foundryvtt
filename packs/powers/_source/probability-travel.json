@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrProbabili164",
+  "_key": "!items!kPwrProbabili164",
+  "name": "Probability Travel",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets the user wander across the planes, bodily and with willing companions, to reach other worlds.",
+    "discipline": "psychoportation",
+    "kind": "science",
+    "abilityKey": "int",
+    "abilityModifier": 0,
+    "initialCost": 20,
+    "costNote": "",
+    "maintenanceCost": 8,
+    "maintenanceUnit": "hour",
+    "range": "unlimited",
+    "preparation": "2",
+    "areaOfEffect": "individual +",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

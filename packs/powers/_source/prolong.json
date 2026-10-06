@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrProlong00223",
+  "_key": "!items!kPwrProlong00223",
+  "name": "Prolong",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Stretches the range and area of the user's other powers while it is maintained.",
+    "discipline": "metapsionics",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -4,
+    "initialCost": 5,
+    "costNote": "",
+    "maintenanceCost": 2,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 4
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrIncarnati191",
+  "_key": "!items!kPwrIncarnati191",
+  "name": "Incarnation Awareness",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Explores a subject's past lives, one incarnation per round.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 13,
+    "maintenanceUnit": "round",
+    "range": "unlim.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

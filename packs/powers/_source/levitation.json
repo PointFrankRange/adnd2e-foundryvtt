@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrLevitatio129",
+  "_key": "!items!kPwrLevitatio129",
+  "name": "Levitation",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lifts the user slowly into the air and lets him hover, though it grants no sideways movement of its own.",
+    "discipline": "psychokinesis",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 12,
+    "costNote": "",
+    "maintenanceCost": 2,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis"
+    ],
+    "minLevel": 0
+  }
+}

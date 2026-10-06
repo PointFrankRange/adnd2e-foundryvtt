@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrDetonate0117",
+  "_key": "!items!kPwrDetonate0117",
+  "name": "Detonate",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Violently overheats the molecules of an item until it bursts apart and hurts those nearby.",
+    "discipline": "psychokinesis",
+    "kind": "science",
+    "abilityKey": "con",
+    "abilityModifier": -3,
+    "initialCost": 18,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "60 yds.",
+    "preparation": "0",
+    "areaOfEffect": "1 item, 8 cu. ft.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis",
+      "Molecular Agitation"
+    ],
+    "minLevel": 0
+  }
+}

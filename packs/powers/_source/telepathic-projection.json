@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrTelepathi209",
+  "_key": "!items!kPwrTelepathi209",
+  "name": "Telepathic Projection",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Sends the psionicist's emotions to everyone contacted within a small area, nudging their moods.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -2,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "unlim.",
+    "preparation": "1",
+    "areaOfEffect": "10-yd. diam",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

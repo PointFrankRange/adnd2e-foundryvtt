@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrImmovabil157",
+  "_key": "!items!kPwrImmovabil157",
+  "name": "Immovability",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist anchors himself to the fabric of the universe so that only overwhelming force can shift him.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -5,
+    "initialCost": 9,
+    "costNote": "",
+    "maintenanceCost": 6,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrSharestre161",
+  "_key": "!items!kPwrSharestre161",
+  "name": "Share Strength",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist lends his own Strength points to another character at a two-for-one cost to himself.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -4,
+    "initialCost": 6,
+    "costNote": "",
+    "maintenanceCost": 2,
+    "maintenanceUnit": "round",
+    "range": "touch",
+    "preparation": "0",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

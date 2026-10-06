@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrAbsorbdis139",
+  "_key": "!items!kPwrAbsorbdis139",
+  "name": "Absorb Disease",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist draws a nonmagical disease out of another person and into his own body.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -3,
+    "initialCost": 12,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "touch",
+    "preparation": "0",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

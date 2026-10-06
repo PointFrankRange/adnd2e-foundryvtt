@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrStasisfie229",
+  "_key": "!items!kPwrStasisfie229",
+  "name": "Stasis Field",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Slows time to a crawl inside a bubble around the user and shuts down energy effects within it.",
+    "discipline": "metapsionics",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -3,
+    "initialCost": 20,
+    "costNote": "maint. 20/rnd. or 1/rnd.",
+    "maintenanceCost": 20,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "3",
+    "areaOfEffect": "max. 1 yd./level",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 8
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrConvergen218",
+  "_key": "!items!kPwrConvergen218",
+  "name": "Convergence",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Links several psionicists into one shared mind that pools their strength and powers.",
+    "discipline": "metapsionics",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": 0,
+    "initialCost": 8,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "10 yds.",
+    "preparation": "1",
+    "areaOfEffect": "10 yds.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Contact"
+    ],
+    "minLevel": 4
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrRetrospec227",
+  "_key": "!items!kPwrRetrospec227",
+  "name": "Retrospection",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets a group of linked minds recall the past by tapping the memories others have left behind.",
+    "discipline": "metapsionics",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 120,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "10",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Convergence"
+    ],
+    "minLevel": 7
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrFalsesens189",
+  "_key": "!items!kPwrFalsesens189",
+  "name": "False Sensory Input",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Feeds a victim distorted sights, sounds, tastes or feelings that stay close to the real thing.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": -3,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "unlim.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

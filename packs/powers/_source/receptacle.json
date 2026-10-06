@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrReceptacl226",
+  "_key": "!items!kPwrReceptacl226",
+  "name": "Receptacle",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Stores psionic strength in a prepared vessel or gem to be drawn on later; the book also allows a prepared valuable gem in place of the prerequisite.",
+    "discipline": "metapsionics",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -5,
+    "initialCost": 0,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "touch",
+    "preparation": "1 rnd./point",
+    "areaOfEffect": "1 item",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Empower"
+    ],
+    "minLevel": 0
+  }
+}

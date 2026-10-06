@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrControlfl123",
+  "_key": "!items!kPwrControlfl123",
+  "name": "Control Flames",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Enlarges, shrinks, strengthens, weakens or even steers an ordinary fire.",
+    "discipline": "psychokinesis",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -1,
+    "initialCost": 6,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "40 yds.",
+    "preparation": "0",
+    "areaOfEffect": "10 sq. ft",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis"
+    ],
+    "minLevel": 0
+  }
+}

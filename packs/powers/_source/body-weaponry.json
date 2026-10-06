@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrBodyweapo143",
+  "_key": "!items!kPwrBodyweapo143",
+  "name": "Body Weaponry",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist turns one arm into a weapon of wood or metal that behaves like a normal weapon and cannot be dropped.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -3,
+    "initialCost": 9,
+    "costNote": "",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

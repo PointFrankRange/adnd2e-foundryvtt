@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrPsychicim201",
+  "_key": "!items!kPwrPsychicim201",
+  "name": "Psychic Impersonation",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Copies another being's aura and thought patterns so the psionicist reads as that person to psionics.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": 0,
+    "initialCost": 10,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "hour",
+    "range": "0",
+    "preparation": "1 turn",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Probe"
+    ],
+    "minLevel": 0
+  }
+}

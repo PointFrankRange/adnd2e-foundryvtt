@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrMolecular130",
+  "_key": "!items!kPwrMolecular130",
+  "name": "Molecular Agitation",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Excites the molecules in an item so that it grows hot, scorches, ignites and eventually melts.",
+    "discipline": "psychokinesis",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": 0,
+    "initialCost": 7,
+    "costNote": "",
+    "maintenanceCost": 6,
+    "maintenanceUnit": "round",
+    "range": "40 yds.",
+    "preparation": "0",
+    "areaOfEffect": "1 item, 20 lbs.",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

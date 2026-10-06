@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrHeightene156",
+  "_key": "!items!kPwrHeightene156",
+  "name": "Heightened Senses",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist sharpens all five senses, letting him spot hidden thieves, track by scent and see or hear much farther.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": 0,
+    "initialCost": 5,
+    "costNote": "",
+    "maintenanceCost": 1,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

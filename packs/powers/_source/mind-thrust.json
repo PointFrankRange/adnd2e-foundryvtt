@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrMindthrus197",
+  "_key": "!items!kPwrMindthrus197",
+  "name": "Mind Thrust",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Stabs at a contacted mind to short out one of its psionic powers for a time.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -2,
+    "initialCost": 2,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "30/60/90 yds.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrSynaptics207",
+  "_key": "!items!kPwrSynaptics207",
+  "name": "Synaptic Static",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Fills an area with mental interference that can block other psionic activity.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": -4,
+    "initialCost": 15,
+    "costNote": "",
+    "maintenanceCost": 10,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "20/50/90 yds.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink"
+    ],
+    "minLevel": 0
+  }
+}

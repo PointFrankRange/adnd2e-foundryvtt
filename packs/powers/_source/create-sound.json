@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrCreatesou127",
+  "_key": "!items!kPwrCreatesou127",
+  "name": "Create Sound",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Produces sound out of silence from any chosen point, though it can never carry a magical effect.",
+    "discipline": "psychokinesis",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": -2,
+    "initialCost": 8,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "100 yds.",
+    "preparation": "0",
+    "areaOfEffect": "na",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis",
+      "Control Sound"
+    ],
+    "minLevel": 0
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrSeesound0114",
+  "_key": "!items!kPwrSeesound0114",
+  "name": "See Sound",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets the user perceive surroundings through sound waves, so darkness does not hinder the user.",
+    "discipline": "clairsentience",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 6,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "special",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

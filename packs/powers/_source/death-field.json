@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrDeathfiel134",
+  "_key": "!items!kPwrDeathfiel134",
+  "name": "Death Field",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist sacrifices hit points to blast a wide zone in which other living things lose the same amount unless they save.",
+    "discipline": "psychometabolism",
+    "kind": "science",
+    "abilityKey": "con",
+    "abilityModifier": -8,
+    "initialCost": 40,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "3",
+    "areaOfEffect": "20-yd. rad.",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

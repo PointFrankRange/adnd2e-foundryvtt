@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrSpiritsen115",
+  "_key": "!items!kPwrSpiritsen115",
+  "name": "Spirit Sense",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Warns the user of ghosts and similar spirits within a short radius.",
+    "discipline": "clairsentience",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 10,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "15-yd. rad.",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

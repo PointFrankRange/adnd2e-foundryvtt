@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrExpansion153",
+  "_key": "!items!kPwrExpansion153",
+  "name": "Expansion",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist enlarges his body along any dimension, growing by a fraction of his size each round up to a maximum.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -2,
+    "initialCost": 6,
+    "costNote": "",
+    "maintenanceCost": 1,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

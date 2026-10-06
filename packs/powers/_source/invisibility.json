@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrInvisibil194",
+  "_key": "!items!kPwrInvisibil194",
+  "name": "Invisibility",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Makes the psionicist seem invisible to the minds of selected creatures.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": -5,
+    "initialCost": 0,
+    "costNote": "contact; maint. per creature",
+    "maintenanceCost": 2,
+    "maintenanceUnit": "round",
+    "range": "100 yds.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrEsp000000188",
+  "_key": "!items!kPwrEsp000000188",
+  "name": "ESP",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Reads the surface thoughts of a contacted mind.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 6,
+    "maintenanceUnit": "round",
+    "range": "unlim.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

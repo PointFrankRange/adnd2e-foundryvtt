@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrSensitivi105",
+  "_key": "!items!kPwrSensitivi105",
+  "name": "Sensitivity to Psychic Impressions",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets the user sense the emotional residue of powerful past events that occurred in the nearby area.",
+    "discipline": "clairsentience",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 12,
+    "costNote": "",
+    "maintenanceCost": 2,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "2",
+    "areaOfEffect": "20-yd. rad.",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

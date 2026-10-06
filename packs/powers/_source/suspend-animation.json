@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrSuspendan162",
+  "_key": "!items!kPwrSuspendan162",
+  "name": "Suspend Animation",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist drops into a deathlike stasis for a span of weeks, and can place a willing ally in the same state.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -3,
+    "initialCost": 12,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0/touch",
+    "preparation": "5",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

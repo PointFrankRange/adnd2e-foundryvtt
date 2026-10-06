@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrInertialb128",
+  "_key": "!items!kPwrInertialb128",
+  "name": "Inertial Barrier",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Wraps the user and nearby allies in a cushioning bubble that absorbs the force of many missiles and impacts.",
+    "discipline": "psychokinesis",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -3,
+    "initialCost": 7,
+    "costNote": "",
+    "maintenanceCost": 5,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "3-yd. diam.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis"
+    ],
+    "minLevel": 0
+  }
+}

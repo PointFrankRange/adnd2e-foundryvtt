@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrSplitpers215",
+  "_key": "!items!kPwrSplitpers215",
+  "name": "Split Personality",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Divides the user's mind in two so it can pursue separate mental tasks at once.",
+    "discipline": "metapsionics",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -5,
+    "initialCost": 40,
+    "costNote": "",
+    "maintenanceCost": 6,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "1",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Psychic Surgery"
+    ],
+    "minLevel": 10
+  }
+}

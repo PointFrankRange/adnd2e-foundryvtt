@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrPrecognit104",
+  "_key": "!items!kPwrPrecognit104",
+  "name": "Precognition",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Shows the user the likely outcome of a described course of action, leaving the user drained afterward.",
+    "discipline": "clairsentience",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -5,
+    "initialCost": 24,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "5",
+    "areaOfEffect": "na",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

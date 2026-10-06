@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrLendhealt158",
+  "_key": "!items!kPwrLendhealt158",
+  "name": "Lend Health",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist transfers his own hit points to a touched person to heal them.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -1,
+    "initialCost": 4,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "touch",
+    "preparation": "0",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

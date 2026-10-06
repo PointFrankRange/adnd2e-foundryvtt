@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrMolecular131",
+  "_key": "!items!kPwrMolecular131",
+  "name": "Molecular Manipulation",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Weakens the bonds within a small flat section of an object so that it snaps under stress.",
+    "discipline": "psychokinesis",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": -3,
+    "initialCost": 6,
+    "costNote": "",
+    "maintenanceCost": 5,
+    "maintenanceUnit": "round",
+    "range": "15 yds.",
+    "preparation": "1",
+    "areaOfEffect": "2 sq. in.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis"
+    ],
+    "minLevel": 0
+  }
+}

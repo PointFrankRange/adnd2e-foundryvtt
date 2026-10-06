@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrAnimalaff133",
+  "_key": "!items!kPwrAnimalaff133",
+  "name": "Animal Affinity",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist borrows one trait of a particular animal, fixed by his aura, for as long as he sustains the power.",
+    "discipline": "psychometabolism",
+    "kind": "science",
+    "abilityKey": "con",
+    "abilityModifier": -4,
+    "initialCost": 15,
+    "costNote": "",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

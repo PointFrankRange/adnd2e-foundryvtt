@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrFeelsound108",
+  "_key": "!items!kPwrFeelsound108",
+  "name": "Feel Sound",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets the user sense sound through the body, which keeps working when the ears are disabled and helps against sonic attacks.",
+    "discipline": "clairsentience",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 5,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "special",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

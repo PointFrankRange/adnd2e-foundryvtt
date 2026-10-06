@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrAwe000000183",
+  "_key": "!items!kPwrAwe000000183",
+  "name": "Awe",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Cows everyone nearby into respectful fear of the psionicist's mental might.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "cha",
+    "abilityModifier": -2,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "20 yds.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

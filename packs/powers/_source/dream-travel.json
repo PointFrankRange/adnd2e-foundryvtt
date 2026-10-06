@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrDreamtrav168",
+  "_key": "!items!kPwrDreamtrav168",
+  "name": "Dream Travel",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Carries the sleeping user, and optionally passengers, to a faraway place that is reached by waking there.",
+    "discipline": "psychoportation",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 1,
+    "costNote": "1/25 miles",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "500 mi.",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

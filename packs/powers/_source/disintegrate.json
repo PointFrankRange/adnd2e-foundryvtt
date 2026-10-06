@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrDisintegr118",
+  "_key": "!items!kPwrDisintegr118",
+  "name": "Disintegrate",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Reduces a target item or creature to scattered microscopic dust unless it resists the effect.",
+    "discipline": "psychokinesis",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 40,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "50 yds.",
+    "preparation": "0",
+    "areaOfEffect": "1 item, 8 cu. ft.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Telekinesis",
+      "Soften"
+    ],
+    "minLevel": 0
+  }
+}

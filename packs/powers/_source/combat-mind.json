@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrCombatmin107",
+  "_key": "!items!kPwrCombatmin107",
+  "name": "Combat Mind",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Sharpens the user's grasp of enemy tactics so the user's side acts sooner in combat.",
+    "discipline": "clairsentience",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": -4,
+    "initialCost": 5,
+    "costNote": "",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

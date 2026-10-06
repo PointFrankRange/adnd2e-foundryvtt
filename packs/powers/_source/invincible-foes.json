@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrInvincibl193",
+  "_key": "!items!kPwrInvincibl193",
+  "name": "Invincible Foes",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Convinces a victim that any blow against them is crippling or fatal.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 5,
+    "maintenanceUnit": "round",
+    "range": "unlim.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

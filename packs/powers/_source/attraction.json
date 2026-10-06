@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrAttractio181",
+  "_key": "!items!kPwrAttractio181",
+  "name": "Attraction",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Fills a victim with a compelling urge to approach a chosen person, thing or event.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 8,
+    "maintenanceUnit": "round",
+    "range": "200 yds.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

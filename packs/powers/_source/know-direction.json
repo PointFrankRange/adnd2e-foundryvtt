@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrKnowdirec110",
+  "_key": "!items!kPwrKnowdirec110",
+  "name": "Know Direction",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Tells the user which way is north.",
+    "discipline": "clairsentience",
+    "kind": "devotion",
+    "abilityKey": "int",
+    "abilityModifier": 0,
+    "initialCost": 1,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "0",
+    "preparation": "0",
+    "areaOfEffect": "personal",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

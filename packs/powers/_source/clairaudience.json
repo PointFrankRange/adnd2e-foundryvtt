@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrClairaudi102",
+  "_key": "!items!kPwrClairaudi102",
+  "name": "Clairaudience",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Lets the user hear what could be heard from a chosen distant spot, with accuracy dropping as the distance grows.",
+    "discipline": "clairsentience",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 6,
+    "costNote": "",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "round",
+    "range": "unlim.",
+    "preparation": "0",
+    "areaOfEffect": "special",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

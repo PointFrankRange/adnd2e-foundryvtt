@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrCausedeca145",
+  "_key": "!items!kPwrCausedeca145",
+  "name": "Cause Decay",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist's touch rusts, rots or crumbles an inanimate object unless it saves.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -2,
+    "initialCost": 4,
+    "costNote": "",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "touch",
+    "preparation": "0",
+    "areaOfEffect": "60 lbs.",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrMindlink0176",
+  "_key": "!items!kPwrMindlink0176",
+  "name": "Mindlink",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Opens a wordless two-way channel of thought with an intelligent creature that has been contacted.",
+    "discipline": "telepathy",
+    "kind": "science",
+    "abilityKey": "wis",
+    "abilityModifier": -5,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 8,
+    "maintenanceUnit": "round",
+    "range": "unlim.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

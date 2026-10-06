@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrPsionicin224",
+  "_key": "!items!kPwrPsionicin224",
+  "name": "Psionic Inflation",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Raises a bubble of psionic noise around the user that makes all nearby psionic activity cost far more.",
+    "discipline": "metapsionics",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -5,
+    "initialCost": 20,
+    "costNote": "",
+    "maintenanceCost": 3,
+    "maintenanceUnit": "round",
+    "range": "0",
+    "preparation": "1",
+    "areaOfEffect": "101 ft. rad.",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 3
+  }
+}

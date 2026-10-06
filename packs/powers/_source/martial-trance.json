@@ -17,6 +17,8 @@
     "range": "0",
     "preparation": "1",
     "areaOfEffect": "personal",
-    "scoreBonus": 0
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 3
   }
 }

@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrAversion0182",
+  "_key": "!items!kPwrAversion0182",
+  "name": "Aversion",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Makes a victim shun a chosen person, place or thing, keeping well away from it.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 8,
+    "maintenanceUnit": "turn",
+    "range": "200 yds.",
+    "preparation": "0",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

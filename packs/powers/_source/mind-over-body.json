@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrMindoverb159",
+  "_key": "!items!kPwrMindoverb159",
+  "name": "Mind Over Body",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "The psionicist suppresses his need for food, water and sleep in exchange for an hour of meditation each day.",
+    "discipline": "psychometabolism",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -3,
+    "initialCost": 0,
+    "costNote": "none; maint. 10/day",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "touch",
+    "preparation": "0",
+    "areaOfEffect": "individual",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}

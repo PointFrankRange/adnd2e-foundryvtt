@@ -1,0 +1,26 @@
+{
+  "_id": "kPwrPsychicdr225",
+  "_key": "!items!kPwrPsychicdr225",
+  "name": "Psychic Drain",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Siphons psionic energy from sleeping victims to power the user's own abilities.",
+    "discipline": "metapsionics",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -6,
+    "initialCost": 10,
+    "costNote": "10/person + contact; maint. none",
+    "maintenanceCost": 0,
+    "maintenanceUnit": "none",
+    "range": "30 yds.",
+    "preparation": "0",
+    "areaOfEffect": "up to 6 minds",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Contact"
+    ],
+    "minLevel": 6
+  }
+}

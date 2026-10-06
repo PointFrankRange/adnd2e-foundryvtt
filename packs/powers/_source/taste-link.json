@@ -1,0 +1,27 @@
+{
+  "_id": "kPwrTastelink208",
+  "_key": "!items!kPwrTastelink208",
+  "name": "Taste Link",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Shares the flavor senses of a contacted creature with the psionicist.",
+    "discipline": "telepathy",
+    "kind": "devotion",
+    "abilityKey": "con",
+    "abilityModifier": -2,
+    "initialCost": 0,
+    "costNote": "contact",
+    "maintenanceCost": 4,
+    "maintenanceUnit": "turn",
+    "range": "unlim.",
+    "preparation": "1",
+    "areaOfEffect": "individ.",
+    "scoreBonus": 0,
+    "prerequisites": [
+      "Mindlink",
+      "Contact"
+    ],
+    "minLevel": 0
+  }
+}

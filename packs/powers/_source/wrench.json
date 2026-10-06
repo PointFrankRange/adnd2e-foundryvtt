@@ -1,0 +1,24 @@
+{
+  "_id": "kPwrWrench000230",
+  "_key": "!items!kPwrWrench000230",
+  "name": "Wrench",
+  "type": "power",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "description": "Forces a creature that lives on two planes entirely onto one of them.",
+    "discipline": "metapsionics",
+    "kind": "devotion",
+    "abilityKey": "wis",
+    "abilityModifier": -4,
+    "initialCost": 15,
+    "costNote": "",
+    "maintenanceCost": 8,
+    "maintenanceUnit": "round",
+    "range": "30 yds.",
+    "preparation": "0",
+    "areaOfEffect": "1 undead",
+    "scoreBonus": 0,
+    "prerequisites": [],
+    "minLevel": 0
+  }
+}
