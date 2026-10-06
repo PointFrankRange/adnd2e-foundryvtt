@@ -3280,7 +3280,7 @@ describe("buildCharacterSheetContext — subrace layer (SP12 Plan A)", () => {
     id: "c1", name: "Thief", img: "", chassisId: "thief", hitDie: 6,
     xp: 0, level: 1, canLevelUp: false, dualClassState: null, specialistSchool: null,
   };
-  const baseLayer = { id: "x", abilityAdjustments: null, abilityRanges: null, thiefAdjustments: null, conSaveBonusAdjustment: 0, xpModifierPercent: 0 };
+  const baseLayer = { id: "x", abilityAdjustments: null, abilityRanges: null, thiefAdjustments: null, conSaveBonusAdjustment: 0, xpModifierPercent: 0, flatSaveBonus: null };
 
   it("the racial ability delta uses the subrace layer's adjustments (SP12 Plan A)", () => {
     const deepLayer = { ...baseLayer, id: "deep-dwarf", abilityAdjustments: { con: 2, cha: -2 }, conSaveBonusAdjustment: 1, xpModifierPercent: 10 };

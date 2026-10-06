@@ -375,7 +375,7 @@ describe("deriveCharacter — subrace layer (SP12 Plan A)", () => {
   const dwarfFighter = { ...base, race: "dwarf" as const, classes: [{ ...fighterClass, level: 3, xp: 4000 }], abilities: { ...base.abilities, con: 15 } };
   const deepLayer = {
     id: "deep-dwarf", abilityAdjustments: { con: 2, cha: -2 }, abilityRanges: null, thiefAdjustments: null,
-    conSaveBonusAdjustment: 1, xpModifierPercent: 10,
+    conSaveBonusAdjustment: 1, xpModifierPercent: 10, flatSaveBonus: null,
   };
   it("a deep-dwarf layer adds +1 to the Constitution save modifier of the qualifying saves", () => {
     const plain = deriveCharacter(dwarfFighter, DEFAULT_OPTIONAL_RULES);
@@ -389,5 +389,25 @@ describe("deriveCharacter — subrace layer (SP12 Plan A)", () => {
     expect(deriveCharacter({ ...dwarfFighter, raceLayer: null }, DEFAULT_OPTIONAL_RULES)).toEqual(plain);
     expect(deriveCharacter({ ...dwarfFighter, raceLayer: normalizeSubrace({}) }, DEFAULT_OPTIONAL_RULES)).toEqual(plain);
     expect(deriveCharacter({ ...dwarfFighter }, DEFAULT_OPTIONAL_RULES)).toEqual(plain);
+  });
+  it("a Deep Gnome layer gives +3 on every save; a Rock Gnome keeps the Constitution bonus (SP12 Plan C)", () => {
+    const gnomeFighter = { ...base, race: "gnome" as const, classes: [{ ...fighterClass, level: 3, xp: 4000 }], abilities: { ...base.abilities, con: 15 } };
+    const noLayer = { id: "", abilityAdjustments: null, abilityRanges: null, thiefAdjustments: null, conSaveBonusAdjustment: 0, xpModifierPercent: 0, flatSaveBonus: null };
+    const rock = deriveCharacter({ ...gnomeFighter, raceLayer: noLayer }, DEFAULT_OPTIONAL_RULES);
+    const deep = deriveCharacter({ ...gnomeFighter, raceLayer: { ...noLayer, id: "deep-gnome", flatSaveBonus: { all: 3, poison: 2 } } }, DEFAULT_OPTIONAL_RULES);
+    expect(rock.saves!.rsw.rollModifier).toBe(4);
+    expect(rock.saves!.pp.rollModifier).toBe(0);
+    for (const category of ["ppd", "rsw", "pp", "bw", "spell"] as const) expect(deep.saves![category].rollModifier, category).toBe(3);
+    expect(deriveCharacter({ ...gnomeFighter, raceLayer: null }, DEFAULT_OPTIONAL_RULES)).toEqual(rock);
+  });
+  it("the flat save bonus reaches the multiclass saves too (SP12 Plan C)", () => {
+    const multi: ActorSnapshot = { ...base, race: "gnome", abilities: { ...base.abilities, con: 15 }, classes: [
+      { chassisId: "fighter", specialistSchool: null, xp: 16000, hpRolls: [10, 9, 8, 10, 7], dualClassState: null, level: 5 },
+      { chassisId: "mage", specialistSchool: null, xp: 4000, hpRolls: [4, 3, 4], dualClassState: null, level: 3 },
+    ] };
+    const noLayer = { id: "", abilityAdjustments: null, abilityRanges: null, thiefAdjustments: null, conSaveBonusAdjustment: 0, xpModifierPercent: 0, flatSaveBonus: null };
+    const d = deriveCharacter({ ...multi, raceLayer: { ...noLayer, id: "deep-gnome", flatSaveBonus: { all: 3, poison: 2 } } }, DEFAULT_OPTIONAL_RULES);
+    expect(d.multiclass.mode).toBe("multiclass");
+    for (const category of ["ppd", "rsw", "pp", "bw", "spell"] as const) expect(d.saves![category].rollModifier, category).toBe(3);
   });
 });
