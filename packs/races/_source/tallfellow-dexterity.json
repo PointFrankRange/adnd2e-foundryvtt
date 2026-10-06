@@ -1,7 +1,7 @@
 {
   "_id": "kHalfTallDex0001",
   "_key": "!items!kHalfTallDex0001",
-  "name": "Tallfellow (Dexterity)",
+  "name": "Halfling, Tallfellow (Dexterity)",
   "type": "race",
   "img": "icons/svg/house.svg",
   "system": {
@@ -45,6 +45,7 @@
     ],
     "subrace": {
       "id": "tallfellow-dex",
+      "displayName": "Tallfellow (Dexterity)",
       "abilityAdjustments": {
         "str": -1,
         "dex": 1,

@@ -1,7 +1,7 @@
 {
   "_id": "kElfAquatic00001",
   "_key": "!items!kElfAquatic00001",
-  "name": "Aquatic Elf",
+  "name": "Elf, Aquatic",
   "type": "race",
   "img": "icons/svg/oak.svg",
   "system": {
@@ -59,6 +59,7 @@
     ],
     "subrace": {
       "id": "aquatic-elf",
+      "displayName": "Aquatic Elf",
       "abilityAdjustments": {
         "str": 0,
         "dex": 1,
