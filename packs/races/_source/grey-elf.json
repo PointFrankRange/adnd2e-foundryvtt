@@ -1,0 +1,94 @@
+{
+  "_id": "kElfGrey00000001",
+  "_key": "!items!kElfGrey00000001",
+  "name": "Grey Elf",
+  "type": "race",
+  "img": "icons/svg/oak.svg",
+  "system": {
+    "description": "",
+    "raceId": "elf",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 60,
+    "classLevelLimits": {
+      "cleric": 12,
+      "fighter": 12,
+      "mage": 15,
+      "thief": 12,
+      "ranger": 15
+    },
+    "allowedClasses": [
+      "cleric",
+      "fighter",
+      "mage",
+      "thief",
+      "ranger"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "mage"
+      ],
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "mage",
+        "thief"
+      ],
+      [
+        "fighter",
+        "mage",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "any"
+    ],
+    "grantedFeatures": [
+      "Grey elf: library access",
+      "Grey elf: poor reactions from others"
+    ],
+    "subrace": {
+      "id": "grey-elf",
+      "abilityAdjustments": {
+        "str": -1,
+        "dex": 1,
+        "con": -2,
+        "int": 2,
+        "wis": 0,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 3,
+          "max": 17
+        },
+        "dex": {
+          "min": 7,
+          "max": 19
+        },
+        "con": {
+          "min": 5,
+          "max": 16
+        },
+        "int": {
+          "min": 8,
+          "max": 20
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 8,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 15
+    }
+  }
+}

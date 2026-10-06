@@ -1,0 +1,106 @@
+{
+  "_id": "kElfDrow00000001",
+  "_key": "!items!kElfDrow00000001",
+  "name": "Drow",
+  "type": "race",
+  "img": "icons/svg/oak.svg",
+  "system": {
+    "description": "",
+    "raceId": "elf",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 90,
+    "classLevelLimits": {
+      "cleric": 12,
+      "fighter": 12,
+      "mage": 15,
+      "thief": 12,
+      "ranger": 15
+    },
+    "allowedClasses": [
+      "cleric",
+      "fighter",
+      "mage",
+      "thief",
+      "ranger"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "mage"
+      ],
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "mage",
+        "thief"
+      ],
+      [
+        "fighter",
+        "mage",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "elvish",
+      "duergar",
+      "svirfneblin",
+      "deep dwarf",
+      "illithid",
+      "undercommon",
+      "sign language",
+      "kuo-toa",
+      "bugbear",
+      "orcish"
+    ],
+    "grantedFeatures": [
+      "Drow: innate spell-like abilities",
+      "Drow: magic resistance",
+      "Drow: bonus to saves vs magic",
+      "Drow: bright-light penalties",
+      "Drow: poor reactions from other elves"
+    ],
+    "subrace": {
+      "id": "drow",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 2,
+        "con": -1,
+        "int": 1,
+        "wis": 0,
+        "cha": -2
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 3,
+          "max": 18
+        },
+        "dex": {
+          "min": 8,
+          "max": 20
+        },
+        "con": {
+          "min": 7,
+          "max": 17
+        },
+        "int": {
+          "min": 9,
+          "max": 19
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 6,
+          "max": 16
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 20
+    }
+  }
+}
