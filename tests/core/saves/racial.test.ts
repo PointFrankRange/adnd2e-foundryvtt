@@ -67,6 +67,14 @@ describe("racialSaveBonus", () => {
     expect(() => racialSaveBonus("human", "spell", 999)).toThrow(RangeError);
     expect(() => racialSaveBonus("elf", "bw", 0)).toThrow(RangeError);
   });
+
+  it("racialSaveBonus adds an extra bonus only where the race already qualifies (SP12 Plan A)", () => {
+    expect(racialSaveBonus("dwarf", "rsw", 14, [], 1)).toBe(5); // CON 14 -> +4, extra +1
+    expect(racialSaveBonus("dwarf", "ppd", 14, ["poison"], 1)).toBe(5);
+    expect(racialSaveBonus("dwarf", "ppd", 14, [], 1)).toBe(0); // not a qualifying save
+    expect(racialSaveBonus("human", "rsw", 14, [], 1)).toBe(0); // human never qualifies
+    expect(racialSaveBonus("dwarf", "rsw", 14)).toBe(4);
+  });
 });
 
 describe("sleepCharmResistance", () => {

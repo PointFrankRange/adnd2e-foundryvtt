@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { RACIAL_ABILITY_ADJUSTMENTS, applyRacialAdjustments } from "../../../src/core/abilities/racial-adjustments";
+import { RACIAL_ABILITY_ADJUSTMENTS, applyRacialAdjustments, applyRacialDeltas } from "../../../src/core/abilities/racial-adjustments";
 
 describe("racial ability adjustments", () => {
   it("Table 8 deltas", () => {
@@ -22,5 +22,19 @@ describe("racial ability adjustments", () => {
     expect(applyRacialAdjustments({ str: 7, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }, "halfling").str).toBe(7);
     // Dwarf CON min 11: raw 10 +1 -> 11 (also satisfies min).
     expect(applyRacialAdjustments({ str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }, "dwarf").con).toBe(11);
+  });
+});
+
+describe("override parameters (SP12 Plan A)", () => {
+  const raw = { str: 12, dex: 12, con: 12, int: 12, wis: 12, cha: 12 };
+  it("applyRacialDeltas uses an adjustment override, defaulting to the race table", () => {
+    expect(applyRacialDeltas(raw, "dwarf")).toMatchObject({ con: 13, cha: 11 });
+    expect(applyRacialDeltas(raw, "dwarf", { con: 2, cha: -2 })).toMatchObject({ con: 14, cha: 10 });
+    expect(applyRacialDeltas(raw, "dwarf", {})).toEqual(raw);
+  });
+  it("applyRacialAdjustments uses adjustment and range overrides", () => {
+    const ranges = { str: [8, 18], dex: [3, 16], con: [13, 19], int: [3, 18], wis: [3, 18], cha: [3, 15] } as never;
+    expect(applyRacialAdjustments(raw, "dwarf", { con: 2, cha: -2 }, ranges)).toMatchObject({ con: 14, cha: 10 });
+    expect(applyRacialAdjustments({ ...raw, con: 10 }, "dwarf", { con: 2 }, ranges).con).toBe(13); // clamped up to the override min
   });
 });

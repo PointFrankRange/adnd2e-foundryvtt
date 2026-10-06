@@ -13,3 +13,4 @@ export * from "./encumbrance";
 export * from "./weapons";
 export * from "./turning";
 export * from "./kits";
+export * from "./races";

@@ -1,4 +1,5 @@
 import { getChassis } from "../../core/classes/chassis";
+import { normalizeSubrace, type RawSubrace } from "../../core/races";
 import { nonweaponCheck } from "../../core/proficiencies/nonweapon";
 import { canWeaponSpecialize, categoryForProficiencyGroup } from "../../core/proficiencies/weapon";
 import { weaponMasteryTierCost } from "../../core/proficiencies/weapon-mastery";
@@ -7,8 +8,7 @@ import type { AbilityKey, ArmorType, BardSkill, ClassId, Race, ThiefSkill } from
 import { buildNonweaponCheckCardContext } from "../../combat/nonweapon-check-card";
 import { buildThiefSkillCardContext } from "../../combat/thief-skill-card";
 import { classItemLevel } from "../../data/derive/class-item";
-import { activeKitEntries } from "../../data/derive/character/kits";
-import { kitXpPercentFor } from "../../core/kits";
+import { actorXpPercentFor } from "../../data/derive/character/kits";
 import { getOptionalRules } from "../../settings";
 import { TEMPLATE_PATH } from "../../constants";
 
@@ -264,6 +264,15 @@ function resolveActorRace(actor: ThiefSkillsActor): Race {
   return "human";
 }
 
+/** SP12 Plan A: the race item's subrace thieving-skill table, or undefined (use the base race's). */
+function resolveActorRacialThiefAdjustments(actor: ThiefSkillsActor): Readonly<Record<ThiefSkill, number>> | undefined {
+  for (const item of actor.items) {
+    if (item.type !== "race") continue;
+    return normalizeSubrace((item.system as { subrace?: RawSubrace }).subrace).thiefAdjustments ?? undefined;
+  }
+  return undefined;
+}
+
 /** Resolves the actor's level in its primary thief/bard class, for the
  *  per-skill cap and (thief only) backstab multiplier. */
 function primaryClassLevel(actor: ThiefSkillsActor): number {
@@ -271,7 +280,7 @@ function primaryClassLevel(actor: ThiefSkillsActor): number {
     if (item.type !== "class") continue;
     const s = item.system as { chassisId?: string; xp?: number };
     if (s.chassisId === "thief" || s.chassisId === "bard") {
-      return classItemLevel(s.chassisId as ClassId, s.xp ?? 0, kitXpPercentFor(activeKitEntries(actor.items), s.chassisId));
+      return classItemLevel(s.chassisId as ClassId, s.xp ?? 0, actorXpPercentFor(actor.items, s.chassisId));
     }
   }
   return 0;
@@ -343,6 +352,7 @@ export async function rollThiefSkill(actor: ThiefSkillsActor, skill: ThiefSkill)
   const naturalD100 = roll.dice[0]?.total ?? 0;
   const checkInput = {
     race: resolveActorRace(actor),
+    racialAdjustments: resolveActorRacialThiefAdjustments(actor),
     dexterity: actor.system.abilities.dex.score,
     armor: classification.category,
     allocatedPoints: allocated,

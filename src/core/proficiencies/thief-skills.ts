@@ -114,6 +114,8 @@ export interface ThiefSkillContext {
   race: Race;
   dexterity: number;
   armor: ThiefArmor;
+  /** SP12 Plan A subrace table; replaces the race lookup when present */
+  racialAdjustments?: Readonly<Record<ThiefSkill, number>>;
 }
 
 /** Table 26 + Table 27 + Table 28 + Table 29. May be negative; no cap applied here. */
@@ -123,7 +125,7 @@ export function thiefSkillBaseScore(skill: ThiefSkill, input: ThiefSkillContext)
   const dexAdj = THIEF_DEXTERITY_ADJUSTMENTS[dexKey][skill] ?? 0;
   return (
     THIEF_SKILL_BASE[skill] +
-    THIEF_RACIAL_ADJUSTMENTS[input.race][skill] +
+    (input.racialAdjustments ?? THIEF_RACIAL_ADJUSTMENTS[input.race])[skill] +
     dexAdj +
     THIEF_ARMOR_ADJUSTMENTS[input.armor][skill]
   );
@@ -218,7 +220,7 @@ export function bardSkillBaseScore(skill: BardSkill, input: ThiefSkillContext): 
   const dexAdj = THIEF_DEXTERITY_ADJUSTMENTS[dexKey][skill] ?? 0;
   return (
     BARD_SKILL_BASE[skill] +
-    THIEF_RACIAL_ADJUSTMENTS[input.race][skill] +
+    (input.racialAdjustments ?? THIEF_RACIAL_ADJUSTMENTS[input.race])[skill] +
     dexAdj +
     THIEF_ARMOR_ADJUSTMENTS[input.armor][skill]
   );

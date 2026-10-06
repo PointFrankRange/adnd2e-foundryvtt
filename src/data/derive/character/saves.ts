@@ -13,6 +13,8 @@ export interface SavesInput {
   wisMagicalDefenseAdj: number;
   /** dexterity(dex).defensiveAdj — AC-signed */
   dexDefensiveAdj: number;
+  /** SP12 Plan A: a subrace's Constitution-save adjustment */
+  racialSaveAdjustment?: number;
 }
 
 /**
@@ -32,6 +34,7 @@ export function deriveSaves(
       con: input.con,
       wisMagicalDefenseAdj: input.wisMagicalDefenseAdj,
       dexDefensiveAdj: input.dexDefensiveAdj,
+      racialSaveAdjustment: input.racialSaveAdjustment,
     });
     out[category] = { target: r.target, rollModifier: r.rollModifier, effectiveTarget: r.effectiveTarget };
   }

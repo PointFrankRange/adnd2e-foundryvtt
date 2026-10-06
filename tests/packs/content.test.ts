@@ -3,6 +3,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { CLASS_IDS, RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
 import { EQUIPMENT_MODES, normalizePowers, normalizeOverrides, powerUses, TURNING_MODES, CASTING_MODES } from "../../src/core/kits";
+import { normalizeSubrace } from "../../src/core/races";
+import { THIEF_SKILLS } from "../../src/core/proficiencies/thief-skills";
 import { TRAITS, toTraitEffect, type RawTraitEffect } from "../../src/core/skills/traits";
 
 const ROOT = path.resolve(__dirname, "..", "..");
@@ -40,9 +42,48 @@ describe("classes pack content", () => {
 
 describe("races pack content", () => {
   const items = docs("races");
-  it("has 6 documents, one per RaceId", () => {
-    expect(items).toHaveLength(6);
+  it("has the 6 PHB races plus the 6 dwarf subraces", () => {
+    expect(items).toHaveLength(12);
     expect(new Set(items.map((d) => sys(d).raceId))).toEqual(new Set(RACE_IDS));
+    const subs = items.filter((d) => (sys(d).subrace as { id?: string } | undefined)?.id);
+    expect(subs).toHaveLength(6);
+    for (const d of subs) expect(sys(d).raceId).toBe("dwarf");
+  });
+  const DWARF = {
+    "hill-dwarf":     { adj: { con: 1, cha: -1 }, ranges: [[8,18],[3,17],[11,18],[3,18],[3,18],[3,17]], infra: 60,  xp: 0,  conSave: 0, limits: { fighter: 15, cleric: 10, thief: 12 }, thief: [0, 10, 15, 0, 0, 0, -10, -5] },
+    "mountain-dwarf":{ adj: { con: 1, cha: -1 }, ranges: [[8,18],[3,17],[11,19],[3,18],[3,18],[3,16]], infra: 60,  xp: 0,  conSave: 0, limits: { fighter: 16, cleric: 10, thief: 12 }, thief: [0, 10, 15, 0, 0, 0, -10, -5] },
+    "deep-dwarf":    { adj: { con: 2, cha: -2 }, ranges: [[8,18],[3,16],[13,19],[3,18],[3,18],[3,15]], infra: 90,  xp: 10, conSave: 1, limits: { fighter: 14, cleric: 12, thief: 10 }, thief: [5, 0, 10, 0, 5, 0, -10, -15] },
+    "duergar":       { adj: { con: 1, cha: -2 }, ranges: [[8,18],[3,17],[11,18],[3,16],[3,18],[3,15]], infra: 120, xp: 20, conSave: 0, limits: { fighter: 12, cleric: 12, thief: 14 }, thief: [5, 0, 10, 10, 5, 10, -10, -15] },
+    "sundered-dwarf":{ adj: { str: 1, con: 1, cha: -1 }, ranges: [[8,18],[3,17],[11,18],[3,16],[3,18],[3,16]], infra: 30, xp: 0, conSave: 0, limits: { fighter: 14, cleric: 10, thief: 15 }, thief: [0, 5, 10, 5, 5, 0, 0, -10] },
+    "gully-dwarf":   { adj: { str: 1, dex: 1, cha: -2 }, ranges: [[6,18],[6,18],[8,16],[3,12],[3,14],[3,12]], infra: 60, xp: 0, conSave: 0, limits: { fighter: 8, cleric: 8, thief: 16 }, thief: [10, -5, 5, 0, -5, 0, -5, -25] },
+  } as const;
+
+  it("every dwarf subrace matches The Complete Book of Dwarves (PHBR6 ch. 4)", () => {
+    const subraces = items.filter((d) => (sys(d).subrace as { id?: string } | undefined)?.id);
+    expect(subraces.map((d) => (sys(d).subrace as { id: string }).id).sort()).toEqual(Object.keys(DWARF).sort());
+    for (const d of subraces) {
+      const id = (sys(d).subrace as { id: keyof typeof DWARF }).id;
+      const want = DWARF[id];
+      const layer = normalizeSubrace(sys(d).subrace as never);
+      expect(sys(d).raceId, id).toBe("dwarf");
+      expect(layer.abilityAdjustments, id).toEqual(want.adj);
+      expect(ABILITY_KEYS.map((k) => layer.abilityRanges![k]), id).toEqual(want.ranges);
+      expect(layer.xpModifierPercent, id).toBe(want.xp);
+      expect(layer.conSaveBonusAdjustment, id).toBe(want.conSave);
+      expect(THIEF_SKILLS.map((s) => layer.thiefAdjustments![s]), id).toEqual(want.thief);
+      expect(sys(d).infravision, id).toBe(want.infra);
+      expect(sys(d).classLevelLimits, id).toEqual(want.limits);
+      expect(sys(d).size, id).toBe("small");
+      expect(sys(d).baseMovement, id).toBe(6);
+      expect(sys(d).description, id).toBe("");
+    }
+  });
+  it("race documents have unique names and 16-character ids", () => {
+    expect(new Set(items.map((d) => d.name)).size).toBe(items.length);
+    for (const d of items) {
+      expect(String(d._id)).toHaveLength(16);
+      expect(String(d._key)).toBe(`!items!${String(d._id)}`);
+    }
   });
   it("allowedClasses + allowedMulticlass entries are all valid ClassIds", () => {
     for (const d of items) {

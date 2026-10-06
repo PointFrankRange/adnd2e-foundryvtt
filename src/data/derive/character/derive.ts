@@ -216,6 +216,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
             con: snapshot.abilities.con,
             wisMagicalDefenseAdj: abilities.wis.magicalDefenseAdj,
             dexDefensiveAdj: abilities.dex.defensiveAdj,
+            racialSaveAdjustment: snapshot.raceLayer?.conSaveBonusAdjustment ?? 0,
           })
         : null,
       spellSlots: primaryMember ? mergeCasterSlots([primaryMember], snapshot, abilities) : {},
@@ -272,6 +273,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
       con: snapshot.abilities.con,
       wisMagicalDefenseAdj: abilities.wis.magicalDefenseAdj,
       dexDefensiveAdj: abilities.dex.defensiveAdj,
+      racialSaveAdjustment: snapshot.raceLayer?.conSaveBonusAdjustment ?? 0,
     }),
     spellSlots: mergeCasterSlots(resolution.casters, snapshot, abilities),
     spellPoints: spellPointsEnabled(options) ? mergeCasterSpellPoints(resolution.casters, snapshot, abilities) : {},

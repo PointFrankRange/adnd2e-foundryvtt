@@ -351,6 +351,7 @@
         }
       },
       "drop": {
+        "subraceRangeWarning": "This character's ability scores are outside the subrace's allowed range: {abilities}.",
         "duplicateRace": "This character already has a race.",
         "duplicateClass": "This character already has that class.",
         "insufficientSlots": "Not enough proficiency slots available for that.",
@@ -550,6 +551,7 @@
         "languages": "Languages Known",
         "resources": "Resources",
         "racial": "Racial Abilities",
+        "racialXp": "XP per level",
         "none": "None",
         "languagesHint": "The free-form list of specific languages known is recorded on the character's biography for now.",
         "reputation": "Reputation",

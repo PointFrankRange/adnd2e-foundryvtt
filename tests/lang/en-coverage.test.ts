@@ -826,3 +826,12 @@ describe("lang/en.json — SP11 Plan C (kits panel overrides)", () => {
     }
   });
 });
+
+describe("lang/en.json — SP12 Plan A (subrace)", () => {
+  it("resolves the subrace display keys", () => {
+    for (const key of ["ADND2E.sheet.features.racialXp", "ADND2E.sheet.drop.subraceRangeWarning"]) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

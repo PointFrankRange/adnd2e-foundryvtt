@@ -1,0 +1,92 @@
+{
+  "_id": "kDwarfMount00001",
+  "_key": "!items!kDwarfMount00001",
+  "name": "Mountain Dwarf",
+  "type": "race",
+  "img": "icons/svg/mountain.svg",
+  "system": {
+    "description": "",
+    "raceId": "dwarf",
+    "size": "small",
+    "baseMovement": 6,
+    "infravision": 60,
+    "classLevelLimits": {
+      "cleric": 10,
+      "fighter": 16,
+      "thief": 12
+    },
+    "allowedClasses": [
+      "cleric",
+      "fighter",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "fighter",
+        "cleric"
+      ]
+    ],
+    "bonusLanguages": [
+      "gnome",
+      "goblin",
+      "kobold",
+      "orc",
+      "ogre",
+      "troll"
+    ],
+    "grantedFeatures": [],
+    "subrace": {
+      "id": "mountain-dwarf",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 0,
+        "con": 1,
+        "int": 0,
+        "wis": 0,
+        "cha": -1
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 8,
+          "max": 18
+        },
+        "dex": {
+          "min": 3,
+          "max": 17
+        },
+        "con": {
+          "min": 11,
+          "max": 19
+        },
+        "int": {
+          "min": 3,
+          "max": 18
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 16
+        }
+      },
+      "thiefAdjustments": {
+        "pick-pockets": 0,
+        "open-locks": 10,
+        "find-remove-traps": 15,
+        "move-silently": 0,
+        "hide-in-shadows": 0,
+        "detect-noise": 0,
+        "climb-walls": -10,
+        "read-languages": -5
+      },
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0
+    }
+  }
+}

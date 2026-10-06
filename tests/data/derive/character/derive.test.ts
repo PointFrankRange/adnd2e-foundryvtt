@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { deriveCharacter } from "../../../../src/data/derive/character/derive";
 import type { ActorSnapshot } from "../../../../src/data/derive/character/snapshot";
 import { DEFAULT_OPTIONAL_RULES } from "../../../../src/core/options";
+import { normalizeSubrace } from "../../../../src/core/races";
 
 const base: ActorSnapshot = {
   abilities: { str: 12, dex: 12, con: 12, int: 12, wis: 12, cha: 12 },
@@ -367,5 +368,26 @@ describe("deriveCharacter — kit casting override (SP11 Plan C)", () => {
     const d = deriveCharacter({ ...base, classes: [{ ...mage, castingDisabled: true }, fighterClass] }, rules);
     expect(d.spellSlots.wizard).toBeUndefined();
     expect(d.castingDisabled.wizard).toBe(true);
+  });
+});
+
+describe("deriveCharacter — subrace layer (SP12 Plan A)", () => {
+  const dwarfFighter = { ...base, race: "dwarf" as const, classes: [{ ...fighterClass, level: 3, xp: 4000 }], abilities: { ...base.abilities, con: 15 } };
+  const deepLayer = {
+    id: "deep-dwarf", abilityAdjustments: { con: 2, cha: -2 }, abilityRanges: null, thiefAdjustments: null,
+    conSaveBonusAdjustment: 1, xpModifierPercent: 10,
+  };
+  it("a deep-dwarf layer adds +1 to the Constitution save modifier of the qualifying saves", () => {
+    const plain = deriveCharacter(dwarfFighter, DEFAULT_OPTIONAL_RULES);
+    const deep = deriveCharacter({ ...dwarfFighter, raceLayer: deepLayer }, DEFAULT_OPTIONAL_RULES);
+    expect(deep.saves!.rsw.rollModifier).toBe(plain.saves!.rsw.rollModifier + 1);
+    expect(deep.saves!.spell.rollModifier).toBe(plain.saves!.spell.rollModifier + 1);
+    expect(deep.saves!.pp.rollModifier).toBe(plain.saves!.pp.rollModifier);
+  });
+  it("no layer or the inherit layer leaves the derive unchanged", () => {
+    const plain = deriveCharacter(dwarfFighter, DEFAULT_OPTIONAL_RULES);
+    expect(deriveCharacter({ ...dwarfFighter, raceLayer: null }, DEFAULT_OPTIONAL_RULES)).toEqual(plain);
+    expect(deriveCharacter({ ...dwarfFighter, raceLayer: normalizeSubrace({}) }, DEFAULT_OPTIONAL_RULES)).toEqual(plain);
+    expect(deriveCharacter({ ...dwarfFighter }, DEFAULT_OPTIONAL_RULES)).toEqual(plain);
   });
 });
