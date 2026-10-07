@@ -12,7 +12,7 @@ import {
 import { attackModifiers, hitResult } from "../../core/combat/attack";
 import { attackFormula } from "../../core/dice/formula";
 import { criticalSeverity, fumbleSeverity } from "../../combat/critical";
-import { monsterWeaponDamageFormula } from "../../combat/monster-gear";
+import { monsterLauncherAmmo, monsterWeaponDamageFormula, type MonsterAmmo } from "../../combat/monster-gear";
 import { toArmorGroup, weaponVsArmorModifier } from "../../combat/weapon-vs-armor";
 import { getOptionalRules } from "../../settings";
 import { TEMPLATE_PATH } from "../../constants";
@@ -114,11 +114,11 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
 
 /** Attack with an EQUIPPED weapon item: monster THAC0 + the weapon's magic bonus,
  *  the weapon's S-M / L damage by target size (Monster NPC gear design). */
-export async function rollWeaponAttack(actor: CreatureActor & { items: { get(id: string): unknown } }, itemId: string): Promise<void> {
+export async function rollWeaponAttack(actor: CreatureActor & { items: { get(id: string): unknown } & Iterable<unknown> }, itemId: string): Promise<void> {
   const item = actor.items.get(itemId) as
     | {
         name: string; type: string;
-        system: { equipped?: boolean; category: string; magicBonus: number; damageVsSM: string | null; damageVsL: string | null; damageType: DamageType | null };
+        system: { equipped?: boolean; category: string; magicBonus: number; damageVsSM: string | null; damageVsL: string | null; damageType: DamageType | null; ammoType?: string | null; selectedAmmoId?: string | null };
         update(d: Record<string, unknown>): Promise<unknown>;
       }
     | undefined;
@@ -127,11 +127,23 @@ export async function rollWeaponAttack(actor: CreatureActor & { items: { get(id:
     return;
   }
   const weapon = { category: item.system.category, magicBonus: item.system.magicBonus ?? 0, damageVsSM: item.system.damageVsSM, damageVsL: item.system.damageVsL };
+  // #98: a bow/crossbow has no dice of its own — its damage comes from a matching ammo item the monster carries (not consumed).
+  let ammo: MonsterAmmo | null = null;
+  if (item.system.ammoType) {
+    const stock = [...actor.items as Iterable<{ id: string; type: string; system: { ammoType: string; quantity: number; damageVsSM: string | null; damageVsL: string | null } }>]
+      .filter((i) => i.type === "ammo")
+      .map((i) => ({ id: i.id, ammoType: i.system.ammoType, quantity: i.system.quantity, damageVsSM: i.system.damageVsSM, damageVsL: i.system.damageVsL }));
+    ammo = monsterLauncherAmmo({ ammoType: item.system.ammoType, selectedAmmoId: item.system.selectedAmmoId ?? null }, stock);
+    if (!ammo) {
+      ui.notifications?.warn(game.i18n!.format("ADND2E.sheet.creature.noAmmoWarning", { name: item.name }));
+      return;
+    }
+  }
   await rollCreatureAttack(actor, {
     name: item.name,
     thac0: actor.system.attributes.thac0.value,
     weaponMagicBonus: weapon.magicBonus,
-    damageFormula: (size) => monsterWeaponDamageFormula(weapon, size),
+    damageFormula: (size) => monsterWeaponDamageFormula(weapon, size, ammo),
     damageType: item.system.damageType,
     weaponItem: item,
   });

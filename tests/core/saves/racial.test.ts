@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { racialConSaveBonus, racialSaveBonus, poisonSaveAdjustment, racialSaveModifier, sleepCharmResistance } from "../../../src/core/saves/racial";
+import { enchantmentCharmSaveBonus, racialConSaveBonus, racialSaveBonus, poisonSaveAdjustment, racialSaveModifier, sleepCharmResistance } from "../../../src/core/saves/racial";
 import type { Race, SaveCategory } from "../../../src/core/types";
 
 describe("racialConSaveBonus", () => {
@@ -129,5 +129,16 @@ describe("poisonSaveAdjustment (#105)", () => {
   it("is 0 with no flat bonus", () => {
     expect(poisonSaveAdjustment(null)).toBe(0);
     expect(poisonSaveAdjustment(undefined)).toBe(0);
+  });
+});
+
+describe("enchantmentCharmSaveBonus (#117)", () => {
+  it("is +2 for a psionicist, alone or with another class", () => {
+    expect(enchantmentCharmSaveBonus(["psionicist"])).toBe(2);
+    expect(enchantmentCharmSaveBonus(["fighter", "psionicist"])).toBe(2);
+  });
+  it("is 0 for everyone else", () => {
+    expect(enchantmentCharmSaveBonus(["mage"])).toBe(0);
+    expect(enchantmentCharmSaveBonus([])).toBe(0);
   });
 });

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   MONSTER_ITEM_TYPES,
   monsterDropVerdict,
+  monsterLauncherAmmo,
   monsterWeaponAttackType,
   monsterWeaponDamageFormula,
   monsterWeaponDamageLabel,
@@ -54,5 +55,31 @@ describe("monsterWeaponDamageLabel", () => {
     expect(monsterWeaponDamageLabel({ ...sword, magicBonus: 1 })).toBe("1d8 / 1d12 +1");
     expect(monsterWeaponDamageLabel({ ...sword, magicBonus: -2, damageVsL: null })).toBe("1d8 / — -2");
     expect(monsterWeaponDamageLabel({ ...sword, damageVsSM: null, damageVsL: null })).toBe("— / —");
+  });
+});
+
+describe("monster launchers (#98)", () => {
+  const bow = { category: "bow", magicBonus: 1, damageVsSM: null, damageVsL: null };
+  const arrows = { id: "a1", ammoType: "arrow", quantity: 5, damageVsSM: "1d6", damageVsL: "1d6" };
+  const flight = { id: "a2", ammoType: "arrow", quantity: 3, damageVsSM: "1d8", damageVsL: "1d10" };
+  const bolts = { id: "b1", ammoType: "bolt", quantity: 9, damageVsSM: "1d4+2", damageVsL: "1d6+2" };
+  const empty = { id: "a3", ammoType: "arrow", quantity: 0, damageVsSM: "2d6", damageVsL: "2d6" };
+
+  it("a launcher with no ammo item rolls no damage dice", () => {
+    expect(monsterWeaponDamageFormula(bow, null)).toBeNull();
+  });
+  it("the ammo's dice replace the weapon's, keeping the weapon's magic bonus and size pick", () => {
+    expect(monsterWeaponDamageFormula(bow, "medium", arrows)).toBe("1d6 + 1");
+    expect(monsterWeaponDamageFormula(bow, "large", flight)).toBe("1d10 + 1");
+  });
+  it("picks the selected matching ammo, else the first matching in stock", () => {
+    const all = [empty, bolts, arrows, flight];
+    expect(monsterLauncherAmmo({ ammoType: "arrow", selectedAmmoId: "a2" }, all)).toBe(flight);
+    expect(monsterLauncherAmmo({ ammoType: "arrow", selectedAmmoId: null }, all)).toBe(arrows);
+    expect(monsterLauncherAmmo({ ammoType: "arrow", selectedAmmoId: "gone" }, all)).toBe(arrows);
+  });
+  it("ignores ammo of the wrong type or out of stock, and non-launchers", () => {
+    expect(monsterLauncherAmmo({ ammoType: "arrow", selectedAmmoId: null }, [bolts, empty])).toBeNull();
+    expect(monsterLauncherAmmo({ ammoType: null, selectedAmmoId: null }, [arrows])).toBeNull();
   });
 });

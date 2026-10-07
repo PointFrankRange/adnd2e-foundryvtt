@@ -85,6 +85,14 @@ export function poisonSaveAdjustment(flat: { all: number; poison: number } | nul
 }
 
 /**
+ * CPH p.14: a psionicist gains +2 on all saving throws vs. enchantment/charm spells and the like (#117).
+ * No roll carries a tag for it, so the sheet asks; this is the bonus that "yes" applies (0 for any other class mix).
+ */
+export function enchantmentCharmSaveBonus(chassisIds: readonly string[]): number {
+  return chassisIds.includes("psionicist") ? 2 : 0;
+}
+
+/**
  * Percentage chance to ignore a *sleep* or *charm* effect entirely (elf 90,
  * half-elf 30, others 0). Roll d100 BEFORE the saving throw; on `roll <= result`
  * the effect is negated and no save is made. This is NOT a d20 modifier — never

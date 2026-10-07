@@ -969,7 +969,7 @@ export class Adnd2eCharacterSheet extends Base {
     target: HTMLElement,
   ): Promise<void> {
     const category = target.dataset.save as SaveCategory | undefined;
-    if (category) await rollSave(this.document as never, category, { promptPoison: true });
+    if (category) await rollSave(this.document as never, category, { promptTags: true });
   }
 
   // Interaction handlers — SP4a.
