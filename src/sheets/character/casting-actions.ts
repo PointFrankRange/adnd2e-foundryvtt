@@ -164,6 +164,7 @@ export async function castOrBegin(actor: CastingActor, spellItemId: string): Pro
   if (plan.mode === "segments" && plan.initiativeAdd > 0) {
     try {
       let wrote = false;
+      let applied = 0;
       if (typeof ctx.combatant.initiative === "number") {
         const newInitiative = ctx.combatant.initiative + plan.initiativeAdd;
         const isCurrent = ctx.combat.combatant?.id === ctx.combatant.id;
@@ -182,16 +183,19 @@ export async function castOrBegin(actor: CastingActor, spellItemId: string): Pro
           // later in the round, where Complete unlocks (ruling: Plan 9a whole-branch review, finding I1).
           await ctx.combatant.update({ initiative: newInitiative }, { combatTurn: ctx.combat.turn });
           wrote = true;
+          applied = plan.initiativeAdd;
         } else {
           // (c) the caster hasn't acted yet and isn't current: v14's default (pin to the current
           // combatant, who isn't the caster) already leaves the pointer untouched.
           await ctx.combatant.update({ initiative: newInitiative });
           wrote = true;
+          applied = plan.initiativeAdd;
         }
       } else {
         await ctx.combatant.update({ [`flags.${SYSTEM_ID}.castingSegments`]: plan.initiativeAdd });
         wrote = true;
       }
+      if (applied > 0) await actor.update({ "system.options.spellsAndMagic.casting.initiativeApplied": applied });
       // Combatant-only updates don't trigger a re-render of the actor's own sheet.
       if (wrote) (actor as unknown as { sheet?: { render(force?: boolean): unknown } }).sheet?.render(false);
     } catch {
@@ -221,6 +225,24 @@ export async function completeCasting(actor: CastingActor): Promise<void> {
   await clearCombatantFlag(casting.combatId, actor);
 }
 
+/** Takes back the segments a begun cast added to the caster's rolled initiative — only within the round it began (a later round has re-rolled). */
+async function restoreInitiative(actor: CastingActor, casting: CastingState): Promise<void> {
+  const applied = casting.initiativeApplied ?? 0;
+  if (applied <= 0) return;
+  const combat = combats().find((c) => c.id === casting.combatId && c.started);
+  const combatant = combat?.getCombatantsByActor(actor)[0];
+  if (!combat || !combatant || combat.round !== casting.startRound || typeof combatant.initiative !== "number") return;
+  try {
+    const initiative = combatant.initiative - applied;
+    // As in castOrBegin: when the caster is the current combatant, pin the turn pointer where it is.
+    if (combat.combatant?.id === combatant.id) await combatant.update({ initiative }, { combatTurn: combat.turn });
+    else await combatant.update({ initiative });
+    (actor as unknown as { sheet?: { render(force?: boolean): unknown } }).sheet?.render(false);
+  } catch {
+    // best effort — a stale slot only matters until the next initiative roll
+  }
+}
+
 /** Disrupts (announce: posts "spell lost") or cancels the cast. The memorized entry stays expended either way. */
 export async function disruptCasting(actor: CastingActor, opts: { announce: boolean }): Promise<void> {
   const casting = readCasting(actor);
@@ -232,6 +254,7 @@ export async function disruptCasting(actor: CastingActor, opts: { announce: bool
     await actor.update({ "system.options.spellsAndMagic.casting": null });
     if (opts.announce) await postNotice(actor, actor.items.get(casting.spellItemId), "lost", casting);
     await clearCombatantFlag(casting.combatId, actor);
+    await restoreInitiative(actor, casting);
   } finally {
     disrupting.delete(actor.id);
   }

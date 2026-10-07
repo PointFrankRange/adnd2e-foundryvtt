@@ -294,6 +294,8 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
             completeRound: new NumberField({ required: true, nullable: true, integer: true, min: 0, initial: null }),
             segments: new NumberField({ required: true, nullable: true, integer: true, min: 0, initial: null }),
             hp: new NumberField({ required: true, integer: true }),
+            /** segments actually added to the caster's rolled initiative (so a disruption can take them back); null = none added */
+            initiativeApplied: new NumberField({ required: true, nullable: true, integer: true, min: 0, initial: null }),
           },
           { required: true, nullable: true, initial: null },
         ),
