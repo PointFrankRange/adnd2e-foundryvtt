@@ -11,7 +11,7 @@ import {
   resetKeys,
   spendPower,
   usageResetUpdate,
-  usagePruneUpdate,
+  usagePruneKeys,
   usageSpendUpdate,
   usedCount,
   type KitPower,
@@ -136,13 +136,9 @@ describe("reset and prune updates", () => {
   it("usageSpendUpdate sets one key", () => {
     expect(usageSpendUpdate("k1:shape", 2)).toEqual({ "system.kitPowers.k1:shape": { used: 2 } });
   });
-  it("usagePruneUpdate deletes every key of the kit with Foundry's -= operator", () => {
-    expect(usagePruneUpdate(usage, "k1")).toEqual({
-      "system.kitPowers.-=k1:shape": null,
-      "system.kitPowers.-=k1:rally": null,
-      "system.kitPowers.-=k1:feint": null,
-    });
-    expect(usagePruneUpdate(usage, "nothing")).toEqual({});
+  it("usagePruneKeys lists every counter key of the kit and nothing else", () => {
+    expect(usagePruneKeys(usage, "k1")).toEqual(["k1:shape", "k1:rally", "k1:feint"]);
+    expect(usagePruneKeys(usage, "nothing")).toEqual([]);
   });
 });
 

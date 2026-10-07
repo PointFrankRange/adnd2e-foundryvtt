@@ -187,14 +187,10 @@ export function usageSpendUpdate(key: string, used: number): Record<string, unkn
   return { [`system.kitPowers.${key}`]: { used } };
 }
 
-/** Actor update that deletes every counter of a removed kit (Foundry's `-=` operator). */
-export function usagePruneUpdate(usage: PowerUsage, kitId: string): Record<string, unknown> {
+/** The counter keys of a removed kit — the caller deletes each with a `ForcedDeletion` (pure: core stays Foundry-free). */
+export function usagePruneKeys(usage: PowerUsage, kitId: string): string[] {
   const prefix = `${kitId}:`;
-  return Object.fromEntries(
-    Object.keys(usage)
-      .filter((k) => k.startsWith(prefix))
-      .map((k) => [`system.kitPowers.-=${k}`, null]),
-  );
+  return Object.keys(usage).filter((k) => k.startsWith(prefix));
 }
 
 export interface PowerUseCardInput {
