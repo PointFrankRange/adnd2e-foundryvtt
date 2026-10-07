@@ -7,6 +7,7 @@ import { getOptionalRules } from "../../settings";
 import { tierForConditionId } from "../../core/magic/channeller-fatigue";
 import {
   toClassView,
+  toTraitView,
   toFeatureView,
   toNwpView,
   toPhysicalView,
@@ -23,6 +24,7 @@ import { warnSubraceRange } from "../character/subrace-warning";
 import { advanceWeaponMastery, rollNonweaponCheck, rollThiefSkill } from "../character/proficiency-actions";
 import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "../character/casting-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
+import { removeTrait } from "../character/trait-actions";
 import { forgetSpell, learnSpell, memorizeSpell, recoverChannellerSp, restSpellcasting } from "../character/spell-actions";
 import { recoverFromFatigue } from "../character/fatigue-actions";
 import { promptRecoverChannelling } from "../character/recover-dialog";
@@ -125,6 +127,7 @@ export class Adnd2eNpcSheet extends Base {
       cancelCasting: Adnd2eNpcSheet.#onCancelCasting,
       editItem: Adnd2eNpcSheet.#onEditItem,
       deleteItem: Adnd2eNpcSheet.#onDeleteItem,
+      removeTrait: Adnd2eNpcSheet.#onRemoveTrait,
       advanceWeaponMastery: Adnd2eNpcSheet.#onAdvanceWeaponMastery,
       rollNonweaponCheck: Adnd2eNpcSheet.#onRollNonweaponCheck,
       rollThiefSkill: Adnd2eNpcSheet.#onRollThiefSkill,
@@ -225,6 +228,7 @@ export class Adnd2eNpcSheet extends Base {
     const nonweaponProfs: ReturnType<typeof toNwpView>[] = [];
     const spellItems: ReturnType<typeof toSpellView>[] = [];
     const featureItems: ReturnType<typeof toFeatureView>[] = [];
+    const traitItems: ReturnType<typeof toTraitView>[] = [];
 
     for (const it of items) {
       switch (it.type) {
@@ -257,6 +261,9 @@ export class Adnd2eNpcSheet extends Base {
         case "classFeature":
           featureItems.push(toFeatureView(it));
           break;
+        case "trait":
+          traitItems.push(toTraitView(it));
+          break;
         default:
           break;
       }
@@ -285,6 +292,7 @@ export class Adnd2eNpcSheet extends Base {
       ],
       spellItems,
       featureItems,
+      traitItems,
       config: {
         abilities: cfg.abilities,
         saves: cfg.saves,
@@ -537,6 +545,11 @@ export class Adnd2eNpcSheet extends Base {
   static async #onDeleteItem(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
     const itemId = target.dataset.itemId;
     if (itemId && this.isEditable) await deleteOwnedItem(this.document as never, itemId);
+  }
+
+  static async #onRemoveTrait(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const itemId = target.dataset.itemId;
+    if (itemId && this.isEditable) await removeTrait(this.document as never, itemId);
   }
 
   static async #onCancelCasting(this: Adnd2eNpcSheet): Promise<void> {

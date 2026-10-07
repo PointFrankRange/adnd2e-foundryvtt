@@ -103,6 +103,21 @@
     </div>
   </section>
   {{/if}}
+  {{else}}
+  {{#if adnd2e.traits.items.length}}
+  <section class="kit-panel npc-traits">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.traits.title'}}</div>
+    <div class="kit-body">
+      {{#each adnd2e.traits.items as |row|}}
+        <div class="trait-row{{#unless row.active}} inert{{/unless}}" data-item-id="{{row.id}}">
+          <span class="name">{{row.name}}</span>
+          <span class="effect">{{row.summaryAmount}} {{localize row.summaryTargetKey}}</span>
+          {{#if @root.adnd2e.lock.unlocked}}{{#if row.canRemove}}<button type="button" data-action="removeTrait" data-item-id="{{row.id}}">{{localize 'ADND2E.sheet.traits.remove'}}</button>{{/if}}{{/if}}
+        </div>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
   {{/if}}
 
   <section class="kit-panel">

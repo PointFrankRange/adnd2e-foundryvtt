@@ -1199,6 +1199,8 @@ function buildTraits(input: CharacterSheetInput): CharacterSheetContext["traits"
     pool,
     ledger,
     rows: ledger ? rows : [],
+    // every trait item regardless of the rule — the Character NPC sheet lists them read-only (#114)
+    items: rows,
     refundCapped: ledger !== null && ledger.refundUncapped > ledger.refund,
   };
 }

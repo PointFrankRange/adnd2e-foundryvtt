@@ -2356,6 +2356,8 @@ describe("buildCharacterSheetContext — traits + character points (SP8 Plan 8c)
       expect(t.ledger).toBeNull();
       expect(t.rows).toEqual([]);
       expect(t.refundCapped).toBe(false);
+      // #114: the Character NPC sheet still lists owned traits read-only
+      expect(t.items.map((r) => r.id)).toEqual(["t1"]);
     }
   });
 
