@@ -736,6 +736,7 @@
         "notYourDefense": "Only the defender's owner or a GM can roll this defense.",
         "alreadyAnswered": "This contest has already been answered.",
         "alreadyRecorded": "Those tangents are already recorded.",
+        "recorded": "Tangents recorded.",
         "winner": { "attacker": "Attacker wins", "defender": "Defender wins" },
         "reason": {
           "unopposed": "unopposed",

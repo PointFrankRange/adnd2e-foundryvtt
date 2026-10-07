@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerPsionicHooks } from "../../src/hooks/psionic-hooks";
 
-type Handler = (message: unknown) => void;
+type Handler = (message: unknown, changes?: unknown) => void;
 let handler: Handler;
+let actorHandler: Handler;
+let rerendered: unknown[];
 let updates: Record<string, unknown>[];
 let uuidMap: Record<string, unknown>;
 
@@ -16,12 +18,14 @@ const flush = () => new Promise((r) => setTimeout(r, 0));
 
 beforeEach(() => {
   updates = [];
+  rerendered = [];
   uuidMap = {
     "Actor.att": { isOwner: true, getFlag: () => [], update: async (d: Record<string, unknown>) => void updates.push(d), system: { psionics: { contacts: [] } } },
   };
-  (globalThis as Record<string, unknown>).game = { user: { id: "u-att" } };
+  (globalThis as Record<string, unknown>).game = { user: { id: "u-att" }, messages: { contents: [message(contest()), message(contest({ attackerActorUuid: "Actor.other" })), message(undefined)] } };
+  (globalThis as Record<string, unknown>).ui = { chat: { updateMessage: async (m: unknown) => void rerendered.push(m) } };
   (globalThis as Record<string, unknown>).foundry = { utils: { fromUuidSync: (u: string) => uuidMap[u] ?? null } };
-  (globalThis as Record<string, unknown>).Hooks = { on: vi.fn((_name: string, fn: Handler) => void (handler = fn)) };
+  (globalThis as Record<string, unknown>).Hooks = { on: vi.fn((name: string, fn: Handler) => void (name === "updateActor" ? (actorHandler = fn) : (handler = fn))) };
   registerPsionicHooks();
 });
 
@@ -62,5 +66,25 @@ describe("registerPsionicHooks", () => {
     handler(message(contest()));
     await flush();
     expect(updates).toEqual([]);
+  });
+
+  it("re-renders only the matching attacker's contest cards when psionicApplied changes", () => {
+    const msgs = (globalThis as unknown as { game: { messages: { contents: unknown[] } } }).game.messages.contents;
+    actorHandler({ uuid: "Actor.att" }, { flags: { adnd2e: { psionicApplied: ["cid1"] } } });
+    expect(rerendered).toEqual([msgs[0]]);
+    actorHandler({ uuid: "Actor.att" }, { "flags.adnd2e.psionicApplied": ["cid1"] });
+    expect(rerendered).toEqual([msgs[0], msgs[0]]);
+  });
+
+  it("ignores unrelated actor updates and survives a missing chat log or message list", () => {
+    actorHandler({ uuid: "Actor.att" }, { name: "x" });
+    actorHandler({ uuid: "Actor.att" }, { flags: { adnd2e: { other: 1 } } });
+    actorHandler({ uuid: "Actor.att" }, { flags: { core: { x: 1 } } });
+    expect(rerendered).toEqual([]);
+    (globalThis as Record<string, unknown>).ui = {};
+    actorHandler({ uuid: "Actor.att" }, { flags: { adnd2e: { psionicApplied: [] } } });
+    (globalThis as Record<string, unknown>).game = {};
+    actorHandler({ uuid: "Actor.att" }, { flags: { adnd2e: { psionicApplied: [] } } });
+    expect(rerendered).toEqual([]);
   });
 });

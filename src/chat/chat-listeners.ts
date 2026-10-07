@@ -4,7 +4,8 @@ import { damageModifiers } from "../core/combat/damage";
 import { damageFormula } from "../core/dice/formula";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../constants";
 import { requestApply } from "../relay/relay-client";
-import { applyContestTangents, rollDefense, type ContestFlag } from "../sheets/character/psionic-combat";
+import { rerenderContestCards } from "../hooks/psionic-hooks";
+import { applyContestTangents, recordButtonState, rollDefense, type ContestFlag } from "../sheets/character/psionic-combat";
 import type { EffectTarget } from "../relay/apply-effect";
 
 /* ---------------------------------------------------------------------------
@@ -131,14 +132,23 @@ function wirePsionicContest(message: { id: string; getFlag(s: string, k: string)
     else rollButton.remove();
   }
   const recordButton = html.querySelector<HTMLButtonElement>('[data-action="psionicRecordTangent"]');
-  if (recordButton) {
-    if (isGm || isOwner(contest.attackerActorUuid)) {
-      recordButton.addEventListener("click", () => {
-        void applyContestTangents(contest).then((wrote) => {
-          if (!wrote) ui.notifications?.info(game.i18n!.localize("ADND2E.chat.psionicContest.alreadyRecorded"));
-        });
+  const attacker = foundry.utils.fromUuidSync(contest.attackerActorUuid) as { isOwner?: boolean; getFlag(s: string, k: string): unknown } | null;
+  const applied = (attacker?.getFlag(SYSTEM_ID, "psionicApplied") as string[] | undefined) ?? [];
+  const state = recordButtonState(contest, applied, attacker !== null && (isGm || Boolean(attacker.isOwner)));
+  if (state !== "button") recordButton?.remove();
+  if (state === "recorded") {
+    const line = document.createElement("p");
+    line.className = "hint recorded";
+    line.textContent = game.i18n!.localize("ADND2E.chat.psionicContest.recorded");
+    html.querySelector(".psionic-contest")?.append(line);
+  }
+  if (state === "button") {
+    recordButton?.addEventListener("click", () => {
+      void applyContestTangents(contest).then((wrote) => {
+        if (!wrote) ui.notifications?.info(game.i18n!.localize("ADND2E.chat.psionicContest.alreadyRecorded"));
+        rerenderContestCards(contest.attackerActorUuid);
       });
-    } else recordButton.remove();
+    });
   }
 }
 

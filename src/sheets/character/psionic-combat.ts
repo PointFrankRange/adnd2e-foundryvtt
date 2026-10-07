@@ -348,3 +348,13 @@ async function applyContestTangentsNow(contest: ContestFlag): Promise<boolean> {
   });
   return true;
 }
+
+/** What the contest card's tangent control shows to one viewer: the Record button (still
+ *  eligible and the viewer may record it), a "recorded" line (already recorded; shown to
+ *  every viewer who can see the card), or nothing (no tangents to record, or not recorded yet
+ *  and this viewer cannot record it). */
+export function recordButtonState(contest: ContestFlag, actorApplied: string[], viewerIsOwnerOrGm: boolean): "button" | "recorded" | "none" {
+  if (contest.state !== "resolved" || (contest.outcome?.tangentsGained ?? 0) <= 0) return "none";
+  if (contest.applied === true || actorApplied.includes(contest.id)) return "recorded";
+  return viewerIsOwnerOrGm ? "button" : "none";
+}

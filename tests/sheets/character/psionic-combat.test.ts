@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- chat-card flags and contexts are inspected loosely */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { applyContestTangents, attackMode, dropDefense, endContactAction, payUpkeep, raiseDefense, rollDefense } from "../../../src/sheets/character/psionic-combat";
+import { applyContestTangents, attackMode, recordButtonState, dropDefense, endContactAction, payUpkeep, raiseDefense, rollDefense } from "../../../src/sheets/character/psionic-combat";
 import egoWhip from "../../../packs/powers/_source/ego-whip.json";
 import mindBlankJson from "../../../packs/powers/_source/mind-blank.json";
 import mindThrust from "../../../packs/powers/_source/mind-thrust.json";
@@ -627,5 +627,26 @@ describe("applyContestTangents", () => {
     expect(await applyContestTangents(resolved(1))).toBe(false);
     uuidMap["Actor.att"] = { isOwner: false };
     expect(await applyContestTangents(resolved(1))).toBe(false);
+  });
+});
+
+describe("recordButtonState", () => {
+  const c = (over: Record<string, unknown> = {}) => ({ id: "cid", state: "resolved", applied: false, outcome: { tangentsGained: 2 }, ...over }) as never;
+  it("shows the button only when eligible", () => {
+    expect(recordButtonState(c(), [], true)).toBe("button");
+  });
+  it("shows recorded to everyone when the id is already applied or the card is flagged applied", () => {
+    expect(recordButtonState(c(), ["cid"], true)).toBe("recorded");
+    expect(recordButtonState(c(), ["cid"], false)).toBe("recorded");
+    expect(recordButtonState(c({ applied: true }), [], true)).toBe("recorded");
+    expect(recordButtonState(c({ applied: true }), [], false)).toBe("recorded");
+  });
+  it("shows nothing to a non-owner/non-GM when not yet recorded", () => {
+    expect(recordButtonState(c(), [], false)).toBe("none");
+  });
+  it("shows nothing when no tangents were gained or the contest is pending", () => {
+    expect(recordButtonState(c({ outcome: { tangentsGained: 0 } }), [], true)).toBe("none");
+    expect(recordButtonState(c({ outcome: undefined }), [], true)).toBe("none");
+    expect(recordButtonState(c({ state: "pending" }), [], true)).toBe("none");
   });
 });
