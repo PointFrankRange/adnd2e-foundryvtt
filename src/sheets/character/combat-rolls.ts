@@ -1,5 +1,5 @@
 import { buildAttackCardContext } from "../../combat/attack-card";
-import { poisonSaveAdjustment } from "../../core/saves/racial";
+import { enchantmentCharmSaveBonus, poisonSaveAdjustment } from "../../core/saves/racial";
 import { normalizeSubrace } from "../../core/races/subrace";
 import { buildSaveCardContext } from "../../combat/save-card";
 import { matchingAmmo, defaultAmmoSelection } from "../../combat/ammo";
@@ -474,12 +474,24 @@ export async function rollAttack(
   }
 }
 
+/** Asks a yes/no question about the save being rolled; null = the dialog was dismissed. */
+async function askSaveQuestion(titleKey: string, promptKey: string): Promise<boolean | null> {
+  const answer = await foundry.applications.api.DialogV2.confirm({
+    window: { title: game.i18n!.localize(titleKey) },
+    content: `<p>${game.i18n!.localize(promptKey)}</p>`,
+    rejectClose: false,
+  });
+  return answer === null || answer === undefined ? null : Boolean(answer);
+}
+
 /** Roll one of the 5 saving-throw categories using the actor's already-cached
  *  system.saves.<category>. `opts.penalty` (SP15 Plan D, e.g. -5) adds to the
- *  roll modifier. `opts.promptPoison` (the sheet's save button) asks whether a
- *  paralysis/poison save is against poison when the race's flat save bonus
- *  differs for poison (Deep Gnome, #105) and applies that difference. Resolves
- *  to whether the save succeeded (false if the poison prompt was dismissed). */
+ *  roll modifier. `opts.promptTags` (the sheet's save button) asks the
+ *  circumstance questions no roll carries a tag for: whether a paralysis/poison
+ *  save is against poison when the race's flat bonus differs for poison (Deep
+ *  Gnome, #105), and whether a psionicist's save is against enchantment/charm
+ *  (+2, #117). Resolves to whether the save succeeded (false if a prompt was
+ *  dismissed — no roll is made). */
 export async function rollSave(
   actor: {
     name: string; img: string; uuid: string;
@@ -487,26 +499,33 @@ export async function rollSave(
     items?: Iterable<{ type: string; system: unknown }>;
   },
   category: SaveCategory,
-  opts: { penalty?: number; promptPoison?: boolean } = {},
+  opts: { penalty?: number; promptTags?: boolean } = {},
 ): Promise<boolean> {
   const save = actor.system.saves[category];
-  let poisonAdjustment = 0;
-  if (opts.promptPoison && category === "ppd") {
-    const raceItem = [...(actor.items ?? [])].find((i) => i.type === "race");
-    const delta = poisonSaveAdjustment(
-      raceItem ? normalizeSubrace((raceItem.system as { subrace?: never }).subrace).flatSaveBonus : null,
+  let tagAdjustment = 0;
+  if (opts.promptTags) {
+    const items = [...(actor.items ?? [])];
+    if (category === "ppd") {
+      const raceItem = items.find((i) => i.type === "race");
+      const delta = poisonSaveAdjustment(
+        raceItem ? normalizeSubrace((raceItem.system as { subrace?: never }).subrace).flatSaveBonus : null,
+      );
+      if (delta !== 0) {
+        const isPoison = await askSaveQuestion("ADND2E.chat.save.poisonPromptTitle", "ADND2E.chat.save.poisonPrompt");
+        if (isPoison === null) return false;
+        if (isPoison) tagAdjustment += delta;
+      }
+    }
+    const charmBonus = enchantmentCharmSaveBonus(
+      items.filter((i) => i.type === "class").map((i) => (i.system as { chassisId: string }).chassisId),
     );
-    if (delta !== 0) {
-      const isPoison = await foundry.applications.api.DialogV2.confirm({
-        window: { title: game.i18n!.localize("ADND2E.chat.save.poisonPromptTitle") },
-        content: `<p>${game.i18n!.localize("ADND2E.chat.save.poisonPrompt")}</p>`,
-        rejectClose: false,
-      });
-      if (isPoison === null) return false; // dismissed: no roll
-      if (isPoison) poisonAdjustment = delta;
+    if (charmBonus !== 0) {
+      const isCharm = await askSaveQuestion("ADND2E.chat.save.charmPromptTitle", "ADND2E.chat.save.charmPrompt");
+      if (isCharm === null) return false;
+      if (isCharm) tagAdjustment += charmBonus;
     }
   }
-  const modifier = save.rollModifier + poisonAdjustment + (opts.penalty ?? 0);
+  const modifier = save.rollModifier + tagAdjustment + (opts.penalty ?? 0);
   const roll = await new Roll(`1d20${modifier ? (modifier > 0 ? ` + ${modifier}` : ` - ${Math.abs(modifier)}`) : ""}`).evaluate();
   const naturalD20 = roll.dice[0]?.total ?? 0;
   const context = buildSaveCardContext({
