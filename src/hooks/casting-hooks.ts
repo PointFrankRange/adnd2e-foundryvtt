@@ -6,19 +6,35 @@ import { disruptCasting, readCasting } from "../sheets/character/casting-actions
 /* ---------------------------------------------------------------------------
  * casting-hooks — SP9a. Automatic spell disruption (PHB p.86) and cleanup.
  *
- * Every handler runs ONLY on the active GM's client (`game.user.isActiveGM`,
+ * The disruption handlers run on ONE client: the active GM's (`game.user.isActiveGM`,
  * v14.364 client/documents/user.mjs:86), so it works whoever applied the damage
- * or rolled the save, and never asks a player for permissions they lack.
+ * or rolled the save; with no GM connected, the designated connected owner of the
+ * caster (see handlesDisruption). The combat-cleanup handlers are GM-only.
  * Registered once from the `ready` hook.
  * ------------------------------------------------------------------------- */
 
+interface DesignatedUsers {
+  activeGM: unknown;
+  getDesignatedUser(condition: (user: { active: boolean }) => boolean): unknown;
+}
+
+/**
+ * Whether THIS client reacts to a change on `actor`: the active GM when one is connected; with no GM,
+ * the designated connected owner of that actor, so exactly one client acts (v14.364 users.mjs:70-90).
+ */
+const handlesDisruption = (actor: unknown): boolean => {
+  const users = game.users as unknown as DesignatedUsers;
+  if (users.activeGM) return Boolean((game.user as unknown as { isActiveGM?: boolean } | null)?.isActiveGM);
+  const doc = actor as { testUserPermission(user: unknown, level: string): boolean };
+  return users.getDesignatedUser((u) => u.active && doc.testUserPermission(u, "OWNER")) === game.user;
+};
 const isActiveGm = (): boolean => Boolean((game.user as unknown as { isActiveGM?: boolean } | null)?.isActiveGM);
 const ruleOn = (): boolean => expandedCastingTimeEnabled(getOptionalRules());
 
 export function registerCastingHooks(): void {
   // Hit-point loss while casting disrupts; healing raises the recorded value.
   Hooks.on("updateActor", (actor: unknown, changed: unknown) => {
-    if (!isActiveGm() || !ruleOn()) return;
+    if (!ruleOn() || !handlesDisruption(actor)) return;
     const doc = actor as Parameters<typeof readCasting>[0] & { update(d: Record<string, unknown>): Promise<unknown> };
     const casting = readCasting(doc);
     if (!casting) return;
@@ -30,13 +46,13 @@ export function registerCastingHooks(): void {
 
   // A failed saving throw while casting disrupts (the save card is flagged by rollSave).
   Hooks.on("createChatMessage", (message: unknown) => {
-    if (!isActiveGm() || !ruleOn()) return;
+    if (!ruleOn()) return;
     const flag = (message as { getFlag(scope: string, key: string): unknown }).getFlag(SYSTEM_ID, "save") as
       | { actorUuid?: string; success?: boolean }
       | undefined;
     if (!flag || flag.success !== false || !flag.actorUuid) return;
     const actor = foundry.utils.fromUuidSync(flag.actorUuid) as Parameters<typeof readCasting>[0] | null;
-    if (actor && readCasting(actor)) void disruptCasting(actor as never, { announce: true });
+    if (actor && readCasting(actor) && handlesDisruption(actor)) void disruptCasting(actor as never, { announce: true });
   });
 
   // A combatant removed from a running combat loses its cast with it (no card — nothing was disrupted).

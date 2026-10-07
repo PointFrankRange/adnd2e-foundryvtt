@@ -63,6 +63,8 @@ export interface CastingState {
   segments: number | null;
   /** hit points when the cast began (raised by healing); a drop below this disrupts */
   hp: number;
+  /** segments added to the caster's already-rolled initiative; undefined/null = none (a disruption takes this back) */
+  initiativeApplied?: number | null;
 }
 
 /** Whether the caster may complete the cast now. */
