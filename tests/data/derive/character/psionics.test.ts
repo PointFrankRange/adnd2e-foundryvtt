@@ -30,6 +30,53 @@ describe("derivePsionics", () => {
   });
 });
 
+describe("derivePsionics wild talents", () => {
+  const one = [{ initialCost: 7, maintenanceCost: 4 }];
+  const fighter3 = [{ chassisId: "fighter", level: 3 }];
+  it("a level 3 character found at level 2 with one power (7 / 4): 23 + 4 = 27", () => {
+    const d = derivePsionics({ classes: fighter3, scores, wild: { found: true, levelAtDiscovery: 2, powers: one } });
+    expect(d).toEqual({ wild: true, level: 3, max: 27, row: powerProgression(3) });
+  });
+  it("found at level 3 at level 3: 23", () => {
+    expect(derivePsionics({ classes: fighter3, scores, wild: { found: true, levelAtDiscovery: 3, powers: one } })?.max).toBe(23);
+  });
+  it("never goes negative when the level is below the discovery level; two powers add; no powers is 0", () => {
+    expect(derivePsionics({ classes: fighter3, scores, wild: { found: true, levelAtDiscovery: 5, powers: one } })?.max).toBe(23);
+    expect(derivePsionics({ classes: fighter3, scores, wild: { found: true, levelAtDiscovery: 3, powers: [...one, { initialCost: 3, maintenanceCost: 0 }] } })?.max).toBe(26);
+    expect(derivePsionics({ classes: fighter3, scores, wild: { found: true, levelAtDiscovery: 3, powers: [] } })?.max).toBe(0);
+  });
+  it("uses the highest class level of a multiclass", () => {
+    const d = derivePsionics({ classes: [{ chassisId: "fighter", level: 2 }, { chassisId: "mage", level: 5 }], scores, wild: { found: true, levelAtDiscovery: 4, powers: [] } });
+    expect(d?.level).toBe(5);
+    expect(d?.max).toBe(4);
+  });
+  it("a psionicist is unaffected by wild data (wild false, the normal max)", () => {
+    const d = derivePsionics({ classes: [{ chassisId: "psionicist", level: 5 }], scores, wild: { found: true, levelAtDiscovery: 1, powers: one } });
+    expect(d?.wild).toBe(false);
+    expect(d?.max).toBe(73);
+  });
+  it("is null when not found, when there is no class entry, or without wild data", () => {
+    expect(derivePsionics({ classes: fighter3, scores, wild: { found: false, levelAtDiscovery: 0, powers: one } })).toBeNull();
+    expect(derivePsionics({ classes: [], scores, wild: { found: true, levelAtDiscovery: 0, powers: one } })).toBeNull();
+    expect(derivePsionics({ classes: fighter3, scores })).toBeNull();
+  });
+  it("deriveCharacter threads the snapshot's wildTalent through (and a psionicist reports wild false)", () => {
+    const s = (chassisId: "psionicist" | "fighter"): ActorSnapshot => ({
+      abilities: { str: 12, dex: 12, con: 16, int: 12, wis: 17, cha: 12 },
+      exceptionalStrengthPercentile: null,
+      race: "human",
+      classes: [{ chassisId, specialistSchool: null, xp: 4000, hpRolls: [], dualClassState: null, level: 3 }],
+      equippedArmor: null, equippedShield: null, carriedWeight: 0, wizardMemorized: [], priestMemorized: [],
+      spentWeaponSlots: 0, spentNonweaponSlots: 0, baseMovement: 12, thiefSkillAllocations: [], traits: [], isCasting: false,
+      wildTalent: { found: true, levelAtDiscovery: 2, powers: one },
+    });
+    const wild = deriveCharacter(s("fighter"), DEFAULT_OPTIONAL_RULES).psionics;
+    expect(wild?.wild).toBe(true);
+    expect(wild?.max).toBe(27);
+    expect(deriveCharacter(s("psionicist"), DEFAULT_OPTIONAL_RULES).psionics?.wild).toBe(false);
+  });
+});
+
 describe("deriveCharacter psionics", () => {
   const snap = (chassisId: "psionicist" | "fighter", xp: number): ActorSnapshot => ({
     abilities: { str: 12, dex: 12, con: 16, int: 12, wis: 17, cha: 12 },

@@ -113,17 +113,19 @@ export function validateItemDrop(input: DropCheckInput): DropVerdict {
 
 export interface PowerDropActor {
   /** the derived psionic level cache (0 = no psionics, e.g. no psionicist class or one that is dormant in a dual-class) */
-  system: { psionics: { level: number } };
+  system: { psionics: { level: number; wild?: boolean } };
   items: Iterable<{ id: string; name?: string; type: string; system: Record<string, unknown> }>;
 }
 
 export type PowerDropVerdict = { ok: true } | { ok: false; messageKey: string };
 
 /** SP15: a `power` item may be dropped only on a psionicist, and only when the Table 4 totals and the learning rules allow it. Any other item type is not this rule's business. */
-export function checkPowerDrop(actor: PowerDropActor, item: { type: string; name?: string; system: Record<string, unknown> }): PowerDropVerdict {
+export function checkPowerDrop(actor: PowerDropActor, item: { type: string; name?: string; system: Record<string, unknown> }, isGM = false): PowerDropVerdict {
   if (item.type !== "power") return { ok: true };
   const level = actor.system.psionics.level;
   if (level <= 0) return { ok: false, messageKey: "ADND2E.sheet.psionics.noClass" };
+  // SP15 Plan D: a wild talent only has what its table results gave it (the GM may grant a power by hand, outside the Table 4 budget)
+  if (actor.system.psionics.wild) return isGM ? { ok: true } : { ok: false, messageKey: "ADND2E.sheet.psionics.wildNoLearn" };
   const owned = [...actor.items].filter((i) => i.type === "power");
   const name = (item.name ?? "").trim().toLowerCase();
   if (name !== "" && owned.some((i) => (i.name ?? "").trim().toLowerCase() === name)) return { ok: false, messageKey: "ADND2E.sheet.psionics.alreadyKnown" };

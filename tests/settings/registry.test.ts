@@ -3,14 +3,14 @@ import { SETTING_DESCRIPTORS, readOptionalRules, type SettingDescriptor } from "
 import { DEFAULT_OPTIONAL_RULES } from "../../src/core/options";
 
 describe("SETTING_DESCRIPTORS", () => {
-  it("registers 25 settings across the 4 groups", () => {
-    expect(SETTING_DESCRIPTORS).toHaveLength(25);
+  it("registers 26 settings across the 4 groups", () => {
+    expect(SETTING_DESCRIPTORS).toHaveLength(26);
     const byGroup = SETTING_DESCRIPTORS.reduce<Record<string, number>>((acc, d) => {
       acc[d.group] = (acc[d.group] ?? 0) + 1;
       return acc;
     }, {});
     expect(byGroup).toEqual({
-      core: 10,
+      core: 11,
       combatAndTactics: 6,
       skillsAndPowers: 4,
       spellsAndMagic: 5,
@@ -28,7 +28,7 @@ describe("SETTING_DESCRIPTORS", () => {
 
   it("core, combatAndTactics, skillsAndPowers and spellsAndMagic settings bind 1:1 to OptionalRules fields (exceedLevelLimits is a string choice, not a descriptor)", () => {
     const bound = SETTING_DESCRIPTORS.filter((d) => d.optionalRulesKey !== null);
-    expect(bound).toHaveLength(25);
+    expect(bound).toHaveLength(26);
     const boundKeys = bound.map((d) => d.optionalRulesKey).sort();
     const expectedKeys = Object.keys(DEFAULT_OPTIONAL_RULES)
       .filter((k) => k !== "exceedLevelLimits") // string choice, handled separately
@@ -38,8 +38,8 @@ describe("SETTING_DESCRIPTORS", () => {
     expect(unbound).toEqual([]);
   });
 
-  it("exactly the ten prepare-time rules require a world reload", () => {
-    const reload = ["channelers", "channellerFatigue", "characterPointBuild", "expandedCastingTime", "primeRequisiteBonusLevels", "racialLevelLimits", "skillsAndPowersEnabled", "spellPoints", "spellsAndMagicEnabled", "subAbilityScores"];
+  it("exactly the eleven prepare-time rules require a world reload", () => {
+    const reload = ["channelers", "channellerFatigue", "characterPointBuild", "expandedCastingTime", "primeRequisiteBonusLevels", "racialLevelLimits", "skillsAndPowersEnabled", "spellPoints", "spellsAndMagicEnabled", "subAbilityScores", "wildTalents"];
     const keys = SETTING_DESCRIPTORS.filter((d) => d.requiresReload === true).map((d) => d.key);
     expect(keys.sort()).toEqual(reload);
     for (const d of SETTING_DESCRIPTORS) {
@@ -90,6 +90,11 @@ describe("readOptionalRules()", () => {
     const bag = readOptionalRules((key) => (key === "subAbilityScores" ? true : undefined));
     expect(bag.subAbilityScores).toBe(true);
     expect(bag.skillsAndPowersEnabled).toBe(false); // untouched default
+  });
+
+  it("reads the SP15 wildTalents setting (default false, true when set)", () => {
+    expect(readOptionalRules(() => undefined).wildTalents).toBe(false);
+    expect(readOptionalRules((k) => (k === "wildTalents" ? true : undefined)).wildTalents).toBe(true);
   });
 
   it("reads the SP13 level-limit settings (racialLevelLimits defaults ON; exceedLevelLimits maps off/x2/x3/x4 to 0/2/3/4; garbage = 0)", () => {

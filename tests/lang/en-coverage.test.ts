@@ -839,6 +839,8 @@ describe("lang/en.json — SP12 Plan A (subrace)", () => {
 describe("lang/en.json — SP13 level-limit settings and sheet keys", () => {
   it("resolves the level-limit settings name and hint keys", () => {
     for (const key of [
+      "ADND2E.settings.wildTalents.name",
+      "ADND2E.settings.wildTalents.hint",
       "ADND2E.settings.racialLevelLimits.name",
       "ADND2E.settings.racialLevelLimits.hint",
       "ADND2E.settings.primeRequisiteBonusLevels.name",
@@ -862,7 +864,7 @@ describe("lang/en.json - SP15 psionics", () => {
     const keys = [
       ...["roll", "special", "cost", "remaining"].map((k) => `ADND2E.chat.psionic.${k}`),
       ...["success", "minimum-success", "failure", "automatic-failure"].map((k) => `ADND2E.chat.psionic.result.${k}`),
-      ...["noClass", "notEnoughPsp", "restBlocked", "maintenanceEnded", "relearned", "alreadyKnown", "pcOnly", "adjust", "adjustHint"].map((k) => `ADND2E.sheet.psionics.${k}`),
+      ...["noClass", "notEnoughPsp", "restBlocked", "maintenanceEnded", "relearned", "alreadyKnown", "pcOnly", "adjust", "adjustHint", "wildNoLearn"].map((k) => `ADND2E.sheet.psionics.${k}`),
       "ADND2E.sheet.tabs.psionics",
       ...["title", "psp", "rest", "hours", "maintained", "payMaintenance", "payAll", "end", "use", "relearn", "score", "cost", "maintenance", "primary", "defense", "noPowers"].map((k) => `ADND2E.sheet.psionics.${k}`),
       ...["hard", "light", "rest", "sleep"].map((k) => `ADND2E.sheet.psionics.activity.${k}`),

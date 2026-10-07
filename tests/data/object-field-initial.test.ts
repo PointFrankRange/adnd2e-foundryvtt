@@ -33,6 +33,18 @@ describe("SP15 Plan C psionics.activeDefense / contacts initials", () => {
   });
 });
 
+describe("SP15 Plan D wildTalent schema", () => {
+  it("declares tested/found false and levelAtDiscovery 0, and a cached psionics.wild false (no object/array literal initial)", () => {
+    const at = SRC.indexOf("wildTalent: new SchemaField");
+    expect(at).toBeGreaterThan(-1);
+    const body = SRC.slice(at, at + 500);
+    expect(body).toContain("tested: new BooleanField({ required: true, initial: false })");
+    expect(body).toContain("found: new BooleanField({ required: true, initial: false })");
+    expect(body).toContain("levelAtDiscovery: new NumberField({ required: true, integer: true, min: 0, initial: 0 })");
+    expect(SRC).toContain("wild: new BooleanField({ required: true, initial: false })");
+  });
+});
+
 describe("SP15 psionics.maintained initial", () => {
   it("is declared with a function initial, not a shared array literal", () => {
     const at = SRC.indexOf("maintained: new ArrayField");

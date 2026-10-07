@@ -89,6 +89,8 @@ export interface PsionicsInput {
   psp: number | null;
   max: number;
   level: number;
+  /** SP15 Plan D: the pool is a wild talent's (no Table 4 budget, no relearning); absent = false */
+  wild?: boolean;
   maintained: { powerId: string }[];
   /** SP15 Plan C: the raised defense-mode power id ("" = none) */
   activeDefense: string;
@@ -122,6 +124,8 @@ export interface PsionicsView {
   psp: number;
   max: number;
   level: number;
+  /** SP15 Plan D: the pool is a wild talent's */
+  wild: boolean;
   row: PowerProgressionRow;
   primary: Discipline | null;
   activities: RecoveryActivity[];

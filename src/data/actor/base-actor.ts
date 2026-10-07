@@ -217,6 +217,14 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
       ),
       max: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       level: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+      /** SP15 Plan D: derived cache, true when the PSP pool is a wild talent's (not a psionicist's). */
+      wild: new BooleanField({ required: true, initial: false }),
+    }),
+    /** SP15 Plan D: wild-talent state. `tested` = the one-time test was made; `found` = it succeeded; `levelAtDiscovery` = the class level when it was found (PSP grow 4 per level after). */
+    wildTalent: new SchemaField({
+      tested: new BooleanField({ required: true, initial: false }),
+      found: new BooleanField({ required: true, initial: false }),
+      levelAtDiscovery: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
     }),
     spellcasting: new SchemaField({
       wizard: new SchemaField({
@@ -380,7 +388,7 @@ interface DerivedWriteSurface {
   proficiencies: unknown;
   thiefSkills: { total: number; spent: number; available: number; allocations: unknown };
   languagesKnown: unknown;
-  psionics: { max: number; level: number };
+  psionics: { max: number; level: number; wild: boolean };
   spellcasting: { wizard: { slots: unknown; spellPoints: unknown; channelling: { max: unknown } }; priest: { slots: unknown; spellPoints: unknown; channelling: { max: unknown } } };
 }
 
@@ -439,6 +447,7 @@ export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void 
   if (derived.channelling.priest) sys.spellcasting.priest.channelling.max = derived.channelling.priest.max;
   sys.psionics.max = derived.psionics?.max ?? 0;
   sys.psionics.level = derived.psionics?.level ?? 0;
+  sys.psionics.wild = derived.psionics?.wild ?? false;
   // SP11 Plan C: a kit that switches casting off must also CLEAR the cached derived records (the writes above only run when something was derived, so stale values would otherwise linger).
   for (const key of ["wizard", "priest"] as const) {
     if (!derived.castingDisabled[key]) continue;

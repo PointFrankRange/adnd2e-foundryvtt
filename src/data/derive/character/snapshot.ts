@@ -84,6 +84,8 @@ export interface ActorSnapshot {
   traits: readonly TraitEntry[];
   /** SP11: the effects of every active kit — applied regardless of the character-point rule (absent = none) */
   kitEffects?: readonly TraitEffect[];
+  /** SP15 Plan D: the actor's wild-talent state plus its owned power items' costs (absent = no wild talent) */
+  wildTalent?: { found: boolean; levelAtDiscovery: number; powers: readonly { initialCost: number; maintenanceCost: number }[] };
   /** true while `system.options.spellsAndMagic.casting` is set — honoured only while the casting-time rule is on */
   isCasting: boolean;
 }

@@ -3377,6 +3377,16 @@ describe("buildPsionicsView (SP15 Plan A)", () => {
     expect(v.maintained).toEqual([{ powerId: "a", name: "a", cost: 2, unit: "round" }]);
   });
 
+  it("a wild talent has no Table 4 problems and offers no relearn", () => {
+    const over = { ...base({ level: 1 }), powers: ["d1", "d2", "d3", "d4"].map((id) => pw({ id })) };
+    expect(buildPsionicsView(over)!.problems.length).toBeGreaterThan(0);
+    expect(buildPsionicsView(over)!.wild).toBe(false);
+    const v = buildPsionicsView({ ...over, wild: true })!;
+    expect(v.wild).toBe(true);
+    expect(v.problems).toEqual([]);
+    expect(v.groups.flatMap((g) => g.powers).every((p) => p.canRelearn === false)).toBe(true);
+  });
+
   it("flags every over-budget total and only relearn within budget", () => {
     const fine = buildPsionicsView(base({ level: 5 }))!;
     expect(fine.problems).toEqual([]);

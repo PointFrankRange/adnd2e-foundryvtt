@@ -557,7 +557,7 @@ export class Adnd2eCharacterSheet extends Base {
     }
 
     const rules = getOptionalRules();
-    const psionicSys = (actor.system as { psionics: { psp: number | null; max: number; level: number; maintained: { powerId: string }[]; activeDefense: string; contacts: Contact[] }; abilities: Record<string, { score: number }> }); 
+    const psionicSys = (actor.system as { psionics: { psp: number | null; max: number; level: number; wild?: boolean; maintained: { powerId: string }[]; activeDefense: string; contacts: Contact[] }; abilities: Record<string, { score: number }> }); 
     const actorStatuses = (this.document as unknown as { statuses: ReadonlySet<string> }).statuses;
     const fatigueTier = [...actorStatuses].map(tierForConditionId).find((t) => t !== null) ?? null;
     return {
@@ -602,6 +602,7 @@ export class Adnd2eCharacterSheet extends Base {
             psp: psionicSys.psionics.psp,
             max: psionicSys.psionics.max,
             level: psionicSys.psionics.level,
+            wild: psionicSys.psionics.wild ?? false,
             maintained: psionicSys.psionics.maintained,
             activeDefense: psionicSys.psionics.activeDefense ?? "",
             contacts: psionicSys.psionics.contacts ?? [],
@@ -705,7 +706,7 @@ export class Adnd2eCharacterSheet extends Base {
     }
 
     if (dropped.type === "power" && isNewDrop) {
-      const powerVerdict = checkPowerDrop(this.document as never, dropped as never);
+      const powerVerdict = checkPowerDrop(this.document as never, dropped as never, (game as unknown as { user: { isGM: boolean } }).user.isGM);
       if (!powerVerdict.ok) {
         ui.notifications?.warn(game.i18n!.localize(powerVerdict.messageKey));
         return null;

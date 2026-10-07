@@ -113,6 +113,7 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
   const psp = Math.min(input.psp ?? input.max, input.max);
   const known: KnownPower[] = input.powers.map((p) => ({ id: p.id, name: p.name, discipline: p.discipline, kind: p.kind, scoreBonus: p.scoreBonus }));
   const row = powerProgression(input.level);
+  const wild = input.wild ?? false;
   const toRow = (p: PsionicsInput["powers"][number]): PsionicPowerRow => ({
     id: p.id,
     name: p.name,
@@ -125,7 +126,7 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
     range: p.range,
     scoreBonus: p.scoreBonus,
     canUse: psp >= p.initialCost,
-    canRelearn: canRelearn(known, p.id, input.level).ok,
+    canRelearn: !wild && canRelearn(known, p.id, input.level).ok,
     isAttackMode: isAttackMode(p.name),
   });
   const byId = new Map(input.powers.map((p) => [p.id, p]));
@@ -136,7 +137,7 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
   const defenses = input.powers.filter((p) => p.kind === "defense" && isDefenseMode(p.name)).map((p) => ({ id: p.id, name: p.name, selected: p.id === input.activeDefense }));
   const used = (kind: PsionicPowerRow["kind"]): number => known.filter((k) => k.kind === kind).reduce((n, k) => n + 1 + k.scoreBonus, 0);
   const disciplinesHeld = new Set(known.filter((k) => k.kind !== "defense").map((k) => k.discipline)).size;
-  const problems = [
+  const problems = wild ? [] : [
     ...(disciplinesHeld > row.disciplines ? ["ADND2E.sheet.psionics.problem.disciplines"] : []),
     ...(used("science") > row.sciences ? ["ADND2E.sheet.psionics.problem.sciences"] : []),
     ...(used("devotion") > row.devotions ? ["ADND2E.sheet.psionics.problem.devotions"] : []),
@@ -146,6 +147,7 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
     psp,
     max: input.max,
     level: input.level,
+    wild,
     row,
     primary: primaryDiscipline(known),
     activities: [...PSIONIC_ACTIVITIES],
