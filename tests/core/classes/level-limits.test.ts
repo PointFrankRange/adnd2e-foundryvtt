@@ -83,6 +83,15 @@ describe("xpToNextWithRules", () => {
   it("no limit past the XP table is the existing end-of-table result", () => {
     expect(xpToNextWithRules(druid, 99_000_000, NO_LEVEL_RULES)).toEqual({ level: 14, next: null, toNextLevel: null, pct: 1, atLimit: false });
   });
+  it("past the XP table a class that can still advance shows the extrapolated next threshold (#107)", () => {
+    const top = fighter.xpThresholds[fighter.xpThresholds.length - 1];
+    const lvl20 = xpToNextWithRules(fighter, top, { limit: 20, beyondMultiplier: 2 });
+    expect(lvl20).toMatchObject({ level: 20, next: top + 2 * fighter.xpPerLevelBeyond20, atLimit: false });
+    expect(xpToNextWithRules(fighter, top, NO_LEVEL_RULES).next).toBeNull(); // no exceed rule: unchanged
+  });
+  it("a class with a maxLevel stops at it even past the table rule", () => {
+    expect(xpToNextWithRules(druid, 99_000_000, { limit: 14, beyondMultiplier: 2 }).next).toBeNull();
+  });
   it("is clamped to 0..1 even when xp sits below the band start", () => {
     expect(xpToNextWithRules(fighter, 0, NO_LEVEL_RULES).pct).toBe(0);
   });

@@ -863,9 +863,12 @@
         "applyToTargets": "Apply to Targeted Token(s)",
         "noTargetsWarning": "No token is targeted — nothing to apply damage to.",
         "notOwnerWarning": "You don't have permission to apply damage to one or more targeted tokens.",
-        "sourceNotFoundWarning": "The attacker or weapon for this roll no longer exists — nothing to roll damage from."
+        "sourceNotFoundWarning": "The attacker or weapon for this roll no longer exists — nothing to roll damage from.",
+        "badFormulaWarning": "{name}'s damage formula \"{formula}\" couldn't be rolled — check it for typos."
       },
       "save": {
+        "poisonPromptTitle": "Poison save?",
+        "poisonPrompt": "Is this save against poison? (Your race's save bonus is one point lower against poison.)",
         "success": "Success", "failure": "Failure"
       },
       "cast": {

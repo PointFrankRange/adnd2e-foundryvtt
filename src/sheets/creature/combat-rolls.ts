@@ -249,8 +249,19 @@ async function rollCreatureAttack(actor: CreatureActor, source: AttackSource): P
     // `damage` field was left blank) — skipping the roll in both cases,
     // rather than calling `new Roll("")`, is this refactor's one intentional
     // behavior change from the pre-Task-3 code; see the Task 3 report.
+    // A typo'd formula (e.g. "1d8+") throws on evaluate — warn, skip damage.
+    let rolledDamage: Roll | null = null;
     if (damageFormula) {
-      const damageRoll = await new Roll(damageFormula).evaluate();
+      try {
+        rolledDamage = await new Roll(damageFormula).evaluate();
+      } catch {
+        ui.notifications?.warn(
+          game.i18n!.format("ADND2E.chat.damage.badFormulaWarning", { name: source.name, formula: damageFormula }),
+        );
+      }
+    }
+    const damageRoll = rolledDamage;
+    if (damageRoll) {
       const flavor = game.i18n!.format("ADND2E.chat.creature.damageFlavor", { name: source.name });
       const renderDamage = (total: number, crit: boolean) =>
         foundry.applications.handlebars.renderTemplate(TEMPLATE_PATH("chat/creature-damage.hbs"), {

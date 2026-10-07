@@ -61,7 +61,15 @@ async function onRollDamage(button: HTMLButtonElement): Promise<void> {
     specializationBonus: specializationBonus ? Number(specializationBonus) : 0,
   });
   const formula = damageFormula(dice, damageBonus);
-  const roll = await new Roll(formula).evaluate();
+  // The dice string is author-entered with no format validation, so a typo
+  // like "1d8+" throws here — warn instead of failing silently.
+  let roll: Roll;
+  try {
+    roll = await new Roll(formula).evaluate();
+  } catch {
+    ui.notifications?.warn(game.i18n!.format("ADND2E.chat.damage.badFormulaWarning", { name: weapon.name, formula }));
+    return;
+  }
   const rolledBaseDamage = (roll.total ?? 0) - damageBonus;
 
   const context = buildDamageCardContext({

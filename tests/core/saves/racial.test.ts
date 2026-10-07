@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { racialConSaveBonus, racialSaveBonus, racialSaveModifier, sleepCharmResistance } from "../../../src/core/saves/racial";
+import { racialConSaveBonus, racialSaveBonus, poisonSaveAdjustment, racialSaveModifier, sleepCharmResistance } from "../../../src/core/saves/racial";
 import type { Race, SaveCategory } from "../../../src/core/types";
 
 describe("racialConSaveBonus", () => {
@@ -118,5 +118,16 @@ describe("racialSaveModifier (SP12 Plan C)", () => {
   it("still validates the Constitution score on both paths", () => {
     expect(() => racialSaveModifier({ race: "dwarf", category: "rsw", con: 0, flat })).toThrow();
     expect(() => racialSaveModifier({ race: "dwarf", category: "rsw", con: 0 })).toThrow();
+  });
+});
+
+describe("poisonSaveAdjustment (#105)", () => {
+  it("is the poison-vs-all difference of a flat bonus", () => {
+    expect(poisonSaveAdjustment({ all: 3, poison: 2 })).toBe(-1);
+    expect(poisonSaveAdjustment({ all: 3, poison: 3 })).toBe(0);
+  });
+  it("is 0 with no flat bonus", () => {
+    expect(poisonSaveAdjustment(null)).toBe(0);
+    expect(poisonSaveAdjustment(undefined)).toBe(0);
   });
 });

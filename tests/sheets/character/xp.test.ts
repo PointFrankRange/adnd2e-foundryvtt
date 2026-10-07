@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { awardXpSplit, xpToNext } from "../../../src/sheets/character/xp";
+import { awardXpSplit, derivedClassState, xpToNext } from "../../../src/sheets/character/xp";
 
 describe("xpToNext", () => {
   it("a level-1 fighter with 0 xp needs the level-2 threshold", () => {
@@ -47,5 +47,17 @@ describe("awardXpSplit", () => {
   });
   it("zero or negative class count yields 0 (guard)", () => {
     expect(awardXpSplit(3000, 0)).toBe(0);
+  });
+});
+
+describe("derivedClassState (#106)", () => {
+  const item = { level: 4, canLevelUp: false };
+  it("prefers the actor's derived entry for the chassis", () => {
+    const derived = [{ chassisId: "mage", level: 1, canLevelUp: false }, { chassisId: "fighter", level: 5, canLevelUp: true }];
+    expect(derivedClassState(derived, "fighter", item)).toEqual({ level: 5, canLevelUp: true });
+  });
+  it("falls back to the item's own values with no derived entry", () => {
+    expect(derivedClassState(undefined, "fighter", item)).toEqual(item);
+    expect(derivedClassState([], "fighter", item)).toEqual(item);
   });
 });

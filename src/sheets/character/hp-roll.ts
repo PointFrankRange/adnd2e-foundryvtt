@@ -1,5 +1,6 @@
 import { getChassis } from "../../core/classes/chassis";
 import type { ClassId } from "../../core/types";
+import { derivedClassState } from "./xp";
 
 /* ---------------------------------------------------------------------------
  * rollHitPoints — SP2 Task 8.
@@ -11,7 +12,13 @@ import type { ClassId } from "../../core/types";
 
 interface ClassItemLike {
   system: { chassisId: ClassId; hpRolls: number[]; canLevelUp?: boolean };
-  parent: { name: string; system: { abilities: { con: { mods?: { hpAdjustment?: number } } } } } | null;
+  parent: {
+    name: string;
+    system: {
+      abilities: { con: { mods?: { hpAdjustment?: number } } };
+      classes?: { chassisId: string; level: number; canLevelUp: boolean }[];
+    };
+  } | null;
   name: string;
   update(data: Record<string, unknown>): Promise<unknown>;
 }
@@ -26,7 +33,12 @@ export async function rollHitPoints(
   classItem: ClassItemLike,
   { average = false } = {},
 ): Promise<void> {
-  if (!classItem.system.canLevelUp) return;
+  // The actor's derived classes are computed after Active Effects; the item's cached flag is not (#106).
+  const { canLevelUp } = derivedClassState(classItem.parent?.system.classes, classItem.system.chassisId, {
+    level: 0,
+    canLevelUp: Boolean(classItem.system.canLevelUp),
+  });
+  if (!canLevelUp) return;
   const die = getChassis(classItem.system.chassisId).hitDie;
   const conAdj = classItem.parent?.system.abilities.con.mods?.hpAdjustment ?? 0;
   const con = signed(conAdj);
