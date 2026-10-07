@@ -224,11 +224,20 @@ export async function completeCasting(actor: CastingActor): Promise<void> {
 /** Disrupts (announce: posts "spell lost") or cancels the cast. The memorized entry stays expended either way. */
 export async function disruptCasting(actor: CastingActor, opts: { announce: boolean }): Promise<void> {
   const casting = readCasting(actor);
-  if (!casting) return;
-  await actor.update({ "system.options.spellsAndMagic.casting": null });
-  if (opts.announce) await postNotice(actor, actor.items.get(casting.spellItemId), "lost", casting);
-  await clearCombatantFlag(casting.combatId, actor);
+  // Two near-simultaneous disruptions (e.g. damage and a failed save) both read the cast before
+  // either clears it; the in-flight guard lets only the first through, so one "spell lost" card.
+  if (!casting || disrupting.has(actor.id)) return;
+  disrupting.add(actor.id);
+  try {
+    await actor.update({ "system.options.spellsAndMagic.casting": null });
+    if (opts.announce) await postNotice(actor, actor.items.get(casting.spellItemId), "lost", casting);
+    await clearCombatantFlag(casting.combatId, actor);
+  } finally {
+    disrupting.delete(actor.id);
+  }
 }
+
+const disrupting = new Set<string>();
 
 /** The sheet's casting status — null while idle or while the rule is off. */
 export function readCastingStatus(actor: CastingActor): CastingStatusInput | null {
