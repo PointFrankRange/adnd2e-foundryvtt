@@ -178,6 +178,19 @@
       "doneWithFailures": "AD&D 2E: imported {created} of {total} document(s); {failed} failed — see the console."
     },
     "sheet": {
+      "wildTalent": {
+        "settingOff": "Wild talents are not enabled in this world.",
+        "psionicist": "A psionicist does not test for a wild talent.",
+        "alreadyTested": "This character has already tested for a wild talent.",
+        "alreadyFound": "This character already has a wild talent.",
+        "gmOnly": "Only a GM can reset the wild talent test.",
+        "foundToast": "A wild talent! {n} power(s) gained.",
+        "notFoundToast": "No wild talent.",
+        "resetDone": "The wild talent test can be taken again.",
+        "chooseTitle": "Choose a wild power",
+        "chooseHint": "Pick one power from the table result.",
+        "choose": "Choose"
+      },
       "psionics": {
         "title": "Psionics",
         "psp": "PSPs",
@@ -722,6 +735,34 @@
           "failure": "Failure",
           "automatic-failure": "Automatic failure"
         }
+      },
+      "wildTalent": {
+        "title": "Wild talent test",
+        "chance": "Chance",
+        "parts": "1 base + {wis} Wisdom + {con} Constitution + {int} Intelligence + {level} level = {total}",
+        "halved": "Halved (rounded up) for a mage, cleric or non-human.",
+        "roll": "Roll (d100)",
+        "surgeon": "psychic surgeon, counts as {effective}",
+        "found": "A wild talent!",
+        "notFound": "No wild talent.",
+        "powers": "Powers",
+        "noPowers": "No power was gained from the table results.",
+        "dire": "Dire consequence",
+        "direSave": "Save vs. death (modifier {penalty})",
+        "savePassed": "Saved. Nothing is lost.",
+        "saveFailed": "Failed.",
+        "lossAll": "Wisdom, Intelligence and Constitution all become 3, permanently.",
+        "lossPoints": "{ability} falls by {n} point(s), permanently.",
+        "apply": "Apply",
+        "applied": "Applied.",
+        "alreadyApplied": "This result has already been applied.",
+        "notYours": "Only the character's owner or a GM can apply this.",
+        "confirmTitle": "Apply the dire consequence?",
+        "confirm": "{actor}: {ability} {amount}. This permanently changes the base ability score.",
+        "allAbilities": "Wisdom, Intelligence and Constitution",
+        "toThree": "all become 3",
+        "lose": "lose {n} point(s)",
+        "ability": { "wis": "Wisdom", "int": "Intelligence", "con": "Constitution" }
       },
       "psionicContest": {
         "attackRoll": "Attack",

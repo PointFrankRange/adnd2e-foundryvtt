@@ -76,6 +76,16 @@ describe("registerPsionicHooks", () => {
     expect(rerendered).toEqual([msgs[0], msgs[0]]);
   });
 
+  it("re-renders only the matching actor's wild-talent cards when wildApplied changes", () => {
+    const wild = { getFlag: (_s: string, k: string) => (k === "wildTalent" ? { id: "w1", actorUuid: "Actor.att", dire: null } : undefined) };
+    const other = { getFlag: (_s: string, k: string) => (k === "wildTalent" ? { id: "w2", actorUuid: "Actor.other", dire: null } : undefined) };
+    (globalThis as unknown as { game: { messages: { contents: unknown[] } } }).game.messages.contents = [wild, other];
+    actorHandler({ uuid: "Actor.att" }, { flags: { adnd2e: { wildApplied: ["w1"] } } });
+    expect(rerendered).toEqual([wild]);
+    actorHandler({ uuid: "Actor.att" }, { "flags.adnd2e.wildApplied": ["w1"] });
+    expect(rerendered).toEqual([wild, wild]);
+  });
+
   it("ignores unrelated actor updates and survives a missing chat log or message list", () => {
     actorHandler({ uuid: "Actor.att" }, { name: "x" });
     actorHandler({ uuid: "Actor.att" }, { flags: { adnd2e: { other: 1 } } });

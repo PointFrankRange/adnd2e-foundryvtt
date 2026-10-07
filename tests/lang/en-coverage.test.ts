@@ -874,6 +874,8 @@ describe("lang/en.json - SP15 psionics", () => {
       ...["disciplines", "sciences", "devotions", "defenseModes"].map((k) => `ADND2E.sheet.psionics.problem.${k}`),
       ...["title", "defense", "noDefense", "raise", "drop", "contacts", "noContacts", "fullContact", "tangents", "payUpkeep", "end", "attack", "alreadyRaised", "noUpkeep", "tangentsBroken", "noTarget", "selfTarget", "alreadyFullContact"].map((k) => `ADND2E.sheet.psionics.combat.${k}`),
       ...["attackRoll", "defenseRoll", "against", "undefended", "notMade", "awaiting", "paid", "tangents", "rollDefense", "recordTangent", "notYourDefense", "alreadyAnswered", "alreadyRecorded", "recorded", "winner.attacker", "winner.defender", "reason.unopposed", "reason.attack-failed", "reason.automatic", "reason.attacker-only", "reason.higher", "reason.tie"].map((k) => `ADND2E.chat.psionicContest.${k}`),
+      ...["settingOff", "psionicist", "alreadyTested", "alreadyFound", "gmOnly", "foundToast", "notFoundToast", "resetDone", "chooseTitle", "chooseHint", "choose"].map((k) => `ADND2E.sheet.wildTalent.${k}`),
+      ...["title", "chance", "parts", "halved", "roll", "surgeon", "found", "notFound", "powers", "noPowers", "dire", "direSave", "savePassed", "saveFailed", "lossAll", "lossPoints", "apply", "applied", "alreadyApplied", "notYours", "confirmTitle", "confirm", "allAbilities", "toThree", "lose", "ability.wis", "ability.int", "ability.con"].map((k) => `ADND2E.chat.wildTalent.${k}`),
       ...["discipline-access", "science-limit", "devotion-limit", "defense-limit", "devotion-ratio", "primary-cap", "no-budget", "prerequisite", "min-level"].map((k) => `ADND2E.sheet.psionics.learn.${k}`),
     ];
     for (const key of keys) {
