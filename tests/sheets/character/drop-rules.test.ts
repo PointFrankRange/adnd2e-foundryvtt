@@ -265,3 +265,21 @@ describe("checkPowerDrop (SP15)", () => {
     expect(checkPowerDrop(psi(1, owned), dev("b"))).toEqual({ ok: true });
   });
 });
+
+describe("validateItemDrop — race/class eligibility", () => {
+  const base = { hasRace: false, existingChassisIds: [] as string[] };
+  it("rejects a class or race drop the race tables refuse, with the matching reason", () => {
+    expect(validateItemDrop({ ...base, dropType: "class", dropChassisId: "mage", raceClassVerdict: { ok: false, reason: "class" } }).reason)
+      .toBe("ADND2E.sheet.drop.raceClassNotAllowed");
+    expect(validateItemDrop({ ...base, dropType: "race", raceClassVerdict: { ok: false, reason: "multiclass" } }).reason)
+      .toBe("ADND2E.sheet.drop.raceMulticlassNotAllowed");
+  });
+  it("allows the drop on an ok verdict, and ignores an absent one", () => {
+    expect(validateItemDrop({ ...base, dropType: "class", dropChassisId: "fighter", raceClassVerdict: { ok: true } })).toEqual({ ok: true });
+    expect(validateItemDrop({ ...base, dropType: "class", dropChassisId: "fighter" })).toEqual({ ok: true });
+  });
+  it("still reports a duplicate before an eligibility failure", () => {
+    expect(validateItemDrop({ dropType: "class", dropChassisId: "fighter", hasRace: true, existingChassisIds: ["fighter"], raceClassVerdict: { ok: false, reason: "class" } }).reason)
+      .toBe("ADND2E.sheet.drop.duplicateClass");
+  });
+});

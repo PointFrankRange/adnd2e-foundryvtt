@@ -1,4 +1,5 @@
 import type { KitQualifyVerdict } from "../../core/kits";
+import type { RaceClassVerdict } from "../../core/races";
 import { canLearn, type Discipline, type KnownPower, type PowerKind } from "../../core/psionics";
 import { canAffordTrait } from "../../core/skills/character-points";
 
@@ -42,6 +43,8 @@ export interface DropCheckInput {
   availableCp?: number | null;
   /** disadvantage refund already counted against the cap */
   refundedSoFar?: number;
+  /** class/race drops: whether the race permits the resulting class set (absent = not checked: no race, rule off, or no classes) */
+  raceClassVerdict?: RaceClassVerdict;
   /** kit drops: the kit's class chassis */
   dropKitChassisId?: string;
   /** chassis of every `kit` item already on the actor */
@@ -60,14 +63,22 @@ export interface DropVerdict {
   reason?: string;
 }
 
+function raceClassRejection(input: DropCheckInput): DropVerdict | null {
+  const v = input.raceClassVerdict;
+  if (!v || v.ok) return null;
+  return { ok: false, reason: v.reason === "class" ? "ADND2E.sheet.drop.raceClassNotAllowed" : "ADND2E.sheet.drop.raceMulticlassNotAllowed" };
+}
+
 /** Which compendium/world items a character sheet accepts on drop, and why not. */
 export function validateItemDrop(input: DropCheckInput): DropVerdict {
   if (input.dropType === "race") {
-    return input.hasRace ? { ok: false, reason: "ADND2E.sheet.drop.duplicateRace" } : { ok: true };
+    if (input.hasRace) return { ok: false, reason: "ADND2E.sheet.drop.duplicateRace" };
+    return raceClassRejection(input) ?? { ok: true };
   }
   if (input.dropType === "class") {
     const dup = input.dropChassisId != null && input.existingChassisIds.includes(input.dropChassisId);
-    return dup ? { ok: false, reason: "ADND2E.sheet.drop.duplicateClass" } : { ok: true };
+    if (dup) return { ok: false, reason: "ADND2E.sheet.drop.duplicateClass" };
+    return raceClassRejection(input) ?? { ok: true };
   }
   if (input.dropType === "weaponProficiency") {
     if (input.kitForbidsProficiency) return { ok: false, reason: "ADND2E.sheet.drop.kitForbiddenProficiency" };

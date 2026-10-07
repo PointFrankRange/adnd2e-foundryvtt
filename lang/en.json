@@ -454,6 +454,8 @@
         "subraceRangeWarning": "This character's ability scores are outside the subrace's allowed range: {abilities}.",
         "duplicateRace": "This character already has a race.",
         "duplicateClass": "This character already has that class.",
+        "raceClassNotAllowed": "This character's race can't take that class.",
+        "raceMulticlassNotAllowed": "This character's race can't combine those classes.",
         "insufficientSlots": "Not enough proficiency slots available for that.",
         "duplicateWeaponProficiency": "This character already has that weapon proficiency.",
         "duplicateNonweaponProficiency": "This character already has that proficiency.",
@@ -1060,6 +1062,10 @@
         "x2": "Double experience",
         "x3": "Triple experience",
         "x4": "Quadruple experience"
+      },
+      "enforceRaceClassRestrictions": {
+        "name": "Enforce Race Class Restrictions",
+        "hint": "A character can only take the classes and multi-class combinations their race allows (PHB Table 8). Turn off to allow any class."
       },
       "primeRequisiteXpBonus": {
         "name": "Prime Requisite XP Bonus",
