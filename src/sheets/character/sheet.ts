@@ -1,7 +1,6 @@
 import { abilityScoresOf, activeKitEntries, actorLevelRulesFor, casterTypesDisabled, toKitEntries } from "../../data/derive/character/kits";
 import { buildPowerRows, kitForbidsProficiency, kitQualifies, resolveKitOverrides, type KitQualifications, type PowerUsage } from "../../core/kits";
-import { abilityRangeProblems, effectiveAbilityAdjustments, effectiveAbilityRanges, normalizeSubrace, raceDisplayName, type RawSubrace } from "../../core/races";
-import { applyRacialDeltas } from "../../core/abilities/racial-adjustments";
+import { normalizeSubrace, raceDisplayName, type RawSubrace } from "../../core/races";
 import { classLevelOf, resetKitPowers, resetPower, usePower } from "./kit-power-actions";
 import { ABILITY_KEYS } from "../../data/item/choices";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
@@ -10,7 +9,7 @@ import { getChassis } from "../../core/classes/chassis";
 import type { ManeuverId } from "../../core/combat/maneuvers";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
 import type { RawTraitEffect } from "../../core/skills/traits";
-import type { AbilityKey, AbilityScores, Alignment, ArmorType, ClassId, NonweaponGroup, Race, SaveCategory, ThiefSkill } from "../../core/types";
+import type { AbilityKey, Alignment, ArmorType, ClassId, NonweaponGroup, Race, SaveCategory, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
 import { tierForConditionId } from "../../core/magic/channeller-fatigue";
 import { rollAttack, rollSave } from "./combat-rolls";
@@ -44,6 +43,7 @@ import { seedSubAbilities } from "./sub-ability-actions";
 import { removeTrait, traitDropInputs, traitRefundCapped, type TraitDropInputs } from "./trait-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
 import { awardXpSplit, derivedClassState } from "./xp";
+import { warnSubraceRange } from "./subrace-warning";
 import { actorEquipmentRules, itemNotPermitted } from "../../data/derive/character/equipment-rules";
 import { bindSheetKit, clearSheetKit } from "../kit-dom";
 import { toggleFavoriteFlag } from "../kit-actions";
@@ -749,27 +749,7 @@ export class Adnd2eCharacterSheet extends Base {
       return null;
     }
 
-    const droppedLayer =
-      dropped.type === "race" && isNewDrop
-        ? normalizeSubrace((dropped.system as unknown as { subrace?: RawSubrace }).subrace)
-        : null;
-    // Only a race item that carries its OWN ability ranges (a subrace) warns; the six plain PHB races behave exactly as before.
-    if (droppedLayer?.abilityRanges) {
-      const layer = droppedLayer;
-      const raceId = ((dropped.system as unknown as { raceId?: Race }).raceId ?? "human") as Race;
-      const a = this.document as unknown as { system: { abilities: Record<AbilityKey, { score: number }> } };
-      const raw = Object.fromEntries(ABILITY_KEYS.map((k) => [k, a.system.abilities[k].score])) as unknown as AbilityScores;
-      const adjusted = applyRacialDeltas(raw, raceId, effectiveAbilityAdjustments(raceId, layer));
-      // Approximation: this uses the prepared ability scores, which may already include trait/effect modifiers. It only warns, never blocks.
-      const problems = abilityRangeProblems(adjusted, effectiveAbilityRanges(raceId, layer));
-      if (problems.length > 0) {
-        ui.notifications?.warn(
-          game.i18n!.format("ADND2E.sheet.drop.subraceRangeWarning", {
-            abilities: problems.map((k) => game.i18n!.localize((CONFIG as unknown as { ADND2E: { abilities: Record<string, string> } }).ADND2E.abilities[k]!)).join(", "),
-          }),
-        );
-      }
-    }
+    warnSubraceRange(this.document as never, dropped as never, isNewDrop);
 
     const result = await super._onDropItem(event, item);
     if (

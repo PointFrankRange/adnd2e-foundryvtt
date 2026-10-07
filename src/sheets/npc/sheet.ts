@@ -19,6 +19,7 @@ import { buildCharacterSheetContext } from "../character/context";
 import type { CharacterSheetInput } from "../character/context-types";
 import { rollHitPoints } from "../character/hp-roll";
 import { derivedClassState } from "../character/xp";
+import { warnSubraceRange } from "../character/subrace-warning";
 import { advanceWeaponMastery, rollNonweaponCheck, rollThiefSkill } from "../character/proficiency-actions";
 import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "../character/casting-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
@@ -352,10 +353,11 @@ export class Adnd2eNpcSheet extends Base {
         : (dropped.system.slotCost ?? 1);
     }
 
-    const result = await super._onDropItem(event, item);
     const isNewDrop =
       (item as unknown as { parent?: { uuid?: string } }).parent?.uuid !==
       (this.document as unknown as { uuid: string }).uuid;
+    warnSubraceRange(this.document as never, item as never, isNewDrop);
+    const result = await super._onDropItem(event, item);
     if (
       result &&
       isNewDrop &&

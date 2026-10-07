@@ -34,6 +34,12 @@ export function toggleFavoriteList(list: readonly FavoriteEntry[], entry: Favori
     : [...list, { kind: entry.kind, id: entry.id }];
 }
 
+/** Drops every item/spell favorite pointing at `itemId` (the delete-item cleanup, #112). Thief-skill favorites are keyed
+ *  by skill, never by item id, so they are untouched even on an id collision. */
+export function removeItemFavorites(list: readonly FavoriteEntry[], itemId: string): FavoriteEntry[] {
+  return list.filter((e) => e.kind === "thiefSkill" || e.id !== itemId);
+}
+
 export interface FavoriteSources {
   items: readonly { id: string; name: string; img: string; type: string; equipped: boolean }[];
   spells: readonly { id: string; name: string; img: string; canCast: boolean }[];

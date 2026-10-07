@@ -2,6 +2,8 @@ import { usagePruneUpdate, type PowerUsage } from "../core/kits";
 import { spellDeletionUpdate, type SpellcastingSource } from "../magic/spell-cleanup";
 import { disruptCasting } from "./character/casting-actions";
 import { containerContentsReset } from "./character/grouping";
+import { SYSTEM_ID } from "../constants";
+import { normalizeFavorites, removeItemFavorites } from "./kit/favorites";
 
 /* ---------------------------------------------------------------------------
  * item-row-actions — the ✎ / 🗑 controls on every owned-item row of the PC and
@@ -16,7 +18,8 @@ import { containerContentsReset } from "./character/grouping";
  *    `disruptCasting` (silently), which also clears the combatant's pending
  *    casting-time initiative flag;
  *  - a kit: its kit-power use counters are pruned (pure `usagePruneUpdate`);
- *  - a container: its contents move back to loose (pure `containerContentsReset`).
+ *  - a container: its contents move back to loose (pure `containerContentsReset`);
+ *  - any favorite pointing at it is dropped from `flags.adnd2e.favorites` (pure `removeItemFavorites`).
  * Every write targets the actor whose sheet the user is editing (the handlers
  * require `isEditable`) or that actor's own combatant.
  * ------------------------------------------------------------------------- */
@@ -32,6 +35,8 @@ interface OwnedItem {
 
 interface ItemOwner {
   system: unknown;
+  getFlag(scope: string, key: string): unknown;
+  setFlag(scope: string, key: string, value: unknown): Promise<unknown>;
   items: { get(id: string): OwnedItem | undefined } & Iterable<OwnedItem>;
   update(data: Record<string, unknown>): Promise<unknown>;
   updateEmbeddedDocuments(type: "Item", updates: Record<string, unknown>[]): Promise<unknown>;
@@ -75,6 +80,11 @@ export async function deleteOwnedItem(actor: ItemOwner, itemId: string): Promise
     item.id,
   );
   if (contents.length > 0) await actor.updateEmbeddedDocuments("Item", contents);
+
+  // #112: a deleted item/spell must not linger in the favorites flag
+  const favorites = normalizeFavorites(actor.getFlag(SYSTEM_ID, "favorites"));
+  const pruned = removeItemFavorites(favorites, item.id);
+  if (pruned.length !== favorites.length) await actor.setFlag(SYSTEM_ID, "favorites", pruned);
 
   await item.delete();
 }

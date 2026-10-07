@@ -3,6 +3,7 @@ import {
   buildFavoriteRows,
   isFavorite,
   normalizeFavorites,
+  removeItemFavorites,
   toggleFavoriteList,
   type FavoriteSources,
 } from "../../../src/sheets/kit/favorites";
@@ -102,5 +103,23 @@ describe("buildFavoriteRows", () => {
         sources,
       ),
     ).toEqual([]);
+  });
+});
+
+describe("removeItemFavorites (#112)", () => {
+  const list = [
+    { kind: "item" as const, id: "a" },
+    { kind: "spell" as const, id: "a" },
+    { kind: "item" as const, id: "b" },
+    { kind: "thiefSkill" as const, id: "a" },
+  ];
+  it("drops item and spell favorites for the deleted id, keeping everything else", () => {
+    expect(removeItemFavorites(list, "a")).toEqual([
+      { kind: "item", id: "b" },
+      { kind: "thiefSkill", id: "a" },
+    ]);
+  });
+  it("is a no-op for an id that isn't favorited", () => {
+    expect(removeItemFavorites(list, "zzz")).toEqual(list);
   });
 });
