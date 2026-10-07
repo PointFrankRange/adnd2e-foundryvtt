@@ -1,4 +1,4 @@
-import { usagePruneUpdate, type PowerUsage } from "../core/kits";
+import { usagePruneKeys, type PowerUsage } from "../core/kits";
 import { spellDeletionUpdate, type SpellcastingSource } from "../magic/spell-cleanup";
 import { disruptCasting } from "./character/casting-actions";
 import { containerContentsReset } from "./character/grouping";
@@ -17,7 +17,7 @@ import { normalizeFavorites, removeItemFavorites } from "./kit/favorites";
  *    `spellDeletionUpdate`); an in-progress cast of it is cancelled through
  *    `disruptCasting` (silently), which also clears the combatant's pending
  *    casting-time initiative flag;
- *  - a kit: its kit-power use counters are pruned (pure `usagePruneUpdate`);
+ *  - a kit: its kit-power use counters are pruned (pure `usagePruneKeys`, deleted with `ForcedDeletion`);
  *  - a container: its contents move back to loose (pure `containerContentsReset`);
  *  - any favorite pointing at it is dropped from `flags.adnd2e.favorites` (pure `removeItemFavorites`).
  * Every write targets the actor whose sheet the user is editing (the handlers
@@ -71,8 +71,12 @@ export async function deleteOwnedItem(actor: ItemOwner, itemId: string): Promise
 
   if (item.type === "kit") {
     const usage = (actor.system as { kitPowers?: PowerUsage }).kitPowers ?? {};
-    const prune = usagePruneUpdate(usage, item.id);
-    if (Object.keys(prune).length > 0) await actor.update(prune);
+    const keys = usagePruneKeys(usage, item.id);
+    if (keys.length > 0) {
+      // fvtt-types is v13 and has no `foundry.data.operators` (v14) — see the foundry-v14-vs-fvtt-types note
+      const { ForcedDeletion } = (foundry.data as unknown as { operators: { ForcedDeletion: new () => unknown } }).operators;
+      await actor.update(Object.fromEntries(keys.map((k) => [`system.kitPowers.${k}`, new ForcedDeletion()])));
+    }
   }
 
   const contents = containerContentsReset(
