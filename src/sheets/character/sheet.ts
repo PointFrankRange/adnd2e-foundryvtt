@@ -6,6 +6,7 @@ import { ABILITY_KEYS } from "../../data/item/choices";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
 import { getChassis } from "../../core/classes/chassis";
+import { awardWithPrimeBonus } from "../../core/abilities";
 import type { ManeuverId } from "../../core/combat/maneuvers";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
 import type { RawTraitEffect } from "../../core/skills/traits";
@@ -902,9 +903,20 @@ export class Adnd2eCharacterSheet extends Base {
     if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) return;
     const classItems = this.#classItems();
     const share = awardXpSplit(amount, classItems.length);
+    const scores = abilityScoresOf((this.document as unknown as { system?: never }).system);
+    const enabled = getOptionalRules().primeRequisiteXpBonus;
+    const bonuses: string[] = [];
     await Promise.all(
-      classItems.map((c) => c.update({ "system.xp": (Number(c.system.xp) || 0) + share })),
+      classItems.map((c) => {
+        const chassis = getChassis(String(c.system.chassisId) as never);
+        const { amount: awarded, bonus } = awardWithPrimeBonus(share, chassis?.primeRequisites ?? [], scores, enabled);
+        if (bonus > 0) bonuses.push(`${chassis?.name ?? String(c.system.chassisId)} +${bonus}`);
+        return c.update({ "system.xp": (Number(c.system.xp) || 0) + awarded });
+      }),
     );
+    if (bonuses.length > 0) {
+      ui.notifications?.info(game.i18n!.format("ADND2E.sheet.xp.primeBonusApplied", { bonuses: bonuses.join(", ") }));
+    }
   }
 
   static async #onToggleDualClass(this: Adnd2eCharacterSheet): Promise<void> {

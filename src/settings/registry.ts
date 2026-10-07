@@ -30,6 +30,7 @@ export const SETTING_DESCRIPTORS: readonly SettingDescriptor[] = [
   { key: "nonweaponProficienciesUsed", group: "core", default: true, config: true, optionalRulesKey: "nonweaponProficienciesUsed" },
   { key: "weaponProficienciesUsed", group: "core", default: true, config: true, optionalRulesKey: "weaponProficienciesUsed" },
   { key: "multiclassHpAveraging", group: "core", default: true, config: true, optionalRulesKey: "multiclassHpAveraging" },
+  { key: "primeRequisiteXpBonus", group: "core", default: true, config: true, optionalRulesKey: "primeRequisiteXpBonus" },
   { key: "racialLevelLimits", group: "core", default: true, config: true, optionalRulesKey: "racialLevelLimits", requiresReload: true },
   { key: "primeRequisiteBonusLevels", group: "core", default: false, config: true, optionalRulesKey: "primeRequisiteBonusLevels", requiresReload: true },
   { key: "wildTalents", group: "core", default: false, config: true, optionalRulesKey: "wildTalents", requiresReload: true },

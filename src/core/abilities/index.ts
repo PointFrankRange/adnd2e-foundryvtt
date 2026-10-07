@@ -62,3 +62,20 @@ export function primeRequisiteXpBonus(
 ): boolean {
   return primeRequisites.every((k) => scores[k] >= 16);
 }
+
+/**
+ * PHB p.26: an XP award to one class, with the 10% prime-requisite bonus (rounded
+ * down) when the rule is on and every prime requisite is 16+. A missing score or a
+ * class with no primes earns no bonus.
+ */
+export function awardWithPrimeBonus(
+  share: number,
+  primeRequisites: readonly AbilityKey[],
+  scores: Partial<Record<AbilityKey, number>>,
+  enabled: boolean,
+): { amount: number; bonus: number } {
+  const earned =
+    enabled && primeRequisites.length > 0 && primeRequisites.every((k) => (scores[k] ?? 0) >= 16);
+  const bonus = earned ? Math.floor(share * 0.1) : 0;
+  return { amount: share + bonus, bonus };
+}
