@@ -39,6 +39,17 @@ export function registerCastingHooks(): void {
     if (actor && readCasting(actor)) void disruptCasting(actor as never, { announce: true });
   });
 
+  // A combatant removed from a running combat loses its cast with it (no card — nothing was disrupted).
+  Hooks.on("deleteCombatant", (combatant: unknown) => {
+    if (!isActiveGm()) return;
+    const c = combatant as { actor: unknown; combat?: { id: string } | null; parent?: { id: string } | null };
+    const actor = c.actor as (Parameters<typeof readCasting>[0] & { update(d: Record<string, unknown>): Promise<unknown> }) | null;
+    const combatId = (c.combat ?? c.parent)?.id;
+    if (actor && combatId && readCasting(actor)?.combatId === combatId) {
+      void actor.update({ "system.options.spellsAndMagic.casting": null });
+    }
+  });
+
   // Ending a combat clears every cast that belonged to it (no card — nothing was disrupted).
   Hooks.on("deleteCombat", (combat: unknown) => {
     if (!isActiveGm()) return;
