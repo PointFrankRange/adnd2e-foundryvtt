@@ -12,7 +12,7 @@ const descriptorKeys = SETTING_DESCRIPTORS.map((d) => d.key).sort();
 // test above, but unlike that setting they ARE shown in the config UI (config: true),
 // so they legitimately have name/hint/choice-label strings under ADND2E.settings in
 // lang/en.json and must be excluded from the orphan-key check below by name.
-const NON_OPTIONAL_RULE_SETTING_KEYS = ["playerAppliedEffects", "exceedLevelLimits"];
+const NON_OPTIONAL_RULE_SETTING_KEYS = ["playerAppliedEffects", "exceedLevelLimits", "sections"]; // "sections" = panel headings, not a setting
 
 describe("settings-key contract", () => {
   it("src/types/global.d.ts SettingConfig covers exactly the registered keys", () => {

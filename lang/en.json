@@ -940,6 +940,16 @@
       "descriptionTitle": "Description"
     },
     "settings": {
+      "sections": {
+        "coreRules": "Core Rules",
+        "racesAndLevels": "Races & Levels",
+        "combatAndTactics": "Combat & Tactics",
+        "skillsAndPowers": "Skills & Powers",
+        "spellsAndMagic": "Spells & Magic",
+        "psionics": "Psionics",
+        "tableAndPlay": "Table & Play",
+        "kind": { "core": "Core", "optional": "Optional", "table": "Table" }
+      },
       "exceptionalStrength": {
         "name": "Exceptional Strength",
         "hint": "Warriors with Strength 18 roll d100 for an exceptional-Strength band (PHB p.18)."
