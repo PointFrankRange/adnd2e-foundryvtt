@@ -2,6 +2,7 @@
 <section class="kit-panel">
   <div class="kit-bar">{{localize 'ADND2E.sheet.psionics.title'}}</div>
   <div class="kit-body">
+    {{#if adnd2e.psionics.wild}}<p class="hint wild-talent-tag">{{localize 'ADND2E.sheet.psionics.wildTag'}}</p>{{/if}}
     <p><strong>{{localize 'ADND2E.sheet.psionics.psp'}}:</strong> {{adnd2e.psionics.psp}} / {{adnd2e.psionics.max}}</p>
     {{#if adnd2e.psionics.primary}}<p class="hint">{{localize 'ADND2E.sheet.psionics.primary'}}: {{localize (concat 'ADND2E.sheet.psionics.discipline.' adnd2e.psionics.primary)}}</p>{{/if}}
     {{#each adnd2e.psionics.problems as |key|}}<p class="hint warning">{{localize key}}</p>{{/each}}

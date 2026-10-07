@@ -189,10 +189,18 @@
         "resetDone": "The wild talent test can be taken again.",
         "chooseTitle": "Choose a wild power",
         "chooseHint": "Pick one power from the table result.",
-        "choose": "Choose"
+        "choose": "Choose",
+        "title": "Wild talent",
+        "hint": "A character without the Psionicist class may test once for a wild psionic talent. The test cannot be repeated.",
+        "surgeon": "Psychic surgeon helped (counts as 1 level higher)",
+        "test": "Test for wild talent",
+        "testedNone": "Tested: no wild talent",
+        "foundYes": "Wild talent: yes",
+        "reset": "Reset test (GM)"
       },
       "psionics": {
         "title": "Psionics",
+        "wildTag": "Wild talent",
         "psp": "PSPs",
         "rest": "Rest",
         "hours": "Hours",

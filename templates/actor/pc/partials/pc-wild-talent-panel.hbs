@@ -1,0 +1,19 @@
+{{#if @root.pcActions}}{{#if adnd2e.wildTalent.show}}
+  <section class="kit-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.wildTalent.title'}}</div>
+    <div class="kit-body">
+      <p class="hint">{{localize 'ADND2E.sheet.wildTalent.hint'}}</p>
+      {{#if adnd2e.wildTalent.tested}}
+        {{#if adnd2e.wildTalent.found}}
+          <p>{{localize 'ADND2E.sheet.wildTalent.foundYes'}}</p>
+        {{else}}
+          <p>{{localize 'ADND2E.sheet.wildTalent.testedNone'}}</p>
+          {{#if adnd2e.wildTalent.isGm}}<button type="button" class="kit-small" data-action="wildTalentReset">{{localize 'ADND2E.sheet.wildTalent.reset'}}</button>{{/if}}
+        {{/if}}
+      {{else}}
+        <label><input type="checkbox" data-wild-surgeon> {{localize 'ADND2E.sheet.wildTalent.surgeon'}}</label>
+        <button type="button" class="kit-small" data-action="wildTalentTest">{{localize 'ADND2E.sheet.wildTalent.test'}}</button>
+      {{/if}}
+    </div>
+  </section>
+{{/if}}{{/if}}
