@@ -24,5 +24,5 @@
   // include, the same way initiative-modifier-dialog.ts is carved out above.
   // kit-power-actions.test.ts (SP11 Plan B) drives the Foundry-coupled
   // usePower/resetPower glue, so it is carved out the same way.
-  "exclude": ["src/combat/initiative-modifier-dialog.ts", "tests/sheets/character/spell-actions.test.ts", "tests/sheets/character/kit-power-actions.test.ts", "tests/sheets/character/turning-actions.test.ts", "tests/sheets/character/psionic-actions.test.ts", "tests/sheets/character/psionic-combat.test.ts", "tests/hooks/psionic-hooks.test.ts"]
+  "exclude": ["src/combat/initiative-modifier-dialog.ts", "tests/sheets/character/spell-actions.test.ts", "tests/sheets/character/kit-power-actions.test.ts", "tests/sheets/character/turning-actions.test.ts", "tests/sheets/character/psionic-actions.test.ts", "tests/sheets/character/psionic-combat.test.ts", "tests/hooks/psionic-hooks.test.ts", "tests/core/psionics/wild.test.ts"]
 }
