@@ -1,7 +1,7 @@
 {
   "_id": "kHalfFurchin0001",
   "_key": "!items!kHalfFurchin0001",
-  "name": "Furchin",
+  "name": "Halfling, Furchin",
   "type": "race",
   "img": "icons/svg/house.svg",
   "system": {
@@ -46,6 +46,7 @@
     ],
     "subrace": {
       "id": "furchin",
+      "displayName": "Furchin",
       "abilityAdjustments": {
         "str": -1,
         "dex": 1,

@@ -1,7 +1,7 @@
 {
   "_id": "kDwarfHill000001",
   "_key": "!items!kDwarfHill000001",
-  "name": "Hill Dwarf",
+  "name": "Dwarf, Hill",
   "type": "race",
   "img": "icons/svg/mountain.svg",
   "system": {
@@ -49,6 +49,7 @@
     "grantedFeatures": [],
     "subrace": {
       "id": "hill-dwarf",
+      "displayName": "Hill Dwarf",
       "abilityAdjustments": {
         "str": 0,
         "dex": 0,

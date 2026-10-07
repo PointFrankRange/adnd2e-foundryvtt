@@ -7,6 +7,7 @@ import {
   effectiveAbilityRanges,
   effectiveThiefAdjustments,
   normalizeSubrace,
+  raceDisplayName,
 } from "../../../src/core/races";
 import { RACIAL_ABILITY_ADJUSTMENTS, RACIAL_ABILITY_LIMITS } from "../../../src/core/abilities/racial-adjustments";
 import { THIEF_RACIAL_ADJUSTMENTS } from "../../../src/core/proficiencies/thief-skills";
@@ -119,5 +120,19 @@ describe("combineXpPercent", () => {
     expect(combineXpPercent(0, 0)).toBe(0);
     expect(combineXpPercent(-90, -20)).toBe(-90);
     expect(combineXpPercent(-10, 10)).toBe(0);
+  });
+});
+
+describe("raceDisplayName", () => {
+  it("uses the subrace display name when set", () => {
+    expect(raceDisplayName("Dwarf, Deep", { displayName: "Deep Dwarf" })).toBe("Deep Dwarf");
+  });
+  it("falls back to the item name when blank, whitespace, non-string, or no subrace", () => {
+    expect(raceDisplayName("Dwarf", { displayName: "" })).toBe("Dwarf");
+    expect(raceDisplayName("Dwarf", { displayName: "   " })).toBe("Dwarf");
+    expect(raceDisplayName("Dwarf", { displayName: 5 })).toBe("Dwarf");
+    expect(raceDisplayName("Dwarf", {})).toBe("Dwarf");
+    expect(raceDisplayName("Dwarf", undefined)).toBe("Dwarf");
+    expect(raceDisplayName("Dwarf", null)).toBe("Dwarf");
   });
 });

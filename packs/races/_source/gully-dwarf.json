@@ -1,7 +1,7 @@
 {
   "_id": "kDwarfGully00001",
   "_key": "!items!kDwarfGully00001",
-  "name": "Gully Dwarf",
+  "name": "Dwarf, Gully",
   "type": "race",
   "img": "icons/svg/mountain.svg",
   "system": {
@@ -51,6 +51,7 @@
     ],
     "subrace": {
       "id": "gully-dwarf",
+      "displayName": "Gully Dwarf",
       "abilityAdjustments": {
         "str": 1,
         "dex": 1,

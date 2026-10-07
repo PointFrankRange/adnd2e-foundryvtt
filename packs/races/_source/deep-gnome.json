@@ -1,7 +1,7 @@
 {
   "_id": "kGnomeDeep000001",
   "_key": "!items!kGnomeDeep000001",
-  "name": "Deep Gnome",
+  "name": "Gnome, Deep",
   "type": "race",
   "img": "icons/svg/burrow.svg",
   "system": {
@@ -67,6 +67,7 @@
     ],
     "subrace": {
       "id": "deep-gnome",
+      "displayName": "Deep Gnome",
       "abilityAdjustments": {
         "str": 0,
         "dex": 1,

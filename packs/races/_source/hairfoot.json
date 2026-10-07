@@ -1,7 +1,7 @@
 {
   "_id": "kHalfHairfoot001",
   "_key": "!items!kHalfHairfoot001",
-  "name": "Hairfoot",
+  "name": "Halfling, Hairfoot",
   "type": "race",
   "img": "icons/svg/house.svg",
   "system": {
@@ -44,6 +44,7 @@
     ],
     "subrace": {
       "id": "hairfoot",
+      "displayName": "Hairfoot",
       "abilityAdjustments": {
         "str": -1,
         "dex": 1,

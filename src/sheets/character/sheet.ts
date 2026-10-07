@@ -1,6 +1,6 @@
 import { abilityScoresOf, activeKitEntries, actorLevelRulesFor, casterTypesDisabled, toKitEntries } from "../../data/derive/character/kits";
 import { buildPowerRows, kitForbidsProficiency, kitQualifies, resolveKitOverrides, type KitQualifications, type PowerUsage } from "../../core/kits";
-import { abilityRangeProblems, effectiveAbilityAdjustments, effectiveAbilityRanges, normalizeSubrace, type RawSubrace } from "../../core/races";
+import { abilityRangeProblems, effectiveAbilityAdjustments, effectiveAbilityRanges, normalizeSubrace, raceDisplayName, type RawSubrace } from "../../core/races";
 import { applyRacialDeltas } from "../../core/abilities/racial-adjustments";
 import { classLevelOf, resetKitPowers, resetPower, usePower } from "./kit-power-actions";
 import { ABILITY_KEYS } from "../../data/item/choices";
@@ -135,11 +135,11 @@ export function toRaceView(it: RawItem): RaceItemView {
     infravision: number;
     grantedFeatures: string[];
     bonusLanguages: string[];
-    subrace?: RawSubrace;
+    subrace?: RawSubrace & { displayName?: unknown };
   };
   return {
     id: it.id,
-    name: it.name,
+    name: raceDisplayName(it.name, s.subrace),
     img: it.img,
     raceId: s.raceId,
     size: s.size,

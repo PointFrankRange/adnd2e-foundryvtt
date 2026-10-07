@@ -1,7 +1,7 @@
 {
   "_id": "kDwarfDuergar001",
   "_key": "!items!kDwarfDuergar001",
-  "name": "Duergar",
+  "name": "Dwarf, Duergar",
   "type": "race",
   "img": "icons/svg/mountain.svg",
   "system": {
@@ -56,6 +56,7 @@
     ],
     "subrace": {
       "id": "duergar",
+      "displayName": "Duergar",
       "abilityAdjustments": {
         "str": 0,
         "dex": 0,
