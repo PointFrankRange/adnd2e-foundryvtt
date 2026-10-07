@@ -43,7 +43,7 @@ import { promptRecoverChannelling } from "./recover-dialog";
 import { seedSubAbilities } from "./sub-ability-actions";
 import { removeTrait, traitDropInputs, traitRefundCapped, type TraitDropInputs } from "./trait-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
-import { awardXpSplit } from "./xp";
+import { awardXpSplit, derivedClassState } from "./xp";
 import { actorEquipmentRules, itemNotPermitted } from "../../data/derive/character/equipment-rules";
 import { bindSheetKit, clearSheetKit } from "../kit-dom";
 import { toggleFavoriteFlag } from "../kit-actions";
@@ -527,6 +527,7 @@ export class Adnd2eCharacterSheet extends Base {
           {
             const view = toClassView(it);
             const lr = actorLevelRulesFor(items, view.chassisId, getOptionalRules(), abilityScoresOf(actor.system));
+            Object.assign(view, derivedClassState((actor.system as { classes?: { chassisId: string; level: number; canLevelUp: boolean }[] }).classes, view.chassisId, view));
             classItems.push({ ...view, xpModifierPercent: lr.xpPercent, levelLimit: lr.rules.limit, beyondMultiplier: lr.rules.beyondMultiplier });
           }
           break;
@@ -968,7 +969,7 @@ export class Adnd2eCharacterSheet extends Base {
     target: HTMLElement,
   ): Promise<void> {
     const category = target.dataset.save as SaveCategory | undefined;
-    if (category) await rollSave(this.document as never, category);
+    if (category) await rollSave(this.document as never, category, { promptPoison: true });
   }
 
   // Interaction handlers — SP4a.

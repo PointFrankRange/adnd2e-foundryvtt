@@ -57,8 +57,13 @@ export function xpToNextWithRules(chassis: ClassChassis, xp: number, rules: Leve
   if (limit !== null && rules.beyondMultiplier <= 0 && level >= limit) {
     return { level, next: null, toNextLevel: null, pct: 1, atLimit: true };
   }
-  // past the end of the class's XP table there is no next threshold (same gate the sheet always used)
-  if (level >= chassis.xpThresholds.length) return { level, next: null, toNextLevel: null, pct: 1, atLimit: false };
+  // past the end of the XP table there is no next threshold (the long-standing gate) — unless exceeding the
+  // level limit is on and the class extrapolates (xpPerLevelBeyond20) and has not reached its own maxLevel
+  const exceeding = limit !== null && rules.beyondMultiplier > 0;
+  const hasNext =
+    level < chassis.xpThresholds.length ||
+    (exceeding && chassis.xpPerLevelBeyond20 > 0 && (chassis.maxLevel == null || level < chassis.maxLevel));
+  if (!hasNext) return { level, next: null, toNextLevel: null, pct: 1, atLimit: false };
   const k = limit !== null && rules.beyondMultiplier > 0 ? rules.beyondMultiplier : 1;
   const top = limit !== null ? xpForLevel(chassis, limit) : 0;
   const threshold = (l: number): number =>

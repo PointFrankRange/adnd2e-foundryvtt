@@ -77,6 +77,14 @@ export function racialSaveModifier(input: RacialSaveModifierInput): number {
 }
 
 /**
+ * How much worse a poison-tagged paralysis/poison save is than the untagged baseline the sheet caches
+ * (#105). Only a flat bonus can differ by tag (Deep Gnome +3 all, +2 poison -> -1); 0 otherwise.
+ */
+export function poisonSaveAdjustment(flat: { all: number; poison: number } | null | undefined): number {
+  return flat ? flat.poison - flat.all : 0;
+}
+
+/**
  * Percentage chance to ignore a *sleep* or *charm* effect entirely (elf 90,
  * half-elf 30, others 0). Roll d100 BEFORE the saving throw; on `roll <= result`
  * the effect is negated and no save is made. This is NOT a d20 modifier — never

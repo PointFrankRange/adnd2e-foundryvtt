@@ -26,3 +26,15 @@ export function awardXpSplit(total: number, classCount: number): number {
   if (classCount <= 0) return 0;
   return Math.floor(total / classCount);
 }
+
+/** #106: a class item prepares before the actor's Active Effects apply, so its cached `level`/`canLevelUp` can miss an
+ *  effect-changed prime requisite. The actor's derived `system.classes` is computed after effects — prefer it, falling
+ *  back to the item's own values when the actor has no entry for this chassis. */
+export function derivedClassState(
+  derivedClasses: readonly { chassisId: string; level: number; canLevelUp: boolean }[] | undefined,
+  chassisId: string,
+  itemState: { level: number; canLevelUp: boolean },
+): { level: number; canLevelUp: boolean } {
+  const d = derivedClasses?.find((c) => c.chassisId === chassisId);
+  return d ? { level: d.level, canLevelUp: d.canLevelUp } : itemState;
+}

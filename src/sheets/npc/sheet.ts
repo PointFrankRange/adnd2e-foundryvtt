@@ -18,6 +18,7 @@ import { rollAttack, rollSave } from "../character/combat-rolls";
 import { buildCharacterSheetContext } from "../character/context";
 import type { CharacterSheetInput } from "../character/context-types";
 import { rollHitPoints } from "../character/hp-roll";
+import { derivedClassState } from "../character/xp";
 import { advanceWeaponMastery, rollNonweaponCheck, rollThiefSkill } from "../character/proficiency-actions";
 import { castOrBegin, completeCasting, disruptCasting, readCastingStatus } from "../character/casting-actions";
 import { deleteOwnedItem, editOwnedItem } from "../item-row-actions";
@@ -230,6 +231,7 @@ export class Adnd2eNpcSheet extends Base {
           {
             const view = toClassView(it);
             const lr = actorLevelRulesFor(items, view.chassisId, getOptionalRules(), abilityScoresOf(actor.system));
+            Object.assign(view, derivedClassState((actor.system as { classes?: { chassisId: string; level: number; canLevelUp: boolean }[] }).classes, view.chassisId, view));
             classItems.push({ ...view, xpModifierPercent: lr.xpPercent, levelLimit: lr.rules.limit, beyondMultiplier: lr.rules.beyondMultiplier });
           }
           break;
