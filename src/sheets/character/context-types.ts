@@ -631,6 +631,8 @@ export interface CharacterSheetContext {
     pool: number;
     ledger: CharacterPointLedger | null;
     rows: TraitRow[];
+    /** all trait items, even with the character-point rule off (the Character NPC sheet's read-only list) */
+    items: TraitRow[];
     /** disadvantage refunds exceed the cap, so part of them is not returned */
     refundCapped: boolean;
   };
