@@ -1,5 +1,6 @@
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { isHalved, lookupWild, testWildTalent as rollWildTest, wildTalentChance, type DireOutcome, type WildResult } from "../../core/psionics/wild";
+import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
 import { getOptionalRules } from "../../settings";
 import { info, warn, type PsionicItem } from "./psionic-actions";
 
@@ -12,19 +13,25 @@ import { info, warn, type PsionicItem } from "./psionic-actions";
 const MAX_APPLIED_IDS = 50;
 const ABILITY_KEYS = ["wis", "int", "con"] as const;
 
+/** The two SP8 sub-scores of an ability (null = not set). */
+export interface SubScores {
+  a: number | null;
+  b: number | null;
+}
+
 export interface WildActor {
   uuid: string;
   name: string;
   img: string;
   items: Iterable<PsionicItem>;
   system: {
-    abilities: Record<string, { score: number }>;
+    abilities: Record<string, { score: number; sub?: SubScores }>;
     psionics: { level: number; wild?: boolean };
     wildTalent: { tested: boolean; found: boolean; levelAtDiscovery: number };
     saves?: Record<string, { target: number; rollModifier: number }>;
   };
   /** The authored (unprepared) data: the BASE ability scores live here */
-  _source?: { system?: { abilities?: Record<string, { score?: number }> } };
+  _source?: { system?: { abilities?: Record<string, { score?: number; sub?: SubScores }> } };
   isOwner?: boolean;
   getFlag?(scope: string, key: string): unknown;
   update(data: Record<string, unknown>): Promise<unknown>;
@@ -73,6 +80,8 @@ export interface ApplyDeps {
   userIsGM: () => boolean;
   getFlag: (messageId: string) => WildFlag | undefined;
   getActor: (uuid: string) => WildActor | null;
+  /** whether the SP8 sub-ability rule is on (then the prepared score is the average of the sub-scores) */
+  subRuleOn: () => boolean;
 }
 
 const rollTotal = async (formula: string): Promise<number> => Number((await new Roll(formula).evaluate()).total);
@@ -92,6 +101,7 @@ const defaultApplyDeps = (): ApplyDeps => ({
   userIsGM: () => Boolean(game.user?.isGM),
   getFlag: (messageId) => (game.messages?.get(messageId) as { getFlag(s: string, k: string): unknown } | undefined)?.getFlag(SYSTEM_ID, "wildTalent") as WildFlag | undefined,
   getActor: (uuid) => foundry.utils.fromUuidSync(uuid) as unknown as WildActor | null,
+  subRuleOn: () => subAbilitiesEnabled(getOptionalRules()),
 });
 
 async function defaultReadPack(pack: string): Promise<PackPower[]> {
@@ -344,17 +354,29 @@ async function applyDireNow(flag: WildFlag, dire: WildDireFlag, d: ApplyDeps): P
   const i18n = game.i18n!;
   const abilityName = dire.ability === "all" ? i18n.localize("ADND2E.chat.wildTalent.allAbilities") : i18n.localize(`ADND2E.chat.wildTalent.ability.${dire.ability}`);
   const amount = dire.points === "all" ? i18n.localize("ADND2E.chat.wildTalent.toThree") : i18n.format("ADND2E.chat.wildTalent.lose", { n: String(dire.points) });
-  const ok = await d.confirm(i18n.localize("ADND2E.chat.wildTalent.confirmTitle"), i18n.format("ADND2E.chat.wildTalent.confirm", { actor: actor.name, ability: abilityName, amount }));
+  const ok = await d.confirm(i18n.localize("ADND2E.chat.wildTalent.confirmTitle"), i18n.format("ADND2E.chat.wildTalent.confirm", { actor: foundry.utils.escapeHTML(actor.name), ability: abilityName, amount }));
   if (!ok) return false;
   if (appliedIds(actor).includes(flag.id)) return false; // answered while the dialog was open
   const base = (k: string): number => actor._source?.system?.abilities?.[k]?.score ?? actor.system.abilities[k]?.score ?? 3;
   const update: Record<string, unknown> = {
     [`flags.${SYSTEM_ID}.wildApplied`]: [...appliedIds(actor), flag.id].slice(-MAX_APPLIED_IDS),
   };
-  if (dire.points === "all") for (const k of ABILITY_KEYS) update[`system.abilities.${k}.score`] = 3;
+  // With the sub-ability rule on, the prepared score is the average of the sub-scores (when set), so
+  // the loss must lower both of them too; null sub-scores (or the rule off) leave only the base score.
+  const subs = (k: string): SubScores | undefined => actor._source?.system?.abilities?.[k]?.sub ?? actor.system.abilities[k]?.sub;
+  const lower = (k: string, to: (n: number) => number): void => {
+    update[`system.abilities.${k}.score`] = to(base(k));
+    if (!d.subRuleOn()) return;
+    const sub = subs(k);
+    for (const side of ["a", "b"] as const) {
+      const value = sub?.[side];
+      if (value != null) update[`system.abilities.${k}.sub.${side}`] = to(value);
+    }
+  };
+  if (dire.points === "all") for (const k of ABILITY_KEYS) lower(k, () => 3);
   else {
-    const k = dire.ability as "wis" | "int" | "con";
-    update[`system.abilities.${k}.score`] = Math.max(3, base(k) - dire.points);
+    const points = dire.points;
+    lower(dire.ability, (n) => Math.max(3, n - points));
   }
   await actor.update(update);
   return true;

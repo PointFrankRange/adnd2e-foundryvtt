@@ -179,7 +179,13 @@ function wireWildTalent(message: { id: string; getFlag(s: string, k: string): un
   if (state === "button") {
     button?.addEventListener("click", () => {
       button.disabled = true;
-      void applyDire(message.id).then(() => rerenderWildCards(flag.actorUuid));
+      void applyDire(message.id).then(
+        () => rerenderWildCards(flag.actorUuid),
+        (error: unknown) => {
+          button.disabled = false; // a rejected write leaves the card usable for a retry
+          console.error("adnd2e | applying the wild-talent dire result failed", error);
+        },
+      );
     });
   }
 }

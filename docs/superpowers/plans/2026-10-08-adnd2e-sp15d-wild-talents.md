@@ -23,6 +23,7 @@
 3. "Levels gained" for the PSP bonus = `max(0, characterLevel - levelAtDiscovery)` where characterLevel is the highest class level; `levelAtDiscovery` is stored at the moment the talent is found.
 4. For a wild talent `system.psionics.level` is the character's highest class level and `wild` is true; for a psionicist `wild` is false. A psionicist never uses the wild-talent PSP formula.
 5. The dire loss is rolled when the card is posted (the card shows the exact points and the save result), and Apply reduces the BASE ability score by exactly that amount (floor 3), or sets all three to 3 for the 00 result when the save fails; the save is the existing paralyzation/poison/death save rolled through the existing save machinery at -5 for 00. If the save succeeds, nothing is lost and no Apply button is shown.
+6. A character whose talent is already FOUND is refused a retest even after a GM reset; a reset only unlocks a character who found nothing (a retest could grant more powers). With the SP8 sub-ability rule on, Apply also lowers both non-null sub-scores by the same points (floor 3 each) in the same update, since the prepared score is their average.
 
 ## File Structure
 

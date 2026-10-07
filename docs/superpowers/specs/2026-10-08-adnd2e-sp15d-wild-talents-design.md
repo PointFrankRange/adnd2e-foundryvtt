@@ -8,6 +8,7 @@ Date: 2026-10-08. Source: *The Complete Psionics Handbook* (PHBR5) Chapter 1 "Wi
 - **One test per character.** The button locks after the test; a GM can reset it (the book allows testing only at specific moments: creation, a new Wisdom high, the first psychic surgeon, psionics entering the campaign). A "psychic surgeon (-2)" checkbox on the test.
 - **Dire consequences are applied through a confirmed button.** A roll of 97 or higher posts a card with the save versus death rolled and the loss rolled; the owner (or a GM) presses **Apply** (with a confirmation) to permanently reduce the base ability score. Nothing changes without the press.
 - **Wild talents use the normal Psionics tab** (PSP bar, Use, rest, maintenance, contests) but cannot learn more powers by dragging or relearning: the powers are granted from Tables 12-13. A GM may add a power by hand (the drop refusal is for players).
+- **A found talent is never retested.** A character whose wild talent is already FOUND is refused a retest even after a GM reset (a reset only unlocks a character who found nothing, because a retest could grant more powers).
 - **Proficiencies:** add the "psionicist" non-weapon proficiency group, the four new proficiencies (Harness Subconscious, Hypnosis, Rejuvenation, Meditative Focus) and let the four shared ones (Gem Cutting, Musical Instrument, Reading/Writing, Religion) cost their Table 11 slots for a psionicist. Effects stay as the book's text (no automation of Harness Subconscious or Meditative Focus).
 
 ## Rules summary (PHBR5 pp.18-21)

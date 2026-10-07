@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- chat-card flags and views are inspected loosely */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { applyDire, resetWildTest, testWildTalent, highestClassLevel, type ApplyDeps, type PackPower, type WildActor, type WildFlag } from "../../../src/sheets/character/psionic-wild";
+import { mainScoreFromSubs } from "../../../src/core/abilities/sub-abilities";
 import { derivePsionics } from "../../../src/data/derive/character/psionics";
 import allRoundVision from "../../../packs/powers/_source/all-round-vision.json";
 import combatMind from "../../../packs/powers/_source/combat-mind.json";
@@ -25,7 +26,7 @@ beforeEach(() => {
   g.game = { i18n: { localize: (k: string) => k, format: (k: string, d: Record<string, string>) => `${k}:${JSON.stringify(d)}` }, user: { isGM: false } };
   g.ui = { notifications: { warn, info } };
   g.foundry = {
-    utils: { randomID: () => `id${++counter}` },
+    utils: { randomID: () => `id${++counter}`, escapeHTML: (x: string) => x.replace(/</g, "&lt;").replace(/>/g, "&gt;") },
     applications: { handlebars: { renderTemplate: async (_p: string, ctx: unknown) => JSON.stringify(ctx) } },
   };
   g.ChatMessage = { getSpeaker: () => ({}), create: async (m: { content: string; flags: unknown }) => void messages.push(m as never) };
@@ -256,6 +257,7 @@ describe("dire consequences", () => {
     userIsGM: () => false,
     getFlag: () => flagOf(),
     getActor: () => actor,
+    subRuleOn: () => false,
     ...over,
   });
   const failedSave = (roll: number, extra: Record<string, unknown> = {}) => baseDeps({ roll100: seq(roll), rollSave: vi.fn(async () => false), ...extra });
@@ -378,6 +380,73 @@ describe("dire consequences", () => {
     await testWildTalent(bare.actor, { surgeon: false }, failedSave(97));
     await applyDire("m2", applyDeps(bare.actor, { getFlag: () => flagOf(0) }));
     expect(bare.updates[1]!["system.abilities.wis.score"]).toBe(3);
+  });
+
+  describe("sub-ability scores", () => {
+    const withSubs = (subs: Record<string, { a: number | null; b: number | null }>, base = { wis: 17, int: 9, con: 16 }) => {
+      const made = makeActor({ scores: base });
+      const src = made.actor._source!.system!.abilities!;
+      for (const k of Object.keys(subs)) src[k]!.sub = subs[k]!;
+      return made;
+    };
+    const ruleOn = { subRuleOn: () => true };
+    const lose = async (actor: WildActor, roll: number, d6: number, over: Partial<ApplyDeps>) => {
+      await testWildTalent(actor, { surgeon: false }, failedSave(roll, { rollD6: vi.fn(async () => d6) }));
+      return applyDire("m1", applyDeps(actor, over));
+    };
+    it("rule on, Wis 17 with subs 17/17 and a loss of 4: base and both subs become 13 in ONE update", async () => {
+      const { actor, updates } = withSubs({ wis: { a: 17, b: 17 } });
+      expect(await lose(actor, 97, 4, ruleOn)).toBe(true);
+      expect(updates).toHaveLength(2);
+      expect(updates[1]).toEqual({ "flags.adnd2e.wildApplied": [flagOf().id], "system.abilities.wis.score": 13, "system.abilities.wis.sub.a": 13, "system.abilities.wis.sub.b": 13 });
+      expect(mainScoreFromSubs(13, 13, 13)).toBe(13);
+    });
+    it("rule on with null subs changes only the base; one null sub is left null", async () => {
+      const { actor, updates } = withSubs({ wis: { a: null, b: null } });
+      await lose(actor, 97, 4, ruleOn);
+      expect(updates[1]).toEqual({ "flags.adnd2e.wildApplied": [flagOf().id], "system.abilities.wis.score": 13 });
+      messages = [];
+      const half = withSubs({ int: { a: 12, b: null } });
+      await lose(half.actor, 98, 4, ruleOn);
+      expect(half.updates[1]).toEqual({ "flags.adnd2e.wildApplied": [flagOf().id], "system.abilities.int.score": 5, "system.abilities.int.sub.a": 8 });
+    });
+    it("rule off changes only the base even with subs set", async () => {
+      const { actor, updates } = withSubs({ wis: { a: 17, b: 17 } });
+      await lose(actor, 97, 4, { subRuleOn: () => false });
+      expect(updates[1]).toEqual({ "flags.adnd2e.wildApplied": [flagOf().id], "system.abilities.wis.score": 13 });
+    });
+    it("floors at 3 on the base and on each sub", async () => {
+      const { actor, updates } = withSubs({ wis: { a: 5, b: 4 } }, { wis: 5, int: 9, con: 16 });
+      await lose(actor, 97, 6, ruleOn);
+      expect(updates[1]).toMatchObject({ "system.abilities.wis.score": 3, "system.abilities.wis.sub.a": 3, "system.abilities.wis.sub.b": 3 });
+    });
+    it("00 sets wis, int and con and their non-null subs to 3; null subs stay untouched", async () => {
+      const { actor, updates } = withSubs({ wis: { a: 17, b: 15 }, int: { a: 9, b: 10 }, con: { a: null, b: null } });
+      await lose(actor, 100, 1, ruleOn);
+      expect(updates[1]).toEqual({
+        "flags.adnd2e.wildApplied": [flagOf().id],
+        "system.abilities.wis.score": 3, "system.abilities.wis.sub.a": 3, "system.abilities.wis.sub.b": 3,
+        "system.abilities.int.score": 3, "system.abilities.int.sub.a": 3, "system.abilities.int.sub.b": 3,
+        "system.abilities.con.score": 3,
+      });
+    });
+    it("falls back to the prepared subs when the source is unavailable", async () => {
+      const { actor, updates } = makeActor();
+      delete (actor as { _source?: unknown })._source;
+      actor.system.abilities.wis!.sub = { a: 17, b: 17 };
+      await lose(actor, 97, 4, ruleOn);
+      expect(updates[1]).toMatchObject({ "system.abilities.wis.sub.a": 13, "system.abilities.wis.sub.b": 13 });
+    });
+    it("escapes the actor name in the confirm dialog", async () => {
+      const { actor } = makeActor();
+      actor.name = "<b>Brun</b>";
+      const confirm = vi.fn(async () => false);
+      await testWildTalent(actor, { surgeon: false }, failedSave(97));
+      await applyDire("m1", applyDeps(actor, { confirm }));
+      const content = (confirm.mock.calls[0] as unknown as [string, string])[1];
+      expect(content).toContain("&lt;b&gt;Brun&lt;/b&gt;");
+      expect(content).not.toContain("<b>");
+    });
   });
 });
 
