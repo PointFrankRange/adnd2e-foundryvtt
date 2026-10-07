@@ -21,6 +21,39 @@
   </div>
 </section>
 
+<section class="kit-panel">
+  <div class="kit-bar">{{localize 'ADND2E.sheet.psionics.combat.title'}}</div>
+  <div class="kit-body">
+    <div class="psionic-defense">
+      <strong>{{localize 'ADND2E.sheet.psionics.combat.defense'}}:</strong>
+      {{#if adnd2e.psionics.combat.activeDefense}}
+        <span class="name">{{adnd2e.psionics.combat.activeDefense.name}}</span>
+        <button type="button" class="kit-small" data-action="psionicDropDefense">{{localize 'ADND2E.sheet.psionics.combat.drop'}}</button>
+      {{else}}
+        <span class="hint">{{localize 'ADND2E.sheet.psionics.combat.noDefense'}}</span>
+      {{/if}}
+      {{#if adnd2e.psionics.combat.defenses.length}}
+      <select data-psionic-defense>
+        {{#each adnd2e.psionics.combat.defenses as |d|}}<option value="{{d.id}}"{{#if d.selected}} selected{{/if}}>{{d.name}}</option>{{/each}}
+      </select>
+      <button type="button" class="kit-small" data-action="psionicRaiseDefense">{{localize 'ADND2E.sheet.psionics.combat.raise'}}</button>
+      {{/if}}
+    </div>
+    <div class="psionic-contacts">
+      <strong>{{localize 'ADND2E.sheet.psionics.combat.contacts'}}:</strong>
+      {{#unless adnd2e.psionics.combat.contacts.length}}<span class="hint">{{localize 'ADND2E.sheet.psionics.combat.noContacts'}}</span>{{/unless}}
+      {{#if adnd2e.psionics.combat.hasUpkeep}}<button type="button" class="kit-small" data-action="psionicPayUpkeep">{{localize 'ADND2E.sheet.psionics.combat.payUpkeep'}}</button>{{/if}}
+      {{#each adnd2e.psionics.combat.contacts as |c|}}
+      <div class="power-row">
+        <span class="name">{{c.name}}</span>
+        <span class="effect">{{#if c.full}}{{localize 'ADND2E.sheet.psionics.combat.fullContact'}}{{else}}{{localize 'ADND2E.sheet.psionics.combat.tangents' n=c.tangents}}{{/if}}</span>
+        <button type="button" class="kit-small" data-action="psionicEndContact" data-target="{{c.target}}">{{localize 'ADND2E.sheet.psionics.combat.end'}}</button>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</section>
+
 {{#if adnd2e.psionics.maintained.length}}
 <section class="kit-panel">
   <div class="kit-bar">

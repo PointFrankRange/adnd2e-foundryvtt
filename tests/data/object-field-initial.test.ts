@@ -22,6 +22,17 @@ describe("ObjectField initial must not be a shared literal", () => {
   });
 });
 
+describe("SP15 Plan C psionics.activeDefense / contacts initials", () => {
+  it("contacts uses a function initial and activeDefense a blank string", () => {
+    const at = SRC.indexOf("contacts: new ArrayField");
+    expect(at).toBeGreaterThan(-1);
+    const body = SRC.slice(at, at + 500);
+    expect(body).toMatch(/initial:\s*\(\)\s*=>\s*\[\]/);
+    expect(body).not.toMatch(/initial:\s*\[/);
+    expect(SRC).toContain('activeDefense: new StringField({ required: true, blank: true, initial: "" })');
+  });
+});
+
 describe("SP15 psionics.maintained initial", () => {
   it("is declared with a function initial, not a shared array literal", () => {
     const at = SRC.indexOf("maintained: new ArrayField");

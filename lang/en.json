@@ -214,6 +214,26 @@
           "devotions": "You know more devotions than your level allows.",
           "defenseModes": "You know more defense modes than your level allows."
         },
+        "combat": {
+          "title": "Psionic combat",
+          "defense": "Active defense",
+          "noDefense": "None raised",
+          "raise": "Raise",
+          "drop": "Drop",
+          "contacts": "Contacts",
+          "noContacts": "No contacts",
+          "fullContact": "Full contact",
+          "tangents": "{n} tangent(s)",
+          "payUpkeep": "Pay upkeep",
+          "end": "End",
+          "attack": "Attack",
+          "alreadyRaised": "That defense mode is already raised.",
+          "noUpkeep": "No tangents to maintain.",
+          "tangentsBroken": "Not enough PSPs: your tangents are broken.",
+          "noTarget": "Target a token first.",
+          "selfTarget": "You cannot attack yourself.",
+          "alreadyFullContact": "You already have full contact with that target."
+        },
         "noClass": "Only a psionicist can do that.",
         "notEnoughPsp": "Not enough PSPs to use that power.",
         "restBlocked": "You cannot recover PSPs while maintaining a power.",
@@ -700,6 +720,31 @@
           "minimum-success": "Minimum success",
           "failure": "Failure",
           "automatic-failure": "Automatic failure"
+        }
+      },
+      "psionicContest": {
+        "attackRoll": "Attack",
+        "defenseRoll": "Defense",
+        "against": "against {target}",
+        "undefended": "Undefended",
+        "notMade": "Not made (full contact)",
+        "awaiting": "Waiting for the defender to roll.",
+        "paid": "PSPs spent",
+        "tangents": "Tangents",
+        "rollDefense": "Roll defense",
+        "recordTangent": "Record tangent",
+        "notYourDefense": "Only the defender's owner or a GM can roll this defense.",
+        "alreadyAnswered": "This contest has already been answered.",
+        "alreadyRecorded": "Those tangents are already recorded.",
+        "recorded": "Tangents recorded.",
+        "winner": { "attacker": "Attacker wins", "defender": "Defender wins" },
+        "reason": {
+          "unopposed": "unopposed",
+          "attack-failed": "the attack check failed",
+          "automatic": "the attack roll beats the defense score",
+          "attacker-only": "only the attacker succeeded",
+          "higher": "higher successful roll",
+          "tie": "a tie goes to the defender"
         }
       },
       "kitPower": {

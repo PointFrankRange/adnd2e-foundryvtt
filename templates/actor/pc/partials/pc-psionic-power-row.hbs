@@ -7,6 +7,7 @@
   {{#if p.range}}<span class="effect">{{p.range}}</span>{{/if}}
   {{#if @root.pcActions}}
   <button type="button" class="kit-small" data-action="usePsionicPower" data-power-id="{{p.id}}"{{#unless p.canUse}} disabled{{/unless}}>{{localize 'ADND2E.sheet.psionics.use'}}</button>
+  {{#if p.isAttackMode}}<button type="button" class="kit-small" data-action="psionicAttack" data-power-id="{{p.id}}">{{localize 'ADND2E.sheet.psionics.combat.attack'}}</button>{{/if}}
   {{#if p.canRelearn}}<button type="button" class="kit-small" data-action="relearnPsionicPower" data-power-id="{{p.id}}">{{localize 'ADND2E.sheet.psionics.relearn'}}</button>{{/if}}
   {{/if}}
   {{#if @root.adnd2e.lock.unlocked}}{{> adnd2e.item-controls id=p.id deletable=true}}{{/if}}

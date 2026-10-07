@@ -52,7 +52,7 @@ function actor(opts: { psp?: number | null; maintained?: string[]; items?: unkno
     items: (opts.items ?? [power("p1")]) as never,
     system: {
       abilities: { wis: { score: 14 } },
-      psionics: { psp: opts.psp === undefined ? 20 : opts.psp, maintained: (opts.maintained ?? []).map((powerId) => ({ powerId })), max: opts.max ?? 40, level: opts.level ?? 3 },
+      psionics: { psp: opts.psp === undefined ? 20 : opts.psp, maintained: (opts.maintained ?? []).map((powerId) => ({ powerId })), activeDefense: "", contacts: [], max: opts.max ?? 40, level: opts.level ?? 3 },
     },
     update: async (d) => void updates.push(d),
   };

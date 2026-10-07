@@ -53,6 +53,7 @@ import { classItemLevel } from "../../data/derive/class-item";
 import { CONDITIONS } from "../../conditions";
 import { groupInventory } from "./grouping";
 import { xpToNext } from "./xp";
+import { FULL_CONTACT, isAttackMode, isDefenseMode, upkeepDue } from "../../core/psionics/combat";
 import { canRelearn, DISCIPLINES, powerProgression, powerScore, primaryDiscipline, type KnownPower } from "../../core/psionics";
 import { levelRulesOf } from "../../core/classes/level-limits";
 import { buildFavoriteRows, isFavorite, normalizeFavorites, type FavoriteKind } from "../kit/favorites";
@@ -125,12 +126,14 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
     scoreBonus: p.scoreBonus,
     canUse: psp >= p.initialCost,
     canRelearn: canRelearn(known, p.id, input.level).ok,
+    isAttackMode: isAttackMode(p.name),
   });
   const byId = new Map(input.powers.map((p) => [p.id, p]));
   const maintained = input.maintained.flatMap((m) => {
     const p = byId.get(m.powerId);
     return p ? [{ powerId: p.id, name: p.name, cost: p.maintenanceCost, unit: p.maintenanceUnit }] : []; // an orphan entry (its power item is gone) is skipped
   });
+  const defenses = input.powers.filter((p) => p.kind === "defense" && isDefenseMode(p.name)).map((p) => ({ id: p.id, name: p.name, selected: p.id === input.activeDefense }));
   const used = (kind: PsionicPowerRow["kind"]): number => known.filter((k) => k.kind === kind).reduce((n, k) => n + 1 + k.scoreBonus, 0);
   const disciplinesHeld = new Set(known.filter((k) => k.kind !== "defense").map((k) => k.discipline)).size;
   const problems = [
@@ -152,6 +155,12 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
       powers: input.powers.filter((p) => p.discipline === discipline && p.kind !== "defense").map(toRow),
     })).filter((g) => g.powers.length > 0),
     defense: input.powers.filter((p) => p.kind === "defense").map(toRow),
+    combat: {
+      activeDefense: defenses.filter((d) => d.selected).map((d) => ({ id: d.id, name: d.name }))[0] ?? null, // a stale or non-defense id resolves to none
+      defenses,
+      contacts: input.contacts.map((c) => ({ target: c.target, name: c.name, tangents: c.tangents, full: c.tangents >= FULL_CONTACT })),
+      hasUpkeep: upkeepDue(input.contacts) > 0,
+    },
     problems,
   };
 }
