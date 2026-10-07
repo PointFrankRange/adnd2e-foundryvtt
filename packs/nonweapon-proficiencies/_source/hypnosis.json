@@ -1,0 +1,17 @@
+{
+  "_id": "2cYkDpzv9ELReODc",
+  "_key": "!items!2cYkDpzv9ELReODc",
+  "name": "Hypnosis",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "The psionicist can place a willing, aware subject into a relaxed state in which the subject is open to suggestion.",
+    "governingAbility": "cha",
+    "modifier": -2,
+    "slotCost": 1,
+    "group": "psionicist",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

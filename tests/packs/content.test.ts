@@ -215,9 +215,46 @@ describe("races pack content", () => {
 
 describe("nonweapon-proficiencies pack content", () => {
   const items = docs("nonweapon-proficiencies");
-  it("has exactly 65 documents", () => {
-    // 82 PHB Table 37 rows − 17 cross-group duplicates (see packs/nonweapon-proficiencies/_source/_MANIFEST.md)
-    expect(items).toHaveLength(65);
+  it("has exactly 69 documents", () => {
+    // 82 PHB Table 37 rows - 17 cross-group duplicates (see packs/nonweapon-proficiencies/_source/_MANIFEST.md)
+    // + 4 PHBR5 Table 11 Psionicist-group proficiencies (SP15 Plan D)
+    expect(items).toHaveLength(69);
+  });
+  it("has the four Psionicist-group items with the Table 11 numbers", () => {
+    const want: Record<string, [string, number, number]> = {
+      "Harness Subconscious": ["wis", -1, 2],
+      Hypnosis: ["cha", -2, 1],
+      Rejuvenation: ["wis", -1, 1],
+      "Meditative Focus": ["wis", 1, 1],
+    };
+    for (const [name, [ab, mod, cost]] of Object.entries(want)) {
+      const d = items.find((i) => i.name === name)!;
+      expect(d, name).toBeDefined();
+      expect(sys(d).group).toBe("psionicist");
+      expect(sys(d).governingAbility).toBe(ab);
+      expect(sys(d).modifier).toBe(mod);
+      expect(sys(d).slotCost).toBe(cost);
+      expect(typeof sys(d).description).toBe("string");
+      expect((sys(d).description as string).length).toBeGreaterThan(10);
+      expect(d._key).toBe(`!items!${d._id}`);
+    }
+    expect(items.filter((i) => sys(i).group === "psionicist")).toHaveLength(4);
+  });
+  it("exactly the four shared proficiencies carry alsoGroups [psionicist], at their Table 11 cost", () => {
+    const tagged = items.filter((i) => sys(i).alsoGroups !== undefined);
+    expect(tagged.map((i) => i.name).sort()).toEqual(["Gem Cutting", "Musical Instrument", "Reading/Writing", "Religion"]);
+    const cost: Record<string, number> = { "Gem Cutting": 2, "Musical Instrument": 1, "Reading/Writing": 1, Religion: 1 };
+    for (const d of tagged) {
+      expect(sys(d).alsoGroups).toEqual(["psionicist"]);
+      expect(sys(d).slotCost).toBe(cost[d.name as string]);
+    }
+  });
+  it("ids are 16 alphanumeric characters, match _key, and are unique", () => {
+    for (const d of items) {
+      expect(d._id as string).toMatch(/^[A-Za-z0-9]{16}$/);
+      expect(d._key).toBe(`!items!${d._id}`);
+    }
+    expect(new Set(items.map((d) => d._id)).size).toBe(items.length);
   });
   it("every entry: valid ability + group, slotCost >= 1, integer modifier", () => {
     for (const d of items) {

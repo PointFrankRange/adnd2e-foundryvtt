@@ -54,3 +54,14 @@ describe("SP15 psionics.maintained initial", () => {
     expect(body).not.toMatch(/initial:\s*\[/);
   });
 });
+
+describe("SP15 Plan D nonweapon proficiency alsoGroups initial", () => {
+  it("uses a function initial, not a shared array literal", () => {
+    const src = readFileSync(path.resolve(__dirname, "..", "..", "src", "data", "item", "nonweapon-proficiency.ts"), "utf8");
+    const at = src.indexOf("alsoGroups: new ArrayField");
+    expect(at).toBeGreaterThan(-1);
+    const body = src.slice(at, at + 300);
+    expect(body).toMatch(/initial:\s*\(\)\s*=>\s*\[\]/);
+    expect(body).not.toMatch(/initial:\s*\[/);
+  });
+});

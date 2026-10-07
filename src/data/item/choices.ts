@@ -46,7 +46,7 @@ export const ARMOR_TYPES: readonly ArmorType[] = [
 ];
 
 export const NONWEAPON_GROUPS: readonly NonweaponGroup[] = [
-  "general", "warrior", "wizard", "priest", "rogue",
+  "general", "warrior", "wizard", "priest", "rogue", "psionicist",
 ];
 
 /** The four class groups (= core `ClassGroup`). */

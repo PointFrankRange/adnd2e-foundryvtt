@@ -322,7 +322,7 @@ export class Adnd2eNpcSheet extends Base {
     };
     const dropped = item as unknown as {
       type: string;
-      system: { slotCost?: number; group?: NonweaponGroup };
+      system: { slotCost?: number; group?: NonweaponGroup; alsoGroups?: NonweaponGroup[] };
     };
     // SP8 Plan 8c: traits are PC-sheet-only (spec §7). The shared derive would
     // apply a dropped trait's effects invisibly on this streamlined sheet, so refuse it.
@@ -346,7 +346,7 @@ export class Adnd2eNpcSheet extends Base {
     } else if (dropped.type === "nonweaponProficiency") {
       const firstClassId = [...actor.items].find((i) => i.type === "class")?.system.chassisId ?? null;
       dropSlotCost = firstClassId
-        ? nonweaponSlotCost(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", firstClassId as never)
+        ? nonweaponSlotCost(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", firstClassId as never, dropped.system.alsoGroups ?? [])
         : (dropped.system.slotCost ?? 1);
     }
 

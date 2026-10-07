@@ -633,13 +633,13 @@ export class Adnd2eCharacterSheet extends Base {
       system: { proficiencies: { weapon: { available: number }; nonweapon: { available: number } } };
       items: Iterable<{
         id: string; name: string; type: string;
-        system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; weaponOrGroup?: string; isGroup?: boolean };
+        system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; alsoGroups?: NonweaponGroup[]; weaponOrGroup?: string; isGroup?: boolean };
       }>;
     };
     const existing = [...actor.items];
     const dropped = item as unknown as {
       id: string; name: string; type: string;
-      system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; weaponOrGroup?: string; isGroup?: boolean; casterClass?: string };
+      system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; alsoGroups?: NonweaponGroup[]; weaponOrGroup?: string; isGroup?: boolean; casterClass?: string };
     };
     const isNewDrop =
       (item as unknown as { parent?: { uuid?: string } }).parent?.uuid !==
@@ -676,7 +676,7 @@ export class Adnd2eCharacterSheet extends Base {
     } else if (dropped.type === "nonweaponProficiency") {
       const firstClassId = existing.find((i) => i.type === "class")?.system.chassisId ?? null;
       dropSlotCost = firstClassId
-        ? nonweaponSlotCost(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", firstClassId as never)
+        ? nonweaponSlotCost(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", firstClassId as never, dropped.system.alsoGroups ?? [])
         : (dropped.system.slotCost ?? 1);
       availableSlots = actor.system.proficiencies.nonweapon.available;
     }
