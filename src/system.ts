@@ -7,6 +7,7 @@ import { ACTOR_DATA_MODELS } from "./data/actor";
 import { ITEM_DATA_MODELS } from "./data/item";
 import { Adnd2eActiveEffect, Adnd2eActor, Adnd2eCombat, Adnd2eCombatant, Adnd2eItem } from "./documents";
 import { registerSettings } from "./settings";
+import { registerSettingsSections } from "./settings/sections-ui";
 import { registerSheets } from "./sheets";
 import { registerSheetPartials } from "./sheets/handlebars";
 import { buildApi } from "./api";
@@ -75,6 +76,7 @@ Hooks.once("init", () => {
   }
   CONFIG.specialStatusEffects.BLIND = "blinded";
   registerSettings();
+  registerSettingsSections();
   registerRelayQuery();
   registerMigrationSettings();
   registerSheets();
