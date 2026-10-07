@@ -1,5 +1,5 @@
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
-import { isHalved, lookupWild, testWildTalent as rollWildTest, wildTalentChance, type DireOutcome, type WildResult } from "../../core/psionics/wild";
+import { isHalved, lookupWild, testWildTalent as rollWildTest, wildTalentChance, WILD_TABLE_12, type DireOutcome, type WildResult } from "../../core/psionics/wild";
 import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
 import { getOptionalRules } from "../../settings";
 import { info, warn, type PsionicItem } from "./psionic-actions";
@@ -28,6 +28,8 @@ export interface WildActor {
     abilities: Record<string, { score: number; sub?: SubScores }>;
     psionics: { level: number; wild?: boolean };
     wildTalent: { tested: boolean; found: boolean; levelAtDiscovery: number };
+    /** the derived dual-class state: a dormant class does not count while it is not surpassed */
+    multiclass?: { dualClass?: { dormantChassisId: string | null; surpassed: boolean } };
     saves?: Record<string, { target: number; rollModifier: number }>;
   };
   /** The authored (unprepared) data: the BASE ability scores live here */
@@ -56,7 +58,6 @@ export interface ChoiceOption {
 export interface WildDireFlag {
   ability: "wis" | "int" | "con" | "all";
   points: number | "all";
-  applied: boolean;
 }
 
 /** The data carried in `flags.adnd2e.wildTalent` on a wild-talent chat card. */
@@ -132,10 +133,20 @@ async function defaultChooseDialog(options: ChoiceOption[]): Promise<string | nu
 
 const itemsOfType = (actor: WildActor, type: string): PsionicItem[] => [...actor.items].filter((i) => i.type === type);
 
-/** The character's highest class level (0 with no class item). */
+/** The character's highest class level among the classes in play (0 with no class item); a dormant dual-class class does not count until it is surpassed. */
 export function highestClassLevel(actor: WildActor): number {
-  return itemsOfType(actor, "class").reduce((max, c) => Math.max(max, Number(c.system.level ?? 0)), 0);
+  const dual = actor.system.multiclass?.dualClass;
+  const dormant = dual && dual.dormantChassisId !== null && !dual.surpassed ? dual.dormantChassisId : null;
+  return itemsOfType(actor, "class")
+    .filter((c) => dormant === null || String(c.system.chassisId) !== dormant)
+    .reduce((max, c) => Math.max(max, Number(c.system.level ?? 0)), 0);
 }
+
+/** The power names Table 12 itself lists: "choose any <discipline> devotion above" offers only these. */
+const TABLE_12_NAMES: ReadonlySet<string> = new Set(WILD_TABLE_12.flatMap((e) => (e.result.kind === "power" ? [e.result.name] : [])));
+
+/** Actors whose wild-talent test is running (a second test is refused until the first finishes). */
+const testsInFlight = new Set<string>();
 
 /** Per-source parts of the chance (before halving), via the pure formula. */
 function chanceParts(i: { wis: number; con: number; int: number; level: number }): { wis: number; con: number; int: number; level: number } {
@@ -194,7 +205,8 @@ async function resolve(g: Grant, table: 12 | 13, result: WildResult): Promise<vo
       await resolve(g, 13, lookupWild(13, await g.deps.roll100()));
       return;
     case "choose":
-      await pick(g, (p) => p.system.discipline === result.discipline && choosable(p, result.powerKinds));
+      // Table 12 says "any <discipline> devotion above": only the devotions that table lists; Table 13 is unrestricted
+      await pick(g, (p) => p.system.discipline === result.discipline && choosable(p, result.powerKinds) && (table !== 12 || TABLE_12_NAMES.has(p.name)));
       return;
     case "chooseAny": {
       // Table 13's "choose any science or devotion" is encoded (1 science, 0 devotions): one pick of either kind
@@ -271,6 +283,19 @@ export async function testWildTalent(actor: WildActor, opts: { surgeon: boolean 
     return;
   }
 
+  if (testsInFlight.has(actor.uuid)) {
+    warn("ADND2E.sheet.wildTalent.testInProgress");
+    return;
+  }
+  testsInFlight.add(actor.uuid); // checked and added before the first await, so two overlapping clicks cannot both test
+  try {
+    await runWildTest(actor, opts, d);
+  } finally {
+    testsInFlight.delete(actor.uuid);
+  }
+}
+
+async function runWildTest(actor: WildActor, opts: { surgeon: boolean }, d: WildDeps): Promise<void> {
   const level = highestClassLevel(actor);
   const raceItem = itemsOfType(actor, "race")[0];
   const halved = isHalved({
@@ -295,7 +320,7 @@ export async function testWildTalent(actor: WildActor, opts: { surgeon: boolean 
   let flagDire: WildDireFlag | null = null;
   if (dire) {
     saved = await d.rollSave(actor, "ppd", { penalty: dire.savePenalty });
-    if (!saved) flagDire = { ability: dire.ability, points: dire.ability === "all" ? "all" : await d.rollD6(), applied: false };
+    if (!saved) flagDire = { ability: dire.ability, points: dire.ability === "all" ? "all" : await d.rollD6() };
   }
 
   if (g.granted.length > 0) await actor.createEmbeddedDocuments("Item", g.granted.map(({ _id: _i, _key: _k, ...doc }) => doc));

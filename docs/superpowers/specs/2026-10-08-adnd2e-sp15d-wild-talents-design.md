@@ -35,7 +35,7 @@ Telepathic: 49-50 Domination; 51-52 Fate Link; 53-54 Mass Domination; 55-56 Mind
 Psychoportive: 69-70 Banishment; 71-72 Probability Travel; 73-74 Summon Planar Creature; 75-76 Teleport; 77-78 Teleport Other; 79-82 choose any psychoportive science or devotion.
 83-85 roll two times; 86-88 roll three times; 89-92 choose any science or devotion; 93-96 choose any science and two devotions; 97-99 choose any science and three devotions; 00 choose any two sciences and four devotions.
 
-(Wild talents never receive metapsionic powers; "roll two/three times" re-rolls on the same table; a "choose" result is picked by the owning player from a dialog listing the eligible powers of that kind; a power the character already holds is skipped.)
+(Wild talents never receive metapsionic powers; "roll two/three times" re-rolls on the same table; a "choose" result is picked by the owning player from a dialog listing the eligible powers of that kind (for Table 12 "choose any <discipline> devotion above" only the devotions Table 12 itself lists for that discipline, e.g. the 7 psychokinetic ones, not Levitation; Table 13 and the "any devotion/science" rows are unrestricted); a power the character already holds is skipped.)
 
 ## Pure rules: `src/core/psionics/wild.ts`
 
@@ -44,7 +44,7 @@ Psychoportive: 69-70 Banishment; 71-72 Probability Travel; 73-74 Summon Planar C
 - `testWildTalent(chance, roll, surgeon): { talent: boolean; effectiveRoll: number; dire: DireResult | null }` where `effectiveRoll = roll - (surgeon ? 2 : 0)`, `talent = effectiveRoll <= chance`, and `dire` from the rolled d100 (97, 98, 99, 100 as "00").
 - `DIRE_TABLE`; `direOutcome(roll)`: `{ roll, ability: "wis" | "int" | "con" | "all", savePenalty: 0 | -5 }`; loss rule `loseD6` or `setTo3`.
 - `TABLE_12`, `TABLE_13` (range tables as data) and `lookupWild(table, roll)` returning `{ kind: "power", name } | { kind: "choose", discipline, powerKinds } | { kind: "roll", times, table } | { kind: "chooseAny", sciences, devotions } | { kind: "table13" } | { kind: "chooseThenTable13" }` with the 01-00 convention (a roll of 100 is "00").
-- `wildPsp(powers: { initialCost; maintenanceCost }[], levelsGained: number): number` = sum of (`initialCost` + 4 x `maintenanceCost`) + 4 x `levelsGained`.
+- `wildPsp(powers: { initialCost; maintenanceCost; wildMinimum? }[], levelsGained: number): number` = sum of each power's `wildMinimum` (when non-null) or (`initialCost` + 4 x `maintenanceCost`), + 4 x `levelsGained`. `wildMinimum` is an optional power-item field (null = computed) holding the book's stated minimum for powers whose real cost is only in `costNote` (Contact 7, Enhanced Strength 6, Mind Over Body 40, Reduction 5, Domination 30, Mass Domination 14, Switch Personality 30, Post-Hypnotic Suggestion 1); Ejection's cost is twice the opponent's contact power score, so it has none.
 - Foundry-free, 100% covered; every table range tested at its boundaries and the book's worked example (a 3rd-level dwarf cleric, Wis 17, Int 9, Con 16: chance = (1 + 2 + 1) x 0.5 = 2).
 
 ## Data and gating

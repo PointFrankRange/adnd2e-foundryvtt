@@ -32,6 +32,9 @@ describe("PowerItemModel schema (source-pinned)", () => {
     expect(line("maintenanceUnit")).toContain("choices: POWER_MAINTENANCE_UNITS");
     expect(line("abilityKey")).toContain("choices: ABILITY_KEYS");
   });
+  it("models wildMinimum as a nullable non-negative integer defaulting to null", () => {
+    expect(line("wildMinimum")).toContain("required: true, nullable: true, integer: true, min: 0, initial: null");
+  });
   it("keeps costs integer and non-negative, with no literal-object initials", () => {
     for (const f of ["initialCost", "maintenanceCost", "scoreBonus"]) expect(line(f), f).toMatch(/integer: true, min: 0/);
     expect(SRC).not.toMatch(/initial: [[{]/);

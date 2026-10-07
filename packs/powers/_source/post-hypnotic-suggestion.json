@@ -13,6 +13,7 @@
     "initialCost": 0,
     "costNote": "contact; maint. 1/level or hit die",
     "maintenanceCost": 0,
+    "wildMinimum": 1,
     "maintenanceUnit": "none",
     "range": "unlim.",
     "preparation": "0",

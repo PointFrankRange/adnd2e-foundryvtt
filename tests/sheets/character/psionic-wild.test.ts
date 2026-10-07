@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- chat-card flags and views are inspected loosely */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { applyDire, resetWildTest, testWildTalent, highestClassLevel, type ApplyDeps, type PackPower, type WildActor, type WildFlag } from "../../../src/sheets/character/psionic-wild";
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { mainScoreFromSubs } from "../../../src/core/abilities/sub-abilities";
 import { derivePsionics } from "../../../src/data/derive/character/psionics";
 import allRoundVision from "../../../packs/powers/_source/all-round-vision.json";
@@ -9,6 +11,11 @@ import contact from "../../../packs/powers/_source/contact.json";
 import dangerSense from "../../../packs/powers/_source/danger-sense.json";
 import feelLight from "../../../packs/powers/_source/feel-light.json";
 import mindlink from "../../../packs/powers/_source/mindlink.json";
+import esp from "../../../packs/powers/_source/esp.json";
+import mindOverBody from "../../../packs/powers/_source/mind-over-body.json";
+
+const POWERS_DIR = path.resolve(__dirname, "..", "..", "..", "packs", "powers", "_source");
+const FULL_PACK = readdirSync(POWERS_DIR).filter((f) => f.endsWith(".json")).map((f) => JSON.parse(readFileSync(path.join(POWERS_DIR, f), "utf8")) as PackPower);
 
 const PACK = [allRoundVision, combatMind, contact, dangerSense, feelLight, mindlink] as unknown as PackPower[];
 
@@ -77,7 +84,7 @@ const baseDeps = (over: Record<string, unknown> = {}) => ({
 const wildPsp = (docs: Record<string, unknown>[]) =>
   derivePsionics({
     classes: [{ chassisId: "cleric", level: 3 }], scores: { wis: 17, int: 9, con: 16 },
-    wild: { found: true, levelAtDiscovery: 3, powers: docs.map((d) => ({ initialCost: (d.system as any).initialCost, maintenanceCost: (d.system as any).maintenanceCost })) },
+    wild: { found: true, levelAtDiscovery: 3, powers: docs.map((d) => ({ initialCost: (d.system as any).initialCost, maintenanceCost: (d.system as any).maintenanceCost, wildMinimum: (d.system as any).wildMinimum ?? null })) },
   });
 
 describe("testWildTalent: the chance and the talent test", () => {
@@ -121,6 +128,81 @@ describe("testWildTalent: the chance and the talent test", () => {
   });
 });
 
+describe("testWildTalent: one test at a time", () => {
+  it("a second call while the first is suspended in the choose dialog is refused; exactly one test runs", async () => {
+    const { actor, updates } = makeActor();
+    let release!: (v: string | null) => void;
+    const gate = new Promise<string | null>((r) => (release = r));
+    const first = testWildTalent(actor, { surgeon: false }, baseDeps({ roll100: seq(2, 13), chooseDialog: vi.fn(() => gate) }));
+    await Promise.resolve();
+    const rollSecond = vi.fn(async () => 1);
+    await testWildTalent(actor, { surgeon: false }, baseDeps({ roll100: rollSecond }));
+    expect(warn).toHaveBeenCalledWith("ADND2E.sheet.wildTalent.testInProgress");
+    expect(rollSecond).not.toHaveBeenCalled();
+    expect(updates).toEqual([]);
+    expect(messages).toEqual([]);
+    release("Combat Mind");
+    await first;
+    expect(updates).toHaveLength(1);
+    expect(messages).toHaveLength(1);
+  });
+  it("the guard is released after a failure, so a retry works", async () => {
+    const { actor, updates } = makeActor();
+    await expect(testWildTalent(actor, { surgeon: false }, baseDeps({ roll100: async () => { throw new Error("boom"); } }))).rejects.toThrow("boom");
+    expect(updates).toEqual([]);
+    await testWildTalent(actor, { surgeon: false }, baseDeps({ roll100: seq(3) }));
+    expect(updates).toEqual([{ "system.wildTalent.tested": true, "system.wildTalent.found": false }]);
+    expect(warn).not.toHaveBeenCalled();
+  });
+});
+
+describe("testWildTalent: wild PSP maximums use the book's minimum for variable-cost powers", () => {
+  it("Mind Over Body alone (none; 10/day maintenance) gives the stated minimum 4 x 10 = 40, plus 4 per level gained", () => {
+    expect(wildPsp([mindOverBody as never])?.max).toBe(40);
+    expect((mindOverBody.system as any).wildMinimum).toBe(40);
+  });
+  it("Contact (3 to contact a level 1-5 target + 4 x 1 maintenance = 7) plus ESP (0 + 4 x 6 = 24) gives 31", () => {
+    expect(wildPsp([contact as never, esp as never])?.max).toBe(31);
+  });
+  it("a power without wildMinimum keeps initialCost + 4 x maintenanceCost (Danger Sense 4 + 4 x 3 = 16)", () => {
+    expect((dangerSense.system as any).wildMinimum).toBeUndefined();
+    expect(wildPsp([dangerSense as never])?.max).toBe(16);
+  });
+});
+
+describe("highestClassLevel counts the classes in play", () => {
+  const classes = [{ id: "a", name: "F", type: "class", system: { chassisId: "fighter", level: 9 } }, { id: "b", name: "M", type: "class", system: { chassisId: "mage", level: 2 } }];
+  it("a dormant dual-class class is ignored until it is surpassed", () => {
+    const dormant = makeActor({ items: classes });
+    dormant.actor.system.multiclass = { dualClass: { dormantChassisId: "fighter", surpassed: false } };
+    expect(highestClassLevel(dormant.actor)).toBe(2);
+    dormant.actor.system.multiclass = { dualClass: { dormantChassisId: "fighter", surpassed: true } };
+    expect(highestClassLevel(dormant.actor)).toBe(9);
+    dormant.actor.system.multiclass = { dualClass: { dormantChassisId: null, surpassed: false } };
+    expect(highestClassLevel(dormant.actor)).toBe(9);
+  });
+});
+
+describe("testWildTalent: Table 12 choose results list only Table 12's own devotions", () => {
+  const names = (o: { name: string }[]) => o.map((x) => x.name).sort();
+  it("a psychokinetic choose (Table 12 roll 22) offers exactly the 7 listed devotions, not Levitation", async () => {
+    const { actor } = makeActor({ items: [{ id: "c1", name: "Cleric", type: "class", system: { chassisId: "cleric", level: 3 } }] });
+    const chooseDialog = vi.fn(async () => null);
+    await testWildTalent(actor, { surgeon: false }, baseDeps({ roll100: seq(2, 22), readPack: async () => FULL_PACK, chooseDialog }));
+    const offered = names((chooseDialog.mock.calls[0] as unknown as [{ name: string }[]])[0]);
+    expect(offered).toEqual(["Animate Object", "Animate Shadow", "Ballistic Attack", "Control Body", "Control Flames", "Control Light", "Control Sound"]);
+    expect(offered).not.toContain("Levitation");
+  });
+  it("Table 13's psychokinetic choose (roll 27) stays unrestricted: it offers Levitation and Telekinesis", async () => {
+    const { actor } = makeActor({ items: [{ id: "c1", name: "Cleric", type: "class", system: { chassisId: "cleric", level: 3 } }] });
+    const chooseDialog = vi.fn(async () => null);
+    await testWildTalent(actor, { surgeon: false }, baseDeps({ roll100: seq(2, 95, 27), readPack: async () => FULL_PACK, chooseDialog }));
+    const offered = names((chooseDialog.mock.calls[0] as unknown as [{ name: string }[]])[0]);
+    expect(offered).toContain("Levitation");
+    expect(offered).toContain("Telekinesis");
+  });
+});
+
 describe("testWildTalent: granting powers", () => {
   it("Table 12 roll 3 grants Danger Sense; levelAtDiscovery and the PSP maximum follow (4 + 4x3 = 16)", async () => {
     const { actor, created } = makeActor();
@@ -138,7 +220,7 @@ describe("testWildTalent: granting powers", () => {
     const { actor, created } = makeActor();
     await testWildTalent(actor, { surgeon: false }, baseDeps({ roll100: seq(1, 95, 63) }));
     expect(created[0]!.map((d) => d.name)).toEqual(["Mindlink", "Contact"]);
-    expect(wildPsp(created[0]!)?.max).toBe(36);
+    expect(wildPsp(created[0]!)?.max).toBe(39); // Mindlink 0 + 4 x 8 = 32, Contact wildMinimum 7
   });
   it("a held prerequisite is not granted twice", async () => {
     const { actor, created } = makeActor({ items: [{ id: "p1", name: "Contact", type: "power", system: {} }, { id: "c1", name: "Cleric", type: "class", system: { chassisId: "cleric", level: 3 } }] });
@@ -267,7 +349,7 @@ describe("dire consequences", () => {
     const deps = failedSave(97);
     await testWildTalent(actor, { surgeon: false }, deps);
     expect(deps.rollSave).toHaveBeenCalledWith(actor, "ppd", { penalty: 0 });
-    expect(flagOf().dire).toEqual({ ability: "wis", points: 4, applied: false });
+    expect(flagOf().dire).toEqual({ ability: "wis", points: 4 });
     expect(view().showApply).toBe(true);
     expect(view().lossPoints).toBe(4);
     expect(updates).toHaveLength(1); // the test's own update; the loss is not applied yet
@@ -302,7 +384,7 @@ describe("dire consequences", () => {
     await testWildTalent(actor, { surgeon: false }, deps);
     expect(deps.rollSave).toHaveBeenCalledWith(actor, "ppd", { penalty: -5 });
     expect(deps.rollD6).not.toHaveBeenCalled();
-    expect(flagOf().dire).toEqual({ ability: "all", points: "all", applied: false });
+    expect(flagOf().dire).toEqual({ ability: "all", points: "all" });
     await applyDire("m1", applyDeps(actor));
     expect(updates[1]).toEqual({
       "flags.adnd2e.wildApplied": [flagOf().id],

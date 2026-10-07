@@ -227,11 +227,11 @@ export function lookupWild(table: 12 | 13, roll: number): WildResult {
   return entry.result;
 }
 
-/** PSP maximum for a wild talent: sum of (initialCost + 4 * maintenanceCost) for each power, plus 4 * levelsGained. */
-export function wildPsp(powers: readonly { initialCost: number; maintenanceCost: number }[], levelsGained: number): number {
+/** PSP maximum for a wild talent: sum over its powers of `wildMinimum` (the book's stated minimum for a power whose cost varies; null/absent = initialCost + 4 * maintenanceCost), plus 4 * levelsGained. */
+export function wildPsp(powers: readonly { initialCost: number; maintenanceCost: number; wildMinimum?: number | null }[], levelsGained: number): number {
   let total = 0;
   for (const power of powers) {
-    total += power.initialCost + 4 * power.maintenanceCost;
+    total += power.wildMinimum ?? power.initialCost + 4 * power.maintenanceCost;
   }
   total += 4 * levelsGained;
   return total;

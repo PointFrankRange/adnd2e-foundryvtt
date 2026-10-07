@@ -13,7 +13,7 @@ export interface DerivedPsionics {
 export function derivePsionics(input: {
   classes: readonly { chassisId: string; level: number }[];
   scores: { wis: number; int: number; con: number };
-  wild?: { found: boolean; levelAtDiscovery: number; powers: readonly { initialCost: number; maintenanceCost: number }[] };
+  wild?: { found: boolean; levelAtDiscovery: number; powers: readonly { initialCost: number; maintenanceCost: number; wildMinimum?: number | null }[] };
 }): DerivedPsionics | null {
   const entry = input.classes.find((c) => c.chassisId === "psionicist");
   if (entry) {

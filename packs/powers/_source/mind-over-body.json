@@ -13,6 +13,7 @@
     "initialCost": 0,
     "costNote": "none; maint. 10/day",
     "maintenanceCost": 0,
+    "wildMinimum": 40,
     "maintenanceUnit": "none",
     "range": "touch",
     "preparation": "0",

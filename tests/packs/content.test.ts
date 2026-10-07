@@ -468,6 +468,20 @@ describe("powers pack content", () => {
     }
   });
 
+  it("wildMinimum is set only where the book states a minimum for a variable cost (PHBR5 Table 12/13 powers)", () => {
+    const set = Object.fromEntries(items.filter((d) => sys(d).wildMinimum != null).map((d) => [String(d.name), sys(d).wildMinimum]));
+    expect(set).toEqual({
+      Contact: 7, // 3 to contact a level 1-5 target + 4 x 1/round
+      "Enhanced Strength": 6, // 1 point: 2 initial + 4 x 1/round
+      "Mind Over Body": 40, // 4 x 10/day
+      Reduction: 5, // 1 PSP + 4 x 1/round
+      Domination: 30, // 2 x 3 to establish, 4 x 6 to maintain
+      "Mass Domination": 14, // 2 x 3 + 4 x (2 x level 1)
+      "Switch Personality": 30, // the +30 over contact
+      "Post-Hypnotic Suggestion": 1, // a one-time 1 per level or hit die
+    });
+  });
+
   it("has exactly 5 defense powers, all telepathy", () => {
     const defense = items.filter((d) => kindOf(d) === "defense");
     expect(defense).toHaveLength(5);

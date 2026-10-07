@@ -525,6 +525,11 @@ describe("wildPsp", () => {
     expect(wildPsp([{ initialCost: 7, maintenanceCost: 4 }], 5)).toBe(23 + 4 * 5);
   });
 
+  it("wildMinimum replaces the computed cost when non-null (Mind Over Body 40; Contact 7), null keeps it", () => {
+    expect(wildPsp([{ initialCost: 0, maintenanceCost: 0, wildMinimum: 40 }], 0)).toBe(40);
+    expect(wildPsp([{ initialCost: 0, maintenanceCost: 1, wildMinimum: 7 }, { initialCost: 0, maintenanceCost: 6, wildMinimum: null }], 1)).toBe(7 + 24 + 4);
+  });
+
   it("empty powers with levels gained", () => {
     expect(wildPsp([], 3)).toBe(4 * 3);
     expect(wildPsp([], 0)).toBe(0);

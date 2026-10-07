@@ -15,6 +15,7 @@ export class PowerItemModel extends Adnd2eItemModel {
       initialCost: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       costNote: new StringField({ required: true, blank: true, initial: "" }),
       maintenanceCost: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+      wildMinimum: new NumberField({ required: true, nullable: true, integer: true, min: 0, initial: null }),
       maintenanceUnit: new StringField({ required: true, blank: false, initial: "none", choices: POWER_MAINTENANCE_UNITS }),
       range: new StringField({ required: true, blank: true, initial: "" }),
       preparation: new StringField({ required: true, blank: true, initial: "" }),

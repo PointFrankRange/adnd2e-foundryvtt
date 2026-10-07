@@ -1189,10 +1189,16 @@ export class Adnd2eCharacterSheet extends Base {
     if (powerId && this.isEditable) await relearnPower(this.document as never, powerId);
   }
 
-  static async #onWildTalentTest(this: Adnd2eCharacterSheet): Promise<void> {
+  static async #onWildTalentTest(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
+    const button = target as HTMLButtonElement;
     const surgeon = this.element.querySelector<HTMLInputElement>("[data-wild-surgeon]")?.checked ?? false;
-    await testWildTalent(this.document as never, { surgeon });
+    button.disabled = true;
+    try {
+      await testWildTalent(this.document as never, { surgeon });
+    } finally {
+      button.disabled = false;
+    }
   }
 
   static async #onWildTalentReset(this: Adnd2eCharacterSheet): Promise<void> {
