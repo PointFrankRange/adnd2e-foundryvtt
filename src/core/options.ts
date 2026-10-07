@@ -57,6 +57,8 @@ export interface OptionalRules {
   channelers: boolean;
   /** Sub-project 14 Plan C: Table 21 spell fatigue for channelling wizards (pp.82-84). */
   channellerFatigue: boolean;
+  /** PHB Table 8: a race may only take its listed classes and multiclass combinations (core 2E rule; ON by default). */
+  enforceRaceClassRestrictions: boolean;
   /** PHB p.26: +10% on XP awarded to a class when every one of its prime requisites is 16 or higher (core 2E rule; ON by default). */
   primeRequisiteXpBonus: boolean;
   /** Sub-project 13: enforce the racial class level limits carried by the race item (core 2E rule; ON by default). */
@@ -93,6 +95,7 @@ export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
   spellPoints: false,
   channelers: false,
   channellerFatigue: false,
+  enforceRaceClassRestrictions: true,
   primeRequisiteXpBonus: true,
   racialLevelLimits: true,
   exceedLevelLimits: 0,

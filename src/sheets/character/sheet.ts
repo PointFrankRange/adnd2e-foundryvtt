@@ -7,6 +7,7 @@ import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
 import { getChassis } from "../../core/classes/chassis";
 import { awardWithPrimeBonus } from "../../core/abilities";
+import { raceAllowsClasses, raceTablesOf, type RaceClassVerdict } from "../../core/races";
 import type { ManeuverId } from "../../core/combat/maneuvers";
 import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
 import type { RawTraitEffect } from "../../core/skills/traits";
@@ -725,7 +726,18 @@ export class Adnd2eCharacterSheet extends Base {
       }
     }
 
+    let raceClassVerdict: RaceClassVerdict | undefined;
+    if (isNewDrop && getOptionalRules().enforceRaceClassRestrictions) {
+      const ownedClassIds = existing.filter((i) => i.type === "class").map((i) => i.system.chassisId ?? "").filter(Boolean);
+      if (dropped.type === "class" && dropped.system?.chassisId) {
+        const raceItem = existing.find((i) => i.type === "race");
+        if (raceItem) raceClassVerdict = raceAllowsClasses(raceTablesOf(raceItem.system), [...ownedClassIds, dropped.system.chassisId]);
+      } else if (dropped.type === "race" && ownedClassIds.length > 0) {
+        raceClassVerdict = raceAllowsClasses(raceTablesOf(dropped.system), ownedClassIds);
+      }
+    }
     const verdict = validateItemDrop({
+      raceClassVerdict,
       dropType: dropped.type,
       dropChassisId: dropped.system?.chassisId ?? null,
       hasRace: existing.some((i) => i.type === "race"),

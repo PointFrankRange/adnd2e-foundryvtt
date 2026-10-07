@@ -839,6 +839,8 @@ describe("lang/en.json — SP12 Plan A (subrace)", () => {
 describe("lang/en.json — SP13 level-limit settings and sheet keys", () => {
   it("resolves the level-limit settings name and hint keys", () => {
     for (const key of [
+      "ADND2E.settings.enforceRaceClassRestrictions.name",
+      "ADND2E.settings.enforceRaceClassRestrictions.hint",
       "ADND2E.settings.primeRequisiteXpBonus.name",
       "ADND2E.settings.primeRequisiteXpBonus.hint",
       "ADND2E.settings.wildTalents.name",

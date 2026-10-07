@@ -17,7 +17,7 @@ export const SETTING_SECTIONS: readonly SettingSection[] = [
     keys: [
       "exceptionalStrength", "maxSpellsPerLevel", "weaponSpeedInitiative", "spellFailureFromWisdom",
       "trainingRequiredToLevel", "nonweaponProficienciesUsed", "weaponProficienciesUsed", "multiclassHpAveraging",
-      "primeRequisiteXpBonus", "racialLevelLimits",
+      "enforceRaceClassRestrictions", "primeRequisiteXpBonus", "racialLevelLimits",
     ],
   },
   { id: "racesAndLevels", kind: "optional", keys: ["exceedLevelLimits", "primeRequisiteBonusLevels"] },
