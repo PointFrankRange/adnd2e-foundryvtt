@@ -17,6 +17,7 @@ import type {
   PsionicPowerRow,
   PsionicsInput,
   PsionicsView,
+  WildTalentView,
   TabDescriptor,
   ThiefSkillRow,
   TraitRow,
@@ -108,11 +109,23 @@ const PSIONICS_TAB: TabDescriptor = { id: "psionics", label: "ADND2E.sheet.tabs.
 const PSIONIC_ACTIVITIES = ["hard", "light", "rest", "sleep"] as const;
 
 /** SP15 Plan A: the Psionics tab view; null when the actor has no psionicist class (input null/absent). */
+/** SP15 Plan D: the Wild talent panel - shown when the rule is on and the actor is not an active psionicist. */
+export function buildWildTalentView(input: CharacterSheetInput): WildTalentView {
+  const w = input.wildTalent;
+  return {
+    show: input.optionalRules.wildTalents && !!w && (w.psionicLevel === 0 || w.wild),
+    tested: w?.tested ?? false,
+    found: w?.found ?? false,
+    isGm: input.perms.isGM,
+  };
+}
+
 export function buildPsionicsView(input: PsionicsInput | null | undefined): PsionicsView | null {
   if (!input) return null;
   const psp = Math.min(input.psp ?? input.max, input.max);
   const known: KnownPower[] = input.powers.map((p) => ({ id: p.id, name: p.name, discipline: p.discipline, kind: p.kind, scoreBonus: p.scoreBonus }));
   const row = powerProgression(input.level);
+  const wild = input.wild ?? false;
   const toRow = (p: PsionicsInput["powers"][number]): PsionicPowerRow => ({
     id: p.id,
     name: p.name,
@@ -125,7 +138,7 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
     range: p.range,
     scoreBonus: p.scoreBonus,
     canUse: psp >= p.initialCost,
-    canRelearn: canRelearn(known, p.id, input.level).ok,
+    canRelearn: !wild && canRelearn(known, p.id, input.level).ok,
     isAttackMode: isAttackMode(p.name),
   });
   const byId = new Map(input.powers.map((p) => [p.id, p]));
@@ -136,7 +149,7 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
   const defenses = input.powers.filter((p) => p.kind === "defense" && isDefenseMode(p.name)).map((p) => ({ id: p.id, name: p.name, selected: p.id === input.activeDefense }));
   const used = (kind: PsionicPowerRow["kind"]): number => known.filter((k) => k.kind === kind).reduce((n, k) => n + 1 + k.scoreBonus, 0);
   const disciplinesHeld = new Set(known.filter((k) => k.kind !== "defense").map((k) => k.discipline)).size;
-  const problems = [
+  const problems = wild ? [] : [
     ...(disciplinesHeld > row.disciplines ? ["ADND2E.sheet.psionics.problem.disciplines"] : []),
     ...(used("science") > row.sciences ? ["ADND2E.sheet.psionics.problem.sciences"] : []),
     ...(used("devotion") > row.devotions ? ["ADND2E.sheet.psionics.problem.devotions"] : []),
@@ -146,6 +159,7 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
     psp,
     max: input.max,
     level: input.level,
+    wild,
     row,
     primary: primaryDiscipline(known),
     activities: [...PSIONIC_ACTIVITIES],
@@ -1202,6 +1216,7 @@ export function buildCharacterSheetContext(input: CharacterSheetInput): Characte
   const spells = buildSpells(input, fav);
   const thiefArmorDisabled = skills.thief?.armorDisabled ?? false;
   const psionics = buildPsionicsView(input.psionics);
+  const wildTalent = buildWildTalentView(input);
 
   return {
     identity: buildIdentity(input),
@@ -1222,6 +1237,7 @@ export function buildCharacterSheetContext(input: CharacterSheetInput): Characte
     },
     tabs: psionics ? [...TABS_DEF.slice(0, 4), PSIONICS_TAB, ...TABS_DEF.slice(4)] : [...TABS_DEF],
     psionics,
+    wildTalent,
     lock: lockState(input.perms.editable, input.unlocked === true),
     favorites: {
       canFavorite: input.perms.isOwner,

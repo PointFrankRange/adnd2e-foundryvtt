@@ -53,6 +53,7 @@ export function snapshotActor(actor: Actor.Implementation, options: OptionalRule
       spellcasting: SpellcastingSystem;
       thiefSkills: ThiefSkillsSystem;
       options?: { spellsAndMagic?: { casting?: unknown } };
+      wildTalent?: { found: boolean; levelAtDiscovery: number };
     };
     items: Iterable<{ id: string; type: string; system: unknown }>;
   };
@@ -138,6 +139,20 @@ export function snapshotActor(actor: Actor.Implementation, options: OptionalRule
     thiefSkillAllocations,
     traits: toTraitEntries(items),
     kitEffects: kitEntries.flatMap((k) => k.effects),
+    ...(doc.system.wildTalent
+      ? {
+          wildTalent: {
+            found: doc.system.wildTalent.found,
+            levelAtDiscovery: doc.system.wildTalent.levelAtDiscovery,
+            powers: items
+              .filter((i) => i.type === "power")
+              .map((i) => {
+                const p = i.system as { initialCost?: number; maintenanceCost?: number; wildMinimum?: number | null };
+                return { initialCost: p.initialCost ?? 0, maintenanceCost: p.maintenanceCost ?? 0, wildMinimum: p.wildMinimum ?? null };
+              }),
+          },
+        }
+      : {}),
     isCasting: Boolean(doc.system.options?.spellsAndMagic?.casting),
   };
 }

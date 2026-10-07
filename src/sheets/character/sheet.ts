@@ -29,6 +29,7 @@ import type {
 import { checkPowerDrop, validateItemDrop, type DropCheckInput } from "./drop-rules";
 import { adjustPsp, endPower, payMaintenance, relearnPower, rest as psionicRest, usePower as usePsionicPower } from "./psionic-actions";
 import type { Contact } from "../../core/psionics/combat";
+import { resetWildTest, testWildTalent } from "./psionic-wild";
 import { attackMode, dropDefense, endContactAction, payUpkeep, raiseDefense } from "./psionic-combat";
 import type { PsionicPowerItem } from "./context-types";
 import { rollHitPoints } from "./hp-roll";
@@ -371,6 +372,8 @@ export class Adnd2eCharacterSheet extends Base {
       psionicAttack: Adnd2eCharacterSheet.#onPsionicAttack,
       psionicPayUpkeep: Adnd2eCharacterSheet.#onPsionicPayUpkeep,
       psionicEndContact: Adnd2eCharacterSheet.#onPsionicEndContact,
+      wildTalentTest: Adnd2eCharacterSheet.#onWildTalentTest,
+      wildTalentReset: Adnd2eCharacterSheet.#onWildTalentReset,
     },
   };
 
@@ -557,7 +560,8 @@ export class Adnd2eCharacterSheet extends Base {
     }
 
     const rules = getOptionalRules();
-    const psionicSys = (actor.system as { psionics: { psp: number | null; max: number; level: number; maintained: { powerId: string }[]; activeDefense: string; contacts: Contact[] }; abilities: Record<string, { score: number }> }); 
+    const wildSys = actor.system as unknown as { wildTalent?: { tested: boolean; found: boolean } };
+    const psionicSys = (actor.system as { psionics: { psp: number | null; max: number; level: number; wild?: boolean; maintained: { powerId: string }[]; activeDefense: string; contacts: Contact[] }; abilities: Record<string, { score: number }> }); 
     const actorStatuses = (this.document as unknown as { statuses: ReadonlySet<string> }).statuses;
     const fatigueTier = [...actorStatuses].map(tierForConditionId).find((t) => t !== null) ?? null;
     return {
@@ -602,6 +606,7 @@ export class Adnd2eCharacterSheet extends Base {
             psp: psionicSys.psionics.psp,
             max: psionicSys.psionics.max,
             level: psionicSys.psionics.level,
+            wild: psionicSys.psionics.wild ?? false,
             maintained: psionicSys.psionics.maintained,
             activeDefense: psionicSys.psionics.activeDefense ?? "",
             contacts: psionicSys.psionics.contacts ?? [],
@@ -609,6 +614,12 @@ export class Adnd2eCharacterSheet extends Base {
             powers: items.filter((i) => i.type === "power").map((i) => ({ id: i.id, name: i.name, ...(i.system as Omit<PsionicPowerItem, "id" | "name">) })),
           }
         : null,
+      wildTalent: {
+        tested: wildSys.wildTalent?.tested ?? false,
+        found: wildSys.wildTalent?.found ?? false,
+        psionicLevel: psionicSys.psionics.level ?? 0,
+        wild: psionicSys.psionics.wild ?? false,
+      },
       unlocked: this.#unlocked,
       favorites: (this.document as unknown as { getFlag(scope: string, key: string): unknown }).getFlag(
         SYSTEM_ID,
@@ -622,13 +633,13 @@ export class Adnd2eCharacterSheet extends Base {
       system: { proficiencies: { weapon: { available: number }; nonweapon: { available: number } } };
       items: Iterable<{
         id: string; name: string; type: string;
-        system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; weaponOrGroup?: string; isGroup?: boolean };
+        system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; alsoGroups?: NonweaponGroup[]; weaponOrGroup?: string; isGroup?: boolean };
       }>;
     };
     const existing = [...actor.items];
     const dropped = item as unknown as {
       id: string; name: string; type: string;
-      system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; weaponOrGroup?: string; isGroup?: boolean; casterClass?: string };
+      system: { chassisId?: string | null; slotCost?: number; group?: NonweaponGroup; alsoGroups?: NonweaponGroup[]; weaponOrGroup?: string; isGroup?: boolean; casterClass?: string };
     };
     const isNewDrop =
       (item as unknown as { parent?: { uuid?: string } }).parent?.uuid !==
@@ -665,7 +676,7 @@ export class Adnd2eCharacterSheet extends Base {
     } else if (dropped.type === "nonweaponProficiency") {
       const firstClassId = existing.find((i) => i.type === "class")?.system.chassisId ?? null;
       dropSlotCost = firstClassId
-        ? nonweaponSlotCost(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", firstClassId as never)
+        ? nonweaponSlotCost(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", firstClassId as never, dropped.system.alsoGroups ?? [])
         : (dropped.system.slotCost ?? 1);
       availableSlots = actor.system.proficiencies.nonweapon.available;
     }
@@ -705,7 +716,7 @@ export class Adnd2eCharacterSheet extends Base {
     }
 
     if (dropped.type === "power" && isNewDrop) {
-      const powerVerdict = checkPowerDrop(this.document as never, dropped as never);
+      const powerVerdict = checkPowerDrop(this.document as never, dropped as never, (game as unknown as { user: { isGM: boolean } }).user.isGM);
       if (!powerVerdict.ok) {
         ui.notifications?.warn(game.i18n!.localize(powerVerdict.messageKey));
         return null;
@@ -1176,6 +1187,23 @@ export class Adnd2eCharacterSheet extends Base {
   static async #onRelearnPsionicPower(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
     const { powerId } = target.dataset;
     if (powerId && this.isEditable) await relearnPower(this.document as never, powerId);
+  }
+
+  static async #onWildTalentTest(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
+    const button = target as HTMLButtonElement;
+    const surgeon = this.element.querySelector<HTMLInputElement>("[data-wild-surgeon]")?.checked ?? false;
+    button.disabled = true;
+    try {
+      await testWildTalent(this.document as never, { surgeon });
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  static async #onWildTalentReset(this: Adnd2eCharacterSheet): Promise<void> {
+    if (!this.isEditable) return;
+    await resetWildTest(this.document as never);
   }
 
   static async #onPsionicRest(this: Adnd2eCharacterSheet): Promise<void> {

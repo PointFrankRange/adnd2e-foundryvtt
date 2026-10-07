@@ -13,6 +13,7 @@
     "initialCost": 0,
     "costNote": "contact; maint. varies",
     "maintenanceCost": 0,
+    "wildMinimum": 14,
     "maintenanceUnit": "none",
     "range": "40 yds.",
     "preparation": "2",

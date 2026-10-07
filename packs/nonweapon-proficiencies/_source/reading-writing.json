@@ -10,6 +10,7 @@
     "modifier": 1,
     "slotCost": 1,
     "group": "wizard",
+    "alsoGroups": ["psionicist"],
     "slotsInvested": 1,
     "isRacial": false,
     "checkPenalty": 0

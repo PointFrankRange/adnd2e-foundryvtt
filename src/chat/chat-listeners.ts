@@ -4,8 +4,9 @@ import { damageModifiers } from "../core/combat/damage";
 import { damageFormula } from "../core/dice/formula";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../constants";
 import { requestApply } from "../relay/relay-client";
-import { rerenderContestCards } from "../hooks/psionic-hooks";
+import { rerenderContestCards, rerenderWildCards } from "../hooks/psionic-hooks";
 import { applyContestTangents, recordButtonState, rollDefense, type ContestFlag } from "../sheets/character/psionic-combat";
+import { applyDire, type WildFlag } from "../sheets/character/psionic-wild";
 import type { EffectTarget } from "../relay/apply-effect";
 
 /* ---------------------------------------------------------------------------
@@ -152,11 +153,49 @@ function wirePsionicContest(message: { id: string; getFlag(s: string, k: string)
   }
 }
 
+/** Wild-talent cards (SP15 Plan D): the Apply button is hidden from anyone who is neither the
+ *  character's owner nor a GM and from an already-applied card (which shows "Applied." instead);
+ *  applyDire re-checks and is authoritative. */
+function wildApplyState(flag: WildFlag, applied: string[], viewerMayApply: boolean): "button" | "applied" | "none" {
+  if (flag.dire === null) return "none";
+  if (applied.includes(flag.id)) return "applied";
+  return viewerMayApply ? "button" : "none";
+}
+
+function wireWildTalent(message: { id: string; getFlag(s: string, k: string): unknown }, html: HTMLElement): void {
+  const flag = message.getFlag(SYSTEM_ID, "wildTalent") as WildFlag | undefined;
+  if (!flag) return;
+  const button = html.querySelector<HTMLButtonElement>('[data-action="wildApplyDire"]');
+  const actor = foundry.utils.fromUuidSync(flag.actorUuid) as { isOwner?: boolean; getFlag(s: string, k: string): unknown } | null;
+  const applied = (actor?.getFlag(SYSTEM_ID, "wildApplied") as string[] | undefined) ?? [];
+  const state = wildApplyState(flag, applied, actor !== null && (Boolean(game.user?.isGM) || Boolean(actor.isOwner)));
+  if (state !== "button") button?.remove();
+  if (state === "applied") {
+    const line = document.createElement("p");
+    line.className = "hint applied";
+    line.textContent = game.i18n!.localize("ADND2E.chat.wildTalent.applied");
+    html.querySelector(".wild-talent")?.append(line);
+  }
+  if (state === "button") {
+    button?.addEventListener("click", () => {
+      button.disabled = true;
+      void applyDire(message.id).then(
+        () => rerenderWildCards(flag.actorUuid),
+        (error: unknown) => {
+          button.disabled = false; // a rejected write leaves the card usable for a retry
+          console.error("adnd2e | applying the wild-talent dire result failed", error);
+        },
+      );
+    });
+  }
+}
+
 /** Wires the "Roll Damage" / "Apply Damage" buttons on SP3's chat cards. Call
  *  once from the `ready` hook. */
 export function registerChatListeners(): void {
   Hooks.on("renderChatMessageHTML", (message: unknown, html: HTMLElement) => {
     wirePsionicContest(message as { id: string; getFlag(s: string, k: string): unknown }, html);
+    wireWildTalent(message as { id: string; getFlag(s: string, k: string): unknown }, html);
     html.querySelector<HTMLButtonElement>('[data-action="rollDamage"]')?.addEventListener("click", (ev) => {
       void onRollDamage(ev.currentTarget as HTMLButtonElement);
     });

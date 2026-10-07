@@ -1,0 +1,27 @@
+<div class="adnd2e chat-card wild-talent">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} - {{localize 'ADND2E.chat.wildTalent.title'}}</h3>
+  </header>
+  <p class="check"><strong>{{localize 'ADND2E.chat.wildTalent.chance'}}:</strong> {{chance}}%</p>
+  <p class="hint">{{localize 'ADND2E.chat.wildTalent.parts' base=1 wis=parts.wis con=parts.con int=parts.int level=parts.level total=total}}{{#if halved}} {{localize 'ADND2E.chat.wildTalent.halved'}}{{/if}}</p>
+  <p class="check"><strong>{{localize 'ADND2E.chat.wildTalent.roll'}}:</strong> {{roll}}{{#if surgeon}} ({{localize 'ADND2E.chat.wildTalent.surgeon' effective=effectiveRoll}}){{/if}}</p>
+  {{#if talent}}
+  <p class="result">{{localize 'ADND2E.chat.wildTalent.found'}}</p>
+  {{#if powers.length}}
+  <p class="powers"><strong>{{localize 'ADND2E.chat.wildTalent.powers'}}:</strong> {{#each powers}}{{#unless @first}}, {{/unless}}{{this}}{{/each}}</p>
+  {{/if}}
+  {{#if noPowers}}<p class="hint">{{localize 'ADND2E.chat.wildTalent.noPowers'}}</p>{{/if}}
+  {{else}}
+  <p class="result">{{localize 'ADND2E.chat.wildTalent.notFound'}}</p>
+  {{/if}}
+  {{#if hasDire}}
+  <p class="dire"><strong>{{localize 'ADND2E.chat.wildTalent.dire'}}:</strong> {{localize 'ADND2E.chat.wildTalent.direSave' penalty=direPenalty}} - {{#if saved}}{{localize 'ADND2E.chat.wildTalent.savePassed'}}{{else}}{{localize 'ADND2E.chat.wildTalent.saveFailed'}}{{/if}}</p>
+  {{#unless saved}}
+  <p class="loss">{{#if lossAll}}{{localize 'ADND2E.chat.wildTalent.lossAll'}}{{else}}{{localize 'ADND2E.chat.wildTalent.lossPoints' n=lossPoints ability=(localize direAbilityKey)}}{{/if}}</p>
+  {{/unless}}
+  {{#if showApply}}
+  <button type="button" data-action="wildApplyDire">{{localize 'ADND2E.chat.wildTalent.apply'}}</button>
+  {{/if}}
+  {{/if}}
+</div>

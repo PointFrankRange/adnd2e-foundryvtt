@@ -473,18 +473,21 @@ export async function rollAttack(
 }
 
 /** Roll one of the 5 saving-throw categories using the actor's already-cached
- *  system.saves.<category>. */
+ *  system.saves.<category>. `opts.penalty` (SP15 Plan D, e.g. -5) adds to the
+ *  roll modifier. Resolves to whether the save succeeded. */
 export async function rollSave(
   actor: { name: string; img: string; uuid: string; system: { saves: Record<SaveCategory, { target: number; rollModifier: number }> } },
   category: SaveCategory,
-): Promise<void> {
+  opts: { penalty?: number } = {},
+): Promise<boolean> {
   const save = actor.system.saves[category];
-  const roll = await new Roll(`1d20${save.rollModifier ? (save.rollModifier > 0 ? ` + ${save.rollModifier}` : ` - ${Math.abs(save.rollModifier)}`) : ""}`).evaluate();
+  const modifier = save.rollModifier + (opts.penalty ?? 0);
+  const roll = await new Roll(`1d20${modifier ? (modifier > 0 ? ` + ${modifier}` : ` - ${Math.abs(modifier)}`) : ""}`).evaluate();
   const naturalD20 = roll.dice[0]?.total ?? 0;
   const context = buildSaveCardContext({
     actorName: actor.name, actorImg: actor.img,
     categoryLabel: `ADND2E.saves.${category}`,
-    formula: roll.formula, naturalD20, rollModifier: save.rollModifier, target: save.target,
+    formula: roll.formula, naturalD20, rollModifier: modifier, target: save.target,
   });
   const content = await foundry.applications.handlebars.renderTemplate(
     TEMPLATE_PATH("chat/save-roll.hbs"), context as unknown as Record<string, unknown>,
@@ -495,4 +498,5 @@ export async function rollSave(
     // SP9a: lets the active GM's client disrupt a cast on a failed save (PHB p.86)
     flags: { [SYSTEM_ID]: { save: { actorUuid: actor.uuid, success: context.success } } },
   } as never);
+  return context.success;
 }

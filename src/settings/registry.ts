@@ -32,6 +32,7 @@ export const SETTING_DESCRIPTORS: readonly SettingDescriptor[] = [
   { key: "multiclassHpAveraging", group: "core", default: true, config: true, optionalRulesKey: "multiclassHpAveraging" },
   { key: "racialLevelLimits", group: "core", default: true, config: true, optionalRulesKey: "racialLevelLimits", requiresReload: true },
   { key: "primeRequisiteBonusLevels", group: "core", default: false, config: true, optionalRulesKey: "primeRequisiteBonusLevels", requiresReload: true },
+  { key: "wildTalents", group: "core", default: false, config: true, optionalRulesKey: "wildTalents", requiresReload: true },
   // --- combatAndTactics: Sub-project 7 ---
   { key: "combatAndTacticsEnabled", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "combatAndTacticsEnabled" },
   { key: "criticalHits", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "criticalHits" },

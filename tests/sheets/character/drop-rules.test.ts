@@ -224,6 +224,11 @@ describe("checkPowerDrop (SP15)", () => {
     const a = { system: { psionics: { level: 0 } }, items: [] };
     expect(checkPowerDrop(a, dev("n"))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.noClass" });
   });
+  it("a wild talent: refuses a dragged power for a player (wildNoLearn) and allows it for a GM", () => {
+    const wild = { system: { psionics: { level: 3, wild: true } }, items: [] };
+    expect(checkPowerDrop(wild, dev("w"))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.wildNoLearn" });
+    expect(checkPowerDrop(wild, dev("w"), true)).toEqual({ ok: true });
+  });
   it("refuses with the canLearn reason mapped to a lang key", () => {
     const a = psi(1, [dev("a"), dev("b"), dev("c")]); // 3 devotions = the level 1 total
     expect(checkPowerDrop(a, dev("d"))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.learn.devotion-limit" });

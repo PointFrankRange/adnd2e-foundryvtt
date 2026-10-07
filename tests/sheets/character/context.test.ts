@@ -3377,6 +3377,16 @@ describe("buildPsionicsView (SP15 Plan A)", () => {
     expect(v.maintained).toEqual([{ powerId: "a", name: "a", cost: 2, unit: "round" }]);
   });
 
+  it("a wild talent has no Table 4 problems and offers no relearn", () => {
+    const over = { ...base({ level: 1 }), powers: ["d1", "d2", "d3", "d4"].map((id) => pw({ id })) };
+    expect(buildPsionicsView(over)!.problems.length).toBeGreaterThan(0);
+    expect(buildPsionicsView(over)!.wild).toBe(false);
+    const v = buildPsionicsView({ ...over, wild: true })!;
+    expect(v.wild).toBe(true);
+    expect(v.problems).toEqual([]);
+    expect(v.groups.flatMap((g) => g.powers).every((p) => p.canRelearn === false)).toBe(true);
+  });
+
   it("flags every over-budget total and only relearn within budget", () => {
     const fine = buildPsionicsView(base({ level: 5 }))!;
     expect(fine.problems).toEqual([]);
@@ -3432,5 +3442,29 @@ describe("buildPsionicsView (SP15 Plan A)", () => {
     const without = buildCharacterSheetContext(input());
     expect(without.psionics).toBeNull();
     expect(without.tabs.map((t) => t.id)).not.toContain("psionics");
+  });
+});
+
+describe("buildCharacterSheetContext wildTalent (SP15 Plan D)", () => {
+  const rules = (on: boolean) => ({ ...DEFAULT_OPTIONAL_RULES, wildTalents: on });
+  const w = (over: Partial<{ tested: boolean; found: boolean; psionicLevel: number; wild: boolean }> = {}) => ({ tested: false, found: false, psionicLevel: 0, wild: false, ...over });
+  const view = (on: boolean, wildTalent: ReturnType<typeof w> | null | undefined, isGM = false) =>
+    buildCharacterSheetContext(input({ optionalRules: rules(on), wildTalent, perms: { isGM, isOwner: true, editable: true } })).wildTalent;
+
+  it("show: setting off is hidden", () => expect(view(false, w()).show).toBe(false));
+  it("show: on + non-psionicist", () => expect(view(true, w()).show).toBe(true));
+  it("show: on + active psionicist is hidden", () => expect(view(true, w({ psionicLevel: 3 })).show).toBe(false));
+  it("show: on + wild talent (level above 0 but wild)", () => expect(view(true, w({ psionicLevel: 2, wild: true, found: true, tested: true })).show).toBe(true));
+  it("show: absent input is hidden", () => {
+    expect(view(true, undefined).show).toBe(false);
+    expect(view(true, null)).toEqual({ show: false, tested: false, found: false, isGm: false });
+  });
+  it("passes tested, found and isGm through", () => {
+    expect(view(true, w({ tested: true, found: true }), true)).toEqual({ show: true, tested: true, found: true, isGm: true });
+    expect(view(true, w({ tested: true }), false)).toEqual({ show: true, tested: true, found: false, isGm: false });
+  });
+  it("the wild flag reaches the template context for the Wild talent tag", () => {
+    const ctx = buildCharacterSheetContext(input({ psionics: { psp: null, max: 27, level: 3, wild: true, maintained: [], activeDefense: "", contacts: [], abilityScores: { wis: 17, con: 16, int: 12 }, powers: [] } }));
+    expect(ctx.psionics!.wild).toBe(true);
   });
 });

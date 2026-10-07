@@ -839,6 +839,8 @@ describe("lang/en.json — SP12 Plan A (subrace)", () => {
 describe("lang/en.json — SP13 level-limit settings and sheet keys", () => {
   it("resolves the level-limit settings name and hint keys", () => {
     for (const key of [
+      "ADND2E.settings.wildTalents.name",
+      "ADND2E.settings.wildTalents.hint",
       "ADND2E.settings.racialLevelLimits.name",
       "ADND2E.settings.racialLevelLimits.hint",
       "ADND2E.settings.primeRequisiteBonusLevels.name",
@@ -862,7 +864,7 @@ describe("lang/en.json - SP15 psionics", () => {
     const keys = [
       ...["roll", "special", "cost", "remaining"].map((k) => `ADND2E.chat.psionic.${k}`),
       ...["success", "minimum-success", "failure", "automatic-failure"].map((k) => `ADND2E.chat.psionic.result.${k}`),
-      ...["noClass", "notEnoughPsp", "restBlocked", "maintenanceEnded", "relearned", "alreadyKnown", "pcOnly", "adjust", "adjustHint"].map((k) => `ADND2E.sheet.psionics.${k}`),
+      ...["noClass", "notEnoughPsp", "restBlocked", "maintenanceEnded", "relearned", "alreadyKnown", "pcOnly", "adjust", "adjustHint", "wildNoLearn", "wildTag"].map((k) => `ADND2E.sheet.psionics.${k}`),
       "ADND2E.sheet.tabs.psionics",
       ...["title", "psp", "rest", "hours", "maintained", "payMaintenance", "payAll", "end", "use", "relearn", "score", "cost", "maintenance", "primary", "defense", "noPowers"].map((k) => `ADND2E.sheet.psionics.${k}`),
       ...["hard", "light", "rest", "sleep"].map((k) => `ADND2E.sheet.psionics.activity.${k}`),
@@ -872,6 +874,8 @@ describe("lang/en.json - SP15 psionics", () => {
       ...["disciplines", "sciences", "devotions", "defenseModes"].map((k) => `ADND2E.sheet.psionics.problem.${k}`),
       ...["title", "defense", "noDefense", "raise", "drop", "contacts", "noContacts", "fullContact", "tangents", "payUpkeep", "end", "attack", "alreadyRaised", "noUpkeep", "tangentsBroken", "noTarget", "selfTarget", "alreadyFullContact"].map((k) => `ADND2E.sheet.psionics.combat.${k}`),
       ...["attackRoll", "defenseRoll", "against", "undefended", "notMade", "awaiting", "paid", "tangents", "rollDefense", "recordTangent", "notYourDefense", "alreadyAnswered", "alreadyRecorded", "recorded", "winner.attacker", "winner.defender", "reason.unopposed", "reason.attack-failed", "reason.automatic", "reason.attacker-only", "reason.higher", "reason.tie"].map((k) => `ADND2E.chat.psionicContest.${k}`),
+      ...["settingOff", "psionicist", "alreadyTested", "alreadyFound", "gmOnly", "foundToast", "notFoundToast", "resetDone", "chooseTitle", "chooseHint", "choose", "title", "hint", "surgeon", "test", "testedNone", "foundYes", "reset", "testInProgress"].map((k) => `ADND2E.sheet.wildTalent.${k}`),
+      ...["title", "chance", "parts", "halved", "roll", "surgeon", "found", "notFound", "powers", "noPowers", "dire", "direSave", "savePassed", "saveFailed", "lossAll", "lossPoints", "apply", "applied", "alreadyApplied", "notYours", "confirmTitle", "confirm", "allAbilities", "toThree", "lose", "ability.wis", "ability.int", "ability.con"].map((k) => `ADND2E.chat.wildTalent.${k}`),
       ...["discipline-access", "science-limit", "devotion-limit", "defense-limit", "devotion-ratio", "primary-cap", "no-budget", "prerequisite", "min-level"].map((k) => `ADND2E.sheet.psionics.learn.${k}`),
     ];
     for (const key of keys) {

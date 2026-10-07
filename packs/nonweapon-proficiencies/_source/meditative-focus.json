@@ -1,0 +1,17 @@
+{
+  "_id": "Ogg3Ip08aia3T4lN",
+  "_key": "!items!Ogg3Ip08aia3T4lN",
+  "name": "Meditative Focus",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "The psionicist uses calm concentration to steady the mind and stay centered on psionic work.",
+    "governingAbility": "wis",
+    "modifier": 1,
+    "slotCost": 1,
+    "group": "psionicist",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

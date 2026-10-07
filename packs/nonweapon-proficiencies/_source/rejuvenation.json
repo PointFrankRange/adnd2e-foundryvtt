@@ -1,0 +1,17 @@
+{
+  "_id": "AAoj0n4F7QOjrxYw",
+  "_key": "!items!AAoj0n4F7QOjrxYw",
+  "name": "Rejuvenation",
+  "type": "nonweaponProficiency",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "The psionicist enters a restful trance to recover strength and wellbeing faster than ordinary resting allows.",
+    "governingAbility": "wis",
+    "modifier": -1,
+    "slotCost": 1,
+    "group": "psionicist",
+    "slotsInvested": 1,
+    "isRacial": false,
+    "checkPenalty": 0
+  }
+}

@@ -28,6 +28,7 @@ describe("DEFAULT_OPTIONAL_RULES", () => {
         "spellPoints",
         "spellsAndMagicEnabled",
         "subAbilityScores",
+        "wildTalents",
         "trainingRequiredToLevel",
         "weaponMastery",
         "weaponProficienciesUsed",
@@ -64,6 +65,7 @@ describe("DEFAULT_OPTIONAL_RULES", () => {
       racialLevelLimits: true,
       exceedLevelLimits: 0,
       primeRequisiteBonusLevels: false,
+      wildTalents: false,
     };
     expect(DEFAULT_OPTIONAL_RULES).toEqual(expected);
   });

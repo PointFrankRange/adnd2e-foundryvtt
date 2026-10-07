@@ -1,7 +1,7 @@
 import { ABILITY_KEYS, NONWEAPON_GROUPS } from "./choices";
 import { Adnd2eItemModel } from "./base-item";
 
-const { StringField, NumberField, BooleanField } = foundry.data.fields;
+const { StringField, NumberField, BooleanField, ArrayField } = foundry.data.fields;
 
 export class NonweaponProficiencyItemModel extends Adnd2eItemModel {
   static override defineSchema(): foundry.data.fields.DataSchema {
@@ -11,6 +11,7 @@ export class NonweaponProficiencyItemModel extends Adnd2eItemModel {
       modifier: new NumberField({ required: true, integer: true, initial: 0 }),
       slotCost: new NumberField({ required: true, integer: true, min: 1, initial: 1 }),
       group: new StringField({ required: true, blank: false, initial: "general", choices: NONWEAPON_GROUPS }),
+      alsoGroups: new ArrayField(new StringField({ required: true, blank: false, choices: NONWEAPON_GROUPS }), { required: true, initial: () => [] }),
       slotsInvested: new NumberField({ required: true, integer: true, min: 1, initial: 1 }),
       isRacial: new BooleanField({ required: true, initial: false }),
       checkPenalty: new NumberField({ required: true, integer: true, initial: 0 }),

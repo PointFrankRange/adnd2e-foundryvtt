@@ -46,7 +46,7 @@ describe("item schema choice arrays match the engine unions", () => {
     expect([...WEAPON_CATEGORIES].sort()).toEqual(["bow", "crossbow", "melee", "thrown"]);
   });
   it("NONWEAPON_GROUPS", () => {
-    expect([...NONWEAPON_GROUPS].sort()).toEqual(["general", "priest", "rogue", "warrior", "wizard"]);
+    expect([...NONWEAPON_GROUPS].sort()).toEqual(["general", "priest", "psionicist", "rogue", "warrior", "wizard"]);
   });
   it("CREATURE_SIZES", () => {
     expect(CREATURE_SIZES).toEqual(["tiny", "small", "medium", "large", "huge", "gargantuan"]);

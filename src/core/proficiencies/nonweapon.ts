@@ -15,19 +15,23 @@ export const CLASS_PROFICIENCY_GROUPS: Readonly<Record<ClassId, readonly Nonweap
   ranger:  ["warrior", "general"],
   druid:   ["priest", "general"],
   bard:    ["rogue", "general"],
-  psionicist: ["general"],
+  psionicist: ["psionicist", "general"],
 };
 
 /**
  * Proficiency slots a non-weapon proficiency costs: the Table-37 base cost when
- * its group is one of the class's groups, otherwise one slot more (PHB p.54).
+ * its group (or any additional group, e.g. the PHBR5 Psionicist group) is one of
+ * the class's groups, otherwise one slot more (PHB p.54).
  */
 export function nonweaponSlotCost(
   baseCost: number,
   proficiencyGroup: NonweaponGroup,
   classId: ClassId,
+  alsoGroups: readonly NonweaponGroup[] = [],
 ): number {
-  return CLASS_PROFICIENCY_GROUPS[classId].includes(proficiencyGroup) ? baseCost : baseCost + 1;
+  const classGroups = CLASS_PROFICIENCY_GROUPS[classId];
+  const inGroup = classGroups.includes(proficiencyGroup) || alsoGroups.some((g) => classGroups.includes(g));
+  return inGroup ? baseCost : baseCost + 1;
 }
 
 export interface NonweaponCheckInput {

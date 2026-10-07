@@ -250,7 +250,7 @@ export type WeaponProficiencyMode = "proficient" | "related" | "non-proficient";
 export type SpecializationCategory = "melee" | "crossbow" | "bow";
 
 /** A non-weapon proficiency's class group (PHB Table 37/38). */
-export type NonweaponGroup = "general" | "warrior" | "wizard" | "priest" | "rogue";
+export type NonweaponGroup = "general" | "warrior" | "wizard" | "priest" | "rogue" | "psionicist";
 
 /** The eight thieving skills (PHB Table 26). */
 export type ThiefSkill =

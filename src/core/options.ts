@@ -63,6 +63,8 @@ export interface OptionalRules {
   exceedLevelLimits: 0 | 2 | 3 | 4;
   /** Sub-project 13: bonus levels past a racial limit from a high prime requisite (single-class; Complete Book of Dwarves table). */
   primeRequisiteBonusLevels: boolean;
+  /** Sub-project 15 Plan D: characters without the Psionicist class can test once for a wild psionic talent (Complete Psionics Handbook). */
+  wildTalents: boolean;
 }
 
 export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
@@ -92,4 +94,5 @@ export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
   racialLevelLimits: true,
   exceedLevelLimits: 0,
   primeRequisiteBonusLevels: false,
+  wildTalents: false,
 };

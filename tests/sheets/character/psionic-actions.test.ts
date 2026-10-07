@@ -177,6 +177,14 @@ describe("relearnPower", () => {
     expect(p.updates).toEqual([]);
     expect(warn).toHaveBeenCalledWith("ADND2E.sheet.psionics.learn.no-budget");
   });
+  it("refuses a wild talent with wildNoLearn and changes nothing", async () => {
+    const p = power("p1");
+    const { a } = actor({ items: [p], level: 3 });
+    a.system.psionics.wild = true;
+    await relearnPower(a, "p1");
+    expect(p.updates).toEqual([]);
+    expect(warn).toHaveBeenCalledWith("ADND2E.sheet.psionics.wildNoLearn");
+  });
   it("refuses a non-psionicist and ignores an unknown power", async () => {
     const none = actor({ level: 0 });
     await relearnPower(none.a, "p1");

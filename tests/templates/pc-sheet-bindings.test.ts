@@ -62,7 +62,7 @@ describe("PC sheet templates (sheet redesign R1)", () => {
   });
 });
 
-const PC_ONLY_ACTIONS = ["awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait", "useKitPower", "resetKitPower", "newDayKitPowers", "newEncounterKitPowers", "usePsionicPower", "relearnPsionicPower", "psionicRest", "adjustPsionicPsp", "payPsionicMaintenance", "endPsionicPower", "psionicRaiseDefense", "psionicDropDefense", "psionicAttack", "psionicPayUpkeep", "psionicEndContact"];
+const PC_ONLY_ACTIONS = ["awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait", "useKitPower", "resetKitPower", "newDayKitPowers", "newEncounterKitPowers", "usePsionicPower", "relearnPsionicPower", "psionicRest", "adjustPsionicPsp", "payPsionicMaintenance", "endPsionicPower", "psionicRaiseDefense", "psionicDropDefense", "psionicAttack", "psionicPayUpkeep", "psionicEndContact", "wildTalentTest", "wildTalentReset"];
 
 describe("PC-only actions (sheet redesign R2)", () => {
   it("every PC template that renders a PC-only action gates it on @root.pcActions", () => {
@@ -115,5 +115,28 @@ describe("Psionic combat panel (SP15 Plan C)", () => {
     expect(panel).toContain("data-psionic-defense");
     expect(SHEET).toContain("[data-psionic-defense]");
     expect(panel).not.toMatch(/name="/);
+  });
+});
+
+describe("Wild talent panel (SP15 Plan D)", () => {
+  const panel = readFileSync(path.join(PC_DIR, "partials", "pc-wild-talent-panel.hbs"), "utf8");
+  it("both actions are rendered, registered on the sheet and PC-only", () => {
+    for (const a of ["wildTalentTest", "wildTalentReset"]) {
+      expect(panel, a).toContain(`data-action="${a}"`);
+      expect(SHEET, a).toContain(`${a}: Adnd2eCharacterSheet.#on`);
+      expect(PC_ONLY_ACTIONS, a).toContain(a);
+    }
+  });
+  it("the surgeon checkbox is read by data attribute and carries no name=", () => {
+    expect(panel).toContain("data-wild-surgeon");
+    expect(SHEET).toContain("[data-wild-surgeon]");
+    expect(panel).not.toMatch(/name="/);
+  });
+  it("the panel is registered and included from the Features tab", () => {
+    expect(readFileSync(path.join(__dirname, "..", "..", "src", "sheets", "handlebars.ts"), "utf8")).toContain("pc-wild-talent-panel.hbs");
+    expect(readFileSync(path.join(PC_DIR, "partials", "pc-feature-panels.hbs"), "utf8")).toContain("adnd2e.pc-wild-talent-panel");
+  });
+  it("the Psionics tab shows the Wild talent tag from view.wild", () => {
+    expect(readFileSync(path.join(PC_DIR, "partials", "pc-psionics-panels.hbs"), "utf8")).toContain("adnd2e.psionics.wild");
   });
 });

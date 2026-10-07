@@ -24,7 +24,7 @@ export interface PsionicActor {
   system: {
     abilities: Record<string, { score: number }>;
     /** `level` is the derived cache: 0 = no active psionicist class */
-    psionics: { psp: number | null; maintained: { powerId: string }[]; activeDefense: string; contacts: Contact[]; max: number; level: number };
+    psionics: { psp: number | null; maintained: { powerId: string }[]; activeDefense: string; contacts: Contact[]; max: number; level: number; wild?: boolean };
   };
   update(data: Record<string, unknown>): Promise<unknown>;
 }
@@ -120,6 +120,10 @@ export async function usePower(actor: PsionicActor, powerId: string, roll: Psion
 /** Relearns a known power: +1 to its score, spending one slot of its kind. */
 export async function relearnPower(actor: PsionicActor, powerId: string): Promise<void> {
   if (!requirePsionicist(actor)) return;
+  if (actor.system.psionics.wild) {
+    warn("ADND2E.sheet.psionics.wildNoLearn");
+    return;
+  }
   const power = findPower(actor, powerId);
   if (!power) return;
   const verdict = canRelearn(knownPowers(actor), powerId, actor.system.psionics.level);

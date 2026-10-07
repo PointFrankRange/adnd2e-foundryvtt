@@ -64,6 +64,8 @@ const PC_ONLY_ACTIONS = [
   // Sub-project 14 priest theurgies: the priest free-theurgy controls in spells.hbs are gated
   // behind `@root.pcActions` too, and only the PC sheet wires these three actions.
   "memorizeFreeTheurgy", "castFreeTheurgy", "forgetFreeTheurgy",
+  // SP15 Plan D: the Wild talent panel is PC-only (gated behind `@root.pcActions`).
+  "wildTalentTest", "wildTalentReset",
   // Sub-project 14 Plan B whole-branch fix I2: recoverChannellerSp is NOT
   // PC-only — a Character NPC channeller needs to recover spell points too,
   // so the Recover button in spells.hbs is unconditional and this sheet now

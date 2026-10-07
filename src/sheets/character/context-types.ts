@@ -66,6 +66,26 @@ export interface CharacterSheetInput {
   favorites?: unknown;
   /** SP15 Plan A: the psionic state, or null/absent when the actor has no psionicist class entry */
   psionics?: PsionicsInput | null;
+  /** SP15 Plan D: the wild-talent state (system.wildTalent plus the derived psionic level/wild flag); absent = no panel */
+  wildTalent?: WildTalentInput | null;
+}
+
+/** SP15 Plan D: what the Wild talent panel reads off the actor (the setting comes from `optionalRules`). */
+export interface WildTalentInput {
+  tested: boolean;
+  found: boolean;
+  /** system.psionics.level (0 for a non-psionicist) */
+  psionicLevel: number;
+  /** system.psionics.wild */
+  wild: boolean;
+}
+
+/** SP15 Plan D: the Features-tab Wild talent panel. */
+export interface WildTalentView {
+  show: boolean;
+  tested: boolean;
+  found: boolean;
+  isGm: boolean;
 }
 
 /** SP15 Plan A: one owned `power` item as the Psionics view reads it. */
@@ -89,6 +109,8 @@ export interface PsionicsInput {
   psp: number | null;
   max: number;
   level: number;
+  /** SP15 Plan D: the pool is a wild talent's (no Table 4 budget, no relearning); absent = false */
+  wild?: boolean;
   maintained: { powerId: string }[];
   /** SP15 Plan C: the raised defense-mode power id ("" = none) */
   activeDefense: string;
@@ -122,6 +144,8 @@ export interface PsionicsView {
   psp: number;
   max: number;
   level: number;
+  /** SP15 Plan D: the pool is a wild talent's */
+  wild: boolean;
   row: PowerProgressionRow;
   primary: Discipline | null;
   activities: RecoveryActivity[];
@@ -614,6 +638,8 @@ export interface CharacterSheetContext {
   tabs: TabDescriptor[];
   /** SP15 Plan A: null without a psionicist class entry (the Psionics tab is then absent) */
   psionics: PsionicsView | null;
+  /** SP15 Plan D: the Wild talent panel on the Features tab */
+  wildTalent: WildTalentView;
   /** sheet redesign R1: the sheet's edit lock */
   lock: LockState;
   /** sheet redesign R1: the Favorites panel */

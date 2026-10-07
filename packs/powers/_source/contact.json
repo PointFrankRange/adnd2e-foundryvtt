@@ -13,6 +13,7 @@
     "initialCost": 0,
     "costNote": "varies",
     "maintenanceCost": 1,
+    "wildMinimum": 7,
     "maintenanceUnit": "round",
     "range": "special",
     "preparation": "0",
