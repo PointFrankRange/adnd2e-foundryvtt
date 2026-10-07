@@ -478,7 +478,8 @@
         "takeAverage": "Take Average",
         "hpRollFlavor": "1d{die} hit points for {name} ({con} CON)",
         "hpAverageFlavor": "Took the average: {result} (d{die}), {con} CON",
-        "atLimit": "limit"
+        "atLimit": "limit",
+        "primeBonusApplied": "Prime requisite XP bonus applied: {bonuses}"
       },
       "dualClass": {
         "toggle": "Dual-class",
@@ -1059,6 +1060,10 @@
         "x2": "Double experience",
         "x3": "Triple experience",
         "x4": "Quadruple experience"
+      },
+      "primeRequisiteXpBonus": {
+        "name": "Prime Requisite XP Bonus",
+        "hint": "Experience awarded to a class is increased by 10% when every one of its prime requisites is 16 or higher (PHB p.26)."
       },
       "wildTalents": {
         "name": "Wild talents",

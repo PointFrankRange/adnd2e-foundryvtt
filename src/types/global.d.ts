@@ -58,6 +58,7 @@ declare global {
     "adnd2e.nonweaponProficienciesUsed": boolean;
     "adnd2e.weaponProficienciesUsed": boolean;
     "adnd2e.multiclassHpAveraging": boolean;
+    "adnd2e.primeRequisiteXpBonus": boolean;
     "adnd2e.racialLevelLimits": boolean;
     "adnd2e.primeRequisiteBonusLevels": boolean;
     "adnd2e.wildTalents": boolean;
