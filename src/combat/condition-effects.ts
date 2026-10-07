@@ -64,3 +64,20 @@ export function fatigueArmorClassPenalty(actorStatuses: StatusSet): number {
 export function canAct(actorStatuses: StatusSet): boolean {
   return !has(actorStatuses, "stunned") && !has(actorStatuses, "held") && !has(actorStatuses, "mortalFatigue");
 }
+
+/** #94: how many rounds each system-applied condition lasts. The numbers are this project's own design (content
+ *  policy) — the books give no table. Conditions absent here (turned, fatigue, anything applied by hand) are indefinite. */
+export const CONDITION_DURATION_ROUNDS: Readonly<Record<string, number>> = { stunned: 1, prone: 1, held: 2 };
+
+/** The ActiveEffect `duration` data for a freshly applied condition, or null when it has none. The effect should run
+ *  through the target's next turn(s): a target yet to act this round loses the rest of this round, so it expires at the
+ *  START of its turn N rounds on; one that has already acted (or is acting now) carries it through that turn, so it expires
+ *  at that turn's END. */
+export function conditionDuration(
+  conditionId: string,
+  targetHasActed: boolean,
+): { value: number; units: "rounds"; expiry: "turnStart" | "turnEnd" } | null {
+  const value = CONDITION_DURATION_ROUNDS[conditionId];
+  if (value === undefined) return null;
+  return { value, units: "rounds", expiry: targetHasActed ? "turnEnd" : "turnStart" };
+}

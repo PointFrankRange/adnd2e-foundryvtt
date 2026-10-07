@@ -27,6 +27,8 @@ Hooks.once("init", () => {
   CONFIG.Actor.documentClass = Adnd2eActor;
   CONFIG.Item.documentClass = Adnd2eItem;
   CONFIG.ActiveEffect.documentClass = Adnd2eActiveEffect;
+  // #94: an expired timed condition leaves the token instead of lingering greyed out.
+  (CONFIG.ActiveEffect as unknown as { expiryAction: string }).expiryAction = "delete"; // v14 only; fvtt-types is v13
   CONFIG.Combatant.documentClass = Adnd2eCombatant;
   CONFIG.Combat.documentClass = Adnd2eCombat;
   // Merge — do NOT replace: unlike CONFIG.Actor/Item.dataModels (which default to

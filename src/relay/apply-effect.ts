@@ -1,4 +1,5 @@
 import { hpDamageUpdate, hpHealingUpdate, type RelayRequest } from "../combat/apply-relay";
+import { conditionDuration } from "../combat/condition-effects";
 
 /* The single place each player-applicable effect is performed on a target actor —
  * used locally (GM / owner) and by the GM query handler. Foundry glue. */
@@ -8,6 +9,36 @@ export interface EffectTarget {
   items: Iterable<{ type: string; system: { equipped?: boolean }; update(d: Record<string, unknown>): Promise<unknown> }>;
   update(d: Record<string, unknown>): Promise<unknown>;
   toggleStatusEffect(id: string, opts: { active: boolean }): Promise<unknown>;
+}
+
+interface DurationEffect {
+  update(d: Record<string, unknown>): Promise<unknown>;
+}
+interface CombatLike {
+  started: boolean;
+  turn: number | null;
+  turns: { id: string }[];
+  getCombatantsByActor(actor: unknown): { id: string }[];
+}
+
+/** #94: gives a freshly created condition effect its duration, anchored to the TARGET's own turn (Foundry
+ *  anchors expiry to whoever was acting when the effect was created — the attacker). `created` is toggleStatusEffect's
+ *  result: the new effect, or `true` when the condition was already present (left as is). Best effort: a failure
+ *  only leaves the condition indefinite, like a hand-applied one. */
+async function applyConditionDuration(actor: unknown, conditionId: string, created: unknown): Promise<void> {
+  if (!created || typeof created !== "object") return;
+  const combat = (game as unknown as { combat?: CombatLike | null }).combat;
+  const live = combat?.started ? combat : null;
+  const combatant = live?.getCombatantsByActor(actor)[0];
+  const index = combatant ? live!.turns.findIndex((t) => t.id === combatant.id) : -1;
+  const hasActed = index >= 0 && live!.turn !== null && index <= live!.turn;
+  const duration = conditionDuration(conditionId, hasActed);
+  if (!duration) return;
+  try {
+    await (created as DurationEffect).update({ duration, ...(combatant ? { "start.combatant": combatant.id } : {}) });
+  } catch {
+    // best effort
+  }
 }
 
 /** Returns whether the target actually changed — always true for
@@ -24,7 +55,7 @@ export async function applyEffectLocally(actor: EffectTarget, request: RelayRequ
       await actor.update(hpHealingUpdate(actor.system.attributes.hp, request.amount));
       return true;
     case "condition":
-      await actor.toggleStatusEffect(request.conditionId, { active: true });
+      await applyConditionDuration(actor, request.conditionId, await actor.toggleStatusEffect(request.conditionId, { active: true }));
       return true;
     case "destroy":
       await actor.update({ "system.attributes.hp.value": 0 });

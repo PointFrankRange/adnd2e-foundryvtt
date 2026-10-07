@@ -7,6 +7,7 @@ import {
   MANAGED_CONDITIONS,
   fatigueAttackPenalty,
   fatigueArmorClassPenalty,
+  conditionDuration,
 } from "../../src/combat/condition-effects";
 
 describe("MANAGED_CONDITIONS", () => {
@@ -93,5 +94,17 @@ describe("canAct — mortal fatigue", () => {
   it("does not block acting at any other fatigue tier", () => {
     expect(canAct(["severeFatigue"])).toBe(true);
     expect(canAct(["lightFatigue"])).toBe(true);
+  });
+});
+
+describe("conditionDuration (#94)", () => {
+  it("gives the managed conditions a round count and an expiry that depends on whether the target has acted", () => {
+    expect(conditionDuration("stunned", false)).toEqual({ value: 1, units: "rounds", expiry: "turnStart" });
+    expect(conditionDuration("prone", true)).toEqual({ value: 1, units: "rounds", expiry: "turnEnd" });
+    expect(conditionDuration("held", false)).toEqual({ value: 2, units: "rounds", expiry: "turnStart" });
+  });
+  it("leaves every other condition indefinite", () => {
+    expect(conditionDuration("turned", false)).toBeNull();
+    expect(conditionDuration("blinded", true)).toBeNull();
   });
 });
