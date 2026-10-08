@@ -773,6 +773,7 @@
         "alreadyGrappling": "This character is already in a grapple.",
         "notGrappling": "This character is not in a grapple.",
         "cannotAct": "You cannot take a wrestling action right now.",
+        "lockPendingFirst": "Choose your lock effect first.",
         "lockNotAllowed": "That lock cannot be used on a target this much larger.",
         "released": "{name} lets go.",
         "lock": { "throw": "Throw", "takedown": "Takedown", "slam": "Slam", "press": "Press", "hammer": "Hammer", "manipulate": "Manipulate", "carry": "Carry" },

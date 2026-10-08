@@ -901,7 +901,7 @@ describe("lang/en.json — SP7e (wrestling chat)", () => {
   it("resolves the wrestling chat keys", () => {
     const leaves = [
       "against", "awaiting", "rollDefense", "resolveForThem", "critical", "swapped", "damage", "lockPending", "unconscious",
-      "notYourDefense", "alreadyAnswered", "noTarget", "selfTarget", "alreadyGrappling", "notGrappling", "cannotAct", "lockNotAllowed",
+      "notYourDefense", "alreadyAnswered", "noTarget", "selfTarget", "alreadyGrappling", "notGrappling", "cannotAct", "lockPendingFirst", "lockNotAllowed",
       "released", "lockApplied",
       ...["attack", "hold", "improve", "holdOn", "breakFree"].map((k) => `kind.${k}`),
       ...["initiator", "responder", "none"].map((k) => `winner.${k}`),

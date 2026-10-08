@@ -5,7 +5,7 @@ import { buildContestView, type ContestKind, type WrestleContestFlag, type Wrest
 import type { RelayRequest } from "../../combat/apply-relay";
 import {
   LOCK_SPECS, bodyModifier, canUseLock, gripOutcome, lockDamageFormula, nextPressCount, resolveOpposed, sideResult, sizeModifier,
-  wrestlingDefenseAc, type GrappleRecord, type LockEffectId,
+  temporaryDamage, wrestlingDefenseAc, type GrappleRecord, type LockEffectId,
 } from "../../core/wrestling";
 import type { EffectTarget } from "../../relay/apply-effect";
 import { requestApply } from "../../relay/relay-client";
@@ -99,8 +99,9 @@ export async function startWrestle(actor: WrestleActor): Promise<void> {
   if (attack.crit) {
     // A natural 20 holds the target outright; the attacker may try for a lock next (Improve grip).
     const amount = await rollDamage(strengthDamage(me.strDmg));
+    const hpBefore = target.system.attributes.hp.value; // read before the write: the update lowers it
     await writeGrapple({ id: base.id, rung: "held", locks: [], lastLock: null, pressCount: 0, lockPending: false, holder: actor, held: target, damageToHeld: amount, damageToHolder: 0, prone: false });
-    await postContest({ ...base, result: { winner: "initiator", critical: true, initiatorTotal: attack.total, responderTotal: 0, rungAfter: "held", swap: false, lockPending: false, damage: { to: target.name, amount }, unconscious: target.system.attributes.hp.value - amount <= 0 } });
+    await postContest({ ...base, result: { winner: "initiator", critical: true, initiatorTotal: attack.total, responderTotal: 0, rungAfter: "held", swap: false, lockPending: false, damage: { to: target.name, amount }, unconscious: temporaryDamage({ value: hpBefore, nonlethal: 0 }, amount).unconscious } });
     return;
   }
   // A plain hit: the hold check is an opposed roll the defender answers.
@@ -114,7 +115,7 @@ export async function startContest(actor: WrestleActor, kind: Exclude<ContestKin
   if (!rules.combatAndTacticsEnabled || !rules.wrestling) return;
   const record = myRecord(actor);
   if (!record) return warn("ADND2E.chat.wrestling.notGrappling");
-  if (record.lockPending && kind !== "breakFree") return;
+  if (record.lockPending && kind !== "breakFree") return warn("ADND2E.chat.wrestling.lockPendingFirst");
   const opponent = actorOf(record.opponentUuid);
   if (!opponent) return warn("ADND2E.chat.wrestling.notGrappling");
   const holderIsInitiator = kind !== "breakFree";
@@ -177,22 +178,25 @@ export async function answerContest(messageId: string): Promise<void> {
     // Damage by who suffers it (the OLD roles); a swap then hands the roles over below.
     const toOldHeld = (grip.damageTo === "held" ? dealt : 0) + repeated;
     const toOldHolder = grip.damageTo === "holder" ? dealt : 0;
+    const damaged = toOldHeld > 0 ? held : toOldHolder > 0 ? holder : null;
+    const total = toOldHeld > 0 ? toOldHeld : toOldHolder;
+    const hpBefore = damaged ? damaged.system.attributes.hp.value : 0; // read before the write: the update lowers it
+    // A still-pending lock survives a contest that neither swaps the roles nor ends the grapple.
+    const lockPending = grip.lockPending || (!grip.swap && grip.rung !== "free" && (record?.lockPending ?? false));
     const newHolder = grip.swap ? held : holder;
     const newHeld = grip.swap ? holder : held;
     await writeGrapple({
       id: record?.id ?? flag.id, rung: grip.rung === "free" ? "held" : grip.rung, locks: grip.swap ? [] : record?.locks ?? [], lastLock, pressCount,
-      lockPending: grip.lockPending, holder: newHolder, held: newHeld,
+      lockPending, holder: newHolder, held: newHeld,
       damageToHeld: grip.swap ? toOldHolder : toOldHeld, damageToHolder: grip.swap ? toOldHeld : toOldHolder, prone: false, end: grip.rung === "free",
     });
-    const damaged = toOldHeld > 0 ? held : toOldHolder > 0 ? holder : null;
-    const total = toOldHeld > 0 ? toOldHeld : toOldHolder;
     await postContest({
       ...flag, state: "resolved", responderRoll,
       result: {
         winner: opposed.winner, critical: opposed.critical, initiatorTotal: opposed.initiator.total, responderTotal: opposed.responder.total,
-        rungAfter: grip.rung, swap: grip.swap, lockPending: grip.lockPending,
+        rungAfter: grip.rung, swap: grip.swap, lockPending,
         damage: damaged ? { to: damaged.name, amount: total } : null,
-        unconscious: damaged ? damaged.system.attributes.hp.value - total <= 0 : false,
+        unconscious: damaged ? temporaryDamage({ value: hpBefore, nonlethal: 0 }, total).unconscious : false,
       },
     });
   } finally {
