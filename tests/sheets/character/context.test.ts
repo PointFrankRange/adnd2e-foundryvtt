@@ -3150,6 +3150,11 @@ describe("buildCharacterSheetContext — Channellers fatigue (SP14c)", () => {
     expect(c.vitals.fatigue).toBeNull();
   });
 
+  it("flags a prone actor so the sheet can offer Stand Up", () => {
+    expect(buildCharacterSheetContext({ ...input() }).vitals.prone).toBe(false);
+    expect(buildCharacterSheetContext({ ...input(), prone: true }).vitals.prone).toBe(true);
+  });
+
   it("a fatigue tier adjusts the displayed movement rate and exposes a label", () => {
     // the fixture's base movement.current is 12 (unencumbered) -> heavy is floor(12*0.25) = 3
     const c = buildCharacterSheetContext({ ...input(), fatigueTier: "heavy" });

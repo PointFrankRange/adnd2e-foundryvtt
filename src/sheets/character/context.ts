@@ -392,6 +392,7 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
     },
     casting: Boolean(input.castingStatus),
     fatigue,
+    prone: input.prone === true,
     canRecoverFatigue,
   };
 }

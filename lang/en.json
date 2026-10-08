@@ -518,6 +518,9 @@
         "notEquipped": "Not equipped",
         "shield": "Shield",
         "speedFactor": "Speed Factor",
+        "proneTitle": "Prone",
+        "proneHint": "Melee attacks against a prone character gain +4 to hit. Standing up is a full-move action: nothing else this round (C&T p.30).",
+        "standUp": "Stand Up",
         "noWeapons": "No weapons carried.",
         "noArmor": "No armor carried.",
         "rollAttack": "Attack",
@@ -737,6 +740,7 @@
       }
     },
     "chat": {
+      "standUp": "{name} spends their full move standing up.",
       "psionic": {
         "roll": "Power check",
         "special": "The roll equals the power score exactly: a special success.",

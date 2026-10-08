@@ -65,9 +65,11 @@ export function canAct(actorStatuses: StatusSet): boolean {
   return !has(actorStatuses, "stunned") && !has(actorStatuses, "held") && !has(actorStatuses, "mortalFatigue");
 }
 
-/** #94: how many rounds each system-applied condition lasts. The numbers are this project's own design (content
- *  policy) — the books give no table. Conditions absent here (turned, fatigue, anything applied by hand) are indefinite. */
-export const CONDITION_DURATION_ROUNDS: Readonly<Record<string, number>> = { stunned: 1, prone: 1, held: 2 };
+/** #94: how many rounds each system-applied condition lasts. Only stunned (a called-shot-to-the-head result this
+ *  project defines itself, 1 round: its own design value) is timed. Prone and held are PERSISTENT because Combat &
+ *  Tactics gives them no timer: standing up from prone is a full-move action (C&T p.30, the sheet Stand Up button) and a
+ *  grapple holds until the victim escapes (C&T p.12). Turned, fatigue and anything applied by hand are indefinite too. */
+export const CONDITION_DURATION_ROUNDS: Readonly<Record<string, number>> = { stunned: 1 };
 
 /** The ActiveEffect `duration` data for a freshly applied condition, or null when it has none. The effect should run
  *  through the target's next turn(s): a target yet to act this round loses the rest of this round, so it expires at the

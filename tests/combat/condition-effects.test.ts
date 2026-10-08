@@ -98,13 +98,11 @@ describe("canAct — mortal fatigue", () => {
 });
 
 describe("conditionDuration (#94)", () => {
-  it("gives the managed conditions a round count and an expiry that depends on whether the target has acted", () => {
+  it("times stunned, with an expiry that depends on whether the target has acted", () => {
     expect(conditionDuration("stunned", false)).toEqual({ value: 1, units: "rounds", expiry: "turnStart" });
-    expect(conditionDuration("prone", true)).toEqual({ value: 1, units: "rounds", expiry: "turnEnd" });
-    expect(conditionDuration("held", false)).toEqual({ value: 2, units: "rounds", expiry: "turnStart" });
+    expect(conditionDuration("stunned", true)).toEqual({ value: 1, units: "rounds", expiry: "turnEnd" });
   });
-  it("leaves every other condition indefinite", () => {
-    expect(conditionDuration("turned", false)).toBeNull();
-    expect(conditionDuration("blinded", true)).toBeNull();
+  it("leaves prone, held and every other condition indefinite", () => {
+    for (const id of ["prone", "held", "turned", "blinded"]) expect(conditionDuration(id, true)).toBeNull();
   });
 });
