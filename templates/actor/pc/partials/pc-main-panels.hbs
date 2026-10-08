@@ -29,6 +29,16 @@
     </section>
   {{/if}}
 
+  {{#if adnd2e.vitals.prone}}
+    <section class="kit-panel kit-prone">
+      <div class="kit-bar">{{localize 'ADND2E.sheet.combat.proneTitle'}}</div>
+      <div class="kit-body">
+        <p class="detail">{{localize 'ADND2E.sheet.combat.proneHint'}}</p>
+        {{#if @root.pcActions}}<button type="button" class="kit-roll" data-action="standUp">{{localize 'ADND2E.sheet.combat.standUp'}}</button>{{/if}}
+      </div>
+    </section>
+  {{/if}}
+
   {{#if adnd2e.vitals.fatigue}}
     <section class="kit-panel kit-fatigue">
       <div class="kit-bar">{{adnd2e.vitals.fatigue.label}}</div>

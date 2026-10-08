@@ -60,6 +60,8 @@ export interface CharacterSheetInput {
    *  Only `vitals.canRecoverFatigue` (context-types.ts, computed from this
    *  same input's `optionalRules`) additionally checks the rule's live state. */
   fatigueTier?: FatigueTier | null;
+  /** #94: the actor currently has the prone condition (drives the Stand Up panel) */
+  prone?: boolean;
   /** sheet redesign R1: the viewer's unlock state (never persisted) */
   unlocked?: boolean;
   /** raw flags.adnd2e.favorites */
@@ -509,6 +511,8 @@ export interface CharacterSheetContext {
      *  interval (see FATIGUE_HINT_KEY in context.ts) — not interpolated, so
      *  each tier's sentence reads grammatically correctly. */
     fatigue: { label: string; hintKey: string } | null;
+    /** #94: true while the actor is prone — the sheet offers Stand Up (a full-move action, C&T p.30) */
+    prone: boolean;
     /** Whole-branch review M2: distinct from `fatigue` being non-null — the
      *  badge/panel and its movement/combat penalties show regardless of the
      *  rule's current on/off state, but the Recover button additionally

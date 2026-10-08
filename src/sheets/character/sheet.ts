@@ -346,6 +346,7 @@ export class Adnd2eCharacterSheet extends Base {
       restSpellcasting: Adnd2eCharacterSheet.#onRestSpellcasting,
       recoverChannellerSp: Adnd2eCharacterSheet.#onRecoverChannellerSp,
       recoverFromFatigue: Adnd2eCharacterSheet.#onRecoverFromFatigue,
+      standUp: Adnd2eCharacterSheet.#onStandUp,
       learnSpell: Adnd2eCharacterSheet.#onLearnSpell,
       completeCasting: Adnd2eCharacterSheet.#onCompleteCasting,
       disruptCasting: Adnd2eCharacterSheet.#onDisruptCasting,
@@ -604,6 +605,7 @@ export class Adnd2eCharacterSheet extends Base {
       subAbilityUi: subAbilitiesEnabled(rules),
       castingStatus: readCastingStatus(this.document as never),
       fatigueTier,
+      prone: actorStatuses.has("prone"),
       psionics: this.#hasPsionics()
         ? {
             psp: psionicSys.psionics.psp,
@@ -1102,6 +1104,19 @@ export class Adnd2eCharacterSheet extends Base {
     const caster = target.dataset.caster === "priest" ? "priest" : "wizard";
     const result = await promptRecoverChannelling();
     if (result) await recoverChannellerSp(this.document as never, caster, result.activity, result.hours);
+  }
+
+  /** #94: standing up from prone is a full-move action (C&T p.30) — clears the condition and says so in chat. */
+  static async #onStandUp(this: Adnd2eCharacterSheet): Promise<void> {
+    const actor = this.document as unknown as {
+      name: string;
+      toggleStatusEffect(id: string, opts: { active: boolean }): Promise<unknown>;
+    };
+    await actor.toggleStatusEffect("prone", { active: false });
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this.document as never }),
+      content: `<p>${game.i18n!.format("ADND2E.chat.standUp", { name: foundry.utils.escapeHTML(actor.name) })}</p>`,
+    } as unknown as ChatMessage.CreateData);
   }
 
   static async #onRecoverFromFatigue(this: Adnd2eCharacterSheet): Promise<void> {
