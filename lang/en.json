@@ -753,6 +753,32 @@
           "automatic-failure": "Automatic failure"
         }
       },
+      "wrestling": {
+        "against": "against {target}",
+        "awaiting": "Waiting for the defender to roll.",
+        "rollDefense": "Roll defense",
+        "resolveForThem": "Resolve for them (GM)",
+        "critical": "critical!",
+        "swapped": "roles reversed",
+        "damage": "Temporary damage",
+        "lockPending": "A lock was won: the holder chooses its effect on their sheet.",
+        "unconscious": "Knocked unconscious.",
+        "kind": { "attack": "Wrestling attack", "hold": "Hold check", "improve": "Improve grip", "holdOn": "Hold on", "breakFree": "Break free" },
+        "winner": { "initiator": "Initiator wins", "responder": "Defender wins", "none": "No change" },
+        "rung": { "free": "Free", "held": "Held", "locked": "Locked" },
+        "notYourDefense": "Only the defender's owner or a GM can answer this roll.",
+        "alreadyAnswered": "This contest was already answered.",
+        "noTarget": "Target exactly one token to wrestle.",
+        "selfTarget": "You cannot wrestle yourself.",
+        "alreadyGrappling": "This character is already in a grapple.",
+        "notGrappling": "This character is not in a grapple.",
+        "cannotAct": "You cannot take a wrestling action right now.",
+        "lockNotAllowed": "That lock cannot be used on a target this much larger.",
+        "released": "{name} lets go.",
+        "lock": { "throw": "Throw", "takedown": "Takedown", "slam": "Slam", "press": "Press", "hammer": "Hammer", "manipulate": "Manipulate", "carry": "Carry" },
+        "lockApplied": "{name} applies a {lock} lock.",
+        "lockSave": { "breath": "The target may save vs. breath weapon to break free (GM adjudicates).", "death": "Save vs. death or be knocked unconscious for 3d10 rounds (GM adjudicates)." }
+      },
       "wildTalent": {
         "title": "Wild talent test",
         "chance": "Chance",

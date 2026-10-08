@@ -896,3 +896,23 @@ describe("lang/en.json - SP15 psionics", () => {
     }
   });
 });
+
+describe("lang/en.json — SP7e (wrestling chat)", () => {
+  it("resolves the wrestling chat keys", () => {
+    const leaves = [
+      "against", "awaiting", "rollDefense", "resolveForThem", "critical", "swapped", "damage", "lockPending", "unconscious",
+      "notYourDefense", "alreadyAnswered", "noTarget", "selfTarget", "alreadyGrappling", "notGrappling", "cannotAct", "lockNotAllowed",
+      "released", "lockApplied",
+      ...["attack", "hold", "improve", "holdOn", "breakFree"].map((k) => `kind.${k}`),
+      ...["initiator", "responder", "none"].map((k) => `winner.${k}`),
+      ...["free", "held", "locked"].map((k) => `rung.${k}`),
+      ...["throw", "takedown", "slam", "press", "hammer", "manipulate", "carry"].map((k) => `lock.${k}`),
+      ...["breath", "death"].map((k) => `lockSave.${k}`),
+    ];
+    for (const leaf of leaves) {
+      const key = `ADND2E.chat.wrestling.${leaf}`;
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});

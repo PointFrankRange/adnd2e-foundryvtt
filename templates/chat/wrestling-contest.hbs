@@ -1,0 +1,22 @@
+<div class="adnd2e chat-card wrestling-contest">
+  <header>
+    <img src="{{initiatorImg}}" alt="{{initiatorName}}">
+    <h3>{{initiatorName}} - {{localize titleKey}}</h3>
+  </header>
+  <p class="target">{{localize 'ADND2E.chat.wrestling.against' target=responderName}}</p>
+  <p class="check"><strong>{{initiatorName}}:</strong> {{initiatorRoll}}</p>
+  {{#if hasResponderRoll}}<p class="check"><strong>{{responderName}}:</strong> {{responderRoll}}</p>{{/if}}
+  {{#if pending}}
+  <p class="hint">{{localize 'ADND2E.chat.wrestling.awaiting'}}</p>
+  {{#if showRoll}}
+  <button type="button" data-action="wrestleRollDefense">{{localize 'ADND2E.chat.wrestling.rollDefense'}}</button>
+  <button type="button" data-action="wrestleResolveForThem">{{localize 'ADND2E.chat.wrestling.resolveForThem'}}</button>
+  {{/if}}
+  {{else}}
+  <p class="result"><strong>{{localize winnerKey}}</strong>{{#if critical}} - {{localize 'ADND2E.chat.wrestling.critical'}}{{/if}}</p>
+  <p class="rung">{{localize rungKey}}{{#if swap}} - {{localize 'ADND2E.chat.wrestling.swapped'}}{{/if}}</p>
+  {{#if damageText}}<p class="damage">{{localize 'ADND2E.chat.wrestling.damage'}}: {{damageText}}</p>{{/if}}
+  {{#if lockPending}}<p class="hint">{{localize 'ADND2E.chat.wrestling.lockPending'}}</p>{{/if}}
+  {{#if unconscious}}<p class="hint">{{localize 'ADND2E.chat.wrestling.unconscious'}}</p>{{/if}}
+  {{/if}}
+</div>
