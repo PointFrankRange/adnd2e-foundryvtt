@@ -1,5 +1,5 @@
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
-import { canAct } from "../../combat/condition-effects";
+import { canAct, contestAllowed } from "../../combat/condition-effects";
 import { grappleRecordOf } from "../../combat/grapple-state";
 import { buildContestView, type ContestKind, type WrestleContestFlag, type WrestleSide } from "../../combat/wrestling-card";
 import type { RelayRequest } from "../../combat/apply-relay";
@@ -127,7 +127,7 @@ async function wrestleAttack(actor: WrestleActor): Promise<void> {
 export async function startContest(actor: WrestleActor, kind: Exclude<ContestKind, "attack" | "hold">): Promise<void> {
   const rules = getOptionalRules();
   if (!rules.combatAndTacticsEnabled || !rules.wrestling) return;
-  if (!canAct(actor.statuses)) return warn("ADND2E.chat.wrestling.cannotAct");
+  if (!contestAllowed(kind, actor.statuses)) return warn("ADND2E.chat.wrestling.cannotAct");
   if (starting.has(actor.uuid)) return;
   starting.add(actor.uuid); // synchronously, before the first await
   try {

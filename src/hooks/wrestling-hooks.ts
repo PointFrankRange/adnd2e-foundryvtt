@@ -1,5 +1,5 @@
 import { SYSTEM_ID } from "../constants";
-import { GRAPPLE_FLAG } from "../combat/grapple-state";
+import { GRAPPLE_DELETE_OPTIONS, GRAPPLE_FLAG } from "../combat/grapple-state";
 import { parseGrappleRecord } from "../core/wrestling";
 
 /* SP7e - removing either grapple condition (held / grappling) from the Token HUD ends the whole grapple:
@@ -16,8 +16,10 @@ interface OpponentActor {
 }
 
 export function registerWrestlingHooks(): void {
-  Hooks.on("deleteActiveEffect", (effect: unknown) => {
+  Hooks.on("deleteActiveEffect", (effect: unknown, options: unknown) => {
     try {
+      // The system's own deletes (relay clears / role swaps) are not Token HUD removals.
+      if ((options as { adnd2eGrapple?: boolean } | undefined)?.adnd2eGrapple === GRAPPLE_DELETE_OPTIONS.adnd2eGrapple) return;
       if (!(game.user as unknown as { isActiveGM?: boolean } | null)?.isActiveGM) return;
       const e = effect as GrappleEffect;
       if (!e.statuses?.has("held") && !e.statuses?.has("grappling")) return;

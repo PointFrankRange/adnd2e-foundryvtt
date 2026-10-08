@@ -4,6 +4,9 @@ import { parseGrappleRecord, type GrappleRecord } from "../core/wrestling";
 
 export const GRAPPLE_FLAG = "grapple";
 
+/** Passed as the options of the system's OWN grapple-effect deletes, so the Token HUD deletion hook can ignore them. */
+export const GRAPPLE_DELETE_OPTIONS = { adnd2eGrapple: true } as const;
+
 interface EffectLike {
   statuses: ReadonlySet<string>;
   getFlag(scope: string, key: string): unknown;
