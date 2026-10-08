@@ -4,6 +4,8 @@
 // the local and relayed paths (moved verbatim from chat/chat-listeners.ts so
 // the two can't drift). Pure — no Foundry imports.
 
+import { parseGrappleRecord, type GrappleRecord } from "../core/wrestling";
+
 export const RELAY_QUERY = "adnd2e.applyEffect";
 
 /** The conditions a maneuver may relay (Plan 7d's called shots + grapple, and SP10's turned). */
@@ -21,7 +23,8 @@ export type RelayRequest =
   | { kind: "healing"; targetUuid: string; amount: number }
   | { kind: "condition"; targetUuid: string; conditionId: RelayConditionId }
   | { kind: "unequip"; targetUuid: string }
-  | { kind: "destroy"; targetUuid: string };
+  | { kind: "destroy"; targetUuid: string }
+  | { kind: "grapple"; targetUuid: string; set: GrappleRecord | null; damage: number; prone: boolean };
 
 /** `changed` distinguishes "the request was processed" from "the target's
  *  state actually changed" — `unequip` against an already-unarmed target is
@@ -54,6 +57,14 @@ export function validateRelayRequest(raw: unknown): RelayRequest | null {
       return { kind: "unequip", targetUuid };
     case "destroy":
       return { kind: "destroy", targetUuid };
+    case "grapple": {
+      if (!("set" in r)) return null;
+      const set = r.set === null ? null : parseGrappleRecord(r.set);
+      if (r.set !== null && set === null) return null;
+      if (typeof r.damage !== "number" || !Number.isInteger(r.damage) || r.damage < 0 || r.damage > MAX_AMOUNT) return null;
+      if (typeof r.prone !== "boolean") return null;
+      return { kind: "grapple", targetUuid, set, damage: r.damage, prone: r.prone };
+    }
     default:
       return null;
   }
@@ -85,5 +96,7 @@ export function relayEffectText(request: RelayRequest): { key: string; data: Rec
       return { key: "ADND2E.relay.effect.unequip", data: {} };
     case "destroy":
       return { key: "ADND2E.relay.effect.destroy", data: {} };
+    case "grapple":
+      return { key: "ADND2E.relay.effect.grapple", data: {} };
   }
 }

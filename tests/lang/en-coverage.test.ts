@@ -563,6 +563,8 @@ describe("lang/en.json — player-applied effects relay", () => {
       "ADND2E.relay.effect.healing",
       "ADND2E.relay.effect.condition",
       "ADND2E.relay.effect.unequip",
+      "ADND2E.relay.effect.destroy",
+      "ADND2E.relay.effect.grapple",
     ]) {
       expect(typeof resolve(key), key).toBe("string");
       expect((resolve(key) as string).length, key).toBeGreaterThan(0);

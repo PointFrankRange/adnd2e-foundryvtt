@@ -1103,7 +1103,8 @@
         "healing": "{amount} healing",
         "condition": "the {condition} condition",
         "unequip": "a disarm (unequip weapon)",
-        "destroy": "destruction (turned to dust)"
+        "destroy": "destruction (turned to dust)",
+        "grapple": "a wrestling grapple change"
       }
     }
   },
