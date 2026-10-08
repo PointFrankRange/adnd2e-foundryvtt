@@ -36,11 +36,12 @@ const strengthDamage = (adj: number): string => (adj === 0 ? "1d2" : `1d2${adj >
 /** Reads one wrestler's numbers from their actor (PC/NPC and creature actors store them differently). */
 export function wrestlerStats(actor: WrestleActor): WrestleSide {
   const sys = actor.system as unknown as {
-    attributes?: { thac0?: { melee?: number; value?: number } };
+    attributes?: { thac0?: { base?: number; value?: number } };
     abilities?: { str?: { mods?: { hitProb?: number; damageAdj?: number } }; dex?: { mods?: { defensiveAdj?: number } } };
   };
   const isCreature = actor.type === "creature";
-  const thac0 = (isCreature ? sys.attributes?.thac0?.value : sys.attributes?.thac0?.melee) ?? 20;
+  // PCs/Character NPCs: the Strength-free base THAC0 (melee already folds Strength in, and strHit is added to the roll below).
+  const thac0 = (isCreature ? sys.attributes?.thac0?.value : sys.attributes?.thac0?.base) ?? 20;
   const info = resolveTargetCombatInfo(actor);
   const magicBonus = isCreature
     ? 0
@@ -51,6 +52,9 @@ export function wrestlerStats(actor: WrestleActor): WrestleSide {
     ac: wrestlingDefenseAc({ dexDefensiveAdj: sys.abilities?.dex?.mods?.defensiveAdj ?? 0, magicBonus }),
   };
 }
+
+/** Actor uuids with a contest being started in this client (a double click must not post two cards). */
+const starting = new Set<string>();
 
 const myRecord = (actor: WrestleActor): GrappleRecord | null => grappleRecordOf(actor.effects);
 
@@ -77,6 +81,16 @@ const targetOf = (): WrestleActor | null => {
 export async function startWrestle(actor: WrestleActor): Promise<void> {
   const rules = getOptionalRules();
   if (!rules.combatAndTacticsEnabled || !rules.wrestling) return;
+  if (starting.has(actor.uuid)) return;
+  starting.add(actor.uuid); // synchronously, before the first await
+  try {
+    await wrestleAttack(actor);
+  } finally {
+    starting.delete(actor.uuid);
+  }
+}
+
+async function wrestleAttack(actor: WrestleActor): Promise<void> {
   if (!canAct(actor.statuses)) return warn("ADND2E.chat.wrestling.cannotAct");
   if (myRecord(actor)) return warn("ADND2E.chat.wrestling.alreadyGrappling");
   const target = targetOf();
@@ -113,6 +127,17 @@ export async function startWrestle(actor: WrestleActor): Promise<void> {
 export async function startContest(actor: WrestleActor, kind: Exclude<ContestKind, "attack" | "hold">): Promise<void> {
   const rules = getOptionalRules();
   if (!rules.combatAndTacticsEnabled || !rules.wrestling) return;
+  if (!canAct(actor.statuses)) return warn("ADND2E.chat.wrestling.cannotAct");
+  if (starting.has(actor.uuid)) return;
+  starting.add(actor.uuid); // synchronously, before the first await
+  try {
+    await followUpContest(actor, kind);
+  } finally {
+    starting.delete(actor.uuid);
+  }
+}
+
+async function followUpContest(actor: WrestleActor, kind: Exclude<ContestKind, "attack" | "hold">): Promise<void> {
   const record = myRecord(actor);
   if (!record) return warn("ADND2E.chat.wrestling.notGrappling");
   if (record.lockPending && kind !== "breakFree") return warn("ADND2E.chat.wrestling.lockPendingFirst");
@@ -151,6 +176,13 @@ export async function answerContest(messageId: string): Promise<void> {
   try {
     const initiatorActor = actorOf(flag.initiator.uuid);
     if (!initiatorActor || !responderActor) return;
+    // Validate against the LIVE grapple so a stale or duplicate card cannot resurrect or double-apply one.
+    const live = myRecord(initiatorActor);
+    const valid =
+      flag.kind === "hold"
+        ? !live && !myRecord(responderActor)
+        : live !== null && live.rung === flag.rungBefore && (live.role === "holder") === flag.holderIsInitiator;
+    if (!valid) return warn("ADND2E.chat.wrestling.staleContest");
     const responderRoll = await d20();
     const opposed = resolveOpposed(
       { thac0: flag.initiator.thac0, bonus: flag.initiator.strHit, targetAc: flag.responder.ac, natural: flag.initiatorRoll },
@@ -181,8 +213,8 @@ export async function answerContest(messageId: string): Promise<void> {
     const damaged = toOldHeld > 0 ? held : toOldHolder > 0 ? holder : null;
     const total = toOldHeld > 0 ? toOldHeld : toOldHolder;
     const hpBefore = damaged ? damaged.system.attributes.hp.value : 0; // read before the write: the update lowers it
-    // A still-pending lock survives a contest that neither swaps the roles nor ends the grapple.
-    const lockPending = grip.lockPending || (!grip.swap && grip.rung !== "free" && (record?.lockPending ?? false));
+    // A still-pending lock survives a contest that neither swaps the roles nor drops the rung below locked.
+    const lockPending = grip.lockPending || (!grip.swap && grip.rung === "locked" && (record?.lockPending ?? false));
     const newHolder = grip.swap ? held : holder;
     const newHeld = grip.swap ? holder : held;
     await writeGrapple({

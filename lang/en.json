@@ -778,6 +778,7 @@
         "notGrappling": "This character is not in a grapple.",
         "cannotAct": "You cannot take a wrestling action right now.",
         "lockPendingFirst": "Choose your lock effect first.",
+        "staleContest": "This contest is no longer valid.",
         "lockNotAllowed": "That lock cannot be used on a target this much larger.",
         "released": "{name} lets go.",
         "lock": { "throw": "Throw", "takedown": "Takedown", "slam": "Slam", "press": "Press", "hammer": "Hammer", "manipulate": "Manipulate", "carry": "Carry" },

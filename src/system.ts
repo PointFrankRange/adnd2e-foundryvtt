@@ -18,6 +18,7 @@ import { registerCastingHooks } from "./hooks/casting-hooks";
 import { registerEquipmentHooks } from "./hooks/equipment-hooks";
 import { registerPsionicHooks } from "./hooks/psionic-hooks";
 import { registerTurningHooks } from "./hooks/turning-hooks";
+import { registerWrestlingHooks } from "./hooks/wrestling-hooks";
 import { registerRelayQuery } from "./relay/relay-handler";
 
 Hooks.once("init", () => {
@@ -149,5 +150,6 @@ Hooks.once("ready", async () => {
   registerCastingHooks();
   registerEquipmentHooks();
   registerTurningHooks();
+  registerWrestlingHooks();
   registerPsionicHooks();
 });

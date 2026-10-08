@@ -524,6 +524,7 @@ export interface CharacterSheetContext {
       locks: string[];
       lockPending: boolean;
       canImprove: boolean;
+      canRelease: boolean;
       canBreakFree: boolean;
       lockOptions: { id: string; labelKey: string }[];
     } | null;

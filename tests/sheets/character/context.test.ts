@@ -824,9 +824,10 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
     expect(holder).toMatchObject({ role: "holder", opponentName: "Bugbear", rungKey: "ADND2E.chat.wrestling.rung.held", canImprove: true, canBreakFree: false, lockPending: false, lockOptions: [] });
     const pending = buildCharacterSheetContext({ ...input(), grapple: { ...rec, rung: "locked", lockPending: true } }).vitals.grapple!;
     expect(pending.canImprove).toBe(false);
+    expect(pending.canRelease).toBe(true);
     expect(pending.lockOptions.map((l) => l.id)).toEqual(["throw", "takedown", "slam", "press", "hammer", "manipulate", "carry"]);
     const held = buildCharacterSheetContext({ ...input(), grapple: { ...rec, role: "held" as const } }).vitals.grapple!;
-    expect(held).toMatchObject({ role: "held", canImprove: false, canBreakFree: true });
+    expect(held).toMatchObject({ role: "held", canImprove: false, canBreakFree: true, canRelease: false });
     const locked = buildCharacterSheetContext({ ...input(), grapple: { ...rec, rung: "locked", locks: ["throw", "press"] } }).vitals.grapple!;
     expect(locked.locks).toEqual(["ADND2E.chat.wrestling.lock.throw", "ADND2E.chat.wrestling.lock.press"]);
   });

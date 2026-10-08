@@ -402,6 +402,7 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
           locks: input.grapple.locks.map((l) => `ADND2E.chat.wrestling.lock.${l}`),
           lockPending: input.grapple.lockPending,
           canImprove: input.grapple.role === "holder" && !input.grapple.lockPending,
+          canRelease: input.grapple.role === "holder",
           canBreakFree: input.grapple.role === "held",
           lockOptions:
             input.grapple.role === "holder" && input.grapple.lockPending
