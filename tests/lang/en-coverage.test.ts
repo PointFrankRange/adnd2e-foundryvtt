@@ -849,6 +849,8 @@ describe("lang/en.json — SP13 level-limit settings and sheet keys", () => {
       "ADND2E.settings.primeRequisiteXpBonus.hint",
       "ADND2E.settings.wildTalents.name",
       "ADND2E.settings.wildTalents.hint",
+      "ADND2E.settings.wrestling.name",
+      "ADND2E.settings.wrestling.hint",
       "ADND2E.settings.racialLevelLimits.name",
       "ADND2E.settings.racialLevelLimits.hint",
       "ADND2E.settings.primeRequisiteBonusLevels.name",

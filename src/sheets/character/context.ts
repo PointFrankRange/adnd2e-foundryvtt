@@ -586,8 +586,10 @@ function buildCombat(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   const rules = input.optionalRules;
   const maneuverOptions = Object.entries(MANEUVERS)
     .filter(
-      ([, m]) =>
-        rules.combatAndTacticsEnabled && (m.category === "calledShot" ? rules.calledShots : rules.combatManeuvers),
+      ([id, m]) =>
+        rules.combatAndTacticsEnabled &&
+        (m.category === "calledShot" ? rules.calledShots : rules.combatManeuvers) &&
+        !(id === "grapple" && rules.wrestling),
     )
     .map(([id]) => ({ value: id, label: `ADND2E.sheet.combat.maneuver.${id}` }));
 

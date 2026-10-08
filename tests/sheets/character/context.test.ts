@@ -807,6 +807,16 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
     ]);
   });
 
+  it("the legacy grapple maneuver is hidden while the wrestling rule is on", () => {
+    const on = { ...DEFAULT_OPTIONAL_RULES, combatAndTacticsEnabled: true, combatManeuvers: true, wrestling: true };
+    const off = { ...on, wrestling: false };
+    const values = (rules: typeof on) =>
+      buildCharacterSheetContext(input({ optionalRules: rules })).combat.maneuverOptions.map((m) => m.value);
+    expect(values(off)).toContain("grapple");
+    expect(values(on)).not.toContain("grapple");
+    expect(values(on)).toContain("disarm");
+  });
+
   it("maneuverOptions is empty when combatAndTacticsEnabled is off, even with calledShots/combatManeuvers on", () => {
     const c = buildCharacterSheetContext(
       input({

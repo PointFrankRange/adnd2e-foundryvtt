@@ -1013,6 +1013,10 @@
         "name": "Combat & Tactics: Weapon Mastery",
         "hint": "Mastery and grand-mastery weapon tiers beyond specialization (Combat & Tactics)."
       },
+      "wrestling": {
+        "name": "Combat & Tactics: Wrestling",
+        "hint": "Use the wrestling rules (opposed holds, locks, breaking free) instead of the simplified grapple maneuver. Requires Combat & Tactics."
+      },
       "skillsAndPowersEnabled": {
         "name": "Skills & Powers: Enabled",
         "hint": "Master switch for the Skills & Powers option group — every other Skills & Powers rule is a no-op unless this is also on."

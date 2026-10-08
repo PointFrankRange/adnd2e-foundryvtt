@@ -35,6 +35,7 @@ describe("DEFAULT_OPTIONAL_RULES", () => {
         "weaponMastery",
         "weaponProficienciesUsed",
         "weaponSpeedInitiative",
+        "wrestling",
       ].sort(),
     );
   });
@@ -70,6 +71,7 @@ describe("DEFAULT_OPTIONAL_RULES", () => {
       exceedLevelLimits: 0,
       primeRequisiteBonusLevels: false,
       wildTalents: false,
+      wrestling: false,
     };
     expect(DEFAULT_OPTIONAL_RULES).toEqual(expected);
   });

@@ -23,7 +23,7 @@ export const SETTING_SECTIONS: readonly SettingSection[] = [
   { id: "racesAndLevels", kind: "optional", keys: ["exceedLevelLimits", "primeRequisiteBonusLevels"] },
   {
     id: "combatAndTactics", kind: "optional",
-    keys: ["combatAndTacticsEnabled", "criticalHits", "calledShots", "combatManeuvers", "armorTypeVsWeaponType", "weaponMastery"],
+    keys: ["combatAndTacticsEnabled", "criticalHits", "calledShots", "combatManeuvers", "armorTypeVsWeaponType", "weaponMastery", "wrestling"],
   },
   {
     id: "skillsAndPowers", kind: "optional",
