@@ -88,9 +88,14 @@ export async function applyEffectLocally(actor: EffectTarget, request: RelayRequ
       // Switching roles (a critical swap) leaves the OLD role's effect behind: remove it first.
       const stale = wrestling().filter((e) => !e.statuses.has(conditionId)).map((e) => e.id);
       if (stale.length > 0) await actor.deleteEmbeddedDocuments?.("ActiveEffect", stale);
-      await actor.toggleStatusEffect(conditionId, { active: true });
-      const effect = [...(actor.effects ?? [])].find((e) => e.statuses.has(conditionId));
-      await effect?.update({ [`flags.${SYSTEM_ID}.${GRAPPLE_FLAG}`]: request.set });
+      const toggled = await actor.toggleStatusEffect(conditionId, { active: true });
+      // Foundry only treats a SINGLE-status effect as "the" status effect: use the one it just created, else the existing one.
+      const effect =
+        toggled && typeof toggled === "object"
+          ? (toggled as { update(d: Record<string, unknown>): Promise<unknown> })
+          : [...(actor.effects ?? [])].find((e) => e.statuses.size === 1 && e.statuses.has(conditionId));
+      if (!effect) return false;
+      await effect.update({ [`flags.${SYSTEM_ID}.${GRAPPLE_FLAG}`]: request.set });
       return true;
     }
     case "unequip":
