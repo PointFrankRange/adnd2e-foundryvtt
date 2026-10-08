@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  bodyModifier, resolveOpposed, sideResult, sizeModifier, wrestlingDefenseAc,
+  bodyModifier, parseGrappleRecord, resolveOpposed, sideResult, sizeModifier, wrestlingDefenseAc,
 } from "../../../src/core/wrestling";
-import { parseGrappleRecord } from "../../../src/core/wrestling";
 
 describe("sizeModifier", () => {
   it("is +4 / -4 per size class, from the initiator's point of view", () => {
@@ -67,6 +66,13 @@ describe("resolveOpposed", () => {
     const r = resolveOpposed(anada(12, 1, 10), bugbear(2, 0, 8));
     expect(r.responder.hit).toBe(false);
     expect(r.winner).toBe("initiator");
+  });
+
+  it("initiator misses and responder hits: responder wins", () => {
+    const r = resolveOpposed(anada(2, 0, 10), bugbear(12, 0, 8));
+    expect(r.initiator.hit).toBe(false);
+    expect(r.responder.hit).toBe(true);
+    expect(r.winner).toBe("responder");
   });
 
   it("a tie or a double miss is no change", () => {
