@@ -4,6 +4,8 @@ import { normalizeSubrace, raceDisplayName, type RawSubrace } from "../../core/r
 import { classLevelOf, resetKitPowers, resetPower, usePower } from "./kit-power-actions";
 import { ABILITY_KEYS } from "../../data/item/choices";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
+import { grappleRecordOf } from "../../combat/grapple-state";
+import { chooseLock, releaseGrapple, startContest, startWrestle } from "./wrestling-actions";
 import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
 import { getChassis } from "../../core/classes/chassis";
 import { awardWithPrimeBonus } from "../../core/abilities";
@@ -347,6 +349,12 @@ export class Adnd2eCharacterSheet extends Base {
       recoverChannellerSp: Adnd2eCharacterSheet.#onRecoverChannellerSp,
       recoverFromFatigue: Adnd2eCharacterSheet.#onRecoverFromFatigue,
       standUp: Adnd2eCharacterSheet.#onStandUp,
+      wrestle: Adnd2eCharacterSheet.#onWrestle,
+      improveGrip: Adnd2eCharacterSheet.#onImproveGrip,
+      holdOn: Adnd2eCharacterSheet.#onHoldOn,
+      breakFree: Adnd2eCharacterSheet.#onBreakFree,
+      releaseGrapple: Adnd2eCharacterSheet.#onReleaseGrapple,
+      chooseLock: Adnd2eCharacterSheet.#onChooseLock,
       learnSpell: Adnd2eCharacterSheet.#onLearnSpell,
       completeCasting: Adnd2eCharacterSheet.#onCompleteCasting,
       disruptCasting: Adnd2eCharacterSheet.#onDisruptCasting,
@@ -606,6 +614,7 @@ export class Adnd2eCharacterSheet extends Base {
       castingStatus: readCastingStatus(this.document as never),
       fatigueTier,
       prone: actorStatuses.has("prone"),
+      grapple: grappleRecordOf((this.document as unknown as { effects: Iterable<never> }).effects),
       psionics: this.#hasPsionics()
         ? {
             psp: psionicSys.psionics.psp,
@@ -1104,6 +1113,26 @@ export class Adnd2eCharacterSheet extends Base {
     const caster = target.dataset.caster === "priest" ? "priest" : "wizard";
     const result = await promptRecoverChannelling();
     if (result) await recoverChannellerSp(this.document as never, caster, result.activity, result.hours);
+  }
+
+  static async #onWrestle(this: Adnd2eCharacterSheet): Promise<void> {
+    await startWrestle(this.document as never);
+  }
+  static async #onImproveGrip(this: Adnd2eCharacterSheet): Promise<void> {
+    await startContest(this.document as never, "improve");
+  }
+  static async #onHoldOn(this: Adnd2eCharacterSheet): Promise<void> {
+    await startContest(this.document as never, "holdOn");
+  }
+  static async #onBreakFree(this: Adnd2eCharacterSheet): Promise<void> {
+    await startContest(this.document as never, "breakFree");
+  }
+  static async #onReleaseGrapple(this: Adnd2eCharacterSheet): Promise<void> {
+    await releaseGrapple(this.document as never);
+  }
+  static async #onChooseLock(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const lock = target.dataset.lock;
+    if (lock) await chooseLock(this.document as never, lock as never);
   }
 
   /** #94: standing up from prone is a full-move action (C&T p.30) — clears the condition and says so in chat. */

@@ -6,6 +6,7 @@ import type { Contact } from "../../core/psionics/combat";
 import type { Discipline, PowerKind, PowerProgressionRow, RecoveryActivity } from "../../core/psionics";
 import type { OptionalRules } from "../../core/options";
 import type { SubraceLayer } from "../../core/races";
+import type { GrappleRecord } from "../../core/wrestling";
 import type { FatigueTier } from "../../core/magic/channeller-fatigue";
 import type { SubAbilityId } from "../../core/abilities/sub-abilities";
 import type { CharacterPointLedger } from "../../core/skills/character-points";
@@ -62,6 +63,8 @@ export interface CharacterSheetInput {
   fatigueTier?: FatigueTier | null;
   /** #94: the actor currently has the prone condition (drives the Stand Up panel) */
   prone?: boolean;
+  /** SP7e: the actor's current grapple record, if any */
+  grapple?: GrappleRecord | null;
   /** sheet redesign R1: the viewer's unlock state (never persisted) */
   unlocked?: boolean;
   /** raw flags.adnd2e.favorites */
@@ -513,6 +516,17 @@ export interface CharacterSheetContext {
     fatigue: { label: string; hintKey: string } | null;
     /** #94: true while the actor is prone — the sheet offers Stand Up (a full-move action, C&T p.30) */
     prone: boolean;
+    /** SP7e: null while not in a grapple. */
+    grapple: {
+      role: "holder" | "held";
+      opponentName: string;
+      rungKey: string;
+      locks: string[];
+      lockPending: boolean;
+      canImprove: boolean;
+      canBreakFree: boolean;
+      lockOptions: { id: string; labelKey: string }[];
+    } | null;
     /** Whole-branch review M2: distinct from `fatigue` being non-null — the
      *  badge/panel and its movement/combat penalties show regardless of the
      *  rule's current on/off state, but the Recover button additionally
@@ -559,6 +573,8 @@ export interface CharacterSheetContext {
     acBreakdown: { label: string; value: number }[];
     armor: { id: string; name: string; equipped: boolean; isShield: boolean; baseAc: number }[];
     maneuverOptions: { value: string; label: string }[];
+    /** SP7e: the wrestling rule is live (Combat & Tactics on + wrestling on) */
+    wrestling: boolean;
   };
   skills: {
     weapon: { total: number; spent: number; available: number; items: WeaponProfView[] };

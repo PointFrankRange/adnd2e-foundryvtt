@@ -39,6 +39,28 @@
     </section>
   {{/if}}
 
+  {{#if adnd2e.combat.wrestling}}
+    <section class="kit-panel kit-wrestle">
+      <div class="kit-bar">{{localize 'ADND2E.sheet.combat.wrestleTitle'}}</div>
+      <div class="kit-body">
+        {{#if adnd2e.vitals.grapple}}
+          <p class="detail">{{localize 'ADND2E.sheet.combat.grappleWith' name=adnd2e.vitals.grapple.opponentName}} - {{localize adnd2e.vitals.grapple.rungKey}}</p>
+          {{#if @root.pcActions}}
+            {{#if adnd2e.vitals.grapple.canImprove}}
+              <button type="button" class="kit-roll" data-action="improveGrip">{{localize 'ADND2E.chat.wrestling.kind.improve'}}</button>
+              <button type="button" class="kit-roll" data-action="holdOn">{{localize 'ADND2E.chat.wrestling.kind.holdOn'}}</button>
+              <button type="button" data-action="releaseGrapple">{{localize 'ADND2E.sheet.combat.release'}}</button>
+            {{/if}}
+            {{#if adnd2e.vitals.grapple.canBreakFree}}<button type="button" class="kit-roll" data-action="breakFree">{{localize 'ADND2E.chat.wrestling.kind.breakFree'}}</button>{{/if}}
+            {{#each adnd2e.vitals.grapple.lockOptions as |l|}}<button type="button" class="kit-roll" data-action="chooseLock" data-lock="{{l.id}}">{{localize l.labelKey}}</button>{{/each}}
+          {{/if}}
+        {{else}}
+          {{#if @root.pcActions}}<button type="button" class="kit-roll" data-action="wrestle">{{localize 'ADND2E.sheet.combat.wrestle'}}</button>{{/if}}
+        {{/if}}
+      </div>
+    </section>
+  {{/if}}
+
   {{#if adnd2e.vitals.fatigue}}
     <section class="kit-panel kit-fatigue">
       <div class="kit-bar">{{adnd2e.vitals.fatigue.label}}</div>
