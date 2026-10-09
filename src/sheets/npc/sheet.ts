@@ -31,6 +31,7 @@ import { recoverFromFatigue } from "../character/fatigue-actions";
 import { promptRecoverChannelling } from "../character/recover-dialog";
 import { bindSheetKit, clearSheetKit } from "../kit-dom";
 import { toggleFavoriteFlag } from "../kit-actions";
+import { enrichItemDescriptions } from "../item-descriptions";
 
 /* ---------------------------------------------------------------------------
  * Adnd2eNpcSheet — SP6 Task 4; rebuilt on the parchment kit (sheet redesign
@@ -175,8 +176,16 @@ export class Adnd2eNpcSheet extends Base {
    *  (mirrors Adnd2eCharacterSheet's own `#unlocked`). */
   #unlocked = false;
 
+  /** enriched row-summary descriptions, rebuilt each render (#111) */
+  #descriptions: ReadonlyMap<string, string> = new Map();
+
   override async _prepareContext(options: unknown): Promise<Record<string, unknown>> {
     const context = await super._prepareContext(options);
+    this.#descriptions = await enrichItemDescriptions(
+      [...(this.document as unknown as { items: Iterable<{ id: string; type: string; isOwner?: boolean; system: unknown }> }).items].filter(
+        (i) => i.type === "weapon" || i.type === "armor" || i.type === "equipment" || i.type === "ammo",
+      ),
+    );
     context.adnd2e = buildCharacterSheetContext(this.#buildInput());
     context.editable = this.isEditable;
     context.notEditable = !this.isEditable;
@@ -257,7 +266,7 @@ export class Adnd2eNpcSheet extends Base {
         case "armor":
         case "equipment":
         case "ammo":
-          physicalItems.push(toPhysicalView(it));
+          physicalItems.push(toPhysicalView(it, this.#descriptions));
           break;
         case "weaponProficiency":
           weaponProfs.push(toWeaponProfView(it));

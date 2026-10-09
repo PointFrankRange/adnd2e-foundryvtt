@@ -134,6 +134,8 @@
     .kit-name { cursor: pointer; display: flex; align-items: center; gap: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; img { width: 20px; height: 20px; border: none; flex: none; } }
     .kit-summary { display: none; background: var(--kit-expand-bg); padding: 4px 8px; font-size: 12px; }
     .kit-row.expanded .kit-summary { display: block; }
+    .kit-summary .kit-description { flex-basis: 100%; margin-top: 4px; font-size: 12px; color: var(--kit-muted); }
+    .kit-summary .kit-description p { margin: 0 0 4px; }
     .kit-empty { padding: 4px 6px; font-style: italic; opacity: .8; }
   }
 

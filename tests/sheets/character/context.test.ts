@@ -171,7 +171,7 @@ function physItem(over: Partial<PhysicalItemView> = {}): PhysicalItemView {
     location: "",
     equipped: false,
     identified: true,
-    magicBonus: 0,
+    magicBonus: 0, descriptionHtml: "",
     isContainer: false,
     capacity: null,
     contentsWeightMultiplier: 1,
@@ -1478,7 +1478,7 @@ describe("buildCharacterSheetContext — spell learn eligibility", () => {
 describe("buildCharacterSheetContext — weapon specialization eligibility + real checkTarget", () => {
   const weaponItem = (over: Partial<PhysicalItemView> = {}): PhysicalItemView => ({
     id: "w1", name: "Long Sword", img: "", type: "weapon",
-    quantity: 1, weight: 4, totalWeight: 4, location: "", equipped: true, identified: true, magicBonus: 0,
+    quantity: 1, weight: 4, totalWeight: 4, location: "", equipped: true, identified: true, magicBonus: 0, descriptionHtml: "",
     isContainer: false, capacity: null, contentsWeightMultiplier: 1,
     weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee", baseWeaponName: "", proficiencyGroup: "", specialistWeaponClass: "", damageType: "slashing", ammoType: null, selectedAmmoId: null },
     ...over,
@@ -2132,7 +2132,7 @@ describe("buildCharacterSheetContext — thief/bard skills + backstab eligibilit
         classItems: [thiefClass],
         physicalItems: [{
           id: "a1", name: "Chain Mail", img: "", type: "armor",
-          quantity: 1, weight: 40, totalWeight: 40, location: "", equipped: true, identified: true, magicBonus: 0,
+          quantity: 1, weight: 40, totalWeight: 40, location: "", equipped: true, identified: true, magicBonus: 0, descriptionHtml: "",
           isContainer: false, capacity: null, contentsWeightMultiplier: 1,
           armor: { baseAc: 5, isShield: false, shieldAcBonus: 0, armorType: "chain-mail" },
         }],
@@ -2163,7 +2163,7 @@ describe("buildCharacterSheetContext — thief/bard skills + backstab eligibilit
         classItems: [thiefClass],
         physicalItems: [{
           id: "w1", name: "Dagger", img: "", type: "weapon",
-          quantity: 1, weight: 1, totalWeight: 1, location: "", equipped: true, identified: true, magicBonus: 0,
+          quantity: 1, weight: 1, totalWeight: 1, location: "", equipped: true, identified: true, magicBonus: 0, descriptionHtml: "",
           isContainer: false, capacity: null, contentsWeightMultiplier: 1,
           weapon: { damageVsSM: "1d4", damageVsL: "1d3", speedFactor: 2, range: null, category: "melee", baseWeaponName: "", proficiencyGroup: "", specialistWeaponClass: "", damageType: "piercing", ammoType: null, selectedAmmoId: null },
         }],
@@ -2178,7 +2178,7 @@ describe("buildCharacterSheetContext — thief/bard skills + backstab eligibilit
         classItems: [fighterClass],
         physicalItems: [{
           id: "w1", name: "Dagger", img: "", type: "weapon",
-          quantity: 1, weight: 1, totalWeight: 1, location: "", equipped: true, identified: true, magicBonus: 0,
+          quantity: 1, weight: 1, totalWeight: 1, location: "", equipped: true, identified: true, magicBonus: 0, descriptionHtml: "",
           isContainer: false, capacity: null, contentsWeightMultiplier: 1,
           weapon: { damageVsSM: "1d4", damageVsL: "1d3", speedFactor: 2, range: null, category: "melee", baseWeaponName: "", proficiencyGroup: "", specialistWeaponClass: "", damageType: "piercing", ammoType: null, selectedAmmoId: null },
         }],
@@ -2193,7 +2193,7 @@ describe("buildCharacterSheetContext — thief/bard skills + backstab eligibilit
         classItems: [thiefClass],
         physicalItems: [{
           id: "w1", name: "Mace", img: "", type: "weapon",
-          quantity: 1, weight: 6, totalWeight: 6, location: "", equipped: true, identified: true, magicBonus: 0,
+          quantity: 1, weight: 6, totalWeight: 6, location: "", equipped: true, identified: true, magicBonus: 0, descriptionHtml: "",
           isContainer: false, capacity: null, contentsWeightMultiplier: 1,
           weapon: { damageVsSM: "1d6", damageVsL: "1d6", speedFactor: 7, range: null, category: "melee", baseWeaponName: "", proficiencyGroup: "", specialistWeaponClass: "", damageType: "bludgeoning", ammoType: null, selectedAmmoId: null },
         }],
@@ -2232,7 +2232,7 @@ describe("buildCharacterSheetContext — thief/bard skills + backstab eligibilit
         classItems: [{ ...fighterClass, id: "c1" }, { ...thiefClass, id: "c2" }],
         physicalItems: [{
           id: "w1", name: "Dagger", img: "", type: "weapon",
-          quantity: 1, weight: 1, totalWeight: 1, location: "", equipped: true, identified: true, magicBonus: 0,
+          quantity: 1, weight: 1, totalWeight: 1, location: "", equipped: true, identified: true, magicBonus: 0, descriptionHtml: "",
           isContainer: false, capacity: null, contentsWeightMultiplier: 1,
           weapon: { damageVsSM: "1d4", damageVsL: "1d3", speedFactor: 2, range: null, category: "melee", baseWeaponName: "", proficiencyGroup: "", specialistWeaponClass: "", damageType: "piercing", ammoType: null, selectedAmmoId: null },
         }],
@@ -2566,7 +2566,7 @@ describe("buildCharacterSheetContext — sheet redesign R1 fields", () => {
   it("only owners can favorite; favorites build rows and flag the matching rows", () => {
     const sword: PhysicalItemView = {
       id: "w1", name: "Long Sword", img: "s.png", type: "weapon", quantity: 1, weight: 4, totalWeight: 4,
-      location: "", equipped: true, identified: true, magicBonus: 0, isContainer: false, capacity: null,
+      location: "", equipped: true, identified: true, magicBonus: 0, descriptionHtml: "", isContainer: false, capacity: null,
       contentsWeightMultiplier: 1,
       weapon: { damageVsSM: "1d8", damageVsL: "1d12", speedFactor: 5, range: null, category: "melee", baseWeaponName: "", proficiencyGroup: "", specialistWeaponClass: "", damageType: "slashing", ammoType: null, selectedAmmoId: null },
     };
@@ -2597,7 +2597,7 @@ describe("buildCharacterSheetContext — sheet redesign R1 fields", () => {
     };
     const chainMail: PhysicalItemView = {
       id: "a1", name: "Chain Mail", img: "", type: "armor",
-      quantity: 1, weight: 40, totalWeight: 40, location: "", equipped: true, identified: true, magicBonus: 0,
+      quantity: 1, weight: 40, totalWeight: 40, location: "", equipped: true, identified: true, magicBonus: 0, descriptionHtml: "",
       isContainer: false, capacity: null, contentsWeightMultiplier: 1,
       armor: { baseAc: 5, isShield: false, shieldAcBonus: 0, armorType: "chain-mail" },
     };
