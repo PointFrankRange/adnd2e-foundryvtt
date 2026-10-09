@@ -11,6 +11,7 @@ function input(over: Partial<AttackCardInput> = {}): AttackCardInput {
     modifierBreakdown: { strength: 1, dexterityMissile: 0, weaponMagic: 0, proficiency: 0, range: 0, situational: 0 },
     damageContext: { weaponItemId: "w1", actorUuid: "Actor.a1", targetSize: "small", ammoItemId: null, backstabMultiplier: null, critMultiplier: null, critFlatBonus: 0, specializationBonus: 0 },
     backstab: false,
+    helpless: false,
     critLabel: null,
     fumbleLabel: null,
     maneuverLabel: null,
@@ -78,6 +79,14 @@ describe("buildAttackCardContext", () => {
     expect(c1.backstab).toBe(true);
     const c2 = buildAttackCardContext(input({ backstab: false }));
     expect(c2.backstab).toBe(false);
+  });
+
+  it("carries helpless through unchanged, independently of backstab", () => {
+    expect(buildAttackCardContext(input({ helpless: true })).helpless).toBe(true);
+    expect(buildAttackCardContext(input({ helpless: false })).helpless).toBe(false);
+    const both = buildAttackCardContext(input({ helpless: true, backstab: true }));
+    expect(both.helpless).toBe(true);
+    expect(both.backstab).toBe(true);
   });
 
   it("carries critLabel/fumbleLabel through unchanged", () => {

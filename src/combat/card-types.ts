@@ -21,6 +21,10 @@ export interface AttackCardInput {
    *  COPY ("Natural 20...") is wrong for a backstab rolled on any other
    *  number. Templates must check `backstab` before `autoHit`. */
   backstab: boolean;
+  /** true when the single targeted actor is helpless (unconscious / paralyzed / sleeping): the hit was forced. Templates
+   *  check `backstab`, then `helpless`, before `autoHit`, because a forced hit on any natural roll must not read
+   *  "Natural 20". */
+  helpless: boolean;
   /** from core/combat/attack.ts attackModifiers().breakdown */
   modifierBreakdown: {
     strength: number; dexterityMissile: number; weaponMagic: number;
@@ -46,7 +50,7 @@ export interface AttackCardContext {
   weaponName: string; targetName: string | null;
   formula: string; naturalD20: number; total: number;
   needed: number; margin: number;
-  hit: boolean; autoHit: boolean; autoMiss: boolean; backstab: boolean;
+  hit: boolean; autoHit: boolean; autoMiss: boolean; backstab: boolean; helpless: boolean;
   /** zero-value modifiers are omitted — a clean card, not a wall of "+0" lines */
   modifierBreakdown: ModifierLine[];
   damageContext: { weaponItemId: string; actorUuid: string; targetSize: string | null; ammoItemId: string | null; backstabMultiplier: number | null; critMultiplier: number | null; critFlatBonus: number; specializationBonus: number } | null;

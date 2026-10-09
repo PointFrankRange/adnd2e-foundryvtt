@@ -868,6 +868,7 @@
         "autoHit": "Natural 20 — automatic hit",
         "autoMiss": "Natural 1 — automatic miss",
         "backstabHit": "Backstab — automatic hit!",
+        "helplessHit": "Helpless target — automatic hit",
         "modStrength": "Strength", "modDexMissile": "Dexterity (missile)",
         "modWeaponMagic": "Weapon magic", "modProficiency": "Proficiency",
         "modRange": "Range", "modSituational": "Situational",
