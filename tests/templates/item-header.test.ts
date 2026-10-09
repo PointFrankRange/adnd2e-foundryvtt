@@ -10,6 +10,10 @@ describe("item sheet header image (#148)", () => {
     expect(TEMPLATE).toContain('data-edit="img"');
     expect(TEMPLATE).toContain("raw-portrait");
   });
+  it("shows a placeholder portrait for a blank image that is never saved unpicked", () => {
+    expect(TEMPLATE).toContain("hasPortrait");
+    expect(TEMPLATE).toContain("data-placeholder");
+  });
   it("no longer renders the raw image path as a form input", () => {
     expect(TEMPLATE).toContain('(eq this.path "img")');
   });

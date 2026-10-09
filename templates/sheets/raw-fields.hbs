@@ -5,8 +5,10 @@
         {{#each header}}
           {{#if (eq this.path "name")}}
             <div class="raw-title-row">
-              {{#if @root.portrait}}
-                <img class="raw-portrait" src="{{@root.portrait}}" alt=""
+              {{#if @root.hasPortrait}}
+                <img class="raw-portrait" width="48" height="48"
+                  src="{{#if @root.portrait}}{{@root.portrait}}{{else}}{{@root.portraitPlaceholder}}{{/if}}" alt=""
+                  {{#unless @root.portrait}}data-placeholder="{{@root.portraitPlaceholder}}"{{/unless}}
                   {{#if @root.editable}}data-action="editImage" data-edit="img"{{/if}}>
               {{/if}}
               <input type="text" class="raw-name" name="name" value="{{this.value}}" placeholder="{{this.label}}"

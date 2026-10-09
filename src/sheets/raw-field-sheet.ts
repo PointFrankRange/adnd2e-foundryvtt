@@ -489,7 +489,10 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
           : undefined;
       // #148: the document's image (the header shows it as a clickable portrait instead of a path input)
       const imgRow = rows.find((r) => r.path === "img");
-      context.portrait = imgRow ? String(imgRow.value ?? "") : undefined;
+      context.hasPortrait = !!imgRow;
+      context.portrait = imgRow ? String(imgRow.value ?? "") : "";
+      context.portraitPlaceholder =
+        (this.document.constructor as { DEFAULT_ICON?: string }).DEFAULT_ICON ?? "icons/svg/mystery-man.svg";
       // #146: gear items get an Effects section; every other document/type renders without one
       context.itemEffects =
         itemType && ["weapon", "armor", "equipment"].includes(itemType)
@@ -527,6 +530,10 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
       formData: unknown,
     ): Record<string, unknown> {
       const submitData = super._processFormData(event, form, formData);
+      // A document with no image shows a placeholder portrait; if the user never picked one the
+      // src is still the placeholder, so do not write it back as the document's img.
+      const portrait = form.querySelector<HTMLImageElement>("img.raw-portrait[data-placeholder]");
+      if (portrait && portrait.getAttribute("src") === portrait.dataset.placeholder) deleteProperty(submitData, "img");
       for (const el of Array.from(form.querySelectorAll<HTMLSelectElement>('select[data-null="true"]'))) {
         if (el.value === "") setProperty(submitData, el.name, null);
       }
