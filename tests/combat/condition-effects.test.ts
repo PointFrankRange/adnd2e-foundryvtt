@@ -9,6 +9,10 @@ import {
   fatigueAttackPenalty,
   fatigueArmorClassPenalty,
   conditionDuration,
+  isHelpless,
+  invisibleTargetPenalty,
+  entangledAttackPenalty,
+  frightenedAttackPenalty,
 } from "../../src/combat/condition-effects";
 
 describe("MANAGED_CONDITIONS", () => {
@@ -59,6 +63,14 @@ describe("canAct", () => {
   });
   it("is false when both are present", () => {
     expect(canAct(["stunned", "held"])).toBe(false);
+  });
+  it("is false for every incapacitating condition", () => {
+    for (const id of ["unconscious", "paralyzed", "sleeping", "incapacitated", "dead", "mortalFatigue"]) {
+      expect(canAct([id])).toBe(false);
+    }
+  });
+  it("stays true for conditions that only modify attacks", () => {
+    expect(canAct(["entangled", "frightened", "invisible", "deafened", "poisoned", "charmed"])).toBe(true);
   });
 });
 
@@ -125,5 +137,44 @@ describe("contestAllowed", () => {
   });
   it("refuses a stunned holder", () => {
     expect(contestAllowed("improve", ["grappling", "stunned"])).toBe(false);
+  });
+  it("refuses every incapacitating condition even to break free", () => {
+    for (const id of ["paralyzed", "sleeping", "incapacitated", "dead"]) {
+      expect(contestAllowed("breakFree", ["held", id])).toBe(false);
+    }
+  });
+});
+
+describe("isHelpless", () => {
+  it("is true for unconscious, paralyzed or sleeping", () => {
+    for (const id of ["unconscious", "paralyzed", "sleeping"]) {
+      expect(isHelpless([id])).toBe(true);
+      expect(isHelpless(new Set([id]))).toBe(true);
+    }
+  });
+  it("is false otherwise, including dead and held", () => {
+    expect(isHelpless([])).toBe(false);
+    expect(isHelpless(["dead", "held", "stunned", "prone"])).toBe(false);
+  });
+});
+
+describe("invisibleTargetPenalty", () => {
+  it("is -4 against an invisible target, else 0", () => {
+    expect(invisibleTargetPenalty(["invisible"])).toBe(-4);
+    expect(invisibleTargetPenalty(["blinded"])).toBe(0);
+  });
+});
+
+describe("entangledAttackPenalty", () => {
+  it("is -2 when entangled, else 0", () => {
+    expect(entangledAttackPenalty(["entangled"])).toBe(-2);
+    expect(entangledAttackPenalty([])).toBe(0);
+  });
+});
+
+describe("frightenedAttackPenalty", () => {
+  it("is -2 when frightened, else 0", () => {
+    expect(frightenedAttackPenalty(new Set(["frightened"]))).toBe(-2);
+    expect(frightenedAttackPenalty([])).toBe(0);
   });
 });

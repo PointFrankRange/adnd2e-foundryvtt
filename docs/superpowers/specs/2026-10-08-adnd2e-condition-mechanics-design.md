@@ -32,7 +32,7 @@ No Foundry imports.
 - `entangledAttackPenalty(actorStatuses)` and `frightenedAttackPenalty(actorStatuses)` — `-2` each when present, else `0`.
 - `canAct` additionally returns false for unconscious, paralyzed, sleeping, incapacitated and dead (on top of stunned, held and mortalFatigue).
 - `contestAllowed` blocks the same new conditions. The existing exception stands: a *held* character may still attempt `breakFree`.
-- `MANAGED_CONDITIONS` and the header comment are updated to match (the "other 11 stay flavor-only" note is replaced by the list of three remaining labels).
+- The header comment is updated to list the newly automated conditions. `MANAGED_CONDITIONS` is unchanged: it is the set a maneuver can apply, not the set with effects.
 
 ### 2. Attack paths — PC and creature
 
