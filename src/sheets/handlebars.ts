@@ -5,6 +5,8 @@ import { TEMPLATE_PATH } from "../constants";
 const PARTIALS = [
   "actor/shared/partials/slot-table.hbs",
   "actor/shared/partials/item-controls.hbs",
+  "sheets/raw-field-row.hbs",
+  "sheets/raw-group.hbs",
   "actor/pc/partials/pc-ability.hbs",
   "actor/pc/partials/pc-class-row.hbs",
   "actor/pc/partials/pc-item-table.hbs",

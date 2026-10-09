@@ -22,6 +22,25 @@
       </div>
     </section>
 
+    {{#if strip.length}}
+      <section class="kit-panel raw-strip">
+        <div class="kit-body raw-strip-body">
+          {{#each strip}}
+            <div class="raw-strip-item display-{{this.display}}">
+              {{> adnd2e.raw-field-row this.row}}
+              {{#if (eq this.display "chips")}}
+                <span class="raw-chips">{{#each this.row.choices}}{{#if this.selected}}<span class="chip">{{this.label}}</span>{{/if}}{{/each}}</span>
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
+      </section>
+    {{/if}}
+
+    {{#if leading.length}}
+      <div class="raw-groups">{{#each leading}}{{> adnd2e.raw-group this}}{{/each}}</div>
+    {{/if}}
+
     {{#if description}}
       <section class="kit-panel raw-description">
         <div class="kit-bar">{{localize 'ADND2E.sheets.descriptionTitle'}}</div>
@@ -33,73 +52,7 @@
     {{/if}}
 
     <div class="raw-groups">
-      {{#each groups}}
-        <section class="kit-panel raw-group">
-          <div class="kit-bar">
-            {{#if this.isHeader}}
-              {{#if this.titleKey}}{{localize this.titleKey}}{{else}}{{this.title}}{{/if}}
-            {{else}}
-              <label><input type="checkbox" data-null-toggle="{{this.toggle.path}}" {{#if this.toggle.value}}checked{{/if}}
-                {{#unless @root.editable}}disabled{{/unless}}> Set {{this.toggle.label}}</label>
-            {{/if}}
-          </div>
-          <div class="kit-body">
-            {{#each this.rows}}
-              {{#if (eq this.kind "nullcheck")}}
-                <h3 class="raw-field-header" style="margin-left:{{this.indent}}px">
-                  <label><input type="checkbox" data-null-toggle="{{this.path}}" {{#if this.value}}checked{{/if}}
-                    {{#unless @root.editable}}disabled{{/unless}}> Set {{this.label}}</label>
-                </h3>
-              {{else if this.header}}
-                <h3 class="raw-field-header" style="margin-left:{{this.indent}}px">{{this.label}}</h3>
-              {{else}}
-                <div class="form-group" style="margin-left:{{this.indent}}px{{#if this.hidden}};display:none{{/if}}"
-                  {{#if this.nullGroup}}data-null-group="{{this.nullGroup}}"{{/if}}>
-                  <label>{{this.label}}</label>
-                  <div class="form-fields">
-                    {{#if (eq this.kind "checkbox")}}
-                      <input type="checkbox" name="{{this.path}}" {{#if this.value}}checked{{/if}}
-                        {{#unless @root.editable}}disabled{{/unless}}>
-                    {{else if (eq this.kind "select")}}
-                      <select name="{{this.path}}" {{#if this.nullable}}data-null="true"{{/if}}
-                        {{#unless @root.editable}}disabled{{/unless}}>
-                        {{#each this.choices}}
-                          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-                        {{/each}}
-                      </select>
-                    {{else if (eq this.kind "multiselect")}}
-                      <details class="multiselect" data-multiselect="true" data-path="{{this.path}}"{{#if this.nullable}} data-nullable="true"{{/if}}>
-                        <summary>{{this.value.length}} selected</summary>
-                        {{#each this.choices}}
-                          <label class="multiselect-option">
-                            <input type="checkbox" value="{{this.value}}" {{#if this.selected}}checked{{/if}}
-                              {{#unless @root.editable}}disabled{{/unless}}> {{this.label}}
-                          </label>
-                        {{/each}}
-                      </details>
-                    {{else if (eq this.kind "lines")}}
-                      <textarea name="{{this.path}}" data-lines="{{this.lineMode}}" rows="4"
-                        {{#unless @root.editable}}readonly{{/unless}}>{{this.value}}</textarea>
-                    {{else if (eq this.kind "json")}}
-                      <textarea name="{{this.path}}" data-json="true" rows="4"
-                        {{#unless @root.editable}}readonly{{/unless}}>{{this.value}}</textarea>
-                    {{else if (eq this.kind "number")}}
-                      <input type="number" step="any" name="{{this.path}}" value="{{this.value}}"
-                        {{#unless @root.editable}}readonly{{/unless}}>
-                    {{else if (eq this.kind "textarea")}}
-                      <textarea name="{{this.path}}" rows="3"
-                        {{#unless @root.editable}}readonly{{/unless}}>{{this.value}}</textarea>
-                    {{else}}
-                      <input type="text" name="{{this.path}}" value="{{this.value}}"
-                        {{#unless @root.editable}}readonly{{/unless}}>
-                    {{/if}}
-                  </div>
-                </div>
-              {{/if}}
-            {{/each}}
-          </div>
-        </section>
-      {{/each}}
+      {{#each groups}}{{> adnd2e.raw-group this}}{{/each}}
     </div>
   </div>
 
