@@ -4,9 +4,13 @@ import { buildSaveCardContext } from "../../combat/save-card";
 import {
   blindedAttackPenalty,
   canAct,
+  entangledAttackPenalty,
   fatigueArmorClassPenalty,
   fatigueAttackPenalty,
+  frightenedAttackPenalty,
   heldAttackBonus,
+  invisibleTargetPenalty,
+  isHelpless,
   proneArmorClassPenalty,
 } from "../../combat/condition-effects";
 import { attackModifiers, hitResult } from "../../core/combat/attack";
@@ -212,17 +216,24 @@ async function rollCreatureAttack(actor: CreatureActor, source: AttackSource): P
     situationalModifier:
       blindedAttackPenalty(actor.statuses) +
       fatigueAttackPenalty(actor.statuses) +
+      entangledAttackPenalty(actor.statuses) +
+      frightenedAttackPenalty(actor.statuses) +
+      invisibleTargetPenalty(targetStatuses) +
       heldAttackBonus(targetStatuses) +
       armorVsWeaponModifier,
   });
   const formula = attackFormula(attackBonus);
   const roll = await new Roll(formula).evaluate();
   const naturalD20 = roll.dice[0]?.total ?? 0;
-  const hit = hitResult({ naturalD20, attackBonus, thac0, targetAc });
+  const baseHit = hitResult({ naturalD20, attackBonus, thac0, targetAc });
+  // #94: a helpless target is a forced hit. crit/fumble read baseHit so a helpless natural 20 still crits but a
+  // natural 1 never fumbles; every later use of `hit` (card, damage roll) sees the forced result.
+  const helpless = isHelpless(targetStatuses);
+  const hit = helpless ? { ...baseHit, hit: true, autoHit: true, autoMiss: false } : baseHit;
 
   const critEnabled = rules.combatAndTacticsEnabled && rules.criticalHits;
-  const crit = critEnabled && hit.autoHit ? criticalSeverity(Math.ceil(Math.random() * 10)) : null;
-  const fumble = critEnabled && hit.autoMiss ? fumbleSeverity(Math.ceil(Math.random() * 10)) : null;
+  const crit = critEnabled && baseHit.autoHit ? criticalSeverity(Math.ceil(Math.random() * 10)) : null;
+  const fumble = critEnabled && baseHit.autoMiss && !helpless ? fumbleSeverity(Math.ceil(Math.random() * 10)) : null;
 
   if (fumble?.effect === "selfInjury" && fumble.selfInjuryDice) {
     const selfRoll = await new Roll(fumble.selfInjuryDice).evaluate();
@@ -241,7 +252,7 @@ async function rollCreatureAttack(actor: CreatureActor, source: AttackSource): P
   const context = buildAttackCardContext({
     actorName: actor.name, actorImg: actor.img,
     weaponName: source.name, targetName,
-    formula, naturalD20, hit, backstab: false, modifierBreakdown: breakdown,
+    formula, naturalD20, hit, backstab: false, helpless, modifierBreakdown: breakdown,
     critLabel: crit ? `ADND2E.chat.attack.crit.${crit.tier}` : null,
     fumbleLabel: fumble ? `ADND2E.chat.attack.fumble.${fumble.tier}` : null,
     maneuverLabel: null,

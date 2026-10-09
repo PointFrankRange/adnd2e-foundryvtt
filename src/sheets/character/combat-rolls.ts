@@ -7,9 +7,13 @@ import type { AmmoStock } from "../../combat/ammo";
 import {
   blindedAttackPenalty,
   canAct,
+  entangledAttackPenalty,
   fatigueArmorClassPenalty,
   fatigueAttackPenalty,
+  frightenedAttackPenalty,
   heldAttackBonus,
+  invisibleTargetPenalty,
+  isHelpless,
   proneArmorClassPenalty,
 } from "../../combat/condition-effects";
 import { getChassis } from "../../core/classes/chassis";
@@ -344,6 +348,9 @@ export async function rollAttack(
     situationalModifier:
       blindedAttackPenalty(actor.statuses) +
       fatigueAttackPenalty(actor.statuses) +
+      entangledAttackPenalty(actor.statuses) +
+      frightenedAttackPenalty(actor.statuses) +
+      invisibleTargetPenalty(targetStatuses) +
       heldAttackBonus(targetStatuses) +
       armorVsWeaponModifier +
       maneuverPenalty,
@@ -362,7 +369,10 @@ export async function rollAttack(
   const backstabActive = backstab && backstabEligible;
 
   const baseHit = hitResult({ naturalD20, attackBonus, thac0, targetAc });
-  const hit = backstabActive ? { ...baseHit, hit: true, autoHit: true, autoMiss: false } : baseHit;
+  // #94: a helpless target (unconscious / paralyzed / sleeping) is a forced hit, like a backstab. targetStatuses is
+  // empty on the manual-AC path, so nothing is helpless there. The d20 is still rolled so a natural 20 can crit.
+  const helpless = isHelpless(targetStatuses);
+  const hit = backstabActive || helpless ? { ...baseHit, hit: true, autoHit: true, autoMiss: false } : baseHit;
 
   const critEnabled = getOptionalRules().combatAndTacticsEnabled && getOptionalRules().criticalHits;
   const crit = critEnabled && baseHit.autoHit && !backstabActive ? criticalSeverity(Math.ceil(Math.random() * 10)) : null;
@@ -373,7 +383,8 @@ export async function rollAttack(
   // above, or a natural-1 backstab roll would produce an incoherent chat
   // card claiming both "automatic hit" and "weapon drops" and genuinely
   // unequip the weapon on an attack just declared a guaranteed hit.
-  const fumble = critEnabled && baseHit.autoMiss && !backstabActive ? fumbleSeverity(Math.ceil(Math.random() * 10)) : null;
+  // A helpless target cannot dodge or parry, so a natural 1 never fumbles against one either.
+  const fumble = critEnabled && baseHit.autoMiss && !backstabActive && !helpless ? fumbleSeverity(Math.ceil(Math.random() * 10)) : null;
 
   if (fumble?.effect === "weaponDrops") {
     await unequipWeapon(weapon as unknown as { update(d: Record<string, unknown>): Promise<unknown> });
@@ -395,13 +406,15 @@ export async function rollAttack(
   // Pure lookup, no side effects: safe to compute here, since the card's
   // maneuverLabel depends on it. The actual target mutation happens after the
   // chat card has posted (below).
-  const maneuverEffect = resolveManeuverOutcome(effectiveManeuverId, baseHit.hit);
+  // A helpless target is hit automatically, so a piggy-backed maneuver lands too (unlike backstab, which is deliberately excluded).
+  const maneuverEffect = resolveManeuverOutcome(effectiveManeuverId, baseHit.hit || helpless);
 
   const context = buildAttackCardContext({
     actorName: actor.name, actorImg: actor.img,
     weaponName: weapon.name, targetName,
     formula, naturalD20, hit, modifierBreakdown: breakdown,
     backstab: backstabActive,
+    helpless,
     critLabel: crit ? `ADND2E.chat.attack.crit.${crit.tier}` : null,
     fumbleLabel: fumble ? `ADND2E.chat.attack.fumble.${fumble.tier}` : null,
     maneuverLabel: effectiveManeuverId && maneuverEffect ? `ADND2E.chat.attack.maneuverLabel.${effectiveManeuverId}` : null,
