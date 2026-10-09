@@ -868,11 +868,12 @@
         "autoHit": "Natural 20 — automatic hit",
         "autoMiss": "Natural 1 — automatic miss",
         "backstabHit": "Backstab — automatic hit!",
+        "helplessHit": "Helpless target — automatic hit",
         "modStrength": "Strength", "modDexMissile": "Dexterity (missile)",
         "modWeaponMagic": "Weapon magic", "modProficiency": "Proficiency",
         "modRange": "Range", "modSituational": "Situational",
         "rollDamage": "Roll Damage",
-        "cannotActWarning": "This actor is stunned or held and cannot attack this round.",
+        "cannotActWarning": "This actor is stunned, held, unconscious or otherwise unable to act and cannot attack.",
         "noAmmoWarning": "No matching ammunition is equipped for this weapon.",
         "crit": {
           "solid": "Critical hit!",

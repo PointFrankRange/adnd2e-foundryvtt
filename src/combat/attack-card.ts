@@ -32,6 +32,7 @@ export function buildAttackCardContext(input: AttackCardInput): AttackCardContex
     autoHit: input.hit.autoHit,
     autoMiss: input.hit.autoMiss,
     backstab: input.backstab,
+    helpless: input.helpless,
     critLabel: input.critLabel,
     fumbleLabel: input.fumbleLabel,
     maneuverLabel: input.maneuverLabel,

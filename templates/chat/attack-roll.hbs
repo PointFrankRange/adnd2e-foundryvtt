@@ -8,6 +8,7 @@
   </header>
   <p class="formula">{{formula}} = <strong>{{total}}</strong> ({{localize 'ADND2E.chat.attack.hit'}}/{{localize 'ADND2E.chat.attack.miss'}}: {{needed}})</p>
   {{#if backstab}}<p class="result hit">{{localize 'ADND2E.chat.attack.backstabHit'}}</p>
+  {{else if helpless}}<p class="result hit">{{localize 'ADND2E.chat.attack.helplessHit'}}</p>
   {{else if autoHit}}<p class="result hit">{{localize 'ADND2E.chat.attack.autoHit'}}</p>
   {{else if autoMiss}}<p class="result miss">{{localize 'ADND2E.chat.attack.autoMiss'}}</p>
   {{else if hit}}<p class="result hit">{{localize 'ADND2E.chat.attack.hit'}} ({{margin}})</p>
