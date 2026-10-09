@@ -71,6 +71,7 @@ declare global {
     "adnd2e.combatManeuvers": boolean;
     "adnd2e.armorTypeVsWeaponType": boolean;
     "adnd2e.weaponMastery": boolean;
+    "adnd2e.wrestling": boolean;
     // skillsAndPowers — reserved for Sub-project 8
     "adnd2e.skillsAndPowersEnabled": boolean;
     "adnd2e.subAbilityScores": boolean;

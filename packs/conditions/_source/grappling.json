@@ -1,0 +1,11 @@
+{
+  "_id": "gRaPpL1nGw7Kd3xZ",
+  "_key": "!items!gRaPpL1nGw7Kd3xZ",
+  "name": "Grappling",
+  "type": "condition",
+  "img": "icons/svg/combat.svg",
+  "system": {
+    "conditionId": "grappling",
+    "description": ""
+  }
+}

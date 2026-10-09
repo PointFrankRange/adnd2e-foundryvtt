@@ -65,6 +65,13 @@ export function canAct(actorStatuses: StatusSet): boolean {
   return !has(actorStatuses, "stunned") && !has(actorStatuses, "held") && !has(actorStatuses, "mortalFatigue");
 }
 
+/** Wrestling follow-ups (SP7e): a holder acts like anyone else, but a HELD character may still try to break free
+ *  (being held is what breaking free is for); stunned, unconscious or mortally fatigued still rule it out. */
+export function contestAllowed(kind: string, actorStatuses: StatusSet): boolean {
+  if (kind !== "breakFree") return canAct(actorStatuses);
+  return !has(actorStatuses, "stunned") && !has(actorStatuses, "unconscious") && !has(actorStatuses, "mortalFatigue");
+}
+
 /** #94: how many rounds each system-applied condition lasts. Only stunned (a called-shot-to-the-head result this
  *  project defines itself, 1 round: its own design value) is timed. Prone and held are PERSISTENT because Combat &
  *  Tactics gives them no timer: standing up from prone is a full-move action (C&T p.30, the sheet Stand Up button) and a

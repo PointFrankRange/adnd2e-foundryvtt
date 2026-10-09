@@ -807,6 +807,39 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
     ]);
   });
 
+  it("the legacy grapple maneuver is hidden while the wrestling rule is on", () => {
+    const on = { ...DEFAULT_OPTIONAL_RULES, combatAndTacticsEnabled: true, combatManeuvers: true, wrestling: true };
+    const off = { ...on, wrestling: false };
+    const values = (rules: typeof on) =>
+      buildCharacterSheetContext(input({ optionalRules: rules })).combat.maneuverOptions.map((m) => m.value);
+    expect(values(off)).toContain("grapple");
+    expect(values(on)).not.toContain("grapple");
+    expect(values(on)).toContain("disarm");
+  });
+
+  it("exposes the grapple panel for a holder and a held character, and none otherwise", () => {
+    const rec = { id: "g1", role: "holder" as const, opponentUuid: "Actor.o", opponentName: "Bugbear", rung: "held" as const, locks: [], lastLock: null, pressCount: 0, lockPending: false };
+    expect(buildCharacterSheetContext({ ...input() }).vitals.grapple).toBeNull();
+    const holder = buildCharacterSheetContext({ ...input(), grapple: rec }).vitals.grapple!;
+    expect(holder).toMatchObject({ role: "holder", opponentName: "Bugbear", rungKey: "ADND2E.chat.wrestling.rung.held", canImprove: true, canBreakFree: false, lockPending: false, lockOptions: [] });
+    const pending = buildCharacterSheetContext({ ...input(), grapple: { ...rec, rung: "locked", lockPending: true } }).vitals.grapple!;
+    expect(pending.canImprove).toBe(false);
+    expect(pending.canRelease).toBe(true);
+    expect(pending.lockOptions.map((l) => l.id)).toEqual(["throw", "takedown", "slam", "press", "hammer", "manipulate", "carry"]);
+    const held = buildCharacterSheetContext({ ...input(), grapple: { ...rec, role: "held" as const } }).vitals.grapple!;
+    expect(held).toMatchObject({ role: "held", canImprove: false, canBreakFree: true, canRelease: false });
+    const locked = buildCharacterSheetContext({ ...input(), grapple: { ...rec, rung: "locked", locks: ["throw", "press"] } }).vitals.grapple!;
+    expect(locked.locks).toEqual(["ADND2E.chat.wrestling.lock.throw", "ADND2E.chat.wrestling.lock.press"]);
+  });
+
+  it("combat.wrestling is false by default and true only with combatAndTacticsEnabled and wrestling both on", () => {
+    const w = (over: object) => buildCharacterSheetContext(input({ optionalRules: { ...DEFAULT_OPTIONAL_RULES, ...over } })).combat.wrestling;
+    expect(buildCharacterSheetContext(input()).combat.wrestling).toBe(false);
+    expect(w({ combatAndTacticsEnabled: true })).toBe(false);
+    expect(w({ wrestling: true })).toBe(false);
+    expect(w({ combatAndTacticsEnabled: true, wrestling: true })).toBe(true);
+  });
+
   it("maneuverOptions is empty when combatAndTacticsEnabled is off, even with calledShots/combatManeuvers on", () => {
     const c = buildCharacterSheetContext(
       input({

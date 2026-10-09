@@ -1,3 +1,4 @@
+import { LOCK_EFFECT_IDS } from "../../core/wrestling";
 import type { AbilityScores, ArmorType, BardSkill, ClassId, DexterityModifiers, IntelligenceModifiers, Race, SphereName, WizardSchool } from "../../core/types";
 import type {
   AbilityRow,
@@ -393,6 +394,22 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
     casting: Boolean(input.castingStatus),
     fatigue,
     prone: input.prone === true,
+    grapple: input.grapple
+      ? {
+          role: input.grapple.role,
+          opponentName: input.grapple.opponentName,
+          rungKey: `ADND2E.chat.wrestling.rung.${input.grapple.rung}`,
+          locks: input.grapple.locks.map((l) => `ADND2E.chat.wrestling.lock.${l}`),
+          lockPending: input.grapple.lockPending,
+          canImprove: input.grapple.role === "holder" && !input.grapple.lockPending,
+          canRelease: input.grapple.role === "holder",
+          canBreakFree: input.grapple.role === "held",
+          lockOptions:
+            input.grapple.role === "holder" && input.grapple.lockPending
+              ? LOCK_EFFECT_IDS.map((id) => ({ id, labelKey: `ADND2E.chat.wrestling.lock.${id}` }))
+              : [],
+        }
+      : null,
     canRecoverFatigue,
   };
 }
@@ -586,12 +603,14 @@ function buildCombat(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   const rules = input.optionalRules;
   const maneuverOptions = Object.entries(MANEUVERS)
     .filter(
-      ([, m]) =>
-        rules.combatAndTacticsEnabled && (m.category === "calledShot" ? rules.calledShots : rules.combatManeuvers),
+      ([id, m]) =>
+        rules.combatAndTacticsEnabled &&
+        (m.category === "calledShot" ? rules.calledShots : rules.combatManeuvers) &&
+        !(id === "grapple" && rules.wrestling),
     )
     .map(([id]) => ({ value: id, label: `ADND2E.sheet.combat.maneuver.${id}` }));
 
-  return { weapons, acBreakdown, armor, maneuverOptions };
+  return { weapons, acBreakdown, armor, maneuverOptions, wrestling: rules.combatAndTacticsEnabled && rules.wrestling };
 }
 
 /* ---------- skills ---------- */

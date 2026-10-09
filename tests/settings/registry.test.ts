@@ -3,15 +3,15 @@ import { SETTING_DESCRIPTORS, readOptionalRules, type SettingDescriptor } from "
 import { DEFAULT_OPTIONAL_RULES } from "../../src/core/options";
 
 describe("SETTING_DESCRIPTORS", () => {
-  it("registers 28 settings across the 4 groups", () => {
-    expect(SETTING_DESCRIPTORS).toHaveLength(28);
+  it("registers 29 settings across the 4 groups", () => {
+    expect(SETTING_DESCRIPTORS).toHaveLength(29);
     const byGroup = SETTING_DESCRIPTORS.reduce<Record<string, number>>((acc, d) => {
       acc[d.group] = (acc[d.group] ?? 0) + 1;
       return acc;
     }, {});
     expect(byGroup).toEqual({
       core: 13,
-      combatAndTactics: 6,
+      combatAndTactics: 7,
       skillsAndPowers: 4,
       spellsAndMagic: 5,
     });
@@ -28,7 +28,7 @@ describe("SETTING_DESCRIPTORS", () => {
 
   it("core, combatAndTactics, skillsAndPowers and spellsAndMagic settings bind 1:1 to OptionalRules fields (exceedLevelLimits is a string choice, not a descriptor)", () => {
     const bound = SETTING_DESCRIPTORS.filter((d) => d.optionalRulesKey !== null);
-    expect(bound).toHaveLength(28);
+    expect(bound).toHaveLength(29);
     const boundKeys = bound.map((d) => d.optionalRulesKey).sort();
     const expectedKeys = Object.keys(DEFAULT_OPTIONAL_RULES)
       .filter((k) => k !== "exceedLevelLimits") // string choice, handled separately

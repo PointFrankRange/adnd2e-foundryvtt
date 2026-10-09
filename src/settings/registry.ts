@@ -42,6 +42,7 @@ export const SETTING_DESCRIPTORS: readonly SettingDescriptor[] = [
   { key: "combatManeuvers", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "combatManeuvers" },
   { key: "armorTypeVsWeaponType", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "armorTypeVsWeaponType" },
   { key: "weaponMastery", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "weaponMastery" },
+  { key: "wrestling", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "wrestling" },
   // --- skillsAndPowers: Sub-project 8 ---
   { key: "skillsAndPowersEnabled", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "skillsAndPowersEnabled", requiresReload: true },
   { key: "subAbilityScores", group: "skillsAndPowers", default: false, config: true, optionalRulesKey: "subAbilityScores", requiresReload: true },

@@ -563,6 +563,8 @@ describe("lang/en.json — player-applied effects relay", () => {
       "ADND2E.relay.effect.healing",
       "ADND2E.relay.effect.condition",
       "ADND2E.relay.effect.unequip",
+      "ADND2E.relay.effect.destroy",
+      "ADND2E.relay.effect.grapple",
     ]) {
       expect(typeof resolve(key), key).toBe("string");
       expect((resolve(key) as string).length, key).toBeGreaterThan(0);
@@ -770,6 +772,10 @@ describe("lang/en.json — SP14c fatigue strings", () => {
       "ADND2E.sheet.combat.proneTitle",
       "ADND2E.sheet.combat.proneHint",
       "ADND2E.sheet.combat.standUp",
+      "ADND2E.sheet.combat.wrestleTitle",
+      "ADND2E.sheet.combat.wrestle",
+      "ADND2E.sheet.combat.grappleWith",
+      "ADND2E.sheet.combat.release",
       "ADND2E.chat.standUp",
       "ADND2E.sheet.spells.fatigueRecoveryHintRound",
       "ADND2E.sheet.spells.fatigueRecoveryHintTurn",
@@ -849,6 +855,8 @@ describe("lang/en.json — SP13 level-limit settings and sheet keys", () => {
       "ADND2E.settings.primeRequisiteXpBonus.hint",
       "ADND2E.settings.wildTalents.name",
       "ADND2E.settings.wildTalents.hint",
+      "ADND2E.settings.wrestling.name",
+      "ADND2E.settings.wrestling.hint",
       "ADND2E.settings.racialLevelLimits.name",
       "ADND2E.settings.racialLevelLimits.hint",
       "ADND2E.settings.primeRequisiteBonusLevels.name",
@@ -887,6 +895,26 @@ describe("lang/en.json - SP15 psionics", () => {
       ...["discipline-access", "science-limit", "devotion-limit", "defense-limit", "devotion-ratio", "primary-cap", "no-budget", "prerequisite", "min-level"].map((k) => `ADND2E.sheet.psionics.learn.${k}`),
     ];
     for (const key of keys) {
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("lang/en.json — SP7e (wrestling chat)", () => {
+  it("resolves the wrestling chat keys", () => {
+    const leaves = [
+      "against", "awaiting", "rollDefense", "resolveForThem", "critical", "swapped", "damage", "lockPending", "unconscious",
+      "notYourDefense", "alreadyAnswered", "noTarget", "selfTarget", "alreadyGrappling", "notGrappling", "cannotAct", "lockPendingFirst", "staleContest", "lockNotAllowed",
+      "released", "lockApplied",
+      ...["attack", "hold", "improve", "holdOn", "breakFree"].map((k) => `kind.${k}`),
+      ...["initiator", "responder", "none"].map((k) => `winner.${k}`),
+      ...["free", "held", "locked"].map((k) => `rung.${k}`),
+      ...["throw", "takedown", "slam", "press", "hammer", "manipulate", "carry"].map((k) => `lock.${k}`),
+      ...["breath", "death"].map((k) => `lockSave.${k}`),
+    ];
+    for (const leaf of leaves) {
+      const key = `ADND2E.chat.wrestling.${leaf}`;
       expect(typeof resolve(key), key).toBe("string");
       expect((resolve(key) as string).length, key).toBeGreaterThan(0);
     }

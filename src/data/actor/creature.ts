@@ -20,6 +20,7 @@ export class CreatureModel extends Adnd2eActorModel {
         hp: new SchemaField({
           value: new NumberField({ required: true, integer: true, initial: 0 }),
           max: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+          nonlethal: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
         }),
         ac: new SchemaField({ value: new NumberField({ required: true, integer: true, initial: 10 }) }),
         thac0: new SchemaField({

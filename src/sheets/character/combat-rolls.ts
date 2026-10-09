@@ -331,7 +331,8 @@ export async function rollAttack(
   const maneuverAllowed =
     maneuverDescriptor !== undefined &&
     rules.combatAndTacticsEnabled &&
-    (maneuverDescriptor.category === "calledShot" ? rules.calledShots : rules.combatManeuvers);
+    (maneuverDescriptor.category === "calledShot" ? rules.calledShots : rules.combatManeuvers) &&
+    !(maneuverId === "grapple" && rules.wrestling);
   const effectiveManeuverId = maneuverAllowed ? maneuverId : null;
   const maneuverPenalty = maneuverAllowed ? (maneuverDescriptor?.attackPenalty ?? 0) : 0;
   const proficiencyEffect = resolveProficiencyModifier(actor, weapon);

@@ -4,6 +4,7 @@ import {
   proneArmorClassPenalty,
   heldAttackBonus,
   canAct,
+  contestAllowed,
   MANAGED_CONDITIONS,
   fatigueAttackPenalty,
   fatigueArmorClassPenalty,
@@ -104,5 +105,25 @@ describe("conditionDuration (#94)", () => {
   });
   it("leaves prone, held and every other condition indefinite", () => {
     for (const id of ["prone", "held", "turned", "blinded"]) expect(conditionDuration(id, true)).toBeNull();
+  });
+});
+
+describe("contestAllowed", () => {
+  it("lets a held character try to break free, but not improve or hold on", () => {
+    expect(contestAllowed("breakFree", ["held"])).toBe(true);
+    expect(contestAllowed("improve", ["held"])).toBe(false);
+    expect(contestAllowed("holdOn", ["held"])).toBe(false);
+  });
+  it("lets the grappling holder improve or hold on", () => {
+    expect(contestAllowed("improve", ["grappling"])).toBe(true);
+    expect(contestAllowed("holdOn", [])).toBe(true);
+  });
+  it("refuses a stunned, unconscious or mortally fatigued character even to break free", () => {
+    for (const id of ["stunned", "unconscious", "mortalFatigue"]) {
+      expect(contestAllowed("breakFree", ["held", id])).toBe(false);
+    }
+  });
+  it("refuses a stunned holder", () => {
+    expect(contestAllowed("improve", ["grappling", "stunned"])).toBe(false);
   });
 });

@@ -1,14 +1,24 @@
 import { hpDamageUpdate, hpHealingUpdate, type RelayRequest } from "../combat/apply-relay";
 import { conditionDuration } from "../combat/condition-effects";
+import { SYSTEM_ID } from "../constants";
+import { GRAPPLE_DELETE_OPTIONS, GRAPPLE_FLAG } from "../combat/grapple-state";
+import { temporaryDamage } from "../core/wrestling";
 
 /* The single place each player-applicable effect is performed on a target actor —
  * used locally (GM / owner) and by the GM query handler. Foundry glue. */
 
 export interface EffectTarget {
-  system: { attributes: { hp: { value: number; max: number; temp?: number } } };
+  system: { attributes: { hp: { value: number; max: number; temp?: number; nonlethal?: number } } };
   items: Iterable<{ type: string; system: { equipped?: boolean }; update(d: Record<string, unknown>): Promise<unknown> }>;
   update(d: Record<string, unknown>): Promise<unknown>;
   toggleStatusEffect(id: string, opts: { active: boolean }): Promise<unknown>;
+  effects?: Iterable<{
+    id: string;
+    statuses: ReadonlySet<string>;
+    getFlag(scope: string, key: string): unknown;
+    update(d: Record<string, unknown>): Promise<unknown>;
+  }>;
+  deleteEmbeddedDocuments?(name: string, ids: string[], options?: Record<string, unknown>): Promise<unknown>;
 }
 
 interface DurationEffect {
@@ -61,6 +71,33 @@ export async function applyEffectLocally(actor: EffectTarget, request: RelayRequ
       await actor.update({ "system.attributes.hp.value": 0 });
       await actor.toggleStatusEffect("dead", { active: true });
       return true;
+    case "grapple": {
+      if (request.damage > 0) {
+        const r = temporaryDamage({ value: actor.system.attributes.hp.value, nonlethal: actor.system.attributes.hp.nonlethal ?? 0 }, request.damage);
+        await actor.update({ "system.attributes.hp.value": r.value, "system.attributes.hp.nonlethal": r.nonlethal });
+        if (r.unconscious) await actor.toggleStatusEffect("unconscious", { active: true });
+      }
+      if (request.prone) await actor.toggleStatusEffect("prone", { active: true });
+      const wrestling = () => [...(actor.effects ?? [])].filter((e) => (e.statuses.has("held") || e.statuses.has("grappling")) && e.getFlag(SYSTEM_ID, GRAPPLE_FLAG) !== undefined);
+      if (request.set === null) {
+        const ids = wrestling().map((e) => e.id);
+        if (ids.length > 0) await actor.deleteEmbeddedDocuments?.("ActiveEffect", ids, { ...GRAPPLE_DELETE_OPTIONS });
+        return true;
+      }
+      const conditionId = request.set.role === "holder" ? "grappling" : "held";
+      // Switching roles (a critical swap) leaves the OLD role's effect behind: remove it first.
+      const stale = wrestling().filter((e) => !e.statuses.has(conditionId)).map((e) => e.id);
+      if (stale.length > 0) await actor.deleteEmbeddedDocuments?.("ActiveEffect", stale, { ...GRAPPLE_DELETE_OPTIONS });
+      const toggled = await actor.toggleStatusEffect(conditionId, { active: true });
+      // Foundry only treats a SINGLE-status effect as "the" status effect: use the one it just created, else the existing one.
+      const effect =
+        toggled && typeof toggled === "object"
+          ? (toggled as { update(d: Record<string, unknown>): Promise<unknown> })
+          : [...(actor.effects ?? [])].find((e) => e.statuses.size === 1 && e.statuses.has(conditionId));
+      if (!effect) return false;
+      await effect.update({ [`flags.${SYSTEM_ID}.${GRAPPLE_FLAG}`]: request.set });
+      return true;
+    }
     case "unequip":
       // the target's FIRST equipped weapon (Plan 7d's first-member-wins rule); unarmed = no-op
       for (const item of actor.items) {

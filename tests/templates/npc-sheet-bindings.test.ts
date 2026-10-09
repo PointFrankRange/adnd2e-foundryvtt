@@ -68,6 +68,8 @@ const PC_ONLY_ACTIONS = [
   "memorizeFreeTheurgy", "castFreeTheurgy", "forgetFreeTheurgy",
   // SP15 Plan D: the Wild talent panel is PC-only (gated behind `@root.pcActions`).
   "wildTalentTest", "wildTalentReset",
+  // SP7e: the wrestling panel is PC-only (gated behind @root.pcActions)
+  "wrestle", "improveGrip", "holdOn", "breakFree", "releaseGrapple", "chooseLock",
   // #94: the Stand Up button (prone panel) is gated behind `@root.pcActions`; only the PC sheet wires it.
   "standUp",
   // Sub-project 14 Plan B whole-branch fix I2: recoverChannellerSp is NOT

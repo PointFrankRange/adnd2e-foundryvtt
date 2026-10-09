@@ -7,6 +7,8 @@ import { requestApply } from "../relay/relay-client";
 import { rerenderContestCards, rerenderWildCards } from "../hooks/psionic-hooks";
 import { applyContestTangents, recordButtonState, rollDefense, type ContestFlag } from "../sheets/character/psionic-combat";
 import { applyDire, type WildFlag } from "../sheets/character/psionic-wild";
+import { answerContest } from "../sheets/character/wrestling-actions";
+import type { WrestleContestFlag } from "../combat/wrestling-card";
 import type { EffectTarget } from "../relay/apply-effect";
 
 /* ---------------------------------------------------------------------------
@@ -198,12 +200,31 @@ function wireWildTalent(message: { id: string; getFlag(s: string, k: string): un
   }
 }
 
+/** Wrestling contest cards (SP7e): Roll defense for the defender's owner or a GM; Resolve for them for a GM only. answerContest re-checks and is authoritative. */
+function wireWrestleContest(message: { id: string; getFlag(s: string, k: string): unknown }, html: HTMLElement): void {
+  const flag = message.getFlag(SYSTEM_ID, "wrestleContest") as WrestleContestFlag | undefined;
+  if (!flag) return;
+  const isGm = Boolean(game.user?.isGM);
+  const responder = foundry.utils.fromUuidSync(flag.responder.uuid as never) as { isOwner?: boolean } | null;
+  const roll = html.querySelector<HTMLButtonElement>('[data-action="wrestleRollDefense"]');
+  const resolve = html.querySelector<HTMLButtonElement>('[data-action="wrestleResolveForThem"]');
+  if (!isGm && !responder?.isOwner) roll?.remove();
+  if (!isGm) resolve?.remove();
+  for (const button of [roll, resolve]) {
+    button?.addEventListener("click", () => {
+      button.disabled = true;
+      void answerContest(message.id);
+    });
+  }
+}
+
 /** Wires the "Roll Damage" / "Apply Damage" buttons on SP3's chat cards. Call
  *  once from the `ready` hook. */
 export function registerChatListeners(): void {
   Hooks.on("renderChatMessageHTML", (message: unknown, html: HTMLElement) => {
     wirePsionicContest(message as { id: string; getFlag(s: string, k: string): unknown }, html);
     wireWildTalent(message as { id: string; getFlag(s: string, k: string): unknown }, html);
+    wireWrestleContest(message as { id: string; getFlag(s: string, k: string): unknown }, html);
     html.querySelector<HTMLButtonElement>('[data-action="rollDamage"]')?.addEventListener("click", (ev) => {
       void onRollDamage(ev.currentTarget as HTMLButtonElement);
     });

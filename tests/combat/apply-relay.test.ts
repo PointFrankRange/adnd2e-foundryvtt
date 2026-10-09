@@ -91,3 +91,26 @@ describe("destroy requests", () => {
     expect(relayEffectText({ kind: "destroy", targetUuid: t })).toEqual({ key: "ADND2E.relay.effect.destroy", data: {} });
   });
 });
+
+describe("validateRelayRequest - grapple", () => {
+  const rec = { id: "g1", role: "held", opponentUuid: "Actor.a", opponentName: "Anada", rung: "held", locks: [], lastLock: null, pressCount: 0, lockPending: false };
+  it("accepts a set request with damage and prone, and a clear request", () => {
+    expect(validateRelayRequest({ kind: "grapple", targetUuid: "Actor.t", set: rec, damage: 3, prone: true })).toEqual({
+      kind: "grapple", targetUuid: "Actor.t", set: rec, damage: 3, prone: true,
+    });
+    expect(validateRelayRequest({ kind: "grapple", targetUuid: "Actor.t", set: null, damage: 0, prone: false })).toMatchObject({ set: null, damage: 0 });
+  });
+  it("rejects a missing or malformed set, damage or prone", () => {
+    for (const bad of [
+      { kind: "grapple", targetUuid: "Actor.t", damage: 0, prone: false },
+      { kind: "grapple", targetUuid: "Actor.t", set: { nope: 1 }, damage: 0, prone: false },
+      { kind: "grapple", targetUuid: "Actor.t", set: null, damage: -1, prone: false },
+      { kind: "grapple", targetUuid: "Actor.t", set: null, damage: 1000, prone: false },
+      { kind: "grapple", targetUuid: "Actor.t", set: null, damage: 1.5, prone: false },
+      { kind: "grapple", targetUuid: "Actor.t", set: null, damage: 0, prone: "yes" },
+    ]) expect(validateRelayRequest(bad)).toBeNull();
+  });
+  it("names the effect for the GM log", () => {
+    expect(relayEffectText({ kind: "grapple", targetUuid: "Actor.t", set: null, damage: 0, prone: false }).key).toBe("ADND2E.relay.effect.grapple");
+  });
+});
