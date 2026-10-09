@@ -1,5 +1,6 @@
 // Enriched item descriptions for the actor sheets' inventory row summaries (#111). Foundry-coupled (async text
-// enrichment, which sanitizes the stored HTML); dev-world verified.
+// enrichment: enrichHTML strips unrevealed secrets and resolves enrichers but does NOT sanitize; the stored HTML is
+// sanitized by the server on write); dev-world verified.
 interface DescribedItem {
   id: string;
   isOwner?: boolean;

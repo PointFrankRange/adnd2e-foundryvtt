@@ -233,7 +233,7 @@ function walk(
       // e.g. spell schools/spheres: a fixed choice list per entry. Render a
       // multi-select instead of a JSON textarea so a typo cannot abort the save.
       const current = Array.isArray(value) ? value.map(String) : [];
-      const choices = toChoiceRows((field.element as unknown as { choices?: unknown }).choices, undefined) ?? [];
+      const choices = toChoiceRows((field.element as unknown as { choices?: unknown }).choices, undefined, path) ?? [];
       out.push({
         path,
         label: humanizeKey(key),
@@ -421,7 +421,12 @@ function sourceList(source: Record<string, unknown>, path: string): string[] {
  */
 function itemSubtitle(type: string, source: Record<string, unknown>): string {
   let category: string[] = [];
-  if (type === "spell") category = [...sourceList(source, "system.schools"), ...sourceList(source, "system.spheres")];
+  if (type === "spell") {
+    category = [
+      ...sourceList(source, "system.schools").map((v) => labelFor("system.schools", v, v)),
+      ...sourceList(source, "system.spheres").map((v) => labelFor("system.spheres", v, v)),
+    ];
+  }
   else if (type === "weapon") {
     const group = getProperty(source, "system.proficiencyGroup");
     if (typeof group === "string" && group) category = [group];

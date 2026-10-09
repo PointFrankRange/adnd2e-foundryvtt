@@ -151,7 +151,7 @@ describe("applyLayout", () => {
 
   it("negative descriptionAfterPanel behaves as no split (description stays above every panel)", () => {
     const r = applyLayout(ROWS, {
-      descriptionAfterPanel: -1,
+      descriptionAfterPanel: -2,
       panels: [{ titleKey: "t.a", paths: ["system.a"] }, { titleKey: "t.b", paths: ["system.b"] }],
     });
     expect(r.leading).toEqual([]);
