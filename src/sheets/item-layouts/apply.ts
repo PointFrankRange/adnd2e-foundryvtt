@@ -88,15 +88,22 @@ export function applyLayout<R extends LayoutRow>(rows: readonly R[], layout: Ite
     panels.push({ title: "", titleKey: panel.titleKey, isHeader: true, rows: panelRows, columns: panel.columns ?? 1 });
   });
 
-  // a heading whose children were all claimed elsewhere would render as a stray empty heading
-  const other = remaining.filter((r) => !isHeading(r) || remaining.some((o) => o !== r && o.path.startsWith(`${r.path}.`)));
+  // Remove headings whose children were all claimed elsewhere. Use fixpoint: iterate until no changes,
+  // because removing a child heading means parent headings that only had that child are now childless too.
+  let other: R[] = remaining;
+  let lastLen = -1;
+  while (other.length !== lastLen) {
+    lastLen = other.length;
+    other = other.filter((r) => !isHeading(r) || other.some((o) => o !== r && o.path.startsWith(`${r.path}.`)));
+  }
+
   const otherPanel: PanelView<R>[] = other.length
     ? [{ title: "", titleKey: OTHER_TITLE_KEY, isHeader: true, rows: other, columns: 1 }]
     : [];
 
   const after = layout.descriptionAfterPanel;
   let splitAt = 0;
-  if (after !== undefined) {
+  if (after !== undefined && after >= 0) {
     // the number of rendered panels at or before the layout index (a skipped empty panel does not count)
     splitAt = panelIndexByLayoutIndex.slice(0, after + 1).filter((i) => i !== undefined).length;
   }

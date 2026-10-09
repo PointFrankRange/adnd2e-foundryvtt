@@ -108,4 +108,65 @@ describe("applyLayout", () => {
     expect(ROWS).toEqual(copy);
     expect(r.trailing[0]!.rows[0]).toBe(ROWS.find((x) => x.path === "system.grp"));
   });
+
+  it("nested headings: removes orphaned parents when children are all claimed elsewhere", () => {
+    const rows = [
+      row("system.grp", { header: true }), row("system.grp.sub", { header: true }), row("system.grp.sub.x"),
+    ];
+    const r = applyLayout(rows, { strip: ["system.grp.sub.x"], panels: [] });
+    expect(paths(r.strip.map((s) => s.row))).toEqual(["system.grp.sub.x"]);
+    expect(r.trailing).toEqual([]); // no Other panel because no rows left after fixpoint removal
+  });
+
+  it("descriptionAfterPanel with a skipped empty panel earlier", () => {
+    const r = applyLayout(ROWS, {
+      descriptionAfterPanel: 1,
+      panels: [
+        { titleKey: "t.empty", paths: ["system.missing"] }, // skipped because empty
+        { titleKey: "t.a", paths: ["system.a"] },              // layout index 1, rendered as panel index 0
+        { titleKey: "t.b", paths: ["system.b"] },              // layout index 2, rendered as panel index 1
+      ],
+    });
+    expect(r.leading.map((p) => p.titleKey)).toEqual(["t.a"]); // only t.a, because skipped panel doesn't count
+    expect(r.trailing.map((p) => p.titleKey)).toEqual(["t.b", OTHER_TITLE_KEY]);
+  });
+
+  it("descriptionAfterPanel pointing at an empty panel does not crash", () => {
+    const r = applyLayout(ROWS, {
+      descriptionAfterPanel: 0,
+      panels: [{ titleKey: "t.empty", paths: ["system.missing"] }],
+    });
+    expect(r.leading).toEqual([]);
+    expect(r.trailing[0]!.titleKey).toBe(OTHER_TITLE_KEY);
+  });
+
+  it("descriptionAfterPanel beyond the panel count puts all rendered panels in leading", () => {
+    const r = applyLayout(ROWS, {
+      descriptionAfterPanel: 10,
+      panels: [{ titleKey: "t.a", paths: ["system.a"] }, { titleKey: "t.b", paths: ["system.b"] }],
+    });
+    expect(r.leading.map((p) => p.titleKey)).toEqual(["t.a", "t.b"]);
+    expect(r.trailing[0]!.titleKey).toBe(OTHER_TITLE_KEY);
+  });
+
+  it("negative descriptionAfterPanel behaves as no split (description stays above every panel)", () => {
+    const r = applyLayout(ROWS, {
+      descriptionAfterPanel: -1,
+      panels: [{ titleKey: "t.a", paths: ["system.a"] }, { titleKey: "t.b", paths: ["system.b"] }],
+    });
+    expect(r.leading).toEqual([]);
+    expect(r.trailing.map((p) => p.titleKey)).toEqual(["t.a", "t.b", OTHER_TITLE_KEY]);
+  });
+
+  it("a heading claimed after its children were taken by the strip still renders as the lone heading row", () => {
+    const rows = [
+      row("system.grp", { header: true }), row("system.grp.x"), row("system.grp.y"),
+    ];
+    const r = applyLayout(rows, {
+      strip: ["system.grp.x", "system.grp.y"],
+      panels: [{ titleKey: "t", paths: ["system.grp"] }],
+    });
+    expect(paths(r.strip.map((s) => s.row))).toEqual(["system.grp.x", "system.grp.y"]);
+    expect(paths(r.trailing[0]!.rows)).toEqual(["system.grp"]); // the heading row remains
+  });
 });
