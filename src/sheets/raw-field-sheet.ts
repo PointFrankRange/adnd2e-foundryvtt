@@ -18,6 +18,7 @@ import { CLASS_IDS } from "../data/item/choices";
 import { applyLayout } from "./item-layouts/apply";
 import { ITEM_LAYOUTS } from "./item-layouts/layouts";
 import { choiceLabelKey } from "./item-layouts/labels";
+import { itemEffectsContext } from "./item-effects-actions";
 
 const fields = foundry.data.fields;
 const { getProperty, setProperty, deleteProperty } = foundry.utils;
@@ -485,6 +486,14 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
       context.subtitle =
         this.document.documentName === "Item"
           ? itemSubtitle((this.document as unknown as { type: string }).type, source)
+          : undefined;
+      // #148: the document's image (the header shows it as a clickable portrait instead of a path input)
+      const imgRow = rows.find((r) => r.path === "img");
+      context.portrait = imgRow ? String(imgRow.value ?? "") : undefined;
+      // #146: gear items get an Effects section; every other document/type renders without one
+      context.itemEffects =
+        itemType && ["weapon", "armor", "equipment"].includes(itemType)
+          ? itemEffectsContext(this.document, Boolean(context.editable))
           : undefined;
       return context;
     }
