@@ -17,6 +17,7 @@ export default defineConfig({
         "src/sheets/character/context.ts",
         "src/sheets/creature/context-types.ts", "src/sheets/creature/context.ts",
         "src/sheets/kit/**/*.ts",
+        "src/sheets/item-layouts/**/*.ts",
         "src/sheets/effects/**/*.ts",
         "src/combat/**/*.ts",
         "src/magic/**/*.ts",
