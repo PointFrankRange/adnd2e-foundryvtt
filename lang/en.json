@@ -1028,6 +1028,23 @@
         "components": "Components",
         "reversible": "Reversible",
         "automation": "Automation"
+      },
+      "effects": {
+        "title": "Effects",
+        "new": "New effect",
+        "newName": "New Effect",
+        "empty": "No effects on this item.",
+        "appliesToOwner": "Applies to owner",
+        "notTransferred": "Not transferred",
+        "whileEquipped": "Only while equipped",
+        "suppressed": "Suppressed",
+        "off": "Disabled",
+        "transferToggle": "Apply this effect to the item's owner, or not",
+        "toggle": "Enable or disable this effect",
+        "edit": "Edit this effect",
+        "delete": "Delete this effect",
+        "deleteTitle": "Delete Effect",
+        "deleteConfirm": "Delete the effect {name}? This can't be undone."
       }
     },
     "settings": {

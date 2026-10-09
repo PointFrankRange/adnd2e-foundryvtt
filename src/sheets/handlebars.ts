@@ -7,6 +7,7 @@ const PARTIALS = [
   "actor/shared/partials/item-controls.hbs",
   "sheets/raw-field-row.hbs",
   "sheets/raw-group.hbs",
+  "sheets/raw-effects.hbs",
   "actor/pc/partials/pc-ability.hbs",
   "actor/pc/partials/pc-class-row.hbs",
   "actor/pc/partials/pc-item-table.hbs",
