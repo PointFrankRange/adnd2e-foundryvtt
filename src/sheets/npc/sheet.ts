@@ -1,3 +1,4 @@
+import { createEffect, deleteEffect, editEffect, effectsContext, openEffectSource, removeCondition, toggleEffect } from "../effects-actions";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { abilityScoresOf, actorLevelRulesFor } from "../../data/derive/character/kits";
 import type { ManeuverId } from "../../core/combat/maneuvers";
@@ -127,6 +128,12 @@ export class Adnd2eNpcSheet extends Base {
       cancelCasting: Adnd2eNpcSheet.#onCancelCasting,
       editItem: Adnd2eNpcSheet.#onEditItem,
       deleteItem: Adnd2eNpcSheet.#onDeleteItem,
+      createEffect: Adnd2eNpcSheet.#onCreateEffect,
+      toggleEffect: Adnd2eNpcSheet.#onToggleEffect,
+      editEffect: Adnd2eNpcSheet.#onEditEffect,
+      deleteEffect: Adnd2eNpcSheet.#onDeleteEffect,
+      removeCondition: Adnd2eNpcSheet.#onRemoveCondition,
+      openEffectSource: Adnd2eNpcSheet.#onOpenEffectSource,
       removeTrait: Adnd2eNpcSheet.#onRemoveTrait,
       advanceWeaponMastery: Adnd2eNpcSheet.#onAdvanceWeaponMastery,
       rollNonweaponCheck: Adnd2eNpcSheet.#onRollNonweaponCheck,
@@ -146,6 +153,7 @@ export class Adnd2eNpcSheet extends Base {
     main: { template: TEMPLATE_PATH("actor/npc", "main.hbs"), scrollable: [""] },
     inventory: { template: TEMPLATE_PATH("actor/pc", "inventory.hbs"), scrollable: [""] },
     spells: { template: TEMPLATE_PATH("actor/pc", "spells.hbs"), scrollable: [""] },
+    effects: { template: TEMPLATE_PATH("actor/shared", "effects.hbs"), scrollable: [""] },
     journal: { template: TEMPLATE_PATH("actor/npc", "journal.hbs"), scrollable: [""] },
   };
 
@@ -157,6 +165,7 @@ export class Adnd2eNpcSheet extends Base {
         { id: "main", icon: "fa-solid fa-user" },
         { id: "inventory", icon: "fa-solid fa-box-open" },
         { id: "spells", icon: "fa-solid fa-wand-sparkles" },
+        { id: "effects", icon: "fa-solid fa-wand-magic-sparkles" },
         { id: "journal", icon: "fa-solid fa-book" },
       ],
     },
@@ -171,6 +180,7 @@ export class Adnd2eNpcSheet extends Base {
     context.adnd2e = buildCharacterSheetContext(this.#buildInput());
     context.editable = this.isEditable;
     context.notEditable = !this.isEditable;
+    context.effectsView = effectsContext(this.document, this.isEditable);
     context.proseDisabled = !this.isEditable || !this.#unlocked;
     // Deliberately NOT set here: `context.pcActions`. Its absence keeps every
     // PC-only action (awardXp, toggleDualClass, seedSubAbilities, the thief
@@ -545,6 +555,35 @@ export class Adnd2eNpcSheet extends Base {
   static async #onDeleteItem(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
     const itemId = target.dataset.itemId;
     if (itemId && this.isEditable) await deleteOwnedItem(this.document as never, itemId);
+  }
+
+  static async #onCreateEffect(this: Adnd2eNpcSheet): Promise<void> {
+    if (this.isEditable) await createEffect(this.document);
+  }
+
+  static async #onToggleEffect(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const id = target.dataset.effectId;
+    if (id && this.isEditable) await toggleEffect(this.document, id);
+  }
+
+  static #onEditEffect(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): void {
+    const id = target.dataset.effectId;
+    if (id && this.isEditable) editEffect(this.document, id);
+  }
+
+  static async #onDeleteEffect(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const id = target.dataset.effectId;
+    if (id && this.isEditable) await deleteEffect(this.document, id);
+  }
+
+  static async #onRemoveCondition(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const id = target.dataset.effectId;
+    if (id && this.isEditable) await removeCondition(this.document, id);
+  }
+
+  static #onOpenEffectSource(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): void {
+    const id = target.dataset.itemId;
+    if (id) openEffectSource(this.document, id);
   }
 
   static async #onRemoveTrait(this: Adnd2eNpcSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {

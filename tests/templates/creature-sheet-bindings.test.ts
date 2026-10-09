@@ -45,7 +45,7 @@ describe("Monster NPC sheet templates (sheet redesign R3)", () => {
   it("uses the kit part templates", () => {
     expect(PART_FILES.map((f) => path.relative(TPL, f).split(path.sep).join("/")).sort()).toEqual([
       "actor/creature/gear.hbs", "actor/creature/header.hbs", "actor/creature/left.hbs", "actor/creature/notes.hbs",
-      "actor/creature/spells.hbs", "actor/creature/statblock.hbs", "actor/pc/tabs.hbs",
+      "actor/creature/spells.hbs", "actor/creature/statblock.hbs", "actor/pc/tabs.hbs", "actor/shared/effects.hbs",
     ]);
   });
 
