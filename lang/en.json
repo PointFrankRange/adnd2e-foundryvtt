@@ -111,6 +111,18 @@
       "necrotic": "Necrotic",
       "radiant": "Radiant"
     },
+    "weaponDamageTypes": {
+      "slashing": "Slashing", "piercing": "Piercing", "bludgeoning": "Bludgeoning",
+      "piercing-slashing": "Piercing / Slashing", "piercing-bludgeoning": "Piercing / Bludgeoning"
+    },
+    "weaponCategories": { "melee": "Melee", "thrown": "Thrown", "bow": "Bow", "crossbow": "Crossbow" },
+    "weaponSizes": { "S": "Small", "M": "Medium", "L": "Large" },
+    "armorTypes": {
+      "none": "No armor", "padded": "Padded", "leather": "Leather", "studded-leather": "Studded leather",
+      "ring-mail": "Ring mail", "scale-mail": "Scale mail", "chain-mail": "Chain mail", "elven-chain": "Elven chain",
+      "splint-mail": "Splint mail", "banded-mail": "Banded mail", "plate-mail": "Plate mail",
+      "field-plate": "Field plate", "full-plate": "Full plate"
+    },
     "encumbranceCategories": {
       "unencumbered": "Unencumbered",
       "light": "Light",
@@ -999,7 +1011,24 @@
       "badJson": "{field}: invalid JSON — not saved",
       "badListEntry": "{field}: one or more entries aren't valid — not saved",
       "detailsTitle": "Details",
-      "descriptionTitle": "Description"
+      "descriptionTitle": "Description",
+      "layout": {
+        "other": "Other",
+        "physical": "Physical",
+        "combat": "Combat",
+        "range": "Range",
+        "proficiency": "Proficiency & Mastery",
+        "ammunition": "Ammunition",
+        "protection": "Protection",
+        "penalties": "Penalties",
+        "details": "Details",
+        "charges": "Charges",
+        "container": "Container",
+        "casting": "Casting",
+        "components": "Components",
+        "reversible": "Reversible",
+        "automation": "Automation"
+      }
     },
     "settings": {
       "sections": {

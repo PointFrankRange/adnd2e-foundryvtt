@@ -134,6 +134,8 @@
     .kit-name { cursor: pointer; display: flex; align-items: center; gap: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; img { width: 20px; height: 20px; border: none; flex: none; } }
     .kit-summary { display: none; background: var(--kit-expand-bg); padding: 4px 8px; font-size: 12px; }
     .kit-row.expanded .kit-summary { display: block; }
+    .kit-summary .kit-description { margin-top: 4px; font-size: 12px; color: var(--kit-muted); }
+    .kit-summary .kit-description p { margin: 0 0 4px; }
     .kit-empty { padding: 4px 6px; font-style: italic; opacity: .8; }
   }
 
@@ -191,6 +193,30 @@
       width: 100%; box-sizing: border-box;
     }
   }
+
+  // panel columns: a panel body laid out as a 1-3 column grid
+  .raw-group.cols-2 .kit-body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
+  .raw-group.cols-3 .kit-body { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 12px; }
+  .raw-group.cols-2 .raw-field-header, .raw-group.cols-3 .raw-field-header { grid-column: 1 / -1; }
+
+  // the stat strip under the title (gear) / the spell card header (spell)
+  .raw-strip .raw-strip-body { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px 12px; }
+  .raw-strip-item { display: flex; flex-direction: column; min-width: 70px; }
+  .raw-strip-item .form-group { margin: 0; border-bottom: none; flex-direction: column; flex-wrap: nowrap; align-items: stretch; }
+  .raw-strip-item .form-group > label { flex: none; min-width: 0; }
+  .raw-strip-item .form-group .form-fields { flex: none; }
+  .raw-strip-item .form-group > label { font-size: 10px; text-transform: uppercase; color: var(--kit-muted); }
+
+  // spell card: level badge, chips for the selected schools/spheres, V/S/M pills that light up when checked
+  .raw-strip-item.display-badge .form-group > label { text-align: center; }
+  .raw-strip-item.display-badge .form-fields > input:not([type="checkbox"]) { width: 3.2em; text-align: center; font-size: 20px; font-weight: 700; }
+  .raw-chips { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+  .raw-chips .chip { font-size: 11px; padding: 0 6px; border: 1px solid var(--kit-row-rule); border-radius: 9px; color: var(--kit-accent-ink); }
+  .raw-strip-item.display-pill { min-width: 0; }
+  .raw-strip-item.display-pill .form-group { display: flex; align-items: center; gap: 4px; padding: 0 8px; border: 1px solid var(--kit-row-rule); border-radius: 12px; opacity: .55; }
+  .raw-strip-item.display-pill .form-group { flex-direction: row; }
+  .raw-strip-item.display-pill .form-group:has(input:checked) { opacity: 1; border-color: var(--kit-accent-ink); color: var(--kit-accent-ink); font-weight: 700; }
+  .raw-strip-item.display-pill .form-group > label { font-size: 12px; text-transform: none; color: inherit; }
 }
 
 // Item sheet checkbox dropdowns (spell schools and spheres): each box sits

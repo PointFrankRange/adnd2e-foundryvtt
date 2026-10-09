@@ -1,0 +1,42 @@
+<div class="form-group" style="margin-left:{{this.indent}}px{{#if this.hidden}};display:none{{/if}}"
+  {{#if this.nullGroup}}data-null-group="{{this.nullGroup}}"{{/if}}>
+  <label>{{this.label}}</label>
+  <div class="form-fields">
+    {{#if (eq this.kind "checkbox")}}
+      <input type="checkbox" name="{{this.path}}" {{#if this.value}}checked{{/if}}
+        {{#unless @root.editable}}disabled{{/unless}}>
+    {{else if (eq this.kind "select")}}
+      <select name="{{this.path}}" {{#if this.nullable}}data-null="true"{{/if}}
+        {{#unless @root.editable}}disabled{{/unless}}>
+        {{#each this.choices}}
+          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+        {{/each}}
+      </select>
+    {{else if (eq this.kind "multiselect")}}
+      <details class="multiselect" data-multiselect="true" data-path="{{this.path}}"{{#if this.nullable}} data-nullable="true"{{/if}}>
+        <summary>{{this.value.length}} selected</summary>
+        {{#each this.choices}}
+          <label class="multiselect-option">
+            <input type="checkbox" value="{{this.value}}" {{#if this.selected}}checked{{/if}}
+              {{#unless @root.editable}}disabled{{/unless}}> {{this.label}}
+          </label>
+        {{/each}}
+      </details>
+    {{else if (eq this.kind "lines")}}
+      <textarea name="{{this.path}}" data-lines="{{this.lineMode}}" rows="4"
+        {{#unless @root.editable}}readonly{{/unless}}>{{this.value}}</textarea>
+    {{else if (eq this.kind "json")}}
+      <textarea name="{{this.path}}" data-json="true" rows="4"
+        {{#unless @root.editable}}readonly{{/unless}}>{{this.value}}</textarea>
+    {{else if (eq this.kind "number")}}
+      <input type="number" step="any" name="{{this.path}}" value="{{this.value}}"
+        {{#unless @root.editable}}readonly{{/unless}}>
+    {{else if (eq this.kind "textarea")}}
+      <textarea name="{{this.path}}" rows="3"
+        {{#unless @root.editable}}readonly{{/unless}}>{{this.value}}</textarea>
+    {{else}}
+      <input type="text" name="{{this.path}}" value="{{this.value}}"
+        {{#unless @root.editable}}readonly{{/unless}}>
+    {{/if}}
+  </div>
+</div>

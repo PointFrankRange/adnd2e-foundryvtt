@@ -5,6 +5,8 @@ import { TEMPLATE_PATH } from "../constants";
 const PARTIALS = [
   "actor/shared/partials/slot-table.hbs",
   "actor/shared/partials/item-controls.hbs",
+  "sheets/raw-field-row.hbs",
+  "sheets/raw-group.hbs",
   "actor/pc/partials/pc-ability.hbs",
   "actor/pc/partials/pc-class-row.hbs",
   "actor/pc/partials/pc-item-table.hbs",
@@ -39,4 +41,10 @@ export async function registerSheetPartials(): Promise<void> {
   // may legitimately be 0 — plain `{{#if}}` treats 0 as falsy, so this checks
   // for null/undefined/empty specifically instead.
   Handlebars.registerHelper("adnd2eOrDash", (v: unknown) => (v === null || v === undefined || v === "" ? "—" : String(v)));
+  // #111: a localized label for an enum value from CONFIG.ADND2E's label maps (armorTypes, weaponDamageTypes, …), else the raw value
+  Handlebars.registerHelper("adnd2eLabel", (map: unknown, value: unknown) => {
+    if (value === null || value === undefined || value === "") return "";
+    const key = `ADND2E.${String(map)}.${String(value)}`;
+    return game.i18n!.has(key) ? game.i18n!.localize(key) : String(value);
+  });
 }

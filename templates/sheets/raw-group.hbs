@@ -1,0 +1,24 @@
+<section class="kit-panel raw-group cols-{{#if this.columns}}{{this.columns}}{{else}}1{{/if}}">
+  <div class="kit-bar">
+    {{#if this.isHeader}}
+      {{#if this.titleKey}}{{localize this.titleKey}}{{else}}{{this.title}}{{/if}}
+    {{else}}
+      <label><input type="checkbox" data-null-toggle="{{this.toggle.path}}" {{#if this.toggle.value}}checked{{/if}}
+        {{#unless @root.editable}}disabled{{/unless}}> Set {{this.toggle.label}}</label>
+    {{/if}}
+  </div>
+  <div class="kit-body">
+    {{#each this.rows}}
+      {{#if (eq this.kind "nullcheck")}}
+        <h3 class="raw-field-header" style="margin-left:{{this.indent}}px">
+          <label><input type="checkbox" data-null-toggle="{{this.path}}" {{#if this.value}}checked{{/if}}
+            {{#unless @root.editable}}disabled{{/unless}}> Set {{this.label}}</label>
+        </h3>
+      {{else if this.header}}
+        <h3 class="raw-field-header" style="margin-left:{{this.indent}}px">{{this.label}}</h3>
+      {{else}}
+        {{> adnd2e.raw-field-row this}}
+      {{/if}}
+    {{/each}}
+  </div>
+</section>

@@ -15,6 +15,9 @@
 // (structure) still comes from the live model — it carries no values.
 
 import { CLASS_IDS } from "../data/item/choices";
+import { applyLayout } from "./item-layouts/apply";
+import { ITEM_LAYOUTS } from "./item-layouts/layouts";
+import { choiceLabelKey } from "./item-layouts/labels";
 
 const fields = foundry.data.fields;
 const { getProperty, setProperty, deleteProperty } = foundry.utils;
@@ -47,7 +50,7 @@ const LINE_FIELDS: Record<string, LineMode> = {
   "system.classLevelLimits": "levels", // race: one "classId: number" per line
 };
 
-interface FieldRow {
+export interface FieldRow {
   /** dot-path used as the input `name` and as the update key: "name", "img", "system.<path>" */
   path: string;
   label: string;
@@ -77,15 +80,21 @@ function humanizeKey(key: string): string {
     .join(" ");
 }
 
+/** A localized label for an enum value when the field has a label map and the key exists; else the entry's own label. */
+function labelFor(path: string | undefined, value: string, fallback: string): string {
+  const key = path ? choiceLabelKey(path, value) : null;
+  return key && game.i18n!.has(key) ? game.i18n!.localize(key) : fallback;
+}
+
 /** Normalise a StringField's `choices` (array | object | function) to option rows. */
-function toChoiceRows(raw: unknown, current: unknown): FieldRow["choices"] {
+function toChoiceRows(raw: unknown, current: unknown, path?: string): FieldRow["choices"] {
   let entries: [string, string][];
   const resolved = typeof raw === "function" ? (raw as () => unknown)() : raw;
   if (Array.isArray(resolved)) entries = resolved.map((v) => [String(v), String(v)]);
   else if (resolved && typeof resolved === "object") {
     entries = Object.entries(resolved as Record<string, unknown>).map(([k, v]) => [k, String(v)]);
   } else return undefined;
-  return entries.map(([value, label]) => ({ value, label, selected: value === String(current ?? "") }));
+  return entries.map(([value, label]) => ({ value, label: labelFor(path, value, label), selected: value === String(current ?? "") }));
 }
 
 /** True for a StringField whose entries are a fixed choice list (a multi-select candidate). */
@@ -224,7 +233,7 @@ function walk(
       // e.g. spell schools/spheres: a fixed choice list per entry. Render a
       // multi-select instead of a JSON textarea so a typo cannot abort the save.
       const current = Array.isArray(value) ? value.map(String) : [];
-      const choices = toChoiceRows((field.element as unknown as { choices?: unknown }).choices, undefined) ?? [];
+      const choices = toChoiceRows((field.element as unknown as { choices?: unknown }).choices, undefined, path) ?? [];
       out.push({
         path,
         label: humanizeKey(key),
@@ -276,7 +285,7 @@ function walk(
       continue;
     }
     if (field instanceof fields.StringField) {
-      const choices = toChoiceRows((field as unknown as { choices?: unknown }).choices, value);
+      const choices = toChoiceRows((field as unknown as { choices?: unknown }).choices, value, path);
       if (choices && choices.length) {
         const nullable = (field as unknown as { nullable?: boolean }).nullable === true;
         const blank = (field as unknown as { blank?: boolean }).blank === true;
@@ -325,7 +334,7 @@ function walk(
 }
 
 /** Build the flat row list for a document: top-level name/img + the whole `system` tree. */
-function buildFieldRows(
+export function buildFieldRows(
   doc: foundry.abstract.Document.Any,
   source: Record<string, unknown>,
 ): FieldRow[] {
@@ -369,7 +378,7 @@ const DESCRIPTION_PATH = "system.description";
  * Rows deeper than a group heading stay in that group with their indent and data
  * attributes unchanged.
  */
-function groupFieldRows(rows: FieldRow[]): { header: FieldRow[]; description?: FieldRow; groups: FieldGroup[] } {
+export function groupFieldRows(rows: FieldRow[]): { header: FieldRow[]; description?: FieldRow; groups: FieldGroup[] } {
   const header: FieldRow[] = [];
   let description: FieldRow | undefined;
   const details: FieldGroup = { title: "Details", titleKey: "ADND2E.sheets.detailsTitle", isHeader: true, rows: [] };
@@ -412,7 +421,12 @@ function sourceList(source: Record<string, unknown>, path: string): string[] {
  */
 function itemSubtitle(type: string, source: Record<string, unknown>): string {
   let category: string[] = [];
-  if (type === "spell") category = [...sourceList(source, "system.schools"), ...sourceList(source, "system.spheres")];
+  if (type === "spell") {
+    category = [
+      ...sourceList(source, "system.schools").map((v) => labelFor("system.schools", v, v)),
+      ...sourceList(source, "system.spheres").map((v) => labelFor("system.spheres", v, v)),
+    ];
+  }
   else if (type === "weapon") {
     const group = getProperty(source, "system.proficiencyGroup");
     if (typeof group === "string" && group) category = [group];
@@ -449,10 +463,25 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
       const context = await super._prepareContext(options);
       const source = (context.source ??
         (this.document as { _source?: unknown })._source) as Record<string, unknown>;
-      const grouped = groupFieldRows(buildFieldRows(this.document, source));
+      const rows = buildFieldRows(this.document, source);
+      const grouped = groupFieldRows(rows);
+      const itemType = this.document.documentName === "Item" ? (this.document as unknown as { type: string }).type : undefined;
+      const layout = itemType ? ITEM_LAYOUTS[itemType] : undefined;
       context.header = grouped.header;
       context.description = grouped.description;
-      context.groups = grouped.groups;
+      if (layout) {
+        const laid = applyLayout(rows.filter((r) => r.indent > 0 && r.path !== DESCRIPTION_PATH), layout);
+        if (laid.unknownPaths.length) {
+          console.warn(`adnd2e | item layout for "${itemType}" names fields that do not exist:`, laid.unknownPaths);
+        }
+        context.strip = laid.strip;
+        context.leading = laid.leading;
+        context.groups = laid.trailing;
+      } else {
+        context.strip = [];
+        context.leading = [];
+        context.groups = grouped.groups;
+      }
       context.subtitle =
         this.document.documentName === "Item"
           ? itemSubtitle((this.document as unknown as { type: string }).type, source)

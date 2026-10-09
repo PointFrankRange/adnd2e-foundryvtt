@@ -294,6 +294,8 @@ export interface PhysicalItemView {
   id: string; name: string; img: string; type: "weapon" | "armor" | "equipment" | "ammo";
   quantity: number; weight: number; totalWeight: number;
   location: string; equipped: boolean; identified: boolean; magicBonus: number;
+  /** sanitized, enriched description HTML for the row summary (#111); "" when the item has none */
+  descriptionHtml: string;
   /** SP11: equipped but not permitted by the class or kit — shows a warning mark (never set on unequipped items) */
   restricted?: boolean;
   /** equipment only */

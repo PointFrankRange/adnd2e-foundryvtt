@@ -5,7 +5,7 @@ import type { PhysicalItemView } from "../../../src/sheets/character/context-typ
 function item(over: Partial<PhysicalItemView>): PhysicalItemView {
   return {
     id: "x", name: "x", img: "", type: "equipment", quantity: 1, weight: 1, totalWeight: 1,
-    location: "", equipped: false, identified: true, magicBonus: 0,
+    location: "", equipped: false, identified: true, magicBonus: 0, descriptionHtml: "",
     isContainer: false, capacity: null, contentsWeightMultiplier: 1,
     ...over,
   };

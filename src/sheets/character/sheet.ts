@@ -52,6 +52,7 @@ import { warnSubraceRange } from "./subrace-warning";
 import { actorEquipmentRules, itemNotPermitted } from "../../data/derive/character/equipment-rules";
 import { bindSheetKit, clearSheetKit } from "../kit-dom";
 import { toggleFavoriteFlag } from "../kit-actions";
+import { enrichItemDescriptions } from "../item-descriptions";
 
 /* ---------------------------------------------------------------------------
  * Adnd2eCharacterSheet — the ApplicationV2 PC sheet shell (SP2 Task 5).
@@ -163,7 +164,7 @@ export function rangeToString(range: unknown): string | null {
   return `${r.short}/${r.medium}/${r.long}`;
 }
 
-export function toPhysicalView(it: RawItem): PhysicalItemView {
+export function toPhysicalView(it: RawItem, descriptions?: ReadonlyMap<string, string>): PhysicalItemView {
   const s = it.system as Record<string, unknown>;
   const type = it.type as PhysicalItemView["type"];
   const view: PhysicalItemView = {
@@ -178,6 +179,7 @@ export function toPhysicalView(it: RawItem): PhysicalItemView {
     equipped: Boolean(s.equipped),
     identified: Boolean(s.identified),
     magicBonus: Number(s.magicBonus ?? 0),
+    descriptionHtml: descriptions?.get(it.id) ?? "",
     isContainer: type === "equipment" ? Boolean(s.container) : false,
     capacity: type === "equipment" ? ((s.capacity as number | null) ?? null) : null,
     contentsWeightMultiplier:
@@ -446,11 +448,19 @@ export class Adnd2eCharacterSheet extends Base {
   /** sheet redesign R1: the viewer's unlock state — never persisted, opens locked. */
   #unlocked = false;
 
+  /** enriched row-summary descriptions, rebuilt each render (#111) */
+  #descriptions: ReadonlyMap<string, string> = new Map();
+
   override async _prepareContext(options: unknown): Promise<Record<string, unknown>> {
     // the Psionics tab vanishes when the psionicist class is removed: do not leave it as the active tab
     const groups = (this as unknown as { tabGroups?: Record<string, string> }).tabGroups;
     if (groups && groups.primary === "psionics" && !this.#hasPsionics()) groups.primary = "main";
     const context = await super._prepareContext(options);
+    this.#descriptions = await enrichItemDescriptions(
+      [...(this.document as unknown as { items: Iterable<{ id: string; type: string; isOwner?: boolean; system: unknown }> }).items].filter(
+        (i) => i.type === "weapon" || i.type === "armor" || i.type === "equipment" || i.type === "ammo",
+      ),
+    );
     context.adnd2e = buildCharacterSheetContext(this.#buildInput());
     context.editable = this.isEditable;
     context.notEditable = !this.isEditable;
@@ -559,7 +569,7 @@ export class Adnd2eCharacterSheet extends Base {
         case "armor":
         case "equipment":
         case "ammo":
-          physicalItems.push({ ...toPhysicalView(it), restricted: Boolean((it.system as { equipped?: boolean }).equipped) && itemNotPermitted(equipmentRules, it) });
+          physicalItems.push({ ...toPhysicalView(it, this.#descriptions), restricted: Boolean((it.system as { equipped?: boolean }).equipped) && itemNotPermitted(equipmentRules, it) });
           break;
         case "weaponProficiency":
           weaponProfs.push(toWeaponProfView(it));

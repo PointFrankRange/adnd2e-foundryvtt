@@ -27,19 +27,20 @@
             <span><span class="label">{{localize 'ADND2E.sheet.kit.cols.damage'}}:</span> {{adnd2eOrDash r.item.weapon.damageVsSM}} / {{adnd2eOrDash r.item.weapon.damageVsL}}</span>
             <span><span class="label">{{localize 'ADND2E.sheet.combat.speedFactor'}}:</span> {{r.item.weapon.speedFactor}}</span>
             {{#if r.item.weapon.range}}<span><span class="label">{{localize 'ADND2E.sheet.kit.summary.range'}}:</span> {{r.item.weapon.range}}</span>{{/if}}
-            <span><span class="label">{{localize 'ADND2E.sheet.kit.summary.category'}}:</span> {{r.item.weapon.category}}</span>
-            {{#if r.item.weapon.damageType}}<span><span class="label">{{localize 'ADND2E.sheet.kit.summary.damageType'}}:</span> {{r.item.weapon.damageType}}</span>{{/if}}
+            <span><span class="label">{{localize 'ADND2E.sheet.kit.summary.category'}}:</span> {{adnd2eLabel 'weaponCategories' r.item.weapon.category}}</span>
+            {{#if r.item.weapon.damageType}}<span><span class="label">{{localize 'ADND2E.sheet.kit.summary.damageType'}}:</span> {{adnd2eLabel 'weaponDamageTypes' r.item.weapon.damageType}}</span>{{/if}}
           {{/if}}
           {{#if r.item.armor}}
             <span><span class="label">{{localize 'ADND2E.sheet.kit.summary.baseAc'}}:</span> {{r.item.armor.baseAc}}</span>
             {{#if r.item.armor.isShield}}<span><span class="label">{{localize 'ADND2E.sheet.kit.summary.shieldBonus'}}:</span> {{r.item.armor.shieldAcBonus}}</span>{{/if}}
-            <span><span class="label">{{localize 'ADND2E.sheet.kit.summary.armorType'}}:</span> {{r.item.armor.armorType}}</span>
+            <span><span class="label">{{localize 'ADND2E.sheet.kit.summary.armorType'}}:</span> {{adnd2eLabel 'armorTypes' r.item.armor.armorType}}</span>
           {{/if}}
           {{#if r.item.isContainer}}
             <span><span class="label">{{localize 'ADND2E.sheet.inventory.capacity'}}:</span> {{r.item.capacity}}</span>
           {{/if}}
           <span><span class="label">{{localize 'ADND2E.sheet.inventory.weight'}}:</span> {{r.item.weight}}</span>
           {{#if r.item.magicBonus}}<span><span class="label">{{localize 'ADND2E.sheet.inventory.magicBonus'}}:</span> {{adnd2eSigned r.item.magicBonus}}</span>{{/if}}
+          {{#if r.item.descriptionHtml}}<div class="kit-description">{{{r.item.descriptionHtml}}}</div>{{/if}}
         </div>
       </div>
     {{else}}
