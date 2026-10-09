@@ -148,6 +148,17 @@
     display: inline-flex; gap: 2px; margin-left: auto;
     .item-control { background: none; border: none; width: auto; padding: 0 3px; color: var(--kit-accent-ink); }
   }
+
+  // Effects tab (templates/actor/shared/effects.hbs)
+  .effects-group { margin: 8px 0 2px; }
+  .effects-list { list-style: none; margin: 0; padding: 0; }
+  .effect-row {
+    display: flex; align-items: center; gap: 6px; padding: 2px 6px;
+    border-bottom: 1px solid var(--kit-row-rule);
+    &.effect-disabled, &.effect-suppressed { opacity: .55; }
+    .item-controls { margin-left: auto; }
+  }
+  .effect-source, .effect-duration, .effect-flag { font-size: 11px; color: var(--kit-muted); }
 }
 
 // Item sheet layout (raw-fields.hbs). Kept apart from the shared rules above so

@@ -411,7 +411,8 @@
         "psionics": "Psionics",
         "statBlock": "Stat Block",
         "gear": "Gear",
-        "notes": "Notes"
+        "notes": "Notes",
+        "effects": "Effects"
       },
       "kit": {
         "lock": "Unlock to edit",
@@ -620,6 +621,27 @@
         "delete": "Delete this item",
         "deleteTitle": "Delete Item",
         "deleteConfirm": "Delete {name} from this character? This can't be undone."
+      },
+      "effects": {
+        "title": "Effects",
+        "new": "New effect",
+        "newName": "New Effect",
+        "empty": "No effects on this actor.",
+        "source": "From",
+        "suppressed": "Suppressed",
+        "disabled": "Disabled",
+        "toggle": "Enable or disable this effect",
+        "edit": "Edit this effect",
+        "delete": "Delete this effect",
+        "remove": "Remove this condition",
+        "openSource": "Open the item that grants this effect",
+        "deleteTitle": "Delete Effect",
+        "deleteConfirm": "Delete the effect {name}? This can't be undone.",
+        "groups": {
+          "conditions": "Conditions",
+          "custom": "Custom effects",
+          "items": "From items"
+        }
       },
       "casting": {
         "title": "Casting",

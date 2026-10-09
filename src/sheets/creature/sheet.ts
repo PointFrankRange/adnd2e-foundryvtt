@@ -1,3 +1,4 @@
+import { createEffect, deleteEffect, editEffect, effectsContext, openEffectSource, removeCondition, toggleEffect } from "../effects-actions";
 import { MONSTER_TYPE_IDS, type MonsterTypeId } from "../../data/item/choices";
 import { TEMPLATE_PATH } from "../../constants";
 import type { SaveCategory } from "../../core/types";
@@ -74,6 +75,12 @@ export class Adnd2eCreatureSheet extends Base {
       toggleEquipped: Adnd2eCreatureSheet.#onToggleEquipped,
       editItem: Adnd2eCreatureSheet.#onEditItem,
       deleteItem: Adnd2eCreatureSheet.#onDeleteItem,
+      createEffect: Adnd2eCreatureSheet.#onCreateEffect,
+      toggleEffect: Adnd2eCreatureSheet.#onToggleEffect,
+      editEffect: Adnd2eCreatureSheet.#onEditEffect,
+      deleteEffect: Adnd2eCreatureSheet.#onDeleteEffect,
+      removeCondition: Adnd2eCreatureSheet.#onRemoveCondition,
+      openEffectSource: Adnd2eCreatureSheet.#onOpenEffectSource,
     },
   };
 
@@ -84,6 +91,7 @@ export class Adnd2eCreatureSheet extends Base {
     statblock: { template: TEMPLATE_PATH("actor/creature", "statblock.hbs"), scrollable: [""] },
     gear: { template: TEMPLATE_PATH("actor/creature", "gear.hbs"), scrollable: [""] },
     spells: { template: TEMPLATE_PATH("actor/creature", "spells.hbs"), scrollable: [""] },
+    effects: { template: TEMPLATE_PATH("actor/shared", "effects.hbs"), scrollable: [""] },
     notes: { template: TEMPLATE_PATH("actor/creature", "notes.hbs"), scrollable: [""] },
   };
 
@@ -95,6 +103,7 @@ export class Adnd2eCreatureSheet extends Base {
         { id: "statblock", label: "ADND2E.sheet.tabs.statBlock", icon: "fa-solid fa-dragon" },
         { id: "gear", icon: "fa-solid fa-box-open" },
         { id: "spells", icon: "fa-solid fa-wand-sparkles" },
+        { id: "effects", icon: "fa-solid fa-wand-magic-sparkles" },
         { id: "notes", icon: "fa-solid fa-book" },
       ],
     },
@@ -108,6 +117,7 @@ export class Adnd2eCreatureSheet extends Base {
     const context = await super._prepareContext(options);
     context.adnd2e = buildCreatureSheetContext(this.#buildInput());
     context.editable = this.isEditable;
+    context.effectsView = effectsContext(this.document, this.isEditable);
     context.proseDisabled = !this.isEditable || !this.#unlocked;
     // matches src/sheets/character/sheet.ts's own _prepareContext exactly —
     // `context.source` (the actor's `_source`) is already provided by
@@ -335,6 +345,35 @@ export class Adnd2eCreatureSheet extends Base {
     if (!this.isEditable) return;
     const itemId = target.dataset.itemId;
     if (itemId) await deleteOwnedItem(this.document as never, itemId);
+  }
+
+  static async #onCreateEffect(this: Adnd2eCreatureSheet): Promise<void> {
+    if (this.isEditable) await createEffect(this.document);
+  }
+
+  static async #onToggleEffect(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const id = target.dataset.effectId;
+    if (id && this.isEditable) await toggleEffect(this.document, id);
+  }
+
+  static #onEditEffect(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): void {
+    const id = target.dataset.effectId;
+    if (id && this.isEditable) editEffect(this.document, id);
+  }
+
+  static async #onDeleteEffect(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const id = target.dataset.effectId;
+    if (id && this.isEditable) await deleteEffect(this.document, id);
+  }
+
+  static async #onRemoveCondition(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const id = target.dataset.effectId;
+    if (id && this.isEditable) await removeCondition(this.document, id);
+  }
+
+  static #onOpenEffectSource(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): void {
+    const id = target.dataset.itemId;
+    if (id) openEffectSource(this.document, id);
   }
 }
 

@@ -1,3 +1,4 @@
+import { createEffect, deleteEffect, editEffect, effectsContext, openEffectSource, removeCondition, toggleEffect } from "../effects-actions";
 import { abilityScoresOf, activeKitEntries, actorLevelRulesFor, casterTypesDisabled, toKitEntries } from "../../data/derive/character/kits";
 import { buildPowerRows, kitForbidsProficiency, kitQualifies, resolveKitOverrides, type KitQualifications, type PowerUsage } from "../../core/kits";
 import { normalizeSubrace, raceDisplayName, type RawSubrace } from "../../core/races";
@@ -361,6 +362,12 @@ export class Adnd2eCharacterSheet extends Base {
       cancelCasting: Adnd2eCharacterSheet.#onCancelCasting,
       editItem: Adnd2eCharacterSheet.#onEditItem,
       deleteItem: Adnd2eCharacterSheet.#onDeleteItem,
+      createEffect: Adnd2eCharacterSheet.#onCreateEffect,
+      toggleEffect: Adnd2eCharacterSheet.#onToggleEffect,
+      editEffect: Adnd2eCharacterSheet.#onEditEffect,
+      deleteEffect: Adnd2eCharacterSheet.#onDeleteEffect,
+      removeCondition: Adnd2eCharacterSheet.#onRemoveCondition,
+      openEffectSource: Adnd2eCharacterSheet.#onOpenEffectSource,
       advanceWeaponMastery: Adnd2eCharacterSheet.#onAdvanceWeaponMastery,
       rollNonweaponCheck: Adnd2eCharacterSheet.#onRollNonweaponCheck,
       allocateThiefSkillPoint: Adnd2eCharacterSheet.#onAllocateThiefSkillPoint,
@@ -398,6 +405,7 @@ export class Adnd2eCharacterSheet extends Base {
     spells: { template: TP("spells.hbs"), scrollable: [""] },
     psionics: { template: TP("psionics.hbs"), scrollable: [""] },
     features: { template: TP("features.hbs"), scrollable: [""] },
+    effects: { template: TEMPLATE_PATH("actor/shared", "effects.hbs"), scrollable: [""] },
     journal: { template: TP("journal.hbs"), scrollable: [""] },
   };
 
@@ -412,6 +420,7 @@ export class Adnd2eCharacterSheet extends Base {
         { id: "spells", icon: "fa-solid fa-wand-sparkles" },
         { id: "psionics", icon: "fa-solid fa-brain" },
         { id: "features", icon: "fa-solid fa-star" },
+        { id: "effects", icon: "fa-solid fa-wand-magic-sparkles" },
         { id: "journal", icon: "fa-solid fa-book" },
       ],
     },
@@ -447,6 +456,7 @@ export class Adnd2eCharacterSheet extends Base {
     context.notEditable = !this.isEditable;
     context.proseDisabled = !this.isEditable || !this.#unlocked;
     context.pcActions = true;
+    context.effectsView = effectsContext(this.document, this.isEditable);
     context.turning = turningPanel(this.document as never);
     const kitCfg = (CONFIG as unknown as { ADND2E: Record<string, Record<string, string>> }).ADND2E;
     const kitUsage = (this.document as unknown as { system: { kitPowers?: PowerUsage } }).system.kitPowers ?? {};
@@ -899,6 +909,35 @@ export class Adnd2eCharacterSheet extends Base {
   static async #onDeleteItem(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
     const itemId = target.dataset.itemId;
     if (itemId && this.isEditable) await deleteOwnedItem(this.document as never, itemId);
+  }
+
+  static async #onCreateEffect(this: Adnd2eCharacterSheet): Promise<void> {
+    if (this.isEditable) await createEffect(this.document);
+  }
+
+  static async #onToggleEffect(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const id = target.dataset.effectId;
+    if (id && this.isEditable) await toggleEffect(this.document, id);
+  }
+
+  static #onEditEffect(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): void {
+    const id = target.dataset.effectId;
+    if (id && this.isEditable) editEffect(this.document, id);
+  }
+
+  static async #onDeleteEffect(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const id = target.dataset.effectId;
+    if (id && this.isEditable) await deleteEffect(this.document, id);
+  }
+
+  static async #onRemoveCondition(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const id = target.dataset.effectId;
+    if (id && this.isEditable) await removeCondition(this.document, id);
+  }
+
+  static #onOpenEffectSource(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): void {
+    const id = target.dataset.itemId;
+    if (id) openEffectSource(this.document, id);
   }
 
   static async #onRemoveTrait(

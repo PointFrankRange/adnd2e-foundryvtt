@@ -89,7 +89,7 @@ const registered = new Set([...SHEET.matchAll(/^\s+([a-zA-Z]+): Adnd2eNpcSheet\.
 describe("Character NPC sheet templates (sheet redesign R2)", () => {
   it("uses the kit part templates", () => {
     expect(PART_FILES.map((f) => path.relative(TPL, f).split(path.sep).join("/")).sort()).toEqual(
-      ["actor/npc/journal.hbs", "actor/npc/main.hbs", "actor/pc/header.hbs", "actor/pc/inventory.hbs", "actor/pc/left.hbs", "actor/pc/spells.hbs", "actor/pc/tabs.hbs"],
+      ["actor/npc/journal.hbs", "actor/npc/main.hbs", "actor/pc/header.hbs", "actor/pc/inventory.hbs", "actor/pc/left.hbs", "actor/pc/spells.hbs", "actor/pc/tabs.hbs", "actor/shared/effects.hbs"],
     );
   });
 
