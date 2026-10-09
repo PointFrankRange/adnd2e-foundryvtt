@@ -3,9 +3,11 @@
 // typed into the global scope by src/types/global.d.ts.
 import type { TurnRowId } from "./core/turning";
 import type { MonsterTypeId } from "./data/item/choices";
+import type { DamageType, WeaponCategory, WeaponSize } from "./core/weapons/data";
 import type {
   AbilityKey,
   Alignment,
+  ArmorType,
   ClassGroup,
   CreatureSize,
   EncumbranceCategory,
@@ -76,6 +78,10 @@ export interface Adnd2eConfig {
   readonly sizes: LabelMap<CreatureSize>;
   readonly movementModes: LabelMap<MovementMode>;
   readonly damageTypes: LabelMap<ConfigDamageType>;
+  readonly armorTypes: LabelMap<ArmorType>;
+  readonly weaponDamageTypes: LabelMap<DamageType>;
+  readonly weaponCategories: LabelMap<WeaponCategory>;
+  readonly weaponSizes: LabelMap<WeaponSize>;
   readonly encumbranceCategories: LabelMap<EncumbranceCategory>;
   readonly creatureIntelligence: LabelMap<CreatureIntelligenceBand>;
   readonly treasureTypes: LabelMap<TreasureType>;
@@ -209,6 +215,26 @@ export function buildAdnd2eConfig(): Adnd2eConfig {
       sonic: "ADND2E.damageTypes.sonic",
       necrotic: "ADND2E.damageTypes.necrotic",
       radiant: "ADND2E.damageTypes.radiant",
+    },
+    weaponDamageTypes: {
+      slashing: "ADND2E.weaponDamageTypes.slashing",
+      piercing: "ADND2E.weaponDamageTypes.piercing",
+      bludgeoning: "ADND2E.weaponDamageTypes.bludgeoning",
+      "piercing-slashing": "ADND2E.weaponDamageTypes.piercing-slashing",
+      "piercing-bludgeoning": "ADND2E.weaponDamageTypes.piercing-bludgeoning",
+    },
+    weaponCategories: {
+      melee: "ADND2E.weaponCategories.melee", thrown: "ADND2E.weaponCategories.thrown",
+      bow: "ADND2E.weaponCategories.bow", crossbow: "ADND2E.weaponCategories.crossbow",
+    },
+    weaponSizes: { S: "ADND2E.weaponSizes.S", M: "ADND2E.weaponSizes.M", L: "ADND2E.weaponSizes.L" },
+    armorTypes: {
+      none: "ADND2E.armorTypes.none", padded: "ADND2E.armorTypes.padded", leather: "ADND2E.armorTypes.leather",
+      "studded-leather": "ADND2E.armorTypes.studded-leather", "ring-mail": "ADND2E.armorTypes.ring-mail",
+      "scale-mail": "ADND2E.armorTypes.scale-mail", "chain-mail": "ADND2E.armorTypes.chain-mail",
+      "elven-chain": "ADND2E.armorTypes.elven-chain", "splint-mail": "ADND2E.armorTypes.splint-mail",
+      "banded-mail": "ADND2E.armorTypes.banded-mail", "plate-mail": "ADND2E.armorTypes.plate-mail",
+      "field-plate": "ADND2E.armorTypes.field-plate", "full-plate": "ADND2E.armorTypes.full-plate",
     },
     encumbranceCategories: {
       unencumbered: "ADND2E.encumbranceCategories.unencumbered",

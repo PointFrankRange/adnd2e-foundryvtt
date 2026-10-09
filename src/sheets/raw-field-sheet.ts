@@ -15,6 +15,7 @@
 // (structure) still comes from the live model — it carries no values.
 
 import { CLASS_IDS } from "../data/item/choices";
+import { choiceLabelKey } from "./item-layouts/labels";
 
 const fields = foundry.data.fields;
 const { getProperty, setProperty, deleteProperty } = foundry.utils;
@@ -78,14 +79,20 @@ function humanizeKey(key: string): string {
 }
 
 /** Normalise a StringField's `choices` (array | object | function) to option rows. */
-function toChoiceRows(raw: unknown, current: unknown): FieldRow["choices"] {
+/** A localized label for an enum value when the field has a label map and the key exists; else the entry's own label. */
+function labelFor(path: string | undefined, value: string, fallback: string): string {
+  const key = path ? choiceLabelKey(path, value) : null;
+  return key && game.i18n!.has(key) ? game.i18n!.localize(key) : fallback;
+}
+
+function toChoiceRows(raw: unknown, current: unknown, path?: string): FieldRow["choices"] {
   let entries: [string, string][];
   const resolved = typeof raw === "function" ? (raw as () => unknown)() : raw;
   if (Array.isArray(resolved)) entries = resolved.map((v) => [String(v), String(v)]);
   else if (resolved && typeof resolved === "object") {
     entries = Object.entries(resolved as Record<string, unknown>).map(([k, v]) => [k, String(v)]);
   } else return undefined;
-  return entries.map(([value, label]) => ({ value, label, selected: value === String(current ?? "") }));
+  return entries.map(([value, label]) => ({ value, label: labelFor(path, value, label), selected: value === String(current ?? "") }));
 }
 
 /** True for a StringField whose entries are a fixed choice list (a multi-select candidate). */
@@ -276,7 +283,7 @@ function walk(
       continue;
     }
     if (field instanceof fields.StringField) {
-      const choices = toChoiceRows((field as unknown as { choices?: unknown }).choices, value);
+      const choices = toChoiceRows((field as unknown as { choices?: unknown }).choices, value, path);
       if (choices && choices.length) {
         const nullable = (field as unknown as { nullable?: boolean }).nullable === true;
         const blank = (field as unknown as { blank?: boolean }).blank === true;
