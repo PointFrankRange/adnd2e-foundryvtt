@@ -34,4 +34,10 @@ describe("Effects tab bindings (#128)", () => {
       expect(sheet.src).toContain("effectsView");
     });
   }
+
+  it("does not put core's .disabled class on a row (core sets pointer-events:none, which kills the toggle button)", () => {
+    expect(TEMPLATE).not.toMatch(/[ }"]disabled[ {"]/);
+    expect(TEMPLATE).not.toMatch(/\}\} disabled\{\{/);
+    expect(TEMPLATE).toContain("effect-disabled");
+  });
 });
