@@ -11,6 +11,7 @@ interface EffectDoc {
   disabled: boolean;
   isSuppressed: boolean;
   isTemporary: boolean;
+  statuses: ReadonlySet<string>;
   duration: { label?: string };
   system: { isCondition?: boolean; conditionId?: string | null };
   parent: { documentName: string; id: string; name: string } | null;
@@ -75,18 +76,26 @@ export async function deleteEffect(actor: unknown, effectId: string): Promise<vo
   if (!effect || effect.system.isCondition) return;
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: { title: game.i18n!.localize("ADND2E.sheet.effects.deleteTitle") },
-    content: `<p>${game.i18n!.format("ADND2E.sheet.effects.deleteConfirm", { name: effect.name })}</p>`,
-  });
+    content: `<p>${game.i18n!.format("ADND2E.sheet.effects.deleteConfirm", {
+      name: foundry.utils.escapeHTML(effect.name),
+    })}</p>`,
+  } as never);
   if (confirmed) await effect.delete();
 }
 
-/** Remove a condition through the same call as the Token HUD and the Stand Up button, so wrestling's held/grappling
- *  cleanup runs. An effect with no condition id falls back to a plain delete. */
+/** Remove a condition. A real status effect (its id is registered in CONFIG.statusEffects AND the effect's own
+ *  `statuses` set carries it) goes through toggleStatusEffect, the same call as the Token HUD and the Stand Up button.
+ *  Anything else (e.g. a hand-made effect flagged isCondition in the raw editor) is deleted directly, because core
+ *  matches on `statuses` and throws on an unregistered id. Wrestling's held/grappling cleanup is the deleteActiveEffect
+ *  hook, so it runs either way. */
 export async function removeCondition(actor: unknown, effectId: string): Promise<void> {
   const owner = actor as EffectOwner;
   const effect = owner.effects.get(effectId);
   if (!effect?.system.isCondition) return;
-  if (effect.system.conditionId) await owner.toggleStatusEffect(effect.system.conditionId, { active: false });
+  const conditionId = effect.system.conditionId;
+  const registered = (CONFIG.statusEffects as unknown as Iterable<{ id: string }>) ?? [];
+  const isStatus = !!conditionId && effect.statuses.has(conditionId) && [...registered].some((s) => s.id === conditionId);
+  if (isStatus) await owner.toggleStatusEffect(conditionId, { active: false });
   else await effect.delete();
 }
 
