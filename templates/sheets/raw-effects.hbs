@@ -1,0 +1,30 @@
+<section class="kit-panel raw-effects">
+  <div class="kit-bar">
+    <span>{{localize 'ADND2E.sheets.effects.title'}}</span>
+    {{#if itemEffects.canCreate}}
+      <button type="button" class="item-control" data-action="createItemEffect" title="{{localize 'ADND2E.sheets.effects.new'}}" aria-label="{{localize 'ADND2E.sheets.effects.new'}}"><i class="fa-solid fa-plus"></i></button>
+    {{/if}}
+  </div>
+  <div class="kit-body">
+    {{#if itemEffects.isEmpty}}<p class="hint">{{localize 'ADND2E.sheets.effects.empty'}}</p>{{/if}}
+    <ul class="effects-list">
+      {{#each itemEffects.rows as |row|}}
+        <li class="effect-row{{#if row.disabled}} effect-disabled{{/if}}{{#if row.suppressed}} effect-suppressed{{/if}}">
+          <img src="{{row.img}}" alt="" width="24" height="24">
+          <span class="effect-name">{{row.name}}</span>
+          {{#if row.durationLabel}}<span class="effect-duration">{{row.durationLabel}}</span>{{/if}}
+          <span class="effect-flag">{{#if row.transfer}}{{localize 'ADND2E.sheets.effects.appliesToOwner'}}{{else}}{{localize 'ADND2E.sheets.effects.notTransferred'}}{{/if}}</span>
+          {{#if row.suppressWhenUnequipped}}<span class="effect-flag">{{localize 'ADND2E.sheets.effects.whileEquipped'}}</span>{{/if}}
+          {{#if row.suppressed}}<span class="effect-flag">{{localize 'ADND2E.sheets.effects.suppressed'}}</span>{{/if}}
+          {{#if row.disabled}}<span class="effect-flag">{{localize 'ADND2E.sheets.effects.off'}}</span>{{/if}}
+          <span class="item-controls">
+            {{#if row.canTransfer}}<button type="button" class="item-control" data-action="toggleItemEffectTransfer" data-effect-id="{{row.id}}" title="{{localize 'ADND2E.sheets.effects.transferToggle'}}" aria-label="{{localize 'ADND2E.sheets.effects.transferToggle'}}"><i class="fa-solid fa-share-from-square"></i></button>{{/if}}
+            {{#if row.canToggle}}<button type="button" class="item-control" data-action="toggleItemEffect" data-effect-id="{{row.id}}" title="{{localize 'ADND2E.sheets.effects.toggle'}}" aria-label="{{localize 'ADND2E.sheets.effects.toggle'}}"><i class="fa-solid fa-power-off"></i></button>{{/if}}
+            {{#if row.canEdit}}<button type="button" class="item-control" data-action="editItemEffect" data-effect-id="{{row.id}}" title="{{localize 'ADND2E.sheets.effects.edit'}}" aria-label="{{localize 'ADND2E.sheets.effects.edit'}}"><i class="fa-solid fa-pen-to-square"></i></button>{{/if}}
+            {{#if row.canDelete}}<button type="button" class="item-control" data-action="deleteItemEffect" data-effect-id="{{row.id}}" title="{{localize 'ADND2E.sheets.effects.delete'}}" aria-label="{{localize 'ADND2E.sheets.effects.delete'}}"><i class="fa-solid fa-trash"></i></button>{{/if}}
+          </span>
+        </li>
+      {{/each}}
+    </ul>
+  </div>
+</section>

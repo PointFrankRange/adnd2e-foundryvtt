@@ -163,13 +163,32 @@
   .effect-source, .effect-duration, .effect-flag { font-size: 11px; color: var(--kit-muted); }
 }
 
+// Header portrait: shared by the item sheet, the ActiveEffect sheet and the actor
+// raw fallback (the effect sheet is not .item, so this sits outside that block).
+.adnd2e.raw-field-sheet {
+  .raw-title-row { display: flex; align-items: center; gap: 8px; }
+  .raw-portrait { width: 48px; height: 48px; object-fit: cover; flex: none; }
+  .raw-portrait[data-action="editImage"] { cursor: pointer; }
+}
+
 // Item sheet layout (raw-fields.hbs). Kept apart from the shared rules above so
 // the actor sheets' output is untouched.
 .adnd2e.raw-field-sheet.item {
   // container, not viewport, query: the sheet is a resizable window, so a
   // media query would size the columns to the browser instead of the sheet.
   .raw-field-list { container-type: inline-size; }
-  .raw-title-row { display: flex; align-items: center; gap: 8px; }
+  .raw-portrait { border: 1px solid var(--kit-row-rule); border-radius: 4px; }
+  .raw-effects .effects-list { list-style: none; margin: 0; padding: 0; }
+  .raw-effects .effect-row {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 2px 6px;
+    border-bottom: 1px solid var(--kit-row-rule);
+    &.effect-disabled, &.effect-suppressed { opacity: .55; }
+  }
+  .raw-effects .item-controls {
+    display: inline-flex; gap: 2px; margin-left: auto;
+    .item-control { background: none; border: none; width: auto; padding: 0 3px; color: var(--kit-accent-ink); cursor: pointer; }
+  }
+  .raw-effects .effect-duration, .raw-effects .effect-flag { font-size: 11px; color: var(--kit-muted); }
   .raw-subtitle { font-size: 12px; font-style: italic; color: var(--kit-muted); margin: 2px 0 4px; }
   .raw-description textarea { width: 100%; box-sizing: border-box; min-height: 180px; resize: vertical; }
   input.raw-name {

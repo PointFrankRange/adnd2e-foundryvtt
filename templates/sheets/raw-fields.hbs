@@ -5,10 +5,18 @@
         {{#each header}}
           {{#if (eq this.path "name")}}
             <div class="raw-title-row">
+              {{#if @root.hasPortrait}}
+                <img class="raw-portrait" width="48" height="48"
+                  src="{{#if @root.portrait}}{{@root.portrait}}{{else}}{{@root.portraitPlaceholder}}{{/if}}" alt=""
+                  {{#unless @root.portrait}}data-placeholder="{{@root.portraitPlaceholder}}"{{/unless}}
+                  {{#if @root.editable}}data-action="editImage" data-edit="img"{{/if}}>
+              {{/if}}
               <input type="text" class="raw-name" name="name" value="{{this.value}}" placeholder="{{this.label}}"
                 {{#unless @root.editable}}readonly{{/unless}}>
             </div>
             {{#if @root.subtitle}}<div class="raw-subtitle">{{@root.subtitle}}</div>{{/if}}
+          {{else if (eq this.path "img")}}
+            {{!-- #148: the image is shown as the portrait above and chosen with the file picker, not typed as a path --}}
           {{else}}
             <div class="form-group">
               <label>{{this.label}}</label>
@@ -54,6 +62,8 @@
     <div class="raw-groups">
       {{#each groups}}{{> adnd2e.raw-group this}}{{/each}}
     </div>
+
+    {{#if itemEffects}}{{> adnd2e.raw-effects}}{{/if}}
   </div>
 
   {{#if editable}}

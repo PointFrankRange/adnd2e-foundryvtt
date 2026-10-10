@@ -18,6 +18,7 @@ import { CLASS_IDS } from "../data/item/choices";
 import { applyLayout } from "./item-layouts/apply";
 import { ITEM_LAYOUTS } from "./item-layouts/layouts";
 import { choiceLabelKey } from "./item-layouts/labels";
+import { itemEffectsContext } from "./item-effects-actions";
 
 const fields = foundry.data.fields;
 const { getProperty, setProperty, deleteProperty } = foundry.utils;
@@ -486,6 +487,17 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
         this.document.documentName === "Item"
           ? itemSubtitle((this.document as unknown as { type: string }).type, source)
           : undefined;
+      // #148: the document's image (the header shows it as a clickable portrait instead of a path input)
+      const imgRow = rows.find((r) => r.path === "img");
+      context.hasPortrait = !!imgRow;
+      context.portrait = imgRow ? String(imgRow.value ?? "") : "";
+      context.portraitPlaceholder =
+        (this.document.constructor as { DEFAULT_ICON?: string }).DEFAULT_ICON ?? "icons/svg/mystery-man.svg";
+      // #146: gear items get an Effects section; every other document/type renders without one
+      context.itemEffects =
+        itemType && ["weapon", "armor", "equipment"].includes(itemType)
+          ? itemEffectsContext(this.document, Boolean(context.editable))
+          : undefined;
       return context;
     }
 
@@ -518,6 +530,10 @@ export function RawFieldSheetMixin<TBase extends abstract new (...args: never[])
       formData: unknown,
     ): Record<string, unknown> {
       const submitData = super._processFormData(event, form, formData);
+      // A document with no image shows a placeholder portrait; if the user never picked one the
+      // src is still the placeholder, so do not write it back as the document's img.
+      const portrait = form.querySelector<HTMLImageElement>("img.raw-portrait[data-placeholder]");
+      if (portrait && portrait.getAttribute("src") === portrait.dataset.placeholder) deleteProperty(submitData, "img");
       for (const el of Array.from(form.querySelectorAll<HTMLSelectElement>('select[data-null="true"]'))) {
         if (el.value === "") setProperty(submitData, el.name, null);
       }

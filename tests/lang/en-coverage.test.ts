@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import enJson from "../../lang/en.json";
 import { buildAdnd2eConfig } from "../../src/config";
 import { SUB_ABILITIES } from "../../src/core/abilities/sub-abilities";
@@ -915,6 +917,24 @@ describe("lang/en.json — SP7e (wrestling chat)", () => {
     ];
     for (const leaf of leaves) {
       const key = `ADND2E.chat.wrestling.${leaf}`;
+      expect(typeof resolve(key), key).toBe("string");
+      expect((resolve(key) as string).length, key).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("lang/en.json — item effects section (#146)", () => {
+  it("resolves every ADND2E.sheets.effects.* key the template and actions reference", () => {
+    const files = [
+      path.resolve(__dirname, "..", "..", "templates", "sheets", "raw-effects.hbs"),
+      path.resolve(__dirname, "..", "..", "src", "sheets", "item-effects-actions.ts"),
+    ];
+    const keys = new Set<string>();
+    for (const f of files) {
+      for (const m of readFileSync(f, "utf8").matchAll(/ADND2E\.sheets\.effects\.[A-Za-z]+/g)) keys.add(m[0]);
+    }
+    expect(keys.size).toBeGreaterThan(0);
+    for (const key of keys) {
       expect(typeof resolve(key), key).toBe("string");
       expect((resolve(key) as string).length, key).toBeGreaterThan(0);
     }
