@@ -1,0 +1,109 @@
+// Chat cards (#150). Chat messages render in the sidebar, outside any sheet window where the kit tokens live, so the
+// cards define their own tokens (the sheet palette: parchment / dark leather, maroon header bar). Dark mode follows the
+// same switch the sheet tokens use (body.theme-dark, or .theme-dark on the element). Class vocabulary = templates/chat/*.hbs.
+.adnd2e.chat-card {
+  --chat-bg: #e6d3a3;
+  --chat-border: #7a0a0a;
+  --chat-head: #7a0a0a;
+  --chat-head-ink: #ffffff;
+  --chat-alert-head: #5a0808;
+  --chat-ink: #1a1208;
+  --chat-muted: #5a3e14;
+  --chat-rule: #d8c7a0;
+  --chat-hit: #1f5a1f;
+  --chat-miss: #8a1010;
+  --chat-crit: #8a5a00;
+  --chat-fumble: #6b2a10;
+  --chat-btn: #7a0a0a;
+}
+
+body.theme-dark .adnd2e.chat-card,
+.adnd2e.chat-card.theme-dark {
+  --chat-bg: #2a211b;
+  --chat-border: #8c1c1c;
+  --chat-head: #8c1c1c;
+  --chat-head-ink: #f6ecd6;
+  --chat-alert-head: #a02424;
+  --chat-ink: #eee3cc;
+  --chat-muted: #c7b08a;
+  --chat-rule: #4a3b31;
+  --chat-hit: #8fd18f;
+  --chat-miss: #ef8a7a;
+  --chat-crit: #f0c060;
+  --chat-fumble: #e0987a;
+  --chat-btn: #e39a7a;
+}
+
+.adnd2e.chat-card {
+  background: var(--chat-bg);
+  color: var(--chat-ink);
+  border: 1px solid var(--chat-border);
+  border-radius: 4px;
+  overflow: hidden;
+  font-size: 13px;
+
+  // the maroon title bar: portrait + title
+  > header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    background: var(--chat-head);
+    color: var(--chat-head-ink);
+
+    img { width: 26px; height: 26px; border: 0; border-radius: 3px; flex: none; object-fit: cover; }
+    h3 {
+      margin: 0; border: 0; min-width: 0;
+      font-size: 13px; font-weight: 700; color: inherit;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+  }
+  &.lost > header { background: var(--chat-alert-head); }
+  // the creature damage card has no title bar
+  &.creature-damage { padding-top: 6px; }
+
+  // body spacing
+  > :not(header) { margin-left: 8px; margin-right: 8px; }
+  > header + * { margin-top: 6px; }
+  > :last-child { margin-bottom: 8px; }
+  p { margin-top: 4px; margin-bottom: 4px; }
+
+  // lines
+  .formula, .cost, .hint, .detail, .scope { color: var(--chat-muted); }
+  .hint { font-style: italic; }
+  .headline { font-weight: 700; }
+  .target { font-weight: 700; }
+  .param strong, .tangents strong { color: var(--chat-muted); }
+  .rung, .damage { font-weight: 700; }
+  .step { border-top: 1px solid var(--chat-rule); padding-top: 2px; }
+
+  // outcomes
+  .result { font-weight: 700; }
+  .result.hit, .result.success { color: var(--chat-hit); }
+  .result.miss, .result.fail, .result.failure, .result.rejected { color: var(--chat-miss); }
+  .crit, .backstab { color: var(--chat-crit); font-weight: 700; }
+  .fumble { color: var(--chat-fumble); font-weight: 700; }
+  .dire, .loss { color: var(--chat-miss); font-weight: 700; }
+
+  // lists: modifier breakdown, spell details, turn-undead rows
+  .modifiers, .spell-details, .turn-results {
+    list-style: none;
+    margin-top: 2px; margin-bottom: 2px; padding: 0;
+    font-size: 11px; color: var(--chat-muted);
+  }
+  .turn-results li { display: flex; align-items: center; gap: 6px; padding: 2px 0; border-bottom: 1px solid var(--chat-rule); }
+  .turn-results li img { width: 24px; height: 24px; border: 0; border-radius: 3px; flex: none; }
+  .turn-results .status-turned, .turn-results .status-destroyed { color: var(--chat-hit); font-weight: 700; }
+  .turn-results .status-fail, .turn-results .status-unaffected, .turn-results .status-cannot { color: var(--chat-miss); }
+  .turn-results .status-notUndead, .turn-results .status-untagged { opacity: .6; }
+
+  // buttons inside a card (Roll Damage, Apply, Roll Defense, ...)
+  button {
+    width: auto; height: auto; margin-top: 4px;
+    padding: 2px 10px; line-height: 1.5;
+    background: transparent; color: var(--chat-btn);
+    border: 1px solid var(--chat-btn); border-radius: 3px;
+    cursor: pointer;
+    &:hover { background: var(--chat-btn); color: var(--chat-bg); }
+  }
+}
