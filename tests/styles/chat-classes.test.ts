@@ -18,7 +18,15 @@ function classTokens(source: string): { root: string[]; rest: string[] } {
 /** Plain paragraphs and labels that deliberately carry no rule of their own (they inherit the card ink). */
 const NO_RULE = new Set(["check", "powers", "maneuver", "name", "chance"]);
 
+const esc = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 describe("chat card stylesheet (#150)", () => {
+  it("styles every turn-undead status", () => {
+    for (const s of ["notUndead", "untagged", "cannot", "fail", "turned", "destroyed", "unaffected"]) {
+      expect(CSS, `.status-${s}`).toMatch(new RegExp("\\.status-" + s + "(?![\\w-])"));
+    }
+  });
+
   it("is loaded from system.scss", () => {
     expect(SYSTEM).toContain("chat/chat");
   });
@@ -36,7 +44,10 @@ describe("chat card stylesheet (#150)", () => {
       const rootModifiers = root.filter((t) => !["adnd2e", "chat-card"].includes(t)).slice(1);
       for (const token of [...rootModifiers, ...rest]) {
         if (NO_RULE.has(token)) continue;
-        expect(CSS, `${file}: .${token}`).toContain(`.${token}`);
+        const re = token.endsWith("-")
+          ? new RegExp("\\." + esc(token) + "\\w")
+          : new RegExp("\\." + esc(token) + "(?![\\w-])");
+        expect(CSS, `${file}: .${token}`).toMatch(re);
       }
     });
   }
