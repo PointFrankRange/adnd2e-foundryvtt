@@ -143,6 +143,7 @@ export async function shiftToForm(actor: ShapechangeActor, formActorId: string):
 export async function returnToNormal(actor: ShapechangeActor): Promise<void> {
   const form = actor.system.shapechange.form;
   if (!form) return;
+  if (!canAct(actor.statuses)) return warn("ADND2E.sheet.shapechange.cannotAct");
   await actor.update(returnUpdate());
   await postCard(
     actor,
