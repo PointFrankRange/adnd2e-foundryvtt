@@ -810,7 +810,7 @@
     "chat": {
       "shapechange": {
         "shift": "Shapechange",
-        "return": "Returns to normal form",
+        "return": "Normal form",
         "healed": "Heals {amount} hit points",
         "usesLeft": "Shapechanges left today: {left} / {max}",
         "takesARound": "The change takes one round; the druid can take no other action.",
