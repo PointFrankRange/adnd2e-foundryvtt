@@ -1,0 +1,14 @@
+<div class="adnd2e chat-card shapechange-use">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} — {{localize headlineKey}}: {{formName}}</h3>
+  </header>
+  {{#unless returning}}
+    <p class="formula">1d6 = <strong>{{d6}}</strong></p>
+    <p class="result">{{localize 'ADND2E.chat.shapechange.healed' amount=healed}}</p>
+    <p class="cost">{{localize 'ADND2E.chat.shapechange.usesLeft' left=usesLeft max=usesMax}}</p>
+    <p class="hint">{{localize 'ADND2E.chat.shapechange.takesARound'}}</p>
+  {{else}}
+    <p class="hint">{{localize 'ADND2E.chat.shapechange.backToNormal'}}</p>
+  {{/unless}}
+</div>
