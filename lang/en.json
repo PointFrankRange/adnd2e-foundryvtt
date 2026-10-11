@@ -200,6 +200,31 @@
       "doneWithFailures": "AD&D 2E: imported {created} of {total} document(s); {failed} failed — see the console."
     },
     "sheet": {
+      "tracking": {
+        "title": "Tracking",
+        "score": "Base score: Wisdom {wisdom}, ranger level {level}",
+        "primaryTerrain": "Primary terrain",
+        "specialized": "Specialized in this terrain",
+        "specializedShort": "specialized",
+        "track": "Track…",
+        "dialogTitle": "Track a quarry",
+        "terrain": "Terrain",
+        "illumination": "Light",
+        "creatures": "Creatures tracked",
+        "assistants": "Assisting trackers",
+        "hours": "Hours since the trail was made",
+        "rainHours": "Hours of rain, snow or sleet since",
+        "animalFollower": "Animal follower assisting",
+        "inPrimaryTerrain": "Trail is in my primary terrain",
+        "nonNatural": "Non-natural surroundings (score halved)",
+        "quarryHides": "Quarry hides its trail",
+        "quarrySpecialized": "Quarry is a specialized ranger hiding in his terrain",
+        "identify": "Also attempt identification",
+        "roll": "Roll",
+        "preview": "Tracking score {score}. {movement}",
+        "previewImpossible": "Tracking score {score}: tracking is not possible",
+        "cannotAct": "This ranger cannot act and cannot track right now."
+      },
       "shapechange": {
         "title": "Shapechange",
         "usesLeft": "Left today: {left} / {max}",

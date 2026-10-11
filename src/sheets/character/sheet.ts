@@ -20,6 +20,7 @@ import { tierForConditionId } from "../../core/magic/channeller-fatigue";
 import { rollAttack, rollSave } from "./combat-rolls";
 import { rollFormAttack } from "../creature/combat-rolls";
 import { promptShift, resetShapechangeDay, returnToNormal, shapechangeView } from "./shapechange-actions";
+import { trackQuarry, trackingView } from "./tracking-actions";
 import { buildCharacterSheetContext, traitTargetKey } from "./context";
 import type {
   ClassItemView,
@@ -401,6 +402,7 @@ export class Adnd2eCharacterSheet extends Base {
       shapechangeReturn: Adnd2eCharacterSheet.#onShapechangeReturn,
       shapechangeNewDay: Adnd2eCharacterSheet.#onShapechangeNewDay,
       rollFormAttack: Adnd2eCharacterSheet.#onRollFormAttack,
+      trackQuarry: Adnd2eCharacterSheet.#onTrackQuarry,
     },
   };
 
@@ -491,6 +493,8 @@ export class Adnd2eCharacterSheet extends Base {
         : [],
     };
     const kitCfg = (CONFIG as unknown as { ADND2E: Record<string, Record<string, string>> }).ADND2E;
+    context.tracking = trackingView(this.document as never);
+    context.primaryTerrains = kitCfg.primaryTerrains;
     const kitUsage = (this.document as unknown as { system: { kitPowers?: PowerUsage } }).system.kitPowers ?? {};
     context.kits = activeKitEntries(
       (this.document as unknown as { items: Iterable<{ id: string; name: string; type: string; system: unknown }> }).items,
@@ -1198,6 +1202,11 @@ export class Adnd2eCharacterSheet extends Base {
 
   static async #onShapechangeNewDay(this: Adnd2eCharacterSheet): Promise<void> {
     if (this.isEditable) await resetShapechangeDay(this.document as never);
+  }
+
+  // Interaction handlers — SP20 ranger tracking.
+  static async #onTrackQuarry(this: Adnd2eCharacterSheet): Promise<void> {
+    if (this.isEditable) await trackQuarry(this.document as never);
   }
 
   static async #onRollFormAttack(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
