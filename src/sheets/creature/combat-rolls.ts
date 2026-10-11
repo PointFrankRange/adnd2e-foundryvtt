@@ -22,6 +22,7 @@ import { getOptionalRules } from "../../settings";
 import { TEMPLATE_PATH } from "../../constants";
 import type { CreatureSize, SaveCategory } from "../../core/types";
 import type { DamageType } from "../../core/weapons/data";
+import { themedPrompt } from "../../dialogs/themed-dialog-foundry";
 
 /* ---------------------------------------------------------------------------
  * combat-rolls — SP6, creature-shaped.
@@ -188,7 +189,7 @@ async function rollCreatureAttack(actor: CreatureActor, source: AttackSource): P
       armorVsWeaponModifier = weaponVsArmorModifier(source.damageType as never, toArmorGroup(targetArmorType));
     }
   } else {
-    const manualAc = await foundry.applications.api.DialogV2.prompt({
+    const manualAc = await themedPrompt({
       window: { title: game.i18n!.localize("ADND2E.chat.attack.manualAcTitle") },
       content: `<p>${game.i18n!.localize(
         targets.length === 0 ? "ADND2E.chat.attack.noTargetHint" : "ADND2E.chat.attack.multiTargetHint",

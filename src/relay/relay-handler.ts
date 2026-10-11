@@ -2,6 +2,7 @@ import { RELAY_QUERY, relayEffectText, validateRelayRequest, type RelayResult } 
 import { SYSTEM_ID } from "../constants";
 import { getPlayerApplyMode } from "../settings";
 import { applyEffectLocally, type EffectTarget } from "./apply-effect";
+import { themedConfirm } from "../dialogs/themed-dialog-foundry";
 
 /* The GM side of the relay: CONFIG.queries["adnd2e.applyEffect"]. v14 runs the
  * handler on the queried user's client with (data, { user, timeout })
@@ -33,7 +34,7 @@ async function handleApplyQuery(
   };
   if (getPlayerApplyMode() === "approve") {
     const started = Date.now();
-    const ok = await foundry.applications.api.DialogV2.confirm({
+    const ok = await themedConfirm({
       window: { title: game.i18n!.localize("ADND2E.relay.approveTitle") },
       content: `<p>${game.i18n!.format("ADND2E.relay.approvePrompt", names)}</p>`,
     } as never);

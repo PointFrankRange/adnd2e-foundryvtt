@@ -4,6 +4,7 @@
 // cast time, not at memorization — spec §1.1). Mirrors the existing
 // combat/initiative-modifier-dialog.ts DialogV2.prompt pattern.
 import { priestFreeCastEligible, type PriestFreeMagickFilter } from "../../magic/priest-sphere-access";
+import { themedPrompt } from "../../dialogs/themed-dialog-foundry";
 
 export interface FreeMagickCastActor {
   system: { spellcasting: { wizard: { spellbookItemIds: string[] } } };
@@ -20,7 +21,7 @@ export async function promptFreeMagickLevel(maxSpellLevel: number): Promise<numb
   const options = Array.from({ length: maxSpellLevel }, (_, i) => i + 1)
     .map((lvl) => `<option value="${lvl}">${lvl}</option>`)
     .join("");
-  const value = await foundry.applications.api.DialogV2.prompt({
+  const value = await themedPrompt({
     window: { title: game.i18n!.localize("ADND2E.sheet.spells.freeMagickLevelTitle") },
     content: `<p>${game.i18n!.localize("ADND2E.sheet.spells.freeMagickLevelHint")}</p>
       <select name="level" autofocus>${options}</select>`,
@@ -62,7 +63,7 @@ export async function promptFreeMagickSpell(
     return null;
   }
   const options = eligible.map((s) => `<option value="${s.id}">${foundry.utils.escapeHTML(s.name)}</option>`).join("");
-  const value = await foundry.applications.api.DialogV2.prompt({
+  const value = await themedPrompt({
     window: { title: game.i18n!.localize("ADND2E.sheet.spells.freeMagickCastTitle") },
     content: `<select name="spell" autofocus>${options}</select>`,
     ok: {

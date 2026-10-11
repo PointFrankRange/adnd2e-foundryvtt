@@ -53,6 +53,7 @@ import { actorEquipmentRules, itemNotPermitted } from "../../data/derive/charact
 import { bindSheetKit, clearSheetKit } from "../kit-dom";
 import { toggleFavoriteFlag } from "../kit-actions";
 import { enrichItemDescriptions } from "../item-descriptions";
+import { themedPrompt } from "../../dialogs/themed-dialog-foundry";
 
 /* ---------------------------------------------------------------------------
  * Adnd2eCharacterSheet — the ApplicationV2 PC sheet shell (SP2 Task 5).
@@ -960,7 +961,7 @@ export class Adnd2eCharacterSheet extends Base {
   }
 
   static async #onAwardXp(this: Adnd2eCharacterSheet): Promise<void> {
-    const amount = await foundry.applications.api.DialogV2.prompt({
+    const amount = await themedPrompt({
       window: { title: game.i18n!.localize("ADND2E.sheet.xp.award") },
       content: `<p>${game.i18n!.localize("ADND2E.sheet.xp.awardPrompt")}</p>
         <input type="number" name="amount" value="0" step="1" autofocus>`,

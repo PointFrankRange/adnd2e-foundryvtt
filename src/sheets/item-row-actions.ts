@@ -4,6 +4,7 @@ import { disruptCasting } from "./character/casting-actions";
 import { containerContentsReset } from "./character/grouping";
 import { SYSTEM_ID } from "../constants";
 import { normalizeFavorites, removeItemFavorites } from "./kit/favorites";
+import { themedConfirm } from "../dialogs/themed-dialog-foundry";
 
 /* ---------------------------------------------------------------------------
  * item-row-actions — the ✎ / 🗑 controls on every owned-item row of the PC and
@@ -53,7 +54,7 @@ export function editOwnedItem(actor: ItemOwner, itemId: string): void {
 export async function deleteOwnedItem(actor: ItemOwner, itemId: string): Promise<void> {
   const item = actor.items.get(itemId);
   if (!item) return;
-  const confirmed = await foundry.applications.api.DialogV2.confirm({
+  const confirmed = await themedConfirm({
     window: { title: game.i18n!.localize("ADND2E.sheet.itemControls.deleteTitle") },
     content: `<p>${game.i18n!.format("ADND2E.sheet.itemControls.deleteConfirm", {
       name: foundry.utils.escapeHTML(item.name),

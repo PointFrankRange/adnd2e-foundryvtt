@@ -2,6 +2,7 @@
 // picking an activity type and a number of hours. Mirrors the existing
 // free-magick-dialog.ts DialogV2.prompt pattern.
 import type { ChannellerActivity } from "../../core/magic/channellers";
+import { themedPrompt } from "../../dialogs/themed-dialog-foundry";
 
 const ACTIVITIES: readonly ChannellerActivity[] = ["hardExertion", "walkingRiding", "sittingResting", "sleeping"];
 
@@ -11,7 +12,7 @@ export async function promptRecoverChannelling(): Promise<{ activity: Channeller
   const options = ACTIVITIES.map(
     (a) => `<option value="${a}">${game.i18n!.localize(`ADND2E.sheet.spells.channellingActivity.${a}`)}</option>`,
   ).join("");
-  const value = await foundry.applications.api.DialogV2.prompt({
+  const value = await themedPrompt({
     window: { title: game.i18n!.localize("ADND2E.sheet.spells.channellingRecoverTitle") },
     content: `<div class="form-group">
         <label>${game.i18n!.localize("ADND2E.sheet.spells.channellingActivityLabel")}</label>
