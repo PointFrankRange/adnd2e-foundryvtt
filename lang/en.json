@@ -69,6 +69,14 @@
     "monsterTypes": { "undead": "Undead" },
     "shapechangeCategories": { "reptile": "Reptile", "bird": "Bird", "mammal": "Mammal" },
     "habitats": { "desert": "Desert", "forest": "Forest", "mountains": "Mountains", "plains": "Plains", "swamp": "Swamp", "arctic": "Arctic", "jungle": "Jungle", "ocean": "Ocean", "underground": "Underground" },
+    "trackingTerrains": { "freshSnow": "Fresh snow", "softGround": "Soft or muddy ground", "thickBrush": "Thick brush or dense jungle", "forestField": "Forest, field or dusty floor", "normal": "Normal ground", "desert": "Desert or dry sand", "swamp": "Swamp", "rocky": "Rock, ice, stone or shallow water" },
+    "trackingIlluminations": { "good": "Good light", "twilight": "Twilight, light fog or a single torch", "moonlit": "Full-moon night or moderate fog", "dark": "Overcast night, dense fog, blizzard or blowing sand" },
+    "primaryTerrains": { "aquatic": "Aquatic", "arctic": "Arctic", "desert": "Desert", "forest": "Forest", "hill": "Hill", "jungle": "Jungle", "mountain": "Mountain", "plain": "Plain", "swamp": "Swamp" },
+    "tracking": {
+      "mod": { "wisdom": "Wisdom", "level": "Ranger level", "creatures": "Creatures tracked", "assistants": "Assisting trackers", "animal": "Animal follower", "primaryTerrain": "Trail in primary terrain", "age": "Age of the trail", "rain": "Rain, snow or sleet since", "hides": "Quarry hides its trail", "specializedHiding": "Quarry is a specialized ranger in his terrain" },
+      "movement": { "quarter": "Tracking movement: 1/4 of normal", "half": "Tracking movement: 1/2 of normal", "threeQuarters": "Tracking movement: 3/4 of normal" },
+      "info": { "generalType": "General type of creature", "specificTypeHeading": "Specific type and heading", "number": "Probable number of creatures", "sizeAge": "Approximate size or age", "pace": "Pace", "recent": "How recent the trail is", "conditions": "Special conditions" }
+    },
     "turnRows": {
       "skeleton": "Skeleton or 1 HD",
       "zombie": "Zombie",
@@ -192,6 +200,31 @@
       "doneWithFailures": "AD&D 2E: imported {created} of {total} document(s); {failed} failed — see the console."
     },
     "sheet": {
+      "tracking": {
+        "title": "Tracking",
+        "score": "Base score: Wisdom {wisdom}, ranger level {level}",
+        "primaryTerrain": "Primary terrain",
+        "specialized": "Specialized in this terrain",
+        "specializedShort": "specialized",
+        "track": "Track quarry",
+        "dialogTitle": "Track a quarry",
+        "terrain": "Terrain",
+        "illumination": "Light",
+        "creatures": "Creatures tracked",
+        "assistants": "Assisting trackers",
+        "hours": "Hours since the trail was made",
+        "rainHours": "Hours of rain, snow or sleet since",
+        "animalFollower": "Animal follower assisting",
+        "inPrimaryTerrain": "Trail is in my primary terrain",
+        "nonNatural": "Non-natural surroundings (score halved)",
+        "quarryHides": "Quarry hides its trail",
+        "quarrySpecialized": "Quarry is a specialized ranger hiding in his terrain",
+        "identify": "Also attempt identification",
+        "roll": "Roll",
+        "preview": "Tracking score {score}. {movement}",
+        "previewImpossible": "Tracking score {score}: tracking is not possible",
+        "cannotAct": "This ranger cannot act and cannot track right now."
+      },
       "shapechange": {
         "title": "Shapechange",
         "usesLeft": "Left today: {left} / {max}",
@@ -1033,6 +1066,17 @@
       "creature": {
         "damageFlavor": "{name} damage",
         "critDamage": "Critical hit damage"
+      },
+      "tracking": {
+        "title": "Tracking",
+        "score": "Tracking score: {score}",
+        "halved": "Non-natural surroundings: score halved.",
+        "found": "Trail found",
+        "lost": "Trail lost",
+        "notPossible": "Tracking is not possible",
+        "identify": "Identification",
+        "identified": "Identified",
+        "notIdentified": "Nothing identified"
       }
     },
     "combat": {

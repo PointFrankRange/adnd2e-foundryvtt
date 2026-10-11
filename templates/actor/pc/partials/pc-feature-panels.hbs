@@ -46,6 +46,25 @@
     </div>
   </section>
   {{/if}}
+  {{#if @root.tracking.visible}}
+  <section class="kit-panel tracking-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.tracking.title'}}</div>
+    <div class="kit-body">
+      <p class="hint">{{localize 'ADND2E.sheet.tracking.score' wisdom=@root.tracking.wisdom level=@root.tracking.level}}</p>
+      {{#if @root.adnd2e.lock.unlocked}}
+        <div class="detail-fields">
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.tracking.primaryTerrain'}}</span>
+          <select name="system.tracking.primaryTerrain">{{selectOptions @root.primaryTerrains selected=@root.tracking.primaryTerrain localize=true blank=''}}</select>
+        </label>
+        <label class="detail-field"><input type="checkbox" name="system.tracking.specialized"{{#if @root.tracking.specialized}} checked{{/if}}> <span>{{localize 'ADND2E.sheet.tracking.specialized'}}</span></label>
+        </div>
+      {{else}}
+        <p class="hint">{{localize 'ADND2E.sheet.tracking.primaryTerrain'}}: {{#if @root.tracking.primaryTerrain}}{{adnd2eLabel 'primaryTerrains' @root.tracking.primaryTerrain}}{{#if @root.tracking.specialized}} ({{localize 'ADND2E.sheet.tracking.specializedShort'}}){{/if}}{{else}}—{{/if}}</p>
+      {{/if}}
+      <button type="button" class="kit-small" data-action="trackQuarry"{{#unless @root.tracking.canAct}} disabled{{/unless}}>{{localize 'ADND2E.sheet.tracking.track'}}</button>
+    </div>
+  </section>
+  {{/if}}
   {{> adnd2e.pc-wild-talent-panel}}
   {{#if @root.kits.length}}
   <section class="kit-panel">

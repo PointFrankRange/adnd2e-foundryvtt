@@ -34,6 +34,11 @@ describe("dialog theme (#150)", () => {
     expect(selectors.length).toBeGreaterThan(0);
     for (const s of selectors) expect(s.startsWith(".adnd2e.adnd2e-dialog")).toBe(true);
   });
+  it("styles the ranger Track dialog classes (#88)", () => {
+    for (const c of [".tracking-dialog", ".tracking-field", ".tracking-check", ".tracking-preview"]) {
+      expect(DIALOG).toContain(c);
+    }
+  });
   it("uses no !important and never core's bare .disabled class", () => {
     expect(DIALOG).not.toContain("!important");
     expect(DIALOG).not.toMatch(/\.disabled\b/);

@@ -33,6 +33,22 @@
     border-radius: 2px;
   }
 
+  // ranger Track dialog (#88): one labelled control per row, checkboxes inline with their text
+  .tracking-dialog { display: flex; flex-direction: column; gap: 6px; }
+  .tracking-field {
+    display: flex; flex-direction: row; align-items: center; gap: 8px;
+    > span { flex: 0 0 45%; }
+    select, input[type="number"] { flex: 1 1 auto; width: auto; min-width: 0; }
+  }
+  .tracking-check {
+    display: flex; flex-direction: row; align-items: center; gap: 6px;
+    input[type="checkbox"] { flex: 0 0 auto; width: auto; margin: 0; accent-color: var(--kit-maroon); }
+  }
+  .tracking-preview {
+    margin: 0; color: var(--kit-muted); font-style: italic;
+    output { color: var(--kit-ink); font-style: normal; font-weight: 700; }
+  }
+
   // footer buttons: the affirmative action is filled maroon, everything else an outline
   .form-footer button {
     height: auto;

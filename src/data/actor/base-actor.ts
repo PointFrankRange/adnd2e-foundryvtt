@@ -9,6 +9,7 @@ import { normalizeSubrace, effectiveAbilityAdjustments, type RawSubrace } from "
 import { DEFAULT_CHARACTER_POINT_POOL } from "../../core/skills/character-points";
 import { abilityScoreWithBonus } from "../../core/skills/traits";
 import { SHAPECHANGE_CATEGORIES, type FormSnapshot } from "../../core/shapechange";
+import { PRIMARY_TERRAINS } from "../../core/tracking";
 import { applyShapechangeOverlay, type OverlayInput } from "../derive/character/shapechange";
 import { deriveCharacter, resolveTraitTotals, toTraitEntries } from "../derive/character";
 import { activeKitEntries } from "../derive/character/kits";
@@ -233,6 +234,11 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
         },
         { required: true, nullable: true, initial: null },
       ),
+    }),
+    /** SP20 ranger tracking: the ranger's primary terrain ("" = none chosen) and whether he specialized in it (PHBR11 optional rule). Edited on the Tracking panel; defaults only, no migration. */
+    tracking: new SchemaField({
+      primaryTerrain: new StringField({ required: true, blank: true, initial: "", choices: PRIMARY_TERRAINS }),
+      specialized: new BooleanField({ required: true, initial: false }),
     }),
     /** SP15 Plan A: psionics state. `psp` is PERSISTED (null = full, i.e. never spent); `maintained` is the ongoing powers; `max`/`level` are derived caches written by deriveAndCache. `maintained` initial MUST be a function (shared-literal gotcha, see kitPowers). */
     psionics: new SchemaField({
