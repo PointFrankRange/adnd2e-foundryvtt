@@ -1,0 +1,23 @@
+<div class="adnd2e chat-card ranger-tracking">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} — {{localize headlineKey}}</h3>
+  </header>
+  <ul class="modifiers">
+    {{#each breakdown as |m|}}<li>{{localize m.labelKey}}: {{adnd2eSigned m.amount}}</li>{{/each}}
+  </ul>
+  {{#if halved}}<p class="hint">{{localize 'ADND2E.chat.tracking.halved'}}</p>{{/if}}
+  <p class="formula">{{localize 'ADND2E.chat.tracking.score' score=score}}</p>
+  {{#if possible}}<p class="formula">1d20 = <strong>{{roll}}</strong></p>{{/if}}
+  <p class="result {{#if success}}hit{{else}}miss{{/if}}">{{localize resultKey}}</p>
+  {{#if movementKey}}<p class="hint">{{localize movementKey}}</p>{{/if}}
+  {{#if identification}}
+    <p class="formula">{{localize 'ADND2E.chat.tracking.identify'}}: 1d20 = <strong>{{identification.roll}}</strong></p>
+    <p class="result {{#if identification.success}}hit{{else}}miss{{/if}}">{{localize identification.resultKey}}</p>
+    {{#if identification.infoKeys.length}}
+      <ul class="modifiers">
+        {{#each identification.infoKeys}}<li>{{localize this}}</li>{{/each}}
+      </ul>
+    {{/if}}
+  {{/if}}
+</div>
