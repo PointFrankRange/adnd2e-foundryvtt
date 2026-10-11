@@ -19,6 +19,7 @@ export default defineConfig({
         "src/sheets/kit/**/*.ts",
         "src/sheets/item-layouts/**/*.ts",
         "src/sheets/effects/**/*.ts",
+        "src/dialogs/themed-dialog.ts",
         "src/combat/**/*.ts",
         "src/magic/**/*.ts",
       ],

@@ -3,6 +3,7 @@
 // the item's OWN effects collection, and the sheet handlers gate on isEditable before calling in. `disabled` and
 // `transfer` live on the effect document (not in `system`), so they are updated directly, never through form data.
 import { buildItemEffectsView, type ItemEffectRecord, type ItemEffectsView } from "./effects/item-view";
+import { themedConfirm } from "../dialogs/themed-dialog-foundry";
 
 interface ItemEffectDoc {
   id: string;
@@ -77,7 +78,7 @@ export function editItemEffect(item: unknown, effectId: string): void {
 export async function deleteItemEffect(item: unknown, effectId: string): Promise<void> {
   const effect = (item as EffectItem).effects.get(effectId);
   if (!effect) return;
-  const confirmed = await foundry.applications.api.DialogV2.confirm({
+  const confirmed = await themedConfirm({
     window: { title: game.i18n!.localize("ADND2E.sheets.effects.deleteTitle") },
     content: `<p>${game.i18n!.format("ADND2E.sheets.effects.deleteConfirm", {
       name: foundry.utils.escapeHTML(effect.name),

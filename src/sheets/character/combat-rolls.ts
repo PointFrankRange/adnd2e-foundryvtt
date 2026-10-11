@@ -36,6 +36,7 @@ import type { ArmorType, ClassId, SaveCategory } from "../../core/types";
 import { requestApply } from "../../relay/relay-client";
 import type { EffectTarget } from "../../relay/apply-effect";
 import type { RelayConditionId } from "../../combat/apply-relay";
+import { themedConfirm, themedPrompt } from "../../dialogs/themed-dialog-foundry";
 
 /* ---------------------------------------------------------------------------
  * combat-rolls — SP3 Task 5.
@@ -305,7 +306,7 @@ export async function rollAttack(
       armorVsWeaponModifier = weaponVsArmorModifier(weapon.system.damageType as never, toArmorGroup(targetArmorType));
     }
   } else {
-    const manualAc = await foundry.applications.api.DialogV2.prompt({
+    const manualAc = await themedPrompt({
       window: { title: game.i18n!.localize("ADND2E.chat.attack.manualAcTitle") },
       content: `<p>${game.i18n!.localize(
         targets.length === 0 ? "ADND2E.chat.attack.noTargetHint" : "ADND2E.chat.attack.multiTargetHint",
@@ -490,7 +491,7 @@ export async function rollAttack(
 
 /** Asks a yes/no question about the save being rolled; null = the dialog was dismissed. */
 async function askSaveQuestion(titleKey: string, promptKey: string): Promise<boolean | null> {
-  const answer = await foundry.applications.api.DialogV2.confirm({
+  const answer = await themedConfirm({
     window: { title: game.i18n!.localize(titleKey) },
     content: `<p>${game.i18n!.localize(promptKey)}</p>`,
     rejectClose: false,

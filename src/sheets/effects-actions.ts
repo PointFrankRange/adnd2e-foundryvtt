@@ -3,6 +3,7 @@
 // action acts only on the actor's OWN effects collection (never an item's transferred effect), and the sheet handlers
 // gate on isEditable before calling in.
 import { buildEffectsView, type EffectRecord, type EffectsView } from "./effects/view";
+import { themedConfirm } from "../dialogs/themed-dialog-foundry";
 
 interface EffectDoc {
   id: string;
@@ -74,7 +75,7 @@ export function editEffect(actor: unknown, effectId: string): void {
 export async function deleteEffect(actor: unknown, effectId: string): Promise<void> {
   const effect = (actor as EffectOwner).effects.get(effectId);
   if (!effect || effect.system.isCondition) return;
-  const confirmed = await foundry.applications.api.DialogV2.confirm({
+  const confirmed = await themedConfirm({
     window: { title: game.i18n!.localize("ADND2E.sheet.effects.deleteTitle") },
     content: `<p>${game.i18n!.format("ADND2E.sheet.effects.deleteConfirm", {
       name: foundry.utils.escapeHTML(effect.name),

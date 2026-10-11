@@ -1,4 +1,5 @@
 import { SYSTEM_ID } from "../constants";
+import { themedPrompt } from "../dialogs/themed-dialog-foundry";
 
 interface ModifiableCombatant {
   getFlag(scope: string, key: string): unknown;
@@ -15,7 +16,7 @@ interface ModifiableCombatant {
  *  a separate manual reroll. */
 export async function promptInitiativeModifier(combatant: ModifiableCombatant): Promise<void> {
   const current = Number(combatant.getFlag(SYSTEM_ID, "initiativeModifier") ?? 0);
-  const value = await foundry.applications.api.DialogV2.prompt({
+  const value = await themedPrompt({
     window: { title: game.i18n!.localize("ADND2E.combat.initiativeModifier.title") },
     content: `<p>${game.i18n!.localize("ADND2E.combat.initiativeModifier.hint")}</p>
       <input type="number" name="modifier" value="${current}" step="1" autofocus>`,

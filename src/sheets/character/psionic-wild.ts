@@ -3,6 +3,7 @@ import { isHalved, lookupWild, testWildTalent as rollWildTest, wildTalentChance,
 import { subAbilitiesEnabled } from "../../core/abilities/sub-abilities";
 import { getOptionalRules } from "../../settings";
 import { info, warn, type PsionicItem } from "./psionic-actions";
+import { themedConfirm, themedPrompt } from "../../dialogs/themed-dialog-foundry";
 
 /* SP15 Plan D - wild talents: the one-time test, the Table 12/13 power grant, the dire
  * consequences and the GM reset (PHBR5 pp.18-21). Foundry glue only; the rules live in
@@ -98,7 +99,7 @@ const defaultDeps = (): WildDeps => ({
 
 const defaultApplyDeps = (): ApplyDeps => ({
   confirm: async (title, content) =>
-    Boolean(await foundry.applications.api.DialogV2.confirm({ window: { title }, content: `<p>${content}</p>` })),
+    Boolean(await themedConfirm({ window: { title }, content: `<p>${content}</p>` })),
   userIsGM: () => Boolean(game.user?.isGM),
   getFlag: (messageId) => (game.messages?.get(messageId) as { getFlag(s: string, k: string): unknown } | undefined)?.getFlag(SYSTEM_ID, "wildTalent") as WildFlag | undefined,
   getActor: (uuid) => foundry.utils.fromUuidSync(uuid) as unknown as WildActor | null,
@@ -117,7 +118,7 @@ async function defaultChooseDialog(options: ChoiceOption[]): Promise<string | nu
   const items = options
     .map((o) => `<option value="${foundry.utils.escapeHTML(o.name)}">${foundry.utils.escapeHTML(o.name)} (${i18n.localize(`ADND2E.sheet.psionics.discipline.${o.discipline}`)}, ${i18n.localize(`ADND2E.sheet.psionics.kind.${o.kind}`)})</option>`)
     .join("");
-  const value = await foundry.applications.api.DialogV2.prompt({
+  const value = await themedPrompt({
     window: { title: i18n.localize("ADND2E.sheet.wildTalent.chooseTitle") },
     content: `<p>${i18n.localize("ADND2E.sheet.wildTalent.chooseHint")}</p><select name="power" autofocus>${items}</select>`,
     ok: {
