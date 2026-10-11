@@ -9,7 +9,7 @@
     "chassisId": "druid",
     "qualifications": {
       "abilityMinimums": { "str": 9, "dex": 0, "con": 0, "int": 0, "wis": 12, "cha": 15 },
-      "races": [],
+      "races": ["human", "half-elf"],
       "alignments": []
     },
     "xpModifierPercent": 0,
@@ -26,8 +26,7 @@
         "params": [
           { "key": "categories", "value": "reptile,bird,mammal" },
           { "key": "oncePerCategory", "value": "true" },
-          { "key": "minLevel", "value": "7" },
-          { "key": "giant", "value": "false" }
+          { "key": "minLevel", "value": "7" }
         ],
         "usesByLevel": []
       }

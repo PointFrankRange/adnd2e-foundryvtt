@@ -375,7 +375,11 @@ describe("kits pack content", () => {
 
   it("the druid branch kits carry a resolvable shapechange power", () => {
     // PHBR13: the desert and swamp branches restrict forms to their habitat; the mountain druid's entry names none.
-    const habitatless = new Set(["Sample Mountain Druid"]);
+    const expected: Record<string, { habitats: string[]; races: string[] }> = {
+      "Sample Desert Druid": { habitats: ["desert"], races: ["human"] },
+      "Sample Mountain Druid": { habitats: [], races: ["human", "half-elf"] },
+      "Sample Swamp Druid": { habitats: ["swamp"], races: ["human"] },
+    };
     const druids = items.filter((i) => (sys(i) as { chassisId: string }).chassisId === "druid");
     expect(druids).toHaveLength(3);
     for (const d of druids) {
@@ -384,8 +388,8 @@ describe("kits pack content", () => {
       expect(power, String(d.name)).toBeTruthy();
       const spec = resolveShapechangeSpec(power!);
       expect(spec.uses, String(d.name)).toBe(3);
-      if (habitatless.has(String(d.name))) expect(spec.habitats, String(d.name)).toEqual([]);
-      else expect(spec.habitats.length, String(d.name)).toBeGreaterThan(0);
+      expect(spec.habitats, String(d.name)).toEqual(expected[String(d.name)]!.habitats);
+      expect((sys(d) as { qualifications: { races: string[] } }).qualifications.races, String(d.name)).toEqual(expected[String(d.name)]!.races);
       expect(spec.minLevel, String(d.name)).toBe(7);
     }
   });

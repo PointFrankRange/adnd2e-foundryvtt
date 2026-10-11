@@ -40,7 +40,7 @@
       <p class="hint">{{localize 'ADND2E.sheet.shapechange.usesLeft' left=@root.shapechange.usesLeft max=@root.shapechange.usesMax}}</p>
       {{#if @root.shapechange.categoriesUsed.length}}<p class="hint">{{localize 'ADND2E.sheet.shapechange.categoriesUsed'}}: {{#each @root.shapechange.categoriesUsed}}{{adnd2eLabel 'shapechangeCategories' this}}{{#unless @last}}, {{/unless}}{{/each}}</p>{{/if}}
       {{#if @root.shapechange.form}}<p class="hint">{{localize 'ADND2E.sheet.shapechange.shifted' name=@root.shapechange.form.name}}</p>{{/if}}
-      <button type="button" class="kit-small" data-action="shapechangeShift"{{#unless @root.shapechange.canAct}} disabled{{/unless}}{{#unless @root.shapechange.usesLeft}} disabled{{/unless}}>{{localize 'ADND2E.sheet.shapechange.shift'}}</button>
+      <button type="button" class="kit-small" data-action="shapechangeShift"{{#unless @root.shapechange.canShiftNow}} disabled{{/unless}}>{{localize 'ADND2E.sheet.shapechange.shift'}}</button>
       {{#if @root.shapechange.form}}<button type="button" class="kit-small" data-action="shapechangeReturn"{{#unless @root.shapechange.canAct}} disabled{{/unless}}>{{localize 'ADND2E.sheet.shapechange.returnToNormal'}}</button>{{/if}}
       <button type="button" class="kit-small" data-action="shapechangeNewDay">{{localize 'ADND2E.sheet.shapechange.newDay'}}</button>
     </div>
@@ -70,8 +70,10 @@
                   {{#if p.atWill}}<span class="uses">{{localize 'ADND2E.sheet.kits.per.at-will'}}</span>{{else}}<span class="uses">{{p.remaining}} / {{p.uses}} {{localize p.perKey}}</span>{{/if}}
                   {{#if p.scope}}<span class="effect">{{p.scope}}</span>{{/if}}
                   {{#each p.params as |q|}}<span class="effect">{{q.key}}: {{q.value}}</span>{{/each}}
+                  {{#unless p.managed}}
                   <button type="button" class="kit-small" data-action="useKitPower" data-kit-id="{{k.id}}" data-power-id="{{p.id}}"{{#unless p.canUse}} disabled{{/unless}}>{{localize 'ADND2E.sheet.kits.use'}}</button>
                   {{#if p.canReset}}<button type="button" class="kit-small" data-action="resetKitPower" data-kit-id="{{k.id}}" data-power-id="{{p.id}}">{{localize 'ADND2E.sheet.kits.resetPower'}}</button>{{/if}}
+                  {{/unless}}
                 </div>
               {{/each}}
             </div>

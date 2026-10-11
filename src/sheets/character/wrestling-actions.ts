@@ -7,6 +7,7 @@ import {
   LOCK_SPECS, bodyModifier, canUseLock, gripOutcome, lockDamageFormula, nextPressCount, resolveOpposed, sideResult, sizeModifier,
   temporaryDamage, wrestlingDefenseAc, type GrappleRecord, type LockEffectId,
 } from "../../core/wrestling";
+import { isShapechanged } from "../../core/shapechange";
 import type { EffectTarget } from "../../relay/apply-effect";
 import { requestApply } from "../../relay/relay-client";
 import { getOptionalRules } from "../../settings";
@@ -43,7 +44,8 @@ export function wrestlerStats(actor: WrestleActor): WrestleSide {
   // PCs/Character NPCs: the Strength-free base THAC0 (melee already folds Strength in, and strHit is added to the roll below).
   const thac0 = (isCreature ? sys.attributes?.thac0?.value : sys.attributes?.thac0?.base) ?? 20;
   const info = resolveTargetCombatInfo(actor);
-  const magicBonus = isCreature
+  // worn armor melds into a shapechanged druid's animal form and adds nothing
+  const magicBonus = isCreature || isShapechanged(actor)
     ? 0
     : [...actor.items].filter((i) => i.type === "armor" && i.system.equipped === true).reduce((n, i) => n + Number(i.system.magicBonus ?? 0), 0);
   return {

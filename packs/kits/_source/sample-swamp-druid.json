@@ -9,7 +9,7 @@
     "chassisId": "druid",
     "qualifications": {
       "abilityMinimums": { "str": 0, "dex": 0, "con": 0, "int": 0, "wis": 12, "cha": 12 },
-      "races": [],
+      "races": ["human"],
       "alignments": []
     },
     "xpModifierPercent": 0,

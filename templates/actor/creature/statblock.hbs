@@ -105,7 +105,7 @@
         <p class="hint">{{localize 'ADND2E.sheet.creature.shapechangeHint'}}</p>
       {{else}}
         <div class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.shapechangeCategory'}}</span><span class="val">{{#if shapechangeCategoryLabel}}{{localize shapechangeCategoryLabel}}{{else}}{{localize 'ADND2E.sheet.creature.shapechangeNotAForm'}}{{/if}}</span></div>
-        <div class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.shapechangeHabitats'}}</span><span class="val">{{#each habitatRows}}{{#if this.checked}}{{localize this.label}}{{#unless @last}} {{/unless}}{{/if}}{{else}}{{adnd2eOrDash ""}}{{/each}}</span></div>
+        <div class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.shapechangeHabitats'}}</span><span class="val">{{adnd2eOrDash habitatLabels}}</span></div>
         <div class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.shapechangeGiant'}}</span><span class="val">{{#if source.system.details.shapechange.giant}}&#10003;{{else}}{{adnd2eOrDash ""}}{{/if}}</span></div>
       {{/if}}
     </div>

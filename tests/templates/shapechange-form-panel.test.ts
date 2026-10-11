@@ -17,6 +17,7 @@ describe("Monster NPC shapechange form panel (SP16 Task 5)", () => {
     expect(STATBLOCK).toContain('name="system.details.shapechange.giant"');
     expect(STATBLOCK).toContain('data-action="toggleHabitat"');
     expect(STATBLOCK).toContain("shapechangeCategories");
+    expect(STATBLOCK).toContain("habitatLabels");
   });
 
   it("registers every data-action in the template on the creature sheet", () => {

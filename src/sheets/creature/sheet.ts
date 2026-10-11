@@ -150,6 +150,10 @@ export class Adnd2eCreatureSheet extends Base {
     context.shapechangeCategories = cfg.shapechangeCategories;
     context.shapechangeCategoryLabel = sc.category ? cfg.shapechangeCategories![sc.category] : "";
     context.habitatRows = SHAPECHANGE_HABITATS.map((id) => ({ id, label: cfg.habitats![id], checked: sc.habitats.includes(id) }));
+    context.habitatLabels = (context.habitatRows as { label: string; checked: boolean }[])
+      .filter((h) => h.checked)
+      .map((h) => game.i18n!.localize(h.label))
+      .join(", ");
     return context;
   }
 

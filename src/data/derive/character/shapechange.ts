@@ -1,6 +1,7 @@
 // The druid's shapechange overlay on the derived character data (SP16, #84). Pure. The form snapshot lives on the actor
 // (system.shapechange.form, copied at shift time); while it is set, AC and the current movement rate come from the form,
-// so every reader of system.attributes.ac / .movement (targeting, wrestling, the sheet) sees the shifted values.
+// so every reader of system.attributes.ac / .movement (targeting, the sheet) sees the shifted values. Wrestling uses its
+// own AC-10 rule instead of attributes.ac, so it zeroes worn-armor bonuses while shifted (see wrestlerStats).
 import { formArmorClass, type FormSnapshot } from "../../../core/shapechange";
 
 export interface OverlayInput {

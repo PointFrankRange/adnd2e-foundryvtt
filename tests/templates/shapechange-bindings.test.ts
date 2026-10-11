@@ -41,6 +41,21 @@ describe("shapechange sheet bindings (SP16)", () => {
     expect(NPC_SHEET).not.toMatch(/context\.pcActions\s*=/);
     expect(NPC_SHEET).not.toMatch(/context\.shapechange\s*=/);
   });
+  it("rolling a weapon attack is refused while shapechanged (the Favorites panel also offers rollAttack)", () => {
+    const handler = SHEET.slice(SHEET.indexOf("static async #onRollAttack"), SHEET.indexOf("static async #onRollSave"));
+    expect(handler).toMatch(/system\.shapechange\.form\)\s*\{[\s\S]*?weaponsUnavailable[\s\S]*?return;/);
+    expect(handler.indexOf("weaponsUnavailable")).toBeLessThan(handler.indexOf("rollAttack("));
+    expect(typeof lookup("ADND2E.sheet.shapechange.weaponsUnavailable")).toBe("string");
+  });
+  it("the Kits panel hides Use and Reset for the shapechange power the Shapechange panel manages", () => {
+    expect(FEATURES).toMatch(/\{\{#unless p\.managed\}\}[\s\S]*useKitPower[\s\S]*resetKitPower[\s\S]*\{\{\/unless\}\}/);
+    expect(SHEET).toMatch(/managed: true, canUse: false, canReset: false/);
+  });
+  it("the Shift button has a single disabled condition", () => {
+    const line = FEATURES.split(/\r?\n/).find((l) => l.includes('data-action="shapechangeShift"'))!;
+    expect(line.match(/disabled/g)).toHaveLength(1);
+    expect(line).toContain("shapechange.canShiftNow");
+  });
   it("every ADND2E.sheet.shapechange key the templates use exists in lang/en.json", () => {
     const used = new Set<string>();
     for (const src of [FEATURES, HEADER, MAIN]) {

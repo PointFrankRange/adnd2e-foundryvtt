@@ -42,6 +42,8 @@ export interface ShapechangeView {
   categoriesUsed: string[];
   form: FormSnapshot | null;
   canAct: boolean;
+  /** can act and has a use left: the one condition for enabling the Shift button */
+  canShiftNow: boolean;
 }
 
 export interface EligibleForm {
@@ -65,21 +67,24 @@ const druidLevel = (actor: ShapechangeActor): number =>
 
 function specOf(actor: ShapechangeActor): ShapechangeSpec {
   const kit = activeKitEntries(actor.items).find((k) => k.chassisId === "druid" && k.powers.some((p) => p.id === "shapechange"));
-  return resolveShapechangeSpec(kit?.powers.find((p) => p.id === "shapechange"));
+  return resolveShapechangeSpec(kit?.powers.find((p) => p.id === "shapechange"), druidLevel(actor));
 }
 
 export function shapechangeView(actor: ShapechangeActor): ShapechangeView {
   const spec = specOf(actor);
   const level = druidLevel(actor);
   const sc = actor.system.shapechange;
+  const left = usesLeft(sc, spec);
+  const acts = canAct(actor.statuses);
   return {
     visible: level > 0 && shapechangeAvailable(level, spec),
     level,
-    usesLeft: usesLeft(sc, spec),
+    usesLeft: left,
     usesMax: spec.uses,
     categoriesUsed: [...sc.categoriesUsed],
     form: sc.form,
-    canAct: canAct(actor.statuses),
+    canAct: acts,
+    canShiftNow: acts && left > 0,
   };
 }
 
@@ -117,7 +122,8 @@ async function postCard(actor: ShapechangeActor, context: ReturnType<typeof buil
 /** Re-validates everything at click time, rolls 1d6, then writes counters + form + healed hp in ONE update. */
 export async function shiftToForm(actor: ShapechangeActor, formActorId: string): Promise<void> {
   const spec = specOf(actor);
-  if (!shapechangeAvailable(druidLevel(actor), spec) || !canAct(actor.statuses)) return warn("ADND2E.sheet.shapechange.cannotAct");
+  if (!shapechangeAvailable(druidLevel(actor), spec)) return warn("ADND2E.sheet.shapechange.notAvailable");
+  if (!canAct(actor.statuses)) return warn("ADND2E.sheet.shapechange.cannotAct");
   const source = worldForms().find((a) => a.id === formActorId);
   const snapshot = source ? snapshotForm(source) : null;
   if (!source || !snapshot) return warn("ADND2E.sheet.shapechange.blocked.notEligible");
@@ -162,6 +168,7 @@ const escape = (s: string) => foundry.utils.escapeHTML(s);
 
 /** The form picker; blocked forms show disabled with the reason. */
 export async function promptShift(actor: ShapechangeActor): Promise<void> {
+  if (!shapechangeAvailable(druidLevel(actor), specOf(actor))) return warn("ADND2E.sheet.shapechange.notAvailable");
   if (!canAct(actor.statuses)) return warn("ADND2E.sheet.shapechange.cannotAct");
   const forms = eligibleForms(actor);
   if (forms.length === 0) return warn("ADND2E.sheet.shapechange.noForms");

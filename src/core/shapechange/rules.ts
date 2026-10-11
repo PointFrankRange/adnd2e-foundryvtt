@@ -2,6 +2,8 @@
 // Characters ch. and branch entries; PH p.37 baseline. Mechanical values only. The system ships no animal stat blocks:
 // a form is a GM-authored Monster NPC tagged with `details.shapechange`, snapshotted onto the druid at shift time.
 
+import { powerUses, type KitPower } from "../kits";
+
 export const SHAPECHANGE_CATEGORIES = ["reptile", "bird", "mammal"] as const;
 export type ShapechangeCategory = (typeof SHAPECHANGE_CATEGORIES)[number];
 
@@ -35,27 +37,44 @@ export interface PowerLike {
   id: string;
   uses: number;
   per: string;
-  params: { key: string; value: string }[];
+  params?: { key: string; value: string }[];
+  /** level-scaled uses (a KitPower); takes precedence over the flat `uses` */
+  usesByLevel?: { minLevel: number; uses: number }[];
 }
 
 const csv = (value: string): string[] => value.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
 
-/** The kit's `shapechange` power read leniently: anything malformed or unknown falls back to the base value. */
-export function resolveShapechangeSpec(power: PowerLike | null | undefined): ShapechangeSpec {
+/** The kit's `shapechange` power read leniently: anything malformed or unknown falls back to the base value, with one
+ *  deliberate exception: `habitats` fails CLOSED. A non-empty list keeps only its known habitat ids, and a list with
+ *  none (a kit-author typo such as "forests") is kept as written so it matches no form, rather than silently lifting
+ *  the restriction. An empty value still means "no restriction". `categories` keeps the fall-back-to-base behaviour.
+ *  `classLevel` selects the bracket of a level-scaled `usesByLevel`. */
+export function resolveShapechangeSpec(power: PowerLike | null | undefined, classLevel = 0): ShapechangeSpec {
   const spec: ShapechangeSpec = { ...BASE_SHAPECHANGE_SPEC, categories: [...BASE_SHAPECHANGE_SPEC.categories], habitats: [] };
   if (!power) return spec;
-  if (power.per === "day" && power.uses > 0) spec.uses = power.uses;
-  const param = (key: string) => power.params.find((p) => p.key === key)?.value;
+  const uses = power.usesByLevel?.length ? powerUses(power as KitPower, classLevel) : power.uses;
+  if (power.per === "day" && Number.isInteger(uses) && uses > 0) spec.uses = uses;
+  const params = power.params ?? [];
+  const param = (key: string) => params.find((p) => p.key === key)?.value;
+  const flag = (key: string) => param(key)?.trim().toLowerCase();
   const minLevel = Number(param("minLevel"));
   if (Number.isInteger(minLevel) && minLevel > 0) spec.minLevel = minLevel;
   const categories = csv(param("categories") ?? "").filter((c): c is ShapechangeCategory =>
     (SHAPECHANGE_CATEGORIES as readonly string[]).includes(c));
   if (categories.length) spec.categories = categories;
-  const habitats = csv(param("habitats") ?? "").filter((h) => (SHAPECHANGE_HABITATS as readonly string[]).includes(h));
-  if (habitats.length) spec.habitats = habitats;
-  if (param("oncePerCategory") === "false") spec.oncePerCategory = false;
-  if (param("giant") === "true") spec.allowGiant = true;
+  const rawHabitats = csv(param("habitats") ?? "");
+  if (rawHabitats.length) {
+    const known = rawHabitats.filter((h) => (SHAPECHANGE_HABITATS as readonly string[]).includes(h));
+    spec.habitats = known.length ? known : rawHabitats;
+  }
+  if (flag("oncePerCategory") === "false") spec.oncePerCategory = false;
+  if (flag("giant") === "true") spec.allowGiant = true;
   return spec;
+}
+
+/** True while the actor wears a shapechange form (structural: any actor-like with `system.shapechange.form`). */
+export function isShapechanged(actor: { system?: unknown }): boolean {
+  return Boolean((actor.system as { shapechange?: { form?: unknown } } | undefined)?.shapechange?.form);
 }
 
 export function shapechangeAvailable(druidLevel: number, spec: ShapechangeSpec): boolean {
@@ -112,6 +131,7 @@ export function afterNewDay(): ShapechangeState {
 
 /** Assuming a new form heals 1d6 x 10% of the damage taken, fractions rounded down (PHBR13 p.7's worked example: 15, 3 -> 4). */
 export function healOnShift(damageTaken: number, d6: number): number {
+  if (!Number.isFinite(damageTaken) || !Number.isFinite(d6)) return 0;
   return Math.max(0, Math.floor((damageTaken * d6 * 10) / 100));
 }
 

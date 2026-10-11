@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   BASE_SHAPECHANGE_SPEC, afterNewDay, afterShift, canShift, formArmorClass, formEligible, healOnShift,
-  resolveShapechangeSpec, shapechangeAvailable, snapshotForm, usesLeft, type ShapechangeSpec,
+  isShapechanged, resolveShapechangeSpec, shapechangeAvailable, snapshotForm, usesLeft, type ShapechangeSpec,
 } from "../../../src/core/shapechange";
 
 const base = BASE_SHAPECHANGE_SPEC;
@@ -35,12 +35,33 @@ describe("resolveShapechangeSpec", () => {
     expect(resolveShapechangeSpec(power({ uses: 9, per: "week" })).uses).toBe(3);
     expect(resolveShapechangeSpec(power({ uses: 0 })).uses).toBe(3);
   });
-  it("falls back on malformed params and ignores a power with another id's params keys", () => {
+  it("falls back on malformed params and ignores unknown param keys", () => {
     const spec = resolveShapechangeSpec(power({ params: [
       { key: "minLevel", value: "zero" }, { key: "categories", value: "fish" }, { key: "habitats", value: "" },
       { key: "oncePerCategory", value: "maybe" }, { key: "giant", value: "yes" }, { key: "other", value: "x" },
     ] }));
     expect(spec).toEqual(base);
+  });
+  it("fails closed on habitats: an all-unknown list matches no form, a mixed list keeps the known ids", () => {
+    const typo = resolveShapechangeSpec(power({ params: [{ key: "habitats", value: "forests" }] }));
+    expect(typo.habitats).toEqual(["forests"]);
+    expect(formEligible({ category: "mammal", habitats: ["forest"], giant: false }, typo)).toBe(false);
+    expect(resolveShapechangeSpec(power({ params: [{ key: "habitats", value: "desert, Forests" }] })).habitats).toEqual(["desert"]);
+  });
+  it("tolerates a missing params array and padded or capitalised booleans", () => {
+    expect(resolveShapechangeSpec({ id: "shapechange", uses: 0, per: "day" })).toEqual(base);
+    const spec = resolveShapechangeSpec(power({ params: [{ key: "oncePerCategory", value: "False" }, { key: "giant", value: " true " }] }));
+    expect(spec.oncePerCategory).toBe(false);
+    expect(spec.allowGiant).toBe(true);
+  });
+  it("requires an integer use count", () => {
+    expect(resolveShapechangeSpec(power({ uses: 2.5 })).uses).toBe(3);
+  });
+  it("honours usesByLevel brackets", () => {
+    const scaled = { ...power({ uses: 0 }), usesByLevel: [{ minLevel: 7, uses: 2 }, { minLevel: 11, uses: 4 }] };
+    expect(resolveShapechangeSpec(scaled, 7).uses).toBe(2);
+    expect(resolveShapechangeSpec(scaled, 11).uses).toBe(4);
+    expect(resolveShapechangeSpec(scaled, 3).uses).toBe(3);
   });
   it("rejects a non-positive or fractional minLevel", () => {
     expect(resolveShapechangeSpec(power({ params: [{ key: "minLevel", value: "0" }] })).minLevel).toBe(7);
@@ -50,6 +71,15 @@ describe("resolveShapechangeSpec", () => {
     const spec = resolveShapechangeSpec(null);
     spec.categories.push("bird");
     expect(base.categories).toHaveLength(3);
+  });
+});
+
+describe("isShapechanged", () => {
+  it("is true only with a form set", () => {
+    expect(isShapechanged({ system: { shapechange: { form: { name: "Bear" } } } })).toBe(true);
+    expect(isShapechanged({ system: { shapechange: { form: null } } })).toBe(false);
+    expect(isShapechanged({ system: {} })).toBe(false);
+    expect(isShapechanged({})).toBe(false);
   });
 });
 
@@ -122,6 +152,10 @@ describe("healOnShift", () => {
     expect(healOnShift(0, 6)).toBe(0);
     expect(healOnShift(-5, 6)).toBe(0);
   });
+  it("is zero when an argument is not finite", () => {
+    expect(healOnShift(Number.NaN, 3)).toBe(0);
+    expect(healOnShift(10, Number.POSITIVE_INFINITY)).toBe(0);
+  });
 });
 
 describe("snapshotForm and formArmorClass", () => {
@@ -150,5 +184,12 @@ describe("snapshotForm and formArmorClass", () => {
   });
   it("the form's AC applies to every AC context", () => {
     expect(formArmorClass({ ac: 6 })).toEqual({ normal: 6, rearAttack: 6, surprised: 6, shieldless: 6 });
+  });
+});
+
+describe("canShift priority", () => {
+  it("reports notEligible before noUsesLeft when both apply", () => {
+    const verdict = canShift({ usedToday: 3, categoriesUsed: [] }, base, { category: "mammal", habitats: [], giant: true });
+    expect(verdict).toEqual({ ok: false, reason: "notEligible" });
   });
 });

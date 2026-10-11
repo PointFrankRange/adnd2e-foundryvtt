@@ -210,7 +210,9 @@
         },
         "formAttacks": "Form attacks",
         "rollFormAttack": "Roll attack",
-        "cannotAct": "This druid cannot act and cannot change shape right now."
+        "cannotAct": "This druid cannot act and cannot change shape right now.",
+        "notAvailable": "This druid cannot shapechange yet.",
+        "weaponsUnavailable": "A shapechanged druid attacks with the form's attacks."
       },
       "wildTalent": {
         "settingOff": "Wild talents are not enabled in this world.",

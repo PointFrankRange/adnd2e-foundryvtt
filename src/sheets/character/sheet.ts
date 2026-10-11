@@ -507,7 +507,12 @@ export class Adnd2eCharacterSheet extends Base {
           amount: e.amount > 0 ? `+${e.amount}` : String(e.amount),
         })),
         grantedFeatures: k.grantedFeatures,
-        powers: buildPowerRows(k.id, k.powers, kitUsage, classLevel).map((p) => ({ ...p, perKey: `ADND2E.sheet.kits.per.${p.per}` })),
+        powers: buildPowerRows(k.id, k.powers, kitUsage, classLevel).map((p) => {
+          // the druid's Shapechange power is tracked by the Shapechange panel's own counters, not system.kitPowers
+          const managed = k.chassisId === "druid" && p.id === "shapechange";
+          const row = managed ? { ...p, managed: true, canUse: false, canReset: false, remaining: shapechange.usesLeft } : { ...p, managed: false };
+          return { ...row, perKey: `ADND2E.sheet.kits.per.${p.per}` };
+        }),
         overrides: {
           castingDisabled: k.overrides.casting === "none",
           turningKey: k.overrides.turning.mode === "inherit" ? "" : `ADND2E.sheet.kits.turning.${k.overrides.turning.mode}`,
@@ -1038,6 +1043,10 @@ export class Adnd2eCharacterSheet extends Base {
     _event: PointerEvent,
     target: HTMLElement,
   ): Promise<void> {
+    if ((this.document as unknown as { system: { shapechange: { form: unknown } } }).system.shapechange.form) {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.shapechange.weaponsUnavailable"));
+      return;
+    }
     const weaponItemId = target.dataset.itemId;
     if (!weaponItemId) return;
     const weaponRow = target.closest(".weapon-row");
