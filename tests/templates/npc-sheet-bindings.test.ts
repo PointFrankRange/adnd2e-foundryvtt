@@ -58,6 +58,8 @@ const NOTHING_LOST_FIELDS = ['data-field="quantity"', 'data-field="location"', '
 // owner remove one (#114) — adding/pooling traits stays PC-only (drops refused, no ledger).
 const PC_ONLY_ACTIONS = [
   "awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "turnUndead", "resetTurnAttempt", "useKitPower", "resetKitPower", "newDayKitPowers", "newEncounterKitPowers",
+  // SP16 druid shapechange: PC-sheet only (panel, banner and form attacks are gated on pcActions/shapechange).
+  "shapechangeShift", "shapechangeReturn", "shapechangeNewDay", "rollFormAttack",
   // Sub-project 14 Plan A: wizard spell points' Free Magicks panel (memorize/cast/forget a
   // free magick) is gated behind `@root.pcActions` in spells.hbs, same as this list's other
   // entries — the Character NPC sheet reuses that same shared PC template but its sheet.ts

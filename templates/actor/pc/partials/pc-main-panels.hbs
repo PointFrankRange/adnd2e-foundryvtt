@@ -76,6 +76,19 @@
   <section class="kit-panel">
     <div class="kit-bar">{{localize 'ADND2E.sheet.kit.attacks'}}</div>
     <div class="kit-body">
+      {{#if @root.shapechange.form}}
+      <h4 class="kit-subhead">{{localize 'ADND2E.sheet.shapechange.formAttacks'}}: {{@root.shapechange.form.name}}</h4>
+      {{#each @root.shapechange.form.attacks as |a|}}
+        <div class="weapon-row form-attack-row equipped">
+          <span class="name">{{a.name}}</span>
+          <span class="count">x{{a.count}}</span>
+          <span class="damage">{{a.damage}}</span>
+          <button type="button" class="kit-roll" data-action="rollFormAttack" data-index="{{@index}}">{{localize 'ADND2E.sheet.shapechange.rollFormAttack'}}</button>
+        </div>
+      {{else}}
+        <p class="kit-empty">{{localize 'ADND2E.sheet.combat.noWeapons'}}</p>
+      {{/each}}
+      {{else}}
       {{#each adnd2e.combat.weapons as |w|}}
         <div class="weapon-row{{#if w.equipped}} equipped{{/if}}" data-item-id="{{w.id}}">
           <span class="name">{{w.name}}</span>
@@ -110,6 +123,7 @@
       {{else}}
         <p class="kit-empty">{{localize 'ADND2E.sheet.combat.noWeapons'}}</p>
       {{/each}}
+      {{/if}}
     </div>
   </section>
 

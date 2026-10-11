@@ -33,6 +33,19 @@
     </div>
   </section>
   {{/if}}
+  {{#if @root.shapechange.visible}}
+  <section class="kit-panel shapechange-panel">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.shapechange.title'}}</div>
+    <div class="kit-body">
+      <p class="hint">{{localize 'ADND2E.sheet.shapechange.usesLeft' left=@root.shapechange.usesLeft max=@root.shapechange.usesMax}}</p>
+      {{#if @root.shapechange.categoriesUsed.length}}<p class="hint">{{localize 'ADND2E.sheet.shapechange.categoriesUsed'}}: {{#each @root.shapechange.categoriesUsed}}{{adnd2eLabel 'shapechangeCategories' this}}{{#unless @last}}, {{/unless}}{{/each}}</p>{{/if}}
+      {{#if @root.shapechange.form}}<p class="hint">{{localize 'ADND2E.sheet.shapechange.shifted' name=@root.shapechange.form.name}}</p>{{/if}}
+      <button type="button" class="kit-small" data-action="shapechangeShift"{{#unless @root.shapechange.canAct}} disabled{{/unless}}{{#unless @root.shapechange.usesLeft}} disabled{{/unless}}>{{localize 'ADND2E.sheet.shapechange.shift'}}</button>
+      {{#if @root.shapechange.form}}<button type="button" class="kit-small" data-action="shapechangeReturn"{{#unless @root.shapechange.canAct}} disabled{{/unless}}>{{localize 'ADND2E.sheet.shapechange.returnToNormal'}}</button>{{/if}}
+      <button type="button" class="kit-small" data-action="shapechangeNewDay">{{localize 'ADND2E.sheet.shapechange.newDay'}}</button>
+    </div>
+  </section>
+  {{/if}}
   {{> adnd2e.pc-wild-talent-panel}}
   {{#if @root.kits.length}}
   <section class="kit-panel">
