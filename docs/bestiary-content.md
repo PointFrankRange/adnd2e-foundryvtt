@@ -29,3 +29,12 @@ folder in the sidebar until at least one pack is assigned to it. The
 compendium (step 3 above) and assign it to that folder — when creating a
 Compendium, use the "Folder" dropdown in Foundry's own creation dialog to
 place it under "Bestiary".
+
+## Shapechange forms (druids)
+
+Druids with a shapechange power (SP16) assume the form of a Monster NPC from your own bestiary; the system ships no animal stat blocks.
+
+1. Create or import the animals as Monster NPCs (see above).
+2. On each animal's sheet, use the Shapechange form panel to tag it: category (reptile, bird or mammal), habitats (desert, swamp, mountains and so on), and whether it is a giant form. These are stored in `details.shapechange`.
+3. Give players Observer permission on the folder holding the animals so a druid's player can pick a form.
+4. The GM judges size: a form should be no smaller than a bullfrog or small bird and no larger than a black bear. The system does not enforce it.
