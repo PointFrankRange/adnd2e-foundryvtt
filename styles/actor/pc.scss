@@ -199,3 +199,7 @@
     font-family: inherit; font-size: 13px; font-weight: 700; margin: 4px 0 2px; color: var(--kit-ink);
   }
 }
+
+// SP16: kit power rows put the name, uses, scope and each param in adjacent inline spans with no whitespace between
+// them (the params ran together: "habitats: desertcategories: ..."); give the spans room.
+.adnd2e.pc-sheet .power-row > span + span { margin-left: 8px; }

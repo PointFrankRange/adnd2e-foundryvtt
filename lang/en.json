@@ -196,7 +196,7 @@
         "title": "Shapechange",
         "usesLeft": "Left today: {left} / {max}",
         "categoriesUsed": "Forms used today",
-        "shift": "Shift…",
+        "shift": "Shift form",
         "shiftTitle": "Shapechange",
         "pick": "Choose a form",
         "noForms": "No eligible forms. The GM tags Monster NPCs as shapechange forms and gives players Observer permission.",
