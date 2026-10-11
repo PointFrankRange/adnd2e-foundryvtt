@@ -5,8 +5,8 @@ import { withDialogTheme } from "./themed-dialog";
 
 /** DialogV2.prompt with the system dialog theme. Same signature and result as the core call. */
 export const themedPrompt: typeof foundry.applications.api.DialogV2.prompt = (config) =>
-  foundry.applications.api.DialogV2.prompt(withDialogTheme(config as never) as never);
+  foundry.applications.api.DialogV2.prompt(withDialogTheme((config ?? {}) as never) as never);
 
 /** DialogV2.confirm with the system dialog theme. Same signature and result as the core call. */
 export const themedConfirm: typeof foundry.applications.api.DialogV2.confirm = (config) =>
-  foundry.applications.api.DialogV2.confirm(withDialogTheme(config as never) as never);
+  foundry.applications.api.DialogV2.confirm(withDialogTheme((config ?? {}) as never) as never);

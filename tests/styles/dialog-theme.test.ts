@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { compile } from "sass";
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const TOKENS = readFileSync(path.join(ROOT, "styles", "theme", "_tokens.scss"), "utf8");
@@ -25,7 +26,13 @@ describe("dialog theme (#150)", () => {
   });
   it("only ever targets our own dialog class, never every core dialog", () => {
     expect(DIALOG).toContain(".adnd2e.adnd2e-dialog");
-    expect(DIALOG).not.toMatch(/(^|\n)\s*\.dialog\b/);
+    const css = compile(path.join(ROOT, "styles", "dialog", "_dialog.scss")).css;
+    const selectors = (css.match(/[^{}]+(?=\{)/g) ?? [])
+      .flatMap((s) => s.split(","))
+      .map((s) => s.trim())
+      .filter((s) => s && !s.startsWith("@") && !/^\d+%$/.test(s));
+    expect(selectors.length).toBeGreaterThan(0);
+    for (const s of selectors) expect(s.startsWith(".adnd2e.adnd2e-dialog")).toBe(true);
   });
   it("uses no !important and never core's bare .disabled class", () => {
     expect(DIALOG).not.toContain("!important");

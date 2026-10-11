@@ -6,6 +6,18 @@ describe("withDialogTheme", () => {
     expect(withDialogTheme({ content: "x" }).classes).toEqual([...DIALOG_CLASSES]);
   });
 
+  it("accepts a typed (weak-type) variable", () => {
+    const typed: { content: string } = { content: "x" };
+    expect(withDialogTheme(typed).classes).toEqual([...DIALOG_CLASSES]);
+  });
+
+  it("rejects a non-array classes value at compile time", () => {
+    if ((0 as number) === 1) {
+      // @ts-expect-error classes must be a string array
+      withDialogTheme({ classes: "x" });
+    }
+  });
+
   it("keeps the caller's classes first and appends ours", () => {
     expect(withDialogTheme({ classes: ["mine", "other"] }).classes).toEqual(["mine", "other", "adnd2e", "adnd2e-dialog"]);
   });

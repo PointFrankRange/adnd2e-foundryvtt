@@ -5,9 +5,7 @@
 export const DIALOG_CLASSES = ["adnd2e", "adnd2e-dialog"] as const;
 
 /** The dialog options with the system dialog classes added after any classes the caller set. Pure: never mutates. */
-export function withDialogTheme<T extends { classes?: readonly string[] }>(options: T): T & { classes: string[] };
-export function withDialogTheme<T extends object>(options: T): T & { classes: string[] };
-export function withDialogTheme<T extends object>(options: T): T & { classes: string[] } {
-  const own = (options as { classes?: readonly string[] }).classes ?? [];
+export function withDialogTheme<T extends object>(options: T & { classes?: readonly string[] }): T & { classes: string[] } {
+  const own = options.classes ?? [];
   return { ...options, classes: [...own, ...DIALOG_CLASSES.filter((c) => !own.includes(c))] };
 }

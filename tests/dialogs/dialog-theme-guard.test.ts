@@ -19,10 +19,10 @@ function code(file: string): string {
 }
 
 describe("dialog theming guard (#150)", () => {
-  it("no file other than the wrapper calls DialogV2.prompt, .confirm or .wait directly", () => {
+  it("no file other than the wrapper references DialogV2", () => {
     const offenders = tsFiles(SRC)
       .filter((f) => f !== WRAPPER)
-      .filter((f) => /DialogV2\s*\.\s*(prompt|confirm|wait)\s*\(/.test(code(f)))
+      .filter((f) => /\bDialogV2\b/.test(code(f)))
       .map((f) => path.relative(SRC, f));
     expect(offenders).toEqual([]);
   });
@@ -34,14 +34,14 @@ describe("dialog theming guard (#150)", () => {
     expect(wrapper).toMatch(/DialogV2\s*\.\s*confirm\s*\(/);
   });
 
-  it("the 14 known call sites import the wrappers", () => {
+  it("every known dialog call-site file imports the wrappers", () => {
     const importers = tsFiles(SRC)
       .filter((f) => f !== WRAPPER)
       .filter((f) => /themedPrompt|themedConfirm/.test(code(f)))
       .map((f) => path.relative(SRC, f).replace(/\\/g, "/"))
       .sort();
     expect(importers).toEqual(
-      [
+      expect.arrayContaining([
         "combat/initiative-modifier-dialog.ts",
         "relay/relay-handler.ts",
         "sheets/character/combat-rolls.ts",
@@ -53,7 +53,7 @@ describe("dialog theming guard (#150)", () => {
         "sheets/effects-actions.ts",
         "sheets/item-effects-actions.ts",
         "sheets/item-row-actions.ts",
-      ].sort(),
+      ]),
     );
   });
 });
