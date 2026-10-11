@@ -67,6 +67,8 @@
       "chaotic-evil": "Chaotic Evil"
     },
     "monsterTypes": { "undead": "Undead" },
+    "shapechangeCategories": { "reptile": "Reptile", "bird": "Bird", "mammal": "Mammal" },
+    "habitats": { "desert": "Desert", "forest": "Forest", "mountains": "Mountains", "plains": "Plains", "swamp": "Swamp", "arctic": "Arctic", "jungle": "Jungle", "ocean": "Ocean", "underground": "Underground" },
     "turnRows": {
       "skeleton": "Skeleton or 1 HD",
       "zombie": "Zombie",

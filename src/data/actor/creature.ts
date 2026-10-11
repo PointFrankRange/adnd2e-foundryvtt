@@ -3,9 +3,10 @@ import { deriveCreature } from "../derive/creature";
 import type { CreatureSnapshot } from "../derive/creature";
 import { ALIGNMENTS, ATTACK_TYPES, CLASS_GROUPS, CREATURE_SIZES, MONSTER_TYPE_IDS, SAVE_MODES, TURN_ROW_CHOICES } from "../item/choices";
 import { Adnd2eActorModel } from "./base-actor";
+import { SHAPECHANGE_CATEGORIES, SHAPECHANGE_HABITATS } from "../../core/shapechange";
 import type { SaveCategory } from "../../core/types";
 
-const { StringField, NumberField, ArrayField, SchemaField } = foundry.data.fields;
+const { StringField, NumberField, ArrayField, SchemaField, BooleanField } = foundry.data.fields;
 
 export class CreatureModel extends Adnd2eActorModel {
   static defineSchema(): foundry.data.fields.DataSchema {
@@ -83,6 +84,12 @@ export class CreatureModel extends Adnd2eActorModel {
         types: new ArrayField(new StringField({ required: true, blank: false, choices: MONSTER_TYPE_IDS }), { required: true, initial: [] }),
         turning: new SchemaField({
           row: new StringField({ required: true, blank: true, initial: "", choices: TURN_ROW_CHOICES }),
+        }),
+        /** SP16: a GM-authored Monster NPC becomes a druid shapechange FORM by setting a category (blank = not a form). Size is the GM's responsibility. */
+        shapechange: new SchemaField({
+          category: new StringField({ required: true, blank: true, initial: "", choices: ["", ...SHAPECHANGE_CATEGORIES] }),
+          habitats: new ArrayField(new StringField({ required: true, blank: false, choices: SHAPECHANGE_HABITATS }), { required: true, initial: () => [] }),
+          giant: new BooleanField({ required: true, initial: false }),
         }),
       }),
     };
