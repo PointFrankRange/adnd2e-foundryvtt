@@ -4,6 +4,7 @@ import path from "node:path";
 import { POWER_DISCIPLINES, POWER_KINDS, POWER_MAINTENANCE_UNITS, CLASS_IDS, RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
 import { EQUIPMENT_MODES, normalizePowers, normalizeOverrides, powerUses, TURNING_MODES, CASTING_MODES } from "../../src/core/kits";
 import { normalizeSubrace } from "../../src/core/races";
+import { resolveShapechangeSpec } from "../../src/core/shapechange";
 import { THIEF_SKILLS } from "../../src/core/proficiencies/thief-skills";
 import { TRAITS, toTraitEffect, type RawTraitEffect } from "../../src/core/skills/traits";
 
@@ -360,15 +361,36 @@ describe("traits pack content (drift-tested against the pure TRAITS table)", () 
 describe("kits pack content", () => {
   const items = docs("kits");
 
-  it("has four uniquely named and identified kit Items", () => {
-    expect(items).toHaveLength(4);
-    expect(new Set(items.map((d) => d._id)).size).toBe(4);
-    expect(new Set(items.map((d) => d.name)).size).toBe(4);
+  it("has seven uniquely named and identified kit Items", () => {
+    expect(items).toHaveLength(7);
+    expect(new Set(items.map((d) => d._id)).size).toBe(7);
+    expect(new Set(items.map((d) => d.name)).size).toBe(7);
     for (const d of items) {
       expect(d.type, String(d.name)).toBe("kit");
       expect(String(d._id)).toHaveLength(16);
       expect(String(d._key)).toBe(`!items!${String(d._id)}`);
       expect(String(d.name).startsWith("Sample"), String(d.name)).toBe(true);
+    }
+  });
+
+  it("the druid branch kits carry a resolvable shapechange power", () => {
+    // PHBR13: the desert and swamp branches restrict forms to their habitat; the mountain druid's entry names none.
+    const expected: Record<string, { habitats: string[]; races: string[] }> = {
+      "Sample Desert Druid": { habitats: ["desert"], races: ["human"] },
+      "Sample Mountain Druid": { habitats: [], races: ["human", "half-elf"] },
+      "Sample Swamp Druid": { habitats: ["swamp"], races: ["human"] },
+    };
+    const druids = items.filter((i) => (sys(i) as { chassisId: string }).chassisId === "druid");
+    expect(druids).toHaveLength(3);
+    for (const d of druids) {
+      const powers = (sys(d) as { powers: { id: string; uses: number; per: string; params: { key: string; value: string }[] }[] }).powers;
+      const power = powers.find((p) => p.id === "shapechange");
+      expect(power, String(d.name)).toBeTruthy();
+      const spec = resolveShapechangeSpec(power!);
+      expect(spec.uses, String(d.name)).toBe(3);
+      expect(spec.habitats, String(d.name)).toEqual(expected[String(d.name)]!.habitats);
+      expect((sys(d) as { qualifications: { races: string[] } }).qualifications.races, String(d.name)).toEqual(expected[String(d.name)]!.races);
+      expect(spec.minLevel, String(d.name)).toBe(7);
     }
   });
 

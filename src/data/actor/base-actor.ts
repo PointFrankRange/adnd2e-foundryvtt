@@ -8,6 +8,8 @@ import type { AbilityScores, Race } from "../../core/types";
 import { normalizeSubrace, effectiveAbilityAdjustments, type RawSubrace } from "../../core/races";
 import { DEFAULT_CHARACTER_POINT_POOL } from "../../core/skills/character-points";
 import { abilityScoreWithBonus } from "../../core/skills/traits";
+import { SHAPECHANGE_CATEGORIES, type FormSnapshot } from "../../core/shapechange";
+import { applyShapechangeOverlay, type OverlayInput } from "../derive/character/shapechange";
 import { deriveCharacter, resolveTraitTotals, toTraitEntries } from "../derive/character";
 import { activeKitEntries } from "../derive/character/kits";
 import { getOptionalRules } from "../../settings";
@@ -201,6 +203,37 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
     }),
     /** SP11 Plan B: kit-power use counts, keyed "<kitItemId>:<powerId>" → { used }. PERSISTED, never touched by prepareDerivedData (like channelling.current); only Use / Reset / kit deletion write it. An ObjectField with initial {} makes "no usage" an empty object. The initial MUST be a function: an object-literal initial is a single object shared by every model (getInitialValue does not clone) and is mutated in place by merge-style updates, leaking one actor's counters onto the others. */
     kitPowers: new ObjectField({ required: true, initial: () => ({}) }),
+    /** SP16 druid shapechanging: shifts used today, the categories used today, and the CURRENT FORM snapshot (null in normal form; copied from a tagged Monster NPC at shift time, never a live link). PERSISTED; only the shift, return and new-day actions write it. `categoriesUsed` initial MUST be a function (shared-literal gotcha, see kitPowers). */
+    shapechange: new SchemaField({
+      usedToday: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+      categoriesUsed: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: () => [] }),
+      form: new SchemaField(
+        {
+          name: new StringField({ required: true, blank: true, initial: "" }),
+          img: new StringField({ required: true, blank: true, initial: "" }),
+          category: new StringField({ required: true, blank: false, initial: "mammal", choices: SHAPECHANGE_CATEGORIES }),
+          ac: new NumberField({ required: true, integer: true, initial: 10 }),
+          movement: new SchemaField({
+            land: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+            burrow: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+            climb: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+            fly: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+            swim: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+            flyManeuverability: new StringField({ required: true, blank: true, initial: "" }),
+          }),
+          attacks: new ArrayField(
+            new SchemaField({
+              name: new StringField({ required: true, blank: true, initial: "" }),
+              count: new NumberField({ required: true, integer: true, min: 1, initial: 1 }),
+              damage: new StringField({ required: true, blank: true, initial: "" }),
+              type: new StringField({ required: true, blank: true, initial: "melee" }),
+            }),
+            { required: true, initial: () => [] },
+          ),
+        },
+        { required: true, nullable: true, initial: null },
+      ),
+    }),
     /** SP15 Plan A: psionics state. `psp` is PERSISTED (null = full, i.e. never spent); `maintained` is the ongoing powers; `max`/`level` are derived caches written by deriveAndCache. `maintained` initial MUST be a function (shared-literal gotcha, see kitPowers). */
     psionics: new SchemaField({
       psp: new NumberField({ required: true, nullable: true, integer: true, min: 0, initial: null }),
@@ -391,6 +424,7 @@ interface DerivedWriteSurface {
   thiefSkills: { total: number; spent: number; available: number; allocations: unknown };
   languagesKnown: unknown;
   psionics: { max: number; level: number; wild: boolean };
+  shapechange: { form: FormSnapshot | null };
   spellcasting: { wizard: { slots: unknown; spellPoints: unknown; channelling: { max: unknown } }; priest: { slots: unknown; spellPoints: unknown; channelling: { max: unknown } } };
 }
 
@@ -439,6 +473,13 @@ export function deriveAndCache(model: foundry.abstract.TypeDataModel.Any): void 
     current: derived.encumbrance.movementRate,
     encumbranceCategory: derived.encumbrance.category,
   };
+  // SP16: a shapechanged druid takes the form's AC and land movement; HP, saves and THAC0 are the druid's own.
+  const overlaid = applyShapechangeOverlay(
+    { ac: derived.ac, movement: sys.attributes.movement as OverlayInput["movement"] },
+    sys.shapechange.form,
+  );
+  sys.attributes.ac = overlaid.ac;
+  sys.attributes.movement = overlaid.movement;
 
   if (derived.spellSlots.wizard) sys.spellcasting.wizard.slots = derived.spellSlots.wizard;
   if (derived.spellSlots.priest) sys.spellcasting.priest.slots = derived.spellSlots.priest;

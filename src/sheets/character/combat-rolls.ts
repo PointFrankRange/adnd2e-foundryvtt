@@ -1,3 +1,4 @@
+import { isShapechanged } from "../../core/shapechange";
 import { buildAttackCardContext } from "../../combat/attack-card";
 import { enchantmentCharmSaveBonus, poisonSaveAdjustment } from "../../core/saves/racial";
 import { normalizeSubrace } from "../../core/races/subrace";
@@ -87,9 +88,12 @@ export function resolveTargetArmorType(
   targetActor: {
     type: string;
     items: Iterable<{ type: string; system: { armorType?: string; equipped?: boolean; isShield?: boolean } }>;
+    system?: unknown;
   },
 ): ArmorType {
   if (targetActor.type === "creature") return "none";
+  // a shapechanged druid's worn armor melds into the animal form and does not count
+  if (isShapechanged(targetActor)) return "none";
   const armorItem = [...targetActor.items].find(
     (i) => i.type === "armor" && i.system.equipped && !i.system.isShield,
   );

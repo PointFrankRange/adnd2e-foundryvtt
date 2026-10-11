@@ -1,0 +1,41 @@
+{
+  "_id": "kSampleSwampDru1",
+  "_key": "!items!kSampleSwampDru1",
+  "name": "Sample Swamp Druid",
+  "type": "kit",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "",
+    "chassisId": "druid",
+    "qualifications": {
+      "abilityMinimums": { "str": 0, "dex": 0, "con": 0, "int": 0, "wis": 12, "cha": 12 },
+      "races": ["human"],
+      "alignments": []
+    },
+    "xpModifierPercent": 0,
+    "effects": [],
+    "equipment": {
+      "armor": { "mode": "inherit", "names": [] },
+      "weapons": { "mode": "inherit", "names": [] }
+    },
+    "forbiddenWeaponProficiencies": [],
+    "grantedFeatures": ["Shapechange: swamp and wetland animals only, each form once per day"],
+    "powers": [
+      {
+        "id": "shapechange", "name": "Shapechange", "uses": 3, "per": "day", "scope": "",
+        "params": [
+          { "key": "habitats", "value": "swamp" },
+          { "key": "categories", "value": "reptile,bird,mammal" },
+          { "key": "oncePerCategory", "value": "true" },
+          { "key": "minLevel", "value": "7" }
+        ],
+        "usesByLevel": []
+      }
+    ],
+    "overrides": {
+      "casting": "inherit",
+      "turning": { "mode": "inherit", "offset": 0 },
+      "removedAbilities": []
+    }
+  }
+}

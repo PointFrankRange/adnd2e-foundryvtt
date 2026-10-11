@@ -13,8 +13,8 @@ describe("buildAdnd2eConfig()", () => {
     expect(Object.keys(cfg).sort()).toEqual(
       [
         "abilities", "alignments", "armorTypes", "attackTypes", "classGroups", "creatureIntelligence",
-        "currency", "damageTypes", "dispositions", "encumbranceCategories", "monsterTypes", "movementModes",
-        "saveModes", "saves", "schools", "sizes", "spheres", "treasureTypes", "turnRows",
+        "currency", "damageTypes", "dispositions", "encumbranceCategories", "habitats", "monsterTypes", "movementModes",
+        "saveModes", "saves", "schools", "shapechangeCategories", "sizes", "spheres", "treasureTypes", "turnRows",
         "weaponCategories", "weaponDamageTypes", "weaponProficiencyGroups", "weaponSizes", "weaponStyleGroups",
       ].sort(),
     );
@@ -78,6 +78,8 @@ describe("buildAdnd2eConfig()", () => {
     assertLabelMap(cfg.saves);
     assertLabelMap(cfg.classGroups);
     assertLabelMap(cfg.schools);
+    assertLabelMap(cfg.habitats);
+    assertLabelMap(cfg.shapechangeCategories);
     assertLabelMap(cfg.spheres);
     assertLabelMap(cfg.alignments);
     assertLabelMap(cfg.sizes);

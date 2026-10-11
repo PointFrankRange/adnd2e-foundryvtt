@@ -47,6 +47,7 @@
     .pc-title-row { display: flex; align-items: center; gap: 8px; }
     .pc-name { flex: 1; font-family: Georgia, "Times New Roman", serif; font-size: 22px; font-weight: 700; color: var(--kit-accent-ink); margin: 0; border: none; background: transparent; }
     input.pc-name { background: var(--kit-field-bg); border: 1px solid var(--kit-field-border); }
+    .shapechange-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0 0 6px; padding: 3px 8px; border: 2px solid var(--kit-maroon); border-radius: 2px; background: var(--kit-field-bg); color: var(--kit-accent-ink); font-weight: 700; .shapechange-move, .shapechange-ac { font-weight: 400; color: var(--kit-field-ink); } .kit-small { margin-left: auto; } }
     .pc-class-line { color: var(--kit-muted); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 2px 0 6px; }
     .pc-vitals {
       display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch;
@@ -198,3 +199,7 @@
     font-family: inherit; font-size: 13px; font-weight: 700; margin: 4px 0 2px; color: var(--kit-ink);
   }
 }
+
+// SP16: kit power rows put the name, uses, scope and each param in adjacent inline spans with no whitespace between
+// them (the params ran together: "habitats: desertcategories: ..."); give the spans room.
+.adnd2e.pc-sheet .power-row > span + span { margin-left: 8px; }

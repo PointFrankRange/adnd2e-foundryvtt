@@ -117,6 +117,29 @@ export async function rollAttack(actor: CreatureActor, attackIndex: number): Pro
   });
 }
 
+/** The shapechanged druid, structurally: its own THAC0 and the snapshotted form's attacks (SP16). */
+interface FormAttackActor extends CreatureActor {
+  system: CreatureActor["system"] & {
+    attributes: CreatureActor["system"]["attributes"] & { thac0: { melee: number; ranged: number } };
+    shapechange: { form: { attacks: { name: string; count: number; damage: string; type: string }[] } | null };
+  };
+}
+
+/** SP16: a shapechanged druid attacks with the FORM's attack (its damage and count), at the druid's own THAC0. */
+export async function rollFormAttack(actor: FormAttackActor, attackIndex: number): Promise<void> {
+  const attack = actor.system.shapechange.form?.attacks[attackIndex];
+  if (!attack) return;
+  const thac0 = attack.type === "ranged" ? actor.system.attributes.thac0.ranged : actor.system.attributes.thac0.melee;
+  await rollCreatureAttack(actor, {
+    name: attack.name,
+    thac0,
+    weaponMagicBonus: 0,
+    damageFormula: () => attack.damage,
+    damageType: null,
+    weaponItem: null,
+  });
+}
+
 /** Attack with an EQUIPPED weapon item: monster THAC0 + the weapon's magic bonus,
  *  the weapon's S-M / L damage by target size (Monster NPC gear design). */
 export async function rollWeaponAttack(actor: CreatureActor & { items: { get(id: string): unknown } & Iterable<unknown> }, itemId: string): Promise<void> {

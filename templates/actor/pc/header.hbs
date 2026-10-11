@@ -21,6 +21,14 @@
       <span class="alignment">{{localize (lookup alignments adnd2e.identity.alignmentValue)}}</span>
     {{/if}}
   </div>
+  {{#if @root.pcActions}}{{#if @root.shapechange.form}}
+  <div class="shapechange-banner">
+    <span class="shapechange-name">{{localize 'ADND2E.sheet.shapechange.shifted' name=@root.shapechange.form.name}}</span>
+    <span class="shapechange-ac">{{localize 'ADND2E.sheet.vitals.ac'}} {{@root.shapechange.form.ac}}</span>
+    {{#each @root.shapechange.movement as |m|}}<span class="shapechange-move">{{localize m.labelKey}} {{m.value}}{{#if m.maneuverability}} ({{m.maneuverability}}){{/if}}</span>{{/each}}
+    <button type="button" class="kit-small" data-action="shapechangeReturn"{{#unless @root.shapechange.canAct}} disabled{{/unless}}>{{localize 'ADND2E.sheet.shapechange.returnToNormal'}}</button>
+  </div>
+  {{/if}}{{/if}}
   <div class="pc-top">
     <div class="pc-top-left">
       <section class="kit-panel pc-classes">

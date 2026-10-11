@@ -18,6 +18,8 @@ import type { AbilityKey, Alignment, ArmorType, ClassId, NonweaponGroup, Race, S
 import { getOptionalRules } from "../../settings";
 import { tierForConditionId } from "../../core/magic/channeller-fatigue";
 import { rollAttack, rollSave } from "./combat-rolls";
+import { rollFormAttack } from "../creature/combat-rolls";
+import { promptShift, resetShapechangeDay, returnToNormal, shapechangeView } from "./shapechange-actions";
 import { buildCharacterSheetContext, traitTargetKey } from "./context";
 import type {
   ClassItemView,
@@ -395,6 +397,10 @@ export class Adnd2eCharacterSheet extends Base {
       psionicEndContact: Adnd2eCharacterSheet.#onPsionicEndContact,
       wildTalentTest: Adnd2eCharacterSheet.#onWildTalentTest,
       wildTalentReset: Adnd2eCharacterSheet.#onWildTalentReset,
+      shapechangeShift: Adnd2eCharacterSheet.#onShapechangeShift,
+      shapechangeReturn: Adnd2eCharacterSheet.#onShapechangeReturn,
+      shapechangeNewDay: Adnd2eCharacterSheet.#onShapechangeNewDay,
+      rollFormAttack: Adnd2eCharacterSheet.#onRollFormAttack,
     },
   };
 
@@ -469,6 +475,21 @@ export class Adnd2eCharacterSheet extends Base {
     context.pcActions = true;
     context.effectsView = effectsContext(this.document, this.isEditable);
     context.turning = turningPanel(this.document as never);
+    const shapechange = shapechangeView(this.document as never);
+    // attributes.movement.current carries only the land rate: list the form's other modes for the banner
+    const formMovement = shapechange.form?.movement;
+    context.shapechange = {
+      ...shapechange,
+      movement: formMovement
+        ? (["burrow", "climb", "fly", "swim"] as const)
+            .filter((mode) => formMovement[mode] > 0)
+            .map((mode) => ({
+              labelKey: `ADND2E.movementModes.${mode}`,
+              value: formMovement[mode],
+              maneuverability: mode === "fly" ? formMovement.flyManeuverability : "",
+            }))
+        : [],
+    };
     const kitCfg = (CONFIG as unknown as { ADND2E: Record<string, Record<string, string>> }).ADND2E;
     const kitUsage = (this.document as unknown as { system: { kitPowers?: PowerUsage } }).system.kitPowers ?? {};
     context.kits = activeKitEntries(
@@ -486,7 +507,12 @@ export class Adnd2eCharacterSheet extends Base {
           amount: e.amount > 0 ? `+${e.amount}` : String(e.amount),
         })),
         grantedFeatures: k.grantedFeatures,
-        powers: buildPowerRows(k.id, k.powers, kitUsage, classLevel).map((p) => ({ ...p, perKey: `ADND2E.sheet.kits.per.${p.per}` })),
+        powers: buildPowerRows(k.id, k.powers, kitUsage, classLevel).map((p) => {
+          // the druid's Shapechange power is tracked by the Shapechange panel's own counters, not system.kitPowers
+          const managed = k.chassisId === "druid" && p.id === "shapechange";
+          const row = managed ? { ...p, managed: true, canUse: false, canReset: false, remaining: shapechange.usesLeft } : { ...p, managed: false };
+          return { ...row, perKey: `ADND2E.sheet.kits.per.${p.per}` };
+        }),
         overrides: {
           castingDisabled: k.overrides.casting === "none",
           turningKey: k.overrides.turning.mode === "inherit" ? "" : `ADND2E.sheet.kits.turning.${k.overrides.turning.mode}`,
@@ -1017,6 +1043,10 @@ export class Adnd2eCharacterSheet extends Base {
     _event: PointerEvent,
     target: HTMLElement,
   ): Promise<void> {
+    if ((this.document as unknown as { system: { shapechange: { form: unknown } } }).system.shapechange.form) {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.shapechange.weaponsUnavailable"));
+      return;
+    }
     const weaponItemId = target.dataset.itemId;
     if (!weaponItemId) return;
     const weaponRow = target.closest(".weapon-row");
@@ -1152,7 +1182,27 @@ export class Adnd2eCharacterSheet extends Base {
   }
 
   static async #onNewDayKitPowers(this: Adnd2eCharacterSheet): Promise<void> {
-    if (this.isEditable) await resetKitPowers(this.document as never, "day");
+    if (!this.isEditable) return;
+    await resetKitPowers(this.document as never, "day");
+    await resetShapechangeDay(this.document as never);
+  }
+
+  // Interaction handlers — SP16 druid shapechange.
+  static async #onShapechangeShift(this: Adnd2eCharacterSheet): Promise<void> {
+    if (this.isEditable) await promptShift(this.document as never);
+  }
+
+  static async #onShapechangeReturn(this: Adnd2eCharacterSheet): Promise<void> {
+    if (this.isEditable) await returnToNormal(this.document as never);
+  }
+
+  static async #onShapechangeNewDay(this: Adnd2eCharacterSheet): Promise<void> {
+    if (this.isEditable) await resetShapechangeDay(this.document as never);
+  }
+
+  static async #onRollFormAttack(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const index = Number.parseInt(target.dataset.index ?? "", 10);
+    if (this.isEditable && Number.isInteger(index) && index >= 0) await rollFormAttack(this.document as never, index);
   }
 
   static async #onNewEncounterKitPowers(this: Adnd2eCharacterSheet): Promise<void> {

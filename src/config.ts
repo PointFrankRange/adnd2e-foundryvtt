@@ -2,6 +2,7 @@
 // Pure and framework-free — assigned to `CONFIG.ADND2E` on `init` by system.ts,
 // typed into the global scope by src/types/global.d.ts.
 import type { TurnRowId } from "./core/turning";
+import type { ShapechangeCategory, SHAPECHANGE_HABITATS } from "./core/shapechange";
 import type { MonsterTypeId } from "./data/item/choices";
 import type { DamageType, WeaponCategory, WeaponSize } from "./core/weapons/data";
 import type {
@@ -74,6 +75,8 @@ export interface Adnd2eConfig {
   readonly spheres: LabelMap<SphereName>;
   readonly alignments: LabelMap<Alignment>;
   readonly monsterTypes: LabelMap<MonsterTypeId>;
+  readonly shapechangeCategories: LabelMap<ShapechangeCategory>;
+  readonly habitats: LabelMap<(typeof SHAPECHANGE_HABITATS)[number]>;
   readonly turnRows: LabelMap<TurnRowId>;
   readonly sizes: LabelMap<CreatureSize>;
   readonly movementModes: LabelMap<MovementMode>;
@@ -172,6 +175,22 @@ export function buildAdnd2eConfig(): Adnd2eConfig {
       "chaotic-evil": "ADND2E.alignments.chaotic-evil",
     },
     monsterTypes: { undead: "ADND2E.monsterTypes.undead" },
+    shapechangeCategories: {
+      reptile: "ADND2E.shapechangeCategories.reptile",
+      bird: "ADND2E.shapechangeCategories.bird",
+      mammal: "ADND2E.shapechangeCategories.mammal",
+    },
+    habitats: {
+      desert: "ADND2E.habitats.desert",
+      forest: "ADND2E.habitats.forest",
+      mountains: "ADND2E.habitats.mountains",
+      plains: "ADND2E.habitats.plains",
+      swamp: "ADND2E.habitats.swamp",
+      arctic: "ADND2E.habitats.arctic",
+      jungle: "ADND2E.habitats.jungle",
+      ocean: "ADND2E.habitats.ocean",
+      underground: "ADND2E.habitats.underground",
+    },
     turnRows: {
       skeleton: "ADND2E.turnRows.skeleton",
       zombie: "ADND2E.turnRows.zombie",

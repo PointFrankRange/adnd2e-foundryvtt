@@ -67,6 +67,8 @@
       "chaotic-evil": "Chaotic Evil"
     },
     "monsterTypes": { "undead": "Undead" },
+    "shapechangeCategories": { "reptile": "Reptile", "bird": "Bird", "mammal": "Mammal" },
+    "habitats": { "desert": "Desert", "forest": "Forest", "mountains": "Mountains", "plains": "Plains", "swamp": "Swamp", "arctic": "Arctic", "jungle": "Jungle", "ocean": "Ocean", "underground": "Underground" },
     "turnRows": {
       "skeleton": "Skeleton or 1 HD",
       "zombie": "Zombie",
@@ -190,6 +192,28 @@
       "doneWithFailures": "AD&D 2E: imported {created} of {total} document(s); {failed} failed — see the console."
     },
     "sheet": {
+      "shapechange": {
+        "title": "Shapechange",
+        "usesLeft": "Left today: {left} / {max}",
+        "categoriesUsed": "Forms used today",
+        "shift": "Shift form",
+        "shiftTitle": "Shapechange",
+        "pick": "Choose a form",
+        "noForms": "No eligible forms. The GM tags Monster NPCs as shapechange forms and gives players Observer permission.",
+        "returnToNormal": "Return to normal form",
+        "newDay": "New day",
+        "shifted": "Shapechanged: {name}",
+        "blocked": {
+          "noUsesLeft": "no uses left",
+          "categoryUsed": "category already used today",
+          "notEligible": "not allowed for this druid"
+        },
+        "formAttacks": "Form attacks",
+        "rollFormAttack": "Roll attack",
+        "cannotAct": "This druid cannot act and cannot change shape right now.",
+        "notAvailable": "This druid cannot shapechange yet.",
+        "weaponsUnavailable": "A shapechanged druid attacks with the form's attacks."
+      },
       "wildTalent": {
         "settingOff": "Wild talents are not enabled in this world.",
         "psionicist": "A psionicist does not test for a wild talent.",
@@ -733,6 +757,12 @@
       "creature": {
         "monsterTypes": "Types",
         "turnRow": "Turning row (Table 61)",
+        "shapechangeTitle": "Shapechange form",
+        "shapechangeCategory": "Category",
+        "shapechangeHabitats": "Habitats",
+        "shapechangeGiant": "Giant form",
+        "shapechangeNotAForm": "Not a shapechange form",
+        "shapechangeHint": "Tag a Monster NPC as a form for druids; the GM chooses legal animals (bullfrog to black bear) and gives players Observer permission.",
         "hd": "Hit Dice",
         "hdBonus": "HD Bonus",
         "fixedHp": "Fixed HP",
@@ -778,6 +808,14 @@
       }
     },
     "chat": {
+      "shapechange": {
+        "shift": "Shapechange",
+        "return": "Normal form",
+        "healed": "Heals {amount} hit points",
+        "usesLeft": "Shapechanges left today: {left} / {max}",
+        "takesARound": "The change takes one round; the druid can take no other action.",
+        "backToNormal": "Resumes normal shape."
+      },
       "standUp": "{name} spends their full move standing up.",
       "psionic": {
         "roll": "Power check",
