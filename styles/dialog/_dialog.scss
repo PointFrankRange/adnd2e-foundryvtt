@@ -1,0 +1,58 @@
+// System dialogs (#150 part 2). Only dialogs opened through src/dialogs/themed-dialog-foundry.ts carry the
+// `adnd2e adnd2e-dialog` classes, so core's and other modules' dialogs are never restyled. Tokens come from
+// styles/theme/_tokens.scss (keyed to this app element). system.css is unlayered, so these rules beat core's layered
+// ones with no need for an override flag. DialogV2 structure: <dialog class="application dialog …"> → .window-header, .window-content >
+// form.dialog-form > .dialog-content + footer.form-footer (buttons carry data-action="ok"|"yes"|"no"|…).
+.adnd2e.adnd2e-dialog {
+  background-color: var(--kit-bg);
+  background-image: var(--kit-bg-image);
+  color: var(--kit-ink);
+  border: 1px solid var(--kit-maroon);
+
+  .window-header {
+    background: var(--kit-maroon);
+    color: var(--kit-maroon-ink);
+    border-bottom: 0;
+
+    .window-title, button, .header-control { color: inherit; }
+  }
+
+  .window-content {
+    background: transparent;
+    color: inherit;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+  }
+
+  p { color: inherit; }
+
+  input[type="text"], input[type="number"], select, textarea {
+    background: var(--kit-field-bg);
+    color: var(--kit-field-ink);
+    border: 1px solid var(--kit-field-border);
+    border-radius: 2px;
+  }
+
+  // footer buttons: the affirmative action is filled maroon, everything else an outline
+  .form-footer button {
+    min-height: 0;
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 2px 12px;
+    background: transparent;
+    color: var(--kit-accent-ink);
+    border: 1px solid var(--kit-maroon);
+    border-radius: 3px;
+    cursor: pointer;
+
+    &:hover:not(:disabled) { background: var(--kit-maroon); color: var(--kit-maroon-ink); }
+    &:disabled { opacity: .5; cursor: default; }
+
+    &[data-action="ok"], &[data-action="yes"] {
+      background: var(--kit-maroon);
+      color: var(--kit-maroon-ink);
+    }
+    &[data-action="ok"]:hover:not(:disabled), &[data-action="yes"]:hover:not(:disabled) { filter: brightness(1.15); }
+  }
+}
