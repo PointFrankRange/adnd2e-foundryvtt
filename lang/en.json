@@ -755,6 +755,12 @@
       "creature": {
         "monsterTypes": "Types",
         "turnRow": "Turning row (Table 61)",
+        "shapechangeTitle": "Shapechange form",
+        "shapechangeCategory": "Category",
+        "shapechangeHabitats": "Habitats",
+        "shapechangeGiant": "Giant form",
+        "shapechangeNotAForm": "Not a shapechange form",
+        "shapechangeHint": "Tag a Monster NPC as a form for druids; the GM chooses legal animals (bullfrog to black bear) and gives players Observer permission.",
         "hd": "Hit Dice",
         "hdBonus": "HD Bonus",
         "fixedHp": "Fixed HP",

@@ -93,4 +93,22 @@
     </section>
   {{/if}}
 
+  <section class="kit-panel shapechange-form">
+    <div class="kit-bar">{{localize 'ADND2E.sheet.creature.shapechangeTitle'}}</div>
+    <div class="kit-body detail-fields">
+      {{#if adnd2e.lock.unlocked}}
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.shapechangeCategory'}}</span><select name="system.details.shapechange.category">{{selectOptions shapechangeCategories selected=source.system.details.shapechange.category localize=true blank=(localize 'ADND2E.sheet.creature.shapechangeNotAForm')}}</select></label>
+        <div class="detail-field shapechange-habitats"><span class="cap">{{localize 'ADND2E.sheet.creature.shapechangeHabitats'}}</span>
+          {{#each habitatRows}}<label><input type="checkbox" data-action="toggleHabitat" data-habitat="{{this.id}}" {{#if this.checked}}checked{{/if}}> {{localize this.label}}</label>{{/each}}
+        </div>
+        <label class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.shapechangeGiant'}}</span><input type="checkbox" name="system.details.shapechange.giant" {{checked source.system.details.shapechange.giant}}></label>
+        <p class="hint">{{localize 'ADND2E.sheet.creature.shapechangeHint'}}</p>
+      {{else}}
+        <div class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.shapechangeCategory'}}</span><span class="val">{{#if shapechangeCategoryLabel}}{{localize shapechangeCategoryLabel}}{{else}}{{localize 'ADND2E.sheet.creature.shapechangeNotAForm'}}{{/if}}</span></div>
+        <div class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.shapechangeHabitats'}}</span><span class="val">{{#each habitatRows}}{{#if this.checked}}{{localize this.label}}{{#unless @last}} {{/unless}}{{/if}}{{else}}{{adnd2eOrDash ""}}{{/each}}</span></div>
+        <div class="detail-field"><span class="cap">{{localize 'ADND2E.sheet.creature.shapechangeGiant'}}</span><span class="val">{{#if source.system.details.shapechange.giant}}&#10003;{{else}}{{adnd2eOrDash ""}}{{/if}}</span></div>
+      {{/if}}
+    </div>
+  </section>
+
 </section>

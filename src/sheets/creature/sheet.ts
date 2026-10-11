@@ -1,5 +1,6 @@
 import { createEffect, deleteEffect, editEffect, effectsContext, openEffectSource, removeCondition, toggleEffect } from "../effects-actions";
 import { MONSTER_TYPE_IDS, type MonsterTypeId } from "../../data/item/choices";
+import { SHAPECHANGE_HABITATS } from "../../core/shapechange";
 import { TEMPLATE_PATH } from "../../constants";
 import type { SaveCategory } from "../../core/types";
 import { monsterDropVerdict } from "../../combat/monster-gear";
@@ -68,6 +69,7 @@ export class Adnd2eCreatureSheet extends Base {
       rollAttack: Adnd2eCreatureSheet.#onRollAttack,
       rollSave: Adnd2eCreatureSheet.#onRollSave,
       toggleMonsterType: Adnd2eCreatureSheet.#onToggleMonsterType,
+      toggleHabitat: Adnd2eCreatureSheet.#onToggleHabitat,
       addAttack: Adnd2eCreatureSheet.#onAddAttack,
       deleteAttack: Adnd2eCreatureSheet.#onDeleteAttack,
       rollWeaponAttack: Adnd2eCreatureSheet.#onRollWeaponAttack,
@@ -144,6 +146,10 @@ export class Adnd2eCreatureSheet extends Base {
     }));
     context.isUndead = types.includes("undead");
     context.turnRows = cfg.turnRows;
+    const sc = (this.document.system as unknown as { details: { shapechange: { category: string; habitats: string[] } } }).details.shapechange;
+    context.shapechangeCategories = cfg.shapechangeCategories;
+    context.shapechangeCategoryLabel = sc.category ? cfg.shapechangeCategories![sc.category] : "";
+    context.habitatRows = SHAPECHANGE_HABITATS.map((id) => ({ id, label: cfg.habitats![id], checked: sc.habitats.includes(id) }));
     return context;
   }
 
@@ -252,6 +258,16 @@ export class Adnd2eCreatureSheet extends Base {
     const current = [...(this.document.system as unknown as { details: { types: string[] } }).details.types];
     const next = current.includes(id) ? current.filter((t) => t !== id) : [...current, id];
     await this.document.update({ "system.details.types": next } as never);
+  }
+
+  /** SP16: toggle one habitat on the form tag — writes the whole toggled array, like the monster types. */
+  static async #onToggleHabitat(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
+    const id = target.dataset.habitat;
+    if (!id || !(SHAPECHANGE_HABITATS as readonly string[]).includes(id)) return;
+    const current = [...(this.document.system as unknown as { details: { shapechange: { habitats: string[] } } }).details.shapechange.habitats];
+    const next = current.includes(id) ? current.filter((h) => h !== id) : [...current, id];
+    await this.document.update({ "system.details.shapechange.habitats": next } as never);
   }
 
   static async #onRollSave(this: Adnd2eCreatureSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
