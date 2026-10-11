@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { buildAdnd2eConfig } from "../../src/config";
+import { TRACKING_TERRAINS, TRACKING_ILLUMINATIONS, PRIMARY_TERRAINS } from "../../src/core/tracking";
 
 const cfg = buildAdnd2eConfig();
 
@@ -14,7 +17,7 @@ describe("buildAdnd2eConfig()", () => {
       [
         "abilities", "alignments", "armorTypes", "attackTypes", "classGroups", "creatureIntelligence",
         "currency", "damageTypes", "dispositions", "encumbranceCategories", "habitats", "monsterTypes", "movementModes",
-        "saveModes", "saves", "schools", "shapechangeCategories", "sizes", "spheres", "treasureTypes", "turnRows",
+        "primaryTerrains", "saveModes", "saves", "schools", "shapechangeCategories", "sizes", "spheres", "trackingIlluminations", "trackingTerrains", "treasureTypes", "turnRows",
         "weaponCategories", "weaponDamageTypes", "weaponProficiencyGroups", "weaponSizes", "weaponStyleGroups",
       ].sort(),
     );
@@ -80,6 +83,9 @@ describe("buildAdnd2eConfig()", () => {
     assertLabelMap(cfg.schools);
     assertLabelMap(cfg.habitats);
     assertLabelMap(cfg.shapechangeCategories);
+    assertLabelMap(cfg.trackingTerrains);
+    assertLabelMap(cfg.trackingIlluminations);
+    assertLabelMap(cfg.primaryTerrains);
     assertLabelMap(cfg.spheres);
     assertLabelMap(cfg.alignments);
     assertLabelMap(cfg.sizes);
@@ -93,6 +99,17 @@ describe("buildAdnd2eConfig()", () => {
     assertLabelMap(cfg.creatureIntelligence);
     assertLabelMap(cfg.treasureTypes);
     assertLabelMap(cfg.weaponStyleGroups);
+  });
+
+  it("tracking label maps cover every id and resolve in lang/en.json", () => {
+    const lang = JSON.parse(readFileSync(path.join(process.cwd(), "lang", "en.json"), "utf8")) as Record<string, unknown>;
+    const lookup = (key: string) => key.split(".").reduce<unknown>((o, k) => (o as Record<string, unknown> | undefined)?.[k], lang);
+    expect(Object.keys(cfg.trackingTerrains)).toEqual([...TRACKING_TERRAINS]);
+    expect(Object.keys(cfg.trackingIlluminations)).toEqual([...TRACKING_ILLUMINATIONS]);
+    expect(Object.keys(cfg.primaryTerrains)).toEqual([...PRIMARY_TERRAINS]);
+    for (const map of [cfg.trackingTerrains, cfg.trackingIlluminations, cfg.primaryTerrains]) {
+      for (const key of Object.values(map)) expect(typeof lookup(key), key).toBe("string");
+    }
   });
 
   it("the returned object is frozen", () => {

@@ -3,6 +3,7 @@
 // typed into the global scope by src/types/global.d.ts.
 import type { TurnRowId } from "./core/turning";
 import type { ShapechangeCategory, SHAPECHANGE_HABITATS } from "./core/shapechange";
+import type { TrackingTerrain, TrackingIllumination, PrimaryTerrain } from "./core/tracking";
 import type { MonsterTypeId } from "./data/item/choices";
 import type { DamageType, WeaponCategory, WeaponSize } from "./core/weapons/data";
 import type {
@@ -77,6 +78,9 @@ export interface Adnd2eConfig {
   readonly monsterTypes: LabelMap<MonsterTypeId>;
   readonly shapechangeCategories: LabelMap<ShapechangeCategory>;
   readonly habitats: LabelMap<(typeof SHAPECHANGE_HABITATS)[number]>;
+  readonly trackingTerrains: LabelMap<TrackingTerrain>;
+  readonly trackingIlluminations: LabelMap<TrackingIllumination>;
+  readonly primaryTerrains: LabelMap<PrimaryTerrain>;
   readonly turnRows: LabelMap<TurnRowId>;
   readonly sizes: LabelMap<CreatureSize>;
   readonly movementModes: LabelMap<MovementMode>;
@@ -190,6 +194,33 @@ export function buildAdnd2eConfig(): Adnd2eConfig {
       jungle: "ADND2E.habitats.jungle",
       ocean: "ADND2E.habitats.ocean",
       underground: "ADND2E.habitats.underground",
+    },
+    trackingTerrains: {
+      freshSnow: "ADND2E.trackingTerrains.freshSnow",
+      softGround: "ADND2E.trackingTerrains.softGround",
+      thickBrush: "ADND2E.trackingTerrains.thickBrush",
+      forestField: "ADND2E.trackingTerrains.forestField",
+      normal: "ADND2E.trackingTerrains.normal",
+      desert: "ADND2E.trackingTerrains.desert",
+      swamp: "ADND2E.trackingTerrains.swamp",
+      rocky: "ADND2E.trackingTerrains.rocky",
+    },
+    trackingIlluminations: {
+      good: "ADND2E.trackingIlluminations.good",
+      twilight: "ADND2E.trackingIlluminations.twilight",
+      moonlit: "ADND2E.trackingIlluminations.moonlit",
+      dark: "ADND2E.trackingIlluminations.dark",
+    },
+    primaryTerrains: {
+      aquatic: "ADND2E.primaryTerrains.aquatic",
+      arctic: "ADND2E.primaryTerrains.arctic",
+      desert: "ADND2E.primaryTerrains.desert",
+      forest: "ADND2E.primaryTerrains.forest",
+      hill: "ADND2E.primaryTerrains.hill",
+      jungle: "ADND2E.primaryTerrains.jungle",
+      mountain: "ADND2E.primaryTerrains.mountain",
+      plain: "ADND2E.primaryTerrains.plain",
+      swamp: "ADND2E.primaryTerrains.swamp",
     },
     turnRows: {
       skeleton: "ADND2E.turnRows.skeleton",
