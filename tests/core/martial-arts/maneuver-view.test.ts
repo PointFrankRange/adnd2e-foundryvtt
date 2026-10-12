@@ -43,6 +43,12 @@ describe("maneuver rows", () => {
       state: "locked", reasonKey: "ADND2E.sheet.martialArts.locked.levelCap",
     });
   });
+  it("a known maneuver still shows (as known) after the style stops offering its list", () => {
+    const item = karate({ availableManeuvers: [{ list: "block", difficulties: [1] }], knownManeuvers: [{ id: "kick:1", level: 2 }] });
+    const rows = rowsOf(buildMartialArtsView({ ...base, items: [item] }));
+    expect(Object.keys(rows).sort()).toEqual(["block:1", "kick:1"]);
+    expect(rows["kick:1"]).toMatchObject({ state: "known", usable: true, reasonKey: "" });
+  });
   it("a style with no availableManeuvers has an empty list, and the new inputs are optional", () => {
     const v = buildMartialArtsView({
       enabled: true, knowsBasics: true, storedActiveId: "", canAct: true,

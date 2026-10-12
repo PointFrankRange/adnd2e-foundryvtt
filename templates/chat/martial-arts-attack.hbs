@@ -5,6 +5,7 @@
   </header>
   {{#if maneuverKey}}<p class="formula">{{localize maneuverKey}} — {{localize costKey}}</p>{{/if}}
   {{#if targetName}}<p class="hint">{{localize 'ADND2E.chat.martialArts.against' target=targetName}}</p>{{/if}}
+  {{#if noStyleDie}}<p class="hint">{{localize 'ADND2E.chat.martialArts.noStyleDie'}}</p>{{/if}}
   {{#if breakdown.length}}
     <ul class="modifiers">
       {{#each breakdown as |m|}}<li>{{localize m.labelKey}}: {{adnd2eSigned m.amount}}</li>{{/each}}

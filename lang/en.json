@@ -578,6 +578,7 @@
           "known": "Already learned.",
           "order": "Learn the easier maneuvers in this list first.",
           "noSlot": "No free weapon proficiency slot.",
+          "noLevel": "A character needs a class level to learn maneuvers.",
           "levelCap": "Two maneuvers per level on a style."
         }
       },
@@ -916,6 +917,7 @@
         "hp": "hp",
         "parried": "Parried",
         "notParried": "Not parried",
+        "noStyleDie": "This style has no damage die, so only the maneuver's own dice are rolled.",
         "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions", "table21": "Target's armor" }
       },
       "shapechange": {

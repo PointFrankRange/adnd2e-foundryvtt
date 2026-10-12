@@ -76,7 +76,7 @@ export function buildMartialArtsView(input: {
     const known = i.system.knownManeuvers ?? [];
     const knownIds = new Set(known.map((k) => k.id));
     const isActive = i.id === activeId;
-    const maneuvers = MANEUVERS.filter((m) => offered.some((o) => o.list === m.list && o.difficulties.includes(m.difficulty))).map(
+    const maneuvers = MANEUVERS.filter((m) => knownIds.has(m.id) || offered.some((o) => o.list === m.list && o.difficulties.includes(m.difficulty))).map(
       (m): ManeuverRow => {
         const verdict = learnability({ maneuverId: m.id, offered, known, freeSlots: input.freeSlots ?? 0, level: input.level ?? 0 });
         const isKnown = knownIds.has(m.id);

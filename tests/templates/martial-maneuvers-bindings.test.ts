@@ -32,6 +32,13 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
     expect(NPC_SHEET).not.toContain("learnManeuver");
     expect(NPC_SHEET).not.toContain("useManeuver");
   });
+  it("a dropped martialStyle is reset to fresh slots and no known maneuvers, and the card notes a missing style die", () => {
+    expect(SHEET).toContain("freshStyleUpdate()");
+    expect(SHEET).toMatch(/dropped\.type === "martialStyle"\) \{[\s\S]*?freshStyleUpdate\(\)/);
+    expect(CHAT).toContain("noStyleDie");
+    expect(ACTIONS).toContain("styleDieIsNull");
+    expect(ACTIONS).toContain("ADND2E.sheet.martialArts.locked.noLevel");
+  });
   it("every sheet, chat and lock-reason key used exists in lang/en.json", () => {
     const keys = new Set([
       ...keysIn(MAIN, /ADND2E\.sheet\.martialArts\.[A-Za-z]+/g),

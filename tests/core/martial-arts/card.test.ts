@@ -52,6 +52,17 @@ describe("buildManeuverCardContext", () => {
     expect(ctx.formula).toBe("1d4+1d2+1");
     expect(ctx.damage).toBe(6);
     expect(ctx.blowKey).toBe("");
+    expect(ctx.noStyleDie).toBe(false);
+  });
+  it("notes a missing style die only for an attack that uses it, on a style with none", () => {
+    const base = { actorName: "A", actorImg: "", styleName: "S", targetName: null, damageTotal: 0 };
+    const kick = resolveManeuverAttack({ ...attackInput, styleDie: null });
+    expect(buildManeuverCardContext({ ...base, result: kick, styleDieIsNull: true }).noStyleDie).toBe(true);
+    expect(buildManeuverCardContext({ ...base, result: kick }).noStyleDie).toBe(false);
+    const fist = resolveManeuverAttack({ ...attackInput, maneuverId: "strike:1", styleDie: null });
+    expect(buildManeuverCardContext({ ...base, result: fist, styleDieIsNull: true }).noStyleDie).toBe(false);
+    const parry = resolveManeuverAttack({ ...attackInput, maneuverId: "block:1", styleDie: null });
+    expect(buildManeuverCardContext({ ...base, result: parry, styleDieIsNull: true }).noStyleDie).toBe(false);
   });
   it("a miss shows the failure text and no damage", () => {
     const ctx = buildManeuverCardContext({

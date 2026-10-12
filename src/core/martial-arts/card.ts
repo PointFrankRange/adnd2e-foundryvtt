@@ -59,6 +59,8 @@ export interface ManeuverCardInput {
   result: ManeuverAttackResult;
   /** the rolled damage total, floored at 0 by the caller; 0 when there is no damage */
   damageTotal: number;
+  /** true when the active style has no damage die (weapon-method style); default false */
+  styleDieIsNull?: boolean;
 }
 
 export interface ManeuverCardContext {
@@ -78,6 +80,8 @@ export interface ManeuverCardContext {
   formula: string;
   damage: number;
   stunTrigger: boolean;
+  /** an attack that uses the style die was rolled on a style with none, so the die counted as 0 */
+  noStyleDie: boolean;
   /** always blank: a maneuver is the result, so the Table 16 blow line is not shown */
   blowKey: string;
 }
@@ -113,6 +117,7 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
     formula: r.damageFormula ?? "",
     damage: r.hit && r.damageFormula !== null ? input.damageTotal : 0,
     stunTrigger: r.hit && r.stunTrigger,
+    noStyleDie: def.kind === "attack" && def.ownDie === null && input.styleDieIsNull === true,
     blowKey: "",
   };
 }

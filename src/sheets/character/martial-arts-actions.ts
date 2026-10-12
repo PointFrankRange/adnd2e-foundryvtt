@@ -69,6 +69,7 @@ export async function learnManeuver(actor: MartialArtsActor, styleId: string, ma
   const sys = item.system as { availableManeuvers?: { list: string; difficulties: number[] }[]; knownManeuvers?: { id: string; level: number }[]; slotsInvested?: number };
   const known = sys.knownManeuvers ?? [];
   const level = characterLevel(actor);
+  if (level < 1) return warn("ADND2E.sheet.martialArts.locked.noLevel");
   const verdict = learnability({ maneuverId, offered: sys.availableManeuvers ?? [], known, freeSlots: freeWeaponSlots(actor), level });
   if (!verdict.ok) return warn(`ADND2E.sheet.martialArts.locked.${verdict.reason}`);
   await item.update({
@@ -199,6 +200,7 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
   if (result.damageFormula) damageTotal = Math.max(0, (await new Roll(result.damageFormula).evaluate()).total ?? 0);
   const context = buildManeuverCardContext({
     actorName: actor.name, actorImg: actor.img, styleName: view.active.name, targetName: target.targetName, result, damageTotal,
+    styleDieIsNull: view.active.damageDie === null,
   });
   await postCard(actor, roll, "chat/martial-arts-attack.hbs", context);
 }

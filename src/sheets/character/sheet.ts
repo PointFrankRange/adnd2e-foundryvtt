@@ -21,6 +21,7 @@ import { rollAttack, rollSave } from "./combat-rolls";
 import { rollFormAttack } from "../creature/combat-rolls";
 import { promptShift, resetShapechangeDay, returnToNormal, shapechangeView } from "./shapechange-actions";
 import { trackQuarry, trackingView } from "./tracking-actions";
+import { freshStyleUpdate } from "../../core/martial-arts";
 import { learnManeuver, martialArtsView, rollMartialArtsAttack, setActiveStyle, useManeuver } from "./martial-arts-actions";
 import { buildCharacterSheetContext, traitTargetKey } from "./context";
 import type {
@@ -860,6 +861,10 @@ export class Adnd2eCharacterSheet extends Base {
       await (result as unknown as { update(data: Record<string, unknown>): Promise<unknown> }).update({
         "system.slotsInvested": dropSlotCost,
       });
+    }
+    if (result && isNewDrop && dropped.type === "martialStyle") {
+      // A style copied from another actor must not carry its source's learned maneuvers or invested slots.
+      await (result as unknown as { update(data: Record<string, unknown>): Promise<unknown> }).update(freshStyleUpdate());
     }
     if (result && isNewDrop && dropped.type === "trait" && traitRefundCapped(traitInputs)) {
       ui.notifications?.info(game.i18n!.localize("ADND2E.sheet.traits.refundCappedToast"));
