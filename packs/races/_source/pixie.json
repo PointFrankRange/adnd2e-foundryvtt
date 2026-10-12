@@ -32,7 +32,7 @@
     "grantedFeatures": [
       "Flight 12, maneuverability B",
       "Becomes visible or polymorphs at will; attackers who cannot detect invisible take -4",
-      "Once per day: know alignment, create illusions, confusion by touch, dispel magic as an 8th-level mage, dancing lights, ESP",
+      "1/day: know alignment, illusion, confusion, dispel magic (8th), ESP",
       "A successful dispel magic against 8th level forces the pixie visible for a round"
     ],
     "subrace": {

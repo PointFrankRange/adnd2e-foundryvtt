@@ -44,7 +44,7 @@ const dir = path.resolve(__dirname, "..", "..", "packs", "races", "_source");
 type Range = { min: number; max: number };
 type Sys = {
   description: string; raceId: string; size: string; baseMovement: number; infravision: number; naturalAc: number | null;
-  classLevelLimits: Record<string, number | null>; allowedClasses: string[]; allowedMulticlass: string[][]; grantedFeatures: string[];
+  classLevelLimits: Record<string, number | null>; allowedClasses: string[]; allowedMulticlass: string[][]; noMulticlass?: boolean; grantedFeatures: string[];
   subrace: { id: string; displayName: string; abilityAdjustments: Record<string, number>; abilityRanges: Record<string, Range>; xpModifierPercent: number };
 };
 type Item = { _id: string; _key: string; name: string; system: Sys };
@@ -125,6 +125,18 @@ describe("PHBR10 humanoid race items", () => {
       });
     });
   }
+
+  it("noMulticlass is set exactly where 2+ classes and no combination are listed (saurials dual-class)", () => {
+    const DUAL_CLASS_RACES = ["saurial-bladeback", "saurial-finback", "saurial-flyer", "saurial-hornhead"];
+    for (const slug of Object.keys(TABLE_1)) {
+      const s = load(slug)!.system;
+      if (s.allowedMulticlass.length > 0) {
+        expect(s.noMulticlass === true, `${slug} lists combinations`).toBe(false);
+      } else if (s.allowedClasses.length >= 2) {
+        expect(s.noMulticlass === true, slug).toBe(!DUAL_CLASS_RACES.includes(slug));
+      }
+    }
+  });
 
   it("DEFERRED_PRIEST names only keyed races", () => {
     for (const slug of DEFERRED_PRIEST) expect(TABLE_1[slug]).toBeDefined();

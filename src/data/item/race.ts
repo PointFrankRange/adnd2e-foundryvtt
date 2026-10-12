@@ -3,7 +3,7 @@ import { isRaceSlug } from "../../core/races/slug";
 import { ABILITY_KEYS, CLASS_IDS, CREATURE_SIZES } from "./choices";
 import { Adnd2eItemModel } from "./base-item";
 
-const { StringField, NumberField, ArrayField, ObjectField, SchemaField } = foundry.data.fields;
+const { StringField, NumberField, ArrayField, ObjectField, SchemaField, BooleanField } = foundry.data.fields;
 
 export class RaceItemModel extends Adnd2eItemModel {
   static override defineSchema(): foundry.data.fields.DataSchema {
@@ -22,6 +22,8 @@ export class RaceItemModel extends Adnd2eItemModel {
         new ArrayField(new StringField({ required: true, blank: false, choices: CLASS_IDS })),
         { required: true, initial: [] },
       ),
+      /** true = the race cannot be multi-classed at all, so any class set of 2+ is refused (reason "multiclass"); false with an empty allowedMulticlass = dual-class or unrestricted, as for humans. */
+      noMulticlass: new BooleanField({ required: true, initial: false }),
       bonusLanguages: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: [] }),
       grantedFeatures: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: [] }),
       /** SP12 Plan A: a subrace layer over `raceId` (the base PHB race). Every nullable field defaults to null = inherit the base race's table; existing race items need no migration. */

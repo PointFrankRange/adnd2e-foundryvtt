@@ -20,6 +20,7 @@
       "druid"
     ],
     "allowedMulticlass": [],
+    "noMulticlass": true,
     "bonusLanguages": [
       "sylvan-elf",
       "dryad"
@@ -29,7 +30,7 @@
       "Flight 19, maneuverability D in swan form",
       "Hit only by +1 or better weapons; 2% magic resistance per hit die (swan form)",
       "Bonus proficiencies: ranger tracking, druid weather sense",
-      "Ability minimums per class: ranger 13/13/14/9/14/9, druid 9/9/12/12/12/15 (Str/Dex/Con/Int/Wis/Cha); item ranges show the lower of each",
+      "Minimums S/D/C/I/W/Ch: ranger 13/13/14/9/14/9, druid 9/9/12/12/12/15",
       "Trapped in current form if the token is stolen"
     ],
     "subrace": {

@@ -1,9 +1,11 @@
 /* Race -> class eligibility (PHB Table 8). Pure; Foundry-free.
  * `allowedClasses` empty = unrestricted (a custom race). `allowedMulticlass` empty = no
- * combination check: humans list none, and their two-class case is dual-classing. */
+ * combination check: humans list none, and their two-class case is dual-classing.
+ * `noMulticlass` true = the race cannot be multi-classed at all (any set of 2+ is refused). */
 export interface RaceClassTables {
   readonly allowedClasses: readonly string[];
   readonly allowedMulticlass: readonly (readonly string[])[];
+  readonly noMulticlass?: boolean;
 }
 
 export type RaceClassVerdict = { ok: true } | { ok: false; reason: "class" | "multiclass" };
@@ -13,6 +15,7 @@ export function raceAllowsClasses(race: RaceClassTables, classIds: readonly stri
   if (race.allowedClasses.length > 0 && classIds.some((c) => !race.allowedClasses.includes(c))) {
     return { ok: false, reason: "class" };
   }
+  if (classIds.length > 1 && race.noMulticlass === true) return { ok: false, reason: "multiclass" };
   if (classIds.length > 1 && race.allowedMulticlass.length > 0) {
     const wanted = new Set(classIds);
     const listed = race.allowedMulticlass.some((combo) => combo.length === wanted.size && combo.every((c) => wanted.has(c)));
@@ -23,10 +26,11 @@ export function raceAllowsClasses(race: RaceClassTables, classIds: readonly stri
 
 /** The eligibility tables of a raw race item's `system` (tolerates missing or malformed fields). */
 export function raceTablesOf(system: unknown): RaceClassTables {
-  const s = (system ?? {}) as { allowedClasses?: unknown; allowedMulticlass?: unknown };
+  const s = (system ?? {}) as { allowedClasses?: unknown; allowedMulticlass?: unknown; noMulticlass?: unknown };
   const strings = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
   return {
     allowedClasses: strings(s.allowedClasses),
     allowedMulticlass: Array.isArray(s.allowedMulticlass) ? s.allowedMulticlass.map(strings) : [],
+    noMulticlass: s.noMulticlass === true,
   };
 }

@@ -15,6 +15,7 @@
 // (structure) still comes from the live model — it carries no values.
 
 import { CLASS_IDS } from "../data/item/choices";
+import { parseRaceSlugLines } from "../core/races/slug-lines";
 import { applyLayout } from "./item-layouts/apply";
 import { ITEM_LAYOUTS } from "./item-layouts/layouts";
 import { choiceLabelKey } from "./item-layouts/labels";
@@ -35,7 +36,7 @@ type RowKind =
   | "lines";
 
 /** How a "lines" textarea is parsed back: one entry per line, or a structured line. */
-type LineMode = "text" | "number" | "multiclass" | "levels";
+type LineMode = "text" | "number" | "multiclass" | "levels" | "raceSlugs";
 
 /**
  * Item fields edited as a textarea, keyed by document path. Anything not listed
@@ -49,6 +50,7 @@ const LINE_FIELDS: Record<string, LineMode> = {
   "system.hpRolls": "number", // class
   "system.allowedMulticlass": "multiclass", // race: one "a, b" combination per line
   "system.classLevelLimits": "levels", // race: one "classId: number" per line
+  "system.qualifications.races": "raceSlugs", // kit: one race slug per line (non-slugs rejected)
 };
 
 export interface FieldRow {
@@ -147,6 +149,10 @@ function parseLines(text: string, mode: LineMode): ParseResult {
   switch (mode) {
     case "text":
       return { ok: true, value: lines };
+    case "raceSlugs": {
+      const slugs = parseRaceSlugLines(text);
+      return slugs ? { ok: true, value: slugs } : { ok: false };
+    }
     case "number": {
       const nums = lines.map((l) => Number(l));
       return nums.every((n) => Number.isFinite(n)) ? { ok: true, value: nums } : { ok: false };

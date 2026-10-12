@@ -20,6 +20,7 @@
       "druid"
     ],
     "allowedMulticlass": [],
+    "noMulticlass": true,
     "bonusLanguages": [
       "alaghi"
     ],
