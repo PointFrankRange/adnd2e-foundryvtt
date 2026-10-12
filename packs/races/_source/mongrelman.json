@@ -1,0 +1,94 @@
+{
+  "_id": "WcmCD2RfEcCqA5hB",
+  "_key": "!items!WcmCD2RfEcCqA5hB",
+  "name": "Mongrelman",
+  "type": "race",
+  "img": "icons/svg/mystery-man-black.svg",
+  "system": {
+    "description": "",
+    "raceId": "mongrelman",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": 5,
+    "classLevelLimits": {
+      "fighter": 10,
+      "mage": 10,
+      "cleric": 10,
+      "thief": 12,
+      "bard": 8
+    },
+    "allowedClasses": [
+      "fighter",
+      "mage",
+      "cleric",
+      "thief",
+      "bard"
+    ],
+    "allowedMulticlass": [
+      [
+        "mage",
+        "thief"
+      ],
+      [
+        "cleric",
+        "mage"
+      ],
+      [
+        "cleric",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [],
+    "grantedFeatures": [
+      "Free +1 to any one other ability score, not above the starting maximum",
+      "Mimics sounds of any creature encountered",
+      "All classes: pick pockets 70% base, +5% per level from 5th",
+      "Camouflage: 80% after one turn, +1% per extra turn, max 95%",
+      "Charisma counts as 1 for first reactions of other races",
+      "Bard limited to own kind's crowds"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 0,
+        "con": 0,
+        "int": -1,
+        "wis": 0,
+        "cha": -1
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 6,
+          "max": 17
+        },
+        "dex": {
+          "min": 6,
+          "max": 18
+        },
+        "con": {
+          "min": 8,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 17
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 2,
+          "max": 8
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

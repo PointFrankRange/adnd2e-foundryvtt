@@ -186,7 +186,7 @@ Source: *The Complete Book of Humanoids* (PHBR10), a scanned PDF with no text la
 page from rendered images (pdftoppm 100-200 dpi, scratch dir only, no page images committed). Each
 humanoid is a `race` item whose `raceId` is its own slug and whose `subrace` block carries the
 race's own layer (ability adjustments, min-max, XP surcharge); `subrace.id` and `subrace.displayName`
-stay blank. Batch 1 of 3 (ten races) is shipped so far.
+stay blank. Batches 1 and 2 of 3 (twenty races) are shipped so far.
 
 | Printed page | PDF page | What was read |
 |--------------|----------|---------------|
@@ -202,6 +202,15 @@ stay blank. Batch 1 of 3 (ten races) is shipped so far.
 | 27-28 | 28-29 | Giant-kin, Firbolg |
 | 29-30 | 30-31 | Giant-kin, Voadkyn |
 | 31-32 | 32-33 | Gnoll |
+| 32-33 | 33-34 | Gnoll, Flind |
+| 35-36 | 36-37 | Goblin |
+| 36-38 | 37-39 | Hobgoblin |
+| 38-40 | 39-41 | Kobold |
+| 40-42 | 41-43 | Lizard Man |
+| 42-43 | 43-44 | Minotaur |
+| 43-45 | 44-46 | Mongrelman |
+| 46-47 | 47-48 | Ogre, Half-Ogre (one shared entry) |
+| 47-49 | 48-50 | Ogre Mage |
 | 119 | 120 | Table 13: Humanoid Multi-Class Combinations (rotated page, rendered upright) |
 
 ### Rules used for every humanoid
@@ -212,7 +221,7 @@ stay blank. Batch 1 of 3 (ten races) is shipped so far.
 - **Chapter 3 priest-kit deferral:** where a race's only priest option is a Chapter 3 kit (shaman,
   witch doctor), the item has no cleric/druid chassis and records the limit as a feature label
   `Shaman (kit) max level N`. Batch 1: aarakocra, bullywug, giant-kin firbolg, giant-kin voadkyn
-  (the test's `DEFERRED_PRIEST`). Races that also have a cleric or druid chassis (bugbear, gnoll,
+  (the test's `DEFERRED_PRIEST`); batch 2 adds lizard man (shaman 7), minotaur (witch doctor 7), ogre (shaman 3) and ogre mage (shaman 7). Races that also have a cleric or druid chassis (bugbear, gnoll,
   alaghi, centaur) ship that chassis and omit their shaman/witch doctor limits.
 - **Table 13 (p.119):** combinations containing shamans or witch doctors are dropped; combinations
   naming a chassis the race may not take are dropped; "illusionist" combinations fold into mage.
@@ -249,3 +258,32 @@ stay blank. Batch 1 of 3 (ten races) is shipped so far.
   shipped as an allowed class with the requirement in a feature label.
 - **Voadkyn 90% sleep/charm resistance (p.30)** is a feature label only (the code resistance table
   covers PHB races).
+
+### Judgement calls, batch 2
+
+- **Hobgoblin thief limit (conflict):** Table 1 (p.9) prints Rg 11; the entry's class table (p.37)
+  prints Thief 12. Shipped 11 (Table 1).
+- **Goblin size:** the entry (p.35) says "small humanoids ... about four feet tall"; exactly 4 ft is
+  medium by the size rule, but the book calls them small, so shipped small.
+- **Minotaur / ogre / half-ogre / ogre mage size:** minotaur 7-7.5 ft (p.43), half-ogre "between seven
+  and eight feet" (p.47) are over 7 ft, so large; ogre (9 ft+) and ogre mage (10.5 ft) are large.
+- **Natural AC printed as 10:** flind (p.33), goblin (p.35), hobgoblin (p.37), kobold (p.38) store null.
+  Lizard man 5 (p.40, matches the p.15 example), minotaur 6, mongrelman 5, ogre 5, half-ogre 8,
+  ogre mage 4.
+- **Lizard man land movement 6** (p.42, stated); swim 12 is a label. Others use 12.
+- **Infravision stated:** goblin 60 (p.36), hobgoblin 60 (p.38), kobold 60 (p.39), minotaur 60 (p.43).
+  Flind, lizard man, mongrelman, ogre, half-ogre, ogre mage state none: 0.
+- **Ogre mage XP:** "twice as many XP" (p.49) = `xpModifierPercent: 100`.
+- **Mongrelman +1:** the free +1 to any one non-Int/Cha ability (p.43) is a label, not an adjustment.
+  Mongrelman shaman 7 dropped (it has a cleric 10 chassis). Bard 8 shipped (footnote noted as a label).
+- **Ogre vs half-ogre:** one entry (p.46) with paired values (ogre/half-ogre). Half-ogre has cleric 4
+  (shipped; Table 1 Pr 4), its shaman/witch doctor 4 dropped; ogre's only priest option is shaman 3
+  (DEFERRED_PRIEST). Table 13: ogre has fighter/shaman only (dropped, so no multi-class); half-ogre
+  keeps fighter/cleric (printed "allowed if Wisdom is 9+", a requirement not encoded).
+- **Table 13 drops:** flind, goblin, hobgoblin, kobold, lizard man fighter/shaman; mongrelman
+  fighter/shaman and shaman/thief; ogre mage fighter/shaman; minotaur's Table 13 row (fighter/thief,
+  fighter/mage) is kept in full (its class table allows ranger/mage/thief).
+- **Languages:** `common` omitted; mongrelman speaks only common (empty list); hobgoblin's rare
+  "carnivorous ape" stored as `carnivorous-ape`; ogre/half-ogre `stone-giant`.
+- **Disadvantage labels with numbers** (hobgoblin dwarf +1, kobold gnome +1, ogre -4 vs gnomes/dwarves)
+  are display-only.

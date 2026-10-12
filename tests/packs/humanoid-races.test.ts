@@ -30,7 +30,7 @@ const NAMES: Record<string, string> = {
 };
 
 /** Races whose only priest option is a Chapter 3 kit (shaman and the like): no cleric/druid chassis, the limit lives in a feature label. */
-const DEFERRED_PRIEST: string[] = ["aarakocra", "bullywug", "giant-kin-firbolg", "giant-kin-voadkyn"];
+const DEFERRED_PRIEST: string[] = ["aarakocra", "bullywug", "giant-kin-firbolg", "giant-kin-voadkyn", "lizard-man", "minotaur", "ogre", "ogre-mage"];
 
 const GROUPS: Record<number, string[]> = {
   0: ["fighter", "ranger", "paladin"],

@@ -1,0 +1,90 @@
+{
+  "_id": "Mx8PBZoJazYlDcCS",
+  "_key": "!items!Mx8PBZoJazYlDcCS",
+  "name": "Kobold",
+  "type": "race",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+    "description": "",
+    "raceId": "kobold",
+    "size": "small",
+    "baseMovement": 12,
+    "infravision": 60,
+    "naturalAc": null,
+    "classLevelLimits": {
+      "fighter": 8,
+      "cleric": 9,
+      "thief": 12
+    },
+    "allowedClasses": [
+      "fighter",
+      "cleric",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "fighter",
+        "cleric"
+      ],
+      [
+        "cleric",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "kobold",
+      "orc",
+      "goblin"
+    ],
+    "grantedFeatures": [
+      "Bright sunlit conditions: -1 to attack rolls",
+      "Gnomes gain +1 to attack rolls against kobolds"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": -1,
+        "dex": 0,
+        "con": -1,
+        "int": 0,
+        "wis": 0,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 3,
+          "max": 16
+        },
+        "dex": {
+          "min": 4,
+          "max": 18
+        },
+        "con": {
+          "min": 4,
+          "max": 15
+        },
+        "int": {
+          "min": 3,
+          "max": 17
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 14
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

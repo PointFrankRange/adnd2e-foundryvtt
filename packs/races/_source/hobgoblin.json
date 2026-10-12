@@ -1,0 +1,87 @@
+{
+  "_id": "8akEzg5x4fKOA56b",
+  "_key": "!items!8akEzg5x4fKOA56b",
+  "name": "Hobgoblin",
+  "type": "race",
+  "img": "icons/svg/skull.svg",
+  "system": {
+    "description": "",
+    "raceId": "hobgoblin",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 60,
+    "naturalAc": null,
+    "classLevelLimits": {
+      "fighter": 11,
+      "cleric": 9,
+      "thief": 11
+    },
+    "allowedClasses": [
+      "fighter",
+      "cleric",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "fighter",
+        "cleric"
+      ]
+    ],
+    "bonusLanguages": [
+      "hobgoblin",
+      "orc",
+      "goblin",
+      "carnivorous-ape"
+    ],
+    "grantedFeatures": [
+      "Detects new construction, sloping passages, shifting walls underground 40% (1-4 on 1d10)",
+      "Dwarves gain +1 to attack rolls against hobgoblins"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 0,
+        "con": 0,
+        "int": 0,
+        "wis": 0,
+        "cha": -1
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 6,
+          "max": 18
+        },
+        "dex": {
+          "min": 6,
+          "max": 18
+        },
+        "con": {
+          "min": 5,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 18
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 14
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

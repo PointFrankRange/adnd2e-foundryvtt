@@ -1,0 +1,98 @@
+{
+  "_id": "SulUpYyOdq4k74Gi",
+  "_key": "!items!SulUpYyOdq4k74Gi",
+  "name": "Ogre Mage",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "",
+    "raceId": "ogre-mage",
+    "size": "large",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": 4,
+    "classLevelLimits": {
+      "fighter": 9,
+      "mage": 8,
+      "thief": 8
+    },
+    "allowedClasses": [
+      "fighter",
+      "mage",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "mage"
+      ],
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "mage",
+        "thief"
+      ],
+      [
+        "fighter",
+        "mage",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "ogre-mage",
+      "ogre"
+    ],
+    "grantedFeatures": [
+      "5 bonus hit points at 1st level",
+      "Innate powers: gaseous form, fly, invisibility, charm person, sleep, regenerate, cause darkness, polymorph, cone of cold",
+      "+1 morale",
+      "Takes damage as a large creature",
+      "Oriental equipment is rare and expensive",
+      "Shaman (kit) max level 7"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 1,
+        "dex": 0,
+        "con": 0,
+        "int": 0,
+        "wis": -2,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 12,
+          "max": 18
+        },
+        "dex": {
+          "min": 7,
+          "max": 18
+        },
+        "con": {
+          "min": 8,
+          "max": 14
+        },
+        "int": {
+          "min": 8,
+          "max": 17
+        },
+        "wis": {
+          "min": 3,
+          "max": 16
+        },
+        "cha": {
+          "min": 2,
+          "max": 14
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 100,
+      "flatSaveBonus": null
+    }
+  }
+}

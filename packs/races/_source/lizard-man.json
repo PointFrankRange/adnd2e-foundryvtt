@@ -1,0 +1,82 @@
+{
+  "_id": "DqQpsirJRcmm17O0",
+  "_key": "!items!DqQpsirJRcmm17O0",
+  "name": "Lizard Man",
+  "type": "race",
+  "img": "icons/svg/frozen.svg",
+  "system": {
+    "description": "",
+    "raceId": "lizard-man",
+    "size": "medium",
+    "baseMovement": 6,
+    "infravision": 0,
+    "naturalAc": 5,
+    "classLevelLimits": {
+      "fighter": 12,
+      "thief": 9
+    },
+    "allowedClasses": [
+      "fighter",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "lizard-man"
+    ],
+    "grantedFeatures": [
+      "Swim 12 with no movement or attack penalty",
+      "Holds breath for 2/3 Constitution in rounds",
+      "Must wet whole body once a day or lose 3 Constitution per day",
+      "Distracted by food or treasure in battle (Wisdom check)",
+      "Fighters start with two weapon proficiencies",
+      "Shaman (kit) max level 7"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 0,
+        "con": 0,
+        "int": 0,
+        "wis": 0,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 8,
+          "max": 18
+        },
+        "dex": {
+          "min": 3,
+          "max": 18
+        },
+        "con": {
+          "min": 6,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 17
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 16
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

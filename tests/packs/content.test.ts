@@ -52,7 +52,7 @@ describe("races pack content", () => {
   const isHumanoid = (d: Record<string, unknown>) => HUMANOID_SLUGS.includes(sys(d).raceId as string);
   it("has the 6 PHB races plus the 6 dwarf, 5 elf, 4 gnome and 7 halfling subraces, plus the humanoid races", () => {
     const humanoids = items.filter(isHumanoid);
-    expect(humanoids).toHaveLength(10); // batch 1 of 3
+    expect(humanoids).toHaveLength(20); // batches 1-2 of 3
     expect(items).toHaveLength(28 + humanoids.length);
     const raceIds = new Set(items.map((d) => sys(d).raceId as string));
     for (const id of PHB_RACE_IDS) expect(raceIds.has(id)).toBe(true);
