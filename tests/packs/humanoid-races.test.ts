@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { CLASS_IDS } from "../../src/data/item/choices";
 import { isRaceSlug } from "../../src/core/races/slug";
@@ -30,7 +30,7 @@ const NAMES: Record<string, string> = {
 };
 
 /** Races whose only priest option is a Chapter 3 kit (shaman and the like): no cleric/druid chassis, the limit lives in a feature label. */
-const DEFERRED_PRIEST: string[] = ["aarakocra", "bullywug", "giant-kin-firbolg", "giant-kin-voadkyn", "lizard-man", "minotaur", "ogre", "ogre-mage"];
+const DEFERRED_PRIEST: string[] = ["aarakocra", "bullywug", "giant-kin-firbolg", "giant-kin-voadkyn", "lizard-man", "minotaur", "ogre", "ogre-mage", "wemic"];
 
 const GROUPS: Record<number, string[]> = {
   0: ["fighter", "ranger", "paladin"],
@@ -128,5 +128,52 @@ describe("PHBR10 humanoid race items", () => {
 
   it("DEFERRED_PRIEST names only keyed races", () => {
     for (const slug of DEFERRED_PRIEST) expect(TABLE_1[slug]).toBeDefined();
+  });
+
+  describe("full pack", () => {
+    const slugs = Object.keys(TABLE_1);
+    const items = slugs.map((slug) => load(slug)).filter((i): i is Item => i !== null);
+    const all = readdirSync(dir)
+      .filter((f) => f.endsWith(".json"))
+      .map((f) => JSON.parse(readFileSync(path.join(dir, f), "utf8")) as Item);
+
+    it("ships all thirty humanoids, one per Table 1 slug", () => {
+      expect(slugs).toHaveLength(30);
+      expect(items).toHaveLength(30);
+      expect(new Set(items.map((i) => i.system.raceId))).toEqual(new Set(slugs));
+    });
+
+    it("gives no two humanoids the same name", () => {
+      const names = items.map((i) => i.name);
+      expect(new Set(names).size).toBe(names.length);
+    });
+
+    it("holds exactly the 6 PHB races, 22 subraces and 30 humanoids", () => {
+      expect(all).toHaveLength(58);
+      const humanoid = all.filter((i) => slugs.includes(i.system.raceId));
+      const subraces = all.filter((i) => (i.system.subrace?.id ?? "") !== "");
+      const phb = all.filter((i) => (i.system.subrace?.id ?? "") === "" && !slugs.includes(i.system.raceId));
+      expect(humanoid).toHaveLength(30);
+      expect(subraces).toHaveLength(22);
+      expect(phb).toHaveLength(6);
+    });
+
+    it("keeps the deferred-priest rule exact", () => {
+      for (const slug of slugs) {
+        const limits = load(slug)!.system.classLevelLimits;
+        const hasPriest = "cleric" in limits || "druid" in limits;
+        if (DEFERRED_PRIEST.includes(slug)) expect(hasPriest, `${slug} deferred`).toBe(false);
+        else if (TABLE_1[slug]![2] !== "-") expect(hasPriest, `${slug} priest`).toBe(true);
+        else expect(hasPriest, `${slug} no priest`).toBe(false);
+      }
+    });
+
+    it("names only allowed classes in every multi-class combination", () => {
+      for (const i of items) {
+        for (const combo of i.system.allowedMulticlass) {
+          for (const c of combo) expect(i.system.allowedClasses, `${i.system.raceId} ${combo.join("/")}`).toContain(c);
+        }
+      }
+    });
   });
 });

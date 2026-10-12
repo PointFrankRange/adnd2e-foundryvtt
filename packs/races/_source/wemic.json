@@ -1,0 +1,77 @@
+{
+  "_id": "XOqQ0nMfD2qZBRc8",
+  "_key": "!items!XOqQ0nMfD2qZBRc8",
+  "name": "Wemic",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "",
+    "raceId": "wemic",
+    "size": "large",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": 6,
+    "classLevelLimits": {
+      "fighter": 12,
+      "bard": 10
+    },
+    "allowedClasses": [
+      "fighter",
+      "bard"
+    ],
+    "allowedMulticlass": [],
+    "bonusLanguages": [
+      "wemic"
+    ],
+    "grantedFeatures": [
+      "5 bonus hit points at 1st level",
+      "Foreleg claws 1-4 each; can also use hand-held weapons",
+      "Leaps 10 ft up or 30 ft forward",
+      "Takes damage as a large creature",
+      "Shaman (kit) max level 7",
+      "Witch Doctor (kit) max level 7"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 1,
+        "dex": -1,
+        "con": 0,
+        "int": 0,
+        "wis": 0,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 11,
+          "max": 18
+        },
+        "dex": {
+          "min": 6,
+          "max": 17
+        },
+        "con": {
+          "min": 11,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 18
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

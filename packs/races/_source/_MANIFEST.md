@@ -211,6 +211,10 @@ stay blank. Batches 1 and 2 of 3 (twenty races) are shipped so far.
 | 43-45 | 44-46 | Mongrelman |
 | 46-47 | 47-48 | Ogre, Half-Ogre (one shared entry) |
 | 47-49 | 48-50 | Ogre Mage |
+| 49-51 | 50-52 | Orc, Half-Orc (one shared entry); Pixie begins p.51 |
+| 53-54 | 54-55 | Satyr |
+| 55-59 | 56-60 | Saurial (four types: bladeback, finback, flyer, hornhead) |
+| 59-61 | 60-62 | Swanmay (p.59-60), Wemic (p.60-61) |
 | 119 | 120 | Table 13: Humanoid Multi-Class Combinations (rotated page, rendered upright) |
 
 ### Rules used for every humanoid
@@ -221,7 +225,7 @@ stay blank. Batches 1 and 2 of 3 (twenty races) are shipped so far.
 - **Chapter 3 priest-kit deferral:** where a race's only priest option is a Chapter 3 kit (shaman,
   witch doctor), the item has no cleric/druid chassis and records the limit as a feature label
   `Shaman (kit) max level N`. Batch 1: aarakocra, bullywug, giant-kin firbolg, giant-kin voadkyn
-  (the test's `DEFERRED_PRIEST`); batch 2 adds lizard man (shaman 7), minotaur (witch doctor 7), ogre (shaman 3) and ogre mage (shaman 7). Races that also have a cleric or druid chassis (bugbear, gnoll,
+  (the test's `DEFERRED_PRIEST`); batch 2 adds lizard man (shaman 7), minotaur (witch doctor 7), ogre (shaman 3) and ogre mage (shaman 7); batch 3 adds wemic (shaman 7 and witch doctor 7, both as labels). Races that also have a cleric or druid chassis (bugbear, gnoll,
   alaghi, centaur) ship that chassis and omit their shaman/witch doctor limits.
 - **Table 13 (p.119):** combinations containing shamans or witch doctors are dropped; combinations
   naming a chassis the race may not take are dropped; "illusionist" combinations fold into mage.
@@ -287,3 +291,43 @@ stay blank. Batches 1 and 2 of 3 (twenty races) are shipped so far.
   "carnivorous ape" stored as `carnivorous-ape`; ogre/half-ogre `stone-giant`.
 - **Disadvantage labels with numbers** (hobgoblin dwarf +1, kobold gnome +1, ogre -4 vs gnomes/dwarves)
   are display-only.
+
+### Judgement calls, batch 3
+
+- **Orc and half-orc** share one entry (p.49-51) with paired values. Natural AC printed as 10 stores
+  null. Infravision 60 (p.50, both). Orc cleric 9 / half-orc cleric 4 match Table 1 Pr; the shaman
+  6/4 and witch doctor 6/4 options are dropped (a cleric chassis exists). Orc Table 13 is
+  fighter/shaman, fighter/thief, shaman/thief, leaving fighter/thief; half-orc keeps fighter/thief,
+  fighter/cleric and cleric/thief. The "single-classed characters can rise higher" footnote is a
+  label (orc) and the half-orc exceptional-score rules are a label. Orc languages orc, goblin,
+  hobgoblin, ogre; half-orc speaks orc (plus an unspecified bonus language, a label).
+- **Pixie (p.51-52):** size small (2.5 ft); XP "twice as much" = +100; flight 12 class B is a
+  label, land movement 12; infravision not stated (0); languages pixie, sprite.
+- **Satyr (p.53-54):** size not stated, medium from the man-torso/goat-legs description (a
+  stated-size entry would win); Str maximum 18/75 stored as 18; infravision 60 (p.54); natural AC 5;
+  languages satyr, sylvan elf (`sylvan-elf`), centaur, dryad, korred.
+- **Saurial (p.55-59):** four items from one entry with slash-paired values (bb/fn/fl/hh). Table 13
+  lists one row "dual-class characters are possible", so `allowedMulticlass` is empty for all four.
+  Sizes: bladeback about 7 ft (medium by the 4-7 ft rule; it also takes damage as large, a label),
+  finhead about 5 ft medium, flyer about 3 ft small, hornhead 10 ft large. Natural AC flyer 6,
+  finhead 5, bladeback 4, hornhead 4 (p.55). All saurials have infravision 60 (p.58). Hornhead
+  mage U with illusionist 12 folds into one `mage` entry (Table 1 Wz U). Finback fighter U, ranger
+  12, paladin 12. Dexterity minimum 2 (hornhead) and Strength minimum 3 (flyer) are stored as
+  printed. The 9-becomes-10 XP-bonus footnote is a label. Hit-point bonuses (bladeback 2, hornhead
+  4), languages (the scent language is stored as `saurial`; saurials cannot speak common) and attack
+  forms are labels. Land movement 12 (flyer flight 24 C is a label).
+- **Swanmay (p.59-60):** the minimums table prints ranger/druid pairs (Str 13/9, Dex 13/9, Con 14/12,
+  Int 9/12, Wis 14/12, Cha 9/15) that "include the class minimums"; the race range takes the lower
+  of each pair (9, 9, 12, 9, 12, 9) so both classes stay reachable, and the class chassis enforce
+  their own minimums. Table 13 "none" gives an empty `allowedMulticlass`. Human female, medium.
+  Natural AC 7; flight 19 D, 2%/hit die magic resistance and "hit only by +1 weapons" are swan-form
+  labels. Druid 12 and ranger 14 match Table 1.
+- **Wemic (p.60-61):** length 10 ft (large; also takes damage as large); shaman 7 and witch doctor 7
+  are the only priest options, so wemic joins `DEFERRED_PRIEST` with both kit labels. Table 13
+  fighter/shaman is dropped, leaving no multi-class. Bard 10 shipped. Natural AC 6, 5 bonus hit
+  points (label), infravision not stated (0), language wemic.
+
+### Deferred-priest race list (final)
+
+aarakocra, bullywug, giant-kin-firbolg, giant-kin-voadkyn, lizard-man, minotaur, ogre, ogre-mage,
+wemic.

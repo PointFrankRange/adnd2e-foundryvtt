@@ -43,7 +43,7 @@ describe("classes pack content", () => {
 
 describe("races pack content", () => {
   const items = docs("races");
-  // the PHBR10 humanoid races shipped so far (independent literal list; blank subrace id)
+  // the thirty PHBR10 humanoid races (independent literal list; blank subrace id)
   const HUMANOID_SLUGS = [
     "aarakocra", "alaghi", "beastman", "bugbear", "bullywug", "centaur", "fremlin", "giant-kin-firbolg", "giant-kin-voadkyn", "gnoll",
     "gnoll-flind", "goblin", "hobgoblin", "kobold", "lizard-man", "minotaur", "mongrelman", "ogre", "half-ogre", "ogre-mage", "orc",
@@ -52,7 +52,7 @@ describe("races pack content", () => {
   const isHumanoid = (d: Record<string, unknown>) => HUMANOID_SLUGS.includes(sys(d).raceId as string);
   it("has the 6 PHB races plus the 6 dwarf, 5 elf, 4 gnome and 7 halfling subraces, plus the humanoid races", () => {
     const humanoids = items.filter(isHumanoid);
-    expect(humanoids).toHaveLength(20); // batches 1-2 of 3
+    expect(humanoids).toHaveLength(30); // all three batches
     expect(items).toHaveLength(28 + humanoids.length);
     const raceIds = new Set(items.map((d) => sys(d).raceId as string));
     for (const id of PHB_RACE_IDS) expect(raceIds.has(id)).toBe(true);

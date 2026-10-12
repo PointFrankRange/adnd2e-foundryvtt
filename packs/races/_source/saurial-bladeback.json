@@ -1,0 +1,87 @@
+{
+  "_id": "IC4GbZzT6Aw8jCic",
+  "_key": "!items!IC4GbZzT6Aw8jCic",
+  "name": "Saurial, Bladeback",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "",
+    "raceId": "saurial-bladeback",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 60,
+    "naturalAc": 4,
+    "classLevelLimits": {
+      "fighter": 9,
+      "mage": 9,
+      "cleric": null,
+      "druid": 9,
+      "thief": 9
+    },
+    "allowedClasses": [
+      "fighter",
+      "mage",
+      "cleric",
+      "druid",
+      "thief"
+    ],
+    "allowedMulticlass": [],
+    "bonusLanguages": [
+      "saurial"
+    ],
+    "grantedFeatures": [
+      "2 bonus hit points at 1st level",
+      "Claws 1d4/1d4 and razored tail 1d6",
+      "Takes damage as a large creature",
+      "Infravision 60 ft (all saurials)",
+      "+2 save vs sound-based attacks, -2 vs gas or scent attacks",
+      "-1 attack with non-saurial weapons",
+      "No percentile Strength",
+      "Cold torpor (cold sleep) when exposed to prolonged cold",
+      "Wizards cannot use other races' spellbooks or scrolls",
+      "Limit shown is 10 with an XP bonus from ability scores"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": -2,
+        "con": 0,
+        "int": 0,
+        "wis": 1,
+        "cha": 1
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 10,
+          "max": 18
+        },
+        "dex": {
+          "min": 3,
+          "max": 14
+        },
+        "con": {
+          "min": 5,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 18
+        },
+        "wis": {
+          "min": 7,
+          "max": 18
+        },
+        "cha": {
+          "min": 5,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "_id": "51SzqeZa38SSV9Sd",
+  "_key": "!items!51SzqeZa38SSV9Sd",
+  "name": "Orc, Half-",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "",
+    "raceId": "half-orc",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 60,
+    "naturalAc": null,
+    "classLevelLimits": {
+      "fighter": 10,
+      "cleric": 4,
+      "thief": 8
+    },
+    "allowedClasses": [
+      "fighter",
+      "cleric",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "fighter",
+        "cleric"
+      ],
+      [
+        "cleric",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "orc"
+    ],
+    "grantedFeatures": [
+      "Bonus language",
+      "Single-classed characters with exceptional scores can rise higher: fighter 17th at Str 21, priests +1 level per Wisdom point to 7th, thieves +1 level per Dexterity point to 11th"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 1,
+        "dex": 0,
+        "con": 1,
+        "int": 0,
+        "wis": 0,
+        "cha": -2
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 6,
+          "max": 18
+        },
+        "dex": {
+          "min": 3,
+          "max": 17
+        },
+        "con": {
+          "min": 13,
+          "max": 19
+        },
+        "int": {
+          "min": 3,
+          "max": 17
+        },
+        "wis": {
+          "min": 3,
+          "max": 14
+        },
+        "cha": {
+          "min": 3,
+          "max": 12
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}
