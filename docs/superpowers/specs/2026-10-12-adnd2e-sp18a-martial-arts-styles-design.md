@@ -83,3 +83,12 @@ A new optional-rule setting **Advanced Martial Arts (PHBR15)**, default off. Whi
 
 - Damage follows reading R3 (Table 16 number only; decided with the user). If play shows martial artists too weak without the style die, revisit when Plan B lands, since the style die is already stored and derived.
 - A new item subtype touches registries and the drop rules; follow the `kit` precedent file-for-file and use the census tests.
+
+## Amendments made at plan time (2026-10-12)
+
+- The 2-slots-per-level cap and `levelLearned` move to Plan B, where maneuvers are actually bought; Plan A stores `slotsInvested` only.
+- Owned styles always count into the weapon-slot sum (a style only exists if someone added it); the setting gates the panel and the AC modifier only.
+- Stun/incapacitate is a card prompt stating the rule; no automated target save.
+- There is no "pull" option; the player does not press Apply.
+- The panel is PC-only (the Character NPC sheet is unchanged, as with SP20 tracking) and lives on the Main tab beside Wrestle, with the owned styles listed inside it.
+- The active style's AC modifier is applied through derived AC (snapshot -> `deriveAc`), gated by the setting.
