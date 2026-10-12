@@ -84,8 +84,8 @@
       "circleKick": "A spinning kick; the extra damage is included.",
       "flyingKick": "A leaping kick that needs 5 feet of running space; the extra damage is included.",
       "backwardKick": "A kick at someone directly behind you.",
-      "ironFist": "Hardened hands: this damage replaces normal damage on each attack with the principal attack form's hands, otherwise on one attack per round.",
-      "crushingBlow": "Your only action this round; can also shatter wood (half an inch per level) or brittle stone.",
+      "ironFist": "Hardened hands: this damage applies to every attack when your principal attack form uses the hands, otherwise to one attack per round.",
+      "crushingBlow": "Your only action this round; can also shatter wood (half an inch per level) or brittle stone (a quarter inch per level).",
       "eagleClaw": "Your only action this round; can also shatter spear shafts and crush stone or metal items."
     },
     "martialManeuverFailures": {
@@ -568,7 +568,18 @@
         "byWeapon": "by weapon",
         "slots": "Slots",
         "extraAttack": "Each style adds one attack per round while unarmed.",
-        "noActive": "Choose a martial arts style first."
+        "noActive": "Choose a martial arts style first.",
+        "maneuvers": "Special maneuvers",
+        "learn": "Learn",
+        "useManeuver": "Use",
+        "notKnown": "You have not learned that maneuver with the active style.",
+        "locked": {
+          "notOffered": "This style does not teach it.",
+          "known": "Already learned.",
+          "order": "Learn the easier maneuvers in this list first.",
+          "noSlot": "No free weapon proficiency slot.",
+          "levelCap": "Two maneuvers per level on a style."
+        }
       },
       "drop": {
         "subraceRangeWarning": "This character's ability scores are outside the subrace's allowed range: {abilities}.",
@@ -902,7 +913,10 @@
         "miss": "Miss",
         "damage": "{damage} hp",
         "stun": "Natural 20: the target saves vs. paralyzation or is stunned (d20 under its HD or level: stunned 1d6 rounds) or incapacitated (d20 over: 1d3 hours); an exactly equal roll counts as stunned.",
-        "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions" }
+        "hp": "hp",
+        "parried": "Parried",
+        "notParried": "Not parried",
+        "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions", "table21": "Target's armor" }
       },
       "shapechange": {
         "shift": "Shapechange",

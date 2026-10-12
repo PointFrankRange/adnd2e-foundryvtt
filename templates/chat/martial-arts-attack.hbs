@@ -3,6 +3,7 @@
     <img src="{{actorImg}}" alt="{{actorName}}">
     <h3>{{actorName}} — {{styleName}}</h3>
   </header>
+  {{#if maneuverKey}}<p class="formula">{{localize maneuverKey}} — {{localize costKey}}</p>{{/if}}
   {{#if targetName}}<p class="hint">{{localize 'ADND2E.chat.martialArts.against' target=targetName}}</p>{{/if}}
   {{#if breakdown.length}}
     <ul class="modifiers">
@@ -11,8 +12,10 @@
   {{/if}}
   <p class="formula">1d20 = <strong>{{natural}}</strong> — {{localize 'ADND2E.chat.martialArts.needed' total=total needed=needed}}</p>
   <p class="result {{#if hit}}hit{{else}}miss{{/if}}">{{localize resultKey}}</p>
+  {{#if outcomeKey}}<p class="hint">{{localize outcomeKey}}</p>{{/if}}
   {{#if hit}}
-    <p class="formula">{{localize blowKey}} — {{localize 'ADND2E.chat.martialArts.damage' damage=damage}}</p>
+    {{#if blowKey}}<p class="formula">{{localize blowKey}} — {{localize 'ADND2E.chat.martialArts.damage' damage=damage}}</p>{{/if}}
+    {{#if formula}}<p class="formula">{{formula}} = <strong>{{damage}}</strong> {{localize 'ADND2E.chat.martialArts.hp'}}</p>{{/if}}
     {{#if stunTrigger}}<p class="hint">{{localize 'ADND2E.chat.martialArts.stun'}}</p>{{/if}}
     {{#if damage}}<button type="button" data-action="applyDamage" data-amount="{{damage}}">{{localize 'ADND2E.chat.damage.applyToTargets'}}</button>{{/if}}
   {{/if}}
