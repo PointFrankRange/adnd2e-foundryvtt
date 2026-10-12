@@ -21,7 +21,7 @@ Deferred and not in any plan yet: DM style builder UI, Monster NPC styles, the n
   - Dmg Mod = form (hard 2, soft 0, hard/soft 1) + method (Block 1, Kick 2, Lock 1, Movement 1, Push 1, Strike 2, Throw 1, Vital Area 2; Weapon = by weapon). The total maps to a die: 1 = 1 hp, 2 = d2, 3 = d3, 4 = d4, 5 = d6.
   - Principal attack: Block Hand, Kick Foot, Lock Body, Movement Legs, Push Hand, Strike Hand, Throw Body, Vital Area Hand/Foot.
 - Table 17's eight styles equal their Table 18 derivation (a unit test asserts it).
-- **Attack roll:** normal THAC0 vs the target's AC, Strength to-hit applies. On a hit, the **unmodified** d20 is looked up on Table 16 for the blow and damage tier:
+- **Attack roll:** normal THAC0 vs the target's AC, Strength to-hit applies. On a hit, the **unmodified** d20 is looked up on Table 16 for the blow and its damage:
 
 | d20 | Blow | Damage |
 |---|---|---|
@@ -35,11 +35,7 @@ Deferred and not in any plan yet: DM style builder UI, Monster NPC styles, the n
 | 3-5 | Low kick | 1 |
 | 1-2 | Graze | 0 |
 
-  **Open rules question (needs a decision before the plan):** the book gives two damage numbers and never says how they combine. The worked example says a 13 is "a vitals punch doing 2 hp damage (plus the attacker's Strength bonus)", which makes the Table 16 number the damage. Yet the style die is described as "the basic amount of damage done when fighting unarmed in the style". Candidate readings:
-  - **R1 (recommended):** Table 16 damage is the hp dealt (the Fighter's Handbook behaviour it replaces) and the style die is rolled in its place on a *kick/punch the style specializes in*, i.e. the principal attack's blows; other blows use the table number. Too speculative to build silently.
-  - **R2:** damage = the style die; Table 16 supplies only the blow name and a +N bonus equal to its damage tier minus 1.
-  - **R3:** damage = Table 16 number only; the style die is used only by Plan B maneuvers ("add 1d4 hp to normal martial arts damage").
-  The user picks one; the choice is encoded in `results.ts` and pinned by unit tests built from the book's printed examples.
+  **Damage rule (decided, reading R3):** the Table 16 number is the hp dealt, plus the attacker's Strength damage bonus (the book's worked example: a 13 is a vitals punch doing 2 hp plus Strength). The style's damage die is derived and shown on the style, but Plan A does not roll it; Plan B's maneuvers use it ("add 1d4 hp to normal martial arts damage"). Unit tests pin this with the book's printed examples.
 - **Pull the attack:** the attacker may deal no damage.
 - **Armor penalty (attacker's own worn armor, PHB Table 57):** studded leather -1; chain, ring, scale -2; banded, splint, plate mail -5; field plate -8; full plate -10. A penalty to the attack roll. Elven chain counts as chain.
 - **Armed opponent (Table 22):** attack penalty by the opponent's weapon size: S -1, M -2, L -4, G -3, H -1. Weapon items carry S/M/L only; G and H apply to creature attacks if their weapon size is recorded, otherwise 0.
@@ -85,5 +81,5 @@ A new optional-rule setting **Advanced Martial Arts (PHBR15)**, default off. Whi
 
 ## Risks
 
-- The Table 16 damage reading (see above) is the one rules reading to pin first, in Task 1, from the printed examples.
+- Damage follows reading R3 (Table 16 number only; decided with the user). If play shows martial artists too weak without the style die, revisit when Plan B lands, since the style die is already stored and derived.
 - A new item subtype touches registries and the drop rules; follow the `kit` precedent file-for-file and use the census tests.
