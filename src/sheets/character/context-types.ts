@@ -45,6 +45,8 @@ export interface CharacterSheetInput {
   optionalRules: OptionalRules;
   /** SP11 Plan C: caster types a kit switched off (absent = none) */
   castingDisabled?: { wizard: boolean; priest: boolean };
+  /** SP18 Plan A: the active martial arts style's AC modifier while the rule is on (negative = better); absent/0 = no breakdown row */
+  martialArtsAcMod?: number;
   /** Sub-project 8 Plan 8a: true ONLY when this sheet renders the sub-score
    *  inputs (the PC sheet, with `subAbilitiesEnabled(rules)` true). Optional so
    *  every other consumer of this builder — notably the NPC sheet, which shares

@@ -566,6 +566,7 @@
         "styleDuplicate": "This character already has that style.",
         "kitForbiddenProficiency": "A kit this character has forbids that weapon proficiency.",
         "kitsPcOnly": "Kits can only be added to a player character sheet.",
+        "stylesPcOnly": "Martial arts styles can only be learned by player characters.",
         "monsterRejects": "A Monster NPC can carry weapons, armor, equipment and spells — not classes, races, proficiencies, traits or class features."
       },
       "xp": {
@@ -609,6 +610,7 @@
         "acShield": "Shield",
         "acMagic": "Magic",
         "acDex": "Dex",
+        "acStyle": "Martial arts style",
         "equipped": "Equipped",
         "notEquipped": "Not equipped",
         "shield": "Shield",
@@ -872,7 +874,7 @@
         "hit": "Hit",
         "miss": "Miss",
         "damage": "{damage} hp",
-        "stun": "Natural 20: the target saves vs. paralyzation or is stunned (d20 under its HD or level: stunned 1d6 rounds) or incapacitated (d20 over: 1d3 hours).",
+        "stun": "Natural 20: the target saves vs. paralyzation or is stunned (d20 under its HD or level: stunned 1d6 rounds) or incapacitated (d20 over: 1d3 hours); an exactly equal roll counts as stunned.",
         "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions" }
       },
       "shapechange": {

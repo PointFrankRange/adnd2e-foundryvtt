@@ -40,6 +40,11 @@ describe("martial arts bindings (SP18 Plan A)", () => {
     expect(keys.size).toBeGreaterThan(10);
     for (const key of keys) expect(typeof lookup(key), key).toBe("string");
   });
+  it("the Apply Damage button is hidden at zero damage; refusal key and PC-only drop guard exist", () => {
+    expect(CHAT).toMatch(/{{#if damage}}<button[^>]*data-action="applyDamage"/);
+    expect(NPC_SHEET).toContain("ADND2E.sheet.drop.stylesPcOnly");
+    expect(lookup("ADND2E.sheet.drop.stylesPcOnly")).toBe("Martial arts styles can only be learned by player characters.");
+  });
   it("the card reuses the generic applyDamage action", () => {
     expect(CHAT).toContain('data-action="applyDamage"');
     expect(CHAT).toContain('data-amount="{{damage}}"');

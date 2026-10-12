@@ -807,6 +807,15 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
     ]);
   });
 
+  it("an active martial arts style adds a labelled AC row; zero or absent adds none", () => {
+    const labels = (over: Partial<CharacterSheetInput>) =>
+      buildCharacterSheetContext(input(over)).combat.acBreakdown.map((r) => [r.label, r.value]);
+    expect(labels({ martialArtsAcMod: -2 }).at(-1)).toEqual(["ADND2E.sheet.combat.acStyle", -2]);
+    expect(labels({ martialArtsAcMod: 1 }).at(-1)).toEqual(["ADND2E.sheet.combat.acStyle", 1]);
+    expect(labels({ martialArtsAcMod: 0 })).toHaveLength(4);
+    expect(labels({})).toHaveLength(4);
+  });
+
   it("the legacy grapple maneuver is hidden while the wrestling rule is on", () => {
     const on = { ...DEFAULT_OPTIONAL_RULES, combatAndTacticsEnabled: true, combatManeuvers: true, wrestling: true };
     const off = { ...on, wrestling: false };

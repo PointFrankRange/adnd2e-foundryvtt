@@ -124,6 +124,8 @@ export function validateItemDrop(input: DropCheckInput): DropVerdict {
   if (input.dropType === "martialStyle") {
     if (!input.knowsBasicMartialArts) return { ok: false, reason: "ADND2E.sheet.drop.styleNeedsBasics" };
     if ((input.existingStyleNames ?? []).includes(input.dropStyleName ?? "")) return { ok: false, reason: "ADND2E.sheet.drop.styleDuplicate" };
+    // The basics cost 1 weapon slot, and an owned style counts into spent slots.
+    if ((input.dropSlotCost ?? 1) > (input.availableSlots ?? 0)) return { ok: false, reason: "ADND2E.sheet.drop.insufficientSlots" };
     return { ok: true };
   }
   if (input.dropType === "spell" && input.kitDisablesCasting) {

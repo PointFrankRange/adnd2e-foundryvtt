@@ -642,6 +642,7 @@ export class Adnd2eCharacterSheet extends Base {
       castingDisabled: casterTypesDisabled(
         classItems.map((c) => ({ chassisId: c.chassisId, castingDisabled: resolveKitOverrides(kitEntries, c.chassisId).castingDisabled })),
       ),
+      martialArtsAcMod: ((v) => (v.visible && v.active ? v.active.acMod : 0))(martialArtsView(this.document as never)),
       raceItem,
       physicalItems,
       proficiencyItems: { weapon: weaponProfs, nonweapon: nonweaponProfs },
@@ -732,6 +733,11 @@ export class Adnd2eCharacterSheet extends Base {
       ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.drop.kitsPcOnly"));
       return null;
     }
+    // Martial arts styles are PC-only (a Character NPC has no Martial Arts panel to show or remove one).
+    if (dropped.type === "martialStyle" && (this.document as unknown as { type: string }).type === "npc") {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.drop.stylesPcOnly"));
+      return null;
+    }
     // Re-sorting an already-owned trait is not a purchase — never validated.
     if (dropped.type === "trait" && !isNewDrop) return super._onDropItem(event, item);
     if (dropped.type === "kit" && !isNewDrop) return super._onDropItem(event, item);
@@ -742,7 +748,7 @@ export class Adnd2eCharacterSheet extends Base {
 
     let dropSlotCost: number | undefined;
     let availableSlots: number | undefined;
-    if (dropped.type === "weaponProficiency") {
+    if (dropped.type === "weaponProficiency" || dropped.type === "martialStyle") {
       dropSlotCost = 1;
       availableSlots = actor.system.proficiencies.weapon.available;
     } else if (dropped.type === "nonweaponProficiency") {

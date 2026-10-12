@@ -14,6 +14,6 @@
   {{#if hit}}
     <p class="formula">{{localize blowKey}} — {{localize 'ADND2E.chat.martialArts.damage' damage=damage}}</p>
     {{#if stunTrigger}}<p class="hint">{{localize 'ADND2E.chat.martialArts.stun'}}</p>{{/if}}
-    <button type="button" data-action="applyDamage" data-amount="{{damage}}">{{localize 'ADND2E.chat.damage.applyToTargets'}}</button>
+    {{#if damage}}<button type="button" data-action="applyDamage" data-amount="{{damage}}">{{localize 'ADND2E.chat.damage.applyToTargets'}}</button>{{/if}}
   {{/if}}
 </div>
