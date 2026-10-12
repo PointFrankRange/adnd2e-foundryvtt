@@ -37,3 +37,13 @@ describe("deriveAc", () => {
     expect(ac.normal).toBe(10);
   });
 });
+
+describe("deriveAc — situational modifier", () => {
+  it("a negative modifier improves every AC variant", () => {
+    const ac = deriveAc({ equippedArmor: { baseArmorAc: 5, magicBonus: 0 }, equippedShield: null, dexDefensiveAdj: 0, situationalModifier: -2 });
+    expect(ac).toEqual({ normal: 3, shieldless: 3, surprised: 3, rearAttack: 3 });
+  });
+  it("absent means 0", () => {
+    expect(deriveAc({ equippedArmor: null, equippedShield: null, dexDefensiveAdj: 0 }).normal).toBe(10);
+  });
+});

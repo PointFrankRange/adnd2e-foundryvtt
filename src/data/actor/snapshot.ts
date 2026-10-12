@@ -12,6 +12,7 @@ import { toTraitEntries } from "../derive/character";
 import { abilityScoresOf, actorLevelRulesFor, activeKitEntries } from "../derive/character/kits";
 import { resolveKitOverrides } from "../../core/kits";
 import { containerAdjustedCarriedWeight } from "../derive/character/container-weight";
+import { resolveActiveStyleId, styleStats, type StyleForm, type StyleMethod } from "../../core/martial-arts";
 
 interface ClassItemSystem {
   chassisId: ClassId;
@@ -55,6 +56,7 @@ export function snapshotActor(actor: Actor.Implementation, options: OptionalRule
       thiefSkills: ThiefSkillsSystem;
       options?: { spellsAndMagic?: { casting?: unknown } };
       wildTalent?: { found: boolean; levelAtDiscovery: number };
+      martialArts?: { activeStyleId?: string };
     };
     items: Iterable<{ id: string; type: string; system: unknown }>;
   };
@@ -108,8 +110,9 @@ export function snapshotActor(actor: Actor.Implementation, options: OptionalRule
     }),
   );
 
+  // SP18: an owned martial arts style spends weapon-proficiency slots like a weapon proficiency
   const spentWeaponSlots = items
-    .filter((i) => i.type === "weaponProficiency")
+    .filter((i) => i.type === "weaponProficiency" || i.type === "martialStyle")
     .reduce((s, i) => s + (i.system as ProfItemSystem).slotsInvested, 0);
   const spentNonweaponSlots = items
     .filter((i) => i.type === "nonweaponProficiency")
@@ -118,6 +121,11 @@ export function snapshotActor(actor: Actor.Implementation, options: OptionalRule
   const wizardMemorized: MemorizedEntry[] = [...doc.system.spellcasting.wizard.memorized];
   const priestMemorized: MemorizedEntry[] = [...doc.system.spellcasting.priest.memorized];
   const thiefSkillAllocations = [...doc.system.thiefSkills.allocations];
+
+  const styles = items.filter((i) => i.type === "martialStyle") as unknown as { id: string; system: { form: StyleForm; principalMethod: StyleMethod } }[];
+  const activeStyleId = resolveActiveStyleId(styles.map((s) => s.id), doc.system.martialArts?.activeStyleId ?? "");
+  const activeStyle = styles.find((s) => s.id === activeStyleId);
+  const martialArtsAcMod = activeStyle ? styleStats(activeStyle.system.form, activeStyle.system.principalMethod).acMod : 0;
 
   const a = doc.system.abilities;
   return {
@@ -156,5 +164,6 @@ export function snapshotActor(actor: Actor.Implementation, options: OptionalRule
         }
       : {}),
     isCasting: Boolean(doc.system.options?.spellsAndMagic?.casting),
+    martialArtsAcMod,
   };
 }
