@@ -2,8 +2,8 @@
  * A subrace is a `race` item whose `raceId` stays the base race and whose
  * `subrace` block overrides racial tables; null = inherit the base table. */
 import type { AbilityKey, AbilityScores, Race, ThiefSkill } from "../types";
-import { RACIAL_ABILITY_ADJUSTMENTS, RACIAL_ABILITY_LIMITS } from "../abilities/racial-adjustments";
-import { THIEF_RACIAL_ADJUSTMENTS, THIEF_SKILLS } from "../proficiencies/thief-skills";
+import { racialAbilityAdjustments, racialAbilityRanges } from "../abilities/racial-adjustments";
+import { THIEF_SKILLS, racialThiefAdjustments } from "../proficiencies/thief-skills";
 
 export type AbilityAdjustments = Partial<Record<AbilityKey, number>>;
 export type AbilityRanges = Record<AbilityKey, [number, number]>;
@@ -106,15 +106,15 @@ export function normalizeSubrace(raw: RawSubrace | null | undefined): SubraceLay
 }
 
 export function effectiveAbilityAdjustments(race: Race, layer: SubraceLayer | null | undefined): AbilityAdjustments {
-  return layer?.abilityAdjustments ?? RACIAL_ABILITY_ADJUSTMENTS[race];
+  return layer?.abilityAdjustments ?? racialAbilityAdjustments(race);
 }
 
 export function effectiveAbilityRanges(race: Race, layer: SubraceLayer | null | undefined): AbilityRanges {
-  return layer?.abilityRanges ?? RACIAL_ABILITY_LIMITS[race];
+  return layer?.abilityRanges ?? racialAbilityRanges(race);
 }
 
 export function effectiveThiefAdjustments(race: Race, layer: SubraceLayer | null | undefined): ThiefAdjustments {
-  return layer?.thiefAdjustments ?? THIEF_RACIAL_ADJUSTMENTS[race];
+  return layer?.thiefAdjustments ?? racialThiefAdjustments(race);
 }
 
 /** The abilities whose score falls outside its [min, max] (inclusive). */

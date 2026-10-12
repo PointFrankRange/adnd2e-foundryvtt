@@ -1,0 +1,84 @@
+{
+  "_id": "p4e5lZcM12cURwTg",
+  "_key": "!items!p4e5lZcM12cURwTg",
+  "name": "Orc",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "",
+    "raceId": "orc",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 60,
+    "naturalAc": null,
+    "classLevelLimits": {
+      "fighter": 10,
+      "cleric": 9,
+      "thief": 11
+    },
+    "allowedClasses": [
+      "fighter",
+      "cleric",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "orc",
+      "goblin",
+      "hobgoblin",
+      "ogre"
+    ],
+    "grantedFeatures": [
+      "Skilled miners: spot new construction 35%, sloping passages 25%",
+      "-1 attack and morale in direct sunlight",
+      "Single-classed characters can rise higher than the listed limits"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 1,
+        "dex": 0,
+        "con": 0,
+        "int": 0,
+        "wis": 0,
+        "cha": -2
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 6,
+          "max": 18
+        },
+        "dex": {
+          "min": 3,
+          "max": 17
+        },
+        "con": {
+          "min": 8,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 16
+        },
+        "wis": {
+          "min": 3,
+          "max": 16
+        },
+        "cha": {
+          "min": 3,
+          "max": 12
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

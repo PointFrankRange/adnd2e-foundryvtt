@@ -1,0 +1,77 @@
+{
+  "_id": "SMyYfJgoCz2mWKla",
+  "_key": "!items!SMyYfJgoCz2mWKla",
+  "name": "Alaghi",
+  "type": "race",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+    "description": "",
+    "raceId": "alaghi",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": 4,
+    "classLevelLimits": {
+      "fighter": 12,
+      "druid": 11
+    },
+    "allowedClasses": [
+      "fighter",
+      "druid"
+    ],
+    "allowedMulticlass": [],
+    "noMulticlass": true,
+    "bonusLanguages": [
+      "alaghi"
+    ],
+    "grantedFeatures": [
+      "9 bonus hit points at 1st level",
+      "Fists deal 2d6 damage",
+      "Move silently 40% and hide in natural surroundings 35% at 1st level, +5% per level",
+      "Takes damage as a large creature",
+      "Druid requires Int 15, Wis 12, Cha 15 and neutral good alignment"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 2,
+        "dex": 0,
+        "con": 0,
+        "int": -2,
+        "wis": 0,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 12,
+          "max": 19
+        },
+        "dex": {
+          "min": 3,
+          "max": 17
+        },
+        "con": {
+          "min": 12,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 16
+        },
+        "wis": {
+          "min": 3,
+          "max": 16
+        },
+        "cha": {
+          "min": 3,
+          "max": 16
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

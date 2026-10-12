@@ -285,6 +285,8 @@ export interface ClassItemView {
 export interface RaceItemView {
   id: string; name: string; img: string;
   raceId: string; size: string; baseMovement: number; infravision: number;
+  /** SP21 (PHBR10 p.15): the race's natural armor class; null/absent = none */
+  naturalAc?: number | null;
   grantedFeatures: string[]; bonusLanguages: string[];
   /** SP12 Plan A: the subrace layer (null/absent = the plain base race) */
   subrace?: SubraceLayer | null;
@@ -507,6 +509,8 @@ export interface CharacterSheetContext {
     hp: { value: number; max: number; temp: number; nonlethal: number };
     thac0: { base: number; melee: number; ranged: number };
     ac: { normal: number; rearAttack: number; surprised: number; shieldless: number };
+    /** SP21: true when the race has a natural AC (drives the AC box tooltip) */
+    naturalAcApplies: boolean;
     saves: SaveRow[];
     movement: { base: number; current: number; encumbranceCategory: string; encumbranceCategoryLabel: string };
     /** Sub-project 9a: true while a cast is in progress — drives the AC badge */

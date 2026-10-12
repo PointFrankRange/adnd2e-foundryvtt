@@ -1,0 +1,88 @@
+{
+  "_id": "LzDj4shPJMNbd6Re",
+  "_key": "!items!LzDj4shPJMNbd6Re",
+  "name": "Centaur",
+  "type": "race",
+  "img": "icons/svg/horse.svg",
+  "system": {
+    "description": "",
+    "raceId": "centaur",
+    "size": "large",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": 5,
+    "classLevelLimits": {
+      "fighter": 12,
+      "ranger": 10,
+      "mage": 12,
+      "druid": 14,
+      "bard": 12
+    },
+    "allowedClasses": [
+      "fighter",
+      "ranger",
+      "mage",
+      "druid",
+      "bard"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "mage"
+      ]
+    ],
+    "bonusLanguages": [
+      "centaur",
+      "elvish"
+    ],
+    "grantedFeatures": [
+      "4 bonus hit points at 1st level",
+      "Three melee attacks per round: one weapon and two front hooves (1-6 each)",
+      "Lance charge deals double damage but no hoof attacks that round",
+      "Takes damage as a large creature",
+      "Difficulty negotiating underground settings"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": -2,
+        "con": 1,
+        "int": 0,
+        "wis": 1,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 11,
+          "max": 18
+        },
+        "dex": {
+          "min": 3,
+          "max": 16
+        },
+        "con": {
+          "min": 11,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 16
+        },
+        "wis": {
+          "min": 4,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

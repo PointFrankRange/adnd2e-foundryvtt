@@ -1,0 +1,91 @@
+{
+  "_id": "ayFeZoPuRNifYwWP",
+  "_key": "!items!ayFeZoPuRNifYwWP",
+  "name": "Minotaur",
+  "type": "race",
+  "img": "icons/svg/horse.svg",
+  "system": {
+    "description": "",
+    "raceId": "minotaur",
+    "size": "large",
+    "baseMovement": 12,
+    "infravision": 60,
+    "naturalAc": 6,
+    "classLevelLimits": {
+      "fighter": 12,
+      "ranger": 8,
+      "mage": 8,
+      "thief": 10
+    },
+    "allowedClasses": [
+      "fighter",
+      "ranger",
+      "mage",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "fighter",
+        "mage"
+      ]
+    ],
+    "bonusLanguages": [
+      "minotaur"
+    ],
+    "grantedFeatures": [
+      "6 bonus hit points at 1st level",
+      "+2 to surprise rolls",
+      "Tracks by scent 50%",
+      "Immune to maze spells",
+      "+3 to morale, including saves vs. magical fear",
+      "Takes damage as a large creature",
+      "Witch Doctor (kit) max level 7"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 2,
+        "dex": 0,
+        "con": 2,
+        "int": 0,
+        "wis": -2,
+        "cha": -2
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 12,
+          "max": 20
+        },
+        "dex": {
+          "min": 5,
+          "max": 14
+        },
+        "con": {
+          "min": 12,
+          "max": 20
+        },
+        "int": {
+          "min": 5,
+          "max": 14
+        },
+        "wis": {
+          "min": 3,
+          "max": 16
+        },
+        "cha": {
+          "min": 3,
+          "max": 16
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

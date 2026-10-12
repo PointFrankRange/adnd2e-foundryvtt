@@ -1,0 +1,88 @@
+{
+  "_id": "HovLc2h2GwS2MBJ6",
+  "_key": "!items!HovLc2h2GwS2MBJ6",
+  "name": "Gnoll",
+  "type": "race",
+  "img": "icons/svg/skull.svg",
+  "system": {
+    "description": "",
+    "raceId": "gnoll",
+    "size": "large",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": null,
+    "classLevelLimits": {
+      "fighter": 11,
+      "cleric": 9,
+      "thief": 11
+    },
+    "allowedClasses": [
+      "fighter",
+      "cleric",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "fighter",
+        "cleric"
+      ]
+    ],
+    "bonusLanguages": [
+      "gnoll",
+      "flind",
+      "troll",
+      "orc",
+      "hobgoblin"
+    ],
+    "grantedFeatures": [
+      "2 bonus hit points at 1st level",
+      "Takes damage as a large creature"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 1,
+        "dex": 0,
+        "con": 0,
+        "int": -1,
+        "wis": 0,
+        "cha": -1
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 6,
+          "max": 18
+        },
+        "dex": {
+          "min": 5,
+          "max": 18
+        },
+        "con": {
+          "min": 5,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 14
+        },
+        "wis": {
+          "min": 3,
+          "max": 16
+        },
+        "cha": {
+          "min": 3,
+          "max": 14
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

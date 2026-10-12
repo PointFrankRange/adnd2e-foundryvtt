@@ -1,0 +1,77 @@
+{
+  "_id": "hAAxQXldJm4RCz79",
+  "_key": "!items!hAAxQXldJm4RCz79",
+  "name": "Ogre",
+  "type": "race",
+  "img": "icons/svg/skull.svg",
+  "system": {
+    "description": "",
+    "raceId": "ogre",
+    "size": "large",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": 5,
+    "classLevelLimits": {
+      "fighter": 12
+    },
+    "allowedClasses": [
+      "fighter"
+    ],
+    "allowedMulticlass": [],
+    "bonusLanguages": [
+      "ogre",
+      "orc",
+      "troll",
+      "stone-giant",
+      "gnoll"
+    ],
+    "grantedFeatures": [
+      "4 bonus hit points at 1st level",
+      "Takes damage as a large creature",
+      "-4 to attack rolls against gnomes and dwarves",
+      "Shaman (kit) max level 3"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 2,
+        "dex": 0,
+        "con": 2,
+        "int": -2,
+        "wis": 0,
+        "cha": -2
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 16,
+          "max": 20
+        },
+        "dex": {
+          "min": 2,
+          "max": 8
+        },
+        "con": {
+          "min": 14,
+          "max": 20
+        },
+        "int": {
+          "min": 2,
+          "max": 8
+        },
+        "wis": {
+          "min": 2,
+          "max": 9
+        },
+        "cha": {
+          "min": 2,
+          "max": 8
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

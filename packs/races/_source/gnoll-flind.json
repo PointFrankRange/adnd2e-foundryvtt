@@ -1,0 +1,88 @@
+{
+  "_id": "oiifG2GBZb1x3hoQ",
+  "_key": "!items!oiifG2GBZb1x3hoQ",
+  "name": "Gnoll, Flind",
+  "type": "race",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+    "description": "",
+    "raceId": "gnoll-flind",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": null,
+    "classLevelLimits": {
+      "fighter": 12,
+      "cleric": 9,
+      "thief": 11
+    },
+    "allowedClasses": [
+      "fighter",
+      "cleric",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "fighter",
+        "cleric"
+      ]
+    ],
+    "bonusLanguages": [
+      "flind",
+      "gnoll",
+      "orc",
+      "hobgoblin",
+      "bugbear",
+      "ogre"
+    ],
+    "grantedFeatures": [
+      "Flindbar disarm: a hit forces the foe to save vs. wands or lose the weapon"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 1,
+        "dex": 0,
+        "con": 0,
+        "int": 0,
+        "wis": 0,
+        "cha": -1
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 8,
+          "max": 18
+        },
+        "dex": {
+          "min": 6,
+          "max": 18
+        },
+        "con": {
+          "min": 6,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 16
+        },
+        "wis": {
+          "min": 3,
+          "max": 16
+        },
+        "cha": {
+          "min": 3,
+          "max": 16
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

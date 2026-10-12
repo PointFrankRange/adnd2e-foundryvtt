@@ -503,6 +503,9 @@
           "armorType": "Armor type"
         }
       },
+      "ac": {
+        "natural": "Includes the race's natural armor class"
+      },
       "vitals": {
         "hp": "Hit Points",
         "ac": "Armor Class",

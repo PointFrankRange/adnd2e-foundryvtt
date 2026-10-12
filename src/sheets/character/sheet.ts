@@ -144,6 +144,7 @@ export function toRaceView(it: RawItem): RaceItemView {
     size: string;
     baseMovement: number;
     infravision: number;
+    naturalAc?: number | null;
     grantedFeatures: string[];
     bonusLanguages: string[];
     subrace?: RawSubrace & { displayName?: unknown };
@@ -156,6 +157,7 @@ export function toRaceView(it: RawItem): RaceItemView {
     size: s.size,
     baseMovement: s.baseMovement,
     infravision: s.infravision,
+    naturalAc: s.naturalAc ?? null,
     grantedFeatures: [...(s.grantedFeatures ?? [])],
     bonusLanguages: [...(s.bonusLanguages ?? [])],
     subrace: normalizeSubrace(s.subrace),

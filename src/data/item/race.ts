@@ -1,17 +1,20 @@
 import { THIEF_SKILLS } from "../../core/proficiencies/thief-skills";
-import { ABILITY_KEYS, CLASS_IDS, CREATURE_SIZES, RACE_IDS } from "./choices";
+import { isRaceSlug } from "../../core/races/slug";
+import { ABILITY_KEYS, CLASS_IDS, CREATURE_SIZES } from "./choices";
 import { Adnd2eItemModel } from "./base-item";
 
-const { StringField, NumberField, ArrayField, ObjectField, SchemaField } = foundry.data.fields;
+const { StringField, NumberField, ArrayField, ObjectField, SchemaField, BooleanField } = foundry.data.fields;
 
 export class RaceItemModel extends Adnd2eItemModel {
   static override defineSchema(): foundry.data.fields.DataSchema {
     return {
       ...super.defineSchema(),
-      raceId: new StringField({ required: true, blank: false, initial: "human", choices: RACE_IDS }),
+      raceId: new StringField({ required: true, blank: false, initial: "human", validate: (value: unknown) => isRaceSlug(value) }),
       size: new StringField({ required: true, blank: false, initial: "medium", choices: CREATURE_SIZES }),
       baseMovement: new NumberField({ required: true, integer: true, min: 0, initial: 12 }),
       infravision: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+      /** SP21 (PHBR10 p.15): the race's natural armor class; null = none (the PHB races). See effectiveBaseArmorAc. */
+      naturalAc: new NumberField({ required: true, nullable: true, integer: true, min: -10, max: 10, initial: null }),
       /** PHB Table 7 — raceId+classId -> max level (or null = unlimited). Free-form object. */
       classLevelLimits: new ObjectField({ required: true, initial: {} }),
       allowedClasses: new ArrayField(new StringField({ required: true, blank: false, choices: CLASS_IDS }), { required: true, initial: [] }),
@@ -19,6 +22,8 @@ export class RaceItemModel extends Adnd2eItemModel {
         new ArrayField(new StringField({ required: true, blank: false, choices: CLASS_IDS })),
         { required: true, initial: [] },
       ),
+      /** true = the race cannot be multi-classed at all, so any class set of 2+ is refused (reason "multiclass"); false with an empty allowedMulticlass = dual-class or unrestricted, as for humans. */
+      noMulticlass: new BooleanField({ required: true, initial: false }),
       bonusLanguages: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: [] }),
       grantedFeatures: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: [] }),
       /** SP12 Plan A: a subrace layer over `raceId` (the base PHB race). Every nullable field defaults to null = inherit the base race's table; existing race items need no migration. */

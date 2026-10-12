@@ -24,6 +24,7 @@ interface ClassItemSystem {
 interface RaceItemSystem {
   raceId: Race;
   baseMovement?: number;
+  naturalAc?: number | null;
   subrace?: RawSubrace;
 }
 interface ArmorItemSystem {
@@ -127,6 +128,7 @@ export function snapshotActor(actor: Actor.Implementation, options: OptionalRule
     exceptionalStrengthPercentile: a.str.exceptional,
     race: raceItem ? (raceItem.system as RaceItemSystem).raceId : null,
     raceLayer: raceItem ? normalizeSubrace((raceItem.system as RaceItemSystem).subrace) : null,
+    naturalAc: raceItem ? ((raceItem.system as RaceItemSystem).naturalAc ?? null) : null,
     classes,
     equippedArmor,
     equippedShield,

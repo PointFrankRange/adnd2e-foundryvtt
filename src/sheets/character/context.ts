@@ -384,6 +384,7 @@ function buildVitals(input: CharacterSheetInput): CharacterSheetContext["vitals"
     hp: a.hp,
     thac0: a.thac0,
     ac: a.ac,
+    naturalAcApplies: typeof input.raceItem?.naturalAc === "number",
     saves,
     movement: {
       base: a.movement.base,

@@ -179,3 +179,155 @@ The Deep Gnome's flat saving-throw bonus is the subrace block's `flatSaveBonus`
 (`{ "all": 3, "poison": 2 }`); every other subrace has `flatSaveBonus: null`. The Athasian halfling
 is deliberately not shipped (Dark Sun content is planned separately). Specials are display labels in
 `grantedFeatures` only.
+
+## PHBR10 humanoid races
+
+Source: *The Complete Book of Humanoids* (PHBR10), a scanned PDF with no text layer, read page by
+page from rendered images (pdftoppm 100-200 dpi, scratch dir only, no page images committed). Each
+humanoid is a `race` item whose `raceId` is its own slug and whose `subrace` block carries the
+race's own layer (ability adjustments, min-max, XP surcharge); `subrace.id` and `subrace.displayName`
+stay blank. Batches 1 and 2 of 3 (twenty races) are shipped so far.
+
+| Printed page | PDF page | What was read |
+|--------------|----------|---------------|
+| 9 | 10 | Table 1: Humanoid Level Limits (the designated source for each race's group limits; keyed independently in `tests/packs/humanoid-races.test.ts`) |
+| 15 | 16 | How to read the entries (natural armor class rule) |
+| 16-17 | 17-18 | Aarakocra |
+| 18-19 | 19-20 | Alaghi |
+| 19-20 | 20-21 | Beastman |
+| 21-22 | 22-23 | Bugbear |
+| 22-23 | 23-24 | Bullywug (entry titled "Bullywug, Advanced") |
+| 24-25 | 25-26 | Centaur |
+| 25-26 | 26-27 | Fremlin |
+| 27-28 | 28-29 | Giant-kin, Firbolg |
+| 29-30 | 30-31 | Giant-kin, Voadkyn |
+| 31-32 | 32-33 | Gnoll |
+| 32-33 | 33-34 | Gnoll, Flind |
+| 35-36 | 36-37 | Goblin |
+| 36-38 | 37-39 | Hobgoblin |
+| 38-40 | 39-41 | Kobold |
+| 40-42 | 41-43 | Lizard Man |
+| 42-43 | 43-44 | Minotaur |
+| 43-45 | 44-46 | Mongrelman |
+| 46-47 | 47-48 | Ogre, Half-Ogre (one shared entry) |
+| 47-49 | 48-50 | Ogre Mage |
+| 49-51 | 50-52 | Orc, Half-Orc (one shared entry); Pixie begins p.51 |
+| 53-54 | 54-55 | Satyr |
+| 55-59 | 56-60 | Saurial (four types: bladeback, finback, flyer, hornhead) |
+| 59-61 | 60-62 | Swanmay (p.59-60), Wemic (p.60-61) |
+| 119 | 120 | Table 13: Humanoid Multi-Class Combinations (rotated page, rendered upright) |
+
+### Rules used for every humanoid
+
+- **Size rule:** small under 4 ft, medium 4-7 ft (7 ft is medium), large over 7 ft.
+- **Class-group mapping (Table 1):** Wr = fighter, ranger, paladin; Wz = mage (illusionist is a mage
+  specialist and shares the mage limit); Pr = cleric, druid; Rg = thief, bard.
+- **Chapter 3 priest-kit deferral:** where a race's only priest option is a Chapter 3 kit (shaman,
+  witch doctor), the item has no cleric/druid chassis and records the limit as a feature label
+  `Shaman (kit) max level N`. Batch 1: aarakocra, bullywug, giant-kin firbolg, giant-kin voadkyn
+  (the test's `DEFERRED_PRIEST`); batch 2 adds lizard man (shaman 7), minotaur (witch doctor 7), ogre (shaman 3) and ogre mage (shaman 7); batch 3 adds wemic (shaman 7 and witch doctor 7, both as labels). Races that also have a cleric or druid chassis (bugbear, gnoll,
+  alaghi, centaur) ship that chassis and omit their shaman/witch doctor limits.
+- **Table 13 (p.119):** combinations containing shamans or witch doctors are dropped; combinations
+  naming a chassis the race may not take are dropped; "illusionist" combinations fold into mage.
+- **Table 1 wins over an entry** whenever the two disagree; the entry value is noted below.
+- Abilities are stored as the race's own `subrace` layer; movement defaults to 12, XP surcharge 0,
+  `thiefAdjustments` null (open), and infravision 0 when the entry states none. `common` is not
+  listed in `bonusLanguages` (every humanoid PC understands it, p.15); the race's own tongue is.
+- Special abilities and drawbacks are display labels in `grantedFeatures` only.
+
+### Judgement calls, batch 1
+
+- **Fremlin thief limit (conflict):** Table 1 (p.9) prints Rg 11; the entry's own class table
+  (p.25-26) prints Thief 12. Shipped 11 (Table 1).
+- **Exceptional Strength maxima:** beastman prints Str max 18/50 (p.19) and bullywug 18/75 (p.22);
+  both are stored as 18 (the range is integer). The exceptional maximum is noted here only.
+- **Size not stated:** beastman (p.19, "short, slender") is medium; centaur (p.24-25, horse body,
+  takes damage as a large creature) is large. Neither entry states a height or length.
+- **Natural AC printed as 10:** bugbear (p.21) and gnoll (p.31) print 10, which equals no armor;
+  stored as `null`.
+- **Centaur Table 13 vs class table:** Table 13 lists fighter/thief and ranger/shaman, but the
+  centaur's class table (p.24) allows no thief; fighter/thief and ranger/shaman are dropped, leaving
+  fighter/mage.
+- **Fremlin:** mage and illusionist are both 10 (one `mage` entry); Table 13's mage/thief and
+  illusionist/thief fold into one combination.
+- **Strength minimum 2 (fremlin, p.25):** stored as printed; the structural test allows a minimum
+  of 1 or more.
+- **Land movement:** none of the ten entries states a land rate (aarakocra flight 36 and fremlin
+  flight 12 are labels); all use 12.
+- **Infravision:** stated only for the bugbear (60, p.22) and voadkyn (90, p.30); the other eight
+  state none and use 0.
+- **Firbolg XP:** double the base class's experience points (p.28-29) is stored as `xpModifierPercent: 100`;
+  the voadkyn "uses the Paladin XP table" (p.31) is a feature label only.
+- **Alaghi druid:** the druid limit of 11 carries a footnote (Int 15, Wis 12, Cha 15, neutral good);
+  shipped as an allowed class with the requirement in a feature label.
+- **Voadkyn 90% sleep/charm resistance (p.30)** is a feature label only (the code resistance table
+  covers PHB races).
+
+### Judgement calls, batch 2
+
+- **Hobgoblin thief limit (conflict):** Table 1 (p.9) prints Rg 11; the entry's class table (p.37)
+  prints Thief 12. Shipped 11 (Table 1).
+- **Goblin size:** the entry (p.35) says "small humanoids ... about four feet tall"; exactly 4 ft is
+  medium by the size rule, but the book calls them small, so shipped small.
+- **Minotaur / ogre / half-ogre / ogre mage size:** minotaur 7-7.5 ft (p.43), half-ogre "between seven
+  and eight feet" (p.47) are over 7 ft, so large; ogre (9 ft+) and ogre mage (10.5 ft) are large.
+- **Natural AC printed as 10:** flind (p.33), goblin (p.35), hobgoblin (p.37), kobold (p.38) store null.
+  Lizard man 5 (p.40, matches the p.15 example), minotaur 6, mongrelman 5, ogre 5, half-ogre 8,
+  ogre mage 4.
+- **Lizard man land movement 6** (p.42, stated); swim 12 is a label. Others use 12.
+- **Infravision stated:** goblin 60 (p.36), hobgoblin 60 (p.38), kobold 60 (p.39), minotaur 60 (p.43).
+  Flind, lizard man, mongrelman, ogre, half-ogre, ogre mage state none: 0.
+- **Ogre mage XP:** "twice as many XP" (p.49) = `xpModifierPercent: 100`.
+- **Mongrelman +1:** the free +1 to any one non-Int/Cha ability (p.43) is a label, not an adjustment.
+  Mongrelman shaman 7 dropped (it has a cleric 10 chassis). Bard 8 shipped (footnote noted as a label).
+- **Ogre vs half-ogre:** one entry (p.46) with paired values (ogre/half-ogre). Half-ogre has cleric 4
+  (shipped; Table 1 Pr 4), its shaman/witch doctor 4 dropped; ogre's only priest option is shaman 3
+  (DEFERRED_PRIEST). Table 13: ogre has fighter/shaman only (dropped, so no multi-class); half-ogre
+  keeps fighter/cleric (printed "allowed if Wisdom is 9+", a requirement not encoded).
+- **Table 13 drops:** flind, goblin, hobgoblin, kobold, lizard man fighter/shaman; mongrelman
+  fighter/shaman and shaman/thief; ogre mage fighter/shaman; minotaur's Table 13 row (fighter/thief,
+  fighter/mage) is kept in full (its class table allows ranger/mage/thief).
+- **Languages:** `common` omitted; mongrelman speaks only common (empty list); hobgoblin's rare
+  "carnivorous ape" stored as `carnivorous-ape`; ogre/half-ogre `stone-giant`.
+- **Disadvantage labels with numbers** (hobgoblin dwarf +1, kobold gnome +1, ogre -4 vs gnomes/dwarves)
+  are display-only.
+
+### Judgement calls, batch 3
+
+- **Orc and half-orc** share one entry (p.49-51) with paired values. Natural AC printed as 10 stores
+  null. Infravision 60 (p.50, both). Orc cleric 9 / half-orc cleric 4 match Table 1 Pr; the shaman
+  6/4 and witch doctor 6/4 options are dropped (a cleric chassis exists). Orc Table 13 is
+  fighter/shaman, fighter/thief, shaman/thief, leaving fighter/thief; half-orc keeps fighter/thief,
+  fighter/cleric and cleric/thief. The "single-classed characters can rise higher" footnote is a
+  label (orc) and the half-orc exceptional-score rules are a label. Orc languages orc, goblin,
+  hobgoblin, ogre; half-orc speaks orc (plus an unspecified bonus language, a label).
+- **Pixie (p.51-52):** size small (2.5 ft); XP "twice as much" = +100; flight 12 class B is a
+  label, land movement 12; infravision not stated (0); languages pixie, sprite.
+- **Satyr (p.53-54):** size not stated, medium from the man-torso/goat-legs description (a
+  stated-size entry would win); Str maximum 18/75 stored as 18; infravision 60 (p.54); natural AC 5;
+  languages satyr, sylvan elf (`sylvan-elf`), centaur, dryad, korred.
+- **Saurial (p.55-59):** four items from one entry with slash-paired values (bb/fn/fl/hh). Table 13
+  lists one row "dual-class characters are possible", so `allowedMulticlass` is empty for all four.
+  Sizes: bladeback about 7 ft (medium by the 4-7 ft rule; it also takes damage as large, a label),
+  finhead about 5 ft medium, flyer about 3 ft small, hornhead 10 ft large. Natural AC flyer 6,
+  finhead 5, bladeback 4, hornhead 4 (p.55). All saurials have infravision 60 (p.58). Hornhead
+  mage U with illusionist 12 folds into one `mage` entry (Table 1 Wz U). Finback fighter U, ranger
+  12, paladin 12. Dexterity minimum 2 (hornhead) and Strength minimum 3 (flyer) are stored as
+  printed. The 9-becomes-10 XP-bonus footnote is a label. Hit-point bonuses (bladeback 2, hornhead
+  4), languages (the scent language is stored as `saurial`; saurials cannot speak common) and attack
+  forms are labels. Land movement 12 (flyer flight 24 C is a label).
+- **Swanmay (p.59-60):** the minimums table prints ranger/druid pairs (Str 13/9, Dex 13/9, Con 14/12,
+  Int 9/12, Wis 14/12, Cha 9/15) that "include the class minimums"; the race range takes the lower
+  of each pair (9, 9, 12, 9, 12, 9) so both classes stay reachable, and the class chassis enforce
+  their own minimums. Table 13 "none" gives an empty `allowedMulticlass`. Human female, medium.
+  Natural AC 7; flight 19 D, 2%/hit die magic resistance and "hit only by +1 weapons" are swan-form
+  labels. Druid 12 and ranger 14 match Table 1.
+- **Wemic (p.60-61):** length 10 ft (large; also takes damage as large); shaman 7 and witch doctor 7
+  are the only priest options, so wemic joins `DEFERRED_PRIEST` with both kit labels. Table 13
+  fighter/shaman is dropped, leaving no multi-class. Bard 10 shipped. Natural AC 6, 5 bonus hit
+  points (label), infravision not stated (0), language wemic.
+
+### Deferred-priest race list (final)
+
+aarakocra, bullywug, giant-kin-firbolg, giant-kin-voadkyn, lizard-man, minotaur, ogre, ogre-mage,
+wemic.

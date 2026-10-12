@@ -1,0 +1,88 @@
+{
+  "_id": "ucc5KKB2Pgot9xWJ",
+  "_key": "!items!ucc5KKB2Pgot9xWJ",
+  "name": "Satyr",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "",
+    "raceId": "satyr",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 60,
+    "naturalAc": 5,
+    "classLevelLimits": {
+      "fighter": 11,
+      "ranger": 7,
+      "thief": 11
+    },
+    "allowedClasses": [
+      "fighter",
+      "ranger",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "satyr",
+      "sylvan-elf",
+      "centaur",
+      "dryad",
+      "korred"
+    ],
+    "grantedFeatures": [
+      "Surprised only on a roll of 1",
+      "90% undetectable in forest foliage",
+      "Head butt 2-8 damage",
+      "Satyr pipe: charm, sleep or cause fear within 60 ft",
+      "Susceptible to distraction",
+      "Strength maximum 18/75"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 1,
+        "con": 1,
+        "int": -1,
+        "wis": 0,
+        "cha": -1
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 6,
+          "max": 18
+        },
+        "dex": {
+          "min": 8,
+          "max": 18
+        },
+        "con": {
+          "min": 7,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 17
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 17
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

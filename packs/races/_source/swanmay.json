@@ -1,0 +1,79 @@
+{
+  "_id": "eNThUZWPJwmobzGY",
+  "_key": "!items!eNThUZWPJwmobzGY",
+  "name": "Swanmay",
+  "type": "race",
+  "img": "icons/svg/wing.svg",
+  "system": {
+    "description": "",
+    "raceId": "swanmay",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": 7,
+    "classLevelLimits": {
+      "ranger": 14,
+      "druid": 12
+    },
+    "allowedClasses": [
+      "ranger",
+      "druid"
+    ],
+    "allowedMulticlass": [],
+    "noMulticlass": true,
+    "bonusLanguages": [
+      "sylvan-elf",
+      "dryad"
+    ],
+    "grantedFeatures": [
+      "Swan form at will via a token; special advantages apply in swan form only",
+      "Flight 19, maneuverability D in swan form",
+      "Hit only by +1 or better weapons; 2% magic resistance per hit die (swan form)",
+      "Bonus proficiencies: ranger tracking, druid weather sense",
+      "Minimums S/D/C/I/W/Ch: ranger 13/13/14/9/14/9, druid 9/9/12/12/12/15",
+      "Trapped in current form if the token is stolen"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 1,
+        "con": 0,
+        "int": 0,
+        "wis": 1,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 9,
+          "max": 18
+        },
+        "dex": {
+          "min": 9,
+          "max": 18
+        },
+        "con": {
+          "min": 12,
+          "max": 18
+        },
+        "int": {
+          "min": 9,
+          "max": 18
+        },
+        "wis": {
+          "min": 12,
+          "max": 19
+        },
+        "cha": {
+          "min": 9,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

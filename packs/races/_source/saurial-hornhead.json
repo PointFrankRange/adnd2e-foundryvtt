@@ -1,0 +1,88 @@
+{
+  "_id": "imAP2usNp1glHrcw",
+  "_key": "!items!imAP2usNp1glHrcw",
+  "name": "Saurial, Hornhead",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "",
+    "raceId": "saurial-hornhead",
+    "size": "large",
+    "baseMovement": 12,
+    "infravision": 60,
+    "naturalAc": 4,
+    "classLevelLimits": {
+      "fighter": 9,
+      "mage": null,
+      "cleric": 9,
+      "druid": 9,
+      "thief": 9
+    },
+    "allowedClasses": [
+      "fighter",
+      "mage",
+      "cleric",
+      "druid",
+      "thief"
+    ],
+    "allowedMulticlass": [],
+    "bonusLanguages": [
+      "saurial"
+    ],
+    "grantedFeatures": [
+      "4 bonus hit points at 1st level",
+      "Claws 1d4/1d4, tail 2d4 and horn charge 2d6",
+      "Takes damage as a large creature",
+      "Cold torpor resisted for 10 turns",
+      "Infravision 60 ft (all saurials)",
+      "+2 save vs sound-based attacks, -2 vs gas or scent attacks",
+      "-1 attack with non-saurial weapons",
+      "No percentile Strength",
+      "Cold torpor (cold sleep) when exposed to prolonged cold",
+      "Wizards cannot use other races' spellbooks or scrolls",
+      "Limit shown is 10 with an XP bonus from ability scores"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 1,
+        "dex": -2,
+        "con": 0,
+        "int": 1,
+        "wis": 0,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 12,
+          "max": 18
+        },
+        "dex": {
+          "min": 2,
+          "max": 12
+        },
+        "con": {
+          "min": 8,
+          "max": 18
+        },
+        "int": {
+          "min": 7,
+          "max": 19
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

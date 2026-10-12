@@ -1,0 +1,81 @@
+{
+  "_id": "UP7wcAARnUojpiNy",
+  "_key": "!items!UP7wcAARnUojpiNy",
+  "name": "Bullywug",
+  "type": "race",
+  "img": "icons/svg/frozen.svg",
+  "system": {
+    "description": "",
+    "raceId": "bullywug",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": 6,
+    "classLevelLimits": {
+      "fighter": 10,
+      "thief": 9
+    },
+    "allowedClasses": [
+      "fighter",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "bullywug"
+    ],
+    "grantedFeatures": [
+      "Chameleon: 75% undetectable; foes -2 surprise (-6 vs hop)",
+      "Hop attack: up to 30 ft forward or 15 ft up, +1 attack, double damage with impaling weapons",
+      "Swimming as a bonus proficiency",
+      "Must wet the whole body three times a day or lose 2 Constitution per missed bath",
+      "Shaman (kit) max level 7"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 1,
+        "con": 0,
+        "int": -1,
+        "wis": 0,
+        "cha": -1
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 6,
+          "max": 18
+        },
+        "dex": {
+          "min": 4,
+          "max": 18
+        },
+        "con": {
+          "min": 6,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 14
+        },
+        "wis": {
+          "min": 6,
+          "max": 16
+        },
+        "cha": {
+          "min": 3,
+          "max": 14
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

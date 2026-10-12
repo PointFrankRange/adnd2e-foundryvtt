@@ -1,0 +1,91 @@
+{
+  "_id": "40FvvikH42y9P1BJ",
+  "_key": "!items!40FvvikH42y9P1BJ",
+  "name": "Goblin",
+  "type": "race",
+  "img": "icons/svg/skull.svg",
+  "system": {
+    "description": "",
+    "raceId": "goblin",
+    "size": "small",
+    "baseMovement": 12,
+    "infravision": 60,
+    "naturalAc": null,
+    "classLevelLimits": {
+      "fighter": 10,
+      "cleric": 9,
+      "thief": 12
+    },
+    "allowedClasses": [
+      "fighter",
+      "cleric",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "fighter",
+        "cleric"
+      ],
+      [
+        "cleric",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "goblin",
+      "kobold",
+      "orc",
+      "hobgoblin"
+    ],
+    "grantedFeatures": [
+      "Detects new or unusual underground construction 25% (1-2 on 1d8)",
+      "Bright sunshine: -1 to attack rolls"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": -1,
+        "dex": 0,
+        "con": 0,
+        "int": 0,
+        "wis": 0,
+        "cha": -1
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 4,
+          "max": 15
+        },
+        "dex": {
+          "min": 4,
+          "max": 17
+        },
+        "con": {
+          "min": 5,
+          "max": 16
+        },
+        "int": {
+          "min": 3,
+          "max": 18
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 12
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

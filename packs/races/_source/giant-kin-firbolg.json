@@ -1,0 +1,79 @@
+{
+  "_id": "H6VJqwC3OcCqZ9u7",
+  "_key": "!items!H6VJqwC3OcCqZ9u7",
+  "name": "Giant-kin, Firbolg",
+  "type": "race",
+  "img": "icons/svg/mountain.svg",
+  "system": {
+    "description": "",
+    "raceId": "giant-kin-firbolg",
+    "size": "large",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": 3,
+    "classLevelLimits": {
+      "fighter": 12
+    },
+    "allowedClasses": [
+      "fighter"
+    ],
+    "allowedMulticlass": [],
+    "bonusLanguages": [
+      "firbolg",
+      "storm giant"
+    ],
+    "grantedFeatures": [
+      "13 bonus hit points at 1st level",
+      "Innate (3rd+, odd levels): detect magic, diminution, fools' gold, forget, alter self",
+      "Wields large weapons one-handed; own-make weapons two-handed for double damage",
+      "Swats away missiles (6+ on 1d20); catches large missiles",
+      "15% magic resistance, even against beneficial magic",
+      "Never wears armor or carries shields",
+      "Takes damage as a large creature",
+      "No Strength bonuses with man-made weapons",
+      "Shaman (kit) max level 7"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 2,
+        "dex": 0,
+        "con": 0,
+        "int": 0,
+        "wis": 0,
+        "cha": -2
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 14,
+          "max": 19
+        },
+        "dex": {
+          "min": 8,
+          "max": 15
+        },
+        "con": {
+          "min": 12,
+          "max": 18
+        },
+        "int": {
+          "min": 8,
+          "max": 18
+        },
+        "wis": {
+          "min": 8,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 14
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 100,
+      "flatSaveBonus": null
+    }
+  }
+}

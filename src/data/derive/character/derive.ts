@@ -185,6 +185,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
   const ac = deriveAc({
     equippedArmor: snapshot.equippedArmor,
     equippedShield: snapshot.equippedShield,
+    naturalAc: snapshot.naturalAc ?? null,
     // PHB p.86 — no Dexterity AC bonus while casting (casting-time rule only)
     dexDefensiveAdj: acDexAdjWhileCasting(
       abilities.dex.defensiveAdj,

@@ -1,0 +1,89 @@
+{
+  "_id": "Mp4NnK5BfDoD5cDS",
+  "_key": "!items!Mp4NnK5BfDoD5cDS",
+  "name": "Saurial, Finback",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "",
+    "raceId": "saurial-finback",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 60,
+    "naturalAc": 5,
+    "classLevelLimits": {
+      "fighter": null,
+      "ranger": 12,
+      "paladin": 12,
+      "mage": 9,
+      "cleric": 9,
+      "druid": 9,
+      "thief": 9
+    },
+    "allowedClasses": [
+      "fighter",
+      "ranger",
+      "paladin",
+      "mage",
+      "cleric",
+      "druid",
+      "thief"
+    ],
+    "allowedMulticlass": [],
+    "bonusLanguages": [
+      "saurial"
+    ],
+    "grantedFeatures": [
+      "Claws 1d3/1d3 and whip tail 1d2",
+      "Infravision 60 ft (all saurials)",
+      "+2 save vs sound-based attacks, -2 vs gas or scent attacks",
+      "-1 attack with non-saurial weapons",
+      "No percentile Strength",
+      "Cold torpor (cold sleep) when exposed to prolonged cold",
+      "Wizards cannot use other races' spellbooks or scrolls",
+      "Limit shown is 10 with an XP bonus from ability scores"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 0,
+        "con": 0,
+        "int": 0,
+        "wis": 0,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 7,
+          "max": 18
+        },
+        "dex": {
+          "min": 5,
+          "max": 18
+        },
+        "con": {
+          "min": 3,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 18
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

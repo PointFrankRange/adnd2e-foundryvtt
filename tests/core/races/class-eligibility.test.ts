@@ -24,6 +24,12 @@ describe("raceAllowsClasses", () => {
   it("does no combination check when the race lists none (humans dual-class)", () => {
     expect(raceAllowsClasses(human, ["fighter", "mage"])).toEqual({ ok: true });
   });
+  it("noMulticlass refuses any pair but still allows a single class", () => {
+    const swanmay = { allowedClasses: ["ranger", "druid"], allowedMulticlass: [], noMulticlass: true };
+    expect(raceAllowsClasses(swanmay, ["ranger", "druid"])).toEqual({ ok: false, reason: "multiclass" });
+    expect(raceAllowsClasses(swanmay, ["druid"])).toEqual({ ok: true });
+    expect(raceAllowsClasses(swanmay, ["ranger", "mage"])).toEqual({ ok: false, reason: "class" });
+  });
   it("treats an empty class list as unrestricted", () => {
     expect(raceAllowsClasses({ allowedClasses: [], allowedMulticlass: [] }, ["paladin", "bard"])).toEqual({ ok: true });
   });
@@ -34,8 +40,11 @@ describe("raceTablesOf", () => {
     expect(raceTablesOf({ allowedClasses: ["fighter", 3], allowedMulticlass: [["fighter", "thief"], "x"] })).toEqual({
       allowedClasses: ["fighter"],
       allowedMulticlass: [["fighter", "thief"], []],
+      noMulticlass: false,
     });
-    expect(raceTablesOf(undefined)).toEqual({ allowedClasses: [], allowedMulticlass: [] });
-    expect(raceTablesOf({ allowedClasses: "x", allowedMulticlass: "y" })).toEqual({ allowedClasses: [], allowedMulticlass: [] });
+    expect(raceTablesOf({ noMulticlass: true }).noMulticlass).toBe(true);
+    expect(raceTablesOf({ noMulticlass: "yes" }).noMulticlass).toBe(false);
+    expect(raceTablesOf(undefined)).toEqual({ allowedClasses: [], allowedMulticlass: [], noMulticlass: false });
+    expect(raceTablesOf({ allowedClasses: "x", allowedMulticlass: "y" })).toEqual({ allowedClasses: [], allowedMulticlass: [], noMulticlass: false });
   });
 });

@@ -1,0 +1,81 @@
+{
+  "_id": "jqxdfvGoRXpmB43T",
+  "_key": "!items!jqxdfvGoRXpmB43T",
+  "name": "Beastman",
+  "type": "race",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+    "description": "",
+    "raceId": "beastman",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": 8,
+    "classLevelLimits": {
+      "fighter": 10,
+      "ranger": 12,
+      "thief": 10
+    },
+    "allowedClasses": [
+      "fighter",
+      "ranger",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "beastman"
+    ],
+    "grantedFeatures": [
+      "Hide in forest 90%; unaware opponents suffer -6 to surprise rolls",
+      "80% magic resistance, even against beneficial magic",
+      "Cannot use magic items except magical weapons"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 0,
+        "dex": 2,
+        "con": 0,
+        "int": 0,
+        "wis": 0,
+        "cha": -2
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 6,
+          "max": 18
+        },
+        "dex": {
+          "min": 6,
+          "max": 18
+        },
+        "con": {
+          "min": 6,
+          "max": 16
+        },
+        "int": {
+          "min": 3,
+          "max": 18
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 16
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

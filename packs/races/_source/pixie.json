@@ -1,0 +1,81 @@
+{
+  "_id": "U5J9jT8MaznASPDO",
+  "_key": "!items!U5J9jT8MaznASPDO",
+  "name": "Pixie",
+  "type": "race",
+  "img": "icons/svg/wing.svg",
+  "system": {
+    "description": "",
+    "raceId": "pixie",
+    "size": "small",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": 5,
+    "classLevelLimits": {
+      "fighter": 7,
+      "thief": 12
+    },
+    "allowedClasses": [
+      "fighter",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "pixie",
+      "sprite"
+    ],
+    "grantedFeatures": [
+      "Flight 12, maneuverability B",
+      "Becomes visible or polymorphs at will; attackers who cannot detect invisible take -4",
+      "1/day: know alignment, illusion, confusion, dispel magic (8th), ESP",
+      "A successful dispel magic against 8th level forces the pixie visible for a round"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": -1,
+        "dex": 1,
+        "con": -1,
+        "int": 0,
+        "wis": 0,
+        "cha": 1
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 3,
+          "max": 14
+        },
+        "dex": {
+          "min": 8,
+          "max": 19
+        },
+        "con": {
+          "min": 7,
+          "max": 16
+        },
+        "int": {
+          "min": 6,
+          "max": 18
+        },
+        "wis": {
+          "min": 3,
+          "max": 16
+        },
+        "cha": {
+          "min": 3,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 100,
+      "flatSaveBonus": null
+    }
+  }
+}

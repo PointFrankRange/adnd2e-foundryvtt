@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { POWER_DISCIPLINES, POWER_KINDS, POWER_MAINTENANCE_UNITS, CLASS_IDS, RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
+import { POWER_DISCIPLINES, POWER_KINDS, POWER_MAINTENANCE_UNITS, CLASS_IDS, PHB_RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
 import { EQUIPMENT_MODES, normalizePowers, normalizeOverrides, powerUses, TURNING_MODES, CASTING_MODES } from "../../src/core/kits";
-import { normalizeSubrace } from "../../src/core/races";
+import { isRaceSlug, normalizeSubrace } from "../../src/core/races";
 import { resolveShapechangeSpec } from "../../src/core/shapechange";
 import { THIEF_SKILLS } from "../../src/core/proficiencies/thief-skills";
 import { TRAITS, toTraitEffect, type RawTraitEffect } from "../../src/core/skills/traits";
@@ -43,9 +43,20 @@ describe("classes pack content", () => {
 
 describe("races pack content", () => {
   const items = docs("races");
-  it("has the 6 PHB races plus the 6 dwarf, 5 elf, 4 gnome and 7 halfling subraces", () => {
-    expect(items).toHaveLength(28);
-    expect(new Set(items.map((d) => sys(d).raceId))).toEqual(new Set(RACE_IDS));
+  // the thirty PHBR10 humanoid races (independent literal list; blank subrace id)
+  const HUMANOID_SLUGS = [
+    "aarakocra", "alaghi", "beastman", "bugbear", "bullywug", "centaur", "fremlin", "giant-kin-firbolg", "giant-kin-voadkyn", "gnoll",
+    "gnoll-flind", "goblin", "hobgoblin", "kobold", "lizard-man", "minotaur", "mongrelman", "ogre", "half-ogre", "ogre-mage", "orc",
+    "half-orc", "pixie", "satyr", "saurial-bladeback", "saurial-finback", "saurial-flyer", "saurial-hornhead", "swanmay", "wemic",
+  ];
+  const isHumanoid = (d: Record<string, unknown>) => HUMANOID_SLUGS.includes(sys(d).raceId as string);
+  it("has the 6 PHB races plus the 6 dwarf, 5 elf, 4 gnome and 7 halfling subraces, plus the humanoid races", () => {
+    const humanoids = items.filter(isHumanoid);
+    expect(humanoids).toHaveLength(30); // all three batches
+    expect(items).toHaveLength(28 + humanoids.length);
+    const raceIds = new Set(items.map((d) => sys(d).raceId as string));
+    for (const id of PHB_RACE_IDS) expect(raceIds.has(id)).toBe(true);
+    for (const id of raceIds) expect(PHB_RACE_IDS.includes(id as never) || HUMANOID_SLUGS.includes(id), id).toBe(true);
     const subs = items.filter((d) => (sys(d).subrace as { id?: string } | undefined)?.id);
     expect(subs).toHaveLength(22);
     expect(subs.filter((d) => sys(d).raceId === "dwarf")).toHaveLength(6);
@@ -60,7 +71,7 @@ describe("races pack content", () => {
       expect(d.name as string, d.name as string).toMatch(new RegExp(`^${TITLE[sys(d).raceId as string]}, .+`));
       expect((sub(d)?.displayName ?? "").trim(), d.name as string).not.toBe("");
     }
-    const phb = items.filter((i) => !sub(i)?.id);
+    const phb = items.filter((i) => !sub(i)?.id && !isHumanoid(i));
     expect(phb.map((d) => d.name).sort()).toEqual(["Dwarf", "Elf", "Gnome", "Half-Elf", "Halfling", "Human"]);
     for (const d of phb) expect(sub(d)?.displayName ?? "", d.name as string).toBe("");
     const names = items.map((d) => d.name as string).sort((a, b) => a.localeCompare(b));
@@ -405,7 +416,7 @@ describe("kits pack content", () => {
       };
       expect(CLASS_IDS as readonly string[], String(d.name)).toContain(s.chassisId);
       expect(Object.keys(s.qualifications.abilityMinimums).sort()).toEqual([...ABILITY_KEYS].sort());
-      for (const r of s.qualifications.races) expect(RACE_IDS as readonly string[]).toContain(r);
+      for (const r of s.qualifications.races) expect(isRaceSlug(r)).toBe(true);
       for (const a of s.qualifications.alignments) expect(ALIGNMENTS as readonly string[]).toContain(a);
       expect(Number.isInteger(s.xpModifierPercent)).toBe(true);
       for (const e of s.effects) expect(toTraitEffect(e), String(d.name)).not.toBeNull();

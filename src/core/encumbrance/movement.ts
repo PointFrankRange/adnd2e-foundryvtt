@@ -1,11 +1,11 @@
 // PHB Table 64 (p.119) base movement + Table 48 (p.78) modified movement +
 // the p.79 "Effects of Encumbrance" combat penalties.
-import type { EncumbranceCategory, EncumbranceRule, MovementTier, Race } from "../types";
+import type { EncumbranceCategory, EncumbranceRule, MovementTier, PhbRace } from "../types";
 import { encumbranceCategory, encumbranceThresholds } from "./weight-allowance";
 
 /** PHB Table 64: BASE MOVEMENT RATES (p.119). */
 // prettier-ignore
-export const BASE_MOVEMENT: Readonly<Record<Race, number>> = {
+export const BASE_MOVEMENT: Readonly<Record<PhbRace, number>> = {
   human: 12, dwarf: 6, elf: 12, "half-elf": 12, gnome: 6, halfling: 6,
 };
 
