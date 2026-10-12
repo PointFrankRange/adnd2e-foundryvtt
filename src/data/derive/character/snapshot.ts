@@ -65,6 +65,8 @@ export interface ActorSnapshot {
   race: Race | null;
   /** SP12: the race item's subrace layer (null/absent = the plain base race) */
   raceLayer?: SubraceLayer | null;
+  /** SP21 (PHBR10 p.15): the race item's natural armor class; absent/null = none */
+  naturalAc?: number | null;
   classes: readonly ClassEntry[];
   equippedArmor: EquippedArmor | null;
   equippedShield: EquippedShield | null;

@@ -58,7 +58,7 @@
           <span class="kit-big"><input type="number" name="system.attributes.hp.value" value="{{adnd2e.vitals.hp.value}}"> / {{adnd2e.vitals.hp.max}}</span></div>
         <div class="kit-stat"><div class="kit-bar">+ HP</div>
           <span class="kit-big"><input type="number" name="system.attributes.hp.temp" value="{{adnd2e.vitals.hp.temp}}"></span></div>
-        <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.ac'}}</div><span class="kit-big">{{adnd2e.vitals.ac.normal}}</span></div>
+        <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.ac'}}</div><span class="kit-big"{{#if adnd2e.vitals.naturalAcApplies}} title="{{localize 'ADND2E.sheet.ac.natural'}}"{{/if}}>{{adnd2e.vitals.ac.normal}}</span></div>
         <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.thac0'}}</div><span class="kit-big">{{adnd2e.vitals.thac0.melee}}</span></div>
         <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.movement'}}</div><span class="kit-big" title="{{localize adnd2e.vitals.movement.encumbranceCategoryLabel}}">{{adnd2e.vitals.movement.current}}</span></div>
         {{#if adnd2e.vitals.casting}}<span class="casting-badge" title="{{localize 'ADND2E.sheet.casting.badgeHint'}}">{{localize 'ADND2E.sheet.casting.badge'}}</span>{{/if}}

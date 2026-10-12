@@ -1,4 +1,5 @@
 import { armorClass } from "../../../core/combat/armor-class";
+import { effectiveBaseArmorAc } from "../../../core/combat/natural-ac";
 import type { EquippedArmor, EquippedShield } from "./snapshot";
 
 export interface AcInput {
@@ -6,6 +7,8 @@ export interface AcInput {
   equippedShield: EquippedShield | null;
   /** dexterity(dex).defensiveAdj — AC-signed (negative = agile) */
   dexDefensiveAdj: number;
+  /** SP21 (PHBR10 p.15): the race's natural armor class; absent/null = none */
+  naturalAc?: number | null;
 }
 
 /**
@@ -23,7 +26,8 @@ export function deriveAc(input: AcInput): {
   surprised: number;
   shieldless: number;
 } {
-  const baseArmorAc = input.equippedArmor?.baseArmorAc ?? 10;
+  const armorAc = input.equippedArmor?.baseArmorAc ?? 10;
+  const baseArmorAc = effectiveBaseArmorAc(armorAc, input.naturalAc ?? null);
   const shieldBonus = input.equippedShield?.shieldBonus ?? 0;
   const armorMagic = input.equippedArmor?.magicBonus ?? 0;
   const shieldMagic = input.equippedShield?.magicBonus ?? 0;
