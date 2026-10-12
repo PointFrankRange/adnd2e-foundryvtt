@@ -1,0 +1,91 @@
+{
+  "_id": "tCDkS1jcI47Dabm5",
+  "_key": "!items!tCDkS1jcI47Dabm5",
+  "name": "Bugbear",
+  "type": "race",
+  "img": "icons/svg/skull.svg",
+  "system": {
+    "description": "",
+    "raceId": "bugbear",
+    "size": "medium",
+    "baseMovement": 12,
+    "infravision": 60,
+    "naturalAc": null,
+    "classLevelLimits": {
+      "fighter": 12,
+      "cleric": 8,
+      "thief": 9
+    },
+    "allowedClasses": [
+      "fighter",
+      "cleric",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "fighter",
+        "cleric"
+      ],
+      [
+        "cleric",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "bugbear",
+      "goblin",
+      "hobgoblin"
+    ],
+    "grantedFeatures": [
+      "3 bonus hit points at 1st level",
+      "Stealthy: opponents suffer -3 to surprise rolls",
+      "Takes damage as a large creature"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 1,
+        "dex": 0,
+        "con": 0,
+        "int": -1,
+        "wis": 0,
+        "cha": -1
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 8,
+          "max": 18
+        },
+        "dex": {
+          "min": 8,
+          "max": 17
+        },
+        "con": {
+          "min": 8,
+          "max": 18
+        },
+        "int": {
+          "min": 3,
+          "max": 16
+        },
+        "wis": {
+          "min": 3,
+          "max": 18
+        },
+        "cha": {
+          "min": 3,
+          "max": 14
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

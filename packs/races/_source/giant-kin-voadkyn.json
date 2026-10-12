@@ -1,0 +1,109 @@
+{
+  "_id": "XxK2Oqh1Zk7XbYyA",
+  "_key": "!items!XxK2Oqh1Zk7XbYyA",
+  "name": "Giant-kin, Voadkyn",
+  "type": "race",
+  "img": "icons/svg/oak.svg",
+  "system": {
+    "description": "",
+    "raceId": "giant-kin-voadkyn",
+    "size": "large",
+    "baseMovement": 12,
+    "infravision": 90,
+    "naturalAc": 8,
+    "classLevelLimits": {
+      "fighter": 11,
+      "ranger": 11,
+      "mage": 8,
+      "thief": 10
+    },
+    "allowedClasses": [
+      "fighter",
+      "ranger",
+      "mage",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "fighter",
+        "mage"
+      ],
+      [
+        "fighter",
+        "thief"
+      ],
+      [
+        "ranger",
+        "mage"
+      ],
+      [
+        "mage",
+        "thief"
+      ],
+      [
+        "fighter",
+        "mage",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "voadkyn",
+      "treant",
+      "sylvan elf"
+    ],
+    "grantedFeatures": [
+      "7 bonus hit points at 1st level",
+      "90% resistant to sleep and charm",
+      "Polymorph self into any humanoid (3 to 15 ft) from 7th level",
+      "Move silently in forests; opponents suffer -4 to surprise rolls",
+      "Blend into forest vegetation; can hide, fire an arrow and re-hide in one round",
+      "Huge long bow: +1 attack, +50% range, 1d8 damage (full size only)",
+      "Takes damage as a large creature",
+      "No Strength attack bonus",
+      "Warriors use the Paladin XP table",
+      "Shaman (kit) max level 7"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": 1,
+        "dex": 2,
+        "con": -1,
+        "int": 0,
+        "wis": -2,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 11,
+          "max": 18
+        },
+        "dex": {
+          "min": 13,
+          "max": 19
+        },
+        "con": {
+          "min": 8,
+          "max": 16
+        },
+        "int": {
+          "min": 11,
+          "max": 17
+        },
+        "wis": {
+          "min": 3,
+          "max": 16
+        },
+        "cha": {
+          "min": 3,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

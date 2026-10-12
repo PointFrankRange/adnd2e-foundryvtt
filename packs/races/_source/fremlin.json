@@ -1,0 +1,79 @@
+{
+  "_id": "AYHp60Qd3ZGC3fBv",
+  "_key": "!items!AYHp60Qd3ZGC3fBv",
+  "name": "Fremlin",
+  "type": "race",
+  "img": "icons/svg/wing.svg",
+  "system": {
+    "description": "",
+    "raceId": "fremlin",
+    "size": "small",
+    "baseMovement": 12,
+    "infravision": 0,
+    "naturalAc": 6,
+    "classLevelLimits": {
+      "mage": 10,
+      "thief": 11
+    },
+    "allowedClasses": [
+      "mage",
+      "thief"
+    ],
+    "allowedMulticlass": [
+      [
+        "mage",
+        "thief"
+      ]
+    ],
+    "bonusLanguages": [
+      "gremlin"
+    ],
+    "grantedFeatures": [
+      "Flight 12, maneuverability B",
+      "Immune to attacks by normal weapons (+1 or better needed to hit)",
+      "Uses tiny scaled weapons dealing one-third damage"
+    ],
+    "subrace": {
+      "id": "",
+      "displayName": "",
+      "abilityAdjustments": {
+        "str": -3,
+        "dex": 2,
+        "con": 0,
+        "int": 1,
+        "wis": 0,
+        "cha": 0
+      },
+      "abilityRanges": {
+        "str": {
+          "min": 2,
+          "max": 11
+        },
+        "dex": {
+          "min": 8,
+          "max": 18
+        },
+        "con": {
+          "min": 4,
+          "max": 13
+        },
+        "int": {
+          "min": 6,
+          "max": 18
+        },
+        "wis": {
+          "min": 3,
+          "max": 16
+        },
+        "cha": {
+          "min": 3,
+          "max": 18
+        }
+      },
+      "thiefAdjustments": null,
+      "conSaveBonusAdjustment": 0,
+      "xpModifierPercent": 0,
+      "flatSaveBonus": null
+    }
+  }
+}

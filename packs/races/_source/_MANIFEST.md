@@ -179,3 +179,73 @@ The Deep Gnome's flat saving-throw bonus is the subrace block's `flatSaveBonus`
 (`{ "all": 3, "poison": 2 }`); every other subrace has `flatSaveBonus: null`. The Athasian halfling
 is deliberately not shipped (Dark Sun content is planned separately). Specials are display labels in
 `grantedFeatures` only.
+
+## PHBR10 humanoid races
+
+Source: *The Complete Book of Humanoids* (PHBR10), a scanned PDF with no text layer, read page by
+page from rendered images (pdftoppm 100-200 dpi, scratch dir only, no page images committed). Each
+humanoid is a `race` item whose `raceId` is its own slug and whose `subrace` block carries the
+race's own layer (ability adjustments, min-max, XP surcharge); `subrace.id` and `subrace.displayName`
+stay blank. Batch 1 of 3 (ten races) is shipped so far.
+
+| Printed page | PDF page | What was read |
+|--------------|----------|---------------|
+| 9 | 10 | Table 1: Humanoid Level Limits (the designated source for each race's group limits; keyed independently in `tests/packs/humanoid-races.test.ts`) |
+| 15 | 16 | How to read the entries (natural armor class rule) |
+| 16-17 | 17-18 | Aarakocra |
+| 18-19 | 19-20 | Alaghi |
+| 19-20 | 20-21 | Beastman |
+| 21-22 | 22-23 | Bugbear |
+| 22-23 | 23-24 | Bullywug (entry titled "Bullywug, Advanced") |
+| 24-25 | 25-26 | Centaur |
+| 25-26 | 26-27 | Fremlin |
+| 27-28 | 28-29 | Giant-kin, Firbolg |
+| 29-30 | 30-31 | Giant-kin, Voadkyn |
+| 31-32 | 32-33 | Gnoll |
+| 119 | 120 | Table 13: Humanoid Multi-Class Combinations (rotated page, rendered upright) |
+
+### Rules used for every humanoid
+
+- **Size rule:** small under 4 ft, medium 4-7 ft (7 ft is medium), large over 7 ft.
+- **Class-group mapping (Table 1):** Wr = fighter, ranger, paladin; Wz = mage (illusionist is a mage
+  specialist and shares the mage limit); Pr = cleric, druid; Rg = thief, bard.
+- **Chapter 3 priest-kit deferral:** where a race's only priest option is a Chapter 3 kit (shaman,
+  witch doctor), the item has no cleric/druid chassis and records the limit as a feature label
+  `Shaman (kit) max level N`. Batch 1: aarakocra, bullywug, giant-kin firbolg, giant-kin voadkyn
+  (the test's `DEFERRED_PRIEST`). Races that also have a cleric or druid chassis (bugbear, gnoll,
+  alaghi, centaur) ship that chassis and omit their shaman/witch doctor limits.
+- **Table 13 (p.119):** combinations containing shamans or witch doctors are dropped; combinations
+  naming a chassis the race may not take are dropped; "illusionist" combinations fold into mage.
+- **Table 1 wins over an entry** whenever the two disagree; the entry value is noted below.
+- Abilities are stored as the race's own `subrace` layer; movement defaults to 12, XP surcharge 0,
+  `thiefAdjustments` null (open), and infravision 0 when the entry states none. `common` is not
+  listed in `bonusLanguages` (every humanoid PC understands it, p.15); the race's own tongue is.
+- Special abilities and drawbacks are display labels in `grantedFeatures` only.
+
+### Judgement calls, batch 1
+
+- **Fremlin thief limit (conflict):** Table 1 (p.9) prints Rg 11; the entry's own class table
+  (p.25-26) prints Thief 12. Shipped 11 (Table 1).
+- **Exceptional Strength maxima:** beastman prints Str max 18/50 (p.19) and bullywug 18/75 (p.22);
+  both are stored as 18 (the range is integer). The exceptional maximum is noted here only.
+- **Size not stated:** beastman (p.19, "short, slender") is medium; centaur (p.24-25, horse body,
+  takes damage as a large creature) is large. Neither entry states a height or length.
+- **Natural AC printed as 10:** bugbear (p.21) and gnoll (p.31) print 10, which equals no armor;
+  stored as `null`.
+- **Centaur Table 13 vs class table:** Table 13 lists fighter/thief and ranger/shaman, but the
+  centaur's class table (p.24) allows no thief; fighter/thief and ranger/shaman are dropped, leaving
+  fighter/mage.
+- **Fremlin:** mage and illusionist are both 10 (one `mage` entry); Table 13's mage/thief and
+  illusionist/thief fold into one combination.
+- **Strength minimum 2 (fremlin, p.25):** stored as printed; the structural test allows a minimum
+  of 1 or more.
+- **Land movement:** none of the ten entries states a land rate (aarakocra flight 36 and fremlin
+  flight 12 are labels); all use 12.
+- **Infravision:** stated only for the bugbear (60, p.22) and voadkyn (90, p.30); the other eight
+  state none and use 0.
+- **Firbolg XP:** double the base class's experience points (p.28-29) is stored as `xpModifierPercent: 100`;
+  the voadkyn "uses the Paladin XP table" (p.31) is a feature label only.
+- **Alaghi druid:** the druid limit of 11 carries a footnote (Int 15, Wis 12, Cha 15, neutral good);
+  shipped as an allowed class with the requirement in a feature label.
+- **Voadkyn 90% sleep/charm resistance (p.30)** is a feature label only (the code resistance table
+  covers PHB races).
