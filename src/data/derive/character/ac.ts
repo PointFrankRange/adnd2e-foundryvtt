@@ -9,7 +9,7 @@ export interface AcInput {
   dexDefensiveAdj: number;
   /** SP21 (PHBR10 p.15): the race's natural armor class; absent/null = none */
   naturalAc?: number | null;
-  /** SP18: added directly to AC (negative improves) — the active martial arts style's modifier */
+  /** SP18: added directly to AC (negative improves) - the active martial arts style's modifier */
   situationalModifier?: number;
 }
 

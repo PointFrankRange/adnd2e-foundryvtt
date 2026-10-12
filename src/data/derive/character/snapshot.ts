@@ -90,6 +90,6 @@ export interface ActorSnapshot {
   wildTalent?: { found: boolean; levelAtDiscovery: number; powers: readonly { initialCost: number; maintenanceCost: number; wildMinimum?: number | null }[] };
   /** true while `system.options.spellsAndMagic.casting` is set â€” honoured only while the casting-time rule is on */
   isCasting: boolean;
-  /** SP18 Plan A: the active martial arts style's AC modifier (negative = better; absent = none) — applied only while `advancedMartialArts` is on */
+  /** SP18 Plan A: the active martial arts style's AC modifier (negative = better; absent = none) - applied only while `advancedMartialArts` is on */
   martialArtsAcMod?: number;
 }
