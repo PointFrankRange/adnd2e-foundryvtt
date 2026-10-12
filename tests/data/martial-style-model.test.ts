@@ -38,3 +38,13 @@ describe("martial arts vocabularies and actor field", () => {
     expect(ACTOR).toMatch(/activeStyleId: new StringField\(\{ required: true, blank: true, initial: "" \}\)/);
   });
 });
+
+describe("knownManeuvers (SP18 Plan B1)", () => {
+  it("is an array of {id, level} with a function initial", () => {
+    expect(SRC).toMatch(/knownManeuvers: new ArrayField\(/);
+    expect(SRC).toMatch(/id: new StringField\(\{ required: true, blank: false \}\)/);
+    expect(SRC).toMatch(/level: new NumberField\(\{ required: true, integer: true, min: 1 \}\)/);
+    expect(SRC.match(/initial: \(\) => \[\]/g)!.length).toBeGreaterThanOrEqual(4);
+    expect(SRC).not.toMatch(/initial: [[{]/);
+  });
+});
