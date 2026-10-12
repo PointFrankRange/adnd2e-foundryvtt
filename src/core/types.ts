@@ -17,7 +17,10 @@ export interface GroupLevel {
   level: number;
 }
 
-export type Race = "human" | "dwarf" | "elf" | "gnome" | "half-elf" | "halfling";
+export type PhbRace = "human" | "dwarf" | "elf" | "gnome" | "half-elf" | "halfling";
+
+/** any race slug: the six PHB races have code tables, every other race carries its own layer (SP21) */
+export type Race = string;
 
 /** Qualifiers on a saving throw that gate category-level modifiers. */
 export type SaveEffectTag = "poison" | "mind-affecting" | "dodgeable";

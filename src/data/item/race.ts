@@ -1,5 +1,5 @@
 import { THIEF_SKILLS } from "../../core/proficiencies/thief-skills";
-import { ABILITY_KEYS, CLASS_IDS, CREATURE_SIZES, RACE_IDS } from "./choices";
+import { ABILITY_KEYS, CLASS_IDS, CREATURE_SIZES, PHB_RACE_IDS } from "./choices";
 import { Adnd2eItemModel } from "./base-item";
 
 const { StringField, NumberField, ArrayField, ObjectField, SchemaField } = foundry.data.fields;
@@ -8,7 +8,7 @@ export class RaceItemModel extends Adnd2eItemModel {
   static override defineSchema(): foundry.data.fields.DataSchema {
     return {
       ...super.defineSchema(),
-      raceId: new StringField({ required: true, blank: false, initial: "human", choices: RACE_IDS }),
+      raceId: new StringField({ required: true, blank: false, initial: "human", choices: PHB_RACE_IDS }),
       size: new StringField({ required: true, blank: false, initial: "medium", choices: CREATURE_SIZES }),
       baseMovement: new NumberField({ required: true, integer: true, min: 0, initial: 12 }),
       infravision: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),

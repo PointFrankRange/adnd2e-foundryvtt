@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  CLASS_IDS, RACE_IDS, ABILITY_KEYS, SPHERE_NAMES, SPELL_SCHOOLS, WIZARD_SCHOOLS,
+  CLASS_IDS, PHB_RACE_IDS, ABILITY_KEYS, SPHERE_NAMES, SPELL_SCHOOLS, WIZARD_SCHOOLS,
   DAMAGE_TYPES, WEAPON_SIZES, WEAPON_CATEGORIES, NONWEAPON_GROUPS, CREATURE_SIZES,
   CASTER_CLASSES, SAVING_THROW_KINDS, DUAL_CLASS_STATES, FEATURE_SOURCE_TYPES, FEATURE_ACTIVATIONS,
   ALIGNMENTS, MOVEMENT_MODES, DISPOSITIONS, SAVE_MODES, ATTACK_TYPES, ENCUMBRANCE_CATEGORIES,
@@ -15,8 +15,8 @@ describe("item schema choice arrays match the engine unions", () => {
       ["bard", "cleric", "druid", "fighter", "mage", "paladin", "psionicist", "ranger", "thief"],
     );
   });
-  it("RACE_IDS = the 6 Race", () => {
-    expect([...RACE_IDS].sort()).toEqual(["dwarf", "elf", "gnome", "half-elf", "halfling", "human"]);
+  it("PHB_RACE_IDS = the 6 PHB races", () => {
+    expect([...PHB_RACE_IDS].sort()).toEqual(["dwarf", "elf", "gnome", "half-elf", "halfling", "human"]);
   });
   it("ABILITY_KEYS", () => {
     expect([...ABILITY_KEYS].sort()).toEqual(["cha", "con", "dex", "int", "str", "wis"]);

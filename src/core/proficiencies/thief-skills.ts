@@ -2,7 +2,7 @@
 // Dexterity (Table 28) and armor (Table 29) adjustments; the point budget;
 // backstab multipliers (Table 30); and the pick-pockets detection threshold.
 import { assertAbilityScore, assertLevel } from "../errors";
-import type { ArmorType, BardSkill, Race, ThiefArmor, ThiefArmorClassification, ThiefSkill } from "../types";
+import type { ArmorType, BardSkill, PhbRace, Race, ThiefArmor, ThiefArmorClassification, ThiefSkill } from "../types";
 
 export const THIEF_SKILLS: readonly ThiefSkill[] = [
   "pick-pockets",
@@ -51,7 +51,7 @@ function skillRow(
 
 /** PHB Table 27: THIEVING SKILL RACIAL ADJUSTMENTS (p.39). Human is all zero. */
 // prettier-ignore
-export const THIEF_RACIAL_ADJUSTMENTS: Readonly<Record<Race, Readonly<Record<ThiefSkill, number>>>> = {
+export const THIEF_RACIAL_ADJUSTMENTS: Readonly<Record<PhbRace, Readonly<Record<ThiefSkill, number>>>> = {
   human:      skillRow(0, 0, 0, 0, 0, 0, 0, 0),
   dwarf:      skillRow(0, 10, 15, 0, 0, 0, -10, -5),
   elf:        skillRow(5, -5, 0, 5, 10, 5, 0, 0),
@@ -59,6 +59,15 @@ export const THIEF_RACIAL_ADJUSTMENTS: Readonly<Record<Race, Readonly<Record<Thi
   "half-elf": skillRow(10, 0, 0, 0, 5, 0, 0, 0),
   halfling:   skillRow(5, 5, 5, 10, 15, 5, -15, -5),
 };
+
+const ZERO_THIEF_ADJUSTMENTS: Readonly<Record<ThiefSkill, number>> = Object.freeze(skillRow(0, 0, 0, 0, 0, 0, 0, 0));
+
+/** The code-table racial adjustments of a PHB race; every other race is zero (its layer supplies them). */
+export function racialThiefAdjustments(race: Race): Readonly<Record<ThiefSkill, number>> {
+  return Object.prototype.hasOwnProperty.call(THIEF_RACIAL_ADJUSTMENTS, race)
+    ? THIEF_RACIAL_ADJUSTMENTS[race as PhbRace]
+    : ZERO_THIEF_ADJUSTMENTS;
+}
 
 /**
  * PHB Table 28: THIEVING SKILL DEXTERITY ADJUSTMENTS (p.39). Keyed by Dexterity
@@ -125,7 +134,7 @@ export function thiefSkillBaseScore(skill: ThiefSkill, input: ThiefSkillContext)
   const dexAdj = THIEF_DEXTERITY_ADJUSTMENTS[dexKey][skill] ?? 0;
   return (
     THIEF_SKILL_BASE[skill] +
-    (input.racialAdjustments ?? THIEF_RACIAL_ADJUSTMENTS[input.race])[skill] +
+    (input.racialAdjustments ?? racialThiefAdjustments(input.race))[skill] +
     dexAdj +
     THIEF_ARMOR_ADJUSTMENTS[input.armor][skill]
   );
@@ -220,7 +229,7 @@ export function bardSkillBaseScore(skill: BardSkill, input: ThiefSkillContext): 
   const dexAdj = THIEF_DEXTERITY_ADJUSTMENTS[dexKey][skill] ?? 0;
   return (
     BARD_SKILL_BASE[skill] +
-    (input.racialAdjustments ?? THIEF_RACIAL_ADJUSTMENTS[input.race])[skill] +
+    (input.racialAdjustments ?? racialThiefAdjustments(input.race))[skill] +
     dexAdj +
     THIEF_ARMOR_ADJUSTMENTS[input.armor][skill]
   );

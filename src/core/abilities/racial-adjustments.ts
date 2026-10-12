@@ -1,7 +1,7 @@
 // PHB Table 7 (racial ability min/max, p.20) + Table 8 (racial adjustments, p.20).
-import type { AbilityKey, AbilityScores, Race } from "../types";
+import type { AbilityKey, AbilityScores, PhbRace, Race } from "../types";
 
-export const RACIAL_ABILITY_ADJUSTMENTS: Record<Race, Partial<Record<AbilityKey, number>>> = {
+export const RACIAL_ABILITY_ADJUSTMENTS: Record<PhbRace, Partial<Record<AbilityKey, number>>> = {
   human: {},
   "half-elf": {},
   dwarf: { con: 1, cha: -1 },
@@ -11,7 +11,7 @@ export const RACIAL_ABILITY_ADJUSTMENTS: Record<Race, Partial<Record<AbilityKey,
 };
 
 // [min, max] per ability. Human is 3/18 across the board.
-export const RACIAL_ABILITY_LIMITS: Record<Race, Record<AbilityKey, [number, number]>> = {
+export const RACIAL_ABILITY_LIMITS: Record<PhbRace, Record<AbilityKey, [number, number]>> = {
   human: { str: [3, 18], dex: [3, 18], con: [3, 18], int: [3, 18], wis: [3, 18], cha: [3, 18] },
   dwarf: { str: [8, 18], dex: [3, 17], con: [11, 18], int: [3, 18], wis: [3, 18], cha: [3, 17] },
   elf: { str: [3, 18], dex: [6, 18], con: [7, 18], int: [8, 18], wis: [3, 18], cha: [8, 18] },
@@ -20,6 +20,22 @@ export const RACIAL_ABILITY_LIMITS: Record<Race, Record<AbilityKey, [number, num
   halfling: { str: [7, 18], dex: [7, 18], con: [10, 18], int: [6, 18], wis: [3, 17], cha: [3, 18] },
 };
 
+const OPEN_RANGES: Record<AbilityKey, [number, number]> = Object.freeze({
+  str: [3, 18], dex: [3, 18], con: [3, 18], int: [3, 18], wis: [3, 18], cha: [3, 18],
+}) as Record<AbilityKey, [number, number]>;
+
+const isPhbRace = (race: string): race is PhbRace => Object.prototype.hasOwnProperty.call(RACIAL_ABILITY_ADJUSTMENTS, race);
+
+/** The code-table adjustments of a PHB race; every other race has none of its own (its layer supplies them). */
+export function racialAbilityAdjustments(race: Race): Partial<Record<AbilityKey, number>> {
+  return isPhbRace(race) ? RACIAL_ABILITY_ADJUSTMENTS[race] : {};
+}
+
+/** The code-table min/max of a PHB race; every other race is open 3-18 unless its layer says otherwise. */
+export function racialAbilityRanges(race: Race): Record<AbilityKey, [number, number]> {
+  return isPhbRace(race) ? RACIAL_ABILITY_LIMITS[race] : OPEN_RANGES;
+}
+
 const KEYS: AbilityKey[] = ["str", "dex", "con", "int", "wis", "cha"];
 
 // Adds the racial deltas but does NOT clamp — the delta is all that changes.
@@ -27,7 +43,7 @@ const KEYS: AbilityKey[] = ["str", "dex", "con", "int", "wis", "cha"];
 export function applyRacialDeltas(
   raw: AbilityScores,
   race: Race,
-  adjustments: Partial<Record<AbilityKey, number>> = RACIAL_ABILITY_ADJUSTMENTS[race],
+  adjustments: Partial<Record<AbilityKey, number>> = racialAbilityAdjustments(race),
 ): AbilityScores {
   const out = {} as AbilityScores;
   for (const k of KEYS) {
@@ -41,7 +57,7 @@ export function applyRacialAdjustments(
   raw: AbilityScores,
   race: Race,
   adjustments?: Partial<Record<AbilityKey, number>>,
-  ranges: Record<AbilityKey, [number, number]> = RACIAL_ABILITY_LIMITS[race],
+  ranges: Record<AbilityKey, [number, number]> = racialAbilityRanges(race),
 ): AbilityScores {
   const deltaed = applyRacialDeltas(raw, race, adjustments);
   const out = {} as AbilityScores;

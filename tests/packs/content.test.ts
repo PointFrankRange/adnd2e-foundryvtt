@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { POWER_DISCIPLINES, POWER_KINDS, POWER_MAINTENANCE_UNITS, CLASS_IDS, RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
+import { POWER_DISCIPLINES, POWER_KINDS, POWER_MAINTENANCE_UNITS, CLASS_IDS, PHB_RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
 import { EQUIPMENT_MODES, normalizePowers, normalizeOverrides, powerUses, TURNING_MODES, CASTING_MODES } from "../../src/core/kits";
-import { normalizeSubrace } from "../../src/core/races";
+import { isRaceSlug, normalizeSubrace } from "../../src/core/races";
 import { resolveShapechangeSpec } from "../../src/core/shapechange";
 import { THIEF_SKILLS } from "../../src/core/proficiencies/thief-skills";
 import { TRAITS, toTraitEffect, type RawTraitEffect } from "../../src/core/skills/traits";
@@ -45,7 +45,7 @@ describe("races pack content", () => {
   const items = docs("races");
   it("has the 6 PHB races plus the 6 dwarf, 5 elf, 4 gnome and 7 halfling subraces", () => {
     expect(items).toHaveLength(28);
-    expect(new Set(items.map((d) => sys(d).raceId))).toEqual(new Set(RACE_IDS));
+    expect(new Set(items.map((d) => sys(d).raceId))).toEqual(new Set(PHB_RACE_IDS));
     const subs = items.filter((d) => (sys(d).subrace as { id?: string } | undefined)?.id);
     expect(subs).toHaveLength(22);
     expect(subs.filter((d) => sys(d).raceId === "dwarf")).toHaveLength(6);
@@ -405,7 +405,7 @@ describe("kits pack content", () => {
       };
       expect(CLASS_IDS as readonly string[], String(d.name)).toContain(s.chassisId);
       expect(Object.keys(s.qualifications.abilityMinimums).sort()).toEqual([...ABILITY_KEYS].sort());
-      for (const r of s.qualifications.races) expect(RACE_IDS as readonly string[]).toContain(r);
+      for (const r of s.qualifications.races) expect(isRaceSlug(r)).toBe(true);
       for (const a of s.qualifications.alignments) expect(ALIGNMENTS as readonly string[]).toContain(a);
       expect(Number.isInteger(s.xpModifierPercent)).toBe(true);
       for (const e of s.effects) expect(toTraitEffect(e), String(d.name)).not.toBeNull();

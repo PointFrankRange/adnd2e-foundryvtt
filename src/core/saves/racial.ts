@@ -2,7 +2,7 @@
 // rules from the Dwarf (p.21), Gnome (p.22), Halfling (p.23), Elf (p.21),
 // Half-Elf (p.22) descriptions.
 import { assertAbilityScore } from "../errors";
-import type { Race, SaveCategory, SaveEffectTag } from "../types";
+import type { PhbRace, Race, SaveCategory, SaveEffectTag } from "../types";
 
 /** PHB Table 9. [upper bound of CON band, bonus]; last entry catches CON >= 18. */
 const CON_SAVE_BANDS: ReadonlyArray<readonly [number, number]> = [
@@ -22,7 +22,7 @@ export function racialConSaveBonus(con: number): number {
 
 // Categories that get the racial CON bonus, by race.
 // "poison" here means "ppd only when the effect is poison-tagged".
-const RACIAL_SAVE_CATEGORIES: Record<Race, ReadonlySet<SaveCategory | "poison">> = {
+const RACIAL_SAVE_CATEGORIES: Record<PhbRace, ReadonlySet<SaveCategory | "poison">> = {
   dwarf: new Set<SaveCategory | "poison">(["rsw", "spell", "poison"]),
   halfling: new Set<SaveCategory | "poison">(["rsw", "spell", "poison"]),
   gnome: new Set<SaveCategory | "poison">(["rsw", "spell"]),
@@ -30,6 +30,15 @@ const RACIAL_SAVE_CATEGORIES: Record<Race, ReadonlySet<SaveCategory | "poison">>
   "half-elf": new Set<SaveCategory | "poison">(),
   human: new Set<SaveCategory | "poison">(),
 };
+
+const NO_SAVE_CATEGORIES: ReadonlySet<SaveCategory | "poison"> = new Set<SaveCategory | "poison">();
+
+/** The save categories a PHB race gets the Constitution bonus on; every other race has none (a layer's flat bonus covers it). */
+export function racialSaveCategories(race: Race): ReadonlySet<SaveCategory | "poison"> {
+  return Object.prototype.hasOwnProperty.call(RACIAL_SAVE_CATEGORIES, race)
+    ? RACIAL_SAVE_CATEGORIES[race as PhbRace]
+    : NO_SAVE_CATEGORIES;
+}
 
 /**
  * The PHB Table 9 bonus this race gets on a saving throw of this category, or 0
@@ -46,7 +55,7 @@ export function racialSaveBonus(
   extra = 0,
 ): number {
   assertAbilityScore(con, "con");
-  const applicable = RACIAL_SAVE_CATEGORIES[race];
+  const applicable = racialSaveCategories(race);
   const matches =
     applicable.has(category) ||
     (category === "ppd" && tags.includes("poison") && applicable.has("poison"));

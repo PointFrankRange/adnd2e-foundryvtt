@@ -1,6 +1,6 @@
 import { Adnd2eItemModel } from "./base-item";
 import {
-  ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, KIT_CASTING_MODES, KIT_EQUIPMENT_MODES, KIT_POWER_FREQUENCIES, KIT_TURNING_MODES, RACE_IDS, TRAIT_ATTACK_MODES, TRAIT_EFFECT_KINDS,
+  ABILITY_KEYS, ALIGNMENTS, CLASS_IDS, KIT_CASTING_MODES, KIT_EQUIPMENT_MODES, KIT_POWER_FREQUENCIES, KIT_TURNING_MODES, TRAIT_ATTACK_MODES, TRAIT_EFFECT_KINDS,
   TRAIT_PROFICIENCY_TRACKS, TRAIT_SAVE_CATEGORIES,
 } from "./choices";
 
@@ -37,7 +37,7 @@ export class KitItemModel extends Adnd2eItemModel {
             ABILITY_KEYS.map((k) => [k, new NumberField({ required: true, integer: true, min: 0, max: 25, initial: 0 })]),
           ),
         ),
-        races: new ArrayField(new StringField({ required: true, blank: false, choices: RACE_IDS }), { required: true, initial: [] }),
+        races: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: [] }),
         alignments: new ArrayField(new StringField({ required: true, blank: false, choices: ALIGNMENTS }), { required: true, initial: [] }),
       }),
       xpModifierPercent: new NumberField({ required: true, integer: true, min: -90, initial: 0 }),

@@ -1,7 +1,7 @@
 // The enumerations the Item and Actor DataModel schemas validate against. Kept here as
 // plain arrays (not in the schema files) so they are unit-testable against the
 // engine unions — defineSchema() imports these and stays logic-free.
-import type { AbilityKey, Alignment, ArmorType, ClassGroup, ClassId, CreatureSize, EncumbranceCategory, MovementMode, NonweaponGroup, Race, SpellSchool, SphereName, WizardSchool } from "../../core/types";
+import type { AbilityKey, Alignment, ArmorType, ClassGroup, ClassId, CreatureSize, EncumbranceCategory, MovementMode, NonweaponGroup, PhbRace, SpellSchool, SphereName, WizardSchool } from "../../core/types";
 import type { DamageType, WeaponCategory, WeaponSize } from "../../core/weapons/data";
 import { TURN_ROW_IDS } from "../../core/turning";
 import type { TurnRowId } from "../../core/turning";
@@ -11,7 +11,7 @@ export const CLASS_IDS: readonly ClassId[] = [
   "fighter", "mage", "cleric", "thief", "paladin", "ranger", "druid", "bard", "psionicist",
 ];
 
-export const RACE_IDS: readonly Race[] = [
+export const PHB_RACE_IDS: readonly PhbRace[] = [
   "human", "dwarf", "elf", "gnome", "half-elf", "halfling",
 ];
 
