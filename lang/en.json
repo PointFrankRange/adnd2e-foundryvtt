@@ -69,6 +69,10 @@
     "monsterTypes": { "undead": "Undead" },
     "shapechangeCategories": { "reptile": "Reptile", "bird": "Bird", "mammal": "Mammal" },
     "habitats": { "desert": "Desert", "forest": "Forest", "mountains": "Mountains", "plains": "Plains", "swamp": "Swamp", "arctic": "Arctic", "jungle": "Jungle", "ocean": "Ocean", "underground": "Underground" },
+    "martialForms": { "hard": "Hard", "soft": "Soft", "hardSoft": "Hard/Soft" },
+    "martialMethods": { "block": "Block", "kick": "Kick", "lock": "Lock", "movement": "Movement", "push": "Push", "strike": "Strike", "throw": "Throw", "vitalArea": "Vital area", "weapon": "Weapon" },
+    "martialAttackForms": { "hand": "Hand", "foot": "Foot", "body": "Body", "legs": "Legs", "handFoot": "Hand/Foot", "handArm": "Hand/Arm" },
+    "martialBlows": { "headKick": "Head kick", "headPunch": "Head punch", "vitalsKick": "Vitals kick", "vitalsPunch": "Vitals punch", "highKick": "High kick", "sideKick": "Side kick", "bodyPunch": "Body punch", "lowKick": "Low kick", "graze": "Graze" },
     "trackingTerrains": { "freshSnow": "Fresh snow", "softGround": "Soft or muddy ground", "thickBrush": "Thick brush or dense jungle", "forestField": "Forest, field or dusty floor", "normal": "Normal ground", "desert": "Desert or dry sand", "swamp": "Swamp", "rocky": "Rock, ice, stone or shallow water" },
     "trackingIlluminations": { "good": "Good light", "twilight": "Twilight, light fog or a single torch", "moonlit": "Full-moon night or moderate fog", "dark": "Overcast night, dense fog, blizzard or blowing sand" },
     "primaryTerrains": { "aquatic": "Aquatic", "arctic": "Arctic", "desert": "Desert", "forest": "Forest", "hill": "Hill", "jungle": "Jungle", "mountain": "Mountain", "plain": "Plain", "swamp": "Swamp" },
@@ -1140,6 +1144,7 @@
         "skillsAndPowers": "Skills & Powers",
         "spellsAndMagic": "Spells & Magic",
         "psionics": "Psionics",
+        "martialArts": "Martial Arts",
         "tableAndPlay": "Table & Play",
         "kind": { "core": "Core", "optional": "Optional", "table": "Table" }
       },
@@ -1265,6 +1270,10 @@
         "name": "Prime Requisite XP Bonus",
         "hint": "Experience awarded to a class is increased by 10% when every one of its prime requisites is 16 or higher (PHB p.26)."
       },
+      "advancedMartialArts": {
+        "name": "Advanced martial arts",
+        "hint": "Characters can learn martial arts styles (Complete Ninja's Handbook). Adds a Martial Arts panel with an unarmed attack, and the active style's AC modifier. Needs a reload."
+      },
       "wildTalents": {
         "name": "Wild talents",
         "hint": "Characters without the Psionicist class can test once for a wild psionic talent (Complete Psionics Handbook)."
@@ -1314,7 +1323,8 @@
       "condition": "Condition",
       "trait": "Trait",
       "kit": "Kit",
-      "power": "Psionic Power"
+      "power": "Psionic Power",
+      "martialStyle": "Martial Arts Style"
     },
     "ActiveEffect": {
       "adnd2e": "AD&D 2E Effect"

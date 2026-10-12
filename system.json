@@ -37,7 +37,8 @@
       "condition": {},
       "trait": {},
       "kit": {},
-      "power": {}
+      "power": {},
+      "martialStyle": {}
     },
     "ActiveEffect": {
       "adnd2e": {}

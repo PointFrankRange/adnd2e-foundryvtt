@@ -14,10 +14,10 @@ describe("system.json documentTypes", () => {
     );
   });
 
-  it("declares the fourteen Item subtypes (camelCase, no hyphens)", () => {
+  it("declares the fifteen Item subtypes (camelCase, no hyphens)", () => {
     expect(Object.keys(manifest.documentTypes.Item).sort()).toEqual(
       [
-        "ammo", "armor", "class", "classFeature", "condition", "equipment", "kit", "nonweaponProficiency",
+        "ammo", "armor", "class", "classFeature", "condition", "equipment", "kit", "martialStyle", "nonweaponProficiency",
         "power", "race", "spell", "trait", "weapon", "weaponProficiency",
       ].sort(),
     );

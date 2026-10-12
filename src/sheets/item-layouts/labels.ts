@@ -9,6 +9,8 @@ export const CHOICE_LABEL_MAPS: Readonly<Record<string, string>> = {
   "system.size": "weaponSizes",
   "system.schools": "schools",
   "system.spheres": "spheres",
+  "system.form": "martialForms",
+  "system.principalMethod": "martialMethods",
 };
 
 /** The localization key for `value` of the field at `path`, or null when the field has no label map. */

@@ -34,6 +34,7 @@ export const SETTING_SECTIONS: readonly SettingSection[] = [
     keys: ["spellsAndMagicEnabled", "spellPoints", "expandedCastingTime", "channelers", "channellerFatigue"],
   },
   { id: "psionics", kind: "optional", keys: ["wildTalents"] },
+  { id: "martialArts", kind: "optional", keys: ["advancedMartialArts"] },
   { id: "tableAndPlay", kind: "table", keys: ["playerAppliedEffects"] },
 ];
 

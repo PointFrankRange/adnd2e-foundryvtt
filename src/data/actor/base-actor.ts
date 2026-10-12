@@ -240,6 +240,11 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
       primaryTerrain: new StringField({ required: true, blank: true, initial: "", choices: PRIMARY_TERRAINS }),
       specialized: new BooleanField({ required: true, initial: false }),
     }),
+    /** SP18 Plan A: Advanced Martial Arts (PHBR15). `knowsBasics` = the character knows basic martial arts (the prerequisite for learning a style); `activeStyleId` = the owned martialStyle item used this round ("" = the first owned style). Defaults only, no migration. */
+    martialArts: new SchemaField({
+      knowsBasics: new BooleanField({ required: true, initial: false }),
+      activeStyleId: new StringField({ required: true, blank: true, initial: "" }),
+    }),
     /** SP15 Plan A: psionics state. `psp` is PERSISTED (null = full, i.e. never spent); `maintained` is the ongoing powers; `max`/`level` are derived caches written by deriveAndCache. `maintained` initial MUST be a function (shared-literal gotcha, see kitPowers). */
     psionics: new SchemaField({
       psp: new NumberField({ required: true, nullable: true, integer: true, min: 0, initial: null }),

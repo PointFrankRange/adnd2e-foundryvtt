@@ -13,6 +13,7 @@ import { ConditionItemModel } from "./condition";
 import { TraitItemModel } from "./trait";
 import { KitItemModel } from "./kit";
 import { PowerItemModel } from "./power";
+import { MartialStyleItemModel } from "./martial-style";
 
 export {
   ClassItemModel,
@@ -29,6 +30,7 @@ export {
   TraitItemModel,
   KitItemModel,
   PowerItemModel,
+  MartialStyleItemModel,
 };
 
 /** Registered on `CONFIG.Item.dataModels` in the init hook. Keys ≡ `ITEM_SUBTYPES`. */
@@ -50,4 +52,5 @@ export const ITEM_DATA_MODELS: Record<
   trait: TraitItemModel,
   kit: KitItemModel,
   power: PowerItemModel,
+  martialStyle: MartialStyleItemModel,
 };
