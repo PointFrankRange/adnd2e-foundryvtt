@@ -21,6 +21,7 @@ import { rollAttack, rollSave } from "./combat-rolls";
 import { rollFormAttack } from "../creature/combat-rolls";
 import { promptShift, resetShapechangeDay, returnToNormal, shapechangeView } from "./shapechange-actions";
 import { trackQuarry, trackingView } from "./tracking-actions";
+import { martialArtsView, rollMartialArtsAttack, setActiveStyle } from "./martial-arts-actions";
 import { buildCharacterSheetContext, traitTargetKey } from "./context";
 import type {
   ClassItemView,
@@ -405,6 +406,8 @@ export class Adnd2eCharacterSheet extends Base {
       shapechangeNewDay: Adnd2eCharacterSheet.#onShapechangeNewDay,
       rollFormAttack: Adnd2eCharacterSheet.#onRollFormAttack,
       trackQuarry: Adnd2eCharacterSheet.#onTrackQuarry,
+      martialArtsAttack: Adnd2eCharacterSheet.#onMartialArtsAttack,
+      useMartialStyle: Adnd2eCharacterSheet.#onUseMartialStyle,
     },
   };
 
@@ -496,6 +499,7 @@ export class Adnd2eCharacterSheet extends Base {
     };
     const kitCfg = (CONFIG as unknown as { ADND2E: Record<string, Record<string, string>> }).ADND2E;
     context.tracking = trackingView(this.document as never);
+    context.martialArts = martialArtsView(this.document as never);
     context.primaryTerrains = kitCfg.primaryTerrains;
     const kitUsage = (this.document as unknown as { system: { kitPowers?: PowerUsage } }).system.kitPowers ?? {};
     context.kits = activeKitEntries(
@@ -731,6 +735,7 @@ export class Adnd2eCharacterSheet extends Base {
     // Re-sorting an already-owned trait is not a purchase — never validated.
     if (dropped.type === "trait" && !isNewDrop) return super._onDropItem(event, item);
     if (dropped.type === "kit" && !isNewDrop) return super._onDropItem(event, item);
+    if (dropped.type === "martialStyle" && !isNewDrop) return super._onDropItem(event, item);
     // Re-derived from the actor's CURRENT authored state + settings at drop time.
     const traitInputs: Partial<TraitDropInputs> =
       dropped.type === "trait" ? traitDropInputs(this.document as never, dropped as never) : {};
@@ -800,6 +805,14 @@ export class Adnd2eCharacterSheet extends Base {
         raceClassVerdict = raceAllowsClasses(raceTablesOf(dropped.system), ownedClassIds);
       }
     }
+    const styleInputs: Partial<DropCheckInput> =
+      dropped.type === "martialStyle"
+        ? {
+            knowsBasicMartialArts: Boolean((this.document as unknown as { system: { martialArts?: { knowsBasics?: boolean } } }).system.martialArts?.knowsBasics),
+            dropStyleName: dropped.name,
+            existingStyleNames: others.filter((i) => i.type === "martialStyle").map((i) => i.name),
+          }
+        : {};
     const verdict = validateItemDrop({
       raceClassVerdict,
       dropType: dropped.type,
@@ -820,6 +833,7 @@ export class Adnd2eCharacterSheet extends Base {
       existingNonweaponNames: others.filter((i) => i.type === "nonweaponProficiency").map((i) => i.name),
       ...traitInputs,
       ...kitInputs,
+      ...styleInputs,
     });
     if (!verdict.ok) {
       ui.notifications?.warn(game.i18n!.localize(verdict.reason!));
@@ -1209,6 +1223,16 @@ export class Adnd2eCharacterSheet extends Base {
   // Interaction handlers — SP20 ranger tracking.
   static async #onTrackQuarry(this: Adnd2eCharacterSheet): Promise<void> {
     if (this.isEditable) await trackQuarry(this.document as never);
+  }
+
+  // Interaction handlers — SP18 martial arts.
+  static async #onMartialArtsAttack(this: Adnd2eCharacterSheet): Promise<void> {
+    if (this.isEditable) await rollMartialArtsAttack(this.document as never);
+  }
+
+  static async #onUseMartialStyle(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const itemId = target.dataset.itemId ?? "";
+    if (this.isEditable && itemId) await setActiveStyle(this.document as never, itemId);
   }
 
   static async #onRollFormAttack(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {

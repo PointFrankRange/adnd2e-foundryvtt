@@ -61,6 +61,34 @@
     </section>
   {{/if}}{{/if}}
 
+  {{#if @root.pcActions}}{{#if @root.martialArts.visible}}
+    <section class="kit-panel kit-martial-arts">
+      <div class="kit-bar">{{localize 'ADND2E.sheet.martialArts.title'}}</div>
+      <div class="kit-body">
+        {{#if @root.adnd2e.lock.unlocked}}
+          <label class="detail-field"><input type="checkbox" name="system.martialArts.knowsBasics"{{#if @root.martialArts.knowsBasics}} checked{{/if}}> <span>{{localize 'ADND2E.sheet.martialArts.knowsBasics'}}</span></label>
+        {{else}}
+          <p class="hint">{{#if @root.martialArts.knowsBasics}}{{localize 'ADND2E.sheet.martialArts.basicsKnown'}}{{else}}{{localize 'ADND2E.sheet.martialArts.basicsUnknown'}}{{/if}}</p>
+        {{/if}}
+        {{#each @root.martialArts.styles as |s|}}
+          <div class="trait-row" data-item-id="{{s.id}}">
+            <span class="name">{{s.name}}{{#if s.active}} — {{localize 'ADND2E.sheet.martialArts.active'}}{{/if}}</span>
+            <span class="effect">{{localize s.formKey}} / {{localize s.methodKey}} ({{localize s.attackFormKey}})</span>
+            <span class="effect">{{localize 'ADND2E.sheet.martialArts.acMod'}} {{adnd2eSigned s.acMod}}</span>
+            <span class="effect">{{localize 'ADND2E.sheet.martialArts.damageDie'}} {{#if s.damageDie}}{{s.damageDie}}{{else}}{{localize 'ADND2E.sheet.martialArts.byWeapon'}}{{/if}}</span>
+            <span class="effect">{{localize 'ADND2E.sheet.martialArts.slots'}} {{s.slots}}</span>
+            <button type="button" class="kit-small" data-action="useMartialStyle" data-item-id="{{s.id}}"{{#if s.active}} disabled{{/if}}>{{localize 'ADND2E.sheet.martialArts.use'}}</button>
+            {{#if @root.adnd2e.lock.unlocked}}{{> adnd2e.item-controls id=s.id deletable=true}}{{/if}}
+          </div>
+        {{else}}
+          <p class="kit-empty">{{localize 'ADND2E.sheet.martialArts.noStyles'}}</p>
+        {{/each}}
+        <p class="hint">{{localize 'ADND2E.sheet.martialArts.extraAttack'}}</p>
+        <button type="button" class="kit-roll" data-action="martialArtsAttack"{{#unless @root.martialArts.canAttack}} disabled{{/unless}}>{{localize 'ADND2E.sheet.martialArts.attack'}}</button>
+      </div>
+    </section>
+  {{/if}}{{/if}}
+
   {{#if adnd2e.vitals.fatigue}}
     <section class="kit-panel kit-fatigue">
       <div class="kit-bar">{{adnd2e.vitals.fatigue.label}}</div>

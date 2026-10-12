@@ -283,3 +283,19 @@ describe("validateItemDrop — race/class eligibility", () => {
       .toBe("ADND2E.sheet.drop.duplicateClass");
   });
 });
+
+describe("validateItemDrop — martial arts styles (SP18)", () => {
+  const base = { dropType: "martialStyle", hasRace: false, existingChassisIds: [] as string[] };
+  it("requires basic martial arts", () => {
+    expect(validateItemDrop({ ...base, knowsBasicMartialArts: false })).toEqual({ ok: false, reason: "ADND2E.sheet.drop.styleNeedsBasics" });
+  });
+  it("rejects a style the character already owns", () => {
+    expect(validateItemDrop({ ...base, knowsBasicMartialArts: true, dropStyleName: "Karate", existingStyleNames: ["Karate"] })).toEqual({
+      ok: false, reason: "ADND2E.sheet.drop.styleDuplicate",
+    });
+  });
+  it("accepts a new style", () => {
+    expect(validateItemDrop({ ...base, knowsBasicMartialArts: true, dropStyleName: "Sumo", existingStyleNames: ["Karate"] })).toEqual({ ok: true });
+    expect(validateItemDrop({ ...base, knowsBasicMartialArts: true, dropStyleName: "Sumo" })).toEqual({ ok: true });
+  });
+});

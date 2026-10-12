@@ -527,6 +527,22 @@
           "spell": "Spell"
         }
       },
+      "martialArts": {
+        "title": "Martial Arts",
+        "knowsBasics": "Knows basic martial arts",
+        "basicsKnown": "Knows basic martial arts.",
+        "basicsUnknown": "Does not know basic martial arts (needed to learn a style).",
+        "noStyles": "No martial arts styles.",
+        "active": "in use",
+        "use": "Use",
+        "attack": "Martial arts attack",
+        "acMod": "AC",
+        "damageDie": "Style damage",
+        "byWeapon": "by weapon",
+        "slots": "Slots",
+        "extraAttack": "Each style adds one attack per round while unarmed.",
+        "noActive": "Choose a martial arts style first."
+      },
       "drop": {
         "subraceRangeWarning": "This character's ability scores are outside the subrace's allowed range: {abilities}.",
         "duplicateRace": "This character already has a race.",
@@ -546,6 +562,8 @@
         "kitRace": "The character's race doesn't qualify for this kit.",
         "kitAlignment": "The character's alignment doesn't qualify for this kit.",
         "kitCastingDisabled": "That class's kit disables spellcasting.",
+        "styleNeedsBasics": "Learning a martial arts style requires knowing basic martial arts.",
+        "styleDuplicate": "This character already has that style.",
         "kitForbiddenProficiency": "A kit this character has forbids that weapon proficiency.",
         "kitsPcOnly": "Kits can only be added to a player character sheet.",
         "monsterRejects": "A Monster NPC can carry weapons, armor, equipment and spells — not classes, races, proficiencies, traits or class features."
@@ -848,6 +866,15 @@
       }
     },
     "chat": {
+      "martialArts": {
+        "against": "against {target}",
+        "needed": "rolled {total}, needed {needed}",
+        "hit": "Hit",
+        "miss": "Miss",
+        "damage": "{damage} hp",
+        "stun": "Natural 20: the target saves vs. paralyzation or is stunned (d20 under its HD or level: stunned 1d6 rounds) or incapacitated (d20 over: 1d3 hours).",
+        "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions" }
+      },
       "shapechange": {
         "shift": "Shapechange",
         "return": "Normal form",
