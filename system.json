@@ -54,7 +54,8 @@
     { "name": "conditions", "label": "Conditions", "path": "packs/conditions", "type": "Item", "system": "adnd2e", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
     { "name": "traits", "label": "Traits", "path": "packs/traits", "type": "Item", "system": "adnd2e", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
     { "name": "kits", "label": "Kits", "path": "packs/kits", "type": "Item", "system": "adnd2e", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
-    { "name": "powers", "label": "Powers", "path": "packs/powers", "type": "Item", "system": "adnd2e", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } }
+    { "name": "powers", "label": "Powers", "path": "packs/powers", "type": "Item", "system": "adnd2e", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
+    { "name": "martial-styles", "label": "Martial Arts Styles", "path": "packs/martial-styles", "type": "Item", "system": "adnd2e", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } }
   ],
 
   "packFolders": [
@@ -70,7 +71,8 @@
         { "name": "Bestiary", "sorting": "a", "packs": [] },
         { "name": "Conditions", "sorting": "a", "packs": ["conditions"] },
         { "name": "Skills & Powers", "sorting": "a", "packs": ["traits"] },
-        { "name": "Psionics", "sorting": "a", "packs": ["powers"] }
+        { "name": "Psionics", "sorting": "a", "packs": ["powers"] },
+        { "name": "Martial Arts", "sorting": "a", "packs": ["martial-styles"] }
       ],
       "packs": []
     }

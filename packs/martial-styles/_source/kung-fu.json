@@ -1,0 +1,53 @@
+{
+  "_id": "kMsKungFu0000001",
+  "_key": "!items!kMsKungFu0000001",
+  "name": "Kung Fu",
+  "type": "martialStyle",
+  "img": "icons/svg/combat.svg",
+  "system": {
+    "description": "A broad family of Chinese styles mixing hard and soft technique.",
+    "form": "hardSoft",
+    "principalMethod": "strike",
+    "slotsInvested": 1,
+    "availableManeuvers": [
+      {
+        "list": "lock",
+        "difficulties": [
+          1
+        ]
+      },
+      {
+        "list": "strike",
+        "difficulties": [
+          1,
+          2
+        ]
+      },
+      {
+        "list": "kick",
+        "difficulties": [
+          2
+        ]
+      },
+      {
+        "list": "block",
+        "difficulties": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "list": "mental",
+        "difficulties": [
+          4,
+          6
+        ]
+      }
+    ],
+    "weaponGroups": [
+      "Any Tight Group of Melee Weapons"
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "_id": "kMsAikijutsu0001",
+  "_key": "!items!kMsAikijutsu0001",
+  "name": "Aikijutsu",
+  "type": "martialStyle",
+  "img": "icons/svg/combat.svg",
+  "system": {
+    "description": "A defensive Japanese style built on evasion and throws.",
+    "form": "soft",
+    "principalMethod": "throw",
+    "slotsInvested": 1,
+    "availableManeuvers": [
+      {
+        "list": "lock",
+        "difficulties": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "list": "block",
+        "difficulties": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "list": "movement",
+        "difficulties": [
+          1,
+          3
+        ]
+      },
+      {
+        "list": "throw",
+        "difficulties": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "list": "mental",
+        "difficulties": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      }
+    ],
+    "weaponGroups": [
+      "Staves",
+      "Fencing Blades",
+      "Oriental Blades",
+      "Medium Blades"
+    ]
+  }
+}

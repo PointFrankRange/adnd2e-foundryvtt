@@ -1,0 +1,60 @@
+{
+  "_id": "kMsJujutsu000001",
+  "_key": "!items!kMsJujutsu000001",
+  "name": "Jujutsu",
+  "type": "martialStyle",
+  "img": "icons/svg/combat.svg",
+  "system": {
+    "description": "A grappling style of locks and throws with some strikes.",
+    "form": "hardSoft",
+    "principalMethod": "lock",
+    "slotsInvested": 1,
+    "availableManeuvers": [
+      {
+        "list": "lock",
+        "difficulties": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "list": "throw",
+        "difficulties": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "list": "movement",
+        "difficulties": [
+          1,
+          3
+        ]
+      },
+      {
+        "list": "vitalArea",
+        "difficulties": [
+          1,
+          2
+        ]
+      },
+      {
+        "list": "mental",
+        "difficulties": [
+          1,
+          2,
+          3
+        ]
+      }
+    ],
+    "weaponGroups": [
+      "Fencing Blades",
+      "Oriental Blades",
+      "Medium Blades"
+    ]
+  }
+}

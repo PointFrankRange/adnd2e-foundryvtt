@@ -1,0 +1,52 @@
+{
+  "_id": "kMsKarate0000001",
+  "_key": "!items!kMsKarate0000001",
+  "name": "Karate",
+  "type": "martialStyle",
+  "img": "icons/svg/combat.svg",
+  "system": {
+    "description": "An empty-hand striking style from Okinawa.",
+    "form": "hard",
+    "principalMethod": "strike",
+    "slotsInvested": 1,
+    "availableManeuvers": [
+      {
+        "list": "strike",
+        "difficulties": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "list": "kick",
+        "difficulties": [
+          1
+        ]
+      },
+      {
+        "list": "block",
+        "difficulties": [
+          1,
+          2
+        ]
+      },
+      {
+        "list": "movement",
+        "difficulties": [
+          1
+        ]
+      },
+      {
+        "list": "mental",
+        "difficulties": [
+          1,
+          4
+        ]
+      }
+    ],
+    "weaponGroups": [
+      "Karate Weapons"
+    ]
+  }
+}
