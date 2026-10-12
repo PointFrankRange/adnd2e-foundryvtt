@@ -40,7 +40,7 @@ Armor groups: **light** = leather, padded, studded leather, and any monster (cre
 | strike:2 | Crushing Blow | the round | -1 / -2 / -3 | style die + floor(level / 2) (no Strength) |
 | strike:3 | Eagle Claw | the round | -2 / -3 / -4 | 1d8 + Str |
 
-Strength damage = the character's damage adjustment (`abilities.str.mods.damageAdj`), minimum total 0. The style die is the Plan A derived die (a weapon-method style has none: its maneuvers add to 0... the Weapon list is B3, so B1 maneuvers on a weapon-method style use the maneuver's own additions only and the card says so).
+Strength damage = the character's damage adjustment (`abilities.str.mods.damageAdj`), minimum total 0. The style die is the Plan A derived die. A weapon-method style has no style die (`damageDie` is null): its B1 maneuvers then count the style die as 0 and roll only their own additions, and the card says so.
 
 ### The attack
 - To-hit bonus = Table 57 worn-armor penalty + Table 22 opponent-weapon-size penalty + conditions + the maneuver's Table 21 modifier for the target's armor group. Natural 20 hits, natural 1 misses, a helpless target is a forced hit (as Plan A).
