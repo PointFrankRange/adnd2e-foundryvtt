@@ -1,0 +1,71 @@
+{
+  "_id": "kMsNinjutsu00001",
+  "_key": "!items!kMsNinjutsu00001",
+  "name": "Ninjutsu",
+  "type": "martialStyle",
+  "img": "icons/svg/combat.svg",
+  "system": {
+    "description": "The deceptive style of the ninja: throw an opponent down, then get away.",
+    "form": "hardSoft",
+    "principalMethod": "movement",
+    "slotsInvested": 1,
+    "availableManeuvers": [
+      {
+        "list": "kick",
+        "difficulties": [
+          1,
+          3
+        ]
+      },
+      {
+        "list": "lock",
+        "difficulties": [
+          1,
+          3
+        ]
+      },
+      {
+        "list": "movement",
+        "difficulties": [
+          1,
+          2,
+          4
+        ]
+      },
+      {
+        "list": "strike",
+        "difficulties": [
+          1
+        ]
+      },
+      {
+        "list": "throw",
+        "difficulties": [
+          1,
+          2
+        ]
+      },
+      {
+        "list": "block",
+        "difficulties": [
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "list": "mental",
+        "difficulties": [
+          2,
+          4
+        ]
+      }
+    ],
+    "weaponGroups": [
+      "Short Blades",
+      "Oriental Blades",
+      "Chain Weapons",
+      "Rope Weapons"
+    ]
+  }
+}

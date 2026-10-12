@@ -9,6 +9,8 @@ export interface AcInput {
   dexDefensiveAdj: number;
   /** SP21 (PHBR10 p.15): the race's natural armor class; absent/null = none */
   naturalAc?: number | null;
+  /** SP18: added directly to AC (negative improves) - the active martial arts style's modifier */
+  situationalModifier?: number;
 }
 
 /**
@@ -31,7 +33,7 @@ export function deriveAc(input: AcInput): {
   const shieldBonus = input.equippedShield?.shieldBonus ?? 0;
   const armorMagic = input.equippedArmor?.magicBonus ?? 0;
   const shieldMagic = input.equippedShield?.magicBonus ?? 0;
-  const common = { baseArmorAc, shieldBonus, dexDefensiveAdj: input.dexDefensiveAdj };
+  const common = { baseArmorAc, shieldBonus, dexDefensiveAdj: input.dexDefensiveAdj, situationalModifier: input.situationalModifier ?? 0 };
   const withShield = armorMagic + shieldMagic;
   return {
     normal: armorClass({ ...common, magicBonus: withShield }).value,

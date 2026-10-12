@@ -283,3 +283,32 @@ describe("validateItemDrop — race/class eligibility", () => {
       .toBe("ADND2E.sheet.drop.duplicateClass");
   });
 });
+
+describe("validateItemDrop — martial arts styles (SP18)", () => {
+  const base = { dropType: "martialStyle", hasRace: false, existingChassisIds: [] as string[] };
+  it("requires basic martial arts", () => {
+    expect(validateItemDrop({ ...base, knowsBasicMartialArts: false })).toEqual({ ok: false, reason: "ADND2E.sheet.drop.styleNeedsBasics" });
+  });
+  it("rejects a style the character already owns", () => {
+    expect(validateItemDrop({ ...base, knowsBasicMartialArts: true, dropStyleName: "Karate", existingStyleNames: ["Karate"] })).toEqual({
+      ok: false, reason: "ADND2E.sheet.drop.styleDuplicate",
+    });
+  });
+  it("accepts a new style", () => {
+    expect(validateItemDrop({ ...base, knowsBasicMartialArts: true, dropStyleName: "Sumo", existingStyleNames: ["Karate"], availableSlots: 1 })).toEqual({ ok: true });
+    expect(validateItemDrop({ ...base, knowsBasicMartialArts: true, dropStyleName: "Sumo", availableSlots: 1, dropSlotCost: 1 })).toEqual({ ok: true });
+  });
+  it("refuses a style when no weapon slot is free", () => {
+    expect(validateItemDrop({ ...base, knowsBasicMartialArts: true, dropStyleName: "Sumo", availableSlots: 0, dropSlotCost: 1 })).toEqual({
+      ok: false, reason: "ADND2E.sheet.drop.insufficientSlots",
+    });
+    expect(validateItemDrop({ ...base, knowsBasicMartialArts: true, dropStyleName: "Sumo" })).toEqual({
+      ok: false, reason: "ADND2E.sheet.drop.insufficientSlots",
+    });
+  });
+  it("reports basics and duplicates before the slot shortfall", () => {
+    expect(validateItemDrop({ ...base, knowsBasicMartialArts: false, availableSlots: 0 }).reason).toBe("ADND2E.sheet.drop.styleNeedsBasics");
+    expect(validateItemDrop({ ...base, knowsBasicMartialArts: true, dropStyleName: "Karate", existingStyleNames: ["Karate"], availableSlots: 0 }).reason)
+      .toBe("ADND2E.sheet.drop.styleDuplicate");
+  });
+});

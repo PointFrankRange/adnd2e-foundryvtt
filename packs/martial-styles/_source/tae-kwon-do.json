@@ -1,0 +1,53 @@
+{
+  "_id": "kMsTaeKwonDo0001",
+  "_key": "!items!kMsTaeKwonDo0001",
+  "name": "Tae Kwon Do",
+  "type": "martialStyle",
+  "img": "icons/svg/combat.svg",
+  "system": {
+    "description": "A hard Korean style that emphasizes punching and kicking.",
+    "form": "hard",
+    "principalMethod": "kick",
+    "slotsInvested": 1,
+    "availableManeuvers": [
+      {
+        "list": "kick",
+        "difficulties": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "list": "strike",
+        "difficulties": [
+          1
+        ]
+      },
+      {
+        "list": "throw",
+        "difficulties": [
+          4
+        ]
+      },
+      {
+        "list": "block",
+        "difficulties": [
+          1,
+          2
+        ]
+      },
+      {
+        "list": "movement",
+        "difficulties": [
+          4
+        ]
+      }
+    ],
+    "weaponGroups": [
+      "Medium Blades",
+      "Staves",
+      "Clubbing Weapons"
+    ]
+  }
+}

@@ -63,6 +63,7 @@ declare global {
     "adnd2e.racialLevelLimits": boolean;
     "adnd2e.primeRequisiteBonusLevels": boolean;
     "adnd2e.wildTalents": boolean;
+    "adnd2e.advancedMartialArts": boolean;
     "adnd2e.exceedLevelLimits": string;
     // combatAndTactics — reserved for Sub-project 7
     "adnd2e.combatAndTacticsEnabled": boolean;

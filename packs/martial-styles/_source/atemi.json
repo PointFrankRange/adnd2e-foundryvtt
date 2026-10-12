@@ -1,0 +1,52 @@
+{
+  "_id": "kMsAtemi00000001",
+  "_key": "!items!kMsAtemi00000001",
+  "name": "Atemi",
+  "type": "martialStyle",
+  "img": "icons/svg/combat.svg",
+  "system": {
+    "description": "A hard style that targets an opponent's vital points.",
+    "form": "hard",
+    "principalMethod": "vitalArea",
+    "slotsInvested": 1,
+    "availableManeuvers": [
+      {
+        "list": "block",
+        "difficulties": [
+          1,
+          2
+        ]
+      },
+      {
+        "list": "movement",
+        "difficulties": [
+          1
+        ]
+      },
+      {
+        "list": "push",
+        "difficulties": [
+          3
+        ]
+      },
+      {
+        "list": "strike",
+        "difficulties": [
+          1
+        ]
+      },
+      {
+        "list": "vitalArea",
+        "difficulties": [
+          1,
+          2,
+          3
+        ]
+      }
+    ],
+    "weaponGroups": [
+      "Clubbing Weapons",
+      "Staves"
+    ]
+  }
+}

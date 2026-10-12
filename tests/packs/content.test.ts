@@ -4,6 +4,7 @@ import path from "node:path";
 import { POWER_DISCIPLINES, POWER_KINDS, POWER_MAINTENANCE_UNITS, CLASS_IDS, PHB_RACE_IDS, ABILITY_KEYS, ALIGNMENTS, WIZARD_SCHOOLS, NONWEAPON_GROUPS } from "../../src/data/item/choices";
 import { EQUIPMENT_MODES, normalizePowers, normalizeOverrides, powerUses, TURNING_MODES, CASTING_MODES } from "../../src/core/kits";
 import { isRaceSlug, normalizeSubrace } from "../../src/core/races";
+import { STYLE_FORMS, STYLE_METHODS, styleStats, type StyleForm, type StyleMethod } from "../../src/core/martial-arts";
 import { resolveShapechangeSpec } from "../../src/core/shapechange";
 import { THIEF_SKILLS } from "../../src/core/proficiencies/thief-skills";
 import { TRAITS, toTraitEffect, type RawTraitEffect } from "../../src/core/skills/traits";
@@ -627,5 +628,39 @@ describe("powers pack content", () => {
     expect(by("Mind Blank")).toMatchObject({ initialCost: 0, maintenanceCost: 0, maintenanceUnit: "none", abilityModifier: -7 });
     expect(by("Clairvoyance")).toMatchObject({ abilityKey: "wis", abilityModifier: -4, initialCost: 7, maintenanceCost: 4, maintenanceUnit: "round", range: "unlimited" });
     expect(by("Complete Healing")).toMatchObject({ initialCost: 30, preparation: "24 hrs.", abilityKey: "con", abilityModifier: 0 });
+  });
+});
+
+describe("martial-styles pack content", () => {
+  const items = docs("martial-styles");
+  const NAMES = ["Aikijutsu", "Atemi", "Jujutsu", "Karate", "Kung Fu", "Ninjutsu", "Sumo", "Tae Kwon Do"];
+
+  it("has the eight Table 17 styles, uniquely named and identified", () => {
+    expect(items.map((d) => String(d.name)).sort()).toEqual([...NAMES].sort());
+    expect(new Set(items.map((d) => String(d._id))).size).toBe(8);
+    for (const d of items) expect(d.type, String(d.name)).toBe("martialStyle");
+  });
+
+  it("every style's forms and methods are from the vocabularies and each carries a maneuver list", () => {
+    for (const d of items) {
+      const s = sys(d) as { form: string; principalMethod: string; slotsInvested: number; availableManeuvers: { list: string; difficulties: number[] }[]; weaponGroups: string[] };
+      expect(STYLE_FORMS, String(d.name)).toContain(s.form);
+      expect(STYLE_METHODS, String(d.name)).toContain(s.principalMethod);
+      expect(s.slotsInvested).toBe(1);
+      expect(s.availableManeuvers.length, String(d.name)).toBeGreaterThan(0);
+      for (const m of s.availableManeuvers) expect(m.difficulties.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("derives Table 17's AC and damage die for every style", () => {
+    const expected: Record<string, [number, string]> = {
+      Aikijutsu: [-3, "1"], Atemi: [-1, "1d4"], Jujutsu: [-2, "1d2"], Karate: [-1, "1d4"],
+      "Kung Fu": [-2, "1d3"], Ninjutsu: [-2, "1d2"], Sumo: [-2, "1d2"], "Tae Kwon Do": [-1, "1d4"],
+    };
+    for (const d of items) {
+      const s = sys(d) as { form: StyleForm; principalMethod: StyleMethod };
+      const stats = styleStats(s.form, s.principalMethod);
+      expect([stats.acMod, stats.damageDie], String(d.name)).toEqual([expected[String(d.name)][0], expected[String(d.name)][1]]);
+    }
   });
 });

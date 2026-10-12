@@ -4,6 +4,7 @@
 import type { AbilityKey, Alignment, ArmorType, ClassGroup, ClassId, CreatureSize, EncumbranceCategory, MovementMode, NonweaponGroup, PhbRace, SpellSchool, SphereName, WizardSchool } from "../../core/types";
 import type { DamageType, WeaponCategory, WeaponSize } from "../../core/weapons/data";
 import { TURN_ROW_IDS } from "../../core/turning";
+import { STYLE_FORMS, STYLE_METHODS } from "../../core/martial-arts";
 import type { TurnRowId } from "../../core/turning";
 import type { ClassArrangement } from "../derive/character/multiclass";
 
@@ -103,3 +104,7 @@ export const TURN_ROW_CHOICES: readonly ("" | TurnRowId)[] = ["", ...TURN_ROW_ID
 export { DISCIPLINES as POWER_DISCIPLINES } from "../../core/psionics";
 export const POWER_KINDS: readonly string[] = ["science", "devotion", "defense"];
 export const POWER_MAINTENANCE_UNITS: readonly string[] = ["none", "round", "turn", "hour"];
+
+/** SP18 Plan A: martial arts styles (PHBR15 Table 18). */
+export const MARTIAL_STYLE_FORMS: readonly string[] = STYLE_FORMS;
+export const MARTIAL_STYLE_METHODS: readonly string[] = STYLE_METHODS;

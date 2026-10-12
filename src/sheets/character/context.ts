@@ -592,6 +592,9 @@ function buildCombat(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
     },
     { label: "ADND2E.sheet.combat.acDex", value: dexMods.defensiveAdj },
   ];
+  // SP18 Plan A: the active style's AC modifier (already rule-gated by the caller) so the rows add up to the total
+  const styleAcMod = input.martialArtsAcMod ?? 0;
+  if (styleAcMod !== 0) acBreakdown.push({ label: "ADND2E.sheet.combat.acStyle", value: styleAcMod });
 
   const armor = armorItems.map((i) => ({
     id: i.id,

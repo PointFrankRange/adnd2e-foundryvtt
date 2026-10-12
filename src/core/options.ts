@@ -71,6 +71,8 @@ export interface OptionalRules {
   wildTalents: boolean;
   /** SP7e: Combat & Tactics wrestling replaces the simplified grapple maneuver (requires combatAndTacticsEnabled). */
   wrestling: boolean;
+  /** SP18 Plan A: PHBR15 Advanced Martial Arts — martial arts styles, the unarmed attack and the style AC modifier. */
+  advancedMartialArts: boolean;
 }
 
 export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
@@ -104,4 +106,5 @@ export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
   primeRequisiteBonusLevels: false,
   wildTalents: false,
   wrestling: false,
+  advancedMartialArts: false,
 };

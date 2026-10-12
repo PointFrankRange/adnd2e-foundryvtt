@@ -10,9 +10,9 @@ describe("ITEM_SUBTYPES", () => {
     expect([...ITEM_SUBTYPES].sort()).toEqual(declared);
   });
 
-  it("has fourteen entries ending with power", () => {
-    expect(ITEM_SUBTYPES).toHaveLength(14);
-    expect(ITEM_SUBTYPES[ITEM_SUBTYPES.length - 1]).toBe("power");
+  it("has fifteen entries ending with martialStyle", () => {
+    expect(ITEM_SUBTYPES).toHaveLength(15);
+    expect(ITEM_SUBTYPES[ITEM_SUBTYPES.length - 1]).toBe("martialStyle");
   });
 
   it("has no duplicates", () => {

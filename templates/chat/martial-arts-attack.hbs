@@ -1,0 +1,19 @@
+<div class="adnd2e chat-card martial-arts-attack">
+  <header>
+    <img src="{{actorImg}}" alt="{{actorName}}">
+    <h3>{{actorName}} — {{styleName}}</h3>
+  </header>
+  {{#if targetName}}<p class="hint">{{localize 'ADND2E.chat.martialArts.against' target=targetName}}</p>{{/if}}
+  {{#if breakdown.length}}
+    <ul class="modifiers">
+      {{#each breakdown as |m|}}<li>{{localize m.labelKey}}: {{adnd2eSigned m.amount}}</li>{{/each}}
+    </ul>
+  {{/if}}
+  <p class="formula">1d20 = <strong>{{natural}}</strong> — {{localize 'ADND2E.chat.martialArts.needed' total=total needed=needed}}</p>
+  <p class="result {{#if hit}}hit{{else}}miss{{/if}}">{{localize resultKey}}</p>
+  {{#if hit}}
+    <p class="formula">{{localize blowKey}} — {{localize 'ADND2E.chat.martialArts.damage' damage=damage}}</p>
+    {{#if stunTrigger}}<p class="hint">{{localize 'ADND2E.chat.martialArts.stun'}}</p>{{/if}}
+    {{#if damage}}<button type="button" data-action="applyDamage" data-amount="{{damage}}">{{localize 'ADND2E.chat.damage.applyToTargets'}}</button>{{/if}}
+  {{/if}}
+</div>

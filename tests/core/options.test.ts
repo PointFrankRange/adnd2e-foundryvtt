@@ -6,6 +6,7 @@ describe("DEFAULT_OPTIONAL_RULES", () => {
   it("has exactly the expected core, combatAndTactics, skillsAndPowers, spellsAndMagic and level-limit toggles", () => {
     expect(Object.keys(DEFAULT_OPTIONAL_RULES).sort()).toEqual(
       [
+        "advancedMartialArts",
         "armorTypeVsWeaponType",
         "calledShots",
         "channelers",
@@ -71,6 +72,7 @@ describe("DEFAULT_OPTIONAL_RULES", () => {
       exceedLevelLimits: 0,
       primeRequisiteBonusLevels: false,
       wildTalents: false,
+      advancedMartialArts: false,
       wrestling: false,
     };
     expect(DEFAULT_OPTIONAL_RULES).toEqual(expected);

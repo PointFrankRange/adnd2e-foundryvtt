@@ -55,6 +55,11 @@ export interface DropCheckInput {
   kitForbidsProficiency?: boolean;
   /** spell drops: true when the owning kit switches that caster type's casting off (SP11 Plan C) */
   kitDisablesCasting?: boolean;
+  /** martialStyle drops: does the character know basic martial arts (the PHBR15 prerequisite) */
+  knowsBasicMartialArts?: boolean;
+  /** martialStyle drops: the dropped style's name and the names of owned styles */
+  dropStyleName?: string;
+  existingStyleNames?: readonly string[];
 }
 
 export interface DropVerdict {
@@ -114,6 +119,13 @@ export function validateItemDrop(input: DropCheckInput): DropVerdict {
     if (!input.existingChassisIds.includes(chassis)) return { ok: false, reason: "ADND2E.sheet.drop.kitNoClass" };
     if ((input.existingKitChassisIds ?? []).includes(chassis)) return { ok: false, reason: "ADND2E.sheet.drop.kitDuplicate" };
     if (input.kitQualifies && !input.kitQualifies.ok) return { ok: false, reason: input.kitQualifies.reason };
+    return { ok: true };
+  }
+  if (input.dropType === "martialStyle") {
+    if (!input.knowsBasicMartialArts) return { ok: false, reason: "ADND2E.sheet.drop.styleNeedsBasics" };
+    if ((input.existingStyleNames ?? []).includes(input.dropStyleName ?? "")) return { ok: false, reason: "ADND2E.sheet.drop.styleDuplicate" };
+    // The basics cost 1 weapon slot, and an owned style counts into spent slots.
+    if ((input.dropSlotCost ?? 1) > (input.availableSlots ?? 0)) return { ok: false, reason: "ADND2E.sheet.drop.insufficientSlots" };
     return { ok: true };
   }
   if (input.dropType === "spell" && input.kitDisablesCasting) {
