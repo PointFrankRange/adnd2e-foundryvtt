@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { STYLE_FORMS, STYLE_METHODS, damageDieFor, resolveActiveStyleId, styleStats } from "../../../src/core/martial-arts";
+import { STYLE_FORMS, STYLE_METHODS, damageDieFor, freshStyleUpdate, resolveActiveStyleId, styleStats } from "../../../src/core/martial-arts";
 
 describe("damageDieFor — rounds up to the nearest game die", () => {
   it.each([
@@ -43,4 +43,10 @@ describe("resolveActiveStyleId", () => {
   it("keeps a stored id that is owned", () => expect(resolveActiveStyleId(["a", "b"], "b")).toBe("b"));
   it("falls back to the first owned style", () => expect(resolveActiveStyleId(["a", "b"], "gone")).toBe("a"));
   it("is blank with no styles", () => expect(resolveActiveStyleId([], "x")).toBe(""));
+});
+
+describe("freshStyleUpdate", () => {
+  it("resets a dropped style to one invested slot and no known maneuvers", () => {
+    expect(freshStyleUpdate()).toEqual({ "system.slotsInvested": 1, "system.knownManeuvers": [] });
+  });
 });

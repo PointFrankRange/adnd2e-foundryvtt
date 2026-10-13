@@ -6,7 +6,8 @@ const { StringField, NumberField, ArrayField, SchemaField } = foundry.data.field
 /**
  * SP18 Plan A: a martial arts style (PHBR15 ch.4). AC mod, damage die and principal attack DERIVE from `form` and
  * `principalMethod` (core/martial-arts `styleStats`); only the choices are stored. `availableManeuvers` and
- * `weaponGroups` are data-only in Plan A (Table 17's lists, used by Plan B).
+ * `weaponGroups` are data-only in Plan A (Table 17's lists, used by Plan B). `knownManeuvers` (Plan B1) records the
+ * special maneuvers learned and the level each was learned at.
  */
 export class MartialStyleItemModel extends Adnd2eItemModel {
   static override defineSchema(): foundry.data.fields.DataSchema {
@@ -23,6 +24,14 @@ export class MartialStyleItemModel extends Adnd2eItemModel {
         { required: true, initial: () => [] },
       ),
       weaponGroups: new ArrayField(new StringField({ required: true, blank: false }), { required: true, initial: () => [] }),
+      /** SP18 Plan B1: the special maneuvers this character has learned on this style ({ id: "<list>:<difficulty>", level learned at }). */
+      knownManeuvers: new ArrayField(
+        new SchemaField({
+          id: new StringField({ required: true, blank: false }),
+          level: new NumberField({ required: true, integer: true, min: 1 }),
+        }),
+        { required: true, initial: () => [] },
+      ),
     };
   }
 }

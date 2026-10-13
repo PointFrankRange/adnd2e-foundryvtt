@@ -73,6 +73,33 @@
     "martialMethods": { "block": "Block", "kick": "Kick", "lock": "Lock", "movement": "Movement", "push": "Push", "strike": "Strike", "throw": "Throw", "vitalArea": "Vital area", "weapon": "Weapon" },
     "martialAttackForms": { "hand": "Hand", "foot": "Foot", "body": "Body", "legs": "Legs", "handFoot": "Hand/Foot", "handArm": "Hand/Arm" },
     "martialBlows": { "headKick": "Head kick", "headPunch": "Head punch", "vitalsKick": "Vitals kick", "vitalsPunch": "Vitals punch", "highKick": "High kick", "sideKick": "Side kick", "bodyPunch": "Body punch", "lowKick": "Low kick", "graze": "Graze" },
+    "martialManeuverLists": { "block": "Block", "kick": "Kick", "strike": "Strike" },
+    "martialManeuverCosts": { "none": "No extra attack", "one": "Costs 1 attack", "two": "Costs 2 attacks", "round": "Takes the whole round" },
+    "martialManeuvers": { "basicParry": "Basic Parry", "parryAll": "Parry All", "grapplingBlock": "Grappling Block", "arrowParry": "Arrow Parry", "circleKick": "Circle Kick", "flyingKick": "Flying Kick", "backwardKick": "Backward Kick", "ironFist": "Iron Fist", "crushingBlow": "Crushing Blow", "eagleClaw": "Eagle Claw" },
+    "martialManeuverEffects": {
+      "basicParry": "The first blow this round is parried.",
+      "parryAll": "Every melee blow this round is parried (roll for each).",
+      "grapplingBlock": "The blow is parried and the weapon is pinned; the attacker must win a Strength check to free it.",
+      "arrowParry": "Every missile aimed at you this round is parried (roll for each).",
+      "circleKick": "A spinning kick; the extra damage is included.",
+      "flyingKick": "A leaping kick that needs 5 feet of running space; the extra damage is included.",
+      "backwardKick": "A kick at someone directly behind you.",
+      "ironFist": "Hardened hands: this damage applies to every attack when your principal attack form uses the hands, otherwise to one attack per round.",
+      "crushingBlow": "Your only action this round; can also shatter wood (half an inch per level) or brittle stone (a quarter inch per level).",
+      "eagleClaw": "Your only action this round; can also shatter spear shafts and crush stone or metal items."
+    },
+    "martialManeuverFailures": {
+      "basicParry": "The blow hits you.",
+      "parryAll": "That blow hits you.",
+      "grapplingBlock": "Your weapon fouls the attacker's; they may yank it free and disarm you.",
+      "arrowParry": "The missile strikes you.",
+      "circleKick": "You lose your next attack and your AC is 2 worse until next round.",
+      "flyingKick": "You fall prone beside the target and spend a round getting up.",
+      "backwardKick": "No ill effect.",
+      "ironFist": "The blow does not land.",
+      "crushingBlow": "Against a hard object you injure your hand: it takes the damage and is useless for 24 hours.",
+      "eagleClaw": "Nothing is damaged and there is no ill effect."
+    },
     "trackingTerrains": { "freshSnow": "Fresh snow", "softGround": "Soft or muddy ground", "thickBrush": "Thick brush or dense jungle", "forestField": "Forest, field or dusty floor", "normal": "Normal ground", "desert": "Desert or dry sand", "swamp": "Swamp", "rocky": "Rock, ice, stone or shallow water" },
     "trackingIlluminations": { "good": "Good light", "twilight": "Twilight, light fog or a single torch", "moonlit": "Full-moon night or moderate fog", "dark": "Overcast night, dense fog, blizzard or blowing sand" },
     "primaryTerrains": { "aquatic": "Aquatic", "arctic": "Arctic", "desert": "Desert", "forest": "Forest", "hill": "Hill", "jungle": "Jungle", "mountain": "Mountain", "plain": "Plain", "swamp": "Swamp" },
@@ -541,7 +568,19 @@
         "byWeapon": "by weapon",
         "slots": "Slots",
         "extraAttack": "Each style adds one attack per round while unarmed.",
-        "noActive": "Choose a martial arts style first."
+        "noActive": "Choose a martial arts style first.",
+        "maneuvers": "Special maneuvers",
+        "learn": "Learn",
+        "useManeuver": "Use",
+        "notKnown": "You have not learned that maneuver with the active style.",
+        "locked": {
+          "notOffered": "This style does not teach it.",
+          "known": "Already learned.",
+          "order": "Learn the easier maneuvers in this list first.",
+          "noSlot": "No free weapon proficiency slot.",
+          "noLevel": "A character needs a class level to learn maneuvers.",
+          "levelCap": "Two maneuvers per level on a style."
+        }
       },
       "drop": {
         "subraceRangeWarning": "This character's ability scores are outside the subrace's allowed range: {abilities}.",
@@ -875,7 +914,11 @@
         "miss": "Miss",
         "damage": "{damage} hp",
         "stun": "Natural 20: the target saves vs. paralyzation or is stunned (d20 under its HD or level: stunned 1d6 rounds) or incapacitated (d20 over: 1d3 hours); an exactly equal roll counts as stunned.",
-        "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions" }
+        "hp": "hp",
+        "parried": "Parried",
+        "notParried": "Not parried",
+        "noStyleDie": "This style has no damage die, so only the maneuver's own dice are rolled.",
+        "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions", "table21": "Target's armor" }
       },
       "shapechange": {
         "shift": "Shapechange",

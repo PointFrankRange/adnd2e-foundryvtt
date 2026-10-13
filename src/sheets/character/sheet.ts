@@ -21,7 +21,8 @@ import { rollAttack, rollSave } from "./combat-rolls";
 import { rollFormAttack } from "../creature/combat-rolls";
 import { promptShift, resetShapechangeDay, returnToNormal, shapechangeView } from "./shapechange-actions";
 import { trackQuarry, trackingView } from "./tracking-actions";
-import { martialArtsView, rollMartialArtsAttack, setActiveStyle } from "./martial-arts-actions";
+import { freshStyleUpdate } from "../../core/martial-arts";
+import { learnManeuver, martialArtsView, rollMartialArtsAttack, setActiveStyle, useManeuver } from "./martial-arts-actions";
 import { buildCharacterSheetContext, traitTargetKey } from "./context";
 import type {
   ClassItemView,
@@ -408,6 +409,8 @@ export class Adnd2eCharacterSheet extends Base {
       trackQuarry: Adnd2eCharacterSheet.#onTrackQuarry,
       martialArtsAttack: Adnd2eCharacterSheet.#onMartialArtsAttack,
       useMartialStyle: Adnd2eCharacterSheet.#onUseMartialStyle,
+      learnManeuver: Adnd2eCharacterSheet.#onLearnManeuver,
+      useManeuver: Adnd2eCharacterSheet.#onUseManeuver,
     },
   };
 
@@ -859,6 +862,10 @@ export class Adnd2eCharacterSheet extends Base {
         "system.slotsInvested": dropSlotCost,
       });
     }
+    if (result && isNewDrop && dropped.type === "martialStyle") {
+      // A style copied from another actor must not carry its source's learned maneuvers or invested slots.
+      await (result as unknown as { update(data: Record<string, unknown>): Promise<unknown> }).update(freshStyleUpdate());
+    }
     if (result && isNewDrop && dropped.type === "trait" && traitRefundCapped(traitInputs)) {
       ui.notifications?.info(game.i18n!.localize("ADND2E.sheet.traits.refundCappedToast"));
     }
@@ -1239,6 +1246,17 @@ export class Adnd2eCharacterSheet extends Base {
   static async #onUseMartialStyle(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
     const itemId = target.dataset.itemId ?? "";
     if (this.isEditable && itemId) await setActiveStyle(this.document as never, itemId);
+  }
+
+  static async #onLearnManeuver(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const styleId = target.dataset.itemId ?? "";
+    const maneuverId = target.dataset.maneuverId ?? "";
+    if (this.isEditable && styleId && maneuverId) await learnManeuver(this.document as never, styleId, maneuverId);
+  }
+
+  static async #onUseManeuver(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const maneuverId = target.dataset.maneuverId ?? "";
+    if (this.isEditable && maneuverId) await useManeuver(this.document as never, maneuverId);
   }
 
   static async #onRollFormAttack(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
