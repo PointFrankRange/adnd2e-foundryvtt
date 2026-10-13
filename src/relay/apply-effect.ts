@@ -35,14 +35,14 @@ interface CombatLike {
  *  anchors expiry to whoever was acting when the effect was created — the attacker). `created` is toggleStatusEffect's
  *  result: the new effect, or `true` when the condition was already present (left as is). Best effort: a failure
  *  only leaves the condition indefinite, like a hand-applied one. */
-async function applyConditionDuration(actor: unknown, conditionId: string, created: unknown): Promise<void> {
+async function applyConditionDuration(actor: unknown, conditionId: string, created: unknown, rounds?: number): Promise<void> {
   if (!created || typeof created !== "object") return;
   const combat = (game as unknown as { combat?: CombatLike | null }).combat;
   const live = combat?.started ? combat : null;
   const combatant = live?.getCombatantsByActor(actor)[0];
   const index = combatant ? live!.turns.findIndex((t) => t.id === combatant.id) : -1;
   const hasActed = index >= 0 && live!.turn !== null && index <= live!.turn;
-  const duration = conditionDuration(conditionId, hasActed);
+  const duration = conditionDuration(conditionId, hasActed, rounds);
   if (!duration) return;
   try {
     await (created as DurationEffect).update({ duration, ...(combatant ? { "start.combatant": combatant.id } : {}) });
@@ -65,7 +65,7 @@ export async function applyEffectLocally(actor: EffectTarget, request: RelayRequ
       await actor.update(hpHealingUpdate(actor.system.attributes.hp, request.amount));
       return true;
     case "condition":
-      await applyConditionDuration(actor, request.conditionId, await actor.toggleStatusEffect(request.conditionId, { active: true }));
+      await applyConditionDuration(actor, request.conditionId, await actor.toggleStatusEffect(request.conditionId, { active: true }), request.rounds);
       return true;
     case "destroy":
       await actor.update({ "system.attributes.hp.value": 0 });
