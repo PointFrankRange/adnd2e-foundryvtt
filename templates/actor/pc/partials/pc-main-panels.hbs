@@ -103,6 +103,12 @@
         {{else}}
           <p class="kit-empty">{{localize 'ADND2E.sheet.martialArts.noStyles'}}</p>
         {{/each}}
+        {{#if @root.martialArts.constants.summary.length}}
+          <h5 class="kit-subhead">{{localize 'ADND2E.sheet.martialArts.constants'}}</h5>
+          {{#each @root.martialArts.constants.summary as |c|}}
+            <p class="hint"><strong>{{localize c.nameKey}}</strong> - {{localize c.effectKey}}</p>
+          {{/each}}
+        {{/if}}
         <p class="hint">{{localize 'ADND2E.sheet.martialArts.extraAttack'}}</p>
         <button type="button" class="kit-roll" data-action="martialArtsAttack"{{#unless @root.martialArts.canAttack}} disabled{{/unless}}>{{localize 'ADND2E.sheet.martialArts.attack'}}</button>
       </div>

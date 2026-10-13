@@ -4,8 +4,9 @@ import {
   heldAttackBonus, invisibleTargetPenalty, isHelpless, proneArmorClassPenalty,
 } from "../../combat/condition-effects";
 import {
-  armorGroupOf, buildMartialArtsView, buildMartialCardContext, buildManeuverCardContext, learnability, maneuverById,
-  resolveManeuverAttack, resolveMartialAttack, type ArmorGroup, type MartialArtsView, type StyleItemLike,
+  armorGroupOf, blindFightingPenalty, buildMartialArtsView, buildMartialCardContext, buildManeuverCardContext, buildSkillCardContext,
+  learnability, maneuverById, resolveLeap, resolveManeuverAttack, resolveMartialAttack, resolveSpeed, type ArmorGroup, type MartialArtsView,
+  type StyleItemLike,
 } from "../../core/martial-arts";
 import { themedPrompt } from "../../dialogs/themed-dialog-foundry";
 import { getOptionalRules } from "../../settings";
@@ -27,7 +28,7 @@ export interface MartialArtsActor {
   system: {
     martialArts: { knowsBasics: boolean; activeStyleId: string };
     attributes?: { thac0?: { melee?: number } };
-    abilities?: { str?: { mods?: { damageAdj?: number } } };
+    abilities?: { str?: { mods?: { damageAdj?: number } }; dex?: { score?: number } };
     /** derived class entries (Plan B1: the character's level is the highest) */
     classes?: { level: number }[];
     proficiencies?: { weapon?: { available?: number } };
@@ -52,6 +53,7 @@ export function martialArtsView(actor: MartialArtsActor): MartialArtsView {
     canAct: canAct(actor.statuses),
     level: characterLevel(actor),
     freeSlots: freeWeaponSlots(actor),
+    wearingBodyArmor: [...actor.items].some((i) => i.type === "armor" && i.system.equipped === true && i.system.isShield !== true),
   });
 }
 
@@ -128,13 +130,13 @@ async function resolveTarget(): Promise<TargetInfo | null> {
 }
 
 /** Summed condition modifiers on the attack roll (the same set the weapon attack uses). */
-function situationalModifier(actor: MartialArtsActor, targetStatuses: ReadonlySet<string>): number {
+function situationalModifier(actor: MartialArtsActor, targetStatuses: ReadonlySet<string>, blindFighting = false): number {
   return (
-    blindedAttackPenalty(actor.statuses) +
+    (blindFighting ? blindFightingPenalty(blindedAttackPenalty(actor.statuses)) : blindedAttackPenalty(actor.statuses)) +
     fatigueAttackPenalty(actor.statuses) +
     entangledAttackPenalty(actor.statuses) +
     frightenedAttackPenalty(actor.statuses) +
-    invisibleTargetPenalty(targetStatuses) +
+    (blindFighting ? blindFightingPenalty(invisibleTargetPenalty(targetStatuses)) : invisibleTargetPenalty(targetStatuses)) +
     heldAttackBonus(targetStatuses)
   );
 }
@@ -160,7 +162,7 @@ export async function rollMartialArtsAttack(actor: MartialArtsActor): Promise<vo
     targetAc: target.targetAc,
     attackerArmorType: resolveTargetArmorType(actor as never),
     opponentWeaponSize: target.opponentWeaponSize,
-    situationalModifier: situationalModifier(actor, target.targetStatuses),
+    situationalModifier: situationalModifier(actor, target.targetStatuses, view.constants.blindFighting),
     strengthDamageAdj: actor.system.abilities?.str?.mods?.damageAdj ?? 0,
     forcedHit: isHelpless(target.targetStatuses),
   });
@@ -179,6 +181,34 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
   const row = view.active.maneuvers.find((m) => m.id === maneuverId);
   if (!maneuverById(maneuverId) || row?.state !== "known") return warn("ADND2E.sheet.martialArts.notKnown");
   if (row.kind === "passive") return warn("ADND2E.sheet.martialArts.passive");
+  const def = maneuverById(maneuverId)!;
+  if (def.kind === "utility") {
+    const card = buildSkillCardContext({
+      actorName: actor.name, actorImg: actor.img, styleName: view.active.name, maneuverId, skill: "levitation", level: characterLevel(actor),
+    });
+    const content = await foundry.applications.handlebars.renderTemplate(TEMPLATE_PATH("chat/martial-arts-attack.hbs"), card as unknown as Record<string, unknown>);
+    await ChatMessage.create({ speaker: ChatMessage.getSpeaker({ actor: actor as never }), content } as never);
+    return;
+  }
+  if (def.kind === "skill") {
+    const skillRoll = await new Roll("1d20").evaluate();
+    const natural = skillRoll.dice[0]?.total ?? skillRoll.total ?? 1;
+    const card =
+      def.slug === "leap"
+        ? buildSkillCardContext({
+            actorName: actor.name, actorImg: actor.img, styleName: view.active.name, maneuverId, skill: "leap",
+            result: resolveLeap({
+              naturalD20: natural, thac0: actor.system.attributes?.thac0?.melee ?? 20,
+              situationalModifier: situationalModifier(actor, new Set<string>(), view.constants.blindFighting), level: characterLevel(actor),
+            }),
+          })
+        : buildSkillCardContext({
+            actorName: actor.name, actorImg: actor.img, styleName: view.active.name, maneuverId, skill: "speed",
+            result: resolveSpeed({ naturalD20: natural, dexterity: actor.system.abilities?.dex?.score ?? 10 }),
+          });
+    await postCard(actor, skillRoll, "chat/martial-arts-attack.hbs", card);
+    return;
+  }
   const target = await resolveTarget();
   if (!target) return;
 
@@ -190,7 +220,7 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
     targetAc: target.targetAc,
     attackerArmorType: resolveTargetArmorType(actor as never),
     opponentWeaponSize: target.opponentWeaponSize,
-    situationalModifier: situationalModifier(actor, target.targetStatuses),
+    situationalModifier: situationalModifier(actor, target.targetStatuses, view.constants.blindFighting),
     targetArmorGroup: target.targetArmorGroup,
     styleDie: view.active.damageDie,
     level: characterLevel(actor),

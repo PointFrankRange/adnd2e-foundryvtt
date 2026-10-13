@@ -90,4 +90,22 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
     ]) expect(typeof lookup(key), key).toBe("string");
     expect(CHAT).toContain("e.deferred");
   });
+  it("the card renders skill lines, hides the roll for Levitation and shows effects outside the hit block", () => {
+    expect(CHAT).toContain("noRoll");
+    expect(CHAT).toContain("lines");
+    expect(CHAT).toContain("l.key");
+    // the effects block follows the hit block's Apply Damage button, so it is not gated on `hit`
+    expect(CHAT.indexOf("effects.length")).toBeGreaterThan(CHAT.indexOf('data-action="applyDamage" data-amount="{{damage}}"'));
+  });
+  it("the panel lists the always-in-effect constants", () => {
+    expect(MAIN).toContain("martialArts.constants.summary");
+    expect(MAIN).toContain("ADND2E.sheet.martialArts.constants");
+  });
+  it("use handles skill and utility rows and passes body armor and Blind Fighting through the glue", () => {
+    expect(ACTIONS).toContain("resolveLeap");
+    expect(ACTIONS).toContain("resolveSpeed");
+    expect(ACTIONS).toContain("buildSkillCardContext");
+    expect(ACTIONS).toContain("blindFightingPenalty");
+    expect(ACTIONS).toContain("wearingBodyArmor");
+  });
 });

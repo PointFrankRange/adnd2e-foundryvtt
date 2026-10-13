@@ -64,6 +64,13 @@ describe("buildManeuverCardContext", () => {
     expect(buildManeuverCardContext({ ...base, result: fist, styleDieIsNull: true }).noStyleDie).toBe(false);
     const parry = resolveManeuverAttack({ ...attackInput, maneuverId: "block:1", styleDie: null });
     expect(buildManeuverCardContext({ ...base, result: parry, styleDieIsNull: true }).noStyleDie).toBe(false);
+    // Feint takes its damage from Table 16, and a touch rolls nothing: neither is a style-die attack
+    const feint = resolveManeuverAttack({ ...attackInput, maneuverId: "movement:1", styleDie: null });
+    expect(buildManeuverCardContext({ ...base, result: feint, styleDieIsNull: true }).noStyleDie).toBe(false);
+    const touch = resolveManeuverAttack({ ...attackInput, maneuverId: "vitalArea:2", styleDie: null });
+    expect(buildManeuverCardContext({ ...base, result: touch, styleDieIsNull: true }).noStyleDie).toBe(false);
+    const circle = resolveManeuverAttack({ ...attackInput, maneuverId: "kick:1", styleDie: null });
+    expect(buildManeuverCardContext({ ...base, result: circle, styleDieIsNull: true }).noStyleDie).toBe(true);
   });
   it("a miss shows the failure text and no damage", () => {
     const ctx = buildManeuverCardContext({

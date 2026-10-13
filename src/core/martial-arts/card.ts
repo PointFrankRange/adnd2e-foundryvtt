@@ -147,7 +147,7 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
     formula: r.blow ? "" : (r.damageFormula ?? ""),
     damage: r.hit && r.damageFormula !== null ? input.damageTotal : 0,
     stunTrigger: r.hit && r.stunTrigger,
-    noStyleDie: def.kind === "attack" && def.ownDie === null && input.styleDieIsNull === true,
+    noStyleDie: def.kind === "attack" && def.ownDie === null && def.basic !== true && def.noDamage !== true && input.styleDieIsNull === true,
     blowKey: r.blow ? `ADND2E.martialBlows.${r.blow}` : "",
     effects,
   };

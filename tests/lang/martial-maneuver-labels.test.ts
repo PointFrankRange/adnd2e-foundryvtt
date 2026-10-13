@@ -9,7 +9,7 @@ describe("martial maneuver labels", () => {
     for (const m of MANEUVERS) {
       expect(LANG.martialManeuvers?.[m.slug], `name ${m.slug}`).toBeTruthy();
       expect(LANG.martialManeuverEffects?.[m.slug], `effect ${m.slug}`).toBeTruthy();
-      if (m.kind !== "passive") expect(LANG.martialManeuverFailures?.[m.slug], `failure ${m.slug}`).toBeTruthy();
+      if (m.kind === "attack" || m.kind === "parry") expect(LANG.martialManeuverFailures?.[m.slug], `failure ${m.slug}`).toBeTruthy();
     }
   });
   it("every list and cost has a label, and none ends in an ellipsis", () => {
@@ -24,5 +24,16 @@ describe("martial maneuver labels", () => {
     expect(ids.size).toBeGreaterThanOrEqual(7);
     for (const id of ids) expect(LANG.martialEffects?.[id], `effect ${id}`).toBeTruthy();
     for (const l of MANEUVER_LISTS) expect(LANG.martialManeuverLists?.[l], l).toBeTruthy();
+  });
+  it("the B3 card, summary and breakdown keys exist", () => {
+    const ma = (enJson as unknown as { ADND2E: { chat: { martialArts: Record<string, unknown> } } }).ADND2E.chat.martialArts;
+    const mod = ma.mod as Record<string, unknown>;
+    expect(mod.maneuver, "mod.maneuver").toBeTruthy();
+    for (const key of [
+      "landed", "fell", "leapStanding", "leapRunning", "speedYes", "speedNo", "speedExtra", "speedOnce",
+      "levitationRate", "levitationDuration", "levitationRules",
+    ]) expect(typeof ma[key] === "string" && ma[key], key).toBeTruthy();
+    const sheet = (enJson as unknown as { ADND2E: { sheet: { martialArts: Record<string, unknown> } } }).ADND2E.sheet.martialArts;
+    expect(sheet.constants).toBeTruthy();
   });
 });
