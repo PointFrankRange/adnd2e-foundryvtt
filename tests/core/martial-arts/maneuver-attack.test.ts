@@ -50,3 +50,31 @@ describe("resolveManeuverAttack", () => {
     expect(() => resolveManeuverAttack({ ...base, maneuverId: "bogus:9" })).toThrow(RangeError);
   });
 });
+
+describe("B2 maneuver attacks", () => {
+  const input = {
+    maneuverId: "vitalArea:2", naturalD20: 15, thac0: 20, targetAc: 10, attackerArmorType: "none", opponentWeaponSize: null,
+    situationalModifier: 0, targetArmorGroup: "light" as const, styleDie: "1d4", level: 5, strengthAdj: 1,
+  };
+  it("a damage-less touch hits with no damage formula and applies its Table 21 modifier", () => {
+    const r = resolveManeuverAttack(input);
+    expect(r.penalties.table21).toBe(-2);
+    expect(r.hit).toBe(true);
+    expect(r.damageFormula).toBeNull();
+    expect(r.doubleDamageFormula).toBeNull();
+  });
+  it("Great Throw builds a multiplied formula", () => {
+    const r = resolveManeuverAttack({ ...input, maneuverId: "throw:4", naturalD20: 18 });
+    expect(r.damageFormula).toBe("(1d4+1)*2");
+  });
+  it("Distance Death exposes the double-damage formula on a hit only", () => {
+    const hit = resolveManeuverAttack({ ...input, maneuverId: "vitalArea:4", naturalD20: 15 });
+    expect(hit.damageFormula).toBeNull();
+    expect(hit.doubleDamageFormula).toBe("(1d4)*2");
+    const miss = resolveManeuverAttack({ ...input, maneuverId: "vitalArea:4", naturalD20: 2 });
+    expect(miss.doubleDamageFormula).toBeNull();
+  });
+  it("rejects a passive maneuver", () => {
+    expect(() => resolveManeuverAttack({ ...input, maneuverId: "throw:1" })).toThrow(RangeError);
+  });
+});

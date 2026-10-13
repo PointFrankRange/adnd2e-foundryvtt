@@ -51,6 +51,16 @@ export function buildMartialCardContext(input: MartialCardInput): MartialCardCon
   };
 }
 
+export interface CardEffect {
+  id: string;
+  labelKey: string;
+  saveKey: string;
+  saveMod: string;
+  condition: string | null;
+  rounds: string | null;
+  damage: number | null;
+}
+
 export interface ManeuverCardInput {
   actorName: string;
   actorImg: string;
@@ -61,6 +71,8 @@ export interface ManeuverCardInput {
   damageTotal: number;
   /** true when the active style has no damage die (weapon-method style); default false */
   styleDieIsNull?: boolean;
+  /** the rolled total of the Double Damage alternative, floored at 0 by the caller */
+  doubleDamageTotal?: number;
 }
 
 export interface ManeuverCardContext {
@@ -84,6 +96,8 @@ export interface ManeuverCardContext {
   noStyleDie: boolean;
   /** always blank: a maneuver is the result, so the Table 16 blow line is not shown */
   blowKey: string;
+  /** the effects a hit offers, each with its save line and apply data; empty on a miss or parry */
+  effects: CardEffect[];
 }
 
 const COST_KEY: Readonly<Record<string, string>> = { "0": "none", "1": "one", "2": "two", round: "round" };
@@ -98,6 +112,17 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
     ["ADND2E.chat.martialArts.mod.table21", r.penalties.table21],
   ];
   const parry = def.kind === "parry";
+  const effects: CardEffect[] = r.hit
+    ? (def.effects ?? []).map((e) => ({
+        id: e.id,
+        labelKey: `ADND2E.martialEffects.${e.id}`,
+        saveKey: e.save === null ? "" : e.save === 0 ? "ADND2E.chat.martialArts.save" : "ADND2E.chat.martialArts.saveAt",
+        saveMod: e.save === null || e.save === 0 ? "" : String(e.save),
+        condition: e.condition,
+        rounds: e.rounds,
+        damage: e.doubleDamage === true ? (input.doubleDamageTotal ?? 0) : null,
+      }))
+    : [];
   return {
     actorName: input.actorName,
     actorImg: input.actorImg,
@@ -119,5 +144,6 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
     stunTrigger: r.hit && r.stunTrigger,
     noStyleDie: def.kind === "attack" && def.ownDie === null && input.styleDieIsNull === true,
     blowKey: "",
+    effects,
   };
 }
