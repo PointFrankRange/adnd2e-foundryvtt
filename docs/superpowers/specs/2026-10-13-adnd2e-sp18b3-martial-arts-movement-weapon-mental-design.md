@@ -33,7 +33,7 @@ Automation depth (decided, option B): registry + roll cards for the roll-able on
 ### Registry field changes
 - `MANEUVER_LISTS` gains `movement`, `weapon`, `mental` (ids `movement:1` ... `mental:7`, matching the shipped styles' `availableManeuvers`).
 - `ManeuverDef.kind` gains `"skill"` and `"utility"`; new optional `basic?: boolean` (the maneuver resolves as the plain Table 16 attack) and `attackBonus?: number` (Feint +3).
-- A `constant: true`-style classification is derived by id: the constants the sheet summarizes are `mental:2`, `mental:3`, `mental:5`, `mental:6` plus the passives with text.
+- The panel's "Always in effect" summary lists exactly these known constants, in this order: All-Around Sight (`mental:2`), Mental Resistance (`mental:3`), Blind Fighting (`mental:5`), Ironskin (`mental:6`); every other passive keeps its own row text.
 
 ## Resolvers (pure)
 - **Leap:** `resolveLeap({ naturalD20, thac0, situationalModifier, level })` -> hit vs AC 10 via `hitResult`, plus `standing { up: 4 + level, forward: 3 + level }` and `running { up: 8 + level, forward: 10 + level }`.
