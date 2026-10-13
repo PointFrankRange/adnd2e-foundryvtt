@@ -118,3 +118,8 @@ export function parseConditionButton(data: { condition?: string; rounds?: string
   if (rounds === "") return { conditionId, roundsFormula: null };
   return /^[1-9]\d?d[1-9]\d?$/.test(rounds) ? { conditionId, roundsFormula: rounds } : null;
 }
+
+/** The actor uuid on a self-applying card button (`data-actor-uuid`), or null unless it is a bare "Actor.<16 chars>". */
+export function parseSelfActorUuid(raw: string | undefined | null): string | null {
+  return typeof raw === "string" && /^Actor\.[A-Za-z0-9]{16}$/.test(raw) ? raw : null;
+}

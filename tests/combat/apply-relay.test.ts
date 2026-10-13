@@ -7,6 +7,7 @@ import {
   hpDamageUpdate,
   hpHealingUpdate,
   parseConditionButton,
+  parseSelfActorUuid,
   relayEffectText,
   validateRelayRequest,
 } from "../../src/combat/apply-relay";
@@ -169,5 +170,16 @@ describe("relay hardening (SP18 B2 review)", () => {
   });
   it.each([{}, [3]])("rejects rounds %j", (rounds) => {
     expect(validateRelayRequest({ kind: "condition", targetUuid: t, conditionId: "stunned", rounds })).toBeNull();
+  });
+});
+
+describe("parseSelfActorUuid", () => {
+  it("accepts a bare actor uuid", () => {
+    expect(parseSelfActorUuid("Actor.AbCdEfGhIjKlMnOp")).toBe("Actor.AbCdEfGhIjKlMnOp");
+  });
+  it("rejects anything else", () => {
+    for (const bad of ["", "Token.xxx", "Actor.short", "Actor.AbCdEfGhIjKlMnOp.Item.abc", "../x", null, undefined]) {
+      expect(parseSelfActorUuid(bad)).toBeNull();
+    }
   });
 });

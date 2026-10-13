@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  blindFightingPenalty, ironskinAcMod, knownManeuverIds, levitationInfo, resolveLeap, resolveSpeed,
+  blindFightingPenalty, blindFightingTotal, ironskinAcMod, knownManeuverIds, levitationInfo, resolveLeap, resolveSpeed,
 } from "../../../src/core/martial-arts";
 
 describe("resolveLeap", () => {
@@ -55,5 +55,16 @@ describe("constant abilities", () => {
   it("knownManeuverIds unions the known ids across every style", () => {
     const ids = knownManeuverIds([{ knownManeuvers: [{ id: "mental:6" }] }, { knownManeuvers: [{ id: "kick:1" }, { id: "mental:6" }] }, {}]);
     expect([...ids].sort()).toEqual(["kick:1", "mental:6"]);
+  });
+});
+
+describe("blindFightingTotal", () => {
+  it("caps the combined blinded + invisible penalty once when known", () => {
+    expect(blindFightingTotal(-4, -4, true)).toBe(-1);
+    expect(blindFightingTotal(-4, 0, true)).toBe(-1);
+    expect(blindFightingTotal(0, 0, true)).toBe(0);
+  });
+  it("sums the penalties when not known", () => {
+    expect(blindFightingTotal(-4, -4, false)).toBe(-8);
   });
 });

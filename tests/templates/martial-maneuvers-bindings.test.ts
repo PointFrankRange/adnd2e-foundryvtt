@@ -105,7 +105,14 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
     expect(ACTIONS).toContain("resolveLeap");
     expect(ACTIONS).toContain("resolveSpeed");
     expect(ACTIONS).toContain("buildSkillCardContext");
-    expect(ACTIONS).toContain("blindFightingPenalty");
+    expect(ACTIONS).toContain("blindFightingTotal");
     expect(ACTIONS).toContain("wearingBodyArmor");
+  });
+  it("Leap's prone button applies to the speaker (SP18 B3 final review)", () => {
+    expect(CHAT).toContain("e.self");
+    expect(CHAT).toContain("data-actor-uuid");
+    expect(CHAT).toContain("appliesToYou");
+    expect(lookup("ADND2E.chat.martialArts.appliesToYou")).toBe("Applies to you.");
+    expect(read("src", "chat", "chat-listeners.ts")).toContain("parseSelfActorUuid");
   });
 });

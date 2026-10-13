@@ -30,7 +30,8 @@
           <strong>{{localize e.labelKey}}</strong>
           {{#if e.saveKey}} - {{localize e.saveKey mod=e.saveMod}}{{/if}}
           {{#if e.condition}}
-            <button type="button" data-action="applyCondition" data-condition="{{e.condition}}" data-rounds="{{e.rounds}}">{{localize 'ADND2E.chat.martialArts.applyPrefix'}} {{localize e.labelKey}}{{#if e.rounds}} ({{e.rounds}}){{/if}}</button>
+            <button type="button" data-action="applyCondition" data-condition="{{e.condition}}" data-rounds="{{e.rounds}}"{{#if e.self}} data-actor-uuid="{{@root.actorUuid}}"{{/if}}>{{localize 'ADND2E.chat.martialArts.applyPrefix'}} {{localize e.labelKey}}{{#if e.rounds}} ({{e.rounds}}){{/if}}</button>
+            {{#if e.self}}<span class="hint">{{localize 'ADND2E.chat.martialArts.appliesToYou'}}</span>{{/if}}
             {{#if e.deferred}}<span class="hint">{{localize 'ADND2E.chat.martialArts.whenHoldEnds'}}</span>{{/if}}
           {{/if}}
           {{#if e.damage}}

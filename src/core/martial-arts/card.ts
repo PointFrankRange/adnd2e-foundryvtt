@@ -62,6 +62,8 @@ export interface CardEffect {
   damage: number | null;
   /** applied later (e.g. when a hold ends), not on the hit */
   deferred: boolean;
+  /** the condition button applies to the card's speaker (e.g. a leaper who falls), not to the targeted tokens */
+  self: boolean;
 }
 
 export interface ManeuverCardInput {
@@ -101,6 +103,8 @@ export interface ManeuverCardContext {
   blowKey: string;
   /** the effects a hit offers, each with its save line and apply data; empty on a miss or parry */
   effects: CardEffect[];
+  /** the speaker's actor uuid, used by a self-applying effect button; blank on cards that have none */
+  actorUuid: string;
 }
 
 const COST_KEY: Readonly<Record<string, string>> = { "0": "none", "1": "one", "2": "two", round: "round" };
@@ -126,6 +130,7 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
         rounds: e.rounds,
         damage: e.doubleDamage === true ? (input.doubleDamageTotal ?? 0) : null,
         deferred: e.deferred === true,
+        self: false,
       }))
     : [];
   return {
@@ -150,6 +155,7 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
     noStyleDie: def.kind === "attack" && def.ownDie === null && def.basic !== true && def.noDamage !== true && input.styleDieIsNull === true,
     blowKey: r.blow ? `ADND2E.martialBlows.${r.blow}` : "",
     effects,
+    actorUuid: "",
   };
 }
 
@@ -166,14 +172,14 @@ export interface SkillCardContext extends ManeuverCardContext {
   noRoll: boolean;
 }
 
-export type SkillCardInput = { actorName: string; actorImg: string; styleName: string; maneuverId: string } & (
+export type SkillCardInput = { actorName: string; actorImg: string; actorUuid: string; styleName: string; maneuverId: string } & (
   | { skill: "leap"; result: LeapResult }
   | { skill: "speed"; result: SpeedResult }
   | { skill: "levitation"; level: number }
 );
 
 const PRONE_EFFECT: CardEffect = {
-  id: "prone", labelKey: "ADND2E.martialEffects.prone", saveKey: "", saveMod: "", condition: "prone", rounds: null, damage: null, deferred: false,
+  id: "prone", labelKey: "ADND2E.martialEffects.prone", saveKey: "", saveMod: "", condition: "prone", rounds: null, damage: null, deferred: false, self: true,
 };
 
 export function buildSkillCardContext(input: SkillCardInput): SkillCardContext {
@@ -198,6 +204,7 @@ export function buildSkillCardContext(input: SkillCardInput): SkillCardContext {
     noStyleDie: false,
     blowKey: "",
     effects: [],
+    actorUuid: input.actorUuid,
     lines: [],
     noRoll: false,
   };

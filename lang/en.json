@@ -970,6 +970,7 @@
         "save": "Target saves vs. paralyzation",
         "saveAt": "Target saves vs. paralyzation at {mod}",
         "applyPrefix": "Apply",
+        "appliesToYou": "Applies to you.",
         "roundsRoll": "Duration in rounds",
         "whenHoldEnds": "Press when the hold ends and the victim has not escaped.",
         "landed": "Landed safely",

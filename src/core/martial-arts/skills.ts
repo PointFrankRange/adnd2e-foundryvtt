@@ -58,6 +58,12 @@ export function blindFightingPenalty(penalty: number): number {
   return Math.max(penalty, -1);
 }
 
+/** The blinded and invisible-target penalties combined: with Blind Fighting the SUM is capped once at -1. */
+export function blindFightingTotal(blinded: number, invisible: number, known: boolean): number {
+  const sum = blinded + invisible;
+  return known ? blindFightingPenalty(sum) : sum;
+}
+
 /** Every maneuver id known on any of the given styles (constant abilities are not limited to the active style). */
 export function knownManeuverIds(styles: readonly { knownManeuvers?: readonly { id: string }[] }[]): Set<string> {
   return new Set(styles.flatMap((s) => (s.knownManeuvers ?? []).map((k) => k.id)));

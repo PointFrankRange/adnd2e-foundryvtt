@@ -3,7 +3,7 @@ import { pickDamageDice } from "../combat/damage-dice";
 import { damageModifiers } from "../core/combat/damage";
 import { damageFormula } from "../core/dice/formula";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../constants";
-import { parseConditionButton } from "../combat/apply-relay";
+import { parseConditionButton, parseSelfActorUuid } from "../combat/apply-relay";
 import { requestApply } from "../relay/relay-client";
 import { rerenderContestCards, rerenderWildCards } from "../hooks/psionic-hooks";
 import { applyContestTangents, recordButtonState, rollDefense, type ContestFlag } from "../sheets/character/psionic-combat";
@@ -112,8 +112,17 @@ async function onApplyDamage(button: HTMLButtonElement): Promise<void> {
 async function onApplyCondition(button: HTMLButtonElement): Promise<void> {
   const parsed = parseConditionButton(button.dataset as { condition?: string; rounds?: string });
   if (!parsed) return;
-  const targets = [...(game as unknown as { user: { targets: Iterable<{ actor: unknown }> } }).user.targets];
-  if (targets.length === 0) {
+  // a self-applying button (Leap's fall) acts on the speaker's actor, never on the targeted tokens
+  const rawSelf = button.dataset.actorUuid ?? "";
+  const selfUuid = parseSelfActorUuid(rawSelf);
+  if (rawSelf !== "" && selfUuid === null) return;
+  let self: (EffectTarget & { uuid: string; isOwner: boolean }) | null = null;
+  if (selfUuid !== null) {
+    self = (foundry.utils.fromUuidSync(selfUuid as never) as (EffectTarget & { uuid: string; isOwner: boolean }) | null) ?? null;
+    if (!self) return;
+  }
+  const targets = self ? [] : [...(game as unknown as { user: { targets: Iterable<{ actor: unknown }> } }).user.targets];
+  if (!self && targets.length === 0) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.damage.noTargetsWarning"));
     return;
   }
@@ -123,8 +132,8 @@ async function onApplyCondition(button: HTMLButtonElement): Promise<void> {
     rounds = Math.min(99, Math.max(1, roll.total ?? 1));
     await roll.toMessage({ flavor: game.i18n!.localize("ADND2E.chat.martialArts.roundsRoll") } as never);
   }
-  for (const t of targets) {
-    const actor = t.actor as (EffectTarget & { uuid: string; isOwner: boolean }) | null;
+  const recipients = self ? [self] : targets.map((t) => t.actor as (EffectTarget & { uuid: string; isOwner: boolean }) | null);
+  for (const actor of recipients) {
     if (!actor) continue;
     await requestApply(actor, {
       kind: "condition", targetUuid: actor.uuid, conditionId: parsed.conditionId, ...(rounds === undefined ? {} : { rounds }),
