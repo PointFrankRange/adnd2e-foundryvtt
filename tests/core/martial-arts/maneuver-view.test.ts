@@ -17,9 +17,9 @@ const base = { enabled: true, knowsBasics: true, storedActiveId: "", canAct: tru
 const rowsOf = (v: ReturnType<typeof buildMartialArtsView>) => Object.fromEntries(v.styles[0]!.maneuvers.map((m) => [m.id, m]));
 
 describe("maneuver rows", () => {
-  it("lists only registry maneuvers the style offers (mental is not in B1) with their states", () => {
+  it("lists only registry maneuvers the style offers with their states", () => {
     const rows = rowsOf(buildMartialArtsView({ ...base, items: [karate()] }));
-    expect(Object.keys(rows).sort()).toEqual(["block:1", "block:2", "kick:1", "strike:1", "strike:2", "strike:3"]);
+    expect(Object.keys(rows).sort()).toEqual(["block:1", "block:2", "kick:1", "mental:1", "mental:4", "strike:1", "strike:2", "strike:3"]);
     expect(rows["strike:1"]).toMatchObject({
       state: "learnable", usable: false, nameKey: "ADND2E.martialManeuvers.ironFist", listKey: "ADND2E.martialManeuverLists.strike",
       costKey: "ADND2E.martialManeuverCosts.none", kind: "attack", difficulty: 1, reasonKey: "",

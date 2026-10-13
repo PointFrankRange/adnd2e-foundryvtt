@@ -1,6 +1,6 @@
 // The PC sheet's Martial Arts panel view. Pure: Foundry glue passes plain item data in.
 import { resolveActiveStyleId, styleStats, type StyleForm, type StyleMethod } from "./style";
-import { MANEUVERS, learnability, type ManeuverCost } from "./maneuvers";
+import { MANEUVERS, learnability, type ManeuverCost, type ManeuverDef } from "./maneuvers";
 
 export interface StyleItemLike {
   id: string;
@@ -22,7 +22,7 @@ export interface ManeuverRow {
   listKey: string;
   difficulty: number;
   costKey: string;
-  kind: "parry" | "attack" | "passive";
+  kind: ManeuverDef["kind"];
   state: "known" | "learnable" | "locked";
   /** why a locked maneuver cannot be learned (i18n key); blank otherwise */
   reasonKey: string;
