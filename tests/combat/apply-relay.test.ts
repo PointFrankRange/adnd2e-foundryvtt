@@ -6,6 +6,7 @@ import {
   RELAY_QUERY,
   hpDamageUpdate,
   hpHealingUpdate,
+  parseConditionButton,
   relayEffectText,
   validateRelayRequest,
 } from "../../src/combat/apply-relay";
@@ -13,7 +14,7 @@ import {
 describe("constants", () => {
   it("pins the query name, conditions and apply modes", () => {
     expect(RELAY_QUERY).toBe("adnd2e.applyEffect");
-    expect([...RELAY_CONDITIONS]).toEqual(["stunned", "prone", "held", "turned"]);
+    expect([...RELAY_CONDITIONS]).toEqual(["stunned", "prone", "held", "turned", "paralyzed", "unconscious"]);
     expect([...PLAYER_APPLY_MODES]).toEqual(["auto", "approve"]);
     expect(DEFAULT_PLAYER_APPLY_MODE).toBe("auto");
   });
@@ -112,5 +113,61 @@ describe("validateRelayRequest - grapple", () => {
   });
   it("names the effect for the GM log", () => {
     expect(relayEffectText({ kind: "grapple", targetUuid: "Actor.t", set: null, damage: 0, prone: false }).key).toBe("ADND2E.relay.effect.grapple");
+  });
+});
+
+describe("relay conditions with a duration (SP18 B2)", () => {
+  const t = "Scene.a.Token.b.Actor.c";
+  it("accepts paralyzed and unconscious", () => {
+    for (const conditionId of ["paralyzed", "unconscious"]) {
+      expect(validateRelayRequest({ kind: "condition", targetUuid: t, conditionId })).toEqual({ kind: "condition", targetUuid: t, conditionId });
+    }
+  });
+  it("accepts an integer rounds between 1 and 99 and carries it", () => {
+    expect(validateRelayRequest({ kind: "condition", targetUuid: t, conditionId: "stunned", rounds: 3 })).toEqual({
+      kind: "condition", targetUuid: t, conditionId: "stunned", rounds: 3,
+    });
+    expect(validateRelayRequest({ kind: "condition", targetUuid: t, conditionId: "paralyzed", rounds: 99 })).toMatchObject({ rounds: 99 });
+  });
+  it.each([0, -1, 100, 2.5, "3", null, NaN])("rejects rounds %s", (rounds) => {
+    expect(validateRelayRequest({ kind: "condition", targetUuid: t, conditionId: "stunned", rounds })).toBeNull();
+  });
+  it("a condition request without rounds has no rounds key", () => {
+    expect(validateRelayRequest({ kind: "condition", targetUuid: t, conditionId: "prone" })).toEqual({
+      kind: "condition", targetUuid: t, conditionId: "prone",
+    });
+  });
+});
+
+describe("parseConditionButton", () => {
+  it("parses a condition with a dice formula or none", () => {
+    expect(parseConditionButton({ condition: "stunned", rounds: "1d4" })).toEqual({ conditionId: "stunned", roundsFormula: "1d4" });
+    expect(parseConditionButton({ condition: "held", rounds: "" })).toEqual({ conditionId: "held", roundsFormula: null });
+    expect(parseConditionButton({ condition: "unconscious" })).toEqual({ conditionId: "unconscious", roundsFormula: null });
+  });
+  it("rejects an unknown condition or a malformed formula", () => {
+    expect(parseConditionButton({ condition: "dead", rounds: "1d4" })).toBeNull();
+    expect(parseConditionButton({})).toBeNull();
+    expect(parseConditionButton({ condition: "stunned", rounds: "1d4+999" })).toBeNull();
+    expect(parseConditionButton({ condition: "stunned", rounds: "banana" })).toBeNull();
+    expect(parseConditionButton({ condition: "stunned", rounds: "0d4" })).toBeNull();
+  });
+});
+
+describe("relay hardening (SP18 B2 review)", () => {
+  const t = "Scene.a.Token.b.Actor.c";
+  it("rejects padded or oversized duration formulas on the card button", () => {
+    for (const rounds of ["01d4", " 1d4", "1d4 ", "100d4"]) {
+      expect(parseConditionButton({ condition: "stunned", rounds }), rounds).toBeNull();
+    }
+  });
+  it("a stray rounds on damage, healing, unequip or destroy is not carried", () => {
+    expect(validateRelayRequest({ kind: "damage", targetUuid: t, amount: 3, rounds: 2 })).toEqual({ kind: "damage", targetUuid: t, amount: 3 });
+    expect(validateRelayRequest({ kind: "healing", targetUuid: t, amount: 3, rounds: 2 })).toEqual({ kind: "healing", targetUuid: t, amount: 3 });
+    expect(validateRelayRequest({ kind: "unequip", targetUuid: t, itemId: "i1", rounds: 2 })).not.toHaveProperty("rounds");
+    expect(validateRelayRequest({ kind: "destroy", targetUuid: t, rounds: 2 })).not.toHaveProperty("rounds");
+  });
+  it.each([{}, [3]])("rejects rounds %j", (rounds) => {
+    expect(validateRelayRequest({ kind: "condition", targetUuid: t, conditionId: "stunned", rounds })).toBeNull();
   });
 });

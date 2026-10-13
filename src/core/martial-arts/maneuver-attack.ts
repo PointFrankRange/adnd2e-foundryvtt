@@ -1,7 +1,7 @@
 // One special-maneuver attack: to-hit with the Table 21 modifier plus the damage formula. Pure.
 import { hitResult } from "../combat/attack";
 import { armorAttackPenalty, weaponSizePenalty } from "./modifiers";
-import { maneuverById, maneuverDamageFormula, table21Modifier, type ArmorGroup } from "./maneuvers";
+import { doubleBasicDamageFormula, maneuverById, maneuverDamageFormula, table21Modifier, type ArmorGroup } from "./maneuvers";
 
 export interface ManeuverAttackInput {
   maneuverId: string;
@@ -31,6 +31,8 @@ export interface ManeuverAttackResult {
   penalties: { armor: number; weaponSize: number; situational: number; table21: number };
   /** the dice expression to roll on a hit; null for a parry or a miss */
   damageFormula: string | null;
+  /** the Double Damage alternative's dice, set on a hit when the maneuver offers one */
+  doubleDamageFormula: string | null;
   /** an unmodified 20 with an attack maneuver */
   stunTrigger: boolean;
 }
@@ -38,6 +40,7 @@ export interface ManeuverAttackResult {
 export function resolveManeuverAttack(input: ManeuverAttackInput): ManeuverAttackResult {
   const def = maneuverById(input.maneuverId);
   if (!def) throw new RangeError(`unknown martial arts maneuver "${input.maneuverId}"`);
+  if (def.kind === "passive") throw new RangeError(`maneuver "${input.maneuverId}" is always in effect and cannot be used`);
   const penalties = {
     armor: armorAttackPenalty(input.attackerArmorType),
     weaponSize: weaponSizePenalty(input.opponentWeaponSize),
@@ -56,6 +59,7 @@ export function resolveManeuverAttack(input: ManeuverAttackInput): ManeuverAttac
     attackBonus,
     penalties,
     damageFormula: hit ? maneuverDamageFormula(def, { styleDie: input.styleDie, level: input.level, strengthAdj: input.strengthAdj }) : null,
+    doubleDamageFormula: hit && (def.effects ?? []).some((e) => e.doubleDamage === true) ? doubleBasicDamageFormula(input.styleDie) : null,
     stunTrigger: def.kind === "attack" && input.naturalD20 === 20,
   };
 }

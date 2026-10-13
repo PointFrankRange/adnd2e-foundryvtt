@@ -178,6 +178,7 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
   if (!view.canAct) return warn("ADND2E.chat.attack.cannotActWarning");
   const row = view.active.maneuvers.find((m) => m.id === maneuverId);
   if (!maneuverById(maneuverId) || row?.state !== "known") return warn("ADND2E.sheet.martialArts.notKnown");
+  if (row.kind === "passive") return warn("ADND2E.sheet.martialArts.passive");
   const target = await resolveTarget();
   if (!target) return;
 
@@ -198,8 +199,11 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
   });
   let damageTotal = 0;
   if (result.damageFormula) damageTotal = Math.max(0, (await new Roll(result.damageFormula).evaluate()).total ?? 0);
+  let doubleDamageTotal = 0;
+  if (result.doubleDamageFormula) doubleDamageTotal = Math.max(0, (await new Roll(result.doubleDamageFormula).evaluate()).total ?? 0);
   const context = buildManeuverCardContext({
     actorName: actor.name, actorImg: actor.img, styleName: view.active.name, targetName: target.targetName, result, damageTotal,
+    doubleDamageTotal,
     styleDieIsNull: view.active.damageDie === null,
   });
   await postCard(actor, roll, "chat/martial-arts-attack.hbs", context);

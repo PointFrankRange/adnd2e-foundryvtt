@@ -57,3 +57,20 @@ describe("maneuver rows", () => {
     expect(v.styles[0]!.maneuvers).toEqual([]);
   });
 });
+
+describe("passive maneuvers (SP18 B2)", () => {
+  it("Fall and Instant Stand are learnable rows with kind passive and are never usable", () => {
+    const item: StyleItemLike = {
+      id: "judo", name: "Judo", img: "", type: "martialStyle",
+      system: {
+        form: "soft", principalMethod: "throw", slotsInvested: 2,
+        availableManeuvers: [{ list: "throw", difficulties: [1, 2] }],
+        knownManeuvers: [{ id: "throw:1", level: 1 }],
+      },
+    };
+    const v = buildMartialArtsView({ enabled: true, knowsBasics: true, storedActiveId: "", canAct: true, level: 3, freeSlots: 2, items: [item] });
+    const rows = Object.fromEntries(v.styles[0]!.maneuvers.map((m) => [m.id, m]));
+    expect(rows["throw:1"]).toMatchObject({ kind: "passive", state: "known", usable: false });
+    expect(rows["throw:2"]).toMatchObject({ kind: "passive", state: "learnable", usable: false });
+  });
+});

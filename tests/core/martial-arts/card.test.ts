@@ -34,11 +34,12 @@ describe("buildMartialCardContext", () => {
   });
 });
 
+const attackInput = {
+  maneuverId: "kick:1", naturalD20: 12, thac0: 20, targetAc: 10, attackerArmorType: "none", opponentWeaponSize: null,
+  situationalModifier: 0, targetArmorGroup: "mail" as const, styleDie: "1d4", level: 5, strengthAdj: 1,
+};
+
 describe("buildManeuverCardContext", () => {
-  const attackInput = {
-    maneuverId: "kick:1", naturalD20: 12, thac0: 20, targetAc: 10, attackerArmorType: "none", opponentWeaponSize: null,
-    situationalModifier: 0, targetArmorGroup: "mail" as const, styleDie: "1d4", level: 5, strengthAdj: 1,
-  };
   it("an attack maneuver hit shows its name, cost, modifiers, formula, damage and effect text", () => {
     const ctx = buildManeuverCardContext({
       actorName: "Akira", actorImg: "a.png", styleName: "Karate", targetName: "Ogre",
@@ -97,5 +98,44 @@ describe("buildManeuverCardContext", () => {
       result: resolveManeuverAttack({ ...attackInput, maneuverId: "strike:1", naturalD20: 14 }), damageTotal: 5,
     });
     expect(none.costKey).toBe("ADND2E.martialManeuverCosts.none");
+  });
+});
+
+describe("maneuver card effects (SP18 B2)", () => {
+  const base = { ...attackInput, targetArmorGroup: "light" as const };
+  const card = (maneuverId: string, naturalD20 = 15, extra: Record<string, unknown> = {}) =>
+    buildManeuverCardContext({
+      actorName: "A", actorImg: "", styleName: "S", targetName: "Ogre",
+      result: resolveManeuverAttack({ ...base, maneuverId, naturalD20 }), damageTotal: 0, ...extra,
+    });
+
+  it("lists a condition effect with its save line and button data", () => {
+    const e = card("vitalArea:3").effects;
+    expect(e).toEqual([{
+      id: "paralyzed", labelKey: "ADND2E.martialEffects.paralyzed", saveKey: "ADND2E.chat.martialArts.saveAt", saveMod: "-2",
+      condition: "paralyzed", rounds: "2d4", damage: null, deferred: false,
+    }]);
+  });
+  it("Choke Hold's unconscious effect is deferred; an immediate effect is not", () => {
+    expect(card("lock:1").effects[0]).toMatchObject({ id: "unconscious", condition: "unconscious", deferred: true });
+    expect(card("vitalArea:2").effects[0]).toMatchObject({ condition: "stunned", deferred: false });
+  });
+  it("a zero save modifier uses the plain save line; no save has none", () => {
+    expect(card("vitalArea:2").effects[0]).toMatchObject({ saveKey: "ADND2E.chat.martialArts.save", saveMod: "", condition: "stunned", rounds: "1d4" });
+    expect(card("throw:3").effects[0]).toMatchObject({ saveKey: "", saveMod: "", condition: "prone", rounds: null });
+  });
+  it("a non-condition effect has no button data", () => {
+    expect(card("lock:3").effects[0]).toMatchObject({ id: "limbUseless", condition: null, rounds: null, saveKey: "ADND2E.chat.martialArts.save" });
+  });
+  it("Distance Death lists four alternatives and the double-damage one carries its rolled total", () => {
+    const e = card("vitalArea:4", 15, { doubleDamageTotal: 6 }).effects;
+    expect(e.map((x) => x.id)).toEqual(["pain", "stunned", "paralyzed", "doubleDamage"]);
+    expect(e[1]).toMatchObject({ saveKey: "ADND2E.chat.martialArts.saveAt", saveMod: "-2" });
+    expect(e[2]).toMatchObject({ saveMod: "-4" });
+    expect(e[3]).toMatchObject({ damage: 6, condition: null });
+  });
+  it("a miss and a parry show no effects", () => {
+    expect(card("vitalArea:3", 2).effects).toEqual([]);
+    expect(card("block:1", 15).effects).toEqual([]);
   });
 });

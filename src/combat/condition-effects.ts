@@ -109,8 +109,9 @@ export const CONDITION_DURATION_ROUNDS: Readonly<Record<string, number>> = { stu
 export function conditionDuration(
   conditionId: string,
   targetHasActed: boolean,
+  rounds?: number,
 ): { value: number; units: "rounds"; expiry: "turnStart" | "turnEnd" } | null {
-  const value = CONDITION_DURATION_ROUNDS[conditionId];
+  const value = rounds ?? CONDITION_DURATION_ROUNDS[conditionId];
   if (value === undefined) return null;
   return { value, units: "rounds", expiry: targetHasActed ? "turnEnd" : "turnStart" };
 }

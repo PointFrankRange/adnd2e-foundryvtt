@@ -200,6 +200,11 @@
   }
 }
 
-// SP16: kit power rows put the name, uses, scope and each param in adjacent inline spans with no whitespace between
-// them (the params ran together: "habitats: desertcategories: ..."); give the spans room.
-.adnd2e.pc-sheet .power-row > span + span { margin-left: 8px; }
+// SP16/SP18: power and maneuver rows hold a name, adjacent inline spans and a button. A wrapping flex row keeps the
+// button inline after the text (no stray line break) and gives the spans room without per-span margins.
+.adnd2e.pc-sheet .power-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 8px;
+}

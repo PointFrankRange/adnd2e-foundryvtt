@@ -22,7 +22,7 @@ export interface ManeuverRow {
   listKey: string;
   difficulty: number;
   costKey: string;
-  kind: "parry" | "attack";
+  kind: "parry" | "attack" | "passive";
   state: "known" | "learnable" | "locked";
   /** why a locked maneuver cannot be learned (i18n key); blank otherwise */
   reasonKey: string;
@@ -89,7 +89,7 @@ export function buildMartialArtsView(input: {
           kind: m.kind,
           state: isKnown ? "known" : verdict.ok ? "learnable" : "locked",
           reasonKey: isKnown || verdict.ok ? "" : `ADND2E.sheet.martialArts.locked.${verdict.reason}`,
-          usable: isKnown && isActive && input.canAct,
+          usable: isKnown && isActive && input.canAct && m.kind !== "passive",
         };
       },
     );

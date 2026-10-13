@@ -17,6 +17,23 @@
   {{#if hit}}
     {{#if blowKey}}<p class="formula">{{localize blowKey}} — {{localize 'ADND2E.chat.martialArts.damage' damage=damage}}</p>{{/if}}
     {{#if formula}}<p class="formula">{{formula}} = <strong>{{damage}}</strong> {{localize 'ADND2E.chat.martialArts.hp'}}</p>{{/if}}
+    {{#if effects.length}}
+      <ul class="modifiers">
+        {{#each effects as |e|}}
+          <li>
+            <strong>{{localize e.labelKey}}</strong>
+            {{#if e.saveKey}} - {{localize e.saveKey mod=e.saveMod}}{{/if}}
+            {{#if e.condition}}
+              <button type="button" data-action="applyCondition" data-condition="{{e.condition}}" data-rounds="{{e.rounds}}">{{localize 'ADND2E.chat.martialArts.applyPrefix'}} {{localize e.labelKey}}{{#if e.rounds}} ({{e.rounds}}){{/if}}</button>
+              {{#if e.deferred}}<span class="hint">{{localize 'ADND2E.chat.martialArts.whenHoldEnds'}}</span>{{/if}}
+            {{/if}}
+            {{#if e.damage}}
+              <button type="button" data-action="applyDamage" data-amount="{{e.damage}}">{{localize 'ADND2E.chat.damage.applyToTargets'}} ({{e.damage}})</button>
+            {{/if}}
+          </li>
+        {{/each}}
+      </ul>
+    {{/if}}
     {{#if stunTrigger}}<p class="hint">{{localize 'ADND2E.chat.martialArts.stun'}}</p>{{/if}}
     {{#if damage}}<button type="button" data-action="applyDamage" data-amount="{{damage}}">{{localize 'ADND2E.chat.damage.applyToTargets'}}</button>{{/if}}
   {{/if}}

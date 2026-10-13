@@ -118,6 +118,11 @@ describe("conditionDuration (#94)", () => {
   it("leaves prone, held and every other condition indefinite", () => {
     for (const id of ["prone", "held", "turned", "blinded"]) expect(conditionDuration(id, true)).toBeNull();
   });
+  it("an explicit rounds value overrides the table and any persistent condition becomes timed", () => {
+    expect(conditionDuration("stunned", false, 3)).toEqual({ value: 3, units: "rounds", expiry: "turnStart" });
+    expect(conditionDuration("paralyzed", true, 5)).toEqual({ value: 5, units: "rounds", expiry: "turnEnd" });
+    expect(conditionDuration("unconscious", true)).toBeNull();
+  });
 });
 
 describe("contestAllowed", () => {

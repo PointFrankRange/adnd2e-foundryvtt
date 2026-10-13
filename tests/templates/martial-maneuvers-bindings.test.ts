@@ -69,4 +69,25 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
     expect(ACTIONS).toContain("themedPrompt");
     expect(ACTIONS).not.toContain("DialogV2");
   });
+  it("the card renders effects with a condition button and a damage button, and the listener is registered", () => {
+    expect(CHAT).toContain('data-action="applyCondition"');
+    expect(CHAT).toContain("data-condition=");
+    expect(CHAT).toContain("data-rounds=");
+    expect(CHAT).toContain("effects");
+    const LISTENERS = read("src", "chat", "chat-listeners.ts");
+    expect(LISTENERS).toContain('[data-action="applyCondition"]');
+    expect(LISTENERS).toContain("parseConditionButton");
+  });
+  it("the panel shows passive maneuvers without a Use button", () => {
+    expect(MAIN).toContain("m.kind 'passive'");
+    expect(MAIN).toContain("ADND2E.sheet.martialArts.passive");
+  });
+  it("the new card and sheet keys exist in lang/en.json", () => {
+    for (const key of [
+      "ADND2E.chat.martialArts.save", "ADND2E.chat.martialArts.saveAt", "ADND2E.chat.martialArts.applyPrefix",
+      "ADND2E.chat.martialArts.roundsRoll", "ADND2E.sheet.martialArts.passive",
+      "ADND2E.chat.martialArts.whenHoldEnds",
+    ]) expect(typeof lookup(key), key).toBe("string");
+    expect(CHAT).toContain("e.deferred");
+  });
 });
