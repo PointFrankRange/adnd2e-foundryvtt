@@ -1,6 +1,7 @@
 // The PC sheet's Martial Arts panel view. Pure: Foundry glue passes plain item data in.
 import { resolveActiveStyleId, styleStats, type StyleForm, type StyleMethod } from "./style";
 import { MANEUVERS, learnability, type ManeuverCost, type ManeuverDef } from "./maneuvers";
+import { ironskinAcMod, knownManeuverIds } from "./skills";
 
 export interface StyleItemLike {
   id: string;
@@ -48,6 +49,17 @@ export interface StyleRow {
   maneuvers: ManeuverRow[];
 }
 
+/** The always-on abilities known on any owned style. */
+export interface MartialConstants {
+  allAroundSight: boolean;
+  mentalResistance: boolean;
+  blindFighting: boolean;
+  ironskin: boolean;
+  /** -2 while Ironskin is known and no body armor is worn; else 0 */
+  ironskinAcMod: number;
+  summary: { nameKey: string; effectKey: string }[];
+}
+
 export interface MartialArtsView {
   visible: boolean;
   knowsBasics: boolean;
@@ -55,6 +67,7 @@ export interface MartialArtsView {
   canAttack: boolean;
   styles: StyleRow[];
   active: StyleRow | null;
+  constants: MartialConstants;
 }
 
 export function buildMartialArtsView(input: {
@@ -65,6 +78,7 @@ export function buildMartialArtsView(input: {
   canAct: boolean;
   level?: number;
   freeSlots?: number;
+  wearingBodyArmor?: boolean;
 }): MartialArtsView {
   const owned = [...input.items].filter((i) => i.type === "martialStyle");
   const activeId = resolveActiveStyleId(owned.map((i) => i.id), input.storedActiveId);
@@ -108,6 +122,20 @@ export function buildMartialArtsView(input: {
     };
   });
   const active = styles.find((s) => s.active) ?? null;
+  const knownIds = knownManeuverIds(owned.map((i) => ({ knownManeuvers: i.system.knownManeuvers })));
+  const ironskin = knownIds.has("mental:6");
+  const SUMMARY: [string, string][] = [["mental:2", "allAroundSight"], ["mental:3", "mentalResistance"], ["mental:5", "blindFighting"], ["mental:6", "ironskin"]];
+  const constants: MartialConstants = {
+    allAroundSight: knownIds.has("mental:2"),
+    mentalResistance: knownIds.has("mental:3"),
+    blindFighting: knownIds.has("mental:5"),
+    ironskin,
+    ironskinAcMod: ironskinAcMod(ironskin, input.wearingBodyArmor ?? false),
+    summary: SUMMARY.filter(([id]) => knownIds.has(id)).map(([, slug]) => ({
+      nameKey: `ADND2E.martialManeuvers.${slug}`,
+      effectKey: `ADND2E.martialManeuverEffects.${slug}`,
+    })),
+  };
   return {
     visible: input.enabled,
     knowsBasics: input.knowsBasics,
@@ -115,5 +143,6 @@ export function buildMartialArtsView(input: {
     canAttack: input.canAct && active !== null,
     styles,
     active,
+    constants,
   };
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildManeuverCardContext, buildMartialCardContext, resolveManeuverAttack, resolveMartialAttack } from "../../../src/core/martial-arts";
+import { buildManeuverCardContext, buildMartialCardContext, buildSkillCardContext, resolveLeap, resolveManeuverAttack, resolveMartialAttack, resolveSpeed } from "../../../src/core/martial-arts";
 
 // needed = 18 - 10 = 8; bonus = -1 (armor) -4 (weapon) -1 (situational) = -6; total = 14 - 6 = 8 → a hit
 const input = { naturalD20: 14, thac0: 18, targetAc: 10, attackerArmorType: "studded-leather", opponentWeaponSize: "L", situationalModifier: -1, strengthDamageAdj: 1 };
@@ -137,5 +137,69 @@ describe("maneuver card effects (SP18 B2)", () => {
   it("a miss and a parry show no effects", () => {
     expect(card("vitalArea:3", 2).effects).toEqual([]);
     expect(card("block:1", 15).effects).toEqual([]);
+  });
+});
+
+describe("Feint and skill cards (SP18 B3)", () => {
+  const feint = {
+    maneuverId: "movement:1", naturalD20: 14, thac0: 20, targetAc: 10, attackerArmorType: "none", opponentWeaponSize: null,
+    situationalModifier: 0, targetArmorGroup: "none" as const, styleDie: "1d4", level: 5, strengthAdj: 1,
+  };
+  it("a Feint card shows the blow, a +3 maneuver row and costs 2 attacks, with no separate formula", () => {
+    const ctx = buildManeuverCardContext({
+      actorName: "A", actorImg: "", styleName: "S", targetName: null, result: resolveManeuverAttack(feint), damageTotal: 3,
+    });
+    expect(ctx.blowKey).toBe("ADND2E.martialBlows.vitalsPunch");
+    expect(ctx.costKey).toBe("ADND2E.martialManeuverCosts.two");
+    expect(ctx.breakdown).toEqual([{ labelKey: "ADND2E.chat.martialArts.mod.maneuver", amount: 3 }]);
+    expect(ctx.formula).toBe("");
+    expect(ctx.damage).toBe(3);
+  });
+  it("a Leap card prints both distances and offers Prone on a failed landing", () => {
+    const landed = buildSkillCardContext({
+      actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:4", skill: "leap",
+      result: resolveLeap({ naturalD20: 15, thac0: 20, situationalModifier: 0, level: 10 }),
+    });
+    expect(landed.noRoll).toBe(false);
+    expect(landed.hit).toBe(true);
+    expect(landed.resultKey).toBe("ADND2E.chat.martialArts.landed");
+    expect(landed.lines).toEqual([
+      { key: "ADND2E.chat.martialArts.leapStanding", n1: 14, n2: 13 },
+      { key: "ADND2E.chat.martialArts.leapRunning", n1: 18, n2: 20 },
+    ]);
+    expect(landed.effects).toEqual([]);
+    const fell = buildSkillCardContext({
+      actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:4", skill: "leap",
+      result: resolveLeap({ naturalD20: 3, thac0: 20, situationalModifier: 0, level: 10 }),
+    });
+    expect(fell.resultKey).toBe("ADND2E.chat.martialArts.fell");
+    expect(fell.effects).toEqual([{
+      id: "prone", labelKey: "ADND2E.martialEffects.prone", saveKey: "", saveMod: "", condition: "prone", rounds: null, damage: null, deferred: false,
+    }]);
+  });
+  it("a Speed card reports the extra attacks, or none on a failure", () => {
+    const ok = buildSkillCardContext({
+      actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:5", skill: "speed", result: resolveSpeed({ naturalD20: 4, dexterity: 13 }),
+    });
+    expect(ok.resultKey).toBe("ADND2E.chat.martialArts.speedYes");
+    expect(ok.lines).toEqual([
+      { key: "ADND2E.chat.martialArts.speedExtra", n1: 2 },
+      { key: "ADND2E.chat.martialArts.speedOnce" },
+    ]);
+    const no = buildSkillCardContext({
+      actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:5", skill: "speed", result: resolveSpeed({ naturalD20: 18, dexterity: 13 }),
+    });
+    expect(no.resultKey).toBe("ADND2E.chat.martialArts.speedNo");
+    expect(no.lines).toEqual([{ key: "ADND2E.chat.martialArts.speedOnce" }]);
+  });
+  it("a Levitation card has no roll and states rate, duration and rules", () => {
+    const ctx = buildSkillCardContext({ actorName: "A", actorImg: "", styleName: "S", maneuverId: "mental:7", skill: "levitation", level: 7 });
+    expect(ctx.noRoll).toBe(true);
+    expect(ctx.lines).toEqual([
+      { key: "ADND2E.chat.martialArts.levitationRate", n1: 5 },
+      { key: "ADND2E.chat.martialArts.levitationDuration", n1: 7 },
+      { key: "ADND2E.chat.martialArts.levitationRules" },
+    ]);
+    expect(ctx.costKey).toBe("ADND2E.martialManeuverCosts.round");
   });
 });

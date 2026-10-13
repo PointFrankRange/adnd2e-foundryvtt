@@ -74,3 +74,33 @@ describe("passive maneuvers (SP18 B2)", () => {
     expect(rows["throw:2"]).toMatchObject({ kind: "passive", state: "learnable", usable: false });
   });
 });
+
+describe("constants (SP18 B3)", () => {
+  const style = (known: string[], id = "s1"): StyleItemLike => ({
+    id, name: id, img: "", type: "martialStyle",
+    system: {
+      form: "soft", principalMethod: "throw", slotsInvested: 1,
+      availableManeuvers: [{ list: "mental", difficulties: [1, 2, 3, 4, 5, 6, 7] }],
+      knownManeuvers: known.map((k) => ({ id: k, level: 1 })),
+    },
+  });
+  const view = (items: StyleItemLike[], wearingBodyArmor = false) =>
+    buildMartialArtsView({ enabled: true, knowsBasics: true, storedActiveId: "", canAct: true, level: 5, freeSlots: 2, wearingBodyArmor, items });
+
+  it("collects constants across ALL owned styles, not only the active one", () => {
+    const v = view([style(["mental:2"], "a"), style(["mental:5", "mental:6"], "b")]);
+    expect(v.constants).toMatchObject({ allAroundSight: true, mentalResistance: false, blindFighting: true, ironskin: true });
+    expect(v.constants.summary.map((s) => s.nameKey)).toEqual([
+      "ADND2E.martialManeuvers.allAroundSight", "ADND2E.martialManeuvers.blindFighting", "ADND2E.martialManeuvers.ironskin",
+    ]);
+    expect(v.constants.summary[2]).toEqual({ nameKey: "ADND2E.martialManeuvers.ironskin", effectKey: "ADND2E.martialManeuverEffects.ironskin" });
+  });
+  it("Ironskin's AC modifier is -2 only without body armor", () => {
+    expect(view([style(["mental:6"])], false).constants.ironskinAcMod).toBe(-2);
+    expect(view([style(["mental:6"])], true).constants.ironskinAcMod).toBe(0);
+    expect(view([style([])]).constants.ironskinAcMod).toBe(0);
+  });
+  it("no styles means no constants", () => {
+    expect(view([]).constants).toMatchObject({ ironskin: false, ironskinAcMod: 0, summary: [] });
+  });
+});
