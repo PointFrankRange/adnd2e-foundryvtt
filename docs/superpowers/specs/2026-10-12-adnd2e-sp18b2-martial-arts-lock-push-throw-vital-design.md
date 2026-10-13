@@ -28,10 +28,10 @@ Costs: a number of attacks, "round" (the only action of the round), or 0 (passiv
 | throw:2 | Instant Stand | passive / 0 | none listed | — | always: regain your feet without the lost round |
 | throw:3 | Hurl | attack / 1 | -1 / +1 / +3 | style die + 1d4 + Str | thrown 1d4 feet: Prone; failure loses remaining attacks and next initiative |
 | throw:4 | Great Throw | attack / 1 | -1 / -2 / -4 | (style die + Str) x 2 | thrown 1 ft per level (6 ft + 1 per level against a charger): Prone |
-| vital:1 | Pain Touch | attack / 1 | -3 / -4 / -5 | none | text: -2 to hit, +2 AC for 1d3 rounds (humans and humanoids only) |
-| vital:2 | Stunning Touch | attack / 1 | -2 / -4 / -4 | none | save vs paralyzation or Stunned 1d4 rounds |
-| vital:3 | Paralyzing Touch | attack / 1 | -2 / -3 / -4 | none | save at -2 or Paralyzed 2d4 rounds |
-| vital:4 | Distance Death | attack / round | 0 / -2 / -3 | none | range 1 ft per level; choose ONE: Pain (no save); Stunning (save -2); Paralysis (save -4); Double Damage (twice the style die, no save) |
+| vitalArea:1 | Pain Touch | attack / 1 | -3 / -4 / -5 | none | text: -2 to hit, +2 AC for 1d3 rounds (humans and humanoids only) |
+| vitalArea:2 | Stunning Touch | attack / 1 | -2 / -4 / -4 | none | save vs paralyzation or Stunned 1d4 rounds |
+| vitalArea:3 | Paralyzing Touch | attack / 1 | -2 / -3 / -4 | none | save at -2 or Paralyzed 2d4 rounds |
+| vitalArea:4 | Distance Death | attack / round | 0 / -2 / -3 | none | range 1 ft per level; choose ONE: Pain (no save); Stunning (save -2); Paralysis (save -4); Double Damage (twice the style die, no save) |
 
 Failure text per maneuver is a lang key (the book's "when the attack roll fails" line). Table 21 values for Hurl and Great Throw: Hurl -1/+1/+3, Great Throw -1/-2/-4.
 
@@ -40,7 +40,7 @@ Failure text per maneuver is a lang key (the book's "when the attack roll fails"
 - `noDamage: boolean` (parries from B1 and the damage-less attacks above; formula is null).
 - `multiplier: number | null` (Great Throw = 2): the formula becomes `(<dice and flat>)*2`.
 - `effects: ManeuverEffect[]`, each `{ id, labelKey, save: null | 0 | -2 | -4, condition: null | "stunned" | "paralyzed" | "unconscious" | "held" | "prone", rounds: null | "1d3" | "1d4" | "2d4", doubleDamage?: boolean }`. `save` is the modifier to the target's saving throw vs paralyzation (null = no save).
-- The learning engine, order, slot and per-level rules are unchanged; the lists `lock`, `push`, `throw`, `vital` (the style data uses `"vitalArea"` as the list name from Table 17 — the registry list id is `vitalArea`) are added to `MANEUVER_LISTS`.
+- The learning engine, order, slot and per-level rules are unchanged; the lists `lock`, `push`, `throw` and `vitalArea` (the same list names the shipped styles' `availableManeuvers` already use, so ids are `lock:1`, `push:3`, `throw:4`, `vitalArea:2`) are added to `MANEUVER_LISTS`.
 
 ## Relay extension (security-sensitive, kept narrow)
 - `RELAY_CONDITIONS` gains `"paralyzed"` and `"unconscious"` (both already exist as status effects).
