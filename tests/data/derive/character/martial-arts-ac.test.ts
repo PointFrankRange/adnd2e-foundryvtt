@@ -36,3 +36,14 @@ describe("deriveCharacter — the active martial arts style's AC modifier", () =
     expect(deriveCharacter(fighter, ON).ac.normal).toBe(10);
   });
 });
+
+describe("deriveCharacter - Ironskin (SP18 B3)", () => {
+  it("adds its modifier to the style modifier while the rule is on", () => {
+    expect(deriveCharacter({ ...fighter, martialArtsAcMod: -1, ironskinAcMod: -2 }, ON).ac.normal).toBe(7);
+    expect(deriveCharacter({ ...fighter, ironskinAcMod: -2 }, ON).ac.normal).toBe(8);
+  });
+  it("does nothing while the rule is off or absent", () => {
+    expect(deriveCharacter({ ...fighter, ironskinAcMod: -2 }, DEFAULT_OPTIONAL_RULES).ac.normal).toBe(10);
+    expect(deriveCharacter(fighter, ON).ac.normal).toBe(10);
+  });
+});

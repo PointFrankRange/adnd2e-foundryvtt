@@ -646,6 +646,7 @@ export class Adnd2eCharacterSheet extends Base {
         classItems.map((c) => ({ chassisId: c.chassisId, castingDisabled: resolveKitOverrides(kitEntries, c.chassisId).castingDisabled })),
       ),
       martialArtsAcMod: ((v) => (v.visible && v.active ? v.active.acMod : 0))(martialArtsView(this.document as never)),
+      ironskinAcMod: ((v) => (v.visible ? v.constants.ironskinAcMod : 0))(martialArtsView(this.document as never)),
       raceItem,
       physicalItems,
       proficiencyItems: { weapon: weaponProfs, nonweapon: nonweaponProfs },

@@ -92,4 +92,6 @@ export interface ActorSnapshot {
   isCasting: boolean;
   /** SP18 Plan A: the active martial arts style's AC modifier (negative = better; absent = none) - applied only while `advancedMartialArts` is on */
   martialArtsAcMod?: number;
+  /** SP18 Plan B3: Ironskin's AC modifier (-2 with the maneuver known and no body armor; absent = none) - applied only while `advancedMartialArts` is on */
+  ironskinAcMod?: number;
 }

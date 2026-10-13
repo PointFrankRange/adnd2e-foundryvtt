@@ -816,6 +816,13 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
     expect(labels({})).toHaveLength(4);
   });
 
+  it("shows an Ironskin row in the AC breakdown only when non-zero (SP18 B3)", () => {
+    const labels = (over: Partial<CharacterSheetInput>) =>
+      buildCharacterSheetContext(input(over)).combat.acBreakdown.map((r) => [r.label, r.value]);
+    expect(labels({ ironskinAcMod: -2 }).at(-1)).toEqual(["ADND2E.sheet.combat.acIronskin", -2]);
+    expect(labels({ ironskinAcMod: 0 })).toHaveLength(4);
+  });
+
   it("the legacy grapple maneuver is hidden while the wrestling rule is on", () => {
     const on = { ...DEFAULT_OPTIONAL_RULES, combatAndTacticsEnabled: true, combatManeuvers: true, wrestling: true };
     const off = { ...on, wrestling: false };

@@ -12,7 +12,7 @@ import { toTraitEntries } from "../derive/character";
 import { abilityScoresOf, actorLevelRulesFor, activeKitEntries } from "../derive/character/kits";
 import { resolveKitOverrides } from "../../core/kits";
 import { containerAdjustedCarriedWeight } from "../derive/character/container-weight";
-import { resolveActiveStyleId, styleStats, type StyleForm, type StyleMethod } from "../../core/martial-arts";
+import { ironskinAcMod, knownManeuverIds, resolveActiveStyleId, styleStats, type StyleForm, type StyleMethod } from "../../core/martial-arts";
 
 interface ClassItemSystem {
   chassisId: ClassId;
@@ -122,10 +122,13 @@ export function snapshotActor(actor: Actor.Implementation, options: OptionalRule
   const priestMemorized: MemorizedEntry[] = [...doc.system.spellcasting.priest.memorized];
   const thiefSkillAllocations = [...doc.system.thiefSkills.allocations];
 
-  const styles = items.filter((i) => i.type === "martialStyle") as unknown as { id: string; system: { form: StyleForm; principalMethod: StyleMethod } }[];
+  const styles = items.filter((i) => i.type === "martialStyle") as unknown as { id: string; system: { form: StyleForm; principalMethod: StyleMethod; knownManeuvers?: { id: string }[] } }[];
   const activeStyleId = resolveActiveStyleId(styles.map((s) => s.id), doc.system.martialArts?.activeStyleId ?? "");
   const activeStyle = styles.find((s) => s.id === activeStyleId);
   const martialArtsAcMod = activeStyle ? styleStats(activeStyle.system.form, activeStyle.system.principalMethod).acMod : 0;
+  // SP18 Plan B3: Ironskin (mental:6) is -2 AC only while no body armor is worn (a shield is not body armor)
+  const hasIronskin = knownManeuverIds(styles.map((s) => ({ knownManeuvers: s.system.knownManeuvers }))).has("mental:6");
+  const ironskinMod = ironskinAcMod(hasIronskin, equippedArmor !== null);
 
   const a = doc.system.abilities;
   return {
@@ -165,5 +168,6 @@ export function snapshotActor(actor: Actor.Implementation, options: OptionalRule
       : {}),
     isCasting: Boolean(doc.system.options?.spellsAndMagic?.casting),
     martialArtsAcMod,
+    ironskinAcMod: ironskinMod,
   };
 }
