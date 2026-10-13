@@ -1,16 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
-  MANEUVERS, MANEUVER_LISTS, MAX_MANEUVERS_PER_LEVEL, armorGroupOf, learnability, maneuverById, maneuverDamageFormula, table21Modifier,
+  MANEUVERS, MANEUVER_LISTS, MAX_MANEUVERS_PER_LEVEL, armorGroupOf, learnability, maneuverById, maneuverDamageFormula, table21Modifier, doubleBasicDamageFormula,
 } from "../../../src/core/martial-arts";
 
 const def = (id: string) => maneuverById(id)!;
 
 describe("registry - Table 19 for Block, Kick and Strike", () => {
-  it("lists the ten maneuvers in order with unique ids", () => {
+  it("lists the 25 maneuvers in order with unique ids", () => {
     expect(MANEUVERS.map((m) => m.id)).toEqual([
       "block:1", "block:2", "block:3", "block:4", "kick:1", "kick:2", "kick:3", "strike:1", "strike:2", "strike:3",
+      "lock:1", "lock:2", "lock:3", "lock:4", "push:1", "push:2", "push:3", "throw:1", "throw:2", "throw:3", "throw:4",
+      "vitalArea:1", "vitalArea:2", "vitalArea:3", "vitalArea:4",
     ]);
-    expect(MANEUVER_LISTS).toEqual(["block", "kick", "strike"]);
+    expect(MANEUVER_LISTS).toEqual(["block", "kick", "strike", "lock", "push", "throw", "vitalArea"]);
     for (const m of MANEUVERS) expect(m.id).toBe(`${m.list}:${m.difficulty}`);
   });
   it("carries slugs, kinds and costs", () => {
@@ -18,6 +20,10 @@ describe("registry - Table 19 for Block, Kick and Strike", () => {
       ["basicParry", "parry", 1], ["parryAll", "parry", 2], ["grapplingBlock", "parry", 1], ["arrowParry", "parry", 2],
       ["circleKick", "attack", 1], ["flyingKick", "attack", 1], ["backwardKick", "attack", 1],
       ["ironFist", "attack", 0], ["crushingBlow", "attack", "round"], ["eagleClaw", "attack", "round"],
+      ["chokeHold", "attack", "round"], ["lockingBlock", "attack", 1], ["incapacitator", "attack", 1], ["immobilizing", "attack", 1],
+      ["concentratedPush", "attack", 1], ["stickingTouch", "attack", 1], ["oneFingerPush", "attack", "round"],
+      ["fall", "passive", 0], ["instantStand", "passive", 0], ["hurl", "attack", 1], ["greatThrow", "attack", 1],
+      ["painTouch", "attack", 1], ["stunningTouch", "attack", 1], ["paralyzingTouch", "attack", 1], ["distanceDeath", "attack", "round"],
     ]);
   });
   it("looks up by id and rejects an unknown id", () => {
@@ -104,5 +110,76 @@ describe("learnability", () => {
     const known = [{ id: "kick:1", level: 3 }, { id: "kick:3", level: 3 }];
     expect(learnability({ ...base, maneuverId: "strike:1", known })).toEqual({ ok: false, reason: "levelCap" });
     expect(learnability({ ...base, maneuverId: "strike:1", known, level: 4 })).toEqual({ ok: true });
+  });
+});
+
+describe("B2 registry rows", () => {
+  it.each([
+    ["lock:1", "chokeHold", "attack", "round", -2, -3, -5],
+    ["lock:2", "lockingBlock", "attack", 1, -1, -1, -1],
+    ["lock:3", "incapacitator", "attack", 1, -1, -2, -4],
+    ["lock:4", "immobilizing", "attack", 1, 1, 2, 3],
+    ["push:1", "concentratedPush", "attack", 1, 0, -1, -2],
+    ["push:2", "stickingTouch", "attack", 1, 0, 1, 2],
+    ["push:3", "oneFingerPush", "attack", "round", 0, 0, 0],
+    ["throw:1", "fall", "passive", 0, 0, 0, 0],
+    ["throw:2", "instantStand", "passive", 0, 0, 0, 0],
+    ["throw:3", "hurl", "attack", 1, -1, 1, 3],
+    ["throw:4", "greatThrow", "attack", 1, -1, -2, -4],
+    ["vitalArea:1", "painTouch", "attack", 1, -3, -4, -5],
+    ["vitalArea:2", "stunningTouch", "attack", 1, -2, -4, -4],
+    ["vitalArea:3", "paralyzingTouch", "attack", 1, -2, -3, -4],
+    ["vitalArea:4", "distanceDeath", "attack", "round", 0, -2, -3],
+  ])("%s %s", (id, slug, kind, cost, light, mail, plate) => {
+    const m = maneuverById(id)!;
+    expect([m.slug, m.kind, m.cost]).toEqual([slug, kind, cost]);
+    expect(m.table21).toEqual({ light, mail, plate });
+  });
+
+  it("lists the effects each maneuver offers", () => {
+    const eff = (id: string) => (maneuverById(id)!.effects ?? []).map((e) => [e.id, e.save, e.condition, e.rounds]);
+    expect(eff("lock:1")).toEqual([["unconscious", null, "unconscious", "1d3"]]);
+    expect(eff("lock:2")).toEqual([]);
+    expect(eff("lock:3")).toEqual([["limbUseless", 0, null, null]]);
+    expect(eff("lock:4")).toEqual([["held", null, "held", null]]);
+    expect(eff("push:1")).toEqual([["prone", 0, "prone", null]]);
+    expect(eff("push:3")).toEqual([["prone", 0, "prone", null]]);
+    expect(eff("throw:3")).toEqual([["prone", null, "prone", null]]);
+    expect(eff("throw:4")).toEqual([["prone", null, "prone", null]]);
+    expect(eff("vitalArea:1")).toEqual([]);
+    expect(eff("vitalArea:2")).toEqual([["stunned", 0, "stunned", "1d4"]]);
+    expect(eff("vitalArea:3")).toEqual([["paralyzed", -2, "paralyzed", "2d4"]]);
+    expect(eff("vitalArea:4")).toEqual([
+      ["pain", null, null, null], ["stunned", -2, "stunned", "1d4"], ["paralyzed", -4, "paralyzed", "2d4"], ["doubleDamage", null, null, null],
+    ]);
+    expect(maneuverById("vitalArea:4")!.effects!.find((e) => e.id === "doubleDamage")!.doubleDamage).toBe(true);
+  });
+
+  const ctx = (styleDie: string | null, strengthAdj = 0) => ({ styleDie, level: 5, strengthAdj });
+  it("damage-less maneuvers and passives have no formula", () => {
+    for (const id of ["lock:1", "lock:2", "lock:4", "push:1", "push:2", "push:3", "throw:1", "throw:2", "vitalArea:1", "vitalArea:2", "vitalArea:3", "vitalArea:4"]) {
+      expect(maneuverDamageFormula(maneuverById(id)!, ctx("1d4", 2)), id).toBeNull();
+    }
+  });
+  it("Incapacitator and Hurl add a die to the style die and Strength", () => {
+    expect(maneuverDamageFormula(maneuverById("lock:3")!, ctx("1d4", 2))).toBe("1d4+1d4+2");
+    expect(maneuverDamageFormula(maneuverById("throw:3")!, ctx("1d4", 1))).toBe("1d4+1d4+1");
+  });
+  it("Great Throw doubles the style die plus Strength", () => {
+    expect(maneuverDamageFormula(maneuverById("throw:4")!, ctx("1d4", 1))).toBe("(1d4+1)*2");
+    expect(maneuverDamageFormula(maneuverById("throw:4")!, ctx("1d4", 0))).toBe("(1d4)*2");
+    expect(maneuverDamageFormula(maneuverById("throw:4")!, ctx("1", 0))).toBe("2");
+    expect(maneuverDamageFormula(maneuverById("throw:4")!, ctx(null, 0))).toBe("0");
+  });
+  it("doubleBasicDamageFormula is twice the style die with no Strength", () => {
+    expect(doubleBasicDamageFormula("1d4")).toBe("(1d4)*2");
+    expect(doubleBasicDamageFormula("1")).toBe("2");
+    expect(doubleBasicDamageFormula(null)).toBe("0");
+  });
+  it("learnability applies to the new lists the same way", () => {
+    const base = { offered: [{ list: "lock", difficulties: [1, 3] }], known: [] as { id: string; level: number }[], freeSlots: 1, level: 3 };
+    expect(learnability({ ...base, maneuverId: "lock:1" })).toEqual({ ok: true });
+    expect(learnability({ ...base, maneuverId: "lock:3" })).toEqual({ ok: false, reason: "order" });
+    expect(learnability({ ...base, maneuverId: "vitalArea:1" })).toEqual({ ok: false, reason: "notOffered" });
   });
 });

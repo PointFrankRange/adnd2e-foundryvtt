@@ -1,11 +1,25 @@
-// PHBR15 Table 19 / Table 21 special maneuvers (Plan B1: Block, Kick, Strike). Pure.
+// PHBR15 Table 19 / Table 21 special maneuvers (Plan B1: Block, Kick, Strike; Plan B2: Lock, Push, Throw, Vital Area). Pure.
 
-export const MANEUVER_LISTS = ["block", "kick", "strike"] as const;
+export const MANEUVER_LISTS = ["block", "kick", "strike", "lock", "push", "throw", "vitalArea"] as const;
 export type ManeuverList = (typeof MANEUVER_LISTS)[number];
 
 /** Attacks a maneuver costs: 0 = none extra, "round" = the only action of the round. */
 export type ManeuverCost = 0 | 1 | 2 | "round";
 export type ArmorGroup = "none" | "light" | "mail" | "plate";
+
+export type EffectCondition = "stunned" | "paralyzed" | "unconscious" | "held" | "prone";
+
+/** One thing a hit may do to the target. `save` is the modifier to the target's saving throw vs paralyzation
+ *  (null = no save); `condition` is the condition a card button applies; `rounds` is its duration dice. */
+export interface ManeuverEffect {
+  /** i18n leaf under ADND2E.martialEffects */
+  id: string;
+  save: null | 0 | -2 | -4;
+  condition: EffectCondition | null;
+  rounds: "1d3" | "1d4" | "2d4" | null;
+  /** this alternative deals twice the style die (Distance Death) */
+  doubleDamage?: boolean;
+}
 
 export interface ManeuverDef {
   /** `<list>:<difficulty>`, the key stored in a style's knownManeuvers */
@@ -14,7 +28,7 @@ export interface ManeuverDef {
   slug: string;
   list: ManeuverList;
   difficulty: number;
-  kind: "parry" | "attack";
+  kind: "parry" | "attack" | "passive";
   cost: ManeuverCost;
   /** a die added to the style's damage die */
   extraDie: string | null;
@@ -25,6 +39,12 @@ export interface ManeuverDef {
   halfLevelBonus: boolean;
   /** Table 21 attack modifier by the target's armor group (negative = harder) */
   table21: { light: number; mail: number; plate: number };
+  /** the attack does no damage (touches, locks, pushes); parries and passives are implicitly damage-less */
+  noDamage?: boolean;
+  /** multiplies the whole damage expression (Great Throw = 2) */
+  multiplier?: number | null;
+  /** what a hit may do to the target; each condition effect becomes an Apply button on the card */
+  effects?: readonly ManeuverEffect[];
 }
 
 const NONE = { light: 0, mail: 0, plate: 0 } as const;
@@ -40,6 +60,36 @@ export const MANEUVERS: readonly ManeuverDef[] = [
   { id: "strike:1", slug: "ironFist", list: "strike", difficulty: 1, kind: "attack", cost: 0, extraDie: null, ownDie: "1d6", addsStrength: true, halfLevelBonus: false, table21: { light: 0, mail: 0, plate: -2 } },
   { id: "strike:2", slug: "crushingBlow", list: "strike", difficulty: 2, kind: "attack", cost: "round", extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: true, table21: { light: -1, mail: -2, plate: -3 } },
   { id: "strike:3", slug: "eagleClaw", list: "strike", difficulty: 3, kind: "attack", cost: "round", extraDie: null, ownDie: "1d8", addsStrength: true, halfLevelBonus: false, table21: { light: -2, mail: -3, plate: -4 } },
+  { id: "lock:1", slug: "chokeHold", list: "lock", difficulty: 1, kind: "attack", cost: "round", extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: { light: -2, mail: -3, plate: -5 }, noDamage: true,
+    effects: [{ id: "unconscious", save: null, condition: "unconscious", rounds: "1d3" }] },
+  { id: "lock:2", slug: "lockingBlock", list: "lock", difficulty: 2, kind: "attack", cost: 1, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: { light: -1, mail: -1, plate: -1 }, noDamage: true, effects: [] },
+  { id: "lock:3", slug: "incapacitator", list: "lock", difficulty: 3, kind: "attack", cost: 1, extraDie: "1d4", ownDie: null, addsStrength: true, halfLevelBonus: false, table21: { light: -1, mail: -2, plate: -4 },
+    effects: [{ id: "limbUseless", save: 0, condition: null, rounds: null }] },
+  { id: "lock:4", slug: "immobilizing", list: "lock", difficulty: 4, kind: "attack", cost: 1, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: { light: 1, mail: 2, plate: 3 }, noDamage: true,
+    effects: [{ id: "held", save: null, condition: "held", rounds: null }] },
+  { id: "push:1", slug: "concentratedPush", list: "push", difficulty: 1, kind: "attack", cost: 1, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: { light: 0, mail: -1, plate: -2 }, noDamage: true,
+    effects: [{ id: "prone", save: 0, condition: "prone", rounds: null }] },
+  { id: "push:2", slug: "stickingTouch", list: "push", difficulty: 2, kind: "attack", cost: 1, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: { light: 0, mail: 1, plate: 2 }, noDamage: true, effects: [] },
+  { id: "push:3", slug: "oneFingerPush", list: "push", difficulty: 3, kind: "attack", cost: "round", extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true,
+    effects: [{ id: "prone", save: 0, condition: "prone", rounds: null }] },
+  { id: "throw:1", slug: "fall", list: "throw", difficulty: 1, kind: "passive", cost: 0, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true, effects: [] },
+  { id: "throw:2", slug: "instantStand", list: "throw", difficulty: 2, kind: "passive", cost: 0, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true, effects: [] },
+  { id: "throw:3", slug: "hurl", list: "throw", difficulty: 3, kind: "attack", cost: 1, extraDie: "1d4", ownDie: null, addsStrength: true, halfLevelBonus: false, table21: { light: -1, mail: 1, plate: 3 },
+    effects: [{ id: "prone", save: null, condition: "prone", rounds: null }] },
+  { id: "throw:4", slug: "greatThrow", list: "throw", difficulty: 4, kind: "attack", cost: 1, extraDie: null, ownDie: null, addsStrength: true, halfLevelBonus: false, table21: { light: -1, mail: -2, plate: -4 }, multiplier: 2,
+    effects: [{ id: "prone", save: null, condition: "prone", rounds: null }] },
+  { id: "vitalArea:1", slug: "painTouch", list: "vitalArea", difficulty: 1, kind: "attack", cost: 1, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: { light: -3, mail: -4, plate: -5 }, noDamage: true, effects: [] },
+  { id: "vitalArea:2", slug: "stunningTouch", list: "vitalArea", difficulty: 2, kind: "attack", cost: 1, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: { light: -2, mail: -4, plate: -4 }, noDamage: true,
+    effects: [{ id: "stunned", save: 0, condition: "stunned", rounds: "1d4" }] },
+  { id: "vitalArea:3", slug: "paralyzingTouch", list: "vitalArea", difficulty: 3, kind: "attack", cost: 1, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: { light: -2, mail: -3, plate: -4 }, noDamage: true,
+    effects: [{ id: "paralyzed", save: -2, condition: "paralyzed", rounds: "2d4" }] },
+  { id: "vitalArea:4", slug: "distanceDeath", list: "vitalArea", difficulty: 4, kind: "attack", cost: "round", extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: { light: 0, mail: -2, plate: -3 }, noDamage: true,
+    effects: [
+      { id: "pain", save: null, condition: null, rounds: null },
+      { id: "stunned", save: -2, condition: "stunned", rounds: "1d4" },
+      { id: "paralyzed", save: -4, condition: "paralyzed", rounds: "2d4" },
+      { id: "doubleDamage", save: null, condition: null, rounds: null, doubleDamage: true },
+    ] },
 ];
 
 export function maneuverById(id: string): ManeuverDef | undefined {
@@ -64,7 +114,7 @@ export function table21Modifier(def: ManeuverDef, group: ArmorGroup): number {
 }
 
 /**
- * The damage dice expression for a hit, or null for a parry. Dice terms are joined with "+", flat terms are
+ * The damage dice expression for a hit, or null for a parry, a passive or a damage-less maneuver. Dice terms are joined with "+", flat terms are
  * summed; a style die of "1" is a flat 1 hp and a null style die (a weapon-method style) counts as 0.
  * With no dice the result is a flat number floored at 0; the caller floors a rolled total at 0 too.
  */
@@ -72,7 +122,7 @@ export function maneuverDamageFormula(
   def: ManeuverDef,
   ctx: { styleDie: string | null; level: number; strengthAdj: number },
 ): string | null {
-  if (def.kind === "parry") return null;
+  if (def.kind !== "attack" || def.noDamage === true) return null;
   const dice: string[] = [];
   let flat = 0;
   const base = def.ownDie ?? ctx.styleDie;
@@ -83,8 +133,17 @@ export function maneuverDamageFormula(
   if (def.extraDie !== null) dice.push(def.extraDie);
   if (def.halfLevelBonus) flat += Math.floor(ctx.level / 2);
   if (def.addsStrength) flat += ctx.strengthAdj;
-  if (dice.length === 0) return String(Math.max(0, flat));
-  return dice.join("+") + (flat > 0 ? `+${flat}` : flat < 0 ? `${flat}` : "");
+  const times = def.multiplier ?? 1;
+  if (dice.length === 0) return String(Math.max(0, flat) * times);
+  const body = dice.join("+") + (flat > 0 ? `+${flat}` : flat < 0 ? `${flat}` : "");
+  return times === 1 ? body : `(${body})*${times}`;
+}
+
+/** Distance Death's Double Damage alternative: twice the style die only (no Strength). */
+export function doubleBasicDamageFormula(styleDie: string | null): string {
+  if (styleDie === null) return "0";
+  if (styleDie === "1") return "2";
+  return `(${styleDie})*2`;
 }
 
 export const MAX_MANEUVERS_PER_LEVEL = 2;
