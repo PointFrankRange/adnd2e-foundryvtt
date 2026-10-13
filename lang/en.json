@@ -952,6 +952,7 @@
         "saveAt": "Target saves vs. paralyzation at {mod}",
         "applyPrefix": "Apply",
         "roundsRoll": "Duration in rounds",
+        "whenHoldEnds": "Press when the hold ends and the victim has not escaped.",
         "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions", "table21": "Target's armor" }
       },
       "shapechange": {

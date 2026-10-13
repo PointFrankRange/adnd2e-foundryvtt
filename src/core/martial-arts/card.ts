@@ -59,6 +59,8 @@ export interface CardEffect {
   condition: string | null;
   rounds: string | null;
   damage: number | null;
+  /** applied later (e.g. when a hold ends), not on the hit */
+  deferred: boolean;
 }
 
 export interface ManeuverCardInput {
@@ -121,6 +123,7 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
         condition: e.condition,
         rounds: e.rounds,
         damage: e.doubleDamage === true ? (input.doubleDamageTotal ?? 0) : null,
+        deferred: e.deferred === true,
       }))
     : [];
   return {

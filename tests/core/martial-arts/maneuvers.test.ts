@@ -153,6 +153,9 @@ describe("B2 registry rows", () => {
       ["pain", null, null, null], ["stunned", -2, "stunned", "1d4"], ["paralyzed", -4, "paralyzed", "2d4"], ["doubleDamage", null, null, null],
     ]);
     expect(maneuverById("vitalArea:4")!.effects!.find((e) => e.id === "doubleDamage")!.doubleDamage).toBe(true);
+    expect(maneuverById("lock:1")!.effects![0]!.deferred).toBe(true);
+    const deferred = MANEUVERS.flatMap((m) => (m.effects ?? []).map((e) => [m.id, e] as const)).filter(([, e]) => e.deferred !== undefined);
+    expect(deferred.map(([id]) => id)).toEqual(["lock:1"]);
   });
 
   const ctx = (styleDie: string | null, strengthAdj = 0) => ({ styleDie, level: 5, strengthAdj });

@@ -19,6 +19,8 @@ export interface ManeuverEffect {
   rounds: "1d3" | "1d4" | "2d4" | null;
   /** this alternative deals twice the style die (Distance Death) */
   doubleDamage?: boolean;
+  /** the effect is applied later (e.g. when a hold ends), not on the hit */
+  deferred?: boolean;
 }
 
 export interface ManeuverDef {
@@ -61,7 +63,7 @@ export const MANEUVERS: readonly ManeuverDef[] = [
   { id: "strike:2", slug: "crushingBlow", list: "strike", difficulty: 2, kind: "attack", cost: "round", extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: true, table21: { light: -1, mail: -2, plate: -3 } },
   { id: "strike:3", slug: "eagleClaw", list: "strike", difficulty: 3, kind: "attack", cost: "round", extraDie: null, ownDie: "1d8", addsStrength: true, halfLevelBonus: false, table21: { light: -2, mail: -3, plate: -4 } },
   { id: "lock:1", slug: "chokeHold", list: "lock", difficulty: 1, kind: "attack", cost: "round", extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: { light: -2, mail: -3, plate: -5 }, noDamage: true,
-    effects: [{ id: "unconscious", save: null, condition: "unconscious", rounds: "1d3" }] },
+    effects: [{ id: "unconscious", save: null, condition: "unconscious", rounds: "1d3", deferred: true }] },
   { id: "lock:2", slug: "lockingBlock", list: "lock", difficulty: 2, kind: "attack", cost: 1, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: { light: -1, mail: -1, plate: -1 }, noDamage: true, effects: [] },
   { id: "lock:3", slug: "incapacitator", list: "lock", difficulty: 3, kind: "attack", cost: 1, extraDie: "1d4", ownDie: null, addsStrength: true, halfLevelBonus: false, table21: { light: -1, mail: -2, plate: -4 },
     effects: [{ id: "limbUseless", save: 0, condition: null, rounds: null }] },

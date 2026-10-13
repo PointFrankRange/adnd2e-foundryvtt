@@ -113,8 +113,12 @@ describe("maneuver card effects (SP18 B2)", () => {
     const e = card("vitalArea:3").effects;
     expect(e).toEqual([{
       id: "paralyzed", labelKey: "ADND2E.martialEffects.paralyzed", saveKey: "ADND2E.chat.martialArts.saveAt", saveMod: "-2",
-      condition: "paralyzed", rounds: "2d4", damage: null,
+      condition: "paralyzed", rounds: "2d4", damage: null, deferred: false,
     }]);
+  });
+  it("Choke Hold's unconscious effect is deferred; an immediate effect is not", () => {
+    expect(card("lock:1").effects[0]).toMatchObject({ id: "unconscious", condition: "unconscious", deferred: true });
+    expect(card("vitalArea:2").effects[0]).toMatchObject({ condition: "stunned", deferred: false });
   });
   it("a zero save modifier uses the plain save line; no save has none", () => {
     expect(card("vitalArea:2").effects[0]).toMatchObject({ saveKey: "ADND2E.chat.martialArts.save", saveMod: "", condition: "stunned", rounds: "1d4" });

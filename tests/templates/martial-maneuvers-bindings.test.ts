@@ -86,6 +86,8 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
     for (const key of [
       "ADND2E.chat.martialArts.save", "ADND2E.chat.martialArts.saveAt", "ADND2E.chat.martialArts.applyPrefix",
       "ADND2E.chat.martialArts.roundsRoll", "ADND2E.sheet.martialArts.passive",
+      "ADND2E.chat.martialArts.whenHoldEnds",
     ]) expect(typeof lookup(key), key).toBe("string");
+    expect(CHAT).toContain("e.deferred");
   });
 });
