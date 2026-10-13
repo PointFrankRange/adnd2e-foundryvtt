@@ -3,6 +3,7 @@ import { pickDamageDice } from "../combat/damage-dice";
 import { damageModifiers } from "../core/combat/damage";
 import { damageFormula } from "../core/dice/formula";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../constants";
+import { parseConditionButton } from "../combat/apply-relay";
 import { requestApply } from "../relay/relay-client";
 import { rerenderContestCards, rerenderWildCards } from "../hooks/psionic-hooks";
 import { applyContestTangents, recordButtonState, rollDefense, type ContestFlag } from "../sheets/character/psionic-combat";
@@ -103,6 +104,31 @@ async function onApplyDamage(button: HTMLButtonElement): Promise<void> {
     const actor = t.actor as (EffectTarget & { uuid: string; isOwner: boolean }) | null;
     if (!actor) continue;
     await requestApply(actor, { kind: "damage", targetUuid: actor.uuid, amount });
+  }
+}
+
+/** Applies the condition on a martial arts card (SP18 B2) to every targeted token: any duration dice are rolled in chat
+ *  first, then the condition goes through the relay like every other target-side effect. */
+async function onApplyCondition(button: HTMLButtonElement): Promise<void> {
+  const parsed = parseConditionButton(button.dataset as { condition?: string; rounds?: string });
+  if (!parsed) return;
+  const targets = [...(game as unknown as { user: { targets: Iterable<{ actor: unknown }> } }).user.targets];
+  if (targets.length === 0) {
+    ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.damage.noTargetsWarning"));
+    return;
+  }
+  let rounds: number | undefined;
+  if (parsed.roundsFormula) {
+    const roll = await new Roll(parsed.roundsFormula).evaluate();
+    rounds = Math.min(99, Math.max(1, roll.total ?? 1));
+    await roll.toMessage({ flavor: game.i18n!.localize("ADND2E.chat.martialArts.roundsRoll") } as never);
+  }
+  for (const t of targets) {
+    const actor = t.actor as (EffectTarget & { uuid: string; isOwner: boolean }) | null;
+    if (!actor) continue;
+    await requestApply(actor, {
+      kind: "condition", targetUuid: actor.uuid, conditionId: parsed.conditionId, ...(rounds === undefined ? {} : { rounds }),
+    });
   }
 }
 
@@ -228,9 +254,12 @@ export function registerChatListeners(): void {
     html.querySelector<HTMLButtonElement>('[data-action="rollDamage"]')?.addEventListener("click", (ev) => {
       void onRollDamage(ev.currentTarget as HTMLButtonElement);
     });
-    html.querySelector<HTMLButtonElement>('[data-action="applyDamage"]')?.addEventListener("click", (ev) => {
-      void onApplyDamage(ev.currentTarget as HTMLButtonElement);
-    });
+    html.querySelectorAll<HTMLButtonElement>('[data-action="applyDamage"]').forEach((b) =>
+      b.addEventListener("click", (ev) => void onApplyDamage(ev.currentTarget as HTMLButtonElement)),
+    );
+    html.querySelectorAll<HTMLButtonElement>('[data-action="applyCondition"]').forEach((b) =>
+      b.addEventListener("click", (ev) => void onApplyCondition(ev.currentTarget as HTMLButtonElement)),
+    );
     html.querySelector<HTMLButtonElement>('[data-action="applyCastEffect"]')?.addEventListener("click", (ev) => {
       void onApplyCastEffect(ev.currentTarget as HTMLButtonElement);
     });

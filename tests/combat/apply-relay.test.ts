@@ -153,3 +153,21 @@ describe("parseConditionButton", () => {
     expect(parseConditionButton({ condition: "stunned", rounds: "0d4" })).toBeNull();
   });
 });
+
+describe("relay hardening (SP18 B2 review)", () => {
+  const t = "Scene.a.Token.b.Actor.c";
+  it("rejects padded or oversized duration formulas on the card button", () => {
+    for (const rounds of ["01d4", " 1d4", "1d4 ", "100d4"]) {
+      expect(parseConditionButton({ condition: "stunned", rounds }), rounds).toBeNull();
+    }
+  });
+  it("a stray rounds on damage, healing, unequip or destroy is not carried", () => {
+    expect(validateRelayRequest({ kind: "damage", targetUuid: t, amount: 3, rounds: 2 })).toEqual({ kind: "damage", targetUuid: t, amount: 3 });
+    expect(validateRelayRequest({ kind: "healing", targetUuid: t, amount: 3, rounds: 2 })).toEqual({ kind: "healing", targetUuid: t, amount: 3 });
+    expect(validateRelayRequest({ kind: "unequip", targetUuid: t, itemId: "i1", rounds: 2 })).not.toHaveProperty("rounds");
+    expect(validateRelayRequest({ kind: "destroy", targetUuid: t, rounds: 2 })).not.toHaveProperty("rounds");
+  });
+  it.each([{}, [3]])("rejects rounds %j", (rounds) => {
+    expect(validateRelayRequest({ kind: "condition", targetUuid: t, conditionId: "stunned", rounds })).toBeNull();
+  });
+});
