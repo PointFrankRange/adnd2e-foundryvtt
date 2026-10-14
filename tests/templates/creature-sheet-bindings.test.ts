@@ -35,13 +35,24 @@ const NOTHING_LOST_NAMES = [
   "system.attacks.{{@index}}.name", "system.attacks.{{@index}}.count", "system.attacks.{{@index}}.damage", "system.attacks.{{@index}}.type",
   "system.attacks.{{@index}}.special", "system.attacks.{{@index}}.thac0Override",
   "system.saves.mode", "system.saves.explicit.{{row.category}}", "system.saves.asClass.group", "system.saves.asClass.level",
-  "system.details.intelligence", "system.details.morale", "system.details.magicResistance", "system.details.treasureType",
+  "system.details.intelligence", "system.details.morale", "system.details.magicResistance", "system.details.hitRequirement", "system.details.treasureType",
   "system.details.numberAppearing", "system.details.xpValue", "system.details.specialAttacks", "system.details.specialDefenses", "system.details.description",
 ].map((n) => `name="${n}"`);
 const CORE_ACTIONS = new Set(["tab", "editImage"]);
 const registered = new Set([...SHEET.matchAll(/^\s+([a-zA-Z]+): Adnd2eCreatureSheet\.#on/gm)].map((m) => m[1]!));
 
 describe("Monster NPC sheet templates (sheet redesign R3)", () => {
+  it("hit-only-by select is unlocked-only with a read-only locked display (SP18 Plan C)", () => {
+    const left = readFileSync(path.join(TPL, "actor", "creature", "left.hbs"), "utf8");
+    const at = left.indexOf('name="system.details.hitRequirement"');
+    expect(at).toBeGreaterThan(-1);
+    const before = left.slice(0, at);
+    expect(before.lastIndexOf("{{#if adnd2e.lock.unlocked}}")).toBeGreaterThan(before.lastIndexOf("{{/if}}"));
+    const after = left.slice(at);
+    expect(after.indexOf("{{else}}")).toBeGreaterThan(-1);
+    expect(after).toContain("adnd2eLabel 'hitRequirements'");
+  });
+
   it("uses the kit part templates", () => {
     expect(PART_FILES.map((f) => path.relative(TPL, f).split(path.sep).join("/")).sort()).toEqual([
       "actor/creature/gear.hbs", "actor/creature/header.hbs", "actor/creature/left.hbs", "actor/creature/notes.hbs",

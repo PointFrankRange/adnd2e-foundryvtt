@@ -51,6 +51,14 @@
           <span class="val">{{adnd2eOrDash source.system.details.magicResistance}}%</span>
         {{/if}}
       </div>
+      <div class="detail-field">
+        <span class="cap">{{localize 'ADND2E.sheet.creature.hitRequirement'}}</span>
+        {{#if adnd2e.lock.unlocked}}
+          <select name="system.details.hitRequirement">{{selectOptions hitRequirements selected=source.system.details.hitRequirement localize=true}}</select>
+        {{else}}
+          <span class="val">{{#if source.system.details.hitRequirement}}{{adnd2eLabel 'hitRequirements' source.system.details.hitRequirement}}{{else}}{{localize 'ADND2E.hitRequirements.none'}}{{/if}}</span>
+        {{/if}}
+      </div>
       <div class="detail-field detail-field-wide">
         <span class="cap">{{localize 'ADND2E.sheet.vitals.movement'}}</span>
         <span class="val">{{adnd2e.vitals.movementSummary}}</span>

@@ -50,6 +50,7 @@ export interface CreatureSheetInput {
     intelligence: string;
     morale: number;
     magicResistance: number;
+    hitRequirement: string;
     treasureType: string;
     numberAppearing: string;
     xpValue: number | null;
@@ -81,6 +82,7 @@ export interface CreatureSheetContext {
     intelligence: string;
     morale: number;
     magicResistance: number;
+    hitRequirement: string;
     treasureType: string;
     numberAppearing: string;
     xpValue: number | null;

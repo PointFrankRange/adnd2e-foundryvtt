@@ -98,6 +98,9 @@ export const MONSTER_TYPE_IDS = ["undead"] as const;
 export type MonsterTypeId = (typeof MONSTER_TYPE_IDS)[number];
 
 /** A Monster NPC's Table 61 row: blank means untagged. */
+/** SP18 Plan C: the creature `hitRequirement` ids (blank = any weapon). */
+export { HIT_REQUIREMENTS } from "../../core/enchantment";
+
 export const TURN_ROW_CHOICES: readonly ("" | TurnRowId)[] = ["", ...TURN_ROW_IDS];
 
 /** SP15 Plan A: psionic powers. */

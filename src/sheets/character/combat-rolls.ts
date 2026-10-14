@@ -54,14 +54,14 @@ import { themedConfirm, themedPrompt } from "../../dialogs/themed-dialog-foundry
  *  shapes (§4.1's "Reference facts" — confirmed by reading both DataModels). */
 export function resolveTargetCombatInfo(
   targetActor: { type: string; system: Record<string, unknown>; items: Iterable<{ type: string; system: { size?: string } }> },
-): { ac: number; size: string | null } {
+): { ac: number; size: string | null; hitRequirement: string } {
   if (targetActor.type === "creature") {
-    const sys = targetActor.system as { attributes?: { ac?: { value?: number } }; details?: { size?: string } };
-    return { ac: sys.attributes?.ac?.value ?? 10, size: sys.details?.size ?? "medium" };
+    const sys = targetActor.system as { attributes?: { ac?: { value?: number } }; details?: { size?: string; hitRequirement?: string } };
+    return { ac: sys.attributes?.ac?.value ?? 10, size: sys.details?.size ?? "medium", hitRequirement: sys.details?.hitRequirement ?? "" };
   }
   const sys = targetActor.system as { attributes?: { ac?: { normal?: number } } };
   const raceItem = [...targetActor.items].find((i) => i.type === "race");
-  return { ac: sys.attributes?.ac?.normal ?? 10, size: raceItem?.system.size ?? "medium" };
+  return { ac: sys.attributes?.ac?.normal ?? 10, size: raceItem?.system.size ?? "medium", hitRequirement: "" };
 }
 
 /** Finds the target's equipped, non-shield `armor`-type item and reads its

@@ -146,6 +146,7 @@
       "weaponBreaker": "The weapon is unharmed."
     },
     "martialEffects": { "unconscious": "Unconscious", "held": "Held", "prone": "Knocked down", "stunned": "Stunned", "paralyzed": "Paralyzed", "limbUseless": "Limb useless (24 hours)", "pain": "Pain", "doubleDamage": "Double damage" },
+    "hitRequirements": { "none": "None", "magical": "Magical weapons", "plus1": "+1 or better weapons", "plus2": "+2 or better weapons", "plus3": "+3 or better weapons", "plus4": "+4 or better weapons", "plus5": "+5 or better weapons" },
     "trackingTerrains": { "freshSnow": "Fresh snow", "softGround": "Soft or muddy ground", "thickBrush": "Thick brush or dense jungle", "forestField": "Forest, field or dusty floor", "normal": "Normal ground", "desert": "Desert or dry sand", "swamp": "Swamp", "rocky": "Rock, ice, stone or shallow water" },
     "trackingIlluminations": { "good": "Good light", "twilight": "Twilight, light fog or a single torch", "moonlit": "Full-moon night or moderate fog", "dark": "Overcast night, dense fog, blizzard or blowing sand" },
     "primaryTerrains": { "aquatic": "Aquatic", "arctic": "Arctic", "desert": "Desert", "forest": "Forest", "hill": "Hill", "jungle": "Jungle", "mountain": "Mountain", "plain": "Plain", "swamp": "Swamp" },
@@ -942,6 +943,7 @@
         "flyManeuverability": "Fly Maneuverability",
         "morale": "Morale",
         "magicResistance": "Magic Resistance",
+        "hitRequirement": "Hit only by",
         "treasureType": "Treasure Type",
         "numberAppearing": "Number Appearing",
         "xpValue": "XP Value",
