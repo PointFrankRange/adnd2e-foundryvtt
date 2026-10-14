@@ -803,8 +803,19 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
     expect(c.combat.armor.map((a) => [a.id, a.isShield, a.baseAc])).toEqual([
       ["a1", false, 3],
       ["s1", true, 10],
-      ["a2", false, 8],
     ]);
+  });
+
+  it("lists no armor rows when nothing is equipped (#165)", () => {
+    const c = buildCharacterSheetContext(
+      input({
+        physicalItems: [
+          physItem({ id: "a2", name: "Spare Leather", type: "armor", equipped: false, armor: { baseAc: 8, isShield: false, shieldAcBonus: 0, armorType: "leather" } }),
+          physItem({ id: "s2", name: "Spare Shield", type: "armor", equipped: false, armor: { baseAc: 10, isShield: true, shieldAcBonus: 1, armorType: "leather" } }),
+        ],
+      }),
+    );
+    expect(c.combat.armor).toEqual([]);
   });
 
   it("an active martial arts style adds a labelled AC row; zero or absent adds none", () => {

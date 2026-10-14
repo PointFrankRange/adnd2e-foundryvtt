@@ -55,7 +55,7 @@
 
       <div class="pc-vitals">
         <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.hp'}}</div>
-          <span class="kit-big"><input type="number" name="system.attributes.hp.value" value="{{adnd2e.vitals.hp.value}}"> / {{adnd2e.vitals.hp.max}}</span></div>
+          <span class="kit-big kit-hp"><input type="number" name="system.attributes.hp.value" value="{{adnd2e.vitals.hp.value}}"> / {{adnd2e.vitals.hp.max}}</span></div>
         <div class="kit-stat"><div class="kit-bar">+ HP</div>
           <span class="kit-big"><input type="number" name="system.attributes.hp.temp" value="{{adnd2e.vitals.hp.temp}}"></span></div>
         <div class="kit-stat"><div class="kit-bar">{{localize 'ADND2E.sheet.vitals.ac'}}</div><span class="kit-big"{{#if adnd2e.vitals.naturalAcApplies}} title="{{localize 'ADND2E.sheet.ac.natural'}}"{{/if}}>{{adnd2e.vitals.ac.normal}}</span></div>

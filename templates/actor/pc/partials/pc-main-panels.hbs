@@ -182,11 +182,11 @@
         <div class="armor-row{{#if a.equipped}} equipped{{/if}}" data-item-id="{{a.id}}">
           <span class="name">{{a.name}}{{#if a.isShield}} <span class="badge">{{localize 'ADND2E.sheet.combat.shield'}}</span>{{/if}}</span>
           <span class="ac">{{a.baseAc}}</span>
-          <span class="equipped-state">{{#if a.equipped}}{{localize 'ADND2E.sheet.combat.equipped'}}{{else}}{{localize 'ADND2E.sheet.combat.notEquipped'}}{{/if}}</span>
+          <span class="equipped-state">{{localize 'ADND2E.sheet.combat.equipped'}}</span>
           {{#if @root.adnd2e.lock.unlocked}}{{> adnd2e.item-controls id=a.id deletable=true}}{{/if}}
         </div>
       {{else}}
-        <p class="kit-empty">{{localize 'ADND2E.sheet.combat.noArmor'}}</p>
+        <p class="kit-empty">{{localize 'ADND2E.sheet.combat.noArmorEquipped'}}</p>
       {{/each}}
       <ul class="ac-breakdown">
         {{#each adnd2e.combat.acBreakdown as |row|}}<li class="kit-stat"><div class="kit-bar">{{localize row.label}}</div><span class="kit-big">{{row.value}}</span></li>{{/each}}
