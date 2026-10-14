@@ -27,6 +27,12 @@ describe("maneuver rows", () => {
     });
     expect(rows["strike:2"]).toMatchObject({ state: "locked", reasonKey: "ADND2E.sheet.martialArts.locked.order" });
   });
+  it("knownManeuvers is the learned subset in order", () => {
+    const item = karate({ knownManeuvers: [{ id: "strike:1", level: 1 }, { id: "block:1", level: 1 }] });
+    const v = buildMartialArtsView({ ...base, items: [item] });
+    expect(v.styles[0]!.knownManeuvers.map((m) => m.id)).toEqual(["block:1", "strike:1"]);
+    expect(v.styles[0]!.maneuvers.length).toBeGreaterThan(2);
+  });
   it("a known maneuver is usable only on the active style while able to act", () => {
     const item = karate({ knownManeuvers: [{ id: "strike:1", level: 1 }] });
     expect(rowsOf(buildMartialArtsView({ ...base, items: [item] }))["strike:1"]).toMatchObject({ state: "known", usable: true });

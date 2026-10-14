@@ -602,6 +602,7 @@
       },
       "martialArts": {
         "title": "Martial Arts",
+        "manageTitle": "Martial Arts: styles and maneuvers",
         "knowsBasics": "Knows basic martial arts",
         "basicsKnown": "Knows basic martial arts.",
         "basicsUnknown": "Does not know basic martial arts (needed to learn a style).",

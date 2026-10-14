@@ -49,6 +49,8 @@ export interface StyleRow {
   slots: number;
   active: boolean;
   maneuvers: ManeuverRow[];
+  /** the learned subset of `maneuvers`, same order */
+  knownManeuvers: ManeuverRow[];
 }
 
 /** The always-on abilities known on any owned style. */
@@ -122,6 +124,7 @@ export function buildMartialArtsView(input: {
       slots: i.system.slotsInvested ?? 1,
       active: i.id === activeId,
       maneuvers,
+      knownManeuvers: maneuvers.filter((m) => m.state === "known"),
     };
   });
   const active = styles.find((s) => s.active) ?? null;

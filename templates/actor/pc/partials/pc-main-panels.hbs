@@ -65,37 +65,21 @@
     <section class="kit-panel kit-martial-arts">
       <div class="kit-bar">{{localize 'ADND2E.sheet.martialArts.title'}}</div>
       <div class="kit-body">
-        {{#if @root.adnd2e.lock.unlocked}}
-          <label class="detail-field"><input type="checkbox" name="system.martialArts.knowsBasics"{{#if @root.martialArts.knowsBasics}} checked{{/if}}> <span>{{localize 'ADND2E.sheet.martialArts.knowsBasics'}}</span></label>
-        {{else}}
-          <p class="hint">{{#if @root.martialArts.knowsBasics}}{{localize 'ADND2E.sheet.martialArts.basicsKnown'}}{{else}}{{localize 'ADND2E.sheet.martialArts.basicsUnknown'}}{{/if}}</p>
-        {{/if}}
+        {{#unless @root.martialArts.knowsBasics}}<p class="hint">{{localize 'ADND2E.sheet.martialArts.basicsUnknown'}}</p>{{/unless}}
         {{#each @root.martialArts.styles as |s|}}
           <div class="trait-row" data-item-id="{{s.id}}">
-            <span class="name">{{s.name}}{{#if s.active}} — {{localize 'ADND2E.sheet.martialArts.active'}}{{/if}}</span>
+            <span class="name">{{s.name}}{{#if s.active}} - {{localize 'ADND2E.sheet.martialArts.active'}}{{/if}}</span>
             <span class="effect">{{localize s.formKey}} / {{localize s.methodKey}} ({{localize s.attackFormKey}})</span>
             <span class="effect">{{localize 'ADND2E.sheet.martialArts.acMod'}} {{adnd2eSigned s.acMod}}</span>
             <span class="effect">{{localize 'ADND2E.sheet.martialArts.damageDie'}} {{#if s.damageDie}}{{s.damageDie}}{{else}}{{localize 'ADND2E.sheet.martialArts.byWeapon'}}{{/if}}</span>
-            <span class="effect">{{localize 'ADND2E.sheet.martialArts.slots'}} {{s.slots}}</span>
             <button type="button" class="kit-small" data-action="useMartialStyle" data-item-id="{{s.id}}"{{#if s.active}} disabled{{/if}}>{{localize 'ADND2E.sheet.martialArts.use'}}</button>
-            {{#if @root.adnd2e.lock.unlocked}}{{> adnd2e.item-controls id=s.id deletable=true}}{{/if}}
-            {{#if s.maneuvers.length}}
+            {{#if s.knownManeuvers.length}}
               <div class="kit-powers">
-                <h5 class="kit-subhead">{{localize 'ADND2E.sheet.martialArts.maneuvers'}}</h5>
-                {{#each s.maneuvers as |m|}}
+                {{#each s.knownManeuvers as |m|}}
                   <div class="power-row" data-maneuver-id="{{m.id}}">
-                    <span class="name">{{localize m.nameKey}}</span>
-                    <span class="effect">{{localize m.listKey}} {{m.difficulty}} — {{localize m.costKey}}</span>
-                    {{#if m.reasonKey}}<span class="effect">{{localize m.reasonKey}}</span>{{/if}}
-                    {{#if (eq m.kind 'passive')}}
-                      {{#if (eq m.state 'known')}}<span class="effect">{{localize 'ADND2E.sheet.martialArts.passive'}}</span> <span class="effect">{{localize m.effectKey}}</span>{{/if}}
-                    {{/if}}
-                    {{#if (eq m.state 'known')}}
-                      {{#unless (eq m.kind 'passive')}}<button type="button" class="kit-small" data-action="useManeuver" data-maneuver-id="{{m.id}}"{{#unless m.usable}} disabled{{/unless}}>{{localize 'ADND2E.sheet.martialArts.useManeuver'}}</button>{{/unless}}
-                      {{#if @root.adnd2e.lock.unlocked}}<button type="button" class="kit-small" data-action="unlearnManeuver" data-item-id="{{s.id}}" data-maneuver-id="{{m.id}}">{{localize 'ADND2E.sheet.martialArts.unlearn'}}</button>{{/if}}
-                    {{else if (eq m.state 'learnable')}}
-                      <button type="button" class="kit-small" data-action="learnManeuver" data-item-id="{{s.id}}" data-maneuver-id="{{m.id}}">{{localize 'ADND2E.sheet.martialArts.learn'}}</button>
-                    {{/if}}
+                    <span class="name" title="{{localize m.effectKey}}">{{localize m.nameKey}}</span>
+                    <span class="effect">{{localize m.listKey}} {{m.difficulty}} - {{localize m.costKey}}</span>
+                    {{#if (eq m.kind 'passive')}}<span class="effect">{{localize 'ADND2E.sheet.martialArts.passive'}}</span>{{else}}<button type="button" class="kit-small" data-action="useManeuver" data-maneuver-id="{{m.id}}"{{#unless m.usable}} disabled{{/unless}}>{{localize 'ADND2E.sheet.martialArts.useManeuver'}}</button>{{/if}}
                   </div>
                 {{/each}}
               </div>

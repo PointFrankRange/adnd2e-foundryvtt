@@ -5,6 +5,7 @@ import path from "node:path";
 const ROOT = path.resolve(__dirname, "..", "..");
 const read = (...p: string[]) => readFileSync(path.join(ROOT, ...p), "utf8");
 const MAIN = read("templates", "actor", "pc", "partials", "pc-main-panels.hbs");
+const FEATURES = read("templates", "actor", "pc", "partials", "pc-feature-panels.hbs");
 const CHAT = read("templates", "chat", "martial-arts-attack.hbs");
 const SHEET = read("src", "sheets", "character", "sheet.ts");
 const NPC_SHEET = read("src", "sheets", "npc", "sheet.ts");
@@ -22,7 +23,9 @@ describe("martial arts bindings (SP18 Plan A)", () => {
     expect(attack.match(/disabled/g)).toHaveLength(1);
     expect(attack).toContain("martialArts.canAttack");
     expect(MAIN).toContain('data-action="useMartialStyle"');
-    expect(MAIN).toContain('name="system.martialArts.knowsBasics"');
+    expect(MAIN).not.toContain('name="system.martialArts.knowsBasics"');
+    expect(FEATURES).toContain('name="system.martialArts.knowsBasics"');
+    expect(FEATURES).toMatch(/@root\.pcActions[\s\S]*@root\.martialArts\.visible[\s\S]*ADND2E\.sheet\.martialArts\.manageTitle/);
   });
   it("the PC sheet registers both actions; the Character NPC sheet sets neither pcActions nor martialArts", () => {
     expect(SHEET).toMatch(/^\s+martialArtsAttack: Adnd2eCharacterSheet\.#on/m);
@@ -32,6 +35,7 @@ describe("martial arts bindings (SP18 Plan A)", () => {
   it("every sheet, chat and drop key used exists in lang/en.json", () => {
     const keys = new Set([
       ...keysIn(MAIN, /ADND2E\.sheet\.martialArts\.[A-Za-z]+/g),
+      ...keysIn(FEATURES, /ADND2E\.sheet\.martialArts\.[A-Za-z]+/g),
       // the lock-reason table is a dynamic prefix (locked.${reason}); the Plan B1 bindings test covers each reason
       ...keysIn(ACTIONS, /ADND2E\.(sheet|chat)\.martialArts\.[A-Za-z]+/g).filter((k) => !k.endsWith(".locked")),
       ...keysIn(CHAT, /ADND2E\.chat\.martialArts\.[A-Za-z]+/g),

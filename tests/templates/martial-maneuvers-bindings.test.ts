@@ -6,6 +6,7 @@ import { MANEUVERS } from "../../src/core/martial-arts";
 const ROOT = path.resolve(__dirname, "..", "..");
 const read = (...p: string[]) => readFileSync(path.join(ROOT, ...p), "utf8");
 const MAIN = read("templates", "actor", "pc", "partials", "pc-main-panels.hbs");
+const FEATURES = read("templates", "actor", "pc", "partials", "pc-feature-panels.hbs");
 const CHAT = read("templates", "chat", "martial-arts-attack.hbs");
 const SHEET = read("src", "sheets", "character", "sheet.ts");
 const NPC_SHEET = read("src", "sheets", "npc", "sheet.ts");
@@ -18,13 +19,25 @@ const lookup = (key: string): unknown => key.split(".").reduce<unknown>((o, k) =
 const keysIn = (src: string, re: RegExp): string[] => [...new Set([...src.matchAll(re)].map((m) => m[0]))];
 
 describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
-  it("the panel lists maneuvers per style with Learn and Use buttons", () => {
-    expect(MAIN).toContain("data-action=\"learnManeuver\"");
+  it("Main is the compact play view: known maneuvers with Use, no management controls", () => {
     expect(MAIN).toContain("data-action=\"useManeuver\"");
+    expect(MAIN).toContain("s.knownManeuvers");
+    expect(MAIN).toContain('title="{{localize m.effectKey}}"');
     expect(MAIN).toMatch(/data-maneuver-id="\{\{m\.id\}\}"/);
     const use = MAIN.split(/\r?\n/).find((l) => l.includes('data-action="useManeuver"'))!;
     expect(use.match(/disabled/g)).toHaveLength(1);
     expect(use).toContain("m.usable");
+    for (const gone of ["learnManeuver", "unlearnManeuver", "system.martialArts.knowsBasics", "s.maneuvers"]) expect(MAIN, gone).not.toContain(gone);
+  });
+  it("Features is the management view: Learn, Unlearn, the full list, no Use or Attack", () => {
+    expect(FEATURES).toContain("data-action=\"learnManeuver\"");
+    expect(FEATURES).toContain('data-item-id="{{s.id}}"');
+    expect(FEATURES).toContain("s.maneuvers");
+    expect(FEATURES).toContain("adnd2e.item-controls");
+    expect(FEATURES).toContain("ADND2E.sheet.martialArts.manageTitle");
+    expect(FEATURES).not.toContain('data-action="useManeuver"');
+    expect(FEATURES).not.toContain('data-action="martialArtsAttack"');
+    expect(lookup("ADND2E.sheet.martialArts.manageTitle")).toBe("Martial Arts: styles and maneuvers");
   });
   it("the PC sheet registers both actions; the Character NPC sheet gets neither", () => {
     expect(SHEET).toMatch(/^\s+learnManeuver: Adnd2eCharacterSheet\.#on/m);
@@ -42,6 +55,7 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
   it("every sheet, chat and lock-reason key used exists in lang/en.json", () => {
     const keys = new Set([
       ...keysIn(MAIN, /ADND2E\.sheet\.martialArts\.[A-Za-z]+/g),
+      ...keysIn(FEATURES, /ADND2E\.sheet\.martialArts\.[A-Za-z]+/g),
       ...keysIn(ACTIONS, /ADND2E\.(sheet|chat)\.martialArts\.[A-Za-z.]+/g).filter((k) => !k.endsWith(".")),
       ...keysIn(CHAT, /ADND2E\.chat\.martialArts\.[A-Za-z]+/g),
       ...keysIn(CARD, /ADND2E\.chat\.martialArts\.(?:mod\.)?[A-Za-z0-9]+/g),
@@ -81,6 +95,7 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
   it("the panel shows passive maneuvers without a Use button", () => {
     expect(MAIN).toContain("m.kind 'passive'");
     expect(MAIN).toContain("ADND2E.sheet.martialArts.passive");
+    expect(FEATURES).toContain("ADND2E.sheet.martialArts.passive");
   });
   it("the new card and sheet keys exist in lang/en.json", () => {
     for (const key of [
@@ -116,8 +131,8 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
     expect(read("src", "chat", "chat-listeners.ts")).toContain("parseSelfActorUuid");
   });
   it("a known passive row shows its own effect text; unlearn is lock-gated and wired (SP18 Plan B3)", () => {
-    expect(MAIN).toContain("m.effectKey");
-    const line = MAIN.split(/\r?\n/).find((l) => l.includes('data-action="unlearnManeuver"'))!;
+    expect(FEATURES).toContain("m.effectKey");
+    const line = FEATURES.split(/\r?\n/).find((l) => l.includes('data-action="unlearnManeuver"'))!;
     expect(line).toContain("@root.adnd2e.lock.unlocked");
     expect(line).not.toContain("disabled");
     expect(SHEET).toMatch(/^\s+unlearnManeuver: Adnd2eCharacterSheet\.#on/m);
