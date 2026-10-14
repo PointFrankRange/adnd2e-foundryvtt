@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  MANEUVERS, MANEUVER_LISTS, MAX_MANEUVERS_PER_LEVEL, armorGroupOf, learnability, maneuverById, maneuverDamageFormula, table21Modifier, doubleBasicDamageFormula,
+  MANEUVERS, MANEUVER_LISTS, MAX_MANEUVERS_PER_LEVEL, armorGroupOf, learnability, unlearnUpdate, maneuverById, maneuverDamageFormula, table21Modifier, doubleBasicDamageFormula,
 } from "../../../src/core/martial-arts";
 
 const def = (id: string) => maneuverById(id)!;
@@ -234,5 +234,27 @@ describe("B3 registry rows", () => {
     expect(learnability({ ...base, known: [], maneuverId: "mental:6" })).toEqual({ ok: false, reason: "order" });
     const known = [{ id: "mental:1", level: 1 }, { id: "mental:4", level: 1 }, { id: "mental:5", level: 1 }];
     expect(learnability({ ...base, known, maneuverId: "mental:6", level: 2 })).toEqual({ ok: true });
+  });
+});
+
+describe("unlearnUpdate", () => {
+  const known = [{ id: "strike:1", level: 1 }, { id: "kick:1", level: 2 }, { id: "block:1", level: 2 }];
+  it("removes only that entry, keeps the others' levels and refunds one slot", () => {
+    expect(unlearnUpdate({ known, maneuverId: "kick:1", slotsInvested: 4 })).toEqual({
+      knownManeuvers: [{ id: "strike:1", level: 1 }, { id: "block:1", level: 2 }], slotsInvested: 3,
+    });
+  });
+  it("never drops below one slot", () => {
+    expect(unlearnUpdate({ known, maneuverId: "kick:1", slotsInvested: 1 })!.slotsInvested).toBe(1);
+  });
+  it("is null for an unknown maneuver", () => {
+    expect(unlearnUpdate({ known, maneuverId: "mental:6", slotsInvested: 3 })).toBeNull();
+  });
+  it("frees the per-level cap again", () => {
+    const offered = [{ list: "strike", difficulties: [1, 2] }, { list: "kick", difficulties: [1] }, { list: "block", difficulties: [1] }];
+    const full = [{ id: "strike:1", level: 2 }, { id: "kick:1", level: 2 }];
+    expect(learnability({ maneuverId: "block:1", offered, known: full, freeSlots: 1, level: 2 })).toEqual({ ok: false, reason: "levelCap" });
+    const after = unlearnUpdate({ known: full, maneuverId: "kick:1", slotsInvested: 3 })!;
+    expect(learnability({ maneuverId: "block:1", offered, known: after.knownManeuvers, freeSlots: 1, level: 2 })).toEqual({ ok: true });
   });
 });

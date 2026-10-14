@@ -29,6 +29,8 @@ export interface ManeuverRow {
   reasonKey: string;
   /** known, on the active style, and the character can act */
   usable: boolean;
+  /** i18n key of the maneuver's effect text */
+  effectKey: string;
 }
 
 const COST_KEY: Readonly<Record<string, string>> = { "0": "none", "1": "one", "2": "two", round: "round" };
@@ -103,6 +105,7 @@ export function buildMartialArtsView(input: {
           kind: m.kind,
           state: isKnown ? "known" : verdict.ok ? "learnable" : "locked",
           reasonKey: isKnown || verdict.ok ? "" : `ADND2E.sheet.martialArts.locked.${verdict.reason}`,
+          effectKey: `ADND2E.martialManeuverEffects.${m.slug}`,
           usable: isKnown && isActive && input.canAct && m.kind !== "passive",
         };
       },

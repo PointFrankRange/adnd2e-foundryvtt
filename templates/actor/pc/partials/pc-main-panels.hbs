@@ -88,10 +88,11 @@
                     <span class="effect">{{localize m.listKey}} {{m.difficulty}} — {{localize m.costKey}}</span>
                     {{#if m.reasonKey}}<span class="effect">{{localize m.reasonKey}}</span>{{/if}}
                     {{#if (eq m.kind 'passive')}}
-                      {{#if (eq m.state 'known')}}<span class="effect">{{localize 'ADND2E.sheet.martialArts.passive'}}</span>{{/if}}
+                      {{#if (eq m.state 'known')}}<span class="effect">{{localize 'ADND2E.sheet.martialArts.passive'}}</span> <span class="effect">{{localize m.effectKey}}</span>{{/if}}
                     {{/if}}
                     {{#if (eq m.state 'known')}}
                       {{#unless (eq m.kind 'passive')}}<button type="button" class="kit-small" data-action="useManeuver" data-maneuver-id="{{m.id}}"{{#unless m.usable}} disabled{{/unless}}>{{localize 'ADND2E.sheet.martialArts.useManeuver'}}</button>{{/unless}}
+                      {{#if @root.adnd2e.lock.unlocked}}<button type="button" class="kit-small" data-action="unlearnManeuver" data-item-id="{{s.id}}" data-maneuver-id="{{m.id}}">{{localize 'ADND2E.sheet.martialArts.unlearn'}}</button>{{/if}}
                     {{else if (eq m.state 'learnable')}}
                       <button type="button" class="kit-small" data-action="learnManeuver" data-item-id="{{s.id}}" data-maneuver-id="{{m.id}}">{{localize 'ADND2E.sheet.martialArts.learn'}}</button>
                     {{/if}}

@@ -115,4 +115,16 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
     expect(lookup("ADND2E.chat.martialArts.appliesToYou")).toBe("Applies to you.");
     expect(read("src", "chat", "chat-listeners.ts")).toContain("parseSelfActorUuid");
   });
+  it("a known passive row shows its own effect text; unlearn is lock-gated and wired (SP18 Plan B3)", () => {
+    expect(MAIN).toContain("m.effectKey");
+    const line = MAIN.split(/\r?\n/).find((l) => l.includes('data-action="unlearnManeuver"'))!;
+    expect(line).toContain("@root.adnd2e.lock.unlocked");
+    expect(line).not.toContain("disabled");
+    expect(SHEET).toMatch(/^\s+unlearnManeuver: Adnd2eCharacterSheet\.#on/m);
+    expect(ACTIONS).toContain("unlearnUpdate(");
+    expect(ACTIONS).toContain("themedConfirm");
+    expect(lookup("ADND2E.sheet.martialArts.unlearn")).toBe("Unlearn");
+    expect(lookup("ADND2E.sheet.martialArts.unlearnTitle")).toBe("Unlearn maneuver");
+    expect(lookup("ADND2E.sheet.martialArts.unlearnConfirm")).toBe("Unlearn {name}? Its weapon proficiency slot is refunded.");
+  });
 });

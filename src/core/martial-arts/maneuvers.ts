@@ -190,3 +190,16 @@ export function learnability(input: {
   if (input.known.filter((k) => k.level === input.level).length >= MAX_MANEUVERS_PER_LEVEL) return { ok: false, reason: "levelCap" };
   return { ok: true };
 }
+
+/** Removes one known maneuver and refunds its slot (never below the style's first slot); null when it is not known. */
+export function unlearnUpdate(input: {
+  known: readonly { id: string; level: number }[];
+  maneuverId: string;
+  slotsInvested: number;
+}): { knownManeuvers: { id: string; level: number }[]; slotsInvested: number } | null {
+  if (!input.known.some((k) => k.id === input.maneuverId)) return null;
+  return {
+    knownManeuvers: input.known.filter((k) => k.id !== input.maneuverId).map((k) => ({ id: k.id, level: k.level })),
+    slotsInvested: Math.max(1, input.slotsInvested - 1),
+  };
+}

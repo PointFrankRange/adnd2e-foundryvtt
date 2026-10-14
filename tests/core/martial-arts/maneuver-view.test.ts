@@ -23,6 +23,7 @@ describe("maneuver rows", () => {
     expect(rows["strike:1"]).toMatchObject({
       state: "learnable", usable: false, nameKey: "ADND2E.martialManeuvers.ironFist", listKey: "ADND2E.martialManeuverLists.strike",
       costKey: "ADND2E.martialManeuverCosts.none", kind: "attack", difficulty: 1, reasonKey: "",
+      effectKey: "ADND2E.martialManeuverEffects.ironFist",
     });
     expect(rows["strike:2"]).toMatchObject({ state: "locked", reasonKey: "ADND2E.sheet.martialArts.locked.order" });
   });

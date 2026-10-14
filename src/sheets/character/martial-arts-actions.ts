@@ -5,10 +5,10 @@ import {
 } from "../../combat/condition-effects";
 import {
   armorGroupOf, blindFightingTotal, buildMartialArtsView, buildMartialCardContext, buildManeuverCardContext, buildSkillCardContext,
-  learnability, maneuverById, resolveLeap, resolveManeuverAttack, resolveMartialAttack, resolveSpeed, type ArmorGroup, type MartialArtsView,
+  learnability, maneuverById, resolveLeap, resolveManeuverAttack, resolveMartialAttack, resolveSpeed, unlearnUpdate, type ArmorGroup, type MartialArtsView,
   type StyleItemLike,
 } from "../../core/martial-arts";
-import { themedPrompt } from "../../dialogs/themed-dialog-foundry";
+import { themedConfirm, themedPrompt } from "../../dialogs/themed-dialog-foundry";
 import { getOptionalRules } from "../../settings";
 import { resolveTargetArmorType, resolveTargetCombatInfo } from "./combat-rolls";
 
@@ -79,6 +79,25 @@ export async function learnManeuver(actor: MartialArtsActor, styleId: string, ma
     "system.knownManeuvers": [...known.map((k) => ({ id: k.id, level: k.level })), { id: maneuverId, level }],
     "system.slotsInvested": (sys.slotsInvested ?? 1) + 1,
   });
+}
+
+/** Unlearn a known maneuver on an owned style after a confirmation; the weapon proficiency slot is refunded. */
+export async function unlearnManeuver(actor: MartialArtsActor, styleId: string, maneuverId: string): Promise<void> {
+  if (!martialArtsView(actor).visible) return;
+  const item = [...actor.items].find((i) => i.type === "martialStyle" && i.id === styleId);
+  if (!item?.update) return;
+  const sys = item.system as { knownManeuvers?: { id: string; level: number }[]; slotsInvested?: number };
+  const change = unlearnUpdate({ known: sys.knownManeuvers ?? [], maneuverId, slotsInvested: sys.slotsInvested ?? 1 });
+  if (!change) return;
+  const slug = maneuverById(maneuverId)?.slug ?? "";
+  const confirmed = await themedConfirm({
+    window: { title: game.i18n!.localize("ADND2E.sheet.martialArts.unlearnTitle") },
+    content: `<p>${game.i18n!.format("ADND2E.sheet.martialArts.unlearnConfirm", {
+      name: foundry.utils.escapeHTML(game.i18n!.localize(`ADND2E.martialManeuvers.${slug}`)),
+    })}</p>`,
+  } as never);
+  if (confirmed !== true) return;
+  await item.update({ "system.knownManeuvers": change.knownManeuvers, "system.slotsInvested": change.slotsInvested });
 }
 
 /** The size ("S"/"M"/"L") of the weapon the target is wielding, or null (a missing size means no penalty). */

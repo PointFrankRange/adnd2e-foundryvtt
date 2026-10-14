@@ -113,7 +113,7 @@
       "meditation": "Always in effect: each hour of meditation gives the rest of two hours of sleep.",
       "allAroundSight": "Always in effect: you notice all non-invisible foes around you and can never be struck from behind.",
       "mentalResistance": "Always in effect: +2 on saving throws against mental attacks such as charm, illusion and hold.",
-      "chiAttacks": "Always in effect: your unarmed hits count as magical weapons by level (Table 20); applied by the damage-resistance rules.",
+      "chiAttacks": "Always in effect: your unarmed hits count as magical weapons by level (Table 20). The game does not model damage resistance yet, so treat this as a reminder for the GM.",
       "blindFighting": "Always in effect: only -1 when blinded, in darkness or against invisible foes (applied to your martial arts rolls).",
       "ironskin": "Always in effect: your AC improves by 2 while you wear no body armor.",
       "levitation": "Float up, down or sideways; one turn of concentration first and a round of rest after."
@@ -617,6 +617,9 @@
         "noActive": "Choose a martial arts style first.",
         "maneuvers": "Special maneuvers",
         "learn": "Learn",
+        "unlearn": "Unlearn",
+        "unlearnTitle": "Unlearn maneuver",
+        "unlearnConfirm": "Unlearn {name}? Its weapon proficiency slot is refunded.",
         "useManeuver": "Use",
         "notKnown": "You have not learned that maneuver with the active style.",
         "passive": "Always in effect",
