@@ -15,4 +15,7 @@ describe("HP box layout (#164)", () => {
     expect(PC).toMatch(/&\.kit-hp\s*\{[^}]*field-sizing:\s*content[^}]*\}/);
     expect(PC).toMatch(/&\.kit-hp\s*\{[^}]*max-width:\s*7ch[^}]*\}/);
   });
+  it("lets only the HP stat box grow with its content", () => {
+    expect(PC).toMatch(/&:has\(>\s*\.kit-big\.kit-hp\)\s*\{[^}]*flex:\s*0 0 auto[^}]*min-width:\s*76px[^}]*\}/);
+  });
 });
