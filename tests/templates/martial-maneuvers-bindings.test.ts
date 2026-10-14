@@ -62,6 +62,7 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
       ...["notOffered", "known", "order", "noSlot", "levelCap"].map((r) => `ADND2E.sheet.martialArts.locked.${r}`),
       "ADND2E.sheet.martialArts.maneuvers", "ADND2E.sheet.martialArts.learn", "ADND2E.sheet.martialArts.useManeuver",
       "ADND2E.chat.martialArts.parried", "ADND2E.chat.martialArts.notParried", "ADND2E.chat.martialArts.mod.table21",
+      ...["blinded", "invisibleTarget", "fatigue", "entangled", "frightened", "heldTarget", "blindFighting"].map((k) => `ADND2E.chat.martialArts.mod.${k}`),
     ]);
     for (const key of keys) expect(typeof lookup(key), key).toBe("string");
   });
@@ -120,7 +121,7 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
     expect(ACTIONS).toContain("resolveLeap");
     expect(ACTIONS).toContain("resolveSpeed");
     expect(ACTIONS).toContain("buildSkillCardContext");
-    expect(ACTIONS).toContain("blindFightingTotal");
+    expect(ACTIONS).toContain("conditionModifiers");
     expect(ACTIONS).toContain("wearingBodyArmor");
   });
   it("Leap's prone button applies to the speaker (SP18 B3 final review)", () => {

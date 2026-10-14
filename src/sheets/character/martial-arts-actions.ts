@@ -4,7 +4,7 @@ import {
   heldAttackBonus, invisibleTargetPenalty, isHelpless, proneArmorClassPenalty,
 } from "../../combat/condition-effects";
 import {
-  armorGroupOf, blindFightingTotal, buildMartialArtsView, buildMartialCardContext, buildManeuverCardContext, buildSkillCardContext,
+  armorGroupOf, conditionModifiers, buildMartialArtsView, buildMartialCardContext, buildManeuverCardContext, buildSkillCardContext,
   learnability, maneuverById, resolveLeap, resolveManeuverAttack, resolveMartialAttack, resolveSpeed, unlearnUpdate, type ArmorGroup, type MartialArtsView,
   type StyleItemLike,
 } from "../../core/martial-arts";
@@ -148,15 +148,17 @@ async function resolveTarget(): Promise<TargetInfo | null> {
   return { targetName: null, targetAc: manualAc, opponentWeaponSize: null, targetStatuses: new Set<string>(), targetArmorGroup: "none" };
 }
 
-/** Summed condition modifiers on the attack roll (the same set the weapon attack uses). */
-function situationalModifier(actor: MartialArtsActor, targetStatuses: ReadonlySet<string>, blindFighting = false): number {
-  return (
-    blindFightingTotal(blindedAttackPenalty(actor.statuses), invisibleTargetPenalty(targetStatuses), blindFighting) +
-    fatigueAttackPenalty(actor.statuses) +
-    entangledAttackPenalty(actor.statuses) +
-    frightenedAttackPenalty(actor.statuses) +
-    heldAttackBonus(targetStatuses)
-  );
+/** The condition modifiers on the attack roll (the same set the weapon attack uses), itemized for the card. */
+function situational(actor: MartialArtsActor, targetStatuses: ReadonlySet<string>, blindFighting = false): { total: number; rows: { labelKey: string; amount: number }[] } {
+  return conditionModifiers({
+    blinded: blindedAttackPenalty(actor.statuses),
+    invisibleTarget: invisibleTargetPenalty(targetStatuses),
+    fatigue: fatigueAttackPenalty(actor.statuses),
+    entangled: entangledAttackPenalty(actor.statuses),
+    frightened: frightenedAttackPenalty(actor.statuses),
+    heldTarget: heldAttackBonus(targetStatuses),
+    blindFighting,
+  });
 }
 
 async function postCard(actor: MartialArtsActor, roll: Roll, template: string, context: object): Promise<void> {
@@ -174,18 +176,19 @@ export async function rollMartialArtsAttack(actor: MartialArtsActor): Promise<vo
   if (!target) return;
 
   const roll = await new Roll("1d20").evaluate();
+  const cond = situational(actor, target.targetStatuses, view.constants.blindFighting);
   const result = resolveMartialAttack({
     naturalD20: roll.dice[0]?.total ?? roll.total ?? 1,
     thac0: actor.system.attributes?.thac0?.melee ?? 20,
     targetAc: target.targetAc,
     attackerArmorType: resolveTargetArmorType(actor as never),
     opponentWeaponSize: target.opponentWeaponSize,
-    situationalModifier: situationalModifier(actor, target.targetStatuses, view.constants.blindFighting),
+    situationalModifier: cond.total,
     strengthDamageAdj: actor.system.abilities?.str?.mods?.damageAdj ?? 0,
     forcedHit: isHelpless(target.targetStatuses),
   });
   const context = buildMartialCardContext({
-    actorName: actor.name, actorImg: actor.img, styleName: view.active.name, targetName: target.targetName, result,
+    actorName: actor.name, actorImg: actor.img, styleName: view.active.name, targetName: target.targetName, result, situationalRows: cond.rows,
   });
   await postCard(actor, roll, "chat/martial-arts-attack.hbs", context);
 }
@@ -211,14 +214,16 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
   if (def.kind === "skill") {
     const skillRoll = await new Roll("1d20").evaluate();
     const natural = skillRoll.dice[0]?.total ?? skillRoll.total ?? 1;
+    const leapCond = situational(actor, new Set<string>(), view.constants.blindFighting);
     const card =
       def.slug === "leap"
         ? buildSkillCardContext({
             actorName: actor.name, actorImg: actor.img, styleName: view.active.name, maneuverId, skill: "leap",
             result: resolveLeap({
               naturalD20: natural, thac0: actor.system.attributes?.thac0?.melee ?? 20,
-              situationalModifier: situationalModifier(actor, new Set<string>(), view.constants.blindFighting), level: characterLevel(actor),
+              situationalModifier: leapCond.total, level: characterLevel(actor),
             }),
+            situationalRows: leapCond.rows,
           })
         : buildSkillCardContext({
             actorName: actor.name, actorImg: actor.img, styleName: view.active.name, maneuverId, skill: "speed",
@@ -231,6 +236,7 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
   if (!target) return;
 
   const roll = await new Roll("1d20").evaluate();
+  const cond = situational(actor, target.targetStatuses, view.constants.blindFighting);
   const result = resolveManeuverAttack({
     maneuverId,
     naturalD20: roll.dice[0]?.total ?? roll.total ?? 1,
@@ -238,7 +244,7 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
     targetAc: target.targetAc,
     attackerArmorType: resolveTargetArmorType(actor as never),
     opponentWeaponSize: target.opponentWeaponSize,
-    situationalModifier: situationalModifier(actor, target.targetStatuses, view.constants.blindFighting),
+    situationalModifier: cond.total,
     targetArmorGroup: target.targetArmorGroup,
     styleDie: view.active.damageDie,
     level: characterLevel(actor),
@@ -251,7 +257,7 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
   if (result.doubleDamageFormula) doubleDamageTotal = Math.max(0, (await new Roll(result.doubleDamageFormula).evaluate()).total ?? 0);
   const context = buildManeuverCardContext({
     actorName: actor.name, actorImg: actor.img, styleName: view.active.name, targetName: target.targetName, result, damageTotal,
-    doubleDamageTotal,
+    doubleDamageTotal, situationalRows: cond.rows,
     styleDieIsNull: view.active.damageDie === null,
   });
   await postCard(actor, roll, "chat/martial-arts-attack.hbs", context);

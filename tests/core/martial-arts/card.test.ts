@@ -214,3 +214,30 @@ describe("Feint and skill cards (SP18 B3)", () => {
     expect(ctx.costKey).toBe("ADND2E.martialManeuverCosts.round");
   });
 });
+
+describe("itemized situational rows", () => {
+  const rows = [{ labelKey: "ADND2E.chat.martialArts.mod.blinded", amount: -4 }, { labelKey: "ADND2E.chat.martialArts.mod.heldTarget", amount: 4 }];
+  it("the plain attack card replaces the Conditions row with the given rows", () => {
+    const ctx = buildMartialCardContext({
+      actorName: "A", actorImg: "", styleName: "S", targetName: null, result: resolveMartialAttack(input), situationalRows: rows,
+    });
+    expect(ctx.breakdown.map((b) => b.labelKey)).not.toContain("ADND2E.chat.martialArts.mod.situational");
+    expect(ctx.breakdown.slice(2)).toEqual(rows);
+  });
+  it("a maneuver card keeps table21 and maneuver rows after the given rows", () => {
+    const feint = { maneuverId: "movement:1", naturalD20: 14, thac0: 18, targetAc: 10, attackerArmorType: "none", opponentWeaponSize: null, situationalModifier: -4, targetArmorGroup: "none", styleDie: "1d6", level: 3, strengthAdj: 0 };
+    const ctx = buildManeuverCardContext({
+      actorName: "A", actorImg: "", styleName: "S", targetName: null, result: resolveManeuverAttack(feint as never), damageTotal: 0,
+      situationalRows: [rows[0]!],
+    });
+    expect(ctx.breakdown[0]).toEqual(rows[0]);
+    expect(ctx.breakdown.map((b) => b.labelKey)).not.toContain("ADND2E.chat.martialArts.mod.situational");
+  });
+  it("a Leap card lists the given non-zero rows, none when absent", () => {
+    const result = resolveLeap({ naturalD20: 15, thac0: 20, situationalModifier: -4, level: 10 });
+    const withRows = buildSkillCardContext({ actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:4", skill: "leap", result, situationalRows: [...rows, { labelKey: "x", amount: 0 }] });
+    expect(withRows.breakdown).toEqual(rows);
+    const without = buildSkillCardContext({ actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:4", skill: "leap", result });
+    expect(without.breakdown).toEqual([]);
+  });
+});

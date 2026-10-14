@@ -10,6 +10,8 @@ export interface MartialCardInput {
   styleName: string;
   targetName: string | null;
   result: MartialAttackResult;
+  /** itemized condition rows; when given they replace the single summed Conditions row */
+  situationalRows?: { labelKey: string; amount: number }[];
 }
 
 export interface MartialCardContext {
@@ -28,12 +30,16 @@ export interface MartialCardContext {
   stunTrigger: boolean;
 }
 
+function situationalEntries(rows: { labelKey: string; amount: number }[] | undefined, summed: number): [string, number][] {
+  return rows ? rows.map((x): [string, number] => [x.labelKey, x.amount]) : [["ADND2E.chat.martialArts.mod.situational", summed]];
+}
+
 export function buildMartialCardContext(input: MartialCardInput): MartialCardContext {
   const r = input.result;
   const rows: [string, number][] = [
     ["ADND2E.chat.martialArts.mod.armor", r.penalties.armor],
     ["ADND2E.chat.martialArts.mod.weaponSize", r.penalties.weaponSize],
-    ["ADND2E.chat.martialArts.mod.situational", r.penalties.situational],
+    ...situationalEntries(input.situationalRows, r.penalties.situational),
   ];
   return {
     actorName: input.actorName,
@@ -78,6 +84,8 @@ export interface ManeuverCardInput {
   styleDieIsNull?: boolean;
   /** the rolled total of the Double Damage alternative, floored at 0 by the caller */
   doubleDamageTotal?: number;
+  /** itemized condition rows; when given they replace the single summed Conditions row */
+  situationalRows?: { labelKey: string; amount: number }[];
 }
 
 export interface ManeuverCardContext {
@@ -113,7 +121,7 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
   const rows: [string, number][] = [
     ["ADND2E.chat.martialArts.mod.armor", r.penalties.armor],
     ["ADND2E.chat.martialArts.mod.weaponSize", r.penalties.weaponSize],
-    ["ADND2E.chat.martialArts.mod.situational", r.penalties.situational],
+    ...situationalEntries(input.situationalRows, r.penalties.situational),
     ["ADND2E.chat.martialArts.mod.table21", r.penalties.table21],
     ["ADND2E.chat.martialArts.mod.maneuver", r.maneuverBonus],
   ];
@@ -170,7 +178,7 @@ export interface SkillCardContext extends ManeuverCardContext {
 }
 
 export type SkillCardInput = { actorName: string; actorImg: string; styleName: string; maneuverId: string } & (
-  | { skill: "leap"; result: LeapResult }
+  | { skill: "leap"; result: LeapResult; situationalRows?: { labelKey: string; amount: number }[] }
   | { skill: "speed"; result: SpeedResult }
   | { skill: "levitation"; level: number }
 );
@@ -212,6 +220,7 @@ export function buildSkillCardContext(input: SkillCardInput): SkillCardContext {
       total: r.total,
       needed: r.needed,
       hit: r.hit,
+      breakdown: (input.situationalRows ?? []).filter((x) => x.amount !== 0),
       resultKey: r.hit ? "ADND2E.chat.martialArts.landed" : "ADND2E.chat.martialArts.fell",
       effects: r.hit ? [] : [PRONE_EFFECT],
       lines: [

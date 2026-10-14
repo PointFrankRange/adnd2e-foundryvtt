@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  blindFightingPenalty, blindFightingTotal, ironskinAcMod, knownManeuverIds, levitationInfo, resolveLeap, resolveSpeed,
+  blindFightingPenalty, blindFightingTotal, conditionModifiers, ironskinAcMod, knownManeuverIds, levitationInfo, resolveLeap, resolveSpeed,
 } from "../../../src/core/martial-arts";
 
 describe("resolveLeap", () => {
@@ -66,5 +66,33 @@ describe("blindFightingTotal", () => {
   });
   it("sums the penalties when not known", () => {
     expect(blindFightingTotal(-4, -4, false)).toBe(-8);
+  });
+});
+
+describe("conditionModifiers", () => {
+  const none = { blinded: 0, invisibleTarget: 0, fatigue: 0, entangled: 0, frightened: 0, heldTarget: 0, blindFighting: false };
+  const P = "ADND2E.chat.martialArts.mod.";
+  it("no conditions gives nothing", () => {
+    expect(conditionModifiers(none)).toEqual({ total: 0, rows: [] });
+  });
+  it("blinded alone is one -4 row", () => {
+    expect(conditionModifiers({ ...none, blinded: -4 })).toEqual({ total: -4, rows: [{ labelKey: `${P}blinded`, amount: -4 }] });
+  });
+  it("blinded and invisible without Blind Fighting are two rows", () => {
+    const r = conditionModifiers({ ...none, blinded: -4, invisibleTarget: -4 });
+    expect(r.total).toBe(-8);
+    expect(r.rows).toEqual([{ labelKey: `${P}blinded`, amount: -4 }, { labelKey: `${P}invisibleTarget`, amount: -4 }]);
+  });
+  it("Blind Fighting folds them into one capped row, and omits it when nothing applies", () => {
+    expect(conditionModifiers({ ...none, blinded: -4, invisibleTarget: -4, blindFighting: true })).toEqual({
+      total: -1, rows: [{ labelKey: `${P}blindFighting`, amount: -1 }],
+    });
+    expect(conditionModifiers({ ...none, blindFighting: true })).toEqual({ total: 0, rows: [] });
+  });
+  it("fatigue, entangled, frightened and a held-target bonus each get a row in order", () => {
+    const r = conditionModifiers({ ...none, fatigue: -2, entangled: -2, frightened: -2, heldTarget: 4 });
+    expect(r.total).toBe(-2);
+    expect(r.rows.map((x) => x.labelKey)).toEqual([`${P}fatigue`, `${P}entangled`, `${P}frightened`, `${P}heldTarget`]);
+    expect(r.rows[3]!.amount).toBe(4);
   });
 });

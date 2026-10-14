@@ -64,6 +64,28 @@ export function blindFightingTotal(blinded: number, invisible: number, known: bo
   return known ? blindFightingPenalty(sum) : sum;
 }
 
+export interface ConditionMods {
+  blinded: number; invisibleTarget: number; fatigue: number; entangled: number; frightened: number; heldTarget: number;
+}
+
+/** The attack-roll condition modifiers itemized: one labelled row per non-zero condition; Blind Fighting folds
+ *  blinded + invisible into one capped row. `total` is the sum of the rows. */
+export function conditionModifiers(input: ConditionMods & { blindFighting: boolean }): { total: number; rows: { labelKey: string; amount: number }[] } {
+  const P = "ADND2E.chat.martialArts.mod.";
+  const rows: { labelKey: string; amount: number }[] = [];
+  if (input.blindFighting) {
+    rows.push({ labelKey: `${P}blindFighting`, amount: blindFightingTotal(input.blinded, input.invisibleTarget, true) });
+  } else {
+    rows.push({ labelKey: `${P}blinded`, amount: input.blinded }, { labelKey: `${P}invisibleTarget`, amount: input.invisibleTarget });
+  }
+  rows.push(
+    { labelKey: `${P}fatigue`, amount: input.fatigue }, { labelKey: `${P}entangled`, amount: input.entangled },
+    { labelKey: `${P}frightened`, amount: input.frightened }, { labelKey: `${P}heldTarget`, amount: input.heldTarget },
+  );
+  const kept = rows.filter((r) => r.amount !== 0);
+  return { total: kept.reduce((n, r) => n + r.amount, 0), rows: kept };
+}
+
 /** Every maneuver id known on any of the given styles (constant abilities are not limited to the active style). */
 export function knownManeuverIds(styles: readonly { knownManeuvers?: readonly { id: string }[] }[]): Set<string> {
   return new Set(styles.flatMap((s) => (s.knownManeuvers ?? []).map((k) => k.id)));
