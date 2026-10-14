@@ -1118,6 +1118,7 @@
       },
       "attack": {
         "rollAttack": "Roll Attack",
+        "noEffect": "No effect. This creature can only be harmed by:",
         "manualAcTitle": "Target Armor Class",
         "noTargetHint": "No token is targeted. Enter the target's Armor Class:",
         "multiTargetHint": "More than one token is targeted. Enter the intended target's Armor Class:",

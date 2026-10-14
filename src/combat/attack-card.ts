@@ -36,6 +36,7 @@ export function buildAttackCardContext(input: AttackCardInput): AttackCardContex
     critLabel: input.critLabel,
     fumbleLabel: input.fumbleLabel,
     maneuverLabel: input.maneuverLabel,
+    ineffective: input.ineffective ?? null,
     modifierBreakdown,
     damageContext: input.damageContext,
   };

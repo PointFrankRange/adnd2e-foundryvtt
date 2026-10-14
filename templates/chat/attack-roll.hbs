@@ -21,6 +21,9 @@
       {{#each modifierBreakdown as |m|}}<li>{{localize m.label}}: {{adnd2eSigned m.value}}</li>{{/each}}
     </ul>
   {{/if}}
+  {{#if (and hit ineffective)}}
+    <p class="result miss">{{localize 'ADND2E.chat.attack.noEffect'}} {{localize ineffective.requirementKey}}</p>
+  {{/if}}
   {{#if (and hit damageContext)}}
     <button type="button" data-action="rollDamage"
       data-actor-uuid="{{damageContext.actorUuid}}" data-weapon-item-id="{{damageContext.weaponItemId}}"

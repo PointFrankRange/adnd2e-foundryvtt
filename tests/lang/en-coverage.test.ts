@@ -207,6 +207,7 @@ describe("lang/en.json — SP3 chat/combat strings", () => {
       "ADND2E.sheet.combat.rollAttack",
       "ADND2E.sheet.combat.rollSave",
       "ADND2E.chat.attack.rollAttack",
+      "ADND2E.chat.attack.noEffect",
       "ADND2E.chat.attack.manualAcTitle",
       "ADND2E.chat.attack.noTargetHint",
       "ADND2E.chat.attack.multiTargetHint",

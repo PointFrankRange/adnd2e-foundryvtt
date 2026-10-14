@@ -1,5 +1,6 @@
 import { isShapechanged } from "../../core/shapechange";
 import { buildAttackCardContext } from "../../combat/attack-card";
+import { attackRank, canHarm, requirementLabelKey } from "../../core/enchantment";
 import { enchantmentCharmSaveBonus, poisonSaveAdjustment } from "../../core/saves/racial";
 import { normalizeSubrace } from "../../core/races/subrace";
 import { buildSaveCardContext } from "../../combat/save-card";
@@ -291,6 +292,7 @@ export async function rollAttack(
   let targetName: string | null = null;
   let targetAc: number;
   let targetSize: string | null = null;
+  let targetHitRequirement = "";
   let targetStatuses: ReadonlySet<string> = new Set<string>();
   let armorVsWeaponModifier = 0;
 
@@ -303,6 +305,7 @@ export async function rollAttack(
       proneArmorClassPenalty((t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>()) +
       fatigueArmorClassPenalty((t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>());
     targetSize = info.size;
+    targetHitRequirement = info.hitRequirement;
     targetStatuses = (t.actor as { statuses?: ReadonlySet<string> }).statuses ?? new Set<string>();
     const rules = getOptionalRules();
     if (rules.combatAndTacticsEnabled && rules.armorTypeVsWeaponType && weapon.system.damageType) {
@@ -412,7 +415,13 @@ export async function rollAttack(
   // maneuverLabel depends on it. The actual target mutation happens after the
   // chat card has posted (below).
   // A helpless target is hit automatically, so a piggy-backed maneuver lands too (unlike backstab, which is deliberately excluded).
-  const maneuverEffect = resolveManeuverOutcome(effectiveManeuverId, baseHit.hit || helpless);
+  const ammoItem = ammoToConsume ? actor.items.get(ammoToConsume.id) : undefined;
+  const rank = attackRank({
+    weaponMagicBonus: weapon.system.magicBonus,
+    ...(ammoItem ? { ammoMagicBonus: Number((ammoItem.system as { magicBonus?: number }).magicBonus ?? 0) } : {}),
+  });
+  const ineffective = hit.hit && !canHarm(rank, targetHitRequirement);
+  const maneuverEffect = ineffective ? null : resolveManeuverOutcome(effectiveManeuverId, baseHit.hit || helpless);
 
   const context = buildAttackCardContext({
     actorName: actor.name, actorImg: actor.img,
@@ -423,7 +432,8 @@ export async function rollAttack(
     critLabel: crit ? `ADND2E.chat.attack.crit.${crit.tier}` : null,
     fumbleLabel: fumble ? `ADND2E.chat.attack.fumble.${fumble.tier}` : null,
     maneuverLabel: effectiveManeuverId && maneuverEffect ? `ADND2E.chat.attack.maneuverLabel.${effectiveManeuverId}` : null,
-    damageContext: hit.hit
+    ineffective: ineffective ? { requirementKey: requirementLabelKey(targetHitRequirement) } : null,
+    damageContext: hit.hit && !ineffective
       ? {
           weaponItemId, actorUuid: (actor as unknown as { uuid: string }).uuid, targetSize,
           ammoItemId: ammoToConsume?.id ?? null,
