@@ -73,9 +73,9 @@
             <span class="effect">{{localize 'ADND2E.sheet.martialArts.acMod'}} {{adnd2eSigned s.acMod}}</span>
             <span class="effect">{{localize 'ADND2E.sheet.martialArts.damageDie'}} {{#if s.damageDie}}{{s.damageDie}}{{else}}{{localize 'ADND2E.sheet.martialArts.byWeapon'}}{{/if}}</span>
             <button type="button" class="kit-small" data-action="useMartialStyle" data-item-id="{{s.id}}"{{#if s.active}} disabled{{/if}}>{{localize 'ADND2E.sheet.martialArts.use'}}</button>
-            {{#if s.knownManeuvers.length}}
+            {{#if s.usableManeuvers.length}}
               <div class="kit-powers">
-                {{#each s.knownManeuvers as |m|}}
+                {{#each s.usableManeuvers as |m|}}
                   <div class="power-row" data-maneuver-id="{{m.id}}">
                     <span class="name" title="{{localize m.effectKey}}">{{localize m.nameKey}}</span>
                     <span class="effect">{{localize m.listKey}} {{m.difficulty}} - {{localize m.costKey}}</span>

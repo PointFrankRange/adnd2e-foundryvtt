@@ -21,7 +21,7 @@ const keysIn = (src: string, re: RegExp): string[] => [...new Set([...src.matchA
 describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
   it("Main is the compact play view: known maneuvers with Use, no management controls", () => {
     expect(MAIN).toContain("data-action=\"useManeuver\"");
-    expect(MAIN).toContain("s.knownManeuvers");
+    expect(MAIN).toContain("s.usableManeuvers");
     expect(MAIN).toContain('title="{{localize m.effectKey}}"');
     expect(MAIN).toMatch(/data-maneuver-id="\{\{m\.id\}\}"/);
     const use = MAIN.split(/\r?\n/).find((l) => l.includes('data-action="useManeuver"'))!;

@@ -206,6 +206,12 @@
 
 // SP16/SP18: power and maneuver rows hold a name, adjacent inline spans and a button. A wrapping flex row keeps the
 // button inline after the text (no stray line break) and gives the spans room without per-span margins.
+.adnd2e.pc-sheet .kit-martial-arts {
+  // every style's maneuvers stack under its row; a disabled Use (the active style) reads dimmed, not as a dark block
+  .kit-powers { flex: 0 0 100%; }
+  .trait-row { flex-wrap: wrap; }
+  .kit-small:disabled { opacity: 0.5; background: transparent; cursor: default; }
+}
 .adnd2e.pc-sheet .power-row {
   display: flex;
   flex-wrap: wrap;

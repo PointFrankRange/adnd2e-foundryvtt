@@ -52,6 +52,8 @@ export interface StyleRow {
   maneuvers: ManeuverRow[];
   /** the learned subset of `maneuvers`, same order */
   knownManeuvers: ManeuverRow[];
+  /** known maneuvers that are used (not passive); passives list once in the constants summary */
+  usableManeuvers: ManeuverRow[];
 }
 
 /** The always-on abilities known on any owned style. */
@@ -130,12 +132,12 @@ export function buildMartialArtsView(input: {
       active: i.id === activeId,
       maneuvers,
       knownManeuvers: maneuvers.filter((m) => m.state === "known"),
+      usableManeuvers: maneuvers.filter((m) => m.state === "known" && m.kind !== "passive"),
     };
   });
   const active = styles.find((s) => s.active) ?? null;
   const knownIds = knownManeuverIds(owned.map((i) => ({ knownManeuvers: i.system.knownManeuvers })));
   const ironskin = knownIds.has("mental:6");
-  const SUMMARY: [string, string][] = [["mental:2", "allAroundSight"], ["mental:3", "mentalResistance"], ["mental:4", "chiAttacks"], ["mental:5", "blindFighting"], ["mental:6", "ironskin"]];
   const chiKnown = knownIds.has("mental:4");
   const chi = chiKnown ? chiRank(input.level ?? 0) : 0;
   const constants: MartialConstants = {
@@ -146,10 +148,10 @@ export function buildMartialArtsView(input: {
     ironskinAcMod: ironskinAcMod(ironskin, input.wearingBodyArmor ?? false),
     chiKnown,
     chiRank: chi,
-    summary: SUMMARY.filter(([id]) => knownIds.has(id)).map(([, slug]) => ({
-      nameKey: `ADND2E.martialManeuvers.${slug}`,
-      effectKey: `ADND2E.martialManeuverEffects.${slug}`,
-      ...(slug === "chiAttacks" ? { detailKey: chiRankLabelKey(chi) } : {}),
+    summary: MANEUVERS.filter((m) => m.kind === "passive" && knownIds.has(m.id)).map((m) => ({
+      nameKey: `ADND2E.martialManeuvers.${m.slug}`,
+      effectKey: `ADND2E.martialManeuverEffects.${m.slug}`,
+      ...(m.slug === "chiAttacks" ? { detailKey: chiRankLabelKey(chi) } : {}),
     })),
   };
   return {

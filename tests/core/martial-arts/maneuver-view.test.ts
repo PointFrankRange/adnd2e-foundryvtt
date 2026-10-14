@@ -131,3 +131,17 @@ describe("ch'i constants (SP18 Plan C)", () => {
     expect(v.constants.summary.some((s) => s.nameKey.endsWith("chiAttacks"))).toBe(false);
   });
 });
+
+describe("passives list once (SP18 Plan C follow-up)", () => {
+  it("every known passive is in the summary and none is a usable row under its style", () => {
+    const v = buildMartialArtsView({
+      enabled: true, knowsBasics: true, storedActiveId: "", canAct: true, level: 5, freeSlots: 2,
+      items: [style(["throw:1", "mental:1", "mental:2"])],
+    });
+    expect(v.constants.summary.map((s) => s.nameKey)).toEqual([
+      "ADND2E.martialManeuvers.fall", "ADND2E.martialManeuvers.meditation", "ADND2E.martialManeuvers.allAroundSight",
+    ]);
+    expect(v.styles[0].knownManeuvers.length).toBe(3);
+    expect(v.styles[0].usableManeuvers).toEqual([]);
+  });
+});
