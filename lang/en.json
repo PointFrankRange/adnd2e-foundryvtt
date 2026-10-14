@@ -630,7 +630,7 @@
         "locked": {
           "notOffered": "This style does not teach it.",
           "known": "Already learned.",
-          "order": "Learn the easier maneuvers in this list first.",
+          "order": "Learn {name} first.",
           "noSlot": "No free weapon proficiency slot.",
           "noLevel": "A character needs a class level to learn maneuvers.",
           "levelCap": "Two maneuvers per level on a style."

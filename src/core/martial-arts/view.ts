@@ -28,6 +28,8 @@ export interface ManeuverRow {
   state: "known" | "learnable" | "locked";
   /** why a locked maneuver cannot be learned (i18n key); blank otherwise */
   reasonKey: string;
+  /** for an out-of-order lock: the name key of the earlier maneuver to learn first; blank otherwise */
+  prereqNameKey: string;
   /** known, on the active style, and the character can act */
   usable: boolean;
   /** i18n key of the maneuver's effect text */
@@ -52,6 +54,8 @@ export interface StyleRow {
   maneuvers: ManeuverRow[];
   /** the learned subset of `maneuvers`, same order */
   knownManeuvers: ManeuverRow[];
+  /** the maneuvers grouped by list, easiest first (the Features management view) */
+  lists: { listKey: string; maneuvers: ManeuverRow[] }[];
   /** known maneuvers that are used (not passive); passives list once in the constants summary */
   usableManeuvers: ManeuverRow[];
 }
@@ -79,6 +83,23 @@ export interface MartialArtsView {
   styles: StyleRow[];
   active: StyleRow | null;
   constants: MartialConstants;
+}
+
+/** The name key of the easiest offered maneuver below `m` in its list that is not yet known. */
+function prereqNameKey(m: ManeuverDef, offered: readonly { list: string; difficulties: readonly number[] }[], knownIds: ReadonlySet<string>): string {
+  const lower = (offered.find((o) => o.list === m.list)?.difficulties ?? []).filter((d) => d < m.difficulty && !knownIds.has(`${m.list}:${d}`));
+  const first = MANEUVERS.find((x) => x.list === m.list && x.difficulty === Math.min(...lower));
+  return first ? `ADND2E.martialManeuvers.${first.slug}` : "";
+}
+
+function groupByList(rows: ManeuverRow[]): { listKey: string; maneuvers: ManeuverRow[] }[] {
+  const out: { listKey: string; maneuvers: ManeuverRow[] }[] = [];
+  for (const r of [...rows].sort((a, b) => a.difficulty - b.difficulty)) {
+    const g = out.find((x) => x.listKey === r.listKey);
+    if (g) g.maneuvers.push(r);
+    else out.push({ listKey: r.listKey, maneuvers: [r] });
+  }
+  return out;
 }
 
 export function buildMartialArtsView(input: {
@@ -115,6 +136,7 @@ export function buildMartialArtsView(input: {
           state: isKnown ? "known" : verdict.ok ? "learnable" : "locked",
           reasonKey: isKnown || verdict.ok ? "" : `ADND2E.sheet.martialArts.locked.${verdict.reason}`,
           effectKey: `ADND2E.martialManeuverEffects.${m.slug}`,
+          prereqNameKey: !isKnown && !verdict.ok && verdict.reason === "order" ? prereqNameKey(m, offered, knownIds) : "",
           usable: isKnown && isActive && input.canAct && m.kind !== "passive",
         };
       },
@@ -131,6 +153,7 @@ export function buildMartialArtsView(input: {
       slots: i.system.slotsInvested ?? 1,
       active: i.id === activeId,
       maneuvers,
+      lists: groupByList(maneuvers),
       knownManeuvers: maneuvers.filter((m) => m.state === "known"),
       usableManeuvers: maneuvers.filter((m) => m.state === "known" && m.kind !== "passive"),
     };

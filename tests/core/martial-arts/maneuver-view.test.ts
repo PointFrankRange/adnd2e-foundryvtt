@@ -145,3 +145,22 @@ describe("passives list once (SP18 Plan C follow-up)", () => {
     expect(v.styles[0].usableManeuvers).toEqual([]);
   });
 });
+
+describe("management grouping (SP18 follow-up)", () => {
+  it("groups by list easiest first and names the earlier maneuver an out-of-order lock needs", () => {
+    const v = buildMartialArtsView({
+      enabled: true, knowsBasics: true, storedActiveId: "", canAct: true, level: 5, freeSlots: 2,
+      items: [style([])],
+    });
+    const lists = v.styles[0].lists;
+    expect(new Set(lists.map((g) => g.listKey)).size).toBe(lists.length);
+    for (const g of lists) {
+      const diffs = g.maneuvers.map((m) => m.difficulty);
+      expect(diffs).toEqual([...diffs].sort((a, b) => a - b));
+      const locked = g.maneuvers.filter((m) => m.reasonKey.endsWith(".order"));
+      for (const m of locked) expect(m.prereqNameKey).toMatch(/^ADND2E\.martialManeuvers\./);
+      for (const m of g.maneuvers.filter((x) => !x.reasonKey.endsWith(".order"))) expect(m.prereqNameKey).toBe("");
+    }
+    expect(lists.some((g) => g.maneuvers.some((m) => m.prereqNameKey !== ""))).toBe(true);
+  });
+});

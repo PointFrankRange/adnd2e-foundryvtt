@@ -212,6 +212,14 @@
   .trait-row { flex-wrap: wrap; }
   .kit-small:disabled { opacity: 0.5; background: transparent; cursor: default; }
 }
+.adnd2e.pc-sheet .tab.features .trait-row .style-name { font-size: 15px; font-weight: 700; color: var(--kit-accent-ink, var(--kit-ink)); }
+// Features management view: one indent for the whole maneuver block, one more for each list's rows
+.adnd2e.pc-sheet .maneuver-list {
+  margin: 0 0 4px 18px;
+  .maneuver-list-name { margin: 4px 0 1px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--kit-ink); }
+  .power-row { margin-left: 14px; }
+  .power-row.locked { opacity: 0.65; }
+}
 .adnd2e.pc-sheet .power-row {
   display: flex;
   flex-wrap: wrap;
