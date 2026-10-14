@@ -208,7 +208,7 @@
 // button inline after the text (no stray line break) and gives the spans room without per-span margins.
 .adnd2e.pc-sheet .kit-martial-arts {
   // every style's maneuvers stack under its row; a disabled Use (the active style) reads dimmed, not as a dark block
-  .kit-powers { flex: 0 0 100%; }
+  .kit-powers { flex: 0 0 100%; box-sizing: border-box; margin-left: 18px; padding-left: 8px; border-left: 2px solid var(--kit-row-rule); }
   .trait-row { flex-wrap: wrap; }
   .kit-small:disabled { opacity: 0.5; background: transparent; cursor: default; }
 }
