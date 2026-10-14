@@ -127,10 +127,9 @@ describe("maneuver card effects (SP18 B2)", () => {
     expect(card("lock:1").effects[0]).toMatchObject({ id: "unconscious", condition: "unconscious", deferred: true });
     expect(card("vitalArea:2").effects[0]).toMatchObject({ condition: "stunned", deferred: false });
   });
-  it("B2 effects apply to the targeted tokens, not the speaker, and the maneuver card has a blank actor uuid", () => {
+  it("B2 effects apply to the targeted tokens, not the speaker, ", () => {
     const c = card("vitalArea:3");
     expect(c.effects.every((e) => e.self === false)).toBe(true);
-    expect(c.actorUuid).toBe("");
   });
   it("a zero save modifier uses the plain save line; no save has none", () => {
     expect(card("vitalArea:2").effects[0]).toMatchObject({ saveKey: "ADND2E.chat.martialArts.save", saveMod: "", condition: "stunned", rounds: "1d4" });
@@ -169,7 +168,7 @@ describe("Feint and skill cards (SP18 B3)", () => {
   });
   it("a Leap card prints both distances and offers Prone on a failed landing", () => {
     const landed = buildSkillCardContext({
-      actorName: "A", actorImg: "", actorUuid: "Actor.AbCdEfGhIjKlMnOp", styleName: "S", maneuverId: "movement:4", skill: "leap",
+      actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:4", skill: "leap",
       result: resolveLeap({ naturalD20: 15, thac0: 20, situationalModifier: 0, level: 10 }),
     });
     expect(landed.noRoll).toBe(false);
@@ -181,18 +180,17 @@ describe("Feint and skill cards (SP18 B3)", () => {
     ]);
     expect(landed.effects).toEqual([]);
     const fell = buildSkillCardContext({
-      actorName: "A", actorImg: "", actorUuid: "Actor.AbCdEfGhIjKlMnOp", styleName: "S", maneuverId: "movement:4", skill: "leap",
+      actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:4", skill: "leap",
       result: resolveLeap({ naturalD20: 3, thac0: 20, situationalModifier: 0, level: 10 }),
     });
     expect(fell.resultKey).toBe("ADND2E.chat.martialArts.fell");
     expect(fell.effects).toEqual([{
       id: "prone", labelKey: "ADND2E.martialEffects.prone", saveKey: "", saveMod: "", condition: "prone", rounds: null, damage: null, deferred: false, self: true,
     }]);
-    expect(fell.actorUuid).toBe("Actor.AbCdEfGhIjKlMnOp");
   });
   it("a Speed card reports the extra attacks, or none on a failure", () => {
     const ok = buildSkillCardContext({
-      actorName: "A", actorImg: "", actorUuid: "Actor.AbCdEfGhIjKlMnOp", styleName: "S", maneuverId: "movement:5", skill: "speed", result: resolveSpeed({ naturalD20: 4, dexterity: 13 }),
+      actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:5", skill: "speed", result: resolveSpeed({ naturalD20: 4, dexterity: 13 }),
     });
     expect(ok.resultKey).toBe("ADND2E.chat.martialArts.speedYes");
     expect(ok.lines).toEqual([
@@ -200,13 +198,13 @@ describe("Feint and skill cards (SP18 B3)", () => {
       { key: "ADND2E.chat.martialArts.speedOnce" },
     ]);
     const no = buildSkillCardContext({
-      actorName: "A", actorImg: "", actorUuid: "Actor.AbCdEfGhIjKlMnOp", styleName: "S", maneuverId: "movement:5", skill: "speed", result: resolveSpeed({ naturalD20: 18, dexterity: 13 }),
+      actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:5", skill: "speed", result: resolveSpeed({ naturalD20: 18, dexterity: 13 }),
     });
     expect(no.resultKey).toBe("ADND2E.chat.martialArts.speedNo");
     expect(no.lines).toEqual([{ key: "ADND2E.chat.martialArts.speedOnce" }]);
   });
   it("a Levitation card has no roll and states rate, duration and rules", () => {
-    const ctx = buildSkillCardContext({ actorName: "A", actorImg: "", actorUuid: "Actor.AbCdEfGhIjKlMnOp", styleName: "S", maneuverId: "mental:7", skill: "levitation", level: 7 });
+    const ctx = buildSkillCardContext({ actorName: "A", actorImg: "", styleName: "S", maneuverId: "mental:7", skill: "levitation", level: 7 });
     expect(ctx.noRoll).toBe(true);
     expect(ctx.lines).toEqual([
       { key: "ADND2E.chat.martialArts.levitationRate", n1: 5 },

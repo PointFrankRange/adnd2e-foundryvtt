@@ -125,10 +125,14 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
   });
   it("Leap's prone button applies to the speaker (SP18 B3 final review)", () => {
     expect(CHAT).toContain("e.self");
-    expect(CHAT).toContain("data-actor-uuid");
+    expect(CHAT).toContain('data-self="true"');
     expect(CHAT).toContain("appliesToYou");
     expect(lookup("ADND2E.chat.martialArts.appliesToYou")).toBe("Applies to you.");
-    expect(read("src", "chat", "chat-listeners.ts")).toContain("parseSelfActorUuid");
+    const L = read("src", "chat", "chat-listeners.ts");
+    expect(L).toContain("getSpeakerActor");
+    expect(L).toContain("noSpeakerActor");
+    expect(L).not.toContain("parseSelfActorUuid");
+    expect(lookup("ADND2E.chat.martialArts.noSpeakerActor")).toBe("Could not find the character who made this roll.");
   });
   it("a known passive row shows its own effect text; unlearn is lock-gated and wired (SP18 Plan B3)", () => {
     expect(FEATURES).toContain("m.effectKey");

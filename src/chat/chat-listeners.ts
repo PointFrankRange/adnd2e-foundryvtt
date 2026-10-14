@@ -3,7 +3,7 @@ import { pickDamageDice } from "../combat/damage-dice";
 import { damageModifiers } from "../core/combat/damage";
 import { damageFormula } from "../core/dice/formula";
 import { SYSTEM_ID, TEMPLATE_PATH } from "../constants";
-import { parseConditionButton, parseSelfActorUuid } from "../combat/apply-relay";
+import { parseConditionButton } from "../combat/apply-relay";
 import { requestApply } from "../relay/relay-client";
 import { rerenderContestCards, rerenderWildCards } from "../hooks/psionic-hooks";
 import { applyContestTangents, recordButtonState, rollDefense, type ContestFlag } from "../sheets/character/psionic-combat";
@@ -109,17 +109,20 @@ async function onApplyDamage(button: HTMLButtonElement): Promise<void> {
 
 /** Applies the condition on a martial arts card (SP18 B2) to every targeted token: any duration dice are rolled in chat
  *  first, then the condition goes through the relay like every other target-side effect. */
-async function onApplyCondition(button: HTMLButtonElement): Promise<void> {
-  const parsed = parseConditionButton(button.dataset as { condition?: string; rounds?: string });
+async function onApplyCondition(button: HTMLButtonElement, message: unknown): Promise<void> {
+  const parsed = parseConditionButton(button.dataset as { condition?: string; rounds?: string; self?: string });
   if (!parsed) return;
-  // a self-applying button (Leap's fall) acts on the speaker's actor, never on the targeted tokens
-  const rawSelf = button.dataset.actorUuid ?? "";
-  const selfUuid = parseSelfActorUuid(rawSelf);
-  if (rawSelf !== "" && selfUuid === null) return;
+  // a self-applying button (Leap's fall) acts on the message speaker's actor (the token's own actor when the
+  // speaker is a token), never on the targeted tokens and never on a DOM-supplied identity
   let self: (EffectTarget & { uuid: string; isOwner: boolean }) | null = null;
-  if (selfUuid !== null) {
-    self = (foundry.utils.fromUuidSync(selfUuid as never) as (EffectTarget & { uuid: string; isOwner: boolean }) | null) ?? null;
-    if (!self) return;
+  if (parsed.self) {
+    self = ((ChatMessage as unknown as { getSpeakerActor(speaker: unknown): unknown }).getSpeakerActor(
+      (message as { speaker: unknown }).speaker,
+    ) as (EffectTarget & { uuid: string; isOwner: boolean }) | null) ?? null;
+    if (!self) {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.martialArts.noSpeakerActor"));
+      return;
+    }
   }
   const targets = self ? [] : [...(game as unknown as { user: { targets: Iterable<{ actor: unknown }> } }).user.targets];
   if (!self && targets.length === 0) {
@@ -267,7 +270,7 @@ export function registerChatListeners(): void {
       b.addEventListener("click", (ev) => void onApplyDamage(ev.currentTarget as HTMLButtonElement)),
     );
     html.querySelectorAll<HTMLButtonElement>('[data-action="applyCondition"]').forEach((b) =>
-      b.addEventListener("click", (ev) => void onApplyCondition(ev.currentTarget as HTMLButtonElement)),
+      b.addEventListener("click", (ev) => void onApplyCondition(ev.currentTarget as HTMLButtonElement, message)),
     );
     html.querySelector<HTMLButtonElement>('[data-action="applyCastEffect"]')?.addEventListener("click", (ev) => {
       void onApplyCastEffect(ev.currentTarget as HTMLButtonElement);

@@ -111,15 +111,11 @@ export function relayEffectText(request: RelayRequest): { key: string; data: Rec
 
 /** The data on a card's Apply-condition button (`data-condition`, `data-rounds`), or null when malformed. The rounds
  *  formula is "NdM" (N, M 1..99); the caller rolls it and sends the integer as `rounds`. */
-export function parseConditionButton(data: { condition?: string; rounds?: string }): { conditionId: RelayConditionId; roundsFormula: string | null } | null {
+export function parseConditionButton(data: { condition?: string; rounds?: string; self?: string }): { conditionId: RelayConditionId; roundsFormula: string | null; self: boolean } | null {
   if (!(RELAY_CONDITIONS as readonly unknown[]).includes(data.condition)) return null;
   const conditionId = data.condition as RelayConditionId;
+  const self = data.self === "true";
   const rounds = data.rounds ?? "";
-  if (rounds === "") return { conditionId, roundsFormula: null };
-  return /^[1-9]\d?d[1-9]\d?$/.test(rounds) ? { conditionId, roundsFormula: rounds } : null;
-}
-
-/** The actor uuid on a self-applying card button (`data-actor-uuid`), or null unless it is a bare "Actor.<16 chars>". */
-export function parseSelfActorUuid(raw: string | undefined | null): string | null {
-  return typeof raw === "string" && /^Actor\.[A-Za-z0-9]{16}$/.test(raw) ? raw : null;
+  if (rounds === "") return { conditionId, roundsFormula: null, self };
+  return /^[1-9]\d?d[1-9]\d?$/.test(rounds) ? { conditionId, roundsFormula: rounds, self } : null;
 }

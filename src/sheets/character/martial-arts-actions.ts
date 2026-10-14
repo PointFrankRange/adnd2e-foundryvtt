@@ -22,7 +22,6 @@ type Statuses = ReadonlySet<string> | readonly string[];
 type OwnedItem = StyleItemLike & { system: Record<string, unknown>; update?(data: Record<string, unknown>): Promise<unknown> };
 
 export interface MartialArtsActor {
-  uuid: string;
   name: string;
   img: string;
   statuses: Statuses;
@@ -203,7 +202,7 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
   const def = maneuverById(maneuverId)!;
   if (def.kind === "utility") {
     const card = buildSkillCardContext({
-      actorName: actor.name, actorImg: actor.img, actorUuid: actor.uuid, styleName: view.active.name, maneuverId, skill: "levitation", level: characterLevel(actor),
+      actorName: actor.name, actorImg: actor.img, styleName: view.active.name, maneuverId, skill: "levitation", level: characterLevel(actor),
     });
     const content = await foundry.applications.handlebars.renderTemplate(TEMPLATE_PATH("chat/martial-arts-attack.hbs"), card as unknown as Record<string, unknown>);
     await ChatMessage.create({ speaker: ChatMessage.getSpeaker({ actor: actor as never }), content } as never);
@@ -215,14 +214,14 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
     const card =
       def.slug === "leap"
         ? buildSkillCardContext({
-            actorName: actor.name, actorImg: actor.img, actorUuid: actor.uuid, styleName: view.active.name, maneuverId, skill: "leap",
+            actorName: actor.name, actorImg: actor.img, styleName: view.active.name, maneuverId, skill: "leap",
             result: resolveLeap({
               naturalD20: natural, thac0: actor.system.attributes?.thac0?.melee ?? 20,
               situationalModifier: situationalModifier(actor, new Set<string>(), view.constants.blindFighting), level: characterLevel(actor),
             }),
           })
         : buildSkillCardContext({
-            actorName: actor.name, actorImg: actor.img, actorUuid: actor.uuid, styleName: view.active.name, maneuverId, skill: "speed",
+            actorName: actor.name, actorImg: actor.img, styleName: view.active.name, maneuverId, skill: "speed",
             result: resolveSpeed({ naturalD20: natural, dexterity: actor.system.abilities?.dex?.score ?? 10 }),
           });
     await postCard(actor, skillRoll, "chat/martial-arts-attack.hbs", card);
