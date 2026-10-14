@@ -66,13 +66,15 @@
       <div class="kit-bar">{{localize 'ADND2E.sheet.martialArts.title'}}</div>
       <div class="kit-body">
         {{#unless @root.martialArts.knowsBasics}}<p class="hint">{{localize 'ADND2E.sheet.martialArts.basicsUnknown'}}</p>{{/unless}}
+        <button type="button" class="kit-roll martial-attack" data-action="martialArtsAttack"{{#unless @root.martialArts.canAttack}} disabled{{/unless}}>{{localize 'ADND2E.sheet.martialArts.attack'}}</button>
+        <div class="martial-styles">
         {{#each @root.martialArts.styles as |s|}}
-          <div class="trait-row" data-item-id="{{s.id}}">
-            <span class="name">{{s.name}}{{#if s.active}} - {{localize 'ADND2E.sheet.martialArts.active'}}{{/if}}</span>
+          <div class="trait-row martial-style{{#if s.active}} active{{/if}}" data-item-id="{{s.id}}">
+            <span class="name style-name">{{s.name}}</span>{{#if s.active}}<span class="active-badge">{{localize 'ADND2E.sheet.martialArts.activeBadge'}}</span>{{/if}}
             <span class="effect">{{localize s.formKey}} / {{localize s.methodKey}} ({{localize s.attackFormKey}})</span>
             <span class="effect">{{localize 'ADND2E.sheet.martialArts.acMod'}} {{adnd2eSigned s.acMod}}</span>
             <span class="effect">{{localize 'ADND2E.sheet.martialArts.damageDie'}} {{#if s.damageDie}}{{s.damageDie}}{{else}}{{localize 'ADND2E.sheet.martialArts.byWeapon'}}{{/if}}</span>
-            <button type="button" class="kit-small" data-action="useMartialStyle" data-item-id="{{s.id}}"{{#if s.active}} disabled{{/if}}>{{localize 'ADND2E.sheet.martialArts.use'}}</button>
+            {{#unless s.active}}<button type="button" class="kit-small" data-action="useMartialStyle" data-item-id="{{s.id}}">{{localize 'ADND2E.sheet.martialArts.use'}}</button>{{/unless}}
             {{#if s.usableManeuvers.length}}
               <div class="kit-powers">
                 {{#each s.usableManeuvers as |m|}}
@@ -88,6 +90,7 @@
         {{else}}
           <p class="kit-empty">{{localize 'ADND2E.sheet.martialArts.noStyles'}}</p>
         {{/each}}
+        </div>
         {{#if @root.martialArts.constants.summary.length}}
           <h5 class="kit-subhead">{{localize 'ADND2E.sheet.martialArts.constants'}}</h5>
           {{#each @root.martialArts.constants.summary as |c|}}
@@ -95,7 +98,6 @@
           {{/each}}
         {{/if}}
         <p class="hint">{{localize 'ADND2E.sheet.martialArts.extraAttack'}}</p>
-        <button type="button" class="kit-roll" data-action="martialArtsAttack"{{#unless @root.martialArts.canAttack}} disabled{{/unless}}>{{localize 'ADND2E.sheet.martialArts.attack'}}</button>
       </div>
     </section>
   {{/if}}{{/if}}

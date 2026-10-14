@@ -211,6 +211,11 @@
   .kit-powers { flex: 0 0 100%; box-sizing: border-box; margin-left: 18px; padding-left: 8px; border-left: 2px solid var(--kit-row-rule); }
   .trait-row { flex-wrap: wrap; }
   .kit-small:disabled { opacity: 0.5; background: transparent; cursor: default; }
+  .martial-attack { margin: 0 0 6px; }
+  .martial-styles { display: flex; flex-direction: column; }
+  .martial-style.active { order: -1; background: var(--kit-field-bg); border-left: 3px solid var(--kit-maroon); padding-left: 6px; }
+  .style-name { font-size: 15px; font-weight: 700; color: var(--kit-accent-ink, var(--kit-ink)); }
+  .active-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0 5px; border-radius: 2px; background: var(--kit-maroon); color: var(--kit-tan, #fff); }
 }
 .adnd2e.pc-sheet .tab.features .trait-row .style-name { font-size: 15px; font-weight: 700; color: var(--kit-accent-ink, var(--kit-ink)); }
 // Features management view: one indent for the whole maneuver block, one more for each list's rows

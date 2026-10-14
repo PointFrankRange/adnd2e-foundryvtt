@@ -626,6 +626,7 @@
         "useManeuver": "Use",
         "notKnown": "You have not learned that maneuver with the active style.",
         "passive": "Always in effect",
+        "activeBadge": "Active",
         "constants": "Always in effect",
         "locked": {
           "notOffered": "This style does not teach it.",
