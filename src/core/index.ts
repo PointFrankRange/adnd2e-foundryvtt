@@ -11,6 +11,7 @@ export * from "./proficiencies";
 export * from "./skills";
 export * from "./encumbrance";
 export * from "./weapons";
+export * from "./tokens";
 export * from "./turning";
 export * from "./kits";
 export * from "./races";

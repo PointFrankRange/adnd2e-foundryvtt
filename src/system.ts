@@ -14,6 +14,7 @@ import { buildApi } from "./api";
 import { registerMigrationSettings, runMigrations } from "./migrations/run";
 import { registerChatListeners } from "./chat/chat-listeners";
 import { promptInitiativeModifier } from "./combat/initiative-modifier-dialog";
+import { registerActorHooks } from "./hooks/actor-hooks";
 import { registerCastingHooks } from "./hooks/casting-hooks";
 import { registerEquipmentHooks } from "./hooks/equipment-hooks";
 import { registerPsionicHooks } from "./hooks/psionic-hooks";
@@ -28,6 +29,7 @@ Hooks.once("init", () => {
   CONFIG.Actor.documentClass = Adnd2eActor;
   CONFIG.Item.documentClass = Adnd2eItem;
   CONFIG.ActiveEffect.documentClass = Adnd2eActiveEffect;
+  registerActorHooks();
   // #94: an expired timed condition leaves the token instead of lingering greyed out.
   (CONFIG.ActiveEffect as unknown as { expiryAction: string }).expiryAction = "delete"; // v14 only; fvtt-types is v13
   CONFIG.Combatant.documentClass = Adnd2eCombatant;
