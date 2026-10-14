@@ -55,7 +55,8 @@ export async function runMigrations(): Promise<void> {
       const actorUpdates: Record<string, unknown>[] = [];
       for (const actor of game.actors!) {
         const source = (actor as unknown as { _source: { system: Record<string, unknown> } })._source;
-        const payload = migration.actorUpdate?.(source.system, actor.type) ?? null;
+        const payload =
+          migration.actorUpdate?.(source.system, actor.type, source as unknown as Record<string, unknown>) ?? null;
         if (payload) {
           if (dryRun) {
             console.log(

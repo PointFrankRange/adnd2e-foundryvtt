@@ -51,7 +51,11 @@ export interface Migration {
    * actor document), or `null` to leave the actor untouched. See the v14 GOTCHA
    * in this file's header before writing a key-removal migration.
    */
-  actorUpdate?(sourceSystem: Record<string, unknown>, actorType: string): Record<string, unknown> | null;
+  actorUpdate?(
+    sourceSystem: Record<string, unknown>,
+    actorType: string,
+    sourceActor?: Record<string, unknown>,
+  ): Record<string, unknown> | null;
   /**
    * One embedded Item's raw `_source.system` object + its `type` → an
    * `updateEmbeddedDocuments("Item", ...)` payload for that item (dot-notation
@@ -104,6 +108,18 @@ export const MIGRATIONS: readonly Migration[] = [
       if (itemType !== "weaponProficiency") return null;
       if (sourceSystem.specialized !== true) return null;
       return { "system.masteryTier": 1 };
+    },
+  },
+  {
+    // #167: player characters get a linked prototype token. `sourceActor` is the
+    // actor's whole `_source`; only world actors are walked, so scene tokens and
+    // compendium actors are never touched.
+    version: "0.3.1",
+    actorUpdate(_sourceSystem, actorType, sourceActor) {
+      if (actorType !== "character") return null;
+      const proto = sourceActor?.prototypeToken as { actorLink?: boolean } | undefined;
+      if (proto?.actorLink !== false) return null;
+      return { "prototypeToken.actorLink": true };
     },
   },
 ];
