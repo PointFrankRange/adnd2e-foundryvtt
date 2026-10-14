@@ -18,6 +18,7 @@
   {{#if outcomeKey}}<p class="hint">{{localize outcomeKey}}</p>{{/if}}
   {{#each lines as |l|}}<p class="hint">{{localize l.key n1=l.n1 n2=l.n2}}</p>{{/each}}
   {{#if hit}}
+    {{#if ineffective}}<p class="result miss">{{localize 'ADND2E.chat.martialArts.noEffect'}} {{localize ineffective.requirementKey}}</p>{{/if}}
     {{#if blowKey}}<p class="formula">{{localize blowKey}} — {{localize 'ADND2E.chat.martialArts.damage' damage=damage}}</p>{{/if}}
     {{#if formula}}<p class="formula">{{formula}} = <strong>{{damage}}</strong> {{localize 'ADND2E.chat.martialArts.hp'}}</p>{{/if}}
     {{#if stunTrigger}}<p class="hint">{{localize 'ADND2E.chat.martialArts.stun'}}</p>{{/if}}

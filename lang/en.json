@@ -113,7 +113,7 @@
       "meditation": "Always in effect: each hour of meditation gives the rest of two hours of sleep.",
       "allAroundSight": "Always in effect: you notice all non-invisible foes around you and can never be struck from behind.",
       "mentalResistance": "Always in effect: +2 on saving throws against mental attacks such as charm, illusion and hold.",
-      "chiAttacks": "Always in effect: your unarmed hits count as magical weapons by level (Table 20). The game does not model damage resistance yet, so treat this as a reminder for the GM.",
+      "chiAttacks": "Always in effect: your unarmed hits count as a magical weapon by level (magical, then +1 at level 5, +2 at 10, +3 at 15, +4 at 20), so they can harm creatures that need magic to hit.",
       "blindFighting": "Always in effect: only -1 when blinded, in darkness or against invisible foes (applied to your martial arts rolls).",
       "ironskin": "Always in effect: your AC improves by 2 while you wear no body armor.",
       "levitation": "Float up, down or sideways; one turn of concentration first and a round of rest after."
@@ -146,6 +146,7 @@
       "weaponBreaker": "The weapon is unharmed."
     },
     "martialEffects": { "unconscious": "Unconscious", "held": "Held", "prone": "Knocked down", "stunned": "Stunned", "paralyzed": "Paralyzed", "limbUseless": "Limb useless (24 hours)", "pain": "Pain", "doubleDamage": "Double damage" },
+    "martialChi": { "rank0": "not yet magical", "rank1": "a magical weapon", "rank2": "a +1 magical weapon", "rank3": "a +2 magical weapon", "rank4": "a +3 magical weapon", "rank5": "a +4 magical weapon" },
     "hitRequirements": { "none": "None", "magical": "Magical weapons", "plus1": "+1 or better weapons", "plus2": "+2 or better weapons", "plus3": "+3 or better weapons", "plus4": "+4 or better weapons", "plus5": "+5 or better weapons" },
     "trackingTerrains": { "freshSnow": "Fresh snow", "softGround": "Soft or muddy ground", "thickBrush": "Thick brush or dense jungle", "forestField": "Forest, field or dusty floor", "normal": "Normal ground", "desert": "Desert or dry sand", "swamp": "Swamp", "rocky": "Rock, ice, stone or shallow water" },
     "trackingIlluminations": { "good": "Good light", "twilight": "Twilight, light fog or a single torch", "moonlit": "Full-moon night or moderate fog", "dark": "Overcast night, dense fog, blizzard or blowing sand" },
@@ -974,6 +975,7 @@
         "parried": "Parried",
         "notParried": "Not parried",
         "noStyleDie": "This style has no damage die, so only the maneuver's own dice are rolled.",
+        "noEffect": "No effect. This creature can only be harmed by:",
         "save": "Target saves vs. paralyzation",
         "saveAt": "Target saves vs. paralyzation at {mod}",
         "applyPrefix": "Apply",

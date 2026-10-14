@@ -36,4 +36,9 @@ describe("martial maneuver labels", () => {
     const sheet = (enJson as unknown as { ADND2E: { sheet: { martialArts: Record<string, unknown> } } }).ADND2E.sheet.martialArts;
     expect(sheet.constants).toBeTruthy();
   });
+  it("the ineffective-hit and ch'i rank labels exist (SP18 Plan C)", () => {
+    const A = (enJson as unknown as { ADND2E: { chat: { martialArts: Record<string, string> }; martialChi: Record<string, string> } }).ADND2E;
+    expect(A.chat.martialArts.noEffect).toBeTruthy();
+    for (let n = 0; n <= 5; n++) expect(A.martialChi[`rank${n}`], `rank${n}`).toBeTruthy();
+  });
 });

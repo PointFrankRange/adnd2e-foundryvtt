@@ -1,6 +1,7 @@
 // The PC sheet's Martial Arts panel view. Pure: Foundry glue passes plain item data in.
 import { resolveActiveStyleId, styleStats, type StyleForm, type StyleMethod } from "./style";
 import { MANEUVERS, learnability, type ManeuverCost, type ManeuverDef } from "./maneuvers";
+import { chiRank, chiRankLabelKey } from "../enchantment";
 import { ironskinAcMod, knownManeuverIds } from "./skills";
 
 export interface StyleItemLike {
@@ -61,7 +62,11 @@ export interface MartialConstants {
   ironskin: boolean;
   /** -2 while Ironskin is known and no body armor is worn; else 0 */
   ironskinAcMod: number;
-  summary: { nameKey: string; effectKey: string }[];
+  /** Ch'i Attacks (mental:4) is known on any owned style */
+  chiKnown: boolean;
+  /** the unarmed enchantment rank at the character's level; 0 when Ch'i is unknown */
+  chiRank: number;
+  summary: { nameKey: string; effectKey: string; detailKey?: string }[];
 }
 
 export interface MartialArtsView {
@@ -130,16 +135,21 @@ export function buildMartialArtsView(input: {
   const active = styles.find((s) => s.active) ?? null;
   const knownIds = knownManeuverIds(owned.map((i) => ({ knownManeuvers: i.system.knownManeuvers })));
   const ironskin = knownIds.has("mental:6");
-  const SUMMARY: [string, string][] = [["mental:2", "allAroundSight"], ["mental:3", "mentalResistance"], ["mental:5", "blindFighting"], ["mental:6", "ironskin"]];
+  const SUMMARY: [string, string][] = [["mental:2", "allAroundSight"], ["mental:3", "mentalResistance"], ["mental:4", "chiAttacks"], ["mental:5", "blindFighting"], ["mental:6", "ironskin"]];
+  const chiKnown = knownIds.has("mental:4");
+  const chi = chiKnown ? chiRank(input.level ?? 0) : 0;
   const constants: MartialConstants = {
     allAroundSight: knownIds.has("mental:2"),
     mentalResistance: knownIds.has("mental:3"),
     blindFighting: knownIds.has("mental:5"),
     ironskin,
     ironskinAcMod: ironskinAcMod(ironskin, input.wearingBodyArmor ?? false),
+    chiKnown,
+    chiRank: chi,
     summary: SUMMARY.filter(([id]) => knownIds.has(id)).map(([, slug]) => ({
       nameKey: `ADND2E.martialManeuvers.${slug}`,
       effectKey: `ADND2E.martialManeuverEffects.${slug}`,
+      ...(slug === "chiAttacks" ? { detailKey: chiRankLabelKey(chi) } : {}),
     })),
   };
   return {

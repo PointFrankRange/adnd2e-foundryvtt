@@ -241,3 +241,36 @@ describe("itemized situational rows", () => {
     expect(without.breakdown).toEqual([]);
   });
 });
+
+describe("ineffective martial arts hits (SP18 Plan C)", () => {
+  const req = { requirementKey: "ADND2E.hitRequirements.plus1" };
+  it("the plain card: damage 0, no blow line, no stun prompt, requirement passed through", () => {
+    const hit = resolveMartialAttack({ ...input, naturalD20: 20 });
+    const ctx = buildMartialCardContext({ actorName: "A", actorImg: "", styleName: "S", targetName: "Wraith", result: hit, ineffective: req });
+    expect(ctx.ineffective).toEqual(req);
+    expect(ctx.damage).toBe(0);
+    expect(ctx.blowKey).toBe("");
+    expect(ctx.stunTrigger).toBe(false);
+  });
+  it("the plain card without a requirement is unchanged", () => {
+    const hit = resolveMartialAttack({ ...input, naturalD20: 14 });
+    const ctx = buildMartialCardContext({ actorName: "A", actorImg: "", styleName: "S", targetName: null, result: hit });
+    expect(ctx.ineffective).toBeNull();
+    expect(ctx.blowKey).not.toBe("");
+  });
+  it("a maneuver card: no damage, formula, effects, stun or outcome text", () => {
+    const result = resolveManeuverAttack({
+      maneuverId: "vitalArea:3", naturalD20: 20, thac0: 20, targetAc: 10, attackerArmorType: "none", opponentWeaponSize: null,
+      situationalModifier: 0, targetArmorGroup: "none", styleDie: "1d4", level: 5, strengthAdj: 1,
+    });
+    const ctx = buildManeuverCardContext({
+      actorName: "A", actorImg: "", styleName: "S", targetName: "Wraith", result, damageTotal: 4, ineffective: req,
+    });
+    expect(ctx.ineffective).toEqual(req);
+    expect(ctx.effects).toEqual([]);
+    expect(ctx.damage).toBe(0);
+    expect(ctx.formula).toBe("");
+    expect(ctx.stunTrigger).toBe(false);
+    expect(ctx.outcomeKey).toBe("");
+  });
+});

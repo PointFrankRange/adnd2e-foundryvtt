@@ -91,7 +91,7 @@
         {{#if @root.martialArts.constants.summary.length}}
           <h5 class="kit-subhead">{{localize 'ADND2E.sheet.martialArts.constants'}}</h5>
           {{#each @root.martialArts.constants.summary as |c|}}
-            <p class="hint"><strong>{{localize c.nameKey}}</strong> - {{localize c.effectKey}}</p>
+            <p class="hint"><strong>{{localize c.nameKey}}</strong> - {{localize c.effectKey}}{{#if c.detailKey}} ({{localize c.detailKey}}){{/if}}</p>
           {{/each}}
         {{/if}}
         <p class="hint">{{localize 'ADND2E.sheet.martialArts.extraAttack'}}</p>

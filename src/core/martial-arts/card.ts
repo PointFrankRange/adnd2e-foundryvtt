@@ -12,6 +12,8 @@ export interface MartialCardInput {
   result: MartialAttackResult;
   /** itemized condition rows; when given they replace the single summed Conditions row */
   situationalRows?: { labelKey: string; amount: number }[];
+  /** a hit below the target's enchantment requirement has no effect */
+  ineffective?: { requirementKey: string } | null;
 }
 
 export interface MartialCardContext {
@@ -28,6 +30,7 @@ export interface MartialCardContext {
   blowKey: string;
   damage: number;
   stunTrigger: boolean;
+  ineffective: { requirementKey: string } | null;
 }
 
 function situationalEntries(rows: { labelKey: string; amount: number }[] | undefined, summed: number): [string, number][] {
@@ -36,6 +39,7 @@ function situationalEntries(rows: { labelKey: string; amount: number }[] | undef
 
 export function buildMartialCardContext(input: MartialCardInput): MartialCardContext {
   const r = input.result;
+  const ineffective = r.hit ? (input.ineffective ?? null) : null;
   const rows: [string, number][] = [
     ["ADND2E.chat.martialArts.mod.armor", r.penalties.armor],
     ["ADND2E.chat.martialArts.mod.weaponSize", r.penalties.weaponSize],
@@ -52,9 +56,10 @@ export function buildMartialCardContext(input: MartialCardInput): MartialCardCon
     hit: r.hit,
     breakdown: rows.filter(([, amount]) => amount !== 0).map(([labelKey, amount]) => ({ labelKey, amount })),
     resultKey: r.hit ? "ADND2E.chat.martialArts.hit" : "ADND2E.chat.martialArts.miss",
-    blowKey: r.blow ? `ADND2E.martialBlows.${r.blow}` : "",
-    damage: r.damage,
-    stunTrigger: r.hit && r.stunTrigger,
+    blowKey: ineffective || !r.blow ? "" : `ADND2E.martialBlows.${r.blow}`,
+    damage: ineffective ? 0 : r.damage,
+    stunTrigger: !ineffective && r.hit && r.stunTrigger,
+    ineffective,
   };
 }
 
@@ -86,6 +91,8 @@ export interface ManeuverCardInput {
   doubleDamageTotal?: number;
   /** itemized condition rows; when given they replace the single summed Conditions row */
   situationalRows?: { labelKey: string; amount: number }[];
+  /** a hit below the target's enchantment requirement has no effect */
+  ineffective?: { requirementKey: string } | null;
 }
 
 export interface ManeuverCardContext {
@@ -111,6 +118,7 @@ export interface ManeuverCardContext {
   blowKey: string;
   /** the effects a hit offers, each with its save line and apply data; empty on a miss or parry */
   effects: CardEffect[];
+  ineffective: { requirementKey: string } | null;
 }
 
 const COST_KEY: Readonly<Record<string, string>> = { "0": "none", "1": "one", "2": "two", round: "round" };
@@ -126,7 +134,8 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
     ["ADND2E.chat.martialArts.mod.maneuver", r.maneuverBonus],
   ];
   const parry = def.kind === "parry";
-  const effects: CardEffect[] = r.hit
+  const ineffective = r.hit ? (input.ineffective ?? null) : null;
+  const effects: CardEffect[] = r.hit && !ineffective
     ? (def.effects ?? []).map((e) => ({
         id: e.id,
         labelKey: `ADND2E.martialEffects.${e.id}`,
@@ -154,13 +163,14 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
     resultKey: parry
       ? r.hit ? "ADND2E.chat.martialArts.parried" : "ADND2E.chat.martialArts.notParried"
       : r.hit ? "ADND2E.chat.martialArts.hit" : "ADND2E.chat.martialArts.miss",
-    outcomeKey: `${r.hit ? "ADND2E.martialManeuverEffects" : "ADND2E.martialManeuverFailures"}.${def.slug}`,
-    formula: r.blow ? "" : (r.damageFormula ?? ""),
-    damage: r.hit && r.damageFormula !== null ? input.damageTotal : 0,
-    stunTrigger: r.hit && r.stunTrigger,
+    outcomeKey: ineffective ? "" : `${r.hit ? "ADND2E.martialManeuverEffects" : "ADND2E.martialManeuverFailures"}.${def.slug}`,
+    formula: ineffective || r.blow ? "" : (r.damageFormula ?? ""),
+    damage: !ineffective && r.hit && r.damageFormula !== null ? input.damageTotal : 0,
+    stunTrigger: !ineffective && r.hit && r.stunTrigger,
     noStyleDie: def.kind === "attack" && def.ownDie === null && def.basic !== true && def.noDamage !== true && input.styleDieIsNull === true,
-    blowKey: r.blow ? `ADND2E.martialBlows.${r.blow}` : "",
+    blowKey: ineffective || !r.blow ? "" : `ADND2E.martialBlows.${r.blow}`,
     effects,
+    ineffective,
   };
 }
 
@@ -209,6 +219,7 @@ export function buildSkillCardContext(input: SkillCardInput): SkillCardContext {
     noStyleDie: false,
     blowKey: "",
     effects: [],
+    ineffective: null,
     lines: [],
     noRoll: false,
   };

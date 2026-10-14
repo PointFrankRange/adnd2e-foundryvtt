@@ -8,6 +8,7 @@ import {
   learnability, maneuverById, resolveLeap, resolveManeuverAttack, resolveMartialAttack, resolveSpeed, unlearnUpdate, type ArmorGroup, type MartialArtsView,
   type StyleItemLike,
 } from "../../core/martial-arts";
+import { attackRank, canHarm, requirementLabelKey } from "../../core/enchantment";
 import { themedConfirm, themedPrompt } from "../../dialogs/themed-dialog-foundry";
 import { getOptionalRules } from "../../settings";
 import { resolveTargetArmorType, resolveTargetCombatInfo } from "./combat-rolls";
@@ -111,6 +112,13 @@ interface TargetInfo {
   opponentWeaponSize: string | null;
   targetStatuses: ReadonlySet<string>;
   targetArmorGroup: ArmorGroup;
+  /** the target's enchantment requirement id; "" when none */
+  hitRequirement: string;
+}
+
+/** The "no effect" marker for a hit below the target's requirement. Unarmed rank comes from Ch'i only. */
+function ineffectiveFor(target: TargetInfo, chiLevel: number | null, hit: boolean): { requirementKey: string } | null {
+  return hit && !canHarm(attackRank({ chiLevel }), target.hitRequirement) ? { requirementKey: requirementLabelKey(target.hitRequirement) } : null;
 }
 
 /** The targeted token's numbers, or a typed-in AC when zero or several tokens are targeted; null when cancelled. */
@@ -129,6 +137,7 @@ async function resolveTarget(): Promise<TargetInfo | null> {
       opponentWeaponSize: wieldedWeaponSize(targetActor as never),
       targetStatuses,
       targetArmorGroup: armorGroupOf(resolveTargetArmorType(targetActor as never), toughMonster),
+      hitRequirement: info.hitRequirement,
     };
   }
   const manualAc = await themedPrompt({
@@ -145,7 +154,7 @@ async function resolveTarget(): Promise<TargetInfo | null> {
     },
   } as never);
   if (typeof manualAc !== "number" || !Number.isFinite(manualAc)) return null;
-  return { targetName: null, targetAc: manualAc, opponentWeaponSize: null, targetStatuses: new Set<string>(), targetArmorGroup: "none" };
+  return { targetName: null, targetAc: manualAc, opponentWeaponSize: null, targetStatuses: new Set<string>(), targetArmorGroup: "none", hitRequirement: "" };
 }
 
 /** The condition modifiers on the attack roll (the same set the weapon attack uses), itemized for the card. */
@@ -187,8 +196,10 @@ export async function rollMartialArtsAttack(actor: MartialArtsActor): Promise<vo
     strengthDamageAdj: actor.system.abilities?.str?.mods?.damageAdj ?? 0,
     forcedHit: isHelpless(target.targetStatuses),
   });
+  const chiLevel = view.constants.chiKnown ? characterLevel(actor) : null;
   const context = buildMartialCardContext({
     actorName: actor.name, actorImg: actor.img, styleName: view.active.name, targetName: target.targetName, result, situationalRows: cond.rows,
+    ineffective: ineffectiveFor(target, chiLevel, result.hit),
   });
   await postCard(actor, roll, "chat/martial-arts-attack.hbs", context);
 }
@@ -255,10 +266,12 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
   if (result.damageFormula) damageTotal = Math.max(0, (await new Roll(result.damageFormula).evaluate()).total ?? 0);
   let doubleDamageTotal = 0;
   if (result.doubleDamageFormula) doubleDamageTotal = Math.max(0, (await new Roll(result.doubleDamageFormula).evaluate()).total ?? 0);
+  const chiLevel = view.constants.chiKnown ? characterLevel(actor) : null;
   const context = buildManeuverCardContext({
     actorName: actor.name, actorImg: actor.img, styleName: view.active.name, targetName: target.targetName, result, damageTotal,
     doubleDamageTotal, situationalRows: cond.rows,
     styleDieIsNull: view.active.damageDie === null,
+    ineffective: ineffectiveFor(target, chiLevel, result.hit),
   });
   await postCard(actor, roll, "chat/martial-arts-attack.hbs", context);
 }

@@ -147,4 +147,12 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
     expect(lookup("ADND2E.sheet.martialArts.unlearnTitle")).toBe("Unlearn maneuver");
     expect(lookup("ADND2E.sheet.martialArts.unlearnConfirm")).toBe("Unlearn {name}? Its weapon proficiency slot is refunded.");
   });
+  it("ineffective hits and ch'i are wired (SP18 Plan C)", () => {
+    expect(CHAT).toContain("ineffective");
+    expect(CHAT).toContain("ADND2E.chat.martialArts.noEffect");
+    expect(ACTIONS).toContain("canHarm(");
+    expect(ACTIONS).toContain("attackRank(");
+    expect(ACTIONS).toContain("chiLevel");
+    expect(read("templates", "actor", "pc", "partials", "pc-main-panels.hbs")).toContain("c.detailKey");
+  });
 });
