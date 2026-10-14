@@ -140,6 +140,7 @@ describe("lang/en.json — SP2 Task 6 sheet strings (Combat/Inventory/Features/B
       "ADND2E.sheet.combat.shield",
       "ADND2E.sheet.combat.noWeapons",
       "ADND2E.sheet.combat.noArmor",
+      "ADND2E.sheet.combat.noArmorEquipped",
       "ADND2E.sheet.combat.speedFactor",
       "ADND2E.sheet.details.age",
       "ADND2E.sheet.details.sex",

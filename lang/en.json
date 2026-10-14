@@ -693,6 +693,7 @@
         "release": "Release",
         "noWeapons": "No weapons carried.",
         "noArmor": "No armor carried.",
+        "noArmorEquipped": "No armor equipped.",
         "rollAttack": "Attack",
         "rollSave": "Save",
         "backstab": "Backstab",

@@ -596,7 +596,8 @@ function buildCombat(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   const styleAcMod = input.martialArtsAcMod ?? 0;
   if (styleAcMod !== 0) acBreakdown.push({ label: "ADND2E.sheet.combat.acStyle", value: styleAcMod });
 
-  const armor = armorItems.map((i) => ({
+  // #165: the Main tab lists only what is worn; spares live on the Inventory tab
+  const armor = armorItems.filter((i) => i.equipped).map((i) => ({
     id: i.id,
     name: i.name,
     equipped: i.equipped,
