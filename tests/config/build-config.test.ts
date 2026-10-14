@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { buildAdnd2eConfig } from "../../src/config";
 import { TRACKING_TERRAINS, TRACKING_ILLUMINATIONS, PRIMARY_TERRAINS } from "../../src/core/tracking";
+import { HIT_REQUIREMENTS } from "../../src/core/enchantment";
 
 const cfg = buildAdnd2eConfig();
 
@@ -16,7 +17,7 @@ describe("buildAdnd2eConfig()", () => {
     expect(Object.keys(cfg).sort()).toEqual(
       [
         "abilities", "alignments", "armorTypes", "attackTypes", "classGroups", "creatureIntelligence",
-        "currency", "damageTypes", "dispositions", "encumbranceCategories", "habitats", "monsterTypes", "movementModes",
+        "currency", "damageTypes", "dispositions", "encumbranceCategories", "habitats", "hitRequirements", "monsterTypes", "movementModes",
         "primaryTerrains", "saveModes", "saves", "schools", "shapechangeCategories", "sizes", "spheres", "trackingIlluminations", "trackingTerrains", "treasureTypes", "turnRows",
         "weaponCategories", "weaponDamageTypes", "weaponProficiencyGroups", "weaponSizes", "weaponStyleGroups",
       ].sort(),
@@ -84,6 +85,7 @@ describe("buildAdnd2eConfig()", () => {
     assertLabelMap(cfg.habitats);
     assertLabelMap(cfg.shapechangeCategories);
     assertLabelMap(cfg.trackingTerrains);
+    assertLabelMap(cfg.hitRequirements);
     assertLabelMap(cfg.trackingIlluminations);
     assertLabelMap(cfg.primaryTerrains);
     assertLabelMap(cfg.spheres);
@@ -110,6 +112,14 @@ describe("buildAdnd2eConfig()", () => {
     for (const map of [cfg.trackingTerrains, cfg.trackingIlluminations, cfg.primaryTerrains]) {
       for (const key of Object.values(map)) expect(typeof lookup(key), key).toBe("string");
     }
+  });
+
+  it("hitRequirements covers every requirement id (blank key included) and resolves in lang", () => {
+    const lang = JSON.parse(readFileSync(path.join(process.cwd(), "lang", "en.json"), "utf8")) as Record<string, unknown>;
+    const lookup = (key: string) => key.split(".").reduce<unknown>((o, k) => (o as Record<string, unknown> | undefined)?.[k], lang);
+    expect(Object.keys(cfg.hitRequirements)).toEqual([...HIT_REQUIREMENTS]);
+    expect(cfg.hitRequirements[""]).toBe("ADND2E.hitRequirements.none");
+    for (const key of Object.values(cfg.hitRequirements)) expect(typeof lookup(key), key).toBe("string");
   });
 
   it("the returned object is frozen", () => {

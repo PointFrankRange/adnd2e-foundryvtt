@@ -82,15 +82,16 @@ describe("passive maneuvers (SP18 B2)", () => {
   });
 });
 
+const style = (known: string[], id = "s1"): StyleItemLike => ({
+  id, name: id, img: "", type: "martialStyle",
+  system: {
+    form: "soft", principalMethod: "throw", slotsInvested: 1,
+    availableManeuvers: [{ list: "mental", difficulties: [1, 2, 3, 4, 5, 6, 7] }],
+    knownManeuvers: known.map((k) => ({ id: k, level: 1 })),
+  },
+});
+
 describe("constants (SP18 B3)", () => {
-  const style = (known: string[], id = "s1"): StyleItemLike => ({
-    id, name: id, img: "", type: "martialStyle",
-    system: {
-      form: "soft", principalMethod: "throw", slotsInvested: 1,
-      availableManeuvers: [{ list: "mental", difficulties: [1, 2, 3, 4, 5, 6, 7] }],
-      knownManeuvers: known.map((k) => ({ id: k, level: 1 })),
-    },
-  });
   const view = (items: StyleItemLike[], wearingBodyArmor = false) =>
     buildMartialArtsView({ enabled: true, knowsBasics: true, storedActiveId: "", canAct: true, level: 5, freeSlots: 2, wearingBodyArmor, items });
 
@@ -109,5 +110,57 @@ describe("constants (SP18 B3)", () => {
   });
   it("no styles means no constants", () => {
     expect(view([]).constants).toMatchObject({ ironskin: false, ironskinAcMod: 0, summary: [] });
+  });
+});
+
+describe("ch'i constants (SP18 Plan C)", () => {
+  it("known ch'i reports its rank at the character's level and lists the summary row between mental 3 and 5", () => {
+    const v = buildMartialArtsView({
+      enabled: true, knowsBasics: true, storedActiveId: "", canAct: true, level: 10, freeSlots: 2,
+      items: [style(["mental:3", "mental:4", "mental:5"])],
+    });
+    expect(v.constants).toMatchObject({ chiKnown: true, chiRank: 3 });
+    expect(v.constants.summary.map((s) => s.nameKey)).toEqual([
+      "ADND2E.martialManeuvers.mentalResistance", "ADND2E.martialManeuvers.chiAttacks", "ADND2E.martialManeuvers.blindFighting",
+    ]);
+    expect(v.constants.summary[1]).toMatchObject({ effectKey: "ADND2E.martialManeuverEffects.chiAttacks", detailKey: "ADND2E.martialChi.rank3" });
+  });
+  it("unknown ch'i has rank 0 flag false and no row", () => {
+    const v = buildMartialArtsView({ enabled: true, knowsBasics: true, storedActiveId: "", canAct: true, level: 10, freeSlots: 2, items: [style(["mental:2"])] });
+    expect(v.constants).toMatchObject({ chiKnown: false, chiRank: 0 });
+    expect(v.constants.summary.some((s) => s.nameKey.endsWith("chiAttacks"))).toBe(false);
+  });
+});
+
+describe("passives list once (SP18 Plan C follow-up)", () => {
+  it("every known passive is in the summary and none is a usable row under its style", () => {
+    const v = buildMartialArtsView({
+      enabled: true, knowsBasics: true, storedActiveId: "", canAct: true, level: 5, freeSlots: 2,
+      items: [style(["throw:1", "mental:1", "mental:2"])],
+    });
+    expect(v.constants.summary.map((s) => s.nameKey)).toEqual([
+      "ADND2E.martialManeuvers.fall", "ADND2E.martialManeuvers.meditation", "ADND2E.martialManeuvers.allAroundSight",
+    ]);
+    expect(v.styles[0].knownManeuvers.length).toBe(3);
+    expect(v.styles[0].usableManeuvers).toEqual([]);
+  });
+});
+
+describe("management grouping (SP18 follow-up)", () => {
+  it("groups by list easiest first and names the earlier maneuver an out-of-order lock needs", () => {
+    const v = buildMartialArtsView({
+      enabled: true, knowsBasics: true, storedActiveId: "", canAct: true, level: 5, freeSlots: 2,
+      items: [style([])],
+    });
+    const lists = v.styles[0].lists;
+    expect(new Set(lists.map((g) => g.listKey)).size).toBe(lists.length);
+    for (const g of lists) {
+      const diffs = g.maneuvers.map((m) => m.difficulty);
+      expect(diffs).toEqual([...diffs].sort((a, b) => a - b));
+      const locked = g.maneuvers.filter((m) => m.reasonKey.endsWith(".order"));
+      for (const m of locked) expect(m.prereqNameKey).toMatch(/^ADND2E\.martialManeuvers\./);
+      for (const m of g.maneuvers.filter((x) => !x.reasonKey.endsWith(".order"))) expect(m.prereqNameKey).toBe("");
+    }
+    expect(lists.some((g) => g.maneuvers.some((m) => m.prereqNameKey !== ""))).toBe(true);
   });
 });

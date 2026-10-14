@@ -21,7 +21,7 @@ const keysIn = (src: string, re: RegExp): string[] => [...new Set([...src.matchA
 describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
   it("Main is the compact play view: known maneuvers with Use, no management controls", () => {
     expect(MAIN).toContain("data-action=\"useManeuver\"");
-    expect(MAIN).toContain("s.knownManeuvers");
+    expect(MAIN).toContain("s.usableManeuvers");
     expect(MAIN).toContain('title="{{localize m.effectKey}}"');
     expect(MAIN).toMatch(/data-maneuver-id="\{\{m\.id\}\}"/);
     const use = MAIN.split(/\r?\n/).find((l) => l.includes('data-action="useManeuver"'))!;
@@ -146,5 +146,13 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
     expect(lookup("ADND2E.sheet.martialArts.unlearn")).toBe("Unlearn");
     expect(lookup("ADND2E.sheet.martialArts.unlearnTitle")).toBe("Unlearn maneuver");
     expect(lookup("ADND2E.sheet.martialArts.unlearnConfirm")).toBe("Unlearn {name}? Its weapon proficiency slot is refunded.");
+  });
+  it("ineffective hits and ch'i are wired (SP18 Plan C)", () => {
+    expect(CHAT).toContain("ineffective");
+    expect(CHAT).toContain("ADND2E.chat.martialArts.noEffect");
+    expect(ACTIONS).toContain("canHarm(");
+    expect(ACTIONS).toContain("attackRank(");
+    expect(ACTIONS).toContain("chiLevel");
+    expect(read("templates", "actor", "pc", "partials", "pc-main-panels.hbs")).toContain("c.detailKey");
   });
 });

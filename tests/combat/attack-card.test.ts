@@ -98,3 +98,11 @@ describe("buildAttackCardContext", () => {
     expect(c2.fumbleLabel).toBe("ADND2E.chat.attack.fumble.miss");
   });
 });
+
+describe("ineffective hits (SP18 Plan C)", () => {
+  it("defaults to null and passes a requirement through", () => {
+    expect(buildAttackCardContext(input()).ineffective).toBeNull();
+    const ctx = buildAttackCardContext(input({ ineffective: { requirementKey: "ADND2E.hitRequirements.plus1" } }));
+    expect(ctx.ineffective).toEqual({ requirementKey: "ADND2E.hitRequirements.plus1" });
+  });
+});

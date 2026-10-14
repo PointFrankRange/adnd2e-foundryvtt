@@ -24,7 +24,7 @@ function input(over: Partial<CreatureSheetInput> = {}): CreatureSheetInput {
     },
     details: {
       size: "large", alignment: "true-neutral", intelligence: "animal", morale: 15,
-      magicResistance: 0, treasureType: "C", numberAppearing: "1d4", xpValue: 175,
+      magicResistance: 0, hitRequirement: "plus2", treasureType: "C", numberAppearing: "1d4", xpValue: 175,
       specialAttacks: "", specialDefenses: "", description: "",
     },
     perms: { isGM: true, isOwner: true, editable: true },
@@ -111,6 +111,7 @@ describe("buildCreatureSheetContext", () => {
     expect(c.details.alignment).toBe("true-neutral");
     expect(c.details.morale).toBe(15);
     expect(c.details.magicResistance).toBe(0);
+    expect(c.details.hitRequirement).toBe("plus2");
     expect(c.details.xpValue).toBe(175);
   });
 

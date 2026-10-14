@@ -1,6 +1,7 @@
 // The PC sheet's Martial Arts panel view. Pure: Foundry glue passes plain item data in.
 import { resolveActiveStyleId, styleStats, type StyleForm, type StyleMethod } from "./style";
 import { MANEUVERS, learnability, type ManeuverCost, type ManeuverDef } from "./maneuvers";
+import { chiRank, chiRankLabelKey } from "../enchantment";
 import { ironskinAcMod, knownManeuverIds } from "./skills";
 
 export interface StyleItemLike {
@@ -27,6 +28,8 @@ export interface ManeuverRow {
   state: "known" | "learnable" | "locked";
   /** why a locked maneuver cannot be learned (i18n key); blank otherwise */
   reasonKey: string;
+  /** for an out-of-order lock: the name key of the earlier maneuver to learn first; blank otherwise */
+  prereqNameKey: string;
   /** known, on the active style, and the character can act */
   usable: boolean;
   /** i18n key of the maneuver's effect text */
@@ -51,6 +54,10 @@ export interface StyleRow {
   maneuvers: ManeuverRow[];
   /** the learned subset of `maneuvers`, same order */
   knownManeuvers: ManeuverRow[];
+  /** the maneuvers grouped by list, easiest first (the Features management view) */
+  lists: { listKey: string; maneuvers: ManeuverRow[] }[];
+  /** known maneuvers that are used (not passive); passives list once in the constants summary */
+  usableManeuvers: ManeuverRow[];
 }
 
 /** The always-on abilities known on any owned style. */
@@ -61,7 +68,11 @@ export interface MartialConstants {
   ironskin: boolean;
   /** -2 while Ironskin is known and no body armor is worn; else 0 */
   ironskinAcMod: number;
-  summary: { nameKey: string; effectKey: string }[];
+  /** Ch'i Attacks (mental:4) is known on any owned style */
+  chiKnown: boolean;
+  /** the unarmed enchantment rank at the character's level; 0 when Ch'i is unknown */
+  chiRank: number;
+  summary: { nameKey: string; effectKey: string; detailKey?: string }[];
 }
 
 export interface MartialArtsView {
@@ -72,6 +83,23 @@ export interface MartialArtsView {
   styles: StyleRow[];
   active: StyleRow | null;
   constants: MartialConstants;
+}
+
+/** The name key of the easiest offered maneuver below `m` in its list that is not yet known. */
+function prereqNameKey(m: ManeuverDef, offered: readonly { list: string; difficulties: readonly number[] }[], knownIds: ReadonlySet<string>): string {
+  const lower = (offered.find((o) => o.list === m.list)?.difficulties ?? []).filter((d) => d < m.difficulty && !knownIds.has(`${m.list}:${d}`));
+  const first = MANEUVERS.find((x) => x.list === m.list && x.difficulty === Math.min(...lower));
+  return first ? `ADND2E.martialManeuvers.${first.slug}` : "";
+}
+
+function groupByList(rows: ManeuverRow[]): { listKey: string; maneuvers: ManeuverRow[] }[] {
+  const out: { listKey: string; maneuvers: ManeuverRow[] }[] = [];
+  for (const r of [...rows].sort((a, b) => a.difficulty - b.difficulty)) {
+    const g = out.find((x) => x.listKey === r.listKey);
+    if (g) g.maneuvers.push(r);
+    else out.push({ listKey: r.listKey, maneuvers: [r] });
+  }
+  return out;
 }
 
 export function buildMartialArtsView(input: {
@@ -108,6 +136,7 @@ export function buildMartialArtsView(input: {
           state: isKnown ? "known" : verdict.ok ? "learnable" : "locked",
           reasonKey: isKnown || verdict.ok ? "" : `ADND2E.sheet.martialArts.locked.${verdict.reason}`,
           effectKey: `ADND2E.martialManeuverEffects.${m.slug}`,
+          prereqNameKey: !isKnown && !verdict.ok && verdict.reason === "order" ? prereqNameKey(m, offered, knownIds) : "",
           usable: isKnown && isActive && input.canAct && m.kind !== "passive",
         };
       },
@@ -124,22 +153,28 @@ export function buildMartialArtsView(input: {
       slots: i.system.slotsInvested ?? 1,
       active: i.id === activeId,
       maneuvers,
+      lists: groupByList(maneuvers),
       knownManeuvers: maneuvers.filter((m) => m.state === "known"),
+      usableManeuvers: maneuvers.filter((m) => m.state === "known" && m.kind !== "passive"),
     };
   });
   const active = styles.find((s) => s.active) ?? null;
   const knownIds = knownManeuverIds(owned.map((i) => ({ knownManeuvers: i.system.knownManeuvers })));
   const ironskin = knownIds.has("mental:6");
-  const SUMMARY: [string, string][] = [["mental:2", "allAroundSight"], ["mental:3", "mentalResistance"], ["mental:5", "blindFighting"], ["mental:6", "ironskin"]];
+  const chiKnown = knownIds.has("mental:4");
+  const chi = chiKnown ? chiRank(input.level ?? 0) : 0;
   const constants: MartialConstants = {
     allAroundSight: knownIds.has("mental:2"),
     mentalResistance: knownIds.has("mental:3"),
     blindFighting: knownIds.has("mental:5"),
     ironskin,
     ironskinAcMod: ironskinAcMod(ironskin, input.wearingBodyArmor ?? false),
-    summary: SUMMARY.filter(([id]) => knownIds.has(id)).map(([, slug]) => ({
-      nameKey: `ADND2E.martialManeuvers.${slug}`,
-      effectKey: `ADND2E.martialManeuverEffects.${slug}`,
+    chiKnown,
+    chiRank: chi,
+    summary: MANEUVERS.filter((m) => m.kind === "passive" && knownIds.has(m.id)).map((m) => ({
+      nameKey: `ADND2E.martialManeuvers.${m.slug}`,
+      effectKey: `ADND2E.martialManeuverEffects.${m.slug}`,
+      ...(m.slug === "chiAttacks" ? { detailKey: chiRankLabelKey(chi) } : {}),
     })),
   };
   return {

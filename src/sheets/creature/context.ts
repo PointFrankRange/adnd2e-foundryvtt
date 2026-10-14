@@ -70,6 +70,7 @@ export function buildCreatureSheetContext(input: CreatureSheetInput): CreatureSh
       intelligence: input.details.intelligence,
       morale: input.details.morale,
       magicResistance: input.details.magicResistance,
+      hitRequirement: input.details.hitRequirement,
       treasureType: input.details.treasureType,
       numberAppearing: input.details.numberAppearing,
       xpValue: input.details.xpValue,

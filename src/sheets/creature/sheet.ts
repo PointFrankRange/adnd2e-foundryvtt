@@ -134,6 +134,7 @@ export class Adnd2eCreatureSheet extends Base {
     // builder (whole-branch-review C1 fix).
     const cfg = (CONFIG as unknown as { ADND2E: Record<string, Record<string, string>> }).ADND2E;
     context.sizes = cfg.sizes;
+    context.hitRequirements = cfg.hitRequirements;
     context.alignments = cfg.alignments;
     context.classGroups = cfg.classGroups;
     context.attackTypes = cfg.attackTypes;

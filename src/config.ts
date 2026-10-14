@@ -2,6 +2,7 @@
 // Pure and framework-free — assigned to `CONFIG.ADND2E` on `init` by system.ts,
 // typed into the global scope by src/types/global.d.ts.
 import type { TurnRowId } from "./core/turning";
+import type { HitRequirement } from "./core/enchantment";
 import type { ShapechangeCategory, SHAPECHANGE_HABITATS } from "./core/shapechange";
 import type { TrackingTerrain, TrackingIllumination, PrimaryTerrain } from "./core/tracking";
 import type { MonsterTypeId } from "./data/item/choices";
@@ -82,6 +83,8 @@ export interface Adnd2eConfig {
   readonly trackingIlluminations: LabelMap<TrackingIllumination>;
   readonly primaryTerrains: LabelMap<PrimaryTerrain>;
   readonly turnRows: LabelMap<TurnRowId>;
+  /** SP18 Plan C: weapon-enchantment requirement ids; the blank id "" labels as "None". */
+  readonly hitRequirements: LabelMap<HitRequirement>;
   readonly sizes: LabelMap<CreatureSize>;
   readonly movementModes: LabelMap<MovementMode>;
   readonly damageTypes: LabelMap<ConfigDamageType>;
@@ -221,6 +224,15 @@ export function buildAdnd2eConfig(): Adnd2eConfig {
       mountain: "ADND2E.primaryTerrains.mountain",
       plain: "ADND2E.primaryTerrains.plain",
       swamp: "ADND2E.primaryTerrains.swamp",
+    },
+    hitRequirements: {
+      "": "ADND2E.hitRequirements.none",
+      magical: "ADND2E.hitRequirements.magical",
+      plus1: "ADND2E.hitRequirements.plus1",
+      plus2: "ADND2E.hitRequirements.plus2",
+      plus3: "ADND2E.hitRequirements.plus3",
+      plus4: "ADND2E.hitRequirements.plus4",
+      plus5: "ADND2E.hitRequirements.plus5",
     },
     turnRows: {
       skeleton: "ADND2E.turnRows.skeleton",

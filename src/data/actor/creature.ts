@@ -1,7 +1,7 @@
 import { htmlField } from "../common/fields";
 import { deriveCreature } from "../derive/creature";
 import type { CreatureSnapshot } from "../derive/creature";
-import { ALIGNMENTS, ATTACK_TYPES, CLASS_GROUPS, CREATURE_SIZES, MONSTER_TYPE_IDS, SAVE_MODES, TURN_ROW_CHOICES } from "../item/choices";
+import { ALIGNMENTS, ATTACK_TYPES, CLASS_GROUPS, CREATURE_SIZES, HIT_REQUIREMENTS, MONSTER_TYPE_IDS, SAVE_MODES, TURN_ROW_CHOICES } from "../item/choices";
 import { Adnd2eActorModel } from "./base-actor";
 import { SHAPECHANGE_CATEGORIES, SHAPECHANGE_HABITATS } from "../../core/shapechange";
 import type { SaveCategory } from "../../core/types";
@@ -75,6 +75,8 @@ export class CreatureModel extends Adnd2eActorModel {
         intelligence: new StringField({ required: true, blank: true, initial: "" }),
         morale: new NumberField({ required: true, integer: true, min: 0, initial: 10 }),
         magicResistance: new NumberField({ required: true, integer: true, min: 0, max: 100, initial: 0 }),
+        /** SP18 Plan C: the minimum weapon enchantment that can harm this creature ("" = any weapon). Defaults only, no migration. */
+        hitRequirement: new StringField({ required: true, blank: true, initial: "", choices: HIT_REQUIREMENTS }),
         treasureType: new StringField({ required: true, blank: true, initial: "" }),
         numberAppearing: new StringField({ required: true, blank: true, initial: "" }),
         xpValue: new NumberField({ required: true, nullable: true, integer: true, min: 0, initial: null }),

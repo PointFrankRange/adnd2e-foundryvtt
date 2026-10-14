@@ -18,3 +18,4 @@ export * from "./races";
 export * from "./psionics";
 export * from "./tracking";
 export * from "./martial-arts";
+export * from "./enchantment";

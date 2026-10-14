@@ -43,6 +43,8 @@ export interface AttackCardInput {
   /** an i18n key naming the called-shot/maneuver outcome, or null when no
    *  maneuver was selected or it missed. */
   maneuverLabel: string | null;
+  /** a hit that cannot harm the target: damage is not offered */
+  ineffective?: { requirementKey: string } | null;
 }
 
 export interface AttackCardContext {
@@ -57,6 +59,7 @@ export interface AttackCardContext {
   critLabel: string | null;
   fumbleLabel: string | null;
   maneuverLabel: string | null;
+  ineffective: { requirementKey: string } | null;
 }
 
 /* ---------- damage ---------- */
