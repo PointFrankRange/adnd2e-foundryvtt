@@ -107,6 +107,10 @@ Sub-projects 10-20 are candidates sourced from the 2026-09 reference survey (`do
 
 - **Player-Applied Damage & Effects** (world setting): when a player applies damage, healing or a maneuver effect to a token they don't own, the active GM's client applies it — automatically (default) or after the GM approves each one — and whispers the GM a log line. Needs a GM connected. If the active GM has the world open in more than one browser tab or device, a relayed effect can apply once per tab (Foundry delivers the query to every connection of that user) — keep one GM session open.
 
+### Player character tokens
+
+New player characters get a **linked** prototype token (Link Actor Data on), so statuses and conditions applied to a token land on the sheet's actor; Character NPCs and Monster NPCs stay unlinked. A one-time migration (system 0.3.1) links the prototype token of existing player characters. Tokens already placed on a scene keep their own flag: tick "Link Actor Data" on the token once, or delete and re-drop it.
+
 ### Roadmap and backlog
 
 Planned sub-projects, rules gaps, known bugs, tech debt and sheet/UI follow-ups are tracked as [GitHub Issues](https://github.com/PointFrankRange/adnd2e-foundryvtt/issues) (labels `sub-project`, `rules-gap`, `backlog`, `tech-debt`, `sheet-ui`, `dark-sun`) on the [roadmap project board](https://github.com/users/PointFrankRange/projects/1). Source-book research behind them is in `docs/mechanics-review-2026-09.md`.

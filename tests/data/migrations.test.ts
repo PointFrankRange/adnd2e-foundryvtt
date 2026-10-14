@@ -81,8 +81,33 @@ describe("pendingMigrations", () => {
 
 describe("MIGRATIONS", () => {
   it("SP1 shipped this framework with an empty list; SP7c Plan 7c adds the first real entry", () => {
-    expect(MIGRATIONS).toHaveLength(1);
+    expect(MIGRATIONS).toHaveLength(2);
     expect(MIGRATIONS[0].version).toBe("0.3.0");
+    expect(MIGRATIONS[1].version).toBe("0.3.1");
+  });
+});
+
+describe("link player character prototype tokens migration (0.3.1, #167)", () => {
+  const migration = MIGRATIONS.find((m) => m.version === "0.3.1")!;
+  const src = (actorLink?: boolean) => ({ prototypeToken: actorLink === undefined ? {} : { actorLink } });
+
+  it("links an unlinked character's prototype token", () => {
+    expect(migration.actorUpdate?.({}, "character", src(false))).toEqual({ "prototypeToken.actorLink": true });
+  });
+  it("is a no-op for an already linked character", () => {
+    expect(migration.actorUpdate?.({}, "character", src(true))).toBeNull();
+  });
+  it("is a no-op when the flag or source is missing", () => {
+    expect(migration.actorUpdate?.({}, "character", src())).toBeNull();
+    expect(migration.actorUpdate?.({}, "character")).toBeNull();
+  });
+  it("is a no-op for npc and creature actors", () => {
+    expect(migration.actorUpdate?.({}, "npc", src(false))).toBeNull();
+    expect(migration.actorUpdate?.({}, "creature", src(false))).toBeNull();
+  });
+  it("runs for a world already at 0.3.0 but not at 0.3.1", () => {
+    expect(pendingMigrations("0.3.0").map((m) => m.version)).toEqual(["0.3.1"]);
+    expect(pendingMigrations("0.3.1")).toEqual([]);
   });
 });
 
