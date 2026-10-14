@@ -60,6 +60,8 @@
           min-height: 34px; box-sizing: border-box;
           display: flex; align-items: center; justify-content: center; gap: 2px;
           padding: 0 4px; font-size: 18px; line-height: 1;
+          // #164: value and "/ max" stay on one line at 3+ digits
+          &.kit-hp { flex-wrap: nowrap; white-space: nowrap; input[type="number"] { field-sizing: content; max-width: 7ch; } }
           input[type="number"] {
             border: none; background: transparent; color: inherit;
             text-align: center; width: 3.2ch; min-width: 2.5ch; padding: 0;
