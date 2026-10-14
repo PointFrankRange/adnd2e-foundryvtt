@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildManeuverCardContext, buildMartialCardContext, resolveManeuverAttack, resolveMartialAttack } from "../../../src/core/martial-arts";
+import { buildManeuverCardContext, buildMartialCardContext, buildSkillCardContext, resolveLeap, resolveManeuverAttack, resolveMartialAttack, resolveSpeed } from "../../../src/core/martial-arts";
 
 // needed = 18 - 10 = 8; bonus = -1 (armor) -4 (weapon) -1 (situational) = -6; total = 14 - 6 = 8 → a hit
 const input = { naturalD20: 14, thac0: 18, targetAc: 10, attackerArmorType: "studded-leather", opponentWeaponSize: "L", situationalModifier: -1, strengthDamageAdj: 1 };
@@ -64,6 +64,13 @@ describe("buildManeuverCardContext", () => {
     expect(buildManeuverCardContext({ ...base, result: fist, styleDieIsNull: true }).noStyleDie).toBe(false);
     const parry = resolveManeuverAttack({ ...attackInput, maneuverId: "block:1", styleDie: null });
     expect(buildManeuverCardContext({ ...base, result: parry, styleDieIsNull: true }).noStyleDie).toBe(false);
+    // Feint takes its damage from Table 16, and a touch rolls nothing: neither is a style-die attack
+    const feint = resolveManeuverAttack({ ...attackInput, maneuverId: "movement:1", styleDie: null });
+    expect(buildManeuverCardContext({ ...base, result: feint, styleDieIsNull: true }).noStyleDie).toBe(false);
+    const touch = resolveManeuverAttack({ ...attackInput, maneuverId: "vitalArea:2", styleDie: null });
+    expect(buildManeuverCardContext({ ...base, result: touch, styleDieIsNull: true }).noStyleDie).toBe(false);
+    const circle = resolveManeuverAttack({ ...attackInput, maneuverId: "kick:1", styleDie: null });
+    expect(buildManeuverCardContext({ ...base, result: circle, styleDieIsNull: true }).noStyleDie).toBe(true);
   });
   it("a miss shows the failure text and no damage", () => {
     const ctx = buildManeuverCardContext({
@@ -113,12 +120,16 @@ describe("maneuver card effects (SP18 B2)", () => {
     const e = card("vitalArea:3").effects;
     expect(e).toEqual([{
       id: "paralyzed", labelKey: "ADND2E.martialEffects.paralyzed", saveKey: "ADND2E.chat.martialArts.saveAt", saveMod: "-2",
-      condition: "paralyzed", rounds: "2d4", damage: null, deferred: false,
+      condition: "paralyzed", rounds: "2d4", damage: null, deferred: false, self: false,
     }]);
   });
   it("Choke Hold's unconscious effect is deferred; an immediate effect is not", () => {
     expect(card("lock:1").effects[0]).toMatchObject({ id: "unconscious", condition: "unconscious", deferred: true });
     expect(card("vitalArea:2").effects[0]).toMatchObject({ condition: "stunned", deferred: false });
+  });
+  it("B2 effects apply to the targeted tokens, not the speaker, ", () => {
+    const c = card("vitalArea:3");
+    expect(c.effects.every((e) => e.self === false)).toBe(true);
   });
   it("a zero save modifier uses the plain save line; no save has none", () => {
     expect(card("vitalArea:2").effects[0]).toMatchObject({ saveKey: "ADND2E.chat.martialArts.save", saveMod: "", condition: "stunned", rounds: "1d4" });
@@ -137,5 +148,96 @@ describe("maneuver card effects (SP18 B2)", () => {
   it("a miss and a parry show no effects", () => {
     expect(card("vitalArea:3", 2).effects).toEqual([]);
     expect(card("block:1", 15).effects).toEqual([]);
+  });
+});
+
+describe("Feint and skill cards (SP18 B3)", () => {
+  const feint = {
+    maneuverId: "movement:1", naturalD20: 14, thac0: 20, targetAc: 10, attackerArmorType: "none", opponentWeaponSize: null,
+    situationalModifier: 0, targetArmorGroup: "none" as const, styleDie: "1d4", level: 5, strengthAdj: 1,
+  };
+  it("a Feint card shows the blow, a +3 maneuver row and costs 2 attacks, with no separate formula", () => {
+    const ctx = buildManeuverCardContext({
+      actorName: "A", actorImg: "", styleName: "S", targetName: null, result: resolveManeuverAttack(feint), damageTotal: 3,
+    });
+    expect(ctx.blowKey).toBe("ADND2E.martialBlows.vitalsPunch");
+    expect(ctx.costKey).toBe("ADND2E.martialManeuverCosts.two");
+    expect(ctx.breakdown).toEqual([{ labelKey: "ADND2E.chat.martialArts.mod.maneuver", amount: 3 }]);
+    expect(ctx.formula).toBe("");
+    expect(ctx.damage).toBe(3);
+  });
+  it("a Leap card prints both distances and offers Prone on a failed landing", () => {
+    const landed = buildSkillCardContext({
+      actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:4", skill: "leap",
+      result: resolveLeap({ naturalD20: 15, thac0: 20, situationalModifier: 0, level: 10 }),
+    });
+    expect(landed.noRoll).toBe(false);
+    expect(landed.hit).toBe(true);
+    expect(landed.resultKey).toBe("ADND2E.chat.martialArts.landed");
+    expect(landed.lines).toEqual([
+      { key: "ADND2E.chat.martialArts.leapStanding", n1: 14, n2: 13 },
+      { key: "ADND2E.chat.martialArts.leapRunning", n1: 18, n2: 20 },
+    ]);
+    expect(landed.effects).toEqual([]);
+    const fell = buildSkillCardContext({
+      actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:4", skill: "leap",
+      result: resolveLeap({ naturalD20: 3, thac0: 20, situationalModifier: 0, level: 10 }),
+    });
+    expect(fell.resultKey).toBe("ADND2E.chat.martialArts.fell");
+    expect(fell.effects).toEqual([{
+      id: "prone", labelKey: "ADND2E.martialEffects.prone", saveKey: "", saveMod: "", condition: "prone", rounds: null, damage: null, deferred: false, self: true,
+    }]);
+  });
+  it("a Speed card reports the extra attacks, or none on a failure", () => {
+    const ok = buildSkillCardContext({
+      actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:5", skill: "speed", result: resolveSpeed({ naturalD20: 4, dexterity: 13 }),
+    });
+    expect(ok.resultKey).toBe("ADND2E.chat.martialArts.speedYes");
+    expect(ok.lines).toEqual([
+      { key: "ADND2E.chat.martialArts.speedExtra", n1: 2 },
+      { key: "ADND2E.chat.martialArts.speedOnce" },
+    ]);
+    const no = buildSkillCardContext({
+      actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:5", skill: "speed", result: resolveSpeed({ naturalD20: 18, dexterity: 13 }),
+    });
+    expect(no.resultKey).toBe("ADND2E.chat.martialArts.speedNo");
+    expect(no.lines).toEqual([{ key: "ADND2E.chat.martialArts.speedOnce" }]);
+  });
+  it("a Levitation card has no roll and states rate, duration and rules", () => {
+    const ctx = buildSkillCardContext({ actorName: "A", actorImg: "", styleName: "S", maneuverId: "mental:7", skill: "levitation", level: 7 });
+    expect(ctx.noRoll).toBe(true);
+    expect(ctx.lines).toEqual([
+      { key: "ADND2E.chat.martialArts.levitationRate", n1: 5 },
+      { key: "ADND2E.chat.martialArts.levitationDuration", n1: 7 },
+      { key: "ADND2E.chat.martialArts.levitationRules" },
+    ]);
+    expect(ctx.costKey).toBe("ADND2E.martialManeuverCosts.round");
+  });
+});
+
+describe("itemized situational rows", () => {
+  const rows = [{ labelKey: "ADND2E.chat.martialArts.mod.blinded", amount: -4 }, { labelKey: "ADND2E.chat.martialArts.mod.heldTarget", amount: 4 }];
+  it("the plain attack card replaces the Conditions row with the given rows", () => {
+    const ctx = buildMartialCardContext({
+      actorName: "A", actorImg: "", styleName: "S", targetName: null, result: resolveMartialAttack(input), situationalRows: rows,
+    });
+    expect(ctx.breakdown.map((b) => b.labelKey)).not.toContain("ADND2E.chat.martialArts.mod.situational");
+    expect(ctx.breakdown.slice(2)).toEqual(rows);
+  });
+  it("a maneuver card keeps table21 and maneuver rows after the given rows", () => {
+    const feint = { maneuverId: "movement:1", naturalD20: 14, thac0: 18, targetAc: 10, attackerArmorType: "none", opponentWeaponSize: null, situationalModifier: -4, targetArmorGroup: "none", styleDie: "1d6", level: 3, strengthAdj: 0 };
+    const ctx = buildManeuverCardContext({
+      actorName: "A", actorImg: "", styleName: "S", targetName: null, result: resolveManeuverAttack(feint as never), damageTotal: 0,
+      situationalRows: [rows[0]!],
+    });
+    expect(ctx.breakdown[0]).toEqual(rows[0]);
+    expect(ctx.breakdown.map((b) => b.labelKey)).not.toContain("ADND2E.chat.martialArts.mod.situational");
+  });
+  it("a Leap card lists the given non-zero rows, none when absent", () => {
+    const result = resolveLeap({ naturalD20: 15, thac0: 20, situationalModifier: -4, level: 10 });
+    const withRows = buildSkillCardContext({ actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:4", skill: "leap", result, situationalRows: [...rows, { labelKey: "x", amount: 0 }] });
+    expect(withRows.breakdown).toEqual(rows);
+    const without = buildSkillCardContext({ actorName: "A", actorImg: "", styleName: "S", maneuverId: "movement:4", skill: "leap", result });
+    expect(without.breakdown).toEqual([]);
   });
 });

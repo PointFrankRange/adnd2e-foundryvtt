@@ -6,6 +6,7 @@ import { MANEUVERS } from "../../src/core/martial-arts";
 const ROOT = path.resolve(__dirname, "..", "..");
 const read = (...p: string[]) => readFileSync(path.join(ROOT, ...p), "utf8");
 const MAIN = read("templates", "actor", "pc", "partials", "pc-main-panels.hbs");
+const FEATURES = read("templates", "actor", "pc", "partials", "pc-feature-panels.hbs");
 const CHAT = read("templates", "chat", "martial-arts-attack.hbs");
 const SHEET = read("src", "sheets", "character", "sheet.ts");
 const NPC_SHEET = read("src", "sheets", "npc", "sheet.ts");
@@ -18,13 +19,25 @@ const lookup = (key: string): unknown => key.split(".").reduce<unknown>((o, k) =
 const keysIn = (src: string, re: RegExp): string[] => [...new Set([...src.matchAll(re)].map((m) => m[0]))];
 
 describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
-  it("the panel lists maneuvers per style with Learn and Use buttons", () => {
-    expect(MAIN).toContain("data-action=\"learnManeuver\"");
+  it("Main is the compact play view: known maneuvers with Use, no management controls", () => {
     expect(MAIN).toContain("data-action=\"useManeuver\"");
+    expect(MAIN).toContain("s.knownManeuvers");
+    expect(MAIN).toContain('title="{{localize m.effectKey}}"');
     expect(MAIN).toMatch(/data-maneuver-id="\{\{m\.id\}\}"/);
     const use = MAIN.split(/\r?\n/).find((l) => l.includes('data-action="useManeuver"'))!;
     expect(use.match(/disabled/g)).toHaveLength(1);
     expect(use).toContain("m.usable");
+    for (const gone of ["learnManeuver", "unlearnManeuver", "system.martialArts.knowsBasics", "s.maneuvers"]) expect(MAIN, gone).not.toContain(gone);
+  });
+  it("Features is the management view: Learn, Unlearn, the full list, no Use or Attack", () => {
+    expect(FEATURES).toContain("data-action=\"learnManeuver\"");
+    expect(FEATURES).toContain('data-item-id="{{s.id}}"');
+    expect(FEATURES).toContain("s.maneuvers");
+    expect(FEATURES).toContain("adnd2e.item-controls");
+    expect(FEATURES).toContain("ADND2E.sheet.martialArts.manageTitle");
+    expect(FEATURES).not.toContain('data-action="useManeuver"');
+    expect(FEATURES).not.toContain('data-action="martialArtsAttack"');
+    expect(lookup("ADND2E.sheet.martialArts.manageTitle")).toBe("Martial Arts: styles and maneuvers");
   });
   it("the PC sheet registers both actions; the Character NPC sheet gets neither", () => {
     expect(SHEET).toMatch(/^\s+learnManeuver: Adnd2eCharacterSheet\.#on/m);
@@ -42,12 +55,14 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
   it("every sheet, chat and lock-reason key used exists in lang/en.json", () => {
     const keys = new Set([
       ...keysIn(MAIN, /ADND2E\.sheet\.martialArts\.[A-Za-z]+/g),
+      ...keysIn(FEATURES, /ADND2E\.sheet\.martialArts\.[A-Za-z]+/g),
       ...keysIn(ACTIONS, /ADND2E\.(sheet|chat)\.martialArts\.[A-Za-z.]+/g).filter((k) => !k.endsWith(".")),
       ...keysIn(CHAT, /ADND2E\.chat\.martialArts\.[A-Za-z]+/g),
       ...keysIn(CARD, /ADND2E\.chat\.martialArts\.(?:mod\.)?[A-Za-z0-9]+/g),
       ...["notOffered", "known", "order", "noSlot", "levelCap"].map((r) => `ADND2E.sheet.martialArts.locked.${r}`),
       "ADND2E.sheet.martialArts.maneuvers", "ADND2E.sheet.martialArts.learn", "ADND2E.sheet.martialArts.useManeuver",
       "ADND2E.chat.martialArts.parried", "ADND2E.chat.martialArts.notParried", "ADND2E.chat.martialArts.mod.table21",
+      ...["blinded", "invisibleTarget", "fatigue", "entangled", "frightened", "heldTarget", "blindFighting"].map((k) => `ADND2E.chat.martialArts.mod.${k}`),
     ]);
     for (const key of keys) expect(typeof lookup(key), key).toBe("string");
   });
@@ -81,6 +96,7 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
   it("the panel shows passive maneuvers without a Use button", () => {
     expect(MAIN).toContain("m.kind 'passive'");
     expect(MAIN).toContain("ADND2E.sheet.martialArts.passive");
+    expect(FEATURES).toContain("ADND2E.sheet.martialArts.passive");
   });
   it("the new card and sheet keys exist in lang/en.json", () => {
     for (const key of [
@@ -89,5 +105,46 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
       "ADND2E.chat.martialArts.whenHoldEnds",
     ]) expect(typeof lookup(key), key).toBe("string");
     expect(CHAT).toContain("e.deferred");
+  });
+  it("the card renders skill lines, hides the roll for Levitation and shows effects outside the hit block", () => {
+    expect(CHAT).toContain("noRoll");
+    expect(CHAT).toContain("lines");
+    expect(CHAT).toContain("l.key");
+    // the effects block follows the hit block's Apply Damage button, so it is not gated on `hit`
+    expect(CHAT.indexOf("effects.length")).toBeGreaterThan(CHAT.indexOf('data-action="applyDamage" data-amount="{{damage}}"'));
+  });
+  it("the panel lists the always-in-effect constants", () => {
+    expect(MAIN).toContain("martialArts.constants.summary");
+    expect(MAIN).toContain("ADND2E.sheet.martialArts.constants");
+  });
+  it("use handles skill and utility rows and passes body armor and Blind Fighting through the glue", () => {
+    expect(ACTIONS).toContain("resolveLeap");
+    expect(ACTIONS).toContain("resolveSpeed");
+    expect(ACTIONS).toContain("buildSkillCardContext");
+    expect(ACTIONS).toContain("conditionModifiers");
+    expect(ACTIONS).toContain("wearingBodyArmor");
+  });
+  it("Leap's prone button applies to the speaker (SP18 B3 final review)", () => {
+    expect(CHAT).toContain("e.self");
+    expect(CHAT).toContain('data-self="true"');
+    expect(CHAT).toContain("appliesToYou");
+    expect(lookup("ADND2E.chat.martialArts.appliesToYou")).toBe("Applies to you.");
+    const L = read("src", "chat", "chat-listeners.ts");
+    expect(L).toContain("getSpeakerActor");
+    expect(L).toContain("noSpeakerActor");
+    expect(L).not.toContain("parseSelfActorUuid");
+    expect(lookup("ADND2E.chat.martialArts.noSpeakerActor")).toBe("Could not find the character who made this roll.");
+  });
+  it("a known passive row shows its own effect text; unlearn is lock-gated and wired (SP18 Plan B3)", () => {
+    expect(FEATURES).toContain("m.effectKey");
+    const line = FEATURES.split(/\r?\n/).find((l) => l.includes('data-action="unlearnManeuver"'))!;
+    expect(line).toContain("@root.adnd2e.lock.unlocked");
+    expect(line).not.toContain("disabled");
+    expect(SHEET).toMatch(/^\s+unlearnManeuver: Adnd2eCharacterSheet\.#on/m);
+    expect(ACTIONS).toContain("unlearnUpdate(");
+    expect(ACTIONS).toContain("themedConfirm");
+    expect(lookup("ADND2E.sheet.martialArts.unlearn")).toBe("Unlearn");
+    expect(lookup("ADND2E.sheet.martialArts.unlearnTitle")).toBe("Unlearn maneuver");
+    expect(lookup("ADND2E.sheet.martialArts.unlearnConfirm")).toBe("Unlearn {name}? Its weapon proficiency slot is refunded.");
   });
 });

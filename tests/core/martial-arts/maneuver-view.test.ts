@@ -17,14 +17,21 @@ const base = { enabled: true, knowsBasics: true, storedActiveId: "", canAct: tru
 const rowsOf = (v: ReturnType<typeof buildMartialArtsView>) => Object.fromEntries(v.styles[0]!.maneuvers.map((m) => [m.id, m]));
 
 describe("maneuver rows", () => {
-  it("lists only registry maneuvers the style offers (mental is not in B1) with their states", () => {
+  it("lists only registry maneuvers the style offers with their states", () => {
     const rows = rowsOf(buildMartialArtsView({ ...base, items: [karate()] }));
-    expect(Object.keys(rows).sort()).toEqual(["block:1", "block:2", "kick:1", "strike:1", "strike:2", "strike:3"]);
+    expect(Object.keys(rows).sort()).toEqual(["block:1", "block:2", "kick:1", "mental:1", "mental:4", "strike:1", "strike:2", "strike:3"]);
     expect(rows["strike:1"]).toMatchObject({
       state: "learnable", usable: false, nameKey: "ADND2E.martialManeuvers.ironFist", listKey: "ADND2E.martialManeuverLists.strike",
       costKey: "ADND2E.martialManeuverCosts.none", kind: "attack", difficulty: 1, reasonKey: "",
+      effectKey: "ADND2E.martialManeuverEffects.ironFist",
     });
     expect(rows["strike:2"]).toMatchObject({ state: "locked", reasonKey: "ADND2E.sheet.martialArts.locked.order" });
+  });
+  it("knownManeuvers is the learned subset in order", () => {
+    const item = karate({ knownManeuvers: [{ id: "strike:1", level: 1 }, { id: "block:1", level: 1 }] });
+    const v = buildMartialArtsView({ ...base, items: [item] });
+    expect(v.styles[0]!.knownManeuvers.map((m) => m.id)).toEqual(["block:1", "strike:1"]);
+    expect(v.styles[0]!.maneuvers.length).toBeGreaterThan(2);
   });
   it("a known maneuver is usable only on the active style while able to act", () => {
     const item = karate({ knownManeuvers: [{ id: "strike:1", level: 1 }] });
@@ -72,5 +79,35 @@ describe("passive maneuvers (SP18 B2)", () => {
     const rows = Object.fromEntries(v.styles[0]!.maneuvers.map((m) => [m.id, m]));
     expect(rows["throw:1"]).toMatchObject({ kind: "passive", state: "known", usable: false });
     expect(rows["throw:2"]).toMatchObject({ kind: "passive", state: "learnable", usable: false });
+  });
+});
+
+describe("constants (SP18 B3)", () => {
+  const style = (known: string[], id = "s1"): StyleItemLike => ({
+    id, name: id, img: "", type: "martialStyle",
+    system: {
+      form: "soft", principalMethod: "throw", slotsInvested: 1,
+      availableManeuvers: [{ list: "mental", difficulties: [1, 2, 3, 4, 5, 6, 7] }],
+      knownManeuvers: known.map((k) => ({ id: k, level: 1 })),
+    },
+  });
+  const view = (items: StyleItemLike[], wearingBodyArmor = false) =>
+    buildMartialArtsView({ enabled: true, knowsBasics: true, storedActiveId: "", canAct: true, level: 5, freeSlots: 2, wearingBodyArmor, items });
+
+  it("collects constants across ALL owned styles, not only the active one", () => {
+    const v = view([style(["mental:2"], "a"), style(["mental:5", "mental:6"], "b")]);
+    expect(v.constants).toMatchObject({ allAroundSight: true, mentalResistance: false, blindFighting: true, ironskin: true });
+    expect(v.constants.summary.map((s) => s.nameKey)).toEqual([
+      "ADND2E.martialManeuvers.allAroundSight", "ADND2E.martialManeuvers.blindFighting", "ADND2E.martialManeuvers.ironskin",
+    ]);
+    expect(v.constants.summary[2]).toEqual({ nameKey: "ADND2E.martialManeuvers.ironskin", effectKey: "ADND2E.martialManeuverEffects.ironskin" });
+  });
+  it("Ironskin's AC modifier is -2 only without body armor", () => {
+    expect(view([style(["mental:6"])], false).constants.ironskinAcMod).toBe(-2);
+    expect(view([style(["mental:6"])], true).constants.ironskinAcMod).toBe(0);
+    expect(view([style([])]).constants.ironskinAcMod).toBe(0);
+  });
+  it("no styles means no constants", () => {
+    expect(view([]).constants).toMatchObject({ ironskin: false, ironskinAcMod: 0, summary: [] });
   });
 });

@@ -2,6 +2,7 @@
 import type { MartialAttackResult } from "./attack";
 import type { ManeuverAttackResult } from "./maneuver-attack";
 import { maneuverById } from "./maneuvers";
+import { levitationInfo, type LeapResult, type SpeedResult } from "./skills";
 
 export interface MartialCardInput {
   actorName: string;
@@ -9,6 +10,8 @@ export interface MartialCardInput {
   styleName: string;
   targetName: string | null;
   result: MartialAttackResult;
+  /** itemized condition rows; when given they replace the single summed Conditions row */
+  situationalRows?: { labelKey: string; amount: number }[];
 }
 
 export interface MartialCardContext {
@@ -27,12 +30,16 @@ export interface MartialCardContext {
   stunTrigger: boolean;
 }
 
+function situationalEntries(rows: { labelKey: string; amount: number }[] | undefined, summed: number): [string, number][] {
+  return rows ? rows.map((x): [string, number] => [x.labelKey, x.amount]) : [["ADND2E.chat.martialArts.mod.situational", summed]];
+}
+
 export function buildMartialCardContext(input: MartialCardInput): MartialCardContext {
   const r = input.result;
   const rows: [string, number][] = [
     ["ADND2E.chat.martialArts.mod.armor", r.penalties.armor],
     ["ADND2E.chat.martialArts.mod.weaponSize", r.penalties.weaponSize],
-    ["ADND2E.chat.martialArts.mod.situational", r.penalties.situational],
+    ...situationalEntries(input.situationalRows, r.penalties.situational),
   ];
   return {
     actorName: input.actorName,
@@ -61,6 +68,8 @@ export interface CardEffect {
   damage: number | null;
   /** applied later (e.g. when a hold ends), not on the hit */
   deferred: boolean;
+  /** the condition button applies to the card's speaker (e.g. a leaper who falls), not to the targeted tokens */
+  self: boolean;
 }
 
 export interface ManeuverCardInput {
@@ -75,6 +84,8 @@ export interface ManeuverCardInput {
   styleDieIsNull?: boolean;
   /** the rolled total of the Double Damage alternative, floored at 0 by the caller */
   doubleDamageTotal?: number;
+  /** itemized condition rows; when given they replace the single summed Conditions row */
+  situationalRows?: { labelKey: string; amount: number }[];
 }
 
 export interface ManeuverCardContext {
@@ -96,7 +107,7 @@ export interface ManeuverCardContext {
   stunTrigger: boolean;
   /** an attack that uses the style die was rolled on a style with none, so the die counted as 0 */
   noStyleDie: boolean;
-  /** always blank: a maneuver is the result, so the Table 16 blow line is not shown */
+  /** blank unless the maneuver is a basic attack (Feint), which shows its Table 16 blow */
   blowKey: string;
   /** the effects a hit offers, each with its save line and apply data; empty on a miss or parry */
   effects: CardEffect[];
@@ -110,8 +121,9 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
   const rows: [string, number][] = [
     ["ADND2E.chat.martialArts.mod.armor", r.penalties.armor],
     ["ADND2E.chat.martialArts.mod.weaponSize", r.penalties.weaponSize],
-    ["ADND2E.chat.martialArts.mod.situational", r.penalties.situational],
+    ...situationalEntries(input.situationalRows, r.penalties.situational),
     ["ADND2E.chat.martialArts.mod.table21", r.penalties.table21],
+    ["ADND2E.chat.martialArts.mod.maneuver", r.maneuverBonus],
   ];
   const parry = def.kind === "parry";
   const effects: CardEffect[] = r.hit
@@ -124,6 +136,7 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
         rounds: e.rounds,
         damage: e.doubleDamage === true ? (input.doubleDamageTotal ?? 0) : null,
         deferred: e.deferred === true,
+        self: false,
       }))
     : [];
   return {
@@ -142,11 +155,103 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
       ? r.hit ? "ADND2E.chat.martialArts.parried" : "ADND2E.chat.martialArts.notParried"
       : r.hit ? "ADND2E.chat.martialArts.hit" : "ADND2E.chat.martialArts.miss",
     outcomeKey: `${r.hit ? "ADND2E.martialManeuverEffects" : "ADND2E.martialManeuverFailures"}.${def.slug}`,
-    formula: r.damageFormula ?? "",
+    formula: r.blow ? "" : (r.damageFormula ?? ""),
     damage: r.hit && r.damageFormula !== null ? input.damageTotal : 0,
     stunTrigger: r.hit && r.stunTrigger,
-    noStyleDie: def.kind === "attack" && def.ownDie === null && input.styleDieIsNull === true,
-    blowKey: "",
+    noStyleDie: def.kind === "attack" && def.ownDie === null && def.basic !== true && def.noDamage !== true && input.styleDieIsNull === true,
+    blowKey: r.blow ? `ADND2E.martialBlows.${r.blow}` : "",
     effects,
+  };
+}
+
+export interface CardLine {
+  key: string;
+  n1?: number;
+  n2?: number;
+}
+
+export interface SkillCardContext extends ManeuverCardContext {
+  /** extra explanatory lines, rendered as hints with up to two numeric parameters */
+  lines: CardLine[];
+  /** no d20 was rolled (Levitation): the template hides the roll and result lines */
+  noRoll: boolean;
+}
+
+export type SkillCardInput = { actorName: string; actorImg: string; styleName: string; maneuverId: string } & (
+  | { skill: "leap"; result: LeapResult; situationalRows?: { labelKey: string; amount: number }[] }
+  | { skill: "speed"; result: SpeedResult }
+  | { skill: "levitation"; level: number }
+);
+
+const PRONE_EFFECT: CardEffect = {
+  id: "prone", labelKey: "ADND2E.martialEffects.prone", saveKey: "", saveMod: "", condition: "prone", rounds: null, damage: null, deferred: false, self: true,
+};
+
+export function buildSkillCardContext(input: SkillCardInput): SkillCardContext {
+  const def = maneuverById(input.maneuverId)!;
+  const base: SkillCardContext = {
+    actorName: input.actorName,
+    actorImg: input.actorImg,
+    styleName: input.styleName,
+    targetName: null,
+    maneuverKey: `ADND2E.martialManeuvers.${def.slug}`,
+    costKey: `ADND2E.martialManeuverCosts.${COST_KEY[String(def.cost)]}`,
+    natural: 0,
+    total: 0,
+    needed: 0,
+    hit: true,
+    breakdown: [],
+    resultKey: "",
+    outcomeKey: "",
+    formula: "",
+    damage: 0,
+    stunTrigger: false,
+    noStyleDie: false,
+    blowKey: "",
+    effects: [],
+    lines: [],
+    noRoll: false,
+  };
+  if (input.skill === "leap") {
+    const r = input.result;
+    return {
+      ...base,
+      natural: r.naturalD20,
+      total: r.total,
+      needed: r.needed,
+      hit: r.hit,
+      breakdown: (input.situationalRows ?? []).filter((x) => x.amount !== 0),
+      resultKey: r.hit ? "ADND2E.chat.martialArts.landed" : "ADND2E.chat.martialArts.fell",
+      effects: r.hit ? [] : [PRONE_EFFECT],
+      lines: [
+        { key: "ADND2E.chat.martialArts.leapStanding", n1: r.standing.up, n2: r.standing.forward },
+        { key: "ADND2E.chat.martialArts.leapRunning", n1: r.running.up, n2: r.running.forward },
+      ],
+    };
+  }
+  if (input.skill === "speed") {
+    const r = input.result;
+    return {
+      ...base,
+      natural: r.naturalD20,
+      total: r.naturalD20,
+      needed: r.dexterity,
+      hit: r.success,
+      resultKey: r.success ? "ADND2E.chat.martialArts.speedYes" : "ADND2E.chat.martialArts.speedNo",
+      lines: [
+        ...(r.success ? [{ key: "ADND2E.chat.martialArts.speedExtra", n1: r.extraAttacks }] : []),
+        { key: "ADND2E.chat.martialArts.speedOnce" },
+      ],
+    };
+  }
+  const info = levitationInfo(input.level);
+  return {
+    ...base,
+    noRoll: true,
+    lines: [
+      { key: "ADND2E.chat.martialArts.levitationRate", n1: info.feetPerRound },
+      { key: "ADND2E.chat.martialArts.levitationDuration", n1: info.rounds },
+      { key: "ADND2E.chat.martialArts.levitationRules" },
+    ],
   };
 }

@@ -595,6 +595,8 @@ function buildCombat(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
   // SP18 Plan A: the active style's AC modifier (already rule-gated by the caller) so the rows add up to the total
   const styleAcMod = input.martialArtsAcMod ?? 0;
   if (styleAcMod !== 0) acBreakdown.push({ label: "ADND2E.sheet.combat.acStyle", value: styleAcMod });
+  const ironskinMod = input.ironskinAcMod ?? 0;
+  if (ironskinMod !== 0) acBreakdown.push({ label: "ADND2E.sheet.combat.acIronskin", value: ironskinMod });
 
   // #165: the Main tab lists only what is worn; spares live on the Inventory tab
   const armor = armorItems.filter((i) => i.equipped).map((i) => ({

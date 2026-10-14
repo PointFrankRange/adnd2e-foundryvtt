@@ -140,10 +140,14 @@ describe("relay conditions with a duration (SP18 B2)", () => {
 });
 
 describe("parseConditionButton", () => {
+  it("reads the self flag only when it is exactly the string true", () => {
+    expect(parseConditionButton({ condition: "prone", self: "true" })?.self).toBe(true);
+    for (const v of ["false", "yes", "", undefined]) expect(parseConditionButton({ condition: "prone", self: v })?.self).toBe(false);
+  });
   it("parses a condition with a dice formula or none", () => {
-    expect(parseConditionButton({ condition: "stunned", rounds: "1d4" })).toEqual({ conditionId: "stunned", roundsFormula: "1d4" });
-    expect(parseConditionButton({ condition: "held", rounds: "" })).toEqual({ conditionId: "held", roundsFormula: null });
-    expect(parseConditionButton({ condition: "unconscious" })).toEqual({ conditionId: "unconscious", roundsFormula: null });
+    expect(parseConditionButton({ condition: "stunned", rounds: "1d4" })).toEqual({ conditionId: "stunned", roundsFormula: "1d4", self: false });
+    expect(parseConditionButton({ condition: "held", rounds: "" })).toEqual({ conditionId: "held", roundsFormula: null, self: false });
+    expect(parseConditionButton({ condition: "unconscious" })).toEqual({ conditionId: "unconscious", roundsFormula: null, self: false });
   });
   it("rejects an unknown condition or a malformed formula", () => {
     expect(parseConditionButton({ condition: "dead", rounds: "1d4" })).toBeNull();
@@ -171,3 +175,4 @@ describe("relay hardening (SP18 B2 review)", () => {
     expect(validateRelayRequest({ kind: "condition", targetUuid: t, conditionId: "stunned", rounds })).toBeNull();
   });
 });
+

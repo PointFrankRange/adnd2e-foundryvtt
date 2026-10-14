@@ -109,11 +109,23 @@ async function onApplyDamage(button: HTMLButtonElement): Promise<void> {
 
 /** Applies the condition on a martial arts card (SP18 B2) to every targeted token: any duration dice are rolled in chat
  *  first, then the condition goes through the relay like every other target-side effect. */
-async function onApplyCondition(button: HTMLButtonElement): Promise<void> {
-  const parsed = parseConditionButton(button.dataset as { condition?: string; rounds?: string });
+async function onApplyCondition(button: HTMLButtonElement, message: unknown): Promise<void> {
+  const parsed = parseConditionButton(button.dataset as { condition?: string; rounds?: string; self?: string });
   if (!parsed) return;
-  const targets = [...(game as unknown as { user: { targets: Iterable<{ actor: unknown }> } }).user.targets];
-  if (targets.length === 0) {
+  // a self-applying button (Leap's fall) acts on the message speaker's actor (the token's own actor when the
+  // speaker is a token), never on the targeted tokens and never on a DOM-supplied identity
+  let self: (EffectTarget & { uuid: string; isOwner: boolean }) | null = null;
+  if (parsed.self) {
+    self = ((ChatMessage as unknown as { getSpeakerActor(speaker: unknown): unknown }).getSpeakerActor(
+      (message as { speaker: unknown }).speaker,
+    ) as (EffectTarget & { uuid: string; isOwner: boolean }) | null) ?? null;
+    if (!self) {
+      ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.martialArts.noSpeakerActor"));
+      return;
+    }
+  }
+  const targets = self ? [] : [...(game as unknown as { user: { targets: Iterable<{ actor: unknown }> } }).user.targets];
+  if (!self && targets.length === 0) {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.chat.damage.noTargetsWarning"));
     return;
   }
@@ -123,8 +135,8 @@ async function onApplyCondition(button: HTMLButtonElement): Promise<void> {
     rounds = Math.min(99, Math.max(1, roll.total ?? 1));
     await roll.toMessage({ flavor: game.i18n!.localize("ADND2E.chat.martialArts.roundsRoll") } as never);
   }
-  for (const t of targets) {
-    const actor = t.actor as (EffectTarget & { uuid: string; isOwner: boolean }) | null;
+  const recipients = self ? [self] : targets.map((t) => t.actor as (EffectTarget & { uuid: string; isOwner: boolean }) | null);
+  for (const actor of recipients) {
     if (!actor) continue;
     await requestApply(actor, {
       kind: "condition", targetUuid: actor.uuid, conditionId: parsed.conditionId, ...(rounds === undefined ? {} : { rounds }),
@@ -258,7 +270,7 @@ export function registerChatListeners(): void {
       b.addEventListener("click", (ev) => void onApplyDamage(ev.currentTarget as HTMLButtonElement)),
     );
     html.querySelectorAll<HTMLButtonElement>('[data-action="applyCondition"]').forEach((b) =>
-      b.addEventListener("click", (ev) => void onApplyCondition(ev.currentTarget as HTMLButtonElement)),
+      b.addEventListener("click", (ev) => void onApplyCondition(ev.currentTarget as HTMLButtonElement, message)),
     );
     html.querySelector<HTMLButtonElement>('[data-action="applyCastEffect"]')?.addEventListener("click", (ev) => {
       void onApplyCastEffect(ev.currentTarget as HTMLButtonElement);

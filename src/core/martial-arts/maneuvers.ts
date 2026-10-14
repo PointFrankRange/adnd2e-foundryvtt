@@ -1,6 +1,6 @@
 // PHBR15 Table 19 / Table 21 special maneuvers (Plan B1: Block, Kick, Strike; Plan B2: Lock, Push, Throw, Vital Area). Pure.
 
-export const MANEUVER_LISTS = ["block", "kick", "strike", "lock", "push", "throw", "vitalArea"] as const;
+export const MANEUVER_LISTS = ["block", "kick", "strike", "lock", "push", "throw", "vitalArea", "movement", "weapon", "mental"] as const;
 export type ManeuverList = (typeof MANEUVER_LISTS)[number];
 
 /** Attacks a maneuver costs: 0 = none extra, "round" = the only action of the round. */
@@ -30,7 +30,7 @@ export interface ManeuverDef {
   slug: string;
   list: ManeuverList;
   difficulty: number;
-  kind: "parry" | "attack" | "passive";
+  kind: "parry" | "attack" | "passive" | "skill" | "utility";
   cost: ManeuverCost;
   /** a die added to the style's damage die */
   extraDie: string | null;
@@ -47,6 +47,10 @@ export interface ManeuverDef {
   multiplier?: number | null;
   /** what a hit may do to the target; each condition effect becomes an Apply button on the card */
   effects?: readonly ManeuverEffect[];
+  /** the maneuver resolves as the plain Table 16 attack (Feint) */
+  basic?: boolean;
+  /** a flat bonus to the attack roll (Feint +3) */
+  attackBonus?: number;
 }
 
 const NONE = { light: 0, mail: 0, plate: 0 } as const;
@@ -92,6 +96,21 @@ export const MANEUVERS: readonly ManeuverDef[] = [
       { id: "paralyzed", save: -4, condition: "paralyzed", rounds: "2d4" },
       { id: "doubleDamage", save: null, condition: null, rounds: null, doubleDamage: true },
     ] },
+  { id: "movement:1", slug: "feint", list: "movement", difficulty: 1, kind: "attack", cost: 2, extraDie: null, ownDie: null, addsStrength: true, halfLevelBonus: false, table21: NONE, basic: true, attackBonus: 3 },
+  { id: "movement:2", slug: "proneFighting", list: "movement", difficulty: 2, kind: "passive", cost: 0, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true },
+  { id: "movement:3", slug: "immovability", list: "movement", difficulty: 3, kind: "passive", cost: 0, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true },
+  { id: "movement:4", slug: "leap", list: "movement", difficulty: 4, kind: "skill", cost: 1, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true },
+  { id: "movement:5", slug: "speed", list: "movement", difficulty: 5, kind: "skill", cost: 0, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true },
+  { id: "movement:6", slug: "slowResistance", list: "movement", difficulty: 6, kind: "passive", cost: 0, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true },
+  { id: "weapon:1", slug: "weaponBreaker", list: "weapon", difficulty: 1, kind: "attack", cost: 1, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true, effects: [] },
+  { id: "weapon:2", slug: "steelCloth", list: "weapon", difficulty: 2, kind: "passive", cost: 0, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: { light: -1, mail: -3, plate: -5 }, noDamage: true },
+  { id: "mental:1", slug: "meditation", list: "mental", difficulty: 1, kind: "passive", cost: 0, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true },
+  { id: "mental:2", slug: "allAroundSight", list: "mental", difficulty: 2, kind: "passive", cost: 0, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true },
+  { id: "mental:3", slug: "mentalResistance", list: "mental", difficulty: 3, kind: "passive", cost: 0, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true },
+  { id: "mental:4", slug: "chiAttacks", list: "mental", difficulty: 4, kind: "passive", cost: 0, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true },
+  { id: "mental:5", slug: "blindFighting", list: "mental", difficulty: 5, kind: "passive", cost: 0, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true },
+  { id: "mental:6", slug: "ironskin", list: "mental", difficulty: 6, kind: "passive", cost: 0, extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true },
+  { id: "mental:7", slug: "levitation", list: "mental", difficulty: 7, kind: "utility", cost: "round", extraDie: null, ownDie: null, addsStrength: false, halfLevelBonus: false, table21: NONE, noDamage: true },
 ];
 
 export function maneuverById(id: string): ManeuverDef | undefined {
@@ -170,4 +189,17 @@ export function learnability(input: {
   if (input.freeSlots < 1) return { ok: false, reason: "noSlot" };
   if (input.known.filter((k) => k.level === input.level).length >= MAX_MANEUVERS_PER_LEVEL) return { ok: false, reason: "levelCap" };
   return { ok: true };
+}
+
+/** Removes one known maneuver and refunds its slot (never below the style's first slot); null when it is not known. */
+export function unlearnUpdate(input: {
+  known: readonly { id: string; level: number }[];
+  maneuverId: string;
+  slotsInvested: number;
+}): { knownManeuvers: { id: string; level: number }[]; slotsInvested: number } | null {
+  if (!input.known.some((k) => k.id === input.maneuverId)) return null;
+  return {
+    knownManeuvers: input.known.filter((k) => k.id !== input.maneuverId).map((k) => ({ id: k.id, level: k.level })),
+    slotsInvested: Math.max(1, input.slotsInvested - 1),
+  };
 }

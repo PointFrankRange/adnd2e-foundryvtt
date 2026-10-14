@@ -22,7 +22,7 @@ import { rollFormAttack } from "../creature/combat-rolls";
 import { promptShift, resetShapechangeDay, returnToNormal, shapechangeView } from "./shapechange-actions";
 import { trackQuarry, trackingView } from "./tracking-actions";
 import { freshStyleUpdate } from "../../core/martial-arts";
-import { learnManeuver, martialArtsView, rollMartialArtsAttack, setActiveStyle, useManeuver } from "./martial-arts-actions";
+import { learnManeuver, martialArtsView, rollMartialArtsAttack, setActiveStyle, unlearnManeuver, useManeuver } from "./martial-arts-actions";
 import { buildCharacterSheetContext, traitTargetKey } from "./context";
 import type {
   ClassItemView,
@@ -410,6 +410,7 @@ export class Adnd2eCharacterSheet extends Base {
       martialArtsAttack: Adnd2eCharacterSheet.#onMartialArtsAttack,
       useMartialStyle: Adnd2eCharacterSheet.#onUseMartialStyle,
       learnManeuver: Adnd2eCharacterSheet.#onLearnManeuver,
+      unlearnManeuver: Adnd2eCharacterSheet.#onUnlearnManeuver,
       useManeuver: Adnd2eCharacterSheet.#onUseManeuver,
     },
   };
@@ -646,6 +647,7 @@ export class Adnd2eCharacterSheet extends Base {
         classItems.map((c) => ({ chassisId: c.chassisId, castingDisabled: resolveKitOverrides(kitEntries, c.chassisId).castingDisabled })),
       ),
       martialArtsAcMod: ((v) => (v.visible && v.active ? v.active.acMod : 0))(martialArtsView(this.document as never)),
+      ironskinAcMod: ((v) => (v.visible ? v.constants.ironskinAcMod : 0))(martialArtsView(this.document as never)),
       raceItem,
       physicalItems,
       proficiencyItems: { weapon: weaponProfs, nonweapon: nonweaponProfs },
@@ -1252,6 +1254,12 @@ export class Adnd2eCharacterSheet extends Base {
     const styleId = target.dataset.itemId ?? "";
     const maneuverId = target.dataset.maneuverId ?? "";
     if (this.isEditable && styleId && maneuverId) await learnManeuver(this.document as never, styleId, maneuverId);
+  }
+
+  static async #onUnlearnManeuver(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const styleId = target.dataset.itemId ?? "";
+    const maneuverId = target.dataset.maneuverId ?? "";
+    if (this.isEditable && styleId && maneuverId) await unlearnManeuver(this.document as never, styleId, maneuverId);
   }
 
   static async #onUseManeuver(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {

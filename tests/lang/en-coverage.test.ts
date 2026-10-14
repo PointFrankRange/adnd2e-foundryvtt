@@ -135,6 +135,7 @@ describe("lang/en.json — SP2 Task 6 sheet strings (Combat/Inventory/Features/B
       "ADND2E.sheet.combat.acMagic",
       "ADND2E.sheet.combat.acDex",
       "ADND2E.sheet.combat.acStyle",
+      "ADND2E.sheet.combat.acIronskin",
       "ADND2E.sheet.combat.equipped",
       "ADND2E.sheet.combat.notEquipped",
       "ADND2E.sheet.combat.shield",

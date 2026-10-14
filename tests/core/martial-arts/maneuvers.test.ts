@@ -1,18 +1,21 @@
 import { describe, expect, it } from "vitest";
 import {
-  MANEUVERS, MANEUVER_LISTS, MAX_MANEUVERS_PER_LEVEL, armorGroupOf, learnability, maneuverById, maneuverDamageFormula, table21Modifier, doubleBasicDamageFormula,
+  MANEUVERS, MANEUVER_LISTS, MAX_MANEUVERS_PER_LEVEL, armorGroupOf, learnability, unlearnUpdate, maneuverById, maneuverDamageFormula, table21Modifier, doubleBasicDamageFormula,
 } from "../../../src/core/martial-arts";
 
 const def = (id: string) => maneuverById(id)!;
 
 describe("registry - Table 19 for Block, Kick and Strike", () => {
-  it("lists the 25 maneuvers in order with unique ids", () => {
+  it("lists the 41 maneuvers in order with unique ids", () => {
     expect(MANEUVERS.map((m) => m.id)).toEqual([
       "block:1", "block:2", "block:3", "block:4", "kick:1", "kick:2", "kick:3", "strike:1", "strike:2", "strike:3",
       "lock:1", "lock:2", "lock:3", "lock:4", "push:1", "push:2", "push:3", "throw:1", "throw:2", "throw:3", "throw:4",
       "vitalArea:1", "vitalArea:2", "vitalArea:3", "vitalArea:4",
+      "movement:1", "movement:2", "movement:3", "movement:4", "movement:5", "movement:6",
+      "weapon:1", "weapon:2",
+      "mental:1", "mental:2", "mental:3", "mental:4", "mental:5", "mental:6", "mental:7",
     ]);
-    expect(MANEUVER_LISTS).toEqual(["block", "kick", "strike", "lock", "push", "throw", "vitalArea"]);
+    expect(MANEUVER_LISTS).toEqual(["block", "kick", "strike", "lock", "push", "throw", "vitalArea", "movement", "weapon", "mental"]);
     for (const m of MANEUVERS) expect(m.id).toBe(`${m.list}:${m.difficulty}`);
   });
   it("carries slugs, kinds and costs", () => {
@@ -24,6 +27,10 @@ describe("registry - Table 19 for Block, Kick and Strike", () => {
       ["concentratedPush", "attack", 1], ["stickingTouch", "attack", 1], ["oneFingerPush", "attack", "round"],
       ["fall", "passive", 0], ["instantStand", "passive", 0], ["hurl", "attack", 1], ["greatThrow", "attack", 1],
       ["painTouch", "attack", 1], ["stunningTouch", "attack", 1], ["paralyzingTouch", "attack", 1], ["distanceDeath", "attack", "round"],
+      ["feint", "attack", 2], ["proneFighting", "passive", 0], ["immovability", "passive", 0], ["leap", "skill", 1], ["speed", "skill", 0],
+      ["slowResistance", "passive", 0], ["weaponBreaker", "attack", 1], ["steelCloth", "passive", 0],
+      ["meditation", "passive", 0], ["allAroundSight", "passive", 0], ["mentalResistance", "passive", 0], ["chiAttacks", "passive", 0],
+      ["blindFighting", "passive", 0], ["ironskin", "passive", 0], ["levitation", "utility", "round"],
     ]);
   });
   it("looks up by id and rejects an unknown id", () => {
@@ -184,5 +191,70 @@ describe("B2 registry rows", () => {
     expect(learnability({ ...base, maneuverId: "lock:1" })).toEqual({ ok: true });
     expect(learnability({ ...base, maneuverId: "lock:3" })).toEqual({ ok: false, reason: "order" });
     expect(learnability({ ...base, maneuverId: "vitalArea:1" })).toEqual({ ok: false, reason: "notOffered" });
+  });
+});
+
+describe("B3 registry rows", () => {
+  it.each([
+    ["movement:1", "feint", "attack", 2, 0, 0, 0],
+    ["movement:2", "proneFighting", "passive", 0, 0, 0, 0],
+    ["movement:3", "immovability", "passive", 0, 0, 0, 0],
+    ["movement:4", "leap", "skill", 1, 0, 0, 0],
+    ["movement:5", "speed", "skill", 0, 0, 0, 0],
+    ["movement:6", "slowResistance", "passive", 0, 0, 0, 0],
+    ["weapon:1", "weaponBreaker", "attack", 1, 0, 0, 0],
+    ["weapon:2", "steelCloth", "passive", 0, -1, -3, -5],
+    ["mental:1", "meditation", "passive", 0, 0, 0, 0],
+    ["mental:2", "allAroundSight", "passive", 0, 0, 0, 0],
+    ["mental:3", "mentalResistance", "passive", 0, 0, 0, 0],
+    ["mental:4", "chiAttacks", "passive", 0, 0, 0, 0],
+    ["mental:5", "blindFighting", "passive", 0, 0, 0, 0],
+    ["mental:6", "ironskin", "passive", 0, 0, 0, 0],
+    ["mental:7", "levitation", "utility", "round", 0, 0, 0],
+  ])("%s %s", (id, slug, kind, cost, light, mail, plate) => {
+    const m = maneuverById(id)!;
+    expect([m.slug, m.kind, m.cost]).toEqual([slug, kind, cost]);
+    expect(m.table21).toEqual({ light, mail, plate });
+  });
+
+  it("Feint is a basic attack with +3; Weapon Breaker does no damage", () => {
+    expect(maneuverById("movement:1")).toMatchObject({ basic: true, attackBonus: 3 });
+    expect(maneuverById("weapon:1")!.noDamage).toBe(true);
+    for (const m of MANEUVERS.filter((x) => x.id !== "movement:1")) expect(m.basic ?? false, m.id).toBe(false);
+  });
+  it("skill, utility and passive rows have no damage formula", () => {
+    const ctx = { styleDie: "1d4", level: 5, strengthAdj: 2 };
+    for (const id of ["movement:4", "movement:5", "mental:7", "weapon:1", "mental:6"]) {
+      expect(maneuverDamageFormula(maneuverById(id)!, ctx), id).toBeNull();
+    }
+  });
+  it("learning order skips nothing: Ironskin needs Chi and Blind Fighting first when the style offers them", () => {
+    const offered = [{ list: "mental", difficulties: [1, 4, 5, 6] }];
+    const base = { offered, freeSlots: 1, level: 3 };
+    expect(learnability({ ...base, known: [], maneuverId: "mental:6" })).toEqual({ ok: false, reason: "order" });
+    const known = [{ id: "mental:1", level: 1 }, { id: "mental:4", level: 1 }, { id: "mental:5", level: 1 }];
+    expect(learnability({ ...base, known, maneuverId: "mental:6", level: 2 })).toEqual({ ok: true });
+  });
+});
+
+describe("unlearnUpdate", () => {
+  const known = [{ id: "strike:1", level: 1 }, { id: "kick:1", level: 2 }, { id: "block:1", level: 2 }];
+  it("removes only that entry, keeps the others' levels and refunds one slot", () => {
+    expect(unlearnUpdate({ known, maneuverId: "kick:1", slotsInvested: 4 })).toEqual({
+      knownManeuvers: [{ id: "strike:1", level: 1 }, { id: "block:1", level: 2 }], slotsInvested: 3,
+    });
+  });
+  it("never drops below one slot", () => {
+    expect(unlearnUpdate({ known, maneuverId: "kick:1", slotsInvested: 1 })!.slotsInvested).toBe(1);
+  });
+  it("is null for an unknown maneuver", () => {
+    expect(unlearnUpdate({ known, maneuverId: "mental:6", slotsInvested: 3 })).toBeNull();
+  });
+  it("frees the per-level cap again", () => {
+    const offered = [{ list: "strike", difficulties: [1, 2] }, { list: "kick", difficulties: [1] }, { list: "block", difficulties: [1] }];
+    const full = [{ id: "strike:1", level: 2 }, { id: "kick:1", level: 2 }];
+    expect(learnability({ maneuverId: "block:1", offered, known: full, freeSlots: 1, level: 2 })).toEqual({ ok: false, reason: "levelCap" });
+    const after = unlearnUpdate({ known: full, maneuverId: "kick:1", slotsInvested: 3 })!;
+    expect(learnability({ maneuverId: "block:1", offered, known: after.knownManeuvers, freeSlots: 1, level: 2 })).toEqual({ ok: true });
   });
 });

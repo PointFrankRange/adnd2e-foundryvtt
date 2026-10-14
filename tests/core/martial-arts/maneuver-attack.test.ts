@@ -78,3 +78,38 @@ describe("B2 maneuver attacks", () => {
     expect(() => resolveManeuverAttack({ ...input, maneuverId: "throw:1" })).toThrow(RangeError);
   });
 });
+
+describe("B3 attacks", () => {
+  const input = {
+    maneuverId: "movement:1", naturalD20: 14, thac0: 20, targetAc: 10, attackerArmorType: "none", opponentWeaponSize: null,
+    situationalModifier: 0, targetArmorGroup: "none" as const, styleDie: "1d4", level: 5, strengthAdj: 1,
+  };
+  it("Feint adds +3, takes the Table 16 blow and damage plus Strength", () => {
+    const r = resolveManeuverAttack(input);
+    expect(r.maneuverBonus).toBe(3);
+    expect(r.attackBonus).toBe(3);
+    expect(r.total).toBe(17);
+    expect(r.blow).toBe("vitalsPunch");
+    expect(r.damageFormula).toBe("3");
+  });
+  it("Feint's +3 can turn a miss into a hit; a miss has no blow or damage", () => {
+    expect(resolveManeuverAttack({ ...input, naturalD20: 7, targetAc: 10 }).hit).toBe(true);
+    const miss = resolveManeuverAttack({ ...input, naturalD20: 2, targetAc: 5 });
+    expect(miss.hit).toBe(false);
+    expect(miss.blow).toBeNull();
+    expect(miss.damageFormula).toBeNull();
+  });
+  it("other maneuvers carry no maneuver bonus and no blow", () => {
+    const r = resolveManeuverAttack({ ...input, maneuverId: "kick:1" });
+    expect(r.maneuverBonus).toBe(0);
+    expect(r.blow).toBeNull();
+  });
+  it("Weapon Breaker hits for no damage", () => {
+    const r = resolveManeuverAttack({ ...input, maneuverId: "weapon:1", naturalD20: 15 });
+    expect(r.hit).toBe(true);
+    expect(r.damageFormula).toBeNull();
+  });
+  it.each(["movement:4", "movement:5", "mental:7", "mental:6"])("rejects %s (not an attack or parry)", (maneuverId) => {
+    expect(() => resolveManeuverAttack({ ...input, maneuverId })).toThrow(RangeError);
+  });
+});
