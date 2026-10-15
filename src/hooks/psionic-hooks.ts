@@ -20,6 +20,15 @@ export function rerenderContestCards(attackerActorUuid: string): void {
   }
 }
 
+/** Issue #178: re-renders every still-pending contest card, so the attacker's offline-defender fallback appears (or goes away) as users connect and disconnect. */
+export function rerenderPendingContestCards(): void {
+  const messages = (game.messages?.contents ?? []) as unknown as { getFlag(scope: string, key: string): unknown }[];
+  for (const m of messages) {
+    const c = m.getFlag(SYSTEM_ID, "psionicContest") as ContestFlag | undefined;
+    if (c?.state === "pending") void (ui.chat as unknown as { updateMessage?(m: unknown): Promise<void> } | undefined)?.updateMessage?.(m);
+  }
+}
+
 /** Re-renders every wild-talent card of one actor (SP15 Plan D) so a just-applied dire result shows "Applied.". */
 export function rerenderWildCards(actorUuid: string): void {
   const messages = (game.messages?.contents ?? []) as unknown as { getFlag(scope: string, key: string): unknown }[];
@@ -35,6 +44,7 @@ const touchesFlag = (changes: Record<string, unknown>, key: string): boolean => 
 };
 
 export function registerPsionicHooks(): void {
+  Hooks.on("userConnected", () => rerenderPendingContestCards());
   Hooks.on("updateActor", (actor: unknown, changes: unknown) => {
     const uuid = (actor as { uuid: string }).uuid;
     if (touchesFlag(changes as Record<string, unknown>, "psionicApplied")) rerenderContestCards(uuid);

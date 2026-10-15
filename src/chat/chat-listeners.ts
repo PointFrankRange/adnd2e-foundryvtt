@@ -6,7 +6,7 @@ import { SYSTEM_ID, TEMPLATE_PATH } from "../constants";
 import { parseConditionButton } from "../combat/apply-relay";
 import { requestApply } from "../relay/relay-client";
 import { rerenderContestCards, rerenderWildCards } from "../hooks/psionic-hooks";
-import { applyContestTangents, recordButtonState, rollDefense, type ContestFlag } from "../sheets/character/psionic-combat";
+import { applyContestTangents, attackerMayAnswer, recordButtonState, rollDefense, type ContestFlag } from "../sheets/character/psionic-combat";
 import { applyDire, type WildFlag } from "../sheets/character/psionic-wild";
 import { answerContest } from "../sheets/character/wrestling-actions";
 import type { WrestleContestFlag } from "../combat/wrestling-card";
@@ -174,7 +174,15 @@ function wirePsionicContest(message: { id: string; getFlag(s: string, k: string)
   const isOwner = (uuid: string): boolean => Boolean((foundry.utils.fromUuidSync(uuid) as { isOwner?: boolean } | null)?.isOwner);
   const rollButton = html.querySelector<HTMLButtonElement>('[data-action="psionicRollDefense"]');
   if (rollButton) {
-    if (isGm || isOwner(contest.targetActorUuid)) rollButton.addEventListener("click", () => {
+    // issue #178: with nobody online who could answer, the attacker may roll the defense (rollDefense re-checks)
+    const fallback = attackerMayAnswer(contest, game.user?.id ?? "", (id) => game.users?.get(id)?.active ?? false);
+    if (fallback && !isGm && !isOwner(contest.targetActorUuid)) {
+      const hint = document.createElement("p");
+      hint.className = "hint";
+      hint.textContent = game.i18n!.localize("ADND2E.chat.psionicContest.offlineHint");
+      rollButton.before(hint);
+    }
+    if (isGm || isOwner(contest.targetActorUuid) || fallback) rollButton.addEventListener("click", () => {
         rollButton.disabled = true;
         // a thrown roll must not leave the defender with a dead button (issue #122)
         void rollDefense(message.id).catch(() => {
