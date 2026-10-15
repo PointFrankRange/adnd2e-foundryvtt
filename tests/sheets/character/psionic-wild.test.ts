@@ -121,6 +121,13 @@ describe("testWildTalent: the chance and the talent test", () => {
     expect(view().halved).toBe(false);
     expect(view().talent).toBe(true);
   });
+  it("issue #125: a dormant dual-class mage does not halve the chance until it is surpassed", async () => {
+    const items = [{ id: "a", name: "A", type: "class", system: { chassisId: "mage", level: 3 } }, { id: "b", name: "B", type: "class", system: { chassisId: "fighter", level: 2 } }];
+    const dormant = makeActor({ items });
+    dormant.actor.system.multiclass = { dualClass: { dormantChassisId: "mage", surpassed: false } };
+    await testWildTalent(dormant.actor, { surgeon: false }, baseDeps({ roll100: seq(50) }));
+    expect(view().halved).toBe(false);
+  });
   it("the highest class level counts (a dual-class actor)", () => {
     const { actor } = makeActor({ items: [{ id: "a", name: "A", type: "class", system: { chassisId: "fighter", level: 2 } }, { id: "b", name: "B", type: "class", system: { chassisId: "mage", level: 5 } }] });
     expect(highestClassLevel(actor)).toBe(5);

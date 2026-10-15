@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   CLASS_PROFICIENCY_GROUPS,
   nonweaponSlotCost,
+  nonweaponSlotCostForClasses,
   nonweaponCheck,
 } from "../../../src/core/proficiencies/nonweapon";
 
@@ -22,6 +23,24 @@ describe("nonweaponSlotCost()", () => {
   it("one extra slot for an out-of-group proficiency", () => {
     expect(nonweaponSlotCost(1, "warrior", "mage")).toBe(2);
     expect(nonweaponSlotCost(2, "rogue", "cleric")).toBe(3);
+  });
+});
+
+describe("nonweaponSlotCostForClasses() (issue #125)", () => {
+  it("is the base cost when ANY class has the group, whatever the order", () => {
+    expect(nonweaponSlotCostForClasses(1, "wizard", ["thief", "mage"])).toBe(1);
+    expect(nonweaponSlotCostForClasses(1, "wizard", ["mage", "thief"])).toBe(1);
+    expect(nonweaponSlotCostForClasses(2, "psionicist", ["thief", "psionicist"])).toBe(2);
+  });
+  it("one extra slot only when no class has the group", () => {
+    expect(nonweaponSlotCostForClasses(1, "priest", ["thief", "mage"])).toBe(2);
+  });
+  it("an additional group counts for any class", () => {
+    expect(nonweaponSlotCostForClasses(1, "general", ["thief"], ["wizard"])).toBe(1);
+    expect(nonweaponSlotCostForClasses(1, "warrior", ["thief", "mage"], ["wizard"])).toBe(1);
+  });
+  it("no classes: the base cost", () => {
+    expect(nonweaponSlotCostForClasses(3, "wizard", [])).toBe(3);
   });
 });
 

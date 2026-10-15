@@ -12,7 +12,7 @@ import { getChassis } from "../../core/classes/chassis";
 import { awardWithPrimeBonus } from "../../core/abilities";
 import { raceAllowsClasses, raceTablesOf, type RaceClassVerdict } from "../../core/races";
 import type { ManeuverId } from "../../core/combat/maneuvers";
-import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
+import { nonweaponSlotCostForClasses } from "../../core/proficiencies/nonweapon";
 import type { RawTraitEffect } from "../../core/skills/traits";
 import type { AbilityKey, Alignment, ArmorType, ClassId, NonweaponGroup, Race, SaveCategory, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
@@ -761,10 +761,8 @@ export class Adnd2eCharacterSheet extends Base {
       dropSlotCost = 1;
       availableSlots = actor.system.proficiencies.weapon.available;
     } else if (dropped.type === "nonweaponProficiency") {
-      const firstClassId = existing.find((i) => i.type === "class")?.system.chassisId ?? null;
-      dropSlotCost = firstClassId
-        ? nonweaponSlotCost(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", firstClassId as never, dropped.system.alsoGroups ?? [])
-        : (dropped.system.slotCost ?? 1);
+      const classIds = existing.filter((i) => i.type === "class").flatMap((i) => (i.system.chassisId ? [i.system.chassisId] : []));
+      dropSlotCost = nonweaponSlotCostForClasses(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", classIds as never[], dropped.system.alsoGroups ?? []);
       availableSlots = actor.system.proficiencies.nonweapon.available;
     }
 
