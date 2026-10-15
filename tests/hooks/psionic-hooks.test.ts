@@ -39,7 +39,7 @@ describe("issue #122: incapacitation breaks all psychic contacts (p.27)", () => 
   beforeEach(() => {
     info.mockClear();
     (globalThis as Record<string, unknown>).ui = { ...((globalThis as Record<string, unknown>).ui as object), notifications: { info } };
-    (globalThis as Record<string, any>).game.i18n = { format: (k: string, d: object) => `${k}:${JSON.stringify(d)}` };
+    ((globalThis as Record<string, unknown>).game as { i18n: unknown }).i18n = { format: (k: string, d: object) => `${k}:${JSON.stringify(d)}` };
   });
   it("clears every contact (full contacts included) when an incapacitating status is applied by this client", async () => {
     const { writes, actor } = actorWith([{ target: "t", name: "T", tangents: 3 }, { target: "u", name: "U", tangents: 1 }]);
