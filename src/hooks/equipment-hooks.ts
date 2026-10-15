@@ -1,3 +1,4 @@
+import { getOptionalRules } from "../settings";
 import { actorEquipmentRules, itemNotPermitted } from "../data/derive/character/equipment-rules";
 
 /* SP11 Plan A: equipping a weapon or armor the character's class (plus kit) does
@@ -12,7 +13,7 @@ export function registerEquipmentHooks(): void {
     if (foundry.utils.getProperty(changed as object, "system.equipped") !== true) return;
     const actor = doc.parent;
     if (!actor || actor.type !== "character") return;
-    if (itemNotPermitted(actorEquipmentRules(actor.items), doc)) {
+    if (itemNotPermitted(actorEquipmentRules(actor.items, { psionicArmorPenalties: getOptionalRules().psionicArmorPenalties }), doc)) {
       ui.notifications?.warn(game.i18n!.format("ADND2E.sheet.equipment.notPermitted", { item: doc.name }));
     }
   });

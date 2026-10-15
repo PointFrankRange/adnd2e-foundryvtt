@@ -10,7 +10,11 @@ import { activeKitEntries } from "./kits";
 
 type ItemLike = { id?: string; name?: string; type: string; system: unknown };
 
-export function actorEquipmentRules(items: Iterable<ItemLike>): { armor: ArmorRule[]; weapons: WeaponRule[] } {
+/** `psionicArmorPenalties` (issue #118): PHBR5 lets a psionicist wear any armor at a power-score cost, so that class's armor restriction is lifted. */
+export function actorEquipmentRules(
+  items: Iterable<ItemLike>,
+  opts: { psionicArmorPenalties?: boolean } = {},
+): { armor: ArmorRule[]; weapons: WeaponRule[] } {
   const all = [...items];
   const kits = activeKitEntries(all);
   const armor: ArmorRule[] = [];
@@ -21,7 +25,7 @@ export function actorEquipmentRules(items: Iterable<ItemLike>): { armor: ArmorRu
     const chassis = getChassis(chassisId);
     if (!chassis) continue;
     const kit = kits.find((k) => k.chassisId === chassisId);
-    const baseArmor = baseArmorRule(chassis.armorAllowed).rule;
+    const baseArmor = opts.psionicArmorPenalties && chassisId === "psionicist" ? ({ any: true } as const) : baseArmorRule(chassis.armorAllowed).rule;
     const baseWeapons = baseWeaponRule(chassis.weaponsAllowed).rule;
     armor.push(kit ? resolveArmorRule(baseArmor, kit.equipment.armor) : baseArmor);
     weapons.push(kit ? resolveWeaponRule(baseWeapons, kit.equipment.weapons) : baseWeapons);

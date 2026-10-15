@@ -127,11 +127,12 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
   const known: KnownPower[] = input.powers.map((p) => ({ id: p.id, name: p.name, discipline: p.discipline, kind: p.kind, scoreBonus: p.scoreBonus }));
   const row = powerProgression(input.level);
   const wild = input.wild ?? false;
+  const armor = input.armorPenalty?.value ?? 0;
   const toRow = (p: PsionicsInput["powers"][number]): PsionicPowerRow => ({
     id: p.id,
     name: p.name,
     kind: p.kind,
-    score: powerScore(input.abilityScores[p.abilityKey] ?? 0, p.abilityModifier + p.scoreBonus),
+    score: powerScore(input.abilityScores[p.abilityKey] ?? 0, p.abilityModifier + p.scoreBonus + armor),
     cost: p.initialCost,
     costNote: p.costNote,
     maintenance: p.maintenanceCost,
@@ -163,6 +164,7 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
     wild,
     row,
     primary: primaryDiscipline(known),
+    armorPenalty: armor < 0 ? { value: armor, armor: input.armorPenalty?.armor ?? "" } : null,
     activities: [...PSIONIC_ACTIVITIES],
     maintained,
     groups: DISCIPLINES.map((discipline) => ({

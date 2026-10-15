@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   adjustPsp,
+  armorPenaltyOf,
   currentPsp,
   endPower,
   knownPowers,
@@ -16,12 +17,15 @@ const rendered: Record<string, unknown>[] = [];
 let warn: ReturnType<typeof vi.fn>;
 let info: ReturnType<typeof vi.fn>;
 
+let armorRule = false;
+
 beforeEach(() => {
+  armorRule = false;
   created.length = 0;
   rendered.length = 0;
   warn = vi.fn();
   info = vi.fn();
-  (globalThis as Record<string, unknown>).game = { i18n: { localize: (k: string) => k, format: (k: string, d: Record<string, string>) => `${k}:${JSON.stringify(d)}` } };
+  (globalThis as Record<string, unknown>).game = { i18n: { localize: (k: string) => k, format: (k: string, d: Record<string, string>) => `${k}:${JSON.stringify(d)}` }, settings: { get: (_s: string, key: string) => (key === "psionicArmorPenalties" ? armorRule : false) } };
   (globalThis as Record<string, unknown>).ui = { notifications: { warn, info } };
   (globalThis as Record<string, unknown>).ChatMessage = {
     getSpeaker: () => ({ alias: "Tam" }),
@@ -92,6 +96,19 @@ describe("usePower", () => {
     await usePower(a, "p1", async () => 1);
     expect(updates).toEqual([{ "system.psionics.psp": 13 }]);
     expect(rendered[0]).toMatchObject({ score: -6, resultKey: "ADND2E.chat.psionic.result.minimum-success", cost: 7 });
+  });
+  it("issue #118: worn plate lowers the score by 3 only with the rule on; a wild talent pays none", async () => {
+    const plate = { name: "Plate", type: "armor", system: { armorType: "plate-mail", equipped: true, isShield: false } };
+    armorRule = true;
+    const on = actor({ items: [power("p1"), plate] });
+    await usePower(on.a, "p1", async () => 7);
+    expect(rendered[0]).toMatchObject({ score: 7, resultKey: "ADND2E.chat.psionic.result.success" });
+    expect(armorPenaltyOf(on.a)).toBe(-3);
+    const wild = actor({ items: [power("p1"), plate] });
+    (wild.a.system.psionics as { wild?: boolean }).wild = true;
+    expect(armorPenaltyOf(wild.a)).toBe(0);
+    armorRule = false;
+    expect(armorPenaltyOf(on.a)).toBe(0);
   });
   it("adds the relearn bonus to the score", async () => {
     const { a } = actor({ items: [power("p1", { scoreBonus: 2 })] });

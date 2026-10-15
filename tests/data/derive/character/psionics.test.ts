@@ -143,3 +143,21 @@ describe("deriveCharacter psionics", () => {
     expect(deriveCharacter(m2, DEFAULT_OPTIONAL_RULES).psionics?.max).toBe(73);
   });
 });
+
+import { equippedArmorPenalty } from "../../../../src/data/derive/character/psionics";
+
+describe("equippedArmorPenalty (issue #118)", () => {
+  const armor = (name: string, armorType: string, equipped = true, isShield = false) => ({ name, type: "armor", system: { armorType, equipped, isShield } });
+  it("is zero when the rule is off", () => {
+    expect(equippedArmorPenalty([armor("Plate", "plate-mail")], false)).toEqual({ value: 0, armor: null });
+  });
+  it("names the worst equipped body armor", () => {
+    expect(equippedArmorPenalty([armor("Chain", "chain-mail"), armor("Plate", "plate-mail"), armor("Buckler", "plate-mail", true, true)], true)).toEqual({ value: -3, armor: "Plate" });
+  });
+  it("ignores unequipped armor and non-armor items", () => {
+    expect(equippedArmorPenalty([armor("Plate", "plate-mail", false), { name: "Rope", type: "equipment", system: {} }], true)).toEqual({ value: 0, armor: null });
+  });
+  it("an unnamed offender falls back to an empty name", () => {
+    expect(equippedArmorPenalty([{ type: "armor", system: { armorType: "full-plate", equipped: true, isShield: false } }], true)).toEqual({ value: -7, armor: "" });
+  });
+});

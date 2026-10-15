@@ -1,4 +1,6 @@
 import { TEMPLATE_PATH } from "../../constants";
+import { equippedArmorPenalty } from "../../data/derive/character/psionics";
+import { getOptionalRules } from "../../settings";
 import type { Contact } from "../../core/psionics/combat";
 import { applyRecovery, canRelearn, checkCost, powerScore, rollPowerCheck, type Discipline, type KnownPower, type PowerKind, type RecoveryActivity } from "../../core/psionics";
 
@@ -54,6 +56,12 @@ export function currentPsp(actor: PsionicActor): number {
 
 const isPsionicist = (actor: PsionicActor): boolean => actor.system.psionics.level > 0;
 
+/** Issue #118: the Table 9 armor reduction (<= 0) on every power score; a wild talent is not a psionicist and pays none. */
+export function armorPenaltyOf(actor: { items: Iterable<PsionicItem>; system: { psionics?: { wild?: boolean } } }): number {
+  if (actor.system.psionics?.wild) return 0;
+  return equippedArmorPenalty(actor.items, getOptionalRules().psionicArmorPenalties).value;
+}
+
 export const powerItems = (actor: PsionicActor): PsionicItem[] => [...actor.items].filter((i) => i.type === "power");
 
 export const findPower = (actor: PsionicActor, id: string): PsionicItem | undefined => powerItems(actor).find((i) => i.id === id);
@@ -88,7 +96,7 @@ export async function usePower(actor: PsionicActor, powerId: string, roll: Psion
     return;
   }
   const abilityKey = String(power.system.abilityKey);
-  const score = powerScore(actor.system.abilities[abilityKey]?.score ?? 0, Number(power.system.abilityModifier ?? 0) + Number(power.system.scoreBonus ?? 0));
+  const score = powerScore(actor.system.abilities[abilityKey]?.score ?? 0, Number(power.system.abilityModifier ?? 0) + Number(power.system.scoreBonus ?? 0) + armorPenaltyOf(actor));
   const natural = await roll();
   const check = rollPowerCheck(natural, score);
   const paid = checkCost(cost, check.success);

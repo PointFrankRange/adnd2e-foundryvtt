@@ -4,7 +4,7 @@ import {
   FULL_CONTACT, attackModifier, breakTangents, endContact, isAttackMode, isDefenseMode, needsDefenseRoll, recordTangents, resolveContest, resolveSeries, switchTarget, tangentsOn, upkeepDue,
   type AttackStep, type SeriesOutcome,
 } from "../../core/psionics/combat";
-import { currentPsp, findPower, info, requirePsionicist, rollD20, warn, type PsionicActor, type PsionicItem, type PsionicRoll } from "./psionic-actions";
+import { armorPenaltyOf, currentPsp, findPower, info, requirePsionicist, rollD20, warn, type PsionicActor, type PsionicItem, type PsionicRoll } from "./psionic-actions";
 
 /* SP15 Plan C - psionic combat state actions (active defense, upkeep, contacts).
  * Foundry glue only; every write targets the acting actor's own `system.psionics`. */
@@ -67,7 +67,7 @@ export interface TargetActor {
   name: string;
   isOwner?: boolean;
   items: Iterable<PsionicItem>;
-  system: { abilities?: Record<string, { score: number }>; psionics?: { level: number; activeDefense: string } };
+  system: { abilities?: Record<string, { score: number }>; psionics?: { level: number; activeDefense: string; wild?: boolean } };
   testUserPermission?(user: unknown, level: string): boolean;
 }
 export interface TargetLike { name: string; uuid: string; actor: TargetActor | null }
@@ -120,7 +120,7 @@ function targetDefense(target: TargetActor): { name: string; score: number } | n
   const item = [...target.items].find((i) => i.id === psionics.activeDefense && i.type === "power");
   if (!item || item.system.kind !== "defense") return null;
   const ability = target.system.abilities?.[String(item.system.abilityKey)]?.score ?? 0;
-  return { name: item.name, score: powerScore(ability, Number(item.system.abilityModifier ?? 0) + Number(item.system.scoreBonus ?? 0)) };
+  return { name: item.name, score: powerScore(ability, Number(item.system.abilityModifier ?? 0) + Number(item.system.scoreBonus ?? 0) + armorPenaltyOf(target)) };
 }
 
 /** Dry run: does any attack that would be made need the defender's roll? */
@@ -228,7 +228,7 @@ export async function attackMode(actor: PsionicActor, powerId: string, deps: Par
 
   const defense = targetDefense(target.actor);
   const modifier = attackModifier(power.name, defense?.name ?? null);
-  const base = powerScore(actor.system.abilities[String(power.system.abilityKey)]?.score ?? 0, Number(power.system.abilityModifier ?? 0) + Number(power.system.scoreBonus ?? 0));
+  const base = powerScore(actor.system.abilities[String(power.system.abilityKey)]?.score ?? 0, Number(power.system.abilityModifier ?? 0) + Number(power.system.scoreBonus ?? 0) + armorPenaltyOf(actor));
   const steps: AttackStep[] = [{ roll: await roll(), score: base + modifier }, { roll: await roll(), score: base + modifier }];
   const starting = tangentsOn(actor.system.psionics.contacts, target.uuid);
   const defenseScore = defense?.score ?? null;
