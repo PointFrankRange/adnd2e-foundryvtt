@@ -16,6 +16,9 @@ const TEMPLATES = allHbs(PC_DIR).map((p) => readFileSync(p, "utf8")).join("\n")
   + readFileSync(path.join(ROOT, "templates", "actor", "shared", "partials", "item-controls.hbs"), "utf8");
 const SHEET = readFileSync(path.join(ROOT, "src", "sheets", "character", "sheet.ts"), "utf8");
 const FAVORITES = readFileSync(path.join(ROOT, "src", "sheets", "kit", "favorites.ts"), "utf8");
+// issue #177: the psionic action handlers live in one shared module both sheets register
+const PSIONIC_SHEET = readFileSync(path.join(ROOT, "src", "sheets", "character", "psionic-sheet.ts"), "utf8");
+const PSIONIC_ACTION_IDS = [...PSIONIC_SHEET.matchAll(/^ {2}([a-zA-Z]+): async \(/gm)].map((m) => m[1]!);
 
 const NOTHING_LOST_ACTIONS = [
   "advanceWeaponMastery", "allocateThiefSkillPoint", "awardXp", "cancelCasting", "castSpell", "completeCasting",
@@ -47,6 +50,8 @@ describe("PC sheet templates (sheet redesign R1)", () => {
   it("every data-action used by a PC template is registered on the PC sheet (or is a core action)", () => {
     const used = new Set([...TEMPLATES.matchAll(/data-action="([a-zA-Z]+)"/g)].map((m) => m[1]!));
     const registered = new Set([...SHEET.matchAll(/^\s+([a-zA-Z]+): Adnd2eCharacterSheet\.#on/gm)].map((m) => m[1]!));
+    expect(SHEET).toContain("...psionicActionHandlers()");
+    for (const id of PSIONIC_ACTION_IDS) registered.add(id);
     for (const a of used) expect(registered.has(a) || CORE_ACTIONS.has(a), a).toBe(true);
   });
 
@@ -62,7 +67,9 @@ describe("PC sheet templates (sheet redesign R1)", () => {
   });
 });
 
-const PC_ONLY_ACTIONS = ["awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait", "useKitPower", "resetKitPower", "newDayKitPowers", "newEncounterKitPowers", "usePsionicPower", "relearnPsionicPower", "psionicRest", "adjustPsionicPsp", "payPsionicMaintenance", "endPsionicPower", "psionicRaiseDefense", "psionicDropDefense", "psionicAttack", "psionicPayUpkeep", "psionicEndContact", "wildTalentTest", "wildTalentReset"];
+const PC_ONLY_ACTIONS = ["awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait", "useKitPower", "resetKitPower", "newDayKitPowers", "newEncounterKitPowers", "wildTalentTest", "wildTalentReset"];
+// issue #177: gated on @root.psionicsPanel (set by the PC and Character NPC sheets), not pcActions
+const PSIONIC_PANEL_ACTIONS = ["usePsionicPower", "relearnPsionicPower", "psionicRest", "adjustPsionicPsp", "payPsionicMaintenance", "endPsionicPower", "psionicRaiseDefense", "psionicDropDefense", "psionicAttack", "psionicPayUpkeep", "psionicEndContact"];
 
 describe("PC-only actions (sheet redesign R2)", () => {
   it("every PC template that renders a PC-only action gates it on @root.pcActions", () => {
@@ -71,6 +78,14 @@ describe("PC-only actions (sheet redesign R2)", () => {
       const used = PC_ONLY_ACTIONS.filter((a) => text.includes(`data-action="${a}"`));
       if (used.length) expect(text, `${file} renders ${used.join(", ")}`).toContain("@root.pcActions");
     }
+  });
+  it("every PC template that renders a psionic action gates it on @root.psionicsPanel, and the PC sheet sets it", () => {
+    for (const file of allHbs(PC_DIR)) {
+      const text = readFileSync(file, "utf8");
+      const used = PSIONIC_PANEL_ACTIONS.filter((a) => text.includes(`data-action="${a}"`));
+      if (used.length) expect(text, `${file} renders ${used.join(", ")}`).toContain("@root.psionicsPanel");
+    }
+    expect(SHEET).toMatch(/context\.psionicsPanel = true;/);
   });
   it("the PC sheet sets pcActions", () => {
     expect(SHEET).toMatch(/context\.pcActions = true;/);
@@ -82,7 +97,7 @@ describe("Psionics tab (SP15 Plan A)", () => {
   it("every psionic action is rendered by a template and registered on the sheet", () => {
     for (const a of ["usePsionicPower", "relearnPsionicPower", "psionicRest", "adjustPsionicPsp", "payPsionicMaintenance", "endPsionicPower"]) {
       expect(TEMPLATES, a).toContain(`data-action="${a}"`);
-      expect(SHEET, a).toContain(`${a}: Adnd2eCharacterSheet.#on`);
+      expect(PSIONIC_ACTION_IDS, a).toContain(a);
     }
   });
   it("the part and tab are declared, and the section is the psionics tab", () => {
@@ -93,7 +108,7 @@ describe("Psionics tab (SP15 Plan A)", () => {
   it("the Adjust PSPs input is read by data attribute", () => {
     const panel = readFileSync(path.join(PC_DIR, "partials", "pc-psionics-panels.hbs"), "utf8");
     expect(panel).toContain("data-psionic-adjust");
-    expect(SHEET).toContain("[data-psionic-adjust]");
+    expect(PSIONIC_SHEET).toContain("[data-psionic-adjust]");
   });
   it("rest inputs carry no name= (they must not be submitted as actor data)", () => {
     const panel = readFileSync(path.join(PC_DIR, "partials", "pc-psionics-panels.hbs"), "utf8");
@@ -106,14 +121,14 @@ describe("Psionic combat panel (SP15 Plan C)", () => {
   it("every combat action is rendered by a template, registered on the sheet and PC-only", () => {
     for (const a of COMBAT_ACTIONS) {
       expect(TEMPLATES, a).toContain(`data-action="${a}"`);
-      expect(SHEET, a).toContain(`${a}: Adnd2eCharacterSheet.#on`);
-      expect(PC_ONLY_ACTIONS, a).toContain(a);
+      expect(PSIONIC_ACTION_IDS, a).toContain(a);
+      expect(PSIONIC_PANEL_ACTIONS, a).toContain(a);
     }
   });
   it("the defense select is read by data attribute and carries no name=", () => {
     const panel = readFileSync(path.join(PC_DIR, "partials", "pc-psionics-panels.hbs"), "utf8");
     expect(panel).toContain("data-psionic-defense");
-    expect(SHEET).toContain("[data-psionic-defense]");
+    expect(PSIONIC_SHEET).toContain("[data-psionic-defense]");
     expect(panel).not.toMatch(/name="/);
   });
 });

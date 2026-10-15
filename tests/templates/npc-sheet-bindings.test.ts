@@ -89,11 +89,14 @@ const PC_ONLY_ACTIONS = [
 ];
 const CORE_ACTIONS = new Set(["tab", "editImage"]);
 const registered = new Set([...SHEET.matchAll(/^\s+([a-zA-Z]+): Adnd2eNpcSheet\.#on/gm)].map((m) => m[1]!));
+// issue #177: the Character NPC sheet registers the shared psionic action handlers (never the PC-only wild-talent ones)
+const PSIONIC_SHEET = readFileSync(path.join(ROOT, "src", "sheets", "character", "psionic-sheet.ts"), "utf8");
+for (const m of PSIONIC_SHEET.matchAll(/^ {2}([a-zA-Z]+): async \(/gm)) registered.add(m[1]!);
 
 describe("Character NPC sheet templates (sheet redesign R2)", () => {
   it("uses the kit part templates", () => {
     expect(PART_FILES.map((f) => path.relative(TPL, f).split(path.sep).join("/")).sort()).toEqual(
-      ["actor/npc/journal.hbs", "actor/npc/main.hbs", "actor/pc/header.hbs", "actor/pc/inventory.hbs", "actor/pc/left.hbs", "actor/pc/spells.hbs", "actor/pc/tabs.hbs", "actor/shared/effects.hbs"],
+      ["actor/npc/journal.hbs", "actor/npc/main.hbs", "actor/pc/header.hbs", "actor/pc/inventory.hbs", "actor/pc/left.hbs", "actor/pc/psionics.hbs", "actor/pc/spells.hbs", "actor/pc/tabs.hbs", "actor/shared/effects.hbs"],
     );
   });
 
@@ -116,6 +119,15 @@ describe("Character NPC sheet templates (sheet redesign R2)", () => {
     const union = favSrc.match(/action:\s*([^;]+);/)![1]!;
     for (const m of union.matchAll(/"([a-zA-Z]+)"/g)) expect(registered.has(m[1]!), m[1]!).toBe(true);
     expect(registered.has("toggleLock") && registered.has("toggleFavorite")).toBe(true);
+  });
+
+  it("registers the shared psionic handlers, sets psionicsPanel and gates the panel on it (issue #177)", () => {
+    expect(SHEET).toContain("...psionicActionHandlers()");
+    expect(SHEET).toMatch(/context\.psionicsPanel = true;/);
+    for (const f of FILES) {
+      const text = readFileSync(f, "utf8");
+      if (text.includes('data-action="usePsionicPower"')) expect(text).toContain("@root.psionicsPanel");
+    }
   });
 
   it("never registers or renders PC-only actions ungated", () => {
