@@ -7,3 +7,4 @@ export * from "./view";
 export * from "./maneuvers";
 export * from "./maneuver-attack";
 export * from "./skills";
+export * from "./weapon-groups";
