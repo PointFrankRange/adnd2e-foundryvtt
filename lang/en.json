@@ -584,7 +584,8 @@
         }
       },
       "ac": {
-        "natural": "Includes the race's natural armor class"
+        "natural": "Includes the race's natural armor class",
+        "variants": "Other ACs: from behind {rear}, surprised {surprised}, without shield {shieldless}."
       },
       "vitals": {
         "hp": "Hit Points",

@@ -187,5 +187,6 @@
       <ul class="ac-breakdown">
         {{#each adnd2e.combat.acBreakdown as |row|}}<li class="kit-stat"><div class="kit-bar">{{localize row.label}}</div><span class="kit-big">{{row.value}}</span></li>{{/each}}
       </ul>
+      <p class="hint ac-variants">{{localize 'ADND2E.sheet.ac.variants' normal=adnd2e.vitals.ac.normal rear=adnd2e.vitals.ac.rearAttack surprised=adnd2e.vitals.ac.surprised shieldless=adnd2e.vitals.ac.shieldless}}</p>
     </div>
   </section>
