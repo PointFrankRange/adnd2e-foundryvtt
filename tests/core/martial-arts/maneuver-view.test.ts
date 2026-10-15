@@ -183,3 +183,13 @@ describe("weapon group rows (SP18 Plan D)", () => {
     expect(v.styles[0].weaponGroups[0]).toMatchObject({ state: "locked", reasonKey: "ADND2E.sheet.martialArts.locked.noSlot" });
   });
 });
+
+describe("showOnMain (SP18)", () => {
+  const base = { enabled: true, storedActiveId: "", canAct: true, level: 1, freeSlots: 0 };
+  it("hides the Main panel until the character knows the basics or owns a style", () => {
+    expect(buildMartialArtsView({ ...base, knowsBasics: false, items: [] }).showOnMain).toBe(false);
+    expect(buildMartialArtsView({ ...base, knowsBasics: true, items: [] }).showOnMain).toBe(true);
+    expect(buildMartialArtsView({ ...base, knowsBasics: false, items: [style([], "a")] }).showOnMain).toBe(true);
+    expect(buildMartialArtsView({ ...base, enabled: false, knowsBasics: true, items: [style([], "a")] }).showOnMain).toBe(false);
+  });
+});

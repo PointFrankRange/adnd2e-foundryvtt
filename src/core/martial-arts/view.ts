@@ -91,6 +91,8 @@ export interface MartialConstants {
 
 export interface MartialArtsView {
   visible: boolean;
+  /** the Main tab panel shows only once the character knows basic martial arts or owns a style */
+  showOnMain: boolean;
   knowsBasics: boolean;
   canAct: boolean;
   canAttack: boolean;
@@ -209,6 +211,7 @@ export function buildMartialArtsView(input: {
   };
   return {
     visible: input.enabled,
+    showOnMain: input.enabled && (input.knowsBasics || styles.length > 0),
     knowsBasics: input.knowsBasics,
     canAct: input.canAct,
     canAttack: input.canAct && active !== null,

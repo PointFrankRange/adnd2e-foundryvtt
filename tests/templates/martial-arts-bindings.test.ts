@@ -18,7 +18,7 @@ const keysIn = (src: string, re: RegExp): string[] => [...new Set([...src.matchA
 
 describe("martial arts bindings (SP18 Plan A)", () => {
   it("the panel is PC-only, rule-gated, with Attack and a Use button per style", () => {
-    expect(MAIN).toMatch(/@root\.pcActions[\s\S]*@root\.martialArts\.visible[\s\S]*data-action="martialArtsAttack"/);
+    expect(MAIN).toMatch(/@root\.pcActions[\s\S]*@root\.martialArts\.showOnMain[\s\S]*data-action="martialArtsAttack"/);
     const attack = MAIN.split(/\r?\n/).find((l) => l.includes('data-action="martialArtsAttack"'))!;
     expect(attack.match(/disabled/g)).toHaveLength(1);
     expect(attack).toContain("martialArts.canAttack");
