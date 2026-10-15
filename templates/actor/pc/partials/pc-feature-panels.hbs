@@ -146,6 +146,24 @@
               {{/each}}
             </div>
           {{/if}}
+          {{#if s.weaponGroups.length}}
+            <div class="kit-powers weapon-groups">
+              <h5 class="kit-subhead">{{localize 'ADND2E.sheet.martialArts.weaponGroups'}}</h5>
+              <div class="maneuver-list">
+                {{#each s.weaponGroups as |g|}}
+                  <div class="power-row{{#if (eq g.state 'locked')}} locked{{/if}}" data-group-id="{{g.id}}">
+                    <span class="name">{{localize g.labelKey}}</span>
+                    {{#if g.reasonKey}}<span class="effect">{{localize g.reasonKey}}</span>{{/if}}
+                    {{#if (eq g.state 'known')}}
+                      {{#if @root.adnd2e.lock.unlocked}}<button type="button" class="kit-small" data-action="unlearnWeaponGroup" data-item-id="{{s.id}}" data-group-id="{{g.id}}">{{localize 'ADND2E.sheet.martialArts.unlearnGroup'}}</button>{{/if}}
+                    {{else if (eq g.state 'learnable')}}
+                      <button type="button" class="kit-small" data-action="learnWeaponGroup" data-item-id="{{s.id}}" data-group-id="{{g.id}}">{{localize 'ADND2E.sheet.martialArts.learnGroup'}}</button>
+                    {{/if}}
+                  </div>
+                {{/each}}
+              </div>
+            </div>
+          {{/if}}
         </div>
       {{else}}
         <p class="kit-empty">{{localize 'ADND2E.sheet.martialArts.noStyles'}}</p>

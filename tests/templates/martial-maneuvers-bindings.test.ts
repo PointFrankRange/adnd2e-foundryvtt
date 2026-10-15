@@ -155,4 +155,13 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
     expect(ACTIONS).toContain("chiLevel");
     expect(read("templates", "actor", "pc", "partials", "pc-main-panels.hbs")).toContain("c.detailKey");
   });
+  it("weapon groups: Features has Learn/Unlearn actions the PC sheet registers; Main only lists known groups", () => {
+    expect(FEATURES).toContain('data-action="learnWeaponGroup"');
+    expect(FEATURES).toContain('data-action="unlearnWeaponGroup"');
+    expect(MAIN).toContain("s.knownWeaponGroups");
+    expect(MAIN).not.toContain("learnWeaponGroup");
+    expect(SHEET).toMatch(/^\s+learnWeaponGroup: Adnd2eCharacterSheet\.#on/m);
+    expect(SHEET).toMatch(/^\s+unlearnWeaponGroup: Adnd2eCharacterSheet\.#on/m);
+    expect(NPC_SHEET).not.toContain("WeaponGroup");
+  });
 });

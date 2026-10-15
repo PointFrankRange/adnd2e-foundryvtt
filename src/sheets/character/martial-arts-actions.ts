@@ -5,7 +5,7 @@ import {
 } from "../../combat/condition-effects";
 import {
   armorGroupOf, conditionModifiers, buildMartialArtsView, buildMartialCardContext, buildManeuverCardContext, buildSkillCardContext,
-  learnability, maneuverById, resolveLeap, resolveManeuverAttack, resolveMartialAttack, resolveSpeed, unlearnUpdate, type ArmorGroup, type MartialArtsView,
+  groupLearnability, learnability, maneuverById, offeredGroupIds, unlearnGroupUpdate, resolveLeap, resolveManeuverAttack, resolveMartialAttack, resolveSpeed, unlearnUpdate, type ArmorGroup, type MartialArtsView,
   type StyleItemLike,
 } from "../../core/martial-arts";
 import { attackRank, canHarm, requirementLabelKey } from "../../core/enchantment";
@@ -69,11 +69,18 @@ export async function learnManeuver(actor: MartialArtsActor, styleId: string, ma
   if (!martialArtsView(actor).visible) return;
   const item = [...actor.items].find((i) => i.type === "martialStyle" && i.id === styleId);
   if (!item?.update) return;
-  const sys = item.system as { availableManeuvers?: { list: string; difficulties: number[] }[]; knownManeuvers?: { id: string; level: number }[]; slotsInvested?: number };
+  const sys = item.system as {
+    availableManeuvers?: { list: string; difficulties: number[] }[];
+    knownManeuvers?: { id: string; level: number }[];
+    knownWeaponGroups?: { id: string; level: number }[];
+    slotsInvested?: number;
+  };
   const known = sys.knownManeuvers ?? [];
   const level = characterLevel(actor);
   if (level < 1) return warn("ADND2E.sheet.martialArts.locked.noLevel");
-  const verdict = learnability({ maneuverId, offered: sys.availableManeuvers ?? [], known, freeSlots: freeWeaponSlots(actor), level });
+  const verdict = learnability({ maneuverId, offered: sys.availableManeuvers ?? [], known, freeSlots: freeWeaponSlots(actor), level,
+    groupsAtLevel: (sys.knownWeaponGroups ?? []).filter((g) => g.level === level).length,
+  });
   if (!verdict.ok) return warn(`ADND2E.sheet.martialArts.locked.${verdict.reason}`);
   await item.update({
     "system.knownManeuvers": [...known.map((k) => ({ id: k.id, level: k.level })), { id: maneuverId, level }],
@@ -274,4 +281,51 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
     ineffective: ineffectiveFor(target, chiLevel, result.hit),
   });
   await postCard(actor, roll, "chat/martial-arts-attack.hbs", context);
+}
+
+/** Buy a weapon group on an owned style: re-validated here, then 1 slot is spent. */
+export async function learnWeaponGroup(actor: MartialArtsActor, styleId: string, groupId: string): Promise<void> {
+  if (!martialArtsView(actor).visible) return;
+  const item = [...actor.items].find((i) => i.type === "martialStyle" && i.id === styleId);
+  if (!item?.update) return;
+  const sys = item.system as {
+    weaponGroups?: string[];
+    knownManeuvers?: { id: string; level: number }[];
+    knownWeaponGroups?: { id: string; level: number }[];
+    slotsInvested?: number;
+  };
+  const level = characterLevel(actor);
+  if (level < 1) return warn("ADND2E.sheet.martialArts.locked.noLevel");
+  const knownGroups = sys.knownWeaponGroups ?? [];
+  const verdict = groupLearnability({
+    groupId,
+    offered: offeredGroupIds(sys.weaponGroups ?? []),
+    knownGroups,
+    maneuversAtLevel: (sys.knownManeuvers ?? []).filter((k) => k.level === level).length,
+    freeSlots: freeWeaponSlots(actor),
+    level,
+  });
+  if (!verdict.ok) return warn(`ADND2E.sheet.martialArts.locked.${verdict.reason}`);
+  await item.update({
+    "system.knownWeaponGroups": [...knownGroups.map((g) => ({ id: g.id, level: g.level })), { id: groupId, level }],
+    "system.slotsInvested": (sys.slotsInvested ?? 1) + 1,
+  });
+}
+
+/** Unlearn a bought weapon group after a confirmation; the weapon proficiency slot is refunded. */
+export async function unlearnWeaponGroup(actor: MartialArtsActor, styleId: string, groupId: string): Promise<void> {
+  if (!martialArtsView(actor).visible) return;
+  const item = [...actor.items].find((i) => i.type === "martialStyle" && i.id === styleId);
+  if (!item?.update) return;
+  const sys = item.system as { knownWeaponGroups?: { id: string; level: number }[]; slotsInvested?: number };
+  const change = unlearnGroupUpdate({ known: sys.knownWeaponGroups ?? [], groupId, slotsInvested: sys.slotsInvested ?? 1 });
+  if (!change) return;
+  const confirmed = await themedConfirm({
+    window: { title: game.i18n!.localize("ADND2E.sheet.martialArts.unlearnTitle") },
+    content: `<p>${game.i18n!.format("ADND2E.sheet.martialArts.unlearnGroupConfirm", {
+      name: foundry.utils.escapeHTML(game.i18n!.localize(`ADND2E.martialWeaponGroups.${groupId}`)),
+    })}</p>`,
+  } as never);
+  if (confirmed !== true) return;
+  await item.update({ "system.knownWeaponGroups": change.knownWeaponGroups, "system.slotsInvested": change.slotsInvested });
 }
