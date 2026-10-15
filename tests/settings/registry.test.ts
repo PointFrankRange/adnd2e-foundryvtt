@@ -3,14 +3,14 @@ import { SETTING_DESCRIPTORS, readOptionalRules, type SettingDescriptor } from "
 import { DEFAULT_OPTIONAL_RULES } from "../../src/core/options";
 
 describe("SETTING_DESCRIPTORS", () => {
-  it("registers 31 settings across the 4 groups", () => {
-    expect(SETTING_DESCRIPTORS).toHaveLength(31);
+  it("registers 32 settings across the 4 groups", () => {
+    expect(SETTING_DESCRIPTORS).toHaveLength(32);
     const byGroup = SETTING_DESCRIPTORS.reduce<Record<string, number>>((acc, d) => {
       acc[d.group] = (acc[d.group] ?? 0) + 1;
       return acc;
     }, {});
     expect(byGroup).toEqual({
-      core: 15,
+      core: 16,
       combatAndTactics: 7,
       skillsAndPowers: 4,
       spellsAndMagic: 5,
@@ -28,7 +28,7 @@ describe("SETTING_DESCRIPTORS", () => {
 
   it("core, combatAndTactics, skillsAndPowers and spellsAndMagic settings bind 1:1 to OptionalRules fields (exceedLevelLimits is a string choice, not a descriptor)", () => {
     const bound = SETTING_DESCRIPTORS.filter((d) => d.optionalRulesKey !== null);
-    expect(bound).toHaveLength(31);
+    expect(bound).toHaveLength(32);
     const boundKeys = bound.map((d) => d.optionalRulesKey).sort();
     const expectedKeys = Object.keys(DEFAULT_OPTIONAL_RULES)
       .filter((k) => k !== "exceedLevelLimits") // string choice, handled separately
@@ -38,8 +38,8 @@ describe("SETTING_DESCRIPTORS", () => {
     expect(unbound).toEqual([]);
   });
 
-  it("exactly the twelve prepare-time rules require a world reload", () => {
-    const reload = ["advancedMartialArts", "channelers", "channellerFatigue", "characterPointBuild", "expandedCastingTime", "primeRequisiteBonusLevels", "psionicArmorPenalties", "racialLevelLimits", "skillsAndPowersEnabled", "spellPoints", "spellsAndMagicEnabled", "subAbilityScores", "wildTalents"];
+  it("exactly the thirteen prepare-time rules require a world reload", () => {
+    const reload = ["advancedMartialArts", "channelers", "channellerFatigue", "characterPointBuild", "expandedCastingTime", "primeRequisiteBonusLevels", "psionicArmorPenalties", "psionicAutoUpkeep", "racialLevelLimits", "skillsAndPowersEnabled", "spellPoints", "spellsAndMagicEnabled", "subAbilityScores", "wildTalents"];
     const keys = SETTING_DESCRIPTORS.filter((d) => d.requiresReload === true).map((d) => d.key);
     expect(keys.sort()).toEqual(reload);
     for (const d of SETTING_DESCRIPTORS) {

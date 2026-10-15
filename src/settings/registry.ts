@@ -36,6 +36,7 @@ export const SETTING_DESCRIPTORS: readonly SettingDescriptor[] = [
   { key: "primeRequisiteBonusLevels", group: "core", default: false, config: true, optionalRulesKey: "primeRequisiteBonusLevels", requiresReload: true },
   { key: "wildTalents", group: "core", default: false, config: true, optionalRulesKey: "wildTalents", requiresReload: true },
   { key: "psionicArmorPenalties", group: "core", default: false, config: true, optionalRulesKey: "psionicArmorPenalties", requiresReload: true },
+  { key: "psionicAutoUpkeep", group: "core", default: false, config: true, optionalRulesKey: "psionicAutoUpkeep", requiresReload: true },
   { key: "advancedMartialArts", group: "core", default: false, config: true, optionalRulesKey: "advancedMartialArts", requiresReload: true },
   // --- combatAndTactics: Sub-project 7 ---
   { key: "combatAndTacticsEnabled", group: "combatAndTactics", default: false, config: true, optionalRulesKey: "combatAndTacticsEnabled" },

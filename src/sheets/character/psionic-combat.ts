@@ -5,6 +5,7 @@ import {
   type AttackStep, type SeriesOutcome,
   applyLateTangents,
 } from "../../core/psionics/combat";
+import { noteInitiation } from "./psionic-round";
 import { armorPenaltyOf, currentPsp, findPower, info, requirePsionicist, rollD20, warn, type PsionicActor, type PsionicItem, type PsionicRoll } from "./psionic-actions";
 
 /* SP15 Plan C - psionic combat state actions (active defense, upkeep, contacts).
@@ -266,6 +267,7 @@ export async function attackMode(actor: PsionicActor, powerId: string, deps: Par
     return;
   }
 
+  await noteInitiation(actor, power);
   const defense = targetDefense(target.actor);
   const modifier = attackModifier(power.name, defense?.name ?? null);
   const base = powerScore(actor.system.abilities[String(power.system.abilityKey)]?.score ?? 0, Number(power.system.abilityModifier ?? 0) + Number(power.system.scoreBonus ?? 0) + armorPenaltyOf(actor));

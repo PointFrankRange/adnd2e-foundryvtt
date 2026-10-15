@@ -5,5 +5,6 @@
   </header>
   <p class="check"><strong>{{localize 'ADND2E.chat.psionic.roll'}}:</strong> {{roll}} / {{score}} - {{localize resultKey}}</p>
   {{#if special}}<p class="hint">{{localize 'ADND2E.chat.psionic.special'}}</p>{{/if}}
+  {{#if halfMove}}<p class="hint">{{localize 'ADND2E.chat.psionic.halfMove'}}</p>{{/if}}
   <p class="cost">{{localize 'ADND2E.chat.psionic.cost'}}: {{cost}} - {{localize 'ADND2E.chat.psionic.remaining'}}: {{remaining}} / {{max}}</p>
 </div>
