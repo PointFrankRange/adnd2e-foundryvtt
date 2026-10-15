@@ -274,3 +274,20 @@ describe("ineffective martial arts hits (SP18 Plan C)", () => {
     expect(ctx.outcomeKey).toBe("");
   });
 });
+
+describe("weapon note (SP18 Plan D)", () => {
+  const base = { thac0: 10, targetAc: 5, attackerArmorType: "none", opponentWeaponSize: null, situationalModifier: 0, targetArmorGroup: "none" as const, styleDie: "1d4", level: 3, strengthAdj: 0 };
+  const result = resolveManeuverAttack({ ...base, maneuverId: "vitalArea:1", naturalD20: 15 });
+  const common = { actorName: "Bo", actorImg: "i.png", styleName: "Kung Fu", targetName: "Orc", result, damageTotal: 0 };
+  it("an uncovered weapon posts the hint key and name", () => {
+    const c = buildManeuverCardContext({ ...common, weaponNote: { state: "uncovered", weaponName: "Club" } });
+    expect(c.weaponNoteKey).toBe("ADND2E.chat.martialArts.weapon.uncovered");
+    expect(c.weaponName).toBe("Club");
+  });
+  it("an ok weapon shows the armed line; no note is blank", () => {
+    expect(buildManeuverCardContext({ ...common, weaponNote: { state: "ok", weaponName: "Club" } }).weaponNoteKey).toBe("ADND2E.chat.martialArts.weapon.ok");
+    const none = buildManeuverCardContext(common);
+    expect(none.weaponNoteKey).toBe("");
+    expect(none.weaponName).toBe("");
+  });
+});

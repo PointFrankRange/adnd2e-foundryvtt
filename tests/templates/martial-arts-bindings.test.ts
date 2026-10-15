@@ -37,9 +37,9 @@ describe("martial arts bindings (SP18 Plan A)", () => {
       ...keysIn(MAIN, /ADND2E\.sheet\.martialArts\.[A-Za-z]+/g),
       ...keysIn(FEATURES, /ADND2E\.sheet\.martialArts\.[A-Za-z]+/g),
       // the lock-reason table is a dynamic prefix (locked.${reason}); the Plan B1 bindings test covers each reason
-      ...keysIn(ACTIONS, /ADND2E\.(sheet|chat)\.martialArts\.[A-Za-z]+/g).filter((k) => !k.endsWith(".locked")),
+      ...keysIn(ACTIONS, /ADND2E\.(sheet|chat)\.martialArts\.[A-Za-z]+/g).filter((k) => !k.endsWith(".locked") && !k.endsWith(".mod") && !k.endsWith(".weapon")),
       ...keysIn(CHAT, /ADND2E\.chat\.martialArts\.[A-Za-z]+/g),
-      ...keysIn(CARD, /ADND2E\.chat\.martialArts\.(?:mod\.)?[A-Za-z0-9]+/g),
+      ...keysIn(CARD, /ADND2E\.chat\.martialArts\.(?:mod\.)?[A-Za-z0-9]+/g).filter((k) => !k.endsWith(".weapon")),
       "ADND2E.sheet.drop.styleNeedsBasics", "ADND2E.sheet.drop.styleDuplicate",
     ]);
     expect(keys.size).toBeGreaterThan(10);

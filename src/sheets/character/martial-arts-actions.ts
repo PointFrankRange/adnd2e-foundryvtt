@@ -5,8 +5,8 @@ import {
 } from "../../combat/condition-effects";
 import {
   armorGroupOf, conditionModifiers, buildMartialArtsView, buildMartialCardContext, buildManeuverCardContext, buildSkillCardContext,
-  groupLearnability, learnability, maneuverById, offeredGroupIds, unlearnGroupUpdate, resolveLeap, resolveManeuverAttack, resolveMartialAttack, resolveSpeed, unlearnUpdate, type ArmorGroup, type MartialArtsView,
-  type StyleItemLike,
+  assessWeaponUse, groupLearnability, learnability, maneuverById, offeredGroupIds, unlearnGroupUpdate, resolveLeap, resolveManeuverAttack, resolveMartialAttack, resolveSpeed, unlearnUpdate, type ArmorGroup, type MartialArtsView,
+  type StyleItemLike, type WieldedWeapon,
 } from "../../core/martial-arts";
 import { attackRank, canHarm, requirementLabelKey } from "../../core/enchantment";
 import { themedConfirm, themedPrompt } from "../../dialogs/themed-dialog-foundry";
@@ -212,6 +212,13 @@ export async function rollMartialArtsAttack(actor: MartialArtsActor): Promise<vo
 }
 
 /** Uses a known maneuver of the active style: one d20 against the target, a damage roll on a hit, one card. */
+/** The equipped melee weapons (a missing category counts as melee). */
+function wieldedWeapons(actor: MartialArtsActor): WieldedWeapon[] {
+  return [...actor.items]
+    .filter((i) => i.type === "weapon" && i.system.equipped === true && i.system.category !== "ranged")
+    .map((i) => ({ name: i.name, baseName: typeof i.system.baseWeaponName === "string" ? i.system.baseWeaponName : "" }));
+}
+
 export async function useManeuver(actor: MartialArtsActor, maneuverId: string): Promise<void> {
   const view = martialArtsView(actor);
   if (!view.visible) return;
@@ -250,6 +257,13 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
     await postCard(actor, skillRoll, "chat/martial-arts-attack.hbs", card);
     return;
   }
+  const armed = assessWeaponUse({
+    maneuverId,
+    knownGroups: view.active.knownWeaponGroups.map((g) => g.id),
+    weapons: wieldedWeapons(actor),
+  });
+  if (armed.state === "needsStyleWeapon") return warn("ADND2E.sheet.martialArts.needsStyleWeapon");
+  const weaponRows = armed.hitBonus ? [{ labelKey: "ADND2E.chat.martialArts.mod.weaponBonus", amount: armed.hitBonus }] : [];
   const target = await resolveTarget();
   if (!target) return;
 
@@ -262,7 +276,7 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
     targetAc: target.targetAc,
     attackerArmorType: resolveTargetArmorType(actor as never),
     opponentWeaponSize: target.opponentWeaponSize,
-    situationalModifier: cond.total,
+    situationalModifier: cond.total + armed.hitBonus,
     targetArmorGroup: target.targetArmorGroup,
     styleDie: view.active.damageDie,
     level: characterLevel(actor),
@@ -276,7 +290,11 @@ export async function useManeuver(actor: MartialArtsActor, maneuverId: string): 
   const chiLevel = view.constants.chiKnown ? characterLevel(actor) : null;
   const context = buildManeuverCardContext({
     actorName: actor.name, actorImg: actor.img, styleName: view.active.name, targetName: target.targetName, result, damageTotal,
-    doubleDamageTotal, situationalRows: cond.rows,
+    doubleDamageTotal, situationalRows: [...cond.rows, ...weaponRows],
+    weaponNote:
+      armed.state === "ok" || armed.state === "uncovered" || armed.state === "notAllowed"
+        ? { state: armed.state, weaponName: armed.weaponName ?? "" }
+        : null,
     styleDieIsNull: view.active.damageDie === null,
     ineffective: ineffectiveFor(target, chiLevel, result.hit),
   });

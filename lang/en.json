@@ -1002,7 +1002,8 @@
         "levitationRate": "Float up, down or sideways at {n1} ft per round.",
         "levitationDuration": "Lasts {n1} rounds.",
         "levitationRules": "Needs one turn of concentration first; no actions while floating; rest one round afterwards.",
-        "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions", "table21": "Target's armor", "maneuver": "Maneuver", "blinded": "Blinded", "invisibleTarget": "Invisible opponent", "fatigue": "Fatigue", "entangled": "Entangled", "frightened": "Frightened", "heldTarget": "Held opponent", "blindFighting": "Blind Fighting (blinded or invisible foe)" }
+        "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions", "table21": "Target's armor", "maneuver": "Maneuver", "blinded": "Blinded", "invisibleTarget": "Invisible opponent", "fatigue": "Fatigue", "entangled": "Entangled", "frightened": "Frightened", "heldTarget": "Held opponent", "blindFighting": "Blind Fighting (blinded or invisible foe)", "weaponBonus": "Weapon bonus" },
+        "weapon": { "ok": "Armed with {weapon}.", "uncovered": "{weapon} is not in a weapon group you have learned for this style.", "notAllowed": "{weapon} cannot be used with this maneuver." }
       },
       "shapechange": {
         "shift": "Shapechange",

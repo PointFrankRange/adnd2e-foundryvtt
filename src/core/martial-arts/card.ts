@@ -93,6 +93,8 @@ export interface ManeuverCardInput {
   situationalRows?: { labelKey: string; amount: number }[];
   /** a hit below the target's enchantment requirement has no effect */
   ineffective?: { requirementKey: string } | null;
+  /** how the wielded weapon relates to the maneuver (a hint only; damage is never replaced) */
+  weaponNote?: { state: "ok" | "uncovered" | "notAllowed"; weaponName: string } | null;
 }
 
 export interface ManeuverCardContext {
@@ -119,6 +121,9 @@ export interface ManeuverCardContext {
   /** the effects a hit offers, each with its save line and apply data; empty on a miss or parry */
   effects: CardEffect[];
   ineffective: { requirementKey: string } | null;
+  /** blank when no melee weapon is wielded */
+  weaponNoteKey: string;
+  weaponName: string;
 }
 
 const COST_KEY: Readonly<Record<string, string>> = { "0": "none", "1": "one", "2": "two", round: "round" };
@@ -171,6 +176,8 @@ export function buildManeuverCardContext(input: ManeuverCardInput): ManeuverCard
     blowKey: ineffective || !r.blow ? "" : `ADND2E.martialBlows.${r.blow}`,
     effects,
     ineffective,
+    weaponNoteKey: input.weaponNote ? `ADND2E.chat.martialArts.weapon.${input.weaponNote.state}` : "",
+    weaponName: input.weaponNote?.weaponName ?? "",
   };
 }
 
@@ -220,6 +227,8 @@ export function buildSkillCardContext(input: SkillCardInput): SkillCardContext {
     blowKey: "",
     effects: [],
     ineffective: null,
+    weaponNoteKey: "",
+    weaponName: "",
     lines: [],
     noRoll: false,
   };
