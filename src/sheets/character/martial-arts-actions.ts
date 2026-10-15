@@ -212,10 +212,10 @@ export async function rollMartialArtsAttack(actor: MartialArtsActor): Promise<vo
 }
 
 /** Uses a known maneuver of the active style: one d20 against the target, a damage roll on a hit, one card. */
-/** The equipped melee weapons (a missing category counts as melee). */
+/** The equipped melee-category weapons (thrown, bow and crossbow weapons are not wielded in a maneuver). */
 function wieldedWeapons(actor: MartialArtsActor): WieldedWeapon[] {
   return [...actor.items]
-    .filter((i) => i.type === "weapon" && i.system.equipped === true && i.system.category !== "ranged")
+    .filter((i) => i.type === "weapon" && i.system.equipped === true && i.system.category === "melee")
     .map((i) => ({ name: i.name, baseName: typeof i.system.baseWeaponName === "string" ? i.system.baseWeaponName : "" }));
 }
 

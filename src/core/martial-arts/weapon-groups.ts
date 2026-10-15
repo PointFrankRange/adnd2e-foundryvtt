@@ -23,12 +23,12 @@ export const WEAPON_GROUPS: readonly WeaponGroupDef[] = [
   },
   { id: "chainWeapons", label: "Chain Weapons", members: ["kau sin ke", "kusarigama", "manriki gusari", "three section staff"] },
   { id: "lashWeapons", label: "Lash Weapons", members: ["scourge", "whip"] },
-  { id: "ropeWeapons", label: "Rope Weapons", members: ["bola", "kawanaga", "kyogetsu shogi"] },
+  { id: "ropeWeapons", label: "Rope Weapons", members: ["bola", "bolas","kawanaga", "kyogetsu shogi"] },
   { id: "axes", label: "Axes", members: ["battle axe", "hand axe", "throwing axe"] },
   {
     id: "clubbingWeapons",
     label: "Clubbing Weapons",
-    members: ["club", "footmans mace", "hanbo", "horsemans mace", "jo", "kiseru", "morning star", "tonfa", "war hammer"],
+    members: ["club", "footmans mace", "hammer", "hanbo","horsemans mace", "jo", "kiseru", "morning star", "tonfa", "war hammer"],
   },
   { id: "flails", label: "Flails", members: ["footmans flail", "horsemans flail"] },
   { id: "karateWeapons", label: "Karate Weapons", members: ["kama", "nunchaku", "quarterstaff", "bo", "sai", "jitte", "tonfa"] },
@@ -45,7 +45,7 @@ export const WEAPON_GROUPS: readonly WeaponGroupDef[] = [
   },
   { id: "poleSpears", label: "Pole Spears", members: ["spetum", "trident", "voulge"] },
   { id: "lances", label: "Lances", members: ["heavy horse lance", "light horse lance", "jousting lance", "medium horse lance"] },
-  { id: "spears", label: "Spears", members: ["awl pike", "chijiriki", "harpoon", "javelin", "long spear", "shakujo yari", "spear", "trident", "uchi ne"] },
+  { id: "spears", label: "Spears", members: ["awl pike", "chijiriki", "harpoon", "javelin", "long spear", "pike", "shakujo yari","spear", "trident", "uchi ne"] },
 ];
 
 export const WEAPON_GROUP_IDS: readonly string[] = WEAPON_GROUPS.map((g) => g.id);

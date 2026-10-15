@@ -68,3 +68,11 @@ describe("unlearnGroupUpdate", () => {
     expect(unlearnGroupUpdate({ known: [], groupId: "staves", slotsInvested: 2 })).toBeNull();
   });
 });
+
+describe("proficiency-pack alias names", () => {
+  it("maps hammer, bolas and pike to their groups", () => {
+    expect(weaponGroupIdsFor("Hammer")).toContain("clubbingWeapons");
+    expect(weaponGroupIdsFor("Bolas")).toContain("ropeWeapons");
+    expect(weaponGroupIdsFor("Pike")).toContain("spears");
+  });
+});

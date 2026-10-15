@@ -28,7 +28,7 @@ describe("assessWeaponUse", () => {
     expect(assessWeaponUse({ maneuverId: "kick:1", knownGroups: ["karateWeapons"], weapons: [sai] })).toMatchObject({ state: "notAllowed", weaponName: "Sai +1" });
   });
   it("'any' is ok; the sai bonus needs the group learned", () => {
-    expect(assessWeaponUse({ maneuverId: "block:1", knownGroups: [], weapons: [sai] })).toMatchObject({ state: "ok", covered: false, hitBonus: 0 });
+    expect(assessWeaponUse({ maneuverId: "block:1", knownGroups: [], weapons: [sai] })).toEqual({ state: "uncovered", weaponName: "Sai +1", covered: false, hitBonus: 0 });
     expect(assessWeaponUse({ maneuverId: "block:1", knownGroups: ["karateWeapons"], weapons: [sai] })).toMatchObject({ state: "ok", covered: true, hitBonus: 2 });
     expect(assessWeaponUse({ maneuverId: "lock:2", knownGroups: ["karateWeapons"], weapons: [sai] }).hitBonus).toBe(2);
   });
@@ -50,6 +50,19 @@ describe("assessWeaponUse", () => {
   it("picks the first workable weapon when several are wielded, and an unknown maneuver id is treated as any", () => {
     const r = assessWeaponUse({ maneuverId: "vitalArea:1", knownGroups: ["clubbingWeapons"], weapons: [{ name: "Rapier", baseName: "" }, { name: "Club", baseName: "" }] });
     expect(r).toMatchObject({ state: "ok", weaponName: "Club" });
-    expect(assessWeaponUse({ maneuverId: "x:1", knownGroups: [], weapons: [sai] }).state).toBe("ok");
+    expect(assessWeaponUse({ maneuverId: "x:1", knownGroups: [], weapons: [sai] }).state).toBe("uncovered");
+    expect(assessWeaponUse({ maneuverId: "x:1", knownGroups: ["karateWeapons"], weapons: [sai] }).state).toBe("ok");
+  });
+  it("under 'any' a covered weapon is preferred over an earlier uncovered one", () => {
+    const longSword = { name: "Long Sword", baseName: "" };
+    expect(assessWeaponUse({ maneuverId: "block:1", knownGroups: ["karateWeapons"], weapons: [longSword, sai] })).toMatchObject({ state: "ok", weaponName: "Sai +1", covered: true, hitBonus: 2 });
+  });
+  it("the +2 bonus comes from any covered wielded weapon, not just the first", () => {
+    const katana = { name: "Katana", baseName: "" };
+    const kusari = { name: "Kusarigama", baseName: "" };
+    expect(assessWeaponUse({ maneuverId: "block:3", knownGroups: ["orientalBlades", "chainWeapons"], weapons: [katana, kusari] })).toMatchObject({ state: "ok", hitBonus: 2 });
+  });
+  it("uncovered-only weapons on an 'any' maneuver are uncovered", () => {
+    expect(assessWeaponUse({ maneuverId: "movement:1", knownGroups: [], weapons: [{ name: "Long Sword", baseName: "" }] })).toEqual({ state: "uncovered", weaponName: "Long Sword", covered: false, hitBonus: 0 });
   });
 });

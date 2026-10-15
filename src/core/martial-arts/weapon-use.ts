@@ -71,12 +71,14 @@ export function assessWeaponUse(input: { maneuverId: string; knownGroups: readon
   if (rows.length === 0) return outcome("unarmed", null);
   if (policy === "none") return outcome("notAllowed", rows[0].weapon.name);
   const permitted: readonly string[] | null = policy === "any" ? null : policy;
+  // "any" with weapons wielded but none in a learned group is "uncovered"; lists fall back to uncovered/notAllowed.
   const inPermitted = (groups: string[]): boolean => permitted === null || groups.some((g) => permitted.includes(g));
-  const usable = rows.find((r) => permitted === null || r.groups.some((g) => known.has(g) && permitted.includes(g)));
-  if (!usable) {
+  const coveredRows = rows.filter((r) => r.groups.some((g) => known.has(g) && (permitted === null || permitted.includes(g))));
+  if (coveredRows.length === 0) {
     const wrongGroup = rows.find((r) => inPermitted(r.groups));
     return wrongGroup ? outcome("uncovered", wrongGroup.weapon.name) : outcome("notAllowed", rows[0].weapon.name);
   }
-  const covered = usable.groups.some((g) => known.has(g));
-  return outcome("ok", usable.weapon.name, covered, covered ? bonusFor(input.maneuverId, usable.weapon, usable.groups) : 0);
+  const bonus = Math.max(...coveredRows.map((r) => bonusFor(input.maneuverId, r.weapon, r.groups)));
+  const bonusRow = coveredRows.find((r) => bonusFor(input.maneuverId, r.weapon, r.groups) === bonus) ?? coveredRows[0];
+  return outcome("ok", (bonus > 0 ? bonusRow : coveredRows[0]).weapon.name, true, bonus);
 }
