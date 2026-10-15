@@ -47,6 +47,6 @@ describe("resolveActiveStyleId", () => {
 
 describe("freshStyleUpdate", () => {
   it("resets a dropped style to one invested slot and no known maneuvers", () => {
-    expect(freshStyleUpdate()).toEqual({ "system.slotsInvested": 1, "system.knownManeuvers": [] });
+    expect(freshStyleUpdate()).toEqual({ "system.slotsInvested": 1, "system.knownManeuvers": [], "system.knownWeaponGroups": [] });
   });
 });

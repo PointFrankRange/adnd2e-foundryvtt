@@ -548,8 +548,9 @@ function buildCombat(input: CharacterSheetInput, fav: FavCheck): CharacterSheetC
     quantity: i.quantity,
   }));
 
+  // Like armor (#165): the Main tab lists only wielded weapons; spares live on the Inventory tab
   const weapons = input.physicalItems
-    .filter((i) => i.type === "weapon")
+    .filter((i) => i.type === "weapon" && i.equipped)
     .map((i) => {
       const w = i.weapon as NonNullable<PhysicalItemView["weapon"]>;
       const ammoCandidates = w.ammoType ? matchingAmmo(ammoStock, w.ammoType) : [];

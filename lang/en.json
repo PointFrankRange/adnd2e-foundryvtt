@@ -75,6 +75,7 @@
     "martialBlows": { "headKick": "Head kick", "headPunch": "Head punch", "vitalsKick": "Vitals kick", "vitalsPunch": "Vitals punch", "highKick": "High kick", "sideKick": "Side kick", "bodyPunch": "Body punch", "lowKick": "Low kick", "graze": "Graze" },
     "martialManeuverLists": { "block": "Block", "kick": "Kick", "strike": "Strike", "lock": "Lock", "push": "Push", "throw": "Throw", "vitalArea": "Vital area", "movement": "Movement", "weapon": "Weapon", "mental": "Mental and physical training" },
     "martialManeuverCosts": { "none": "No extra attack", "one": "Costs 1 attack", "two": "Costs 2 attacks", "round": "Takes the whole round" },
+    "martialWeaponGroups": { "fencingBlades": "Fencing Blades", "longBlades": "Long Blades", "mediumBlades": "Medium Blades", "orientalBlades": "Oriental Blades", "shortBlades": "Short Blades", "chainWeapons": "Chain Weapons", "lashWeapons": "Lash Weapons", "ropeWeapons": "Rope Weapons", "axes": "Axes", "clubbingWeapons": "Clubbing Weapons", "flails": "Flails", "karateWeapons": "Karate Weapons", "picks": "Picks", "sickles": "Sickles", "staves": "Staves", "bladedPoles": "Bladed Poles", "poleSpears": "Pole Spears", "lances": "Lances", "spears": "Spears" },
     "martialManeuvers": { "basicParry": "Basic Parry", "parryAll": "Parry All", "grapplingBlock": "Grappling Block", "arrowParry": "Arrow Parry", "circleKick": "Circle Kick", "flyingKick": "Flying Kick", "backwardKick": "Backward Kick", "ironFist": "Iron Fist", "crushingBlow": "Crushing Blow", "eagleClaw": "Eagle Claw", "chokeHold": "Choke Hold", "lockingBlock": "Locking Block", "incapacitator": "Incapacitator", "immobilizing": "Immobilizing", "concentratedPush": "Concentrated Push", "stickingTouch": "Sticking Touch", "oneFingerPush": "One Finger Push", "fall": "Fall", "instantStand": "Instant Stand", "hurl": "Hurl", "greatThrow": "Great Throw", "painTouch": "Pain Touch", "stunningTouch": "Stunning Touch", "paralyzingTouch": "Paralyzing Touch", "distanceDeath": "Distance Death", "feint": "Feint", "proneFighting": "Prone Fighting", "immovability": "Immovability", "leap": "Leap", "speed": "Speed", "slowResistance": "Slow Resistance", "weaponBreaker": "Weapon Breaker", "steelCloth": "Steel Cloth", "meditation": "Meditation", "allAroundSight": "All-Around Sight", "mentalResistance": "Mental Resistance", "chiAttacks": "Ch'i Attacks", "blindFighting": "Blind Fighting", "ironskin": "Ironskin", "levitation": "Levitation" },
     "martialManeuverEffects": {
       "basicParry": "The first blow this round is parried.",
@@ -626,6 +627,12 @@
         "useManeuver": "Use",
         "notKnown": "You have not learned that maneuver with the active style.",
         "passive": "Always in effect",
+        "weaponGroups": "Weapon groups",
+        "weaponGroupsKnown": "Weapon groups",
+        "learnGroup": "Learn",
+        "unlearnGroup": "Unlearn",
+        "unlearnGroupConfirm": "Unlearn the {name} weapon group? Its weapon proficiency slot is refunded.",
+        "needsStyleWeapon": "Weapon Breaker needs you to wield a weapon from a weapon group you have learned on this style.",
         "activeBadge": "Active",
         "constants": "Always in effect",
         "locked": {
@@ -718,6 +725,7 @@
         "grappleWith": "In a grapple with {name}",
         "release": "Release",
         "noWeapons": "No weapons carried.",
+        "noWeaponsEquipped": "No weapons equipped.",
         "noArmor": "No armor carried.",
         "noArmorEquipped": "No armor equipped.",
         "rollAttack": "Attack",
@@ -995,7 +1003,8 @@
         "levitationRate": "Float up, down or sideways at {n1} ft per round.",
         "levitationDuration": "Lasts {n1} rounds.",
         "levitationRules": "Needs one turn of concentration first; no actions while floating; rest one round afterwards.",
-        "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions", "table21": "Target's armor", "maneuver": "Maneuver", "blinded": "Blinded", "invisibleTarget": "Invisible opponent", "fatigue": "Fatigue", "entangled": "Entangled", "frightened": "Frightened", "heldTarget": "Held opponent", "blindFighting": "Blind Fighting (blinded or invisible foe)" }
+        "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions", "table21": "Target's armor", "maneuver": "Maneuver", "blinded": "Blinded", "invisibleTarget": "Invisible opponent", "fatigue": "Fatigue", "entangled": "Entangled", "frightened": "Frightened", "heldTarget": "Held opponent", "blindFighting": "Blind Fighting (blinded or invisible foe)", "weaponBonus": "Weapon bonus" },
+        "weapon": { "ok": "Armed with {weapon}.", "uncovered": "{weapon} is not in a weapon group you have learned for this style.", "notAllowed": "{weapon} cannot be used with this maneuver." }
       },
       "shapechange": {
         "shift": "Shapechange",

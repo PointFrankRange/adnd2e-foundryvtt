@@ -32,6 +32,14 @@ export class MartialStyleItemModel extends Adnd2eItemModel {
         }),
         { required: true, initial: () => [] },
       ),
+      /** SP18 Plan D: the weapon tight groups bought on this style ({ id: group id, level bought at }); one slot each. */
+      knownWeaponGroups: new ArrayField(
+        new SchemaField({
+          id: new StringField({ required: true, blank: false }),
+          level: new NumberField({ required: true, integer: true, min: 1 }),
+        }),
+        { required: true, initial: () => [] },
+      ),
     };
   }
 }

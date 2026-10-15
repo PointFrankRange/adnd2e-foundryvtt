@@ -58,7 +58,8 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
       ...keysIn(FEATURES, /ADND2E\.sheet\.martialArts\.[A-Za-z]+/g),
       ...keysIn(ACTIONS, /ADND2E\.(sheet|chat)\.martialArts\.[A-Za-z.]+/g).filter((k) => !k.endsWith(".")),
       ...keysIn(CHAT, /ADND2E\.chat\.martialArts\.[A-Za-z]+/g),
-      ...keysIn(CARD, /ADND2E\.chat\.martialArts\.(?:mod\.)?[A-Za-z0-9]+/g),
+      ...keysIn(CARD, /ADND2E\.chat\.martialArts\.(?:mod\.)?[A-Za-z0-9]+/g).filter((k) => !k.endsWith(".weapon")),
+      ...["ok", "uncovered", "notAllowed"].map((s) => `ADND2E.chat.martialArts.weapon.${s}`), "ADND2E.chat.martialArts.mod.weaponBonus",
       ...["notOffered", "known", "order", "noSlot", "levelCap"].map((r) => `ADND2E.sheet.martialArts.locked.${r}`),
       "ADND2E.sheet.martialArts.maneuvers", "ADND2E.sheet.martialArts.learn", "ADND2E.sheet.martialArts.useManeuver",
       "ADND2E.chat.martialArts.parried", "ADND2E.chat.martialArts.notParried", "ADND2E.chat.martialArts.mod.table21",
@@ -154,5 +155,20 @@ describe("martial arts maneuver bindings (SP18 Plan B1)", () => {
     expect(ACTIONS).toContain("attackRank(");
     expect(ACTIONS).toContain("chiLevel");
     expect(read("templates", "actor", "pc", "partials", "pc-main-panels.hbs")).toContain("c.detailKey");
+  });
+  it("weapon groups: Features has Learn/Unlearn actions the PC sheet registers; Main only lists known groups", () => {
+    expect(FEATURES).toContain('data-action="learnWeaponGroup"');
+    expect(FEATURES).toContain('data-action="unlearnWeaponGroup"');
+    expect(MAIN).toContain("s.knownWeaponGroups");
+    expect(MAIN).not.toContain("learnWeaponGroup");
+    expect(SHEET).toMatch(/^\s+learnWeaponGroup: Adnd2eCharacterSheet\.#on/m);
+    expect(SHEET).toMatch(/^\s+unlearnWeaponGroup: Adnd2eCharacterSheet\.#on/m);
+    expect(NPC_SHEET).not.toContain("WeaponGroup");
+  });
+  it("armed use: the card shows the weapon note and the action assesses the wielded weapon", () => {
+    expect(CHAT).toContain("weaponNoteKey");
+    expect(ACTIONS).toContain("assessWeaponUse");
+    expect(ACTIONS).toContain("ADND2E.sheet.martialArts.needsStyleWeapon");
+    expect(ACTIONS).toContain("ADND2E.chat.martialArts.mod.weaponBonus");
   });
 });

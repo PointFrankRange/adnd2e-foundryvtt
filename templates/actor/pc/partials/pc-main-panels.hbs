@@ -86,6 +86,9 @@
                 {{/each}}
               </div>
             {{/if}}
+            {{#if s.knownWeaponGroups.length}}
+              <p class="hint style-weapons">{{localize 'ADND2E.sheet.martialArts.weaponGroupsKnown'}}: {{#each s.knownWeaponGroups as |g|}}{{localize g.labelKey}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+            {{/if}}
           </div>
         {{else}}
           <p class="kit-empty">{{localize 'ADND2E.sheet.martialArts.noStyles'}}</p>
@@ -162,7 +165,7 @@
           {{#if @root.adnd2e.lock.unlocked}}{{> adnd2e.item-controls id=w.id deletable=true}}{{/if}}
         </div>
       {{else}}
-        <p class="kit-empty">{{localize 'ADND2E.sheet.combat.noWeapons'}}</p>
+        <p class="kit-empty">{{localize 'ADND2E.sheet.combat.noWeaponsEquipped'}}</p>
       {{/each}}
       {{/if}}
     </div>

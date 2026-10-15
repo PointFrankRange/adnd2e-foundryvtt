@@ -17,3 +17,11 @@ describe("Main tab armor panel (#165)", () => {
     expect(LANG.ADND2E.sheet.combat.noArmorEquipped).toBe("No armor equipped.");
   });
 });
+
+describe("Main tab attacks panel", () => {
+  it("uses the equipped-only empty state for the weapon list", () => {
+    const panel = MAIN.slice(MAIN.indexOf("adnd2e.combat.weapons"), MAIN.indexOf("adnd2e.combat.armor"));
+    expect(panel).toContain("ADND2E.sheet.combat.noWeaponsEquipped");
+    expect(LANG.ADND2E.sheet.combat.noWeaponsEquipped).toBe("No weapons equipped.");
+  });
+});

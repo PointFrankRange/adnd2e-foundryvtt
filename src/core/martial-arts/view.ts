@@ -3,6 +3,7 @@ import { resolveActiveStyleId, styleStats, type StyleForm, type StyleMethod } fr
 import { MANEUVERS, learnability, type ManeuverCost, type ManeuverDef } from "./maneuvers";
 import { chiRank, chiRankLabelKey } from "../enchantment";
 import { ironskinAcMod, knownManeuverIds } from "./skills";
+import { groupLearnability, offeredGroupIds, weaponGroupLabelKey } from "./weapon-groups";
 
 export interface StyleItemLike {
   id: string;
@@ -15,6 +16,8 @@ export interface StyleItemLike {
     slotsInvested?: number;
     availableManeuvers?: { list: string; difficulties: number[] }[];
     knownManeuvers?: { id: string; level: number }[];
+    weaponGroups?: string[];
+    knownWeaponGroups?: { id: string; level: number }[];
   };
 }
 
@@ -39,6 +42,13 @@ export interface ManeuverRow {
 const COST_KEY: Readonly<Record<string, string>> = { "0": "none", "1": "one", "2": "two", round: "round" };
 const costKey = (cost: ManeuverCost): string => `ADND2E.martialManeuverCosts.${COST_KEY[String(cost)]}`;
 
+export interface WeaponGroupRow {
+  id: string;
+  labelKey: string;
+  state: "known" | "learnable" | "locked";
+  reasonKey: string;
+}
+
 export interface StyleRow {
   id: string;
   name: string;
@@ -58,6 +68,10 @@ export interface StyleRow {
   lists: { listKey: string; maneuvers: ManeuverRow[] }[];
   /** known maneuvers that are used (not passive); passives list once in the constants summary */
   usableManeuvers: ManeuverRow[];
+  /** the tight weapon groups this style offers, with their buy state */
+  weaponGroups: WeaponGroupRow[];
+  /** the bought subset of `weaponGroups` */
+  knownWeaponGroups: WeaponGroupRow[];
 }
 
 /** The always-on abilities known on any owned style. */
@@ -120,11 +134,13 @@ export function buildMartialArtsView(input: {
     const stats = styleStats(form, method);
     const offered = i.system.availableManeuvers ?? [];
     const known = i.system.knownManeuvers ?? [];
+    const knownGroups = i.system.knownWeaponGroups ?? [];
+    const level = input.level ?? 0;
     const knownIds = new Set(known.map((k) => k.id));
     const isActive = i.id === activeId;
     const maneuvers = MANEUVERS.filter((m) => knownIds.has(m.id) || offered.some((o) => o.list === m.list && o.difficulties.includes(m.difficulty))).map(
       (m): ManeuverRow => {
-        const verdict = learnability({ maneuverId: m.id, offered, known, freeSlots: input.freeSlots ?? 0, level: input.level ?? 0 });
+        const verdict = learnability({ maneuverId: m.id, offered, known, freeSlots: input.freeSlots ?? 0, level, groupsAtLevel: knownGroups.filter((g) => g.level === level).length });
         const isKnown = knownIds.has(m.id);
         return {
           id: m.id,
@@ -141,6 +157,18 @@ export function buildMartialArtsView(input: {
         };
       },
     );
+    const offeredIds = offeredGroupIds(i.system.weaponGroups ?? []);
+    const maneuversAtLevel = known.filter((k) => k.level === level).length;
+    const weaponGroups = offeredIds.map((id): WeaponGroupRow => {
+      const isKnown = knownGroups.some((g) => g.id === id);
+      const verdict = groupLearnability({ groupId: id, offered: offeredIds, knownGroups, maneuversAtLevel, freeSlots: input.freeSlots ?? 0, level });
+      return {
+        id,
+        labelKey: weaponGroupLabelKey(id),
+        state: isKnown ? "known" : verdict.ok ? "learnable" : "locked",
+        reasonKey: isKnown || verdict.ok ? "" : `ADND2E.sheet.martialArts.locked.${verdict.reason}`,
+      };
+    });
     return {
       id: i.id,
       name: i.name,
@@ -156,6 +184,8 @@ export function buildMartialArtsView(input: {
       lists: groupByList(maneuvers),
       knownManeuvers: maneuvers.filter((m) => m.state === "known"),
       usableManeuvers: maneuvers.filter((m) => m.state === "known" && m.kind !== "passive"),
+      weaponGroups,
+      knownWeaponGroups: weaponGroups.filter((g) => g.state === "known"),
     };
   });
   const active = styles.find((s) => s.active) ?? null;

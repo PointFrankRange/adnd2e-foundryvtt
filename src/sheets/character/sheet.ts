@@ -22,7 +22,7 @@ import { rollFormAttack } from "../creature/combat-rolls";
 import { promptShift, resetShapechangeDay, returnToNormal, shapechangeView } from "./shapechange-actions";
 import { trackQuarry, trackingView } from "./tracking-actions";
 import { freshStyleUpdate } from "../../core/martial-arts";
-import { learnManeuver, martialArtsView, rollMartialArtsAttack, setActiveStyle, unlearnManeuver, useManeuver } from "./martial-arts-actions";
+import { learnManeuver, learnWeaponGroup, martialArtsView, rollMartialArtsAttack, setActiveStyle, unlearnManeuver, unlearnWeaponGroup, useManeuver } from "./martial-arts-actions";
 import { buildCharacterSheetContext, traitTargetKey } from "./context";
 import type {
   ClassItemView,
@@ -411,6 +411,8 @@ export class Adnd2eCharacterSheet extends Base {
       useMartialStyle: Adnd2eCharacterSheet.#onUseMartialStyle,
       learnManeuver: Adnd2eCharacterSheet.#onLearnManeuver,
       unlearnManeuver: Adnd2eCharacterSheet.#onUnlearnManeuver,
+      learnWeaponGroup: Adnd2eCharacterSheet.#onLearnWeaponGroup,
+      unlearnWeaponGroup: Adnd2eCharacterSheet.#onUnlearnWeaponGroup,
       useManeuver: Adnd2eCharacterSheet.#onUseManeuver,
     },
   };
@@ -1260,6 +1262,18 @@ export class Adnd2eCharacterSheet extends Base {
     const styleId = target.dataset.itemId ?? "";
     const maneuverId = target.dataset.maneuverId ?? "";
     if (this.isEditable && styleId && maneuverId) await unlearnManeuver(this.document as never, styleId, maneuverId);
+  }
+
+  static async #onLearnWeaponGroup(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const styleId = target.dataset.itemId ?? "";
+    const groupId = target.dataset.groupId ?? "";
+    if (this.isEditable && styleId && groupId) await learnWeaponGroup(this.document as never, styleId, groupId);
+  }
+
+  static async #onUnlearnWeaponGroup(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
+    const styleId = target.dataset.itemId ?? "";
+    const groupId = target.dataset.groupId ?? "";
+    if (this.isEditable && styleId && groupId) await unlearnWeaponGroup(this.document as never, styleId, groupId);
   }
 
   static async #onUseManeuver(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {

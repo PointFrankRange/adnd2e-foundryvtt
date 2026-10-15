@@ -212,6 +212,7 @@
   .trait-row { flex-wrap: wrap; }
   .kit-small:disabled { opacity: 0.5; background: transparent; cursor: default; }
   .martial-attack { margin: 0 0 6px; }
+  .style-weapons { flex: 0 0 100%; margin: 2px 0 0 18px; }
   .martial-styles { display: flex; flex-direction: column; }
   .martial-style.active { order: -1; background: var(--kit-field-bg); border-left: 3px solid var(--kit-maroon); padding-left: 6px; }
   .style-name { font-size: 15px; font-weight: 700; color: var(--kit-accent-ink, var(--kit-ink)); }
