@@ -812,6 +812,8 @@ describe("lang/en.json — SP11 Plan B (kit powers)", () => {
   it("resolves the kit-power sheet and chat keys", () => {
     for (const key of [
       "ADND2E.sheet.kits.powers",
+      "ADND2E.sheet.kits.usesColumn",
+      "ADND2E.sheet.kits.scopeColumn",
       "ADND2E.sheet.kits.use",
       "ADND2E.sheet.kits.resetPower",
       "ADND2E.sheet.kits.newDay",

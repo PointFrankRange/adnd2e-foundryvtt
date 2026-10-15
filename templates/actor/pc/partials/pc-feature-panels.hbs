@@ -67,41 +67,53 @@
   {{/if}}
   {{> adnd2e.pc-wild-talent-panel}}
   {{#if @root.kits.length}}
-  <section class="kit-panel">
-    <div class="kit-bar">{{localize 'ADND2E.sheet.kits.title'}}</div>
+  <section class="kit-panel kits-panel">
+    <div class="kit-bar">
+      <span class="bar-title">{{localize 'ADND2E.sheet.kits.title'}}</span>
+      <span class="bar-actions">
+        <button type="button" data-action="newDayKitPowers">{{localize 'ADND2E.sheet.kits.newDay'}}</button>
+        <button type="button" data-action="newEncounterKitPowers">{{localize 'ADND2E.sheet.kits.newEncounter'}}</button>
+      </span>
+    </div>
     <div class="kit-body">
       {{#each @root.kits as |k|}}
-        <div class="trait-row" data-item-id="{{k.id}}">
-          <span class="name">{{k.name}}</span>
-          <span class="cost">{{k.chassisId}}</span>
-          <span class="effect">{{#if k.xpModifierPercent}}{{localize 'ADND2E.sheet.kits.xp'}} {{k.xpModifierPercent}}%{{/if}}</span>
-          {{#each k.effects as |e|}}<span class="effect">{{localize e.kindKey}}{{#if e.targetKey}} {{localize e.targetKey}}{{/if}} {{e.amount}}</span>{{/each}}
-          {{#if k.grantedFeatures.length}}<span class="effect">{{localize 'ADND2E.sheet.kits.features'}}: {{#each k.grantedFeatures}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</span>{{/if}}
-          {{#if k.overrides.castingDisabled}}<span class="effect">{{localize 'ADND2E.sheet.kits.castingDisabled'}}</span>{{/if}}
-          {{#if k.overrides.turningKey}}<span class="effect">{{localize k.overrides.turningKey}}{{#if k.overrides.turningOffsetLabel}} {{k.overrides.turningOffsetLabel}}{{/if}}</span>{{/if}}
-          {{#if k.overrides.removedAbilities.length}}<span class="effect">{{localize 'ADND2E.sheet.kits.removed'}}: {{#each k.overrides.removedAbilities}}<s class="removed">{{this}}</s>{{#unless @last}}, {{/unless}}{{/each}}</span>{{/if}}
+        <div class="kit-card" data-item-id="{{k.id}}">
+          <div class="kit-card-head">
+            <span class="name kit-name">{{k.name}}</span>
+            <span class="chip chip-class">{{k.chassisId}}</span>
+            {{#if k.xpModifierPercent}}<span class="chip">{{localize 'ADND2E.sheet.kits.xp'}} {{k.xpModifierPercent}}%</span>{{/if}}
+            {{#each k.effects as |e|}}<span class="chip">{{localize e.kindKey}}{{#if e.targetKey}} {{localize e.targetKey}}{{/if}} {{e.amount}}</span>{{/each}}
+            {{#if k.overrides.castingDisabled}}<span class="chip chip-warn">{{localize 'ADND2E.sheet.kits.castingDisabled'}}</span>{{/if}}
+            {{#if k.overrides.turningKey}}<span class="chip">{{localize k.overrides.turningKey}}{{#if k.overrides.turningOffsetLabel}} {{k.overrides.turningOffsetLabel}}{{/if}}</span>{{/if}}
+            {{#if @root.adnd2e.lock.unlocked}}<span class="card-controls">{{> adnd2e.item-controls id=k.id deletable=true}}</span>{{/if}}
+          </div>
+          {{#if k.grantedFeatures.length}}<p class="hint kit-features"><strong>{{localize 'ADND2E.sheet.kits.features'}}:</strong> {{#each k.grantedFeatures}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</p>{{/if}}
+          {{#if k.overrides.removedAbilities.length}}<p class="hint kit-removed"><strong>{{localize 'ADND2E.sheet.kits.removed'}}:</strong> {{#each k.overrides.removedAbilities}}<s class="removed">{{this}}</s>{{#unless @last}}, {{/unless}}{{/each}}</p>{{/if}}
           {{#if k.powers.length}}
-            <div class="kit-powers">
-              <h5 class="kit-subhead">{{localize 'ADND2E.sheet.kits.powers'}}</h5>
+            <div class="kit-powers kit-power-table">
+              <div class="power-head">
+                <span>{{localize 'ADND2E.sheet.kits.powers'}}</span>
+                <span>{{localize 'ADND2E.sheet.kits.usesColumn'}}</span>
+                <span>{{localize 'ADND2E.sheet.kits.scopeColumn'}}</span>
+                <span></span>
+              </div>
               {{#each k.powers as |p|}}
                 <div class="power-row" data-power-id="{{p.id}}">
                   <span class="name">{{p.name}}</span>
                   {{#if p.atWill}}<span class="uses">{{localize 'ADND2E.sheet.kits.per.at-will'}}</span>{{else}}<span class="uses">{{p.remaining}} / {{p.uses}} {{localize p.perKey}}</span>{{/if}}
-                  {{#if p.scope}}<span class="effect">{{p.scope}}</span>{{/if}}
-                  {{#each p.params as |q|}}<span class="effect">{{q.key}}: {{q.value}}</span>{{/each}}
-                  {{#unless p.managed}}
-                  <button type="button" class="kit-small" data-action="useKitPower" data-kit-id="{{k.id}}" data-power-id="{{p.id}}"{{#unless p.canUse}} disabled{{/unless}}>{{localize 'ADND2E.sheet.kits.use'}}</button>
-                  {{#if p.canReset}}<button type="button" class="kit-small" data-action="resetKitPower" data-kit-id="{{k.id}}" data-power-id="{{p.id}}">{{localize 'ADND2E.sheet.kits.resetPower'}}</button>{{/if}}
-                  {{/unless}}
+                  <span class="effect">{{#if p.scope}}{{p.scope}}{{/if}}{{#each p.params as |q|}} {{q.key}}: {{q.value}}{{/each}}</span>
+                  <span class="power-actions">
+                    {{#unless p.managed}}
+                    <button type="button" class="kit-small" data-action="useKitPower" data-kit-id="{{k.id}}" data-power-id="{{p.id}}"{{#unless p.canUse}} disabled{{/unless}}>{{localize 'ADND2E.sheet.kits.use'}}</button>
+                    {{#if p.canReset}}<button type="button" class="kit-small" data-action="resetKitPower" data-kit-id="{{k.id}}" data-power-id="{{p.id}}">{{localize 'ADND2E.sheet.kits.resetPower'}}</button>{{/if}}
+                    {{/unless}}
+                  </span>
                 </div>
               {{/each}}
             </div>
           {{/if}}
-          {{#if @root.adnd2e.lock.unlocked}}{{> adnd2e.item-controls id=k.id deletable=true}}{{/if}}
         </div>
       {{/each}}
-      <button type="button" class="kit-small" data-action="newDayKitPowers">{{localize 'ADND2E.sheet.kits.newDay'}}</button>
-      <button type="button" class="kit-small" data-action="newEncounterKitPowers">{{localize 'ADND2E.sheet.kits.newEncounter'}}</button>
     </div>
   </section>
   {{/if}}

@@ -506,6 +506,8 @@
         "xp": "XP per level",
         "features": "Granted features",
         "powers": "Powers",
+        "usesColumn": "Uses",
+        "scopeColumn": "Scope",
         "use": "Use",
         "resetPower": "Reset",
         "newDay": "New day",

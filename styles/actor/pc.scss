@@ -226,6 +226,32 @@
   .power-row { margin-left: 14px; }
   .power-row.locked { opacity: 0.65; }
 }
+// Kits panel (#133): one card per kit - name and chips, then a powers table with inline row buttons; the day and
+// encounter resets sit in the panel bar.
+.adnd2e.pc-sheet .kits-panel {
+  .kit-bar { justify-content: space-between; }
+  .bar-actions { display: inline-flex; gap: 6px; }
+  .kit-card { padding: 6px 4px 8px; border-bottom: 1px solid var(--kit-row-rule); }
+  .kit-card:last-child { border-bottom: none; }
+  .kit-card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+  .kit-name { font-size: 15px; font-weight: 700; color: var(--kit-accent-ink, var(--kit-ink)); margin-right: 4px; }
+  .card-controls { margin-left: auto; }
+  .chip {
+    font-size: 11px; padding: 0 6px; border-radius: 9px; border: 1px solid var(--kit-field-border);
+    background: var(--kit-tan, transparent); color: var(--kit-tan-ink, var(--kit-ink));
+  }
+  .chip-class { text-transform: capitalize; font-weight: 700; }
+  .chip-warn { border-color: var(--kit-maroon); color: var(--kit-accent-ink, var(--kit-ink)); font-weight: 700; }
+  .kit-features, .kit-removed { margin: 3px 0 0 2px; }
+  .kit-power-table { margin-top: 6px; margin-left: 0; }
+  .power-head, .kit-power-table .power-row {
+    display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1.2fr) auto;
+    align-items: center; gap: 2px 10px; padding: 2px 4px;
+  }
+  .power-head { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--kit-muted); border-bottom: 1px solid var(--kit-row-rule); }
+  .kit-power-table .power-row { border-bottom: 1px solid var(--kit-row-rule); }
+  .power-actions { display: inline-flex; gap: 4px; justify-content: flex-end; }
+}
 .adnd2e.pc-sheet .power-row {
   display: flex;
   flex-wrap: wrap;
