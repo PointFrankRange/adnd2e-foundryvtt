@@ -1092,6 +1092,7 @@
       "psionicContest": {
         "attackRoll": "Attack",
         "defenseRoll": "Defense",
+        "countsAsOne": "counts as 1 (maintained)",
         "against": "against {target}",
         "undefended": "Undefended",
         "notMade": "Not made (full contact)",

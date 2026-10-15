@@ -549,6 +549,8 @@ describe("rollDefense", () => {
     await rollDefense("mm", { roll: queue(15) });
     const outcome = created[0]!.flags.adnd2e.psionicContest.outcome;
     expect(outcome.steps[0].result).toMatchObject({ winner: "attacker", reason: "higher" });
+    expect(renderContexts[0]!.steps[0].defenseCountsAsOne).toBe(true);
+    expect(renderContexts[0]!.steps[1].defenseCountsAsOne).toBe(false);
   });
 
   it("ignores a message that is missing, not a contest, already resolved or has no defense", async () => {

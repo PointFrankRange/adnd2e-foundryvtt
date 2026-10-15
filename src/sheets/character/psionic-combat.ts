@@ -182,6 +182,8 @@ function buildContestView(c: ContestFlag): Record<string, unknown> {
         notMade: o ? !o.made : c.startingTangents >= FULL_CONTACT,
         defenseRoll: o?.defenseRoll ?? null,
         hasDefenseRoll: o?.defenseRoll !== null && o?.defenseRoll !== undefined,
+        // issue #122: a maintained defense's failed check is shown as a 1 on the card (the raw roll is kept)
+        defenseCountsAsOne: Boolean(c.defense?.maintained) && o?.defenseRoll !== null && o?.defenseRoll !== undefined && !rollPowerCheck(o.defenseRoll, c.defense?.score ?? 0).success,
         winnerKey: o?.result ? `ADND2E.chat.psionicContest.winner.${o.result.winner}` : "",
         reasonKey: o?.result ? `ADND2E.chat.psionicContest.reason.${o.result.reason}` : "",
         resolved: Boolean(o?.result),
