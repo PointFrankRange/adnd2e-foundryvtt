@@ -16,7 +16,6 @@ import { nonweaponSlotCostForClasses } from "../../core/proficiencies/nonweapon"
 import type { RawTraitEffect } from "../../core/skills/traits";
 import type { AbilityKey, Alignment, ArmorType, ClassId, NonweaponGroup, Race, SaveCategory, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
-import { equippedArmorPenalty } from "../../data/derive/character/psionics";
 import { tierForConditionId } from "../../core/magic/channeller-fatigue";
 import { rollAttack, rollSave } from "./combat-rolls";
 import { rollFormAttack } from "../creature/combat-rolls";
@@ -37,11 +36,8 @@ import type {
   WeaponProfView,
 } from "./context-types";
 import { checkPowerDrop, validateItemDrop, type DropCheckInput } from "./drop-rules";
-import { adjustPsp, endPower, payMaintenance, relearnPower, rest as psionicRest, usePower as usePsionicPower } from "./psionic-actions";
-import type { Contact } from "../../core/psionics/combat";
+import { buildPsionicsInput, hasPsionics, psionicActionHandlers } from "./psionic-sheet";
 import { resetWildTest, testWildTalent } from "./psionic-wild";
-import { attackMode, dropDefense, endContactAction, payUpkeep, raiseDefense } from "./psionic-combat";
-import type { PsionicPowerItem } from "./context-types";
 import { rollHitPoints } from "./hp-roll";
 import { resetTurnAttempt, turningPanel, turnUndead } from "./turning-actions";
 import { advanceWeaponMastery, allocateThiefSkillPoint, deallocateThiefSkillPoint, rollNonweaponCheck, rollThiefSkill } from "./proficiency-actions";
@@ -390,17 +386,7 @@ export class Adnd2eCharacterSheet extends Base {
       resetKitPower: Adnd2eCharacterSheet.#onResetKitPower,
       newDayKitPowers: Adnd2eCharacterSheet.#onNewDayKitPowers,
       newEncounterKitPowers: Adnd2eCharacterSheet.#onNewEncounterKitPowers,
-      usePsionicPower: Adnd2eCharacterSheet.#onUsePsionicPower,
-      relearnPsionicPower: Adnd2eCharacterSheet.#onRelearnPsionicPower,
-      psionicRest: Adnd2eCharacterSheet.#onPsionicRest,
-      adjustPsionicPsp: Adnd2eCharacterSheet.#onAdjustPsionicPsp,
-      payPsionicMaintenance: Adnd2eCharacterSheet.#onPayPsionicMaintenance,
-      endPsionicPower: Adnd2eCharacterSheet.#onEndPsionicPower,
-      psionicRaiseDefense: Adnd2eCharacterSheet.#onPsionicRaiseDefense,
-      psionicDropDefense: Adnd2eCharacterSheet.#onPsionicDropDefense,
-      psionicAttack: Adnd2eCharacterSheet.#onPsionicAttack,
-      psionicPayUpkeep: Adnd2eCharacterSheet.#onPsionicPayUpkeep,
-      psionicEndContact: Adnd2eCharacterSheet.#onPsionicEndContact,
+      ...psionicActionHandlers(),
       wildTalentTest: Adnd2eCharacterSheet.#onWildTalentTest,
       wildTalentReset: Adnd2eCharacterSheet.#onWildTalentReset,
       shapechangeShift: Adnd2eCharacterSheet.#onShapechangeShift,
@@ -451,7 +437,7 @@ export class Adnd2eCharacterSheet extends Base {
 
   /** SP15: the Psionics tab and part exist only while the derived psionic level is above 0 (an active psionicist class). */
   #hasPsionics(): boolean {
-    return ((this.document as unknown as { system: { psionics?: { level: number } } }).system.psionics?.level ?? 0) > 0;
+    return hasPsionics(this.document as never);
   }
 
   override _configureRenderParts(options: unknown): Record<string, unknown> {
@@ -487,6 +473,7 @@ export class Adnd2eCharacterSheet extends Base {
     context.notEditable = !this.isEditable;
     context.proseDisabled = !this.isEditable || !this.#unlocked;
     context.pcActions = true;
+    context.psionicsPanel = true;
     context.effectsView = effectsContext(this.document, this.isEditable);
     context.turning = turningPanel(this.document as never);
     const shapechange = shapechangeView(this.document as never);
@@ -637,7 +624,7 @@ export class Adnd2eCharacterSheet extends Base {
 
     const rules = getOptionalRules();
     const wildSys = actor.system as unknown as { wildTalent?: { tested: boolean; found: boolean } };
-    const psionicSys = (actor.system as { psionics: { psp: number | null; max: number; level: number; wild?: boolean; maintained: { powerId: string }[]; activeDefense: string; contacts: Contact[] }; abilities: Record<string, { score: number }> }); 
+    const psionicSys = actor.system as { psionics: { level?: number; wild?: boolean } };
     const actorStatuses = (this.document as unknown as { statuses: ReadonlySet<string> }).statuses;
     const fatigueTier = [...actorStatuses].map(tierForConditionId).find((t) => t !== null) ?? null;
     return {
@@ -681,20 +668,7 @@ export class Adnd2eCharacterSheet extends Base {
       fatigueTier,
       prone: actorStatuses.has("prone"),
       grapple: grappleRecordOf((this.document as unknown as { effects: Iterable<never> }).effects),
-      psionics: this.#hasPsionics()
-        ? {
-            psp: psionicSys.psionics.psp,
-            max: psionicSys.psionics.max,
-            level: psionicSys.psionics.level,
-            wild: psionicSys.psionics.wild ?? false,
-            maintained: psionicSys.psionics.maintained,
-            activeDefense: psionicSys.psionics.activeDefense ?? "",
-            contacts: psionicSys.psionics.contacts ?? [],
-            abilityScores: Object.fromEntries(Object.entries(psionicSys.abilities).map(([k, v]) => [k, v.score])),
-            armorPenalty: equippedArmorPenalty(items, rules.psionicArmorPenalties && !psionicSys.psionics.wild),
-            powers: items.filter((i) => i.type === "power").map((i) => ({ id: i.id, name: i.name, ...(i.system as Omit<PsionicPowerItem, "id" | "name">) })),
-          }
-        : null,
+      psionics: buildPsionicsInput(this.document as never, items as never, rules.psionicArmorPenalties),
       wildTalent: {
         tested: wildSys.wildTalent?.tested ?? false,
         found: wildSys.wildTalent?.found ?? false,
@@ -1409,16 +1383,6 @@ export class Adnd2eCharacterSheet extends Base {
     await resetTurnAttempt(this.document as never);
   }
 
-  static async #onUsePsionicPower(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
-    const { powerId } = target.dataset;
-    if (powerId && this.isEditable) await usePsionicPower(this.document as never, powerId);
-  }
-
-  static async #onRelearnPsionicPower(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
-    const { powerId } = target.dataset;
-    if (powerId && this.isEditable) await relearnPower(this.document as never, powerId);
-  }
-
   static async #onWildTalentTest(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
     const button = target as HTMLButtonElement;
@@ -1436,56 +1400,6 @@ export class Adnd2eCharacterSheet extends Base {
     await resetWildTest(this.document as never);
   }
 
-  static async #onPsionicRest(this: Adnd2eCharacterSheet): Promise<void> {
-    if (!this.isEditable) return;
-    const activity = this.element.querySelector<HTMLSelectElement>("[data-psionic-activity]")?.value ?? "rest";
-    const hours = Math.max(0, Math.floor(Number(this.element.querySelector<HTMLInputElement>("[data-psionic-hours]")?.value) || 0));
-    if (hours > 0) await psionicRest(this.document as never, activity as never, hours);
-  }
-
-  static async #onAdjustPsionicPsp(this: Adnd2eCharacterSheet): Promise<void> {
-    if (!this.isEditable) return;
-    const input = this.element.querySelector<HTMLInputElement>("[data-psionic-adjust]");
-    const delta = Number(input?.value);
-    if (Number.isInteger(delta) && delta !== 0) {
-      await adjustPsp(this.document as never, delta);
-      if (input) input.value = "";
-    }
-  }
-
-  static async #onPayPsionicMaintenance(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
-    // no data-power-id = pay every maintained power
-    if (this.isEditable) await payMaintenance(this.document as never, target.dataset.powerId ?? null);
-  }
-
-  static async #onEndPsionicPower(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
-    const { powerId } = target.dataset;
-    if (powerId && this.isEditable) await endPower(this.document as never, powerId);
-  }
-
-  static async #onPsionicRaiseDefense(this: Adnd2eCharacterSheet): Promise<void> {
-    if (!this.isEditable) return;
-    const id = this.element.querySelector<HTMLSelectElement>("[data-psionic-defense]")?.value;
-    if (id) await raiseDefense(this.document as never, id);
-  }
-
-  static async #onPsionicDropDefense(this: Adnd2eCharacterSheet): Promise<void> {
-    if (this.isEditable) await dropDefense(this.document as never);
-  }
-
-  static async #onPsionicAttack(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
-    const { powerId } = target.dataset;
-    if (powerId && this.isEditable) await attackMode(this.document as never, powerId);
-  }
-
-  static async #onPsionicPayUpkeep(this: Adnd2eCharacterSheet): Promise<void> {
-    if (this.isEditable) await payUpkeep(this.document as never);
-  }
-
-  static async #onPsionicEndContact(this: Adnd2eCharacterSheet, _event: PointerEvent, target: HTMLElement): Promise<void> {
-    const { target: contact } = target.dataset;
-    if (contact && this.isEditable) await endContactAction(this.document as never, contact);
-  }
 }
 
 // Pin the class name so DocumentSheetConfig.registerSheet's id (adnd2e.<name>)

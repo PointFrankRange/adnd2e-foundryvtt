@@ -29,6 +29,8 @@ import { removeTrait } from "../character/trait-actions";
 import { forgetSpell, learnSpell, memorizeSpell, recoverChannellerSp, restSpellcasting } from "../character/spell-actions";
 import { recoverFromFatigue } from "../character/fatigue-actions";
 import { promptRecoverChannelling } from "../character/recover-dialog";
+import { buildPsionicsInput, hasPsionics, psionicActionHandlers } from "../character/psionic-sheet";
+import { checkPowerDrop } from "../character/drop-rules";
 import { bindSheetKit, clearSheetKit } from "../kit-dom";
 import { toggleFavoriteFlag } from "../kit-actions";
 import { enrichItemDescriptions } from "../item-descriptions";
@@ -87,6 +89,8 @@ const Base = HandlebarsApplicationMixin(ActorSheetV2 as never) as unknown as new
   ): Promise<Record<string, unknown>>;
   _onRender(context: unknown, options: unknown): Promise<void>;
   _onDropItem(event: DragEvent, item: Item.Implementation): Promise<unknown>;
+  _configureRenderParts(options: unknown): Record<string, unknown>;
+  _getTabsConfig(group: string): { tabs: { id: string }[] } | null;
   // Not awaited by the close process (see Adnd2eCharacterSheet's own Base for
   // the client/applications/api/application.mjs citation).
   _onClose(options: unknown): void;
@@ -139,6 +143,8 @@ export class Adnd2eNpcSheet extends Base {
       advanceWeaponMastery: Adnd2eNpcSheet.#onAdvanceWeaponMastery,
       rollNonweaponCheck: Adnd2eNpcSheet.#onRollNonweaponCheck,
       rollThiefSkill: Adnd2eNpcSheet.#onRollThiefSkill,
+      // issue #177: the Psionics tab's actions (the same handlers as the PC sheet; wild-talent actions stay PC-only)
+      ...psionicActionHandlers(),
     },
   };
 
@@ -154,6 +160,7 @@ export class Adnd2eNpcSheet extends Base {
     main: { template: TEMPLATE_PATH("actor/npc", "main.hbs"), scrollable: [""] },
     inventory: { template: TEMPLATE_PATH("actor/pc", "inventory.hbs"), scrollable: [""] },
     spells: { template: TEMPLATE_PATH("actor/pc", "spells.hbs"), scrollable: [""] },
+    psionics: { template: TEMPLATE_PATH("actor/pc", "psionics.hbs"), scrollable: [""] },
     effects: { template: TEMPLATE_PATH("actor/shared", "effects.hbs"), scrollable: [""] },
     journal: { template: TEMPLATE_PATH("actor/npc", "journal.hbs"), scrollable: [""] },
   };
@@ -166,6 +173,7 @@ export class Adnd2eNpcSheet extends Base {
         { id: "main", icon: "fa-solid fa-user" },
         { id: "inventory", icon: "fa-solid fa-box-open" },
         { id: "spells", icon: "fa-solid fa-wand-sparkles" },
+        { id: "psionics", icon: "fa-solid fa-brain" },
         { id: "effects", icon: "fa-solid fa-wand-magic-sparkles" },
         { id: "journal", icon: "fa-solid fa-book" },
       ],
@@ -179,7 +187,27 @@ export class Adnd2eNpcSheet extends Base {
   /** enriched row-summary descriptions, rebuilt each render (#111) */
   #descriptions: ReadonlyMap<string, string> = new Map();
 
+  /** issue #177: the Psionics tab and part exist only while the derived psionic level is above 0. */
+  #hasPsionics(): boolean {
+    return hasPsionics(this.document as never);
+  }
+
+  override _configureRenderParts(options: unknown): Record<string, unknown> {
+    const parts = super._configureRenderParts(options);
+    if (!this.#hasPsionics()) delete parts.psionics;
+    return parts;
+  }
+
+  override _getTabsConfig(group: string): { tabs: { id: string }[] } | null {
+    const cfg = super._getTabsConfig(group);
+    if (!cfg || this.#hasPsionics()) return cfg;
+    return { ...cfg, tabs: cfg.tabs.filter((t) => t.id !== "psionics") };
+  }
+
   override async _prepareContext(options: unknown): Promise<Record<string, unknown>> {
+    // the Psionics tab vanishes when the psionicist class is removed: do not leave it as the active tab
+    const groups = (this as unknown as { tabGroups?: Record<string, string> }).tabGroups;
+    if (groups && groups.primary === "psionics" && !this.#hasPsionics()) groups.primary = "main";
     const context = await super._prepareContext(options);
     this.#descriptions = await enrichItemDescriptions(
       [...(this.document as unknown as { items: Iterable<{ id: string; type: string; isOwner?: boolean; system: unknown }> }).items].filter(
@@ -191,6 +219,8 @@ export class Adnd2eNpcSheet extends Base {
     context.notEditable = !this.isEditable;
     context.effectsView = effectsContext(this.document, this.isEditable);
     context.proseDisabled = !this.isEditable || !this.#unlocked;
+    // issue #177: the Psionics panel gate (separate from pcActions, which stays unset on this sheet)
+    context.psionicsPanel = true;
     // Deliberately NOT set here: `context.pcActions`. Its absence keeps every
     // PC-only action (awardXp, toggleDualClass, seedSubAbilities, the thief
     // allocate/deallocate buttons, the traits panel) hidden on this sheet —
@@ -327,6 +357,7 @@ export class Adnd2eNpcSheet extends Base {
         editable: this.isEditable,
       },
       optionalRules: getOptionalRules(),
+      psionics: buildPsionicsInput(this.document as never, items as never, getOptionalRules().psionicArmorPenalties),
       castingStatus: readCastingStatus(this.document as never),
       fatigueTier,
       unlocked: this.#unlocked,
@@ -368,11 +399,7 @@ export class Adnd2eNpcSheet extends Base {
       ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.drop.stylesPcOnly"));
       return null;
     }
-    // SP15: this sheet has no Psionics tab, so a power would be learned invisibly
-    if (dropped.type === "power") {
-      ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.psionics.pcOnly"));
-      return null;
-    }
+    // issue #177: powers are learned here through the same rules as the PC sheet (the verdict is applied below, once isNewDrop is known)
 
     let dropSlotCost: number | undefined;
     if (dropped.type === "weaponProficiency") {
@@ -385,6 +412,13 @@ export class Adnd2eNpcSheet extends Base {
     const isNewDrop =
       (item as unknown as { parent?: { uuid?: string } }).parent?.uuid !==
       (this.document as unknown as { uuid: string }).uuid;
+    if (dropped.type === "power" && isNewDrop) {
+      const verdict = checkPowerDrop(this.document as never, item as never, (game as unknown as { user: { isGM: boolean } }).user.isGM);
+      if (!verdict.ok) {
+        ui.notifications?.warn(game.i18n!.localize(verdict.messageKey));
+        return null;
+      }
+    }
     warnSubraceRange(this.document as never, item as never, isNewDrop);
     const result = await super._onDropItem(event, item);
     if (
@@ -425,6 +459,8 @@ export class Adnd2eNpcSheet extends Base {
         void this.#onItemFieldChange(el);
       });
     }
+    // v14 never removes a part that is no longer configured: drop a stale Psionics section
+    if (!this.#hasPsionics()) this.element.querySelector('[data-application-part="psionics"]')?.remove();
     bindSheetKit(this.element, this.#sheetKitKey);
   }
 
