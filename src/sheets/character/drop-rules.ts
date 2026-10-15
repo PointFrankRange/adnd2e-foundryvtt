@@ -147,11 +147,11 @@ export function checkPowerDrop(actor: PowerDropActor, item: { type: string; name
   if (item.type !== "power") return { ok: true };
   const level = actor.system.psionics.level;
   if (level <= 0) return { ok: false, messageKey: "ADND2E.sheet.psionics.noClass" };
-  // SP15 Plan D: a wild talent only has what its table results gave it (the GM may grant a power by hand, outside the Table 4 budget)
-  if (actor.system.psionics.wild) return isGM ? { ok: true } : { ok: false, messageKey: "ADND2E.sheet.psionics.wildNoLearn" };
   const owned = [...actor.items].filter((i) => i.type === "power");
   const name = (item.name ?? "").trim().toLowerCase();
   if (name !== "" && owned.some((i) => (i.name ?? "").trim().toLowerCase() === name)) return { ok: false, messageKey: "ADND2E.sheet.psionics.alreadyKnown" };
+  // SP15 Plan D: a wild talent only has what its table results gave it (the GM may grant a power by hand, outside the Table 4 budget; issue #125: never a duplicate)
+  if (actor.system.psionics.wild) return isGM ? { ok: true } : { ok: false, messageKey: "ADND2E.sheet.psionics.wildNoLearn" };
   const known: KnownPower[] = owned
     .map((i) => ({ id: i.id, name: i.name ?? "", discipline: i.system.discipline as Discipline, kind: i.system.kind as PowerKind, scoreBonus: Number(i.system.scoreBonus ?? 0) }));
   const { prerequisites, minLevel } = item.system;

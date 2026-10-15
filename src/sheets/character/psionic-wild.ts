@@ -134,13 +134,16 @@ async function defaultChooseDialog(options: ChoiceOption[]): Promise<string | nu
 
 const itemsOfType = (actor: WildActor, type: string): PsionicItem[] => [...actor.items].filter((i) => i.type === type);
 
-/** The character's highest class level among the classes in play (0 with no class item); a dormant dual-class class does not count until it is surpassed. */
-export function highestClassLevel(actor: WildActor): number {
+/** The class items in play: a dormant dual-class class does not count until it is surpassed. */
+function classesInPlay(actor: WildActor): PsionicItem[] {
   const dual = actor.system.multiclass?.dualClass;
   const dormant = dual && dual.dormantChassisId !== null && !dual.surpassed ? dual.dormantChassisId : null;
-  return itemsOfType(actor, "class")
-    .filter((c) => dormant === null || String(c.system.chassisId) !== dormant)
-    .reduce((max, c) => Math.max(max, Number(c.system.level ?? 0)), 0);
+  return itemsOfType(actor, "class").filter((c) => dormant === null || String(c.system.chassisId) !== dormant);
+}
+
+/** The character's highest class level among the classes in play (0 with no class item). */
+export function highestClassLevel(actor: WildActor): number {
+  return classesInPlay(actor).reduce((max, c) => Math.max(max, Number(c.system.level ?? 0)), 0);
 }
 
 /** The power names Table 12 itself lists: "choose any <discipline> devotion above" offers only these. */
@@ -300,7 +303,7 @@ async function runWildTest(actor: WildActor, opts: { surgeon: boolean }, d: Wild
   const level = highestClassLevel(actor);
   const raceItem = itemsOfType(actor, "race")[0];
   const halved = isHalved({
-    classIds: itemsOfType(actor, "class").map((c) => String(c.system.chassisId)),
+    classIds: classesInPlay(actor).map((c) => String(c.system.chassisId)),
     raceId: raceItem ? String(raceItem.system.raceId) : "human",
   });
   const scores = { wis: actor.system.abilities.wis?.score ?? 0, con: actor.system.abilities.con?.score ?? 0, int: actor.system.abilities.int?.score ?? 0, level };

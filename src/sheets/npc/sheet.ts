@@ -2,7 +2,7 @@ import { createEffect, deleteEffect, editEffect, effectsContext, openEffectSourc
 import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
 import { abilityScoresOf, actorLevelRulesFor } from "../../data/derive/character/kits";
 import type { ManeuverId } from "../../core/combat/maneuvers";
-import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
+import { nonweaponSlotCostForClasses } from "../../core/proficiencies/nonweapon";
 import type { NonweaponGroup, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
 import { tierForConditionId } from "../../core/magic/channeller-fatigue";
@@ -378,10 +378,8 @@ export class Adnd2eNpcSheet extends Base {
     if (dropped.type === "weaponProficiency") {
       dropSlotCost = 1;
     } else if (dropped.type === "nonweaponProficiency") {
-      const firstClassId = [...actor.items].find((i) => i.type === "class")?.system.chassisId ?? null;
-      dropSlotCost = firstClassId
-        ? nonweaponSlotCost(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", firstClassId as never, dropped.system.alsoGroups ?? [])
-        : (dropped.system.slotCost ?? 1);
+      const classIds = [...actor.items].filter((i) => i.type === "class").flatMap((i) => (i.system.chassisId ? [i.system.chassisId] : []));
+      dropSlotCost = nonweaponSlotCostForClasses(dropped.system.slotCost ?? 1, dropped.system.group ?? "general", classIds as never[], dropped.system.alsoGroups ?? []);
     }
 
     const isNewDrop =

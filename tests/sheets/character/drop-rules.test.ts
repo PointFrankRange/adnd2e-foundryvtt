@@ -229,6 +229,10 @@ describe("checkPowerDrop (SP15)", () => {
     expect(checkPowerDrop(wild, dev("w"))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.wildNoLearn" });
     expect(checkPowerDrop(wild, dev("w"), true)).toEqual({ ok: true });
   });
+  it("issue #125: a GM dropping a power a wild talent already has is refused (alreadyKnown)", () => {
+    const wild = { system: { psionics: { level: 3, wild: true } }, items: [dev("w")] as never };
+    expect(checkPowerDrop(wild, dev("w"), true)).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.alreadyKnown" });
+  });
   it("refuses with the canLearn reason mapped to a lang key", () => {
     const a = psi(1, [dev("a"), dev("b"), dev("c")]); // 3 devotions = the level 1 total
     expect(checkPowerDrop(a, dev("d"))).toEqual({ ok: false, messageKey: "ADND2E.sheet.psionics.learn.devotion-limit" });

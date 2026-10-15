@@ -34,6 +34,21 @@ export function nonweaponSlotCost(
   return inGroup ? baseCost : baseCost + 1;
 }
 
+/**
+ * The cost for a multi-classed (or dual-classed) character: the cheapest price
+ * across its classes, so a proficiency in ANY class's group costs the base
+ * (PHB p.54; issue #125 - the price used to follow the first class only).
+ */
+export function nonweaponSlotCostForClasses(
+  baseCost: number,
+  proficiencyGroup: NonweaponGroup,
+  classIds: readonly ClassId[],
+  alsoGroups: readonly NonweaponGroup[] = [],
+): number {
+  if (classIds.length === 0) return baseCost;
+  return Math.min(...classIds.map((id) => nonweaponSlotCost(baseCost, proficiencyGroup, id, alsoGroups)));
+}
+
 export interface NonweaponCheckInput {
   /** which ability governs this proficiency (PHB Table 37) */
   ability: AbilityKey;
