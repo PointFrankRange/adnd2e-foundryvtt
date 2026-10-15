@@ -47,3 +47,19 @@ describe("deriveAc — situational modifier", () => {
     expect(deriveAc({ equippedArmor: null, equippedShield: null, dexDefensiveAdj: 0 }).normal).toBe(10);
   });
 });
+
+describe("deriveAc - All-Around Sight (SP18)", () => {
+  const input = {
+    equippedArmor: { baseArmorAc: 5, magicBonus: 0 },
+    equippedShield: { shieldBonus: 1, magicBonus: 0 },
+    dexDefensiveAdj: -1,
+  };
+  it("rear-attack AC equals the normal AC when the character can never be struck from behind", () => {
+    const ac = deriveAc({ ...input, allAroundSight: true });
+    expect(ac.rearAttack).toBe(ac.normal);
+    expect(ac.rearAttack).toBe(3);
+  });
+  it("is unchanged without it", () => {
+    expect(deriveAc(input).rearAttack).toBe(5);
+  });
+});

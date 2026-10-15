@@ -188,6 +188,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
     naturalAc: snapshot.naturalAc ?? null,
     // SP18 Plan A: the active martial arts style's AC modifier (rule-gated)
     situationalModifier: options.advancedMartialArts ? (snapshot.martialArtsAcMod ?? 0) + (snapshot.ironskinAcMod ?? 0) : 0,
+    allAroundSight: options.advancedMartialArts ? (snapshot.allAroundSight ?? false) : false,
     // PHB p.86 — no Dexterity AC bonus while casting (casting-time rule only)
     dexDefensiveAdj: acDexAdjWhileCasting(
       abilities.dex.defensiveAdj,

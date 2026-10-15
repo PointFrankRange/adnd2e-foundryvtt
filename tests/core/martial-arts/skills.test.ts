@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  blindFightingPenalty, blindFightingTotal, conditionModifiers, ironskinAcMod, knownManeuverIds, levitationInfo, resolveLeap, resolveSpeed,
+  blindFightingPenalty, blindFightingTotal, conditionModifiers, ironskinAcMod, knownManeuverIds, mentalResistanceSaveBonus, levitationInfo, resolveLeap, resolveSpeed,
 } from "../../../src/core/martial-arts";
 
 describe("resolveLeap", () => {
@@ -94,5 +94,12 @@ describe("conditionModifiers", () => {
     expect(r.total).toBe(-2);
     expect(r.rows.map((x) => x.labelKey)).toEqual([`${P}fatigue`, `${P}entangled`, `${P}frightened`, `${P}heldTarget`]);
     expect(r.rows[3]!.amount).toBe(4);
+  });
+});
+
+describe("Mental Resistance", () => {
+  it("is +2 on mental saves only while known", () => {
+    expect(mentalResistanceSaveBonus(true)).toBe(2);
+    expect(mentalResistanceSaveBonus(false)).toBe(0);
   });
 });

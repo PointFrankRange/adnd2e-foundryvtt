@@ -53,6 +53,11 @@ export function ironskinAcMod(known: boolean, wearingBodyArmor: boolean): number
   return known && !wearingBodyArmor ? -2 : 0;
 }
 
+/** Mental Resistance: +2 on saving throws against mental attacks (charm, illusion, hold) while the ability is known. */
+export function mentalResistanceSaveBonus(known: boolean): number {
+  return known ? 2 : 0;
+}
+
 /** Blind Fighting: a darkness/blinded/invisible-opponent penalty never exceeds -1. */
 export function blindFightingPenalty(penalty: number): number {
   return Math.max(penalty, -1);

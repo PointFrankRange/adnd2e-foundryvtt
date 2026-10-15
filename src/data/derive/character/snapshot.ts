@@ -94,4 +94,6 @@ export interface ActorSnapshot {
   martialArtsAcMod?: number;
   /** SP18 Plan B3: Ironskin's AC modifier (-2 with the maneuver known and no body armor; absent = none) - applied only while `advancedMartialArts` is on */
   ironskinAcMod?: number;
+  /** SP18: All-Around Sight (mental:2) is known on any owned style */
+  allAroundSight?: boolean;
 }

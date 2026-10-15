@@ -11,6 +11,8 @@ export interface AcInput {
   naturalAc?: number | null;
   /** SP18: added directly to AC (negative improves) - the active martial arts style's modifier */
   situationalModifier?: number;
+  /** SP18: All-Around Sight - the character can never be struck from behind, so the rear-attack AC is the normal AC */
+  allAroundSight?: boolean;
 }
 
 /**
@@ -35,10 +37,11 @@ export function deriveAc(input: AcInput): {
   const shieldMagic = input.equippedShield?.magicBonus ?? 0;
   const common = { baseArmorAc, shieldBonus, dexDefensiveAdj: input.dexDefensiveAdj, situationalModifier: input.situationalModifier ?? 0 };
   const withShield = armorMagic + shieldMagic;
+  const normal = armorClass({ ...common, magicBonus: withShield }).value;
   return {
-    normal: armorClass({ ...common, magicBonus: withShield }).value,
+    normal,
     shieldless: armorClass({ ...common, magicBonus: armorMagic, denyShield: true }).value,
     surprised: armorClass({ ...common, magicBonus: withShield, denyDexBonus: true }).value,
-    rearAttack: armorClass({ ...common, magicBonus: armorMagic, denyShield: true, denyDexBonus: true }).value,
+    rearAttack: input.allAroundSight ? normal : armorClass({ ...common, magicBonus: armorMagic, denyShield: true, denyDexBonus: true }).value,
   };
 }
