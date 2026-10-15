@@ -61,6 +61,9 @@ describe("unlearnGroupUpdate", () => {
     expect(unlearnGroupUpdate({ known: [{ id: "staves", level: 2 }], groupId: "staves", slotsInvested: 3 })).toEqual({ knownWeaponGroups: [], slotsInvested: 2 });
     expect(unlearnGroupUpdate({ known: [{ id: "staves", level: 2 }], groupId: "staves", slotsInvested: 1 })).toEqual({ knownWeaponGroups: [], slotsInvested: 1 });
   });
+  it("keeps the other known groups", () => {
+    expect(unlearnGroupUpdate({ known: [{ id: "staves", level: 2 }, { id: "axes", level: 3 }], groupId: "staves", slotsInvested: 3 })).toEqual({ knownWeaponGroups: [{ id: "axes", level: 3 }], slotsInvested: 2 });
+  });
   it("returns null for a group that is not known", () => {
     expect(unlearnGroupUpdate({ known: [], groupId: "staves", slotsInvested: 2 })).toBeNull();
   });
