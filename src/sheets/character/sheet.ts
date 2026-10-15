@@ -16,6 +16,7 @@ import { nonweaponSlotCost } from "../../core/proficiencies/nonweapon";
 import type { RawTraitEffect } from "../../core/skills/traits";
 import type { AbilityKey, Alignment, ArmorType, ClassId, NonweaponGroup, Race, SaveCategory, ThiefSkill } from "../../core/types";
 import { getOptionalRules } from "../../settings";
+import { equippedArmorPenalty } from "../../data/derive/character/psionics";
 import { tierForConditionId } from "../../core/magic/channeller-fatigue";
 import { rollAttack, rollSave } from "./combat-rolls";
 import { rollFormAttack } from "../creature/combat-rolls";
@@ -594,7 +595,7 @@ export class Adnd2eCharacterSheet extends Base {
     const featureItems: FeatureItemView[] = [];
     const traitItems: TraitItemView[] = [];
 
-    const equipmentRules = actorEquipmentRules(items);
+    const equipmentRules = actorEquipmentRules(items, { psionicArmorPenalties: getOptionalRules().psionicArmorPenalties });
     for (const it of items) {
       switch (it.type) {
         case "class":
@@ -690,6 +691,7 @@ export class Adnd2eCharacterSheet extends Base {
             activeDefense: psionicSys.psionics.activeDefense ?? "",
             contacts: psionicSys.psionics.contacts ?? [],
             abilityScores: Object.fromEntries(Object.entries(psionicSys.abilities).map(([k, v]) => [k, v.score])),
+            armorPenalty: equippedArmorPenalty(items, rules.psionicArmorPenalties && !psionicSys.psionics.wild),
             powers: items.filter((i) => i.type === "power").map((i) => ({ id: i.id, name: i.name, ...(i.system as Omit<PsionicPowerItem, "id" | "name">) })),
           }
         : null,

@@ -3396,6 +3396,18 @@ describe("buildPsionicsView (SP15 Plan A)", () => {
     ...over,
   });
 
+  it("issue #118: an armor penalty lowers every score and is reported; none reports null", () => {
+    const plain = buildPsionicsView(base())!;
+    expect(plain.armorPenalty).toBeNull();
+    const worn = buildPsionicsView(base({ armorPenalty: { value: -3, armor: "Plate" } }))!;
+    expect(worn.armorPenalty).toEqual({ value: -3, armor: "Plate" });
+    const score = (v: typeof plain, id: string) => [...v.groups.flatMap((g) => g.powers), ...v.defense].find((p) => p.id === id)!.score;
+    expect(score(worn, "a")).toBe(score(plain, "a") - 3);
+    expect(score(worn, "c")).toBe(score(plain, "c") - 3);
+    expect(buildPsionicsView(base({ armorPenalty: { value: 0, armor: null } }))!.armorPenalty).toBeNull();
+    expect(buildPsionicsView(base({ armorPenalty: { value: -1, armor: null } }))!.armorPenalty).toEqual({ value: -1, armor: "" });
+  });
+
   it("is null without a psionicist (null or absent input)", () => {
     expect(buildPsionicsView(null)).toBeNull();
     expect(buildPsionicsView(undefined)).toBeNull();

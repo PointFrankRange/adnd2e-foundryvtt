@@ -69,6 +69,8 @@ export interface OptionalRules {
   primeRequisiteBonusLevels: boolean;
   /** Sub-project 15 Plan D: characters without the Psionicist class can test once for a wild psionic talent (Complete Psionics Handbook). */
   wildTalents: boolean;
+  /** Issue #118: PHBR5 Table 9 - psionicists may wear any armor, but metal armor lowers every power score. */
+  psionicArmorPenalties: boolean;
   /** SP7e: Combat & Tactics wrestling replaces the simplified grapple maneuver (requires combatAndTacticsEnabled). */
   wrestling: boolean;
   /** SP18 Plan A: PHBR15 Advanced Martial Arts — martial arts styles, the unarmed attack and the style AC modifier. */
@@ -105,6 +107,7 @@ export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
   exceedLevelLimits: 0,
   primeRequisiteBonusLevels: false,
   wildTalents: false,
+  psionicArmorPenalties: false,
   wrestling: false,
   advancedMartialArts: false,
 };

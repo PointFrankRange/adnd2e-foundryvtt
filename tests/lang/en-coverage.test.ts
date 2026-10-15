@@ -871,6 +871,8 @@ describe("lang/en.json — SP13 level-limit settings and sheet keys", () => {
       "ADND2E.settings.enforceRaceClassRestrictions.hint",
       "ADND2E.settings.primeRequisiteXpBonus.name",
       "ADND2E.settings.primeRequisiteXpBonus.hint",
+      "ADND2E.settings.psionicArmorPenalties.name",
+      "ADND2E.settings.psionicArmorPenalties.hint",
       "ADND2E.settings.wildTalents.name",
       "ADND2E.settings.wildTalents.hint",
       "ADND2E.settings.advancedMartialArts.name",

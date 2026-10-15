@@ -1,5 +1,7 @@
 import { powerProgression, psionicStrength, type PowerProgressionRow } from "../../../core/psionics";
 import { wildPsp } from "../../../core/psionics/wild";
+import { worstArmorPenalty } from "../../../core/psionics/armor";
+import type { ArmorType } from "../../../core/types";
 
 export interface DerivedPsionics {
   max: number;
@@ -23,4 +25,15 @@ export function derivePsionics(input: {
   if (!input.wild?.found || input.classes.length === 0) return null;
   const level = Math.max(...input.classes.map((c) => c.level));
   return { max: wildPsp(input.wild.powers, Math.max(0, level - input.wild.levelAtDiscovery)), level, row: powerProgression(level), wild: true };
+}
+
+/** Issue #118: the Table 9 power-score reduction from the worn body armor (0 when the rule is off); `armor` names the offender. */
+export function equippedArmorPenalty(
+  items: Iterable<{ name?: string; type: string; system: unknown }>,
+  ruleOn: boolean,
+): { value: number; armor: string | null } {
+  if (!ruleOn) return { value: 0, armor: null };
+  const worn = [...items].filter((i) => i.type === "armor" && (i.system as { equipped?: boolean }).equipped);
+  const { penalty, armor } = worstArmorPenalty(worn.map((i) => i.system as { armorType: ArmorType; isShield: boolean }));
+  return { value: penalty, armor: armor === null ? null : (worn[armor].name ?? "") };
 }

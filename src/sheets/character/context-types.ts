@@ -127,6 +127,8 @@ export interface PsionicsInput {
   contacts: Contact[];
   /** prepared ability scores keyed str..cha */
   abilityScores: Record<string, number>;
+  /** Issue #118: the Table 9 reduction (<= 0) applied to every power score; absent = none */
+  armorPenalty?: { value: number; armor: string | null };
   powers: PsionicPowerItem[];
 }
 
@@ -157,6 +159,8 @@ export interface PsionicsView {
   wild: boolean;
   row: PowerProgressionRow;
   primary: Discipline | null;
+  /** Issue #118: shown when worn armor lowers the power scores (value < 0) */
+  armorPenalty: { value: number; armor: string } | null;
   activities: RecoveryActivity[];
   maintained: { powerId: string; name: string; cost: number; unit: string }[];
   groups: { discipline: Discipline; powers: PsionicPowerRow[] }[];

@@ -10,10 +10,13 @@ import type { PsionicActor } from "../../../src/sheets/character/psionic-actions
 let warn: ReturnType<typeof vi.fn>;
 let info: ReturnType<typeof vi.fn>;
 
+let armorRule = false;
+
 beforeEach(() => {
+  armorRule = false;
   warn = vi.fn();
   info = vi.fn();
-  (globalThis as Record<string, unknown>).game = { i18n: { localize: (k: string) => k, format: (k: string, d: Record<string, string>) => `${k}:${JSON.stringify(d)}` } };
+  (globalThis as Record<string, unknown>).game = { i18n: { localize: (k: string) => k, format: (k: string, d: Record<string, string>) => `${k}:${JSON.stringify(d)}` }, settings: { get: (_s: string, key: string) => (key === "psionicArmorPenalties" ? armorRule : false) } };
   (globalThis as Record<string, unknown>).ui = { notifications: { warn, info } };
 });
 
@@ -198,6 +201,19 @@ describe("attackMode - immediate contests (real powers)", () => {
     expect(flag.steps).toEqual([{ roll: 10, score: 15 }, { roll: 12, score: 15 }]);
     expect(flag.outcome.tangentsGained).toBe(2);
     expect(renderContexts[0]).toMatchObject({ pending: false, undefended: true, modifierText: "", showRecord: false, tangentText: "ADND2E.sheet.psionics.combat.tangents:{\"n\":\"2\"}" });
+  });
+
+  it("issue #118: the attacker's plate (-3) and the defender's chain (-2) lower both scores when the rule is on", async () => {
+    armorRule = true;
+    const worn = (armorType: string) => ({ name: armorType, type: "armor", system: { armorType, equipped: true, isShield: false } });
+    const { a } = attacker();
+    (a.items as unknown as unknown[]).push(worn("plate-mail"));
+    const t = target({ defense: mindBlank });
+    (t.actor.items as unknown[]).push(worn("chain-mail"));
+    await attackMode(a, "mt", { roll: queue(3, 18, 4), targets: () => [t.like], hasOnlineOwner: () => false, userId: "u-att" });
+    const flag = created[0]!.flags.adnd2e.psionicContest;
+    expect(flag.steps).toEqual([{ roll: 3, score: 17 }, { roll: 18, score: 17 }]);
+    expect(flag.defense).toEqual({ name: "Mind Blank", score: 3 });
   });
 
   it("applies the Table 14 modifier to the attack score against a Mind Blank target (Wis 12 -> defense score 5; Mind Thrust +5 -> 20)", async () => {

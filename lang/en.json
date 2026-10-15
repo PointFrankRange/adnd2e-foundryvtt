@@ -350,6 +350,7 @@
       },
       "psionics": {
         "title": "Psionics",
+        "armorPenalty": "Armor penalty to all power scores",
         "wildTag": "Wild talent",
         "psp": "PSPs",
         "rest": "Rest",
@@ -1441,6 +1442,10 @@
       "wildTalents": {
         "name": "Wild talents",
         "hint": "Characters without the Psionicist class can test once for a wild psionic talent (Complete Psionics Handbook)."
+      },
+      "psionicArmorPenalties": {
+        "name": "Psionicist armor penalties",
+        "hint": "Psionicists may wear any armor, but metal armor lowers every psionic power score: -1 brigandine/ring/scale/splint, -2 chain/banded, -3 plate, -5 field plate, -7 full plate (Complete Psionics Handbook, Table 9)."
       },
       "primeRequisiteBonusLevels": {
         "name": "Bonus levels for high prime requisites",

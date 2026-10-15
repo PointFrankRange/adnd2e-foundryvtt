@@ -13,6 +13,18 @@ const kit = (chassisId: string, armor: { mode: string; names: string[] }, weapon
 const armor = (armorType: string, isShield = false) => ({ type: "armor", system: { armorType, isShield } });
 const weapon = (name: string, damageType: string | null = null, baseWeaponName = "") => ({ type: "weapon", name, system: { baseWeaponName, damageType } });
 
+describe("psionicArmorPenalties lifts the psionicist armor restriction (issue #118)", () => {
+  it("restricts armor by default and permits any armor with the rule on", () => {
+    expect(itemNotPermitted(actorEquipmentRules([cls("psionicist")]), armor("plate-mail"))).toBe(true);
+    const on = actorEquipmentRules([cls("psionicist")], { psionicArmorPenalties: true });
+    expect(itemNotPermitted(on, armor("plate-mail"))).toBe(false);
+  });
+  it("leaves other classes alone with the rule on", () => {
+    const on = actorEquipmentRules([cls("mage")], { psionicArmorPenalties: true });
+    expect(itemNotPermitted(on, armor("leather"))).toBe(true);
+  });
+});
+
 describe("actorEquipmentRules / itemNotPermitted", () => {
   it("a classless actor has no restriction", () => {
     const rules = actorEquipmentRules([]);
