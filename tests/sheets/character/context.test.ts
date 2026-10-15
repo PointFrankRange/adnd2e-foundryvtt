@@ -646,22 +646,9 @@ describe("buildCharacterSheetContext — inventory / combat / skills", () => {
         grandMasteryExtraAttack: false,
         specialistAttackRate: null,
       },
-      {
-        id: "w2",
-        name: "Dagger",
-        equipped: false,
-        toHitNote: "",
-        damageNote: "1d4",
-        speedFactor: 2,
-        range: "10/20/30",
-        canBackstab: false,
-        favorite: false,
-        ammoType: null,
-        ammoOptions: [],
-        grandMasteryExtraAttack: false,
-        specialistAttackRate: null,
-      },
     ]);
+    // the unequipped Dagger is carried but not listed on Main
+    expect(c.combat.weapons.some((w) => w.id === "w2")).toBe(false);
   });
 
   it("a bow's ammo select lists matching, in-stock ammo and defaults to the first match", () => {

@@ -725,6 +725,7 @@
         "grappleWith": "In a grapple with {name}",
         "release": "Release",
         "noWeapons": "No weapons carried.",
+        "noWeaponsEquipped": "No weapons equipped.",
         "noArmor": "No armor carried.",
         "noArmorEquipped": "No armor equipped.",
         "rollAttack": "Attack",
