@@ -147,6 +147,7 @@ beforeEach(() => {
   isGM = false;
   const g = (globalThis as Record<string, any>).game;
   g.user = { id: "u-att", get isGM() { return isGM; } };
+  setUsers([]);
   Object.defineProperty(g, "messages", { configurable: true, get: () => Object.assign(messages.slice(), { get: (id: string) => messages.find((m) => m.id === id) }) });
   (globalThis as Record<string, unknown>).ChatMessage = {
     create: vi.fn(async (d: never) => void created.push(d)),
@@ -157,6 +158,11 @@ beforeEach(() => {
     applications: { handlebars: { renderTemplate: async (_p: string, ctx: Record<string, any>) => (renderContexts.push(ctx), "<card/>") } },
   };
 });
+
+/** game.users as an iterable with Foundry's Collection#get. */
+function setUsers(users: { id: string; isGM: boolean; active: boolean }[]): void {
+  (globalThis as Record<string, any>).game.users = Object.assign([...users], { get: (id: string) => users.find((u) => u.id === id) });
+}
 
 const queue = (...rolls: number[]) => {
   const q = [...rolls];
@@ -526,6 +532,34 @@ describe("rollDefense", () => {
     expect(warn).toHaveBeenCalledWith("ADND2E.chat.psionicContest.alreadyAnswered");
   });
 
+  it("issue #178: the attacker may roll when nobody who could answer is online; owners and the GM may always roll", async () => {
+    const contest = pendingMessage("mo", "cidO");
+    (contest as Record<string, unknown>).answerUserIds = ["gm", "p1"];
+    defender(false);
+    setUsers([{ id: "u-att", isGM: false, active: true }, { id: "gm", isGM: true, active: false }, { id: "p1", isGM: false, active: true }]);
+    await rollDefense("mo", { roll: queue(4) });
+    expect(created).toEqual([]); // the defender's owner is online: the attacker cannot answer
+    expect(warn).toHaveBeenCalledWith("ADND2E.chat.psionicContest.notYourDefense");
+    setUsers([{ id: "u-att", isGM: false, active: true }, { id: "gm", isGM: true, active: false }, { id: "p1", isGM: false, active: false }]);
+    await rollDefense("mo", { roll: queue(4) });
+    expect(created).toHaveLength(1);
+    expect(created[0]!.flags.adnd2e.psionicContest.state).toBe("resolved");
+  });
+
+  it("issue #178: another non-owner user cannot use the fallback, nor can the attacker on a card with no answerer list", async () => {
+    const contest = pendingMessage("mn", "cidN");
+    (contest as Record<string, unknown>).answerUserIds = ["gm"];
+    defender(false);
+    setUsers([{ id: "gm", isGM: true, active: false }]);
+    (globalThis as Record<string, any>).game.user.id = "someone-else";
+    await rollDefense("mn", { roll: queue(4) });
+    expect(created).toEqual([]);
+    (globalThis as Record<string, any>).game.user.id = "u-att";
+    delete (contest as Record<string, unknown>).answerUserIds;
+    await rollDefense("mn", { roll: queue(4) });
+    expect(created).toEqual([]);
+  });
+
   it("issue #122: the resolved card is posted under the contest id with keepId; a server rejection reads as already answered", async () => {
     pendingMessage();
     defender(true);
@@ -591,6 +625,24 @@ describe("rollDefense", () => {
     (globalThis as Record<string, unknown>).Roll = class { dice = [{ total: 3 }]; total = 0; async evaluate() { return this; } };
     await rollDefense("m1");
     expect(created[0]!.flags.adnd2e.psionicContest.outcome.steps[0].defenseRoll).toBe(3);
+  });
+});
+
+describe("issue #178: attackMode records who can answer a pending card", () => {
+  it("stores the GMs and the target's owners at attack time", async () => {
+    const { a } = attacker();
+    const t = target({ defense: ts, wis: 13 });
+    (t.actor as Record<string, unknown>).testUserPermission = (u: { id: string }) => u.id === "p1";
+    setUsers([{ id: "gm", isGM: true, active: true }, { id: "p1", isGM: false, active: true }, { id: "p2", isGM: false, active: true }]);
+    await attackMode(a, "mt", { roll: queue(10, 12), targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
+    expect(created[0]!.flags.adnd2e.psionicContest.answerUserIds).toEqual(["gm", "p1"]);
+  });
+  it("a target without a permission test lists only the GMs", async () => {
+    const { a } = attacker();
+    const t = target();
+    setUsers([{ id: "gm", isGM: true, active: true }, { id: "p1", isGM: false, active: true }]);
+    await attackMode(a, "mt", { roll: queue(5, 5), targets: () => [t.like], hasOnlineOwner: () => false, userId: "u-att" });
+    expect(created[0]!.flags.adnd2e.psionicContest.answerUserIds).toEqual(["gm"]);
   });
 });
 

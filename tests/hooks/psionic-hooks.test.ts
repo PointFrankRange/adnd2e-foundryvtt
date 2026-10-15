@@ -65,6 +65,18 @@ describe("issue #122: incapacitation breaks all psychic contacts (p.27)", () => 
   });
 });
 
+describe("issue #178: pending contest cards re-render when a user connects or disconnects", () => {
+  it("re-renders only the pending cards", () => {
+    const calls = (globalThis as unknown as { Hooks: { on: { mock: { calls: [string, () => void][] } } } }).Hooks.on.mock.calls;
+    const connected = calls.find((c) => c[0] === "userConnected")![1];
+    const msgs = (globalThis as unknown as { game: { messages: { contents: unknown[] } } }).game.messages.contents;
+    const pending = message(contest({ state: "pending" }));
+    msgs.push(pending);
+    connected();
+    expect(rerendered).toEqual([pending]);
+  });
+});
+
 describe("registerPsionicHooks", () => {
   it("registers on createChatMessage", () => {
     expect(((globalThis as unknown) as { Hooks: { on: ReturnType<typeof vi.fn> } }).Hooks.on).toHaveBeenCalledWith("createChatMessage", expect.any(Function));

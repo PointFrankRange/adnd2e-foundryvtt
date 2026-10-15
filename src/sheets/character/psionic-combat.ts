@@ -76,6 +76,8 @@ export interface AttackDeps {
   roll: PsionicRoll;
   targets: () => TargetLike[];
   hasOnlineOwner: (target: TargetActor) => boolean;
+  /** issue #178: the users who may answer a pending card (GMs and the target's owners) */
+  answerUserIds: (target: TargetActor) => string[];
   userId: string;
 }
 
@@ -91,6 +93,8 @@ export interface ContestFlag {
   powerName: string;
   /** score is the EFFECTIVE defense score; maintained = the raised defense gets the p.24 maintained-power rule */
   defense: { name: string; score: number; maintained?: boolean } | null;
+  /** issue #178: GM + owner user ids that could answer this card when it was posted */
+  answerUserIds?: string[];
   modifier: number;
   steps: AttackStep[];
   startingTangents: number;
@@ -114,6 +118,22 @@ const defaultHasOnlineOwner = (target: TargetActor): boolean =>
   [...(game as unknown as { users: Iterable<{ isGM: boolean; active: boolean }> }).users].some(
     (u) => !u.isGM && u.active && (target.testUserPermission?.(u, "OWNER") ?? false),
   );
+
+/** Issue #178: every user who can answer a pending defense - the GMs and the target's owners (recorded on the card at attack time). */
+const defaultAnswerUserIds = (target: TargetActor): string[] =>
+  [...(game as unknown as { users: Iterable<{ id: string; isGM: boolean }> }).users]
+    .filter((u) => u.isGM || (target.testUserPermission?.(u, "OWNER") ?? false))
+    .map((u) => u.id);
+
+/**
+ * Issue #178: the attacker may roll a pending defense themselves once nobody who could answer it is online
+ * (the same thing that happens when the defender is offline at attack time). Cards from before the answerer
+ * list existed never allow it.
+ */
+export function attackerMayAnswer(contest: ContestFlag, userId: string, isActive: (id: string) => boolean): boolean {
+  if (contest.state !== "pending" || contest.attackerUserId !== userId || !contest.answerUserIds) return false;
+  return contest.answerUserIds.every((id) => !isActive(id));
+}
 
 /** The target's raised defense mode and its score from the TARGET's own ability scores; null = undefended. */
 function targetDefense(target: TargetActor): { name: string; score: number; maintained: boolean } | null {
@@ -264,6 +284,7 @@ export async function attackMode(actor: PsionicActor, powerId: string, deps: Par
     targetName: target.name,
     powerName: power.name,
     defense,
+    answerUserIds: (deps.answerUserIds ?? defaultAnswerUserIds)(target.actor),
     modifier,
     steps,
     startingTangents: starting,
@@ -316,13 +337,15 @@ const answering = new Set<string>();
 /** The defender's "Roll defense" button on a pending card: rolls, posts the resolved card. Refuses a non-owner non-GM and a second answer. */
 export async function rollDefense(messageId: string, deps: { roll?: PsionicRoll } = {}): Promise<void> {
   const g = game as unknown as {
-    user: { isGM: boolean };
+    user: { isGM: boolean; id: string };
+    users: { get(id: string): { active: boolean } | undefined };
     messages: Iterable<{ getFlag(s: string, k: string): unknown }> & { get(id: string): { getFlag(s: string, k: string): unknown } | undefined };
   };
   const contest = g.messages.get(messageId)?.getFlag(SYSTEM_ID, "psionicContest") as ContestFlag | undefined;
   if (!contest || contest.state !== "pending" || contest.defense === null) return;
   const targetActor = foundry.utils.fromUuidSync(contest.targetActorUuid) as TargetActor | null;
-  if (!g.user.isGM && !targetActor?.isOwner) {
+  const fallback = attackerMayAnswer(contest, g.user.id, (id) => g.users.get(id)?.active ?? false);
+  if (!g.user.isGM && !targetActor?.isOwner && !fallback) {
     warn("ADND2E.chat.psionicContest.notYourDefense");
     return;
   }
