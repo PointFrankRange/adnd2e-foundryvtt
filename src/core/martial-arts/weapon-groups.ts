@@ -1,6 +1,8 @@
 // PHBR15 Table 13 (pp.32-33): the melee tight groups. Pure. Missile and throwing groups are not melee style weapons and are omitted.
 // Weapons the book marks "not part of a tight group" (lasso, net, gunsen, siangkam, dart, tetsu-bishi) are omitted.
 
+import { MAX_MANEUVERS_PER_LEVEL, type LearnVerdict } from "./maneuvers";
+
 export interface WeaponGroupDef {
   id: string;
   /** the English name as written on the shipped styles' `weaponGroups` */
@@ -78,3 +80,34 @@ export function offeredGroupIds(weaponGroups: readonly string[]): string[] {
 }
 
 export const weaponGroupLabelKey = (id: string): string => `ADND2E.martialWeaponGroups.${id}`;
+
+/** Whether a style may buy a tight group now. The two-per-level cap is shared with maneuvers. */
+export function groupLearnability(input: {
+  groupId: string;
+  offered: readonly string[];
+  knownGroups: readonly { id: string; level: number }[];
+  /** maneuvers already learned at the current level on this style */
+  maneuversAtLevel: number;
+  freeSlots: number;
+  level: number;
+}): LearnVerdict {
+  if (!input.offered.includes(input.groupId)) return { ok: false, reason: "notOffered" };
+  if (input.knownGroups.some((g) => g.id === input.groupId)) return { ok: false, reason: "known" };
+  if (input.freeSlots < 1) return { ok: false, reason: "noSlot" };
+  const groupsAtLevel = input.knownGroups.filter((g) => g.level === input.level).length;
+  if (input.maneuversAtLevel + groupsAtLevel >= MAX_MANEUVERS_PER_LEVEL) return { ok: false, reason: "levelCap" };
+  return { ok: true };
+}
+
+/** Removes one bought group and refunds its slot (never below the style's first slot); null when it is not known. */
+export function unlearnGroupUpdate(input: {
+  known: readonly { id: string; level: number }[];
+  groupId: string;
+  slotsInvested: number;
+}): { knownWeaponGroups: { id: string; level: number }[]; slotsInvested: number } | null {
+  if (!input.known.some((g) => g.id === input.groupId)) return null;
+  return {
+    knownWeaponGroups: input.known.filter((g) => g.id !== input.groupId).map((g) => ({ id: g.id, level: g.level })),
+    slotsInvested: Math.max(1, input.slotsInvested - 1),
+  };
+}

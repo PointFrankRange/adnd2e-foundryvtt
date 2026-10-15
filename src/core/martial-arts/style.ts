@@ -55,6 +55,6 @@ export function resolveActiveStyleId(ids: readonly string[], stored: string): st
 
 /** The fields a style item must carry when it lands on an actor from elsewhere (drop): the one
  *  slot that buys the style itself and no learned maneuvers, whatever the source copy held. */
-export function freshStyleUpdate(): { "system.slotsInvested": 1; "system.knownManeuvers": [] } {
-  return { "system.slotsInvested": 1, "system.knownManeuvers": [] };
+export function freshStyleUpdate(): { "system.slotsInvested": 1; "system.knownManeuvers": []; "system.knownWeaponGroups": [] } {
+  return { "system.slotsInvested": 1, "system.knownManeuvers": [], "system.knownWeaponGroups": [] };
 }

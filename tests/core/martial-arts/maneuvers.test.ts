@@ -258,3 +258,9 @@ describe("unlearnUpdate", () => {
     expect(learnability({ maneuverId: "block:1", offered, known: after.knownManeuvers, freeSlots: 1, level: 2 })).toEqual({ ok: true });
   });
 });
+
+it("bought weapon groups count toward the two-per-level cap", () => {
+  const offered = [{ list: "block", difficulties: [1, 2, 3] }];
+  const v = learnability({ maneuverId: "block:2", offered, known: [{ id: "block:1", level: 4 }], freeSlots: 3, level: 4, groupsAtLevel: 1 });
+  expect(v).toEqual({ ok: false, reason: "levelCap" });
+});

@@ -40,3 +40,28 @@ describe("registry shape", () => {
     expect(weaponGroupLabelKey("staves")).toBe("ADND2E.martialWeaponGroups.staves");
   });
 });
+
+import { groupLearnability, unlearnGroupUpdate } from "../../../src/core/martial-arts";
+
+describe("groupLearnability", () => {
+  const base = { groupId: "staves", offered: ["staves", "fencingBlades"], knownGroups: [] as { id: string; level: number }[], maneuversAtLevel: 0, freeSlots: 1, level: 3 };
+  it("is ok with a free slot and room under the cap", () => {
+    expect(groupLearnability(base)).toEqual({ ok: true });
+  });
+  it("refuses groups the style does not offer, already-known groups, no free slot and the shared two-per-level cap", () => {
+    expect(groupLearnability({ ...base, groupId: "axes" })).toEqual({ ok: false, reason: "notOffered" });
+    expect(groupLearnability({ ...base, knownGroups: [{ id: "staves", level: 1 }] })).toEqual({ ok: false, reason: "known" });
+    expect(groupLearnability({ ...base, freeSlots: 0 })).toEqual({ ok: false, reason: "noSlot" });
+    expect(groupLearnability({ ...base, maneuversAtLevel: 1, knownGroups: [{ id: "fencingBlades", level: 3 }] })).toEqual({ ok: false, reason: "levelCap" });
+  });
+});
+
+describe("unlearnGroupUpdate", () => {
+  it("removes the group and refunds the slot (never below the first)", () => {
+    expect(unlearnGroupUpdate({ known: [{ id: "staves", level: 2 }], groupId: "staves", slotsInvested: 3 })).toEqual({ knownWeaponGroups: [], slotsInvested: 2 });
+    expect(unlearnGroupUpdate({ known: [{ id: "staves", level: 2 }], groupId: "staves", slotsInvested: 1 })).toEqual({ knownWeaponGroups: [], slotsInvested: 1 });
+  });
+  it("returns null for a group that is not known", () => {
+    expect(unlearnGroupUpdate({ known: [], groupId: "staves", slotsInvested: 2 })).toBeNull();
+  });
+});

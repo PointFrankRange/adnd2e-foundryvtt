@@ -164,3 +164,22 @@ describe("management grouping (SP18 follow-up)", () => {
     expect(lists.some((g) => g.maneuvers.some((m) => m.prereqNameKey !== ""))).toBe(true);
   });
 });
+
+describe("weapon group rows (SP18 Plan D)", () => {
+  it("lists offered groups with their state and the known ones", () => {
+    const item = style([], "a");
+    item.system.weaponGroups = ["Staves", "Fencing Blades"];
+    item.system.knownWeaponGroups = [{ id: "staves", level: 2 }];
+    const v = buildMartialArtsView({ enabled: true, knowsBasics: true, storedActiveId: "", canAct: true, level: 2, freeSlots: 1, items: [item] });
+    const row = v.styles[0];
+    expect(row.weaponGroups.map((g) => [g.id, g.state])).toEqual([["fencingBlades", "learnable"], ["staves", "known"]]);
+    expect(row.knownWeaponGroups.map((g) => g.id)).toEqual(["staves"]);
+    expect(row.weaponGroups[0].labelKey).toBe("ADND2E.martialWeaponGroups.fencingBlades");
+  });
+  it("a locked group carries a reason key", () => {
+    const item = style([], "a");
+    item.system.weaponGroups = ["Staves"];
+    const v = buildMartialArtsView({ enabled: true, knowsBasics: true, storedActiveId: "", canAct: true, level: 2, freeSlots: 0, items: [item] });
+    expect(v.styles[0].weaponGroups[0]).toMatchObject({ state: "locked", reasonKey: "ADND2E.sheet.martialArts.locked.noSlot" });
+  });
+});

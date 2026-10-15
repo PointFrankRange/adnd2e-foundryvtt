@@ -178,6 +178,8 @@ export function learnability(input: {
   known: readonly { id: string; level: number }[];
   freeSlots: number;
   level: number;
+  /** weapon groups bought at the current level (they share the two-per-level cap) */
+  groupsAtLevel?: number;
 }): LearnVerdict {
   const def = maneuverById(input.maneuverId);
   const offeredDifficulties = def ? (input.offered.find((o) => o.list === def.list)?.difficulties ?? []) : [];
@@ -187,7 +189,7 @@ export function learnability(input: {
   const skipped = offeredDifficulties.some((d) => d < def.difficulty && !knownIds.has(`${def.list}:${d}`));
   if (skipped) return { ok: false, reason: "order" };
   if (input.freeSlots < 1) return { ok: false, reason: "noSlot" };
-  if (input.known.filter((k) => k.level === input.level).length >= MAX_MANEUVERS_PER_LEVEL) return { ok: false, reason: "levelCap" };
+  if (input.known.filter((k) => k.level === input.level).length + (input.groupsAtLevel ?? 0) >= MAX_MANEUVERS_PER_LEVEL) return { ok: false, reason: "levelCap" };
   return { ok: true };
 }
 
