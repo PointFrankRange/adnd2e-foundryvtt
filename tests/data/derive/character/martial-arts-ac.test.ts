@@ -47,3 +47,15 @@ describe("deriveCharacter - Ironskin (SP18 B3)", () => {
     expect(deriveCharacter(fighter, ON).ac.normal).toBe(10);
   });
 });
+
+describe("All-Around Sight rear AC (rule-gated)", () => {
+  const shielded: ActorSnapshot = { ...fighter, equippedArmor: { baseArmorAc: 5, magicBonus: 0 }, equippedShield: { shieldBonus: 1, magicBonus: 0 } };
+  it("rear AC matches normal AC only with the rule on and the ability known", () => {
+    const on = deriveCharacter({ ...shielded, allAroundSight: true }, ON);
+    expect(on.ac.rearAttack).toBe(on.ac.normal);
+    const off = deriveCharacter({ ...shielded, allAroundSight: true }, DEFAULT_OPTIONAL_RULES);
+    expect(off.ac.rearAttack).toBeGreaterThan(off.ac.normal);
+    const unknown = deriveCharacter(shielded, ON);
+    expect(unknown.ac.rearAttack).toBeGreaterThan(unknown.ac.normal);
+  });
+});

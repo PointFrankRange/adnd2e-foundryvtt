@@ -112,8 +112,8 @@
       "weaponBreaker": "A swift blow or twist breaks the opponent's normal weapon (magical weapons are unharmed); no damage to creatures.",
       "steelCloth": "Always in effect: a 6-10 ft cloth you hold becomes a spear (long spear above 8 ft) and is automatically usable.",
       "meditation": "Always in effect: each hour of meditation gives the rest of two hours of sleep.",
-      "allAroundSight": "Always in effect: you notice all non-invisible foes around you and can never be struck from behind.",
-      "mentalResistance": "Always in effect: +2 on saving throws against mental attacks such as charm, illusion and hold.",
+      "allAroundSight": "Always in effect: you notice all non-invisible foes around you and can never be struck from behind (your rear-attack AC equals your normal AC).",
+      "mentalResistance": "Always in effect: +2 on saving throws against mental attacks such as charm, illusion and hold (the save button asks whether the save is mental).",
       "chiAttacks": "Always in effect: your unarmed hits count as a magical weapon by level (magical, then +1 at level 5, +2 at 10, +3 at 15, +4 at 20), so they can harm creatures that need magic to hit.",
       "blindFighting": "Always in effect: only -1 when blinded, in darkness or against invisible foes (applied to your martial arts rolls).",
       "ironskin": "Always in effect: your AC improves by 2 while you wear no body armor.",
@@ -584,7 +584,8 @@
         }
       },
       "ac": {
-        "natural": "Includes the race's natural armor class"
+        "natural": "Includes the race's natural armor class",
+        "variants": "Other ACs: from behind {rear}, surprised {surprised}, without shield {shieldless}."
       },
       "vitals": {
         "hp": "Hit Points",
@@ -1181,6 +1182,8 @@
       "save": {
         "charmPromptTitle": "Enchantment/charm save?",
         "charmPrompt": "Is this save against an enchantment/charm spell or similar effect? (Psionicists get +2.)",
+        "mentalPromptTitle": "Mental attack save?",
+        "mentalPrompt": "Is this save against a mental attack such as a charm, illusion or hold spell? (Mental Resistance gives +2.)",
         "poisonPromptTitle": "Poison save?",
         "poisonPrompt": "Is this save against poison? (Your race's save bonus is one point lower against poison.)",
         "success": "Success", "failure": "Failure"

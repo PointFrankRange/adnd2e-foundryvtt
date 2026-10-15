@@ -25,3 +25,11 @@ describe("Main tab attacks panel", () => {
     expect(LANG.ADND2E.sheet.combat.noWeaponsEquipped).toBe("No weapons equipped.");
   });
 });
+
+describe("Main tab armor panel AC variants", () => {
+  it("shows the rear, surprised and shieldless ACs in the armor panel", () => {
+    const panel = MAIN.slice(MAIN.indexOf("adnd2e.combat.armor"));
+    expect(panel).toContain("adnd2e.vitals.ac.rearAttack");
+    expect(LANG.ADND2E.sheet.ac.variants).toContain("{rear}");
+  });
+});

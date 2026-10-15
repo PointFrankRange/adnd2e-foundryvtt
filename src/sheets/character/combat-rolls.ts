@@ -2,6 +2,7 @@ import { isShapechanged } from "../../core/shapechange";
 import { buildAttackCardContext } from "../../combat/attack-card";
 import { attackRank, canHarm, requirementLabelKey } from "../../core/enchantment";
 import { enchantmentCharmSaveBonus, poisonSaveAdjustment } from "../../core/saves/racial";
+import { knownManeuverIds, mentalResistanceSaveBonus } from "../../core/martial-arts";
 import { normalizeSubrace } from "../../core/races/subrace";
 import { buildSaveCardContext } from "../../combat/save-card";
 import { matchingAmmo, defaultAmmoSelection } from "../../combat/ammo";
@@ -552,6 +553,18 @@ export async function rollSave(
       const isCharm = await askSaveQuestion("ADND2E.chat.save.charmPromptTitle", "ADND2E.chat.save.charmPrompt");
       if (isCharm === null) return false;
       if (isCharm) tagAdjustment += charmBonus;
+    }
+    // SP18: Mental Resistance (+2 against mental attacks) is known on any owned martial arts style
+    const mentalBonus = mentalResistanceSaveBonus(
+      getOptionalRules().advancedMartialArts &&
+        knownManeuverIds(
+          items.filter((i) => i.type === "martialStyle").map((i) => ({ knownManeuvers: (i.system as { knownManeuvers?: { id: string }[] }).knownManeuvers })),
+        ).has("mental:3"),
+    );
+    if (mentalBonus !== 0) {
+      const isMental = await askSaveQuestion("ADND2E.chat.save.mentalPromptTitle", "ADND2E.chat.save.mentalPrompt");
+      if (isMental === null) return false;
+      if (isMental) tagAdjustment += mentalBonus;
     }
   }
   const modifier = save.rollModifier + tagAdjustment + (opts.penalty ?? 0);

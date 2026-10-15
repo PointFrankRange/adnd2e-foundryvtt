@@ -129,6 +129,7 @@ export function snapshotActor(actor: Actor.Implementation, options: OptionalRule
   // SP18 Plan B3: Ironskin (mental:6) is -2 AC only while no body armor is worn (a shield is not body armor)
   const hasIronskin = knownManeuverIds(styles.map((s) => ({ knownManeuvers: s.system.knownManeuvers }))).has("mental:6");
   const ironskinMod = ironskinAcMod(hasIronskin, equippedArmor !== null);
+  const hasAllAroundSight = knownManeuverIds(styles.map((s) => ({ knownManeuvers: s.system.knownManeuvers }))).has("mental:2");
 
   const a = doc.system.abilities;
   return {
@@ -169,5 +170,6 @@ export function snapshotActor(actor: Actor.Implementation, options: OptionalRule
     isCasting: Boolean(doc.system.options?.spellsAndMagic?.casting),
     martialArtsAcMod,
     ironskinAcMod: ironskinMod,
+    allAroundSight: hasAllAroundSight,
   };
 }
