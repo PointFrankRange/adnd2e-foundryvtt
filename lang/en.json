@@ -1445,7 +1445,7 @@
       },
       "psionicArmorPenalties": {
         "name": "Psionicist armor penalties",
-        "hint": "Psionicists may wear any armor, but metal armor lowers every psionic power score: -1 brigandine/ring/scale/splint, -2 chain/banded, -3 plate, -5 field plate, -7 full plate (Complete Psionics Handbook, Table 9)."
+        "hint": "Psionicists may wear any armor, but metal armor lowers every psionic power score: -1 brigandine/ring/scale/splint, -2 chain/banded, -3 plate, -5 field plate, -7 full plate (Complete Psionics Handbook, Table 9). Needs a reload."
       },
       "primeRequisiteBonusLevels": {
         "name": "Bonus levels for high prime requisites",

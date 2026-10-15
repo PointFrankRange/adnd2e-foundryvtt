@@ -39,7 +39,7 @@ describe("SETTING_DESCRIPTORS", () => {
   });
 
   it("exactly the twelve prepare-time rules require a world reload", () => {
-    const reload = ["advancedMartialArts", "channelers", "channellerFatigue", "characterPointBuild", "expandedCastingTime", "primeRequisiteBonusLevels", "racialLevelLimits", "skillsAndPowersEnabled", "spellPoints", "spellsAndMagicEnabled", "subAbilityScores", "wildTalents"];
+    const reload = ["advancedMartialArts", "channelers", "channellerFatigue", "characterPointBuild", "expandedCastingTime", "primeRequisiteBonusLevels", "psionicArmorPenalties", "racialLevelLimits", "skillsAndPowersEnabled", "spellPoints", "spellsAndMagicEnabled", "subAbilityScores", "wildTalents"];
     const keys = SETTING_DESCRIPTORS.filter((d) => d.requiresReload === true).map((d) => d.key);
     expect(keys.sort()).toEqual(reload);
     for (const d of SETTING_DESCRIPTORS) {
