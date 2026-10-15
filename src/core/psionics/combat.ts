@@ -39,16 +39,18 @@ export function needsDefenseRoll(attackRoll: number, attackScore: number, defens
 }
 
 /** A psychic contest (PHBR5 p.22): higher successful roll wins; ties and double failures go to the defender; an attack roll above the defense score wins outright. */
-export function resolveContest(i: { attackRoll: number; attackScore: number; defenseRoll: number | null; defenseScore: number | null }): ContestResult {
+export function resolveContest(i: { attackRoll: number; attackScore: number; defenseRoll: number | null; defenseScore: number | null; defenseMaintained?: boolean }): ContestResult {
   const attack = rollPowerCheck(i.attackRoll, i.attackScore);
   if (!attack.success) return { attackSuccess: false, winner: "defender", reason: "attack-failed" };
   if (i.defenseScore === null) return { attackSuccess: true, winner: "attacker", reason: "unopposed" };
   if (i.attackRoll > i.defenseScore) return { attackSuccess: true, winner: "attacker", reason: "automatic" };
   if (i.defenseRoll === null) throw new Error("resolveContest: a defense roll is required");
   const defense = rollPowerCheck(i.defenseRoll, i.defenseScore);
-  if (!defense.success) return { attackSuccess: true, winner: "attacker", reason: "attacker-only" };
-  if (i.attackRoll > i.defenseRoll) return { attackSuccess: true, winner: "attacker", reason: "higher" };
-  return { attackSuccess: true, winner: "defender", reason: i.attackRoll === i.defenseRoll ? "tie" : "higher" };
+  // p.24: a maintained defense never fails the contest - a failed check counts as a success of 1 (the score's +1 is already in defenseScore)
+  if (!defense.success && !i.defenseMaintained) return { attackSuccess: true, winner: "attacker", reason: "attacker-only" };
+  const defenseRoll = defense.success ? i.defenseRoll : 1;
+  if (i.attackRoll > defenseRoll) return { attackSuccess: true, winner: "attacker", reason: "higher" };
+  return { attackSuccess: true, winner: "defender", reason: i.attackRoll === defenseRoll ? "tie" : "higher" };
 }
 
 /** A maintained power in a contest (p.24): +1 to the score, and a failed check counts as a success of 1. */
@@ -70,7 +72,7 @@ export interface SeriesOutcome {
 export const FULL_CONTACT = 3;
 
 /** Resolves an attack mode's one-two punch (p.25): each attack is a separate contest; after full contact no more attacks are made. */
-export function resolveSeries(steps: readonly AttackStep[], defenseScore: number | null, defenseRolls: readonly (number | null)[], startingTangents: number): SeriesOutcome {
+export function resolveSeries(steps: readonly AttackStep[], defenseScore: number | null, defenseRolls: readonly (number | null)[], startingTangents: number, defenseMaintained = false): SeriesOutcome {
   let tangents = startingTangents;
   let gained = 0;
   let anySuccess = false;
@@ -83,7 +85,7 @@ export function resolveSeries(steps: readonly AttackStep[], defenseScore: number
     const need = needsDefenseRoll(s.roll, s.score, defenseScore);
     const defenseRoll = need ? (defenseRolls[i] ?? null) : null;
     if (need && defenseRoll === null) throw new Error("resolveSeries: a defense roll is required");
-    const result = resolveContest({ attackRoll: s.roll, attackScore: s.score, defenseRoll, defenseScore });
+    const result = resolveContest({ attackRoll: s.roll, attackScore: s.score, defenseRoll, defenseScore, defenseMaintained });
     if (result.attackSuccess) anySuccess = true;
     if (result.winner === "attacker") { tangents += 1; gained += 1; }
     out.push({ made: true, result, defenseRoll });
@@ -114,6 +116,23 @@ export function recordTangents(contacts: readonly Contact[], target: string, nam
 /** Breaks partial tangents (all, or only one target's); a full contact is never broken this way. */
 export function breakTangents(contacts: readonly Contact[], target?: string): Contact[] {
   return contacts.filter((c) => isFullContact(c) || (target !== undefined && c.target !== target)).map((c) => ({ ...c }));
+}
+
+/**
+ * Records a pending contest's tangents that arrive late (a defender answered after the attacker moved on).
+ * A full contact is always kept and never breaks other full contacts or partials; a partial result is stale -
+ * the attacker's later attack on another target already broke it (p.27) - when a partial is held elsewhere.
+ */
+export function applyLateTangents(contacts: readonly Contact[], target: string, name: string, gained: number): { contacts: Contact[]; stale: boolean } {
+  const total = Math.min(FULL_CONTACT, tangentsOn(contacts, target) + gained);
+  if (gained <= 0) return { contacts: contacts.map((c) => ({ ...c })), stale: false };
+  if (total >= FULL_CONTACT) {
+    const others = contacts.filter((c) => c.target !== target).map((c) => ({ ...c }));
+    return { contacts: [...others, { target, name, tangents: FULL_CONTACT }], stale: false };
+  }
+  const elsewhere = contacts.some((c) => c.target !== target && !isFullContact(c) && c.tangents > 0);
+  if (elsewhere) return { contacts: contacts.map((c) => ({ ...c })), stale: true };
+  return { contacts: recordTangents(contacts, target, name, gained), stale: false };
 }
 
 export const endContact = (contacts: readonly Contact[], target: string): Contact[] => contacts.filter((c) => c.target !== target).map((c) => ({ ...c }));

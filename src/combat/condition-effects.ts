@@ -57,6 +57,11 @@ export function fatigueArmorClassPenalty(actorStatuses: StatusSet): number {
  *  gates below because a held actor may still try to break free. */
 const INCAPACITATING: readonly string[] = ["unconscious", "paralyzed", "sleeping", "incapacitated", "dead", "mortalFatigue"];
 
+/** Issue #122: true when any of these status ids leaves an actor incapacitated (not stunned or held, which only block action). */
+export function anyIncapacitating(statusIds: Iterable<string>): boolean {
+  return [...statusIds].some((id) => INCAPACITATING.includes(id));
+}
+
 function anyOf(statuses: StatusSet, ids: readonly string[]): boolean {
   return ids.some((id) => has(statuses, id));
 }

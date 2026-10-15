@@ -183,3 +183,14 @@ describe("frightenedAttackPenalty", () => {
     expect(frightenedAttackPenalty([])).toBe(0);
   });
 });
+
+import { anyIncapacitating } from "../../src/combat/condition-effects";
+
+describe("anyIncapacitating (issue #122)", () => {
+  it("is true for incapacitating conditions and false for stunned, held or nothing", () => {
+    expect(anyIncapacitating(["unconscious"])).toBe(true);
+    expect(anyIncapacitating(new Set(["prone", "dead"]))).toBe(true);
+    expect(anyIncapacitating(["stunned", "held", "prone"])).toBe(false);
+    expect(anyIncapacitating([])).toBe(false);
+  });
+});

@@ -11,7 +11,7 @@
     {{else}}
     <p class="check"><strong>{{n}}. {{localize 'ADND2E.chat.psionicContest.attackRoll'}}:</strong> {{roll}} / {{score}}{{#if ../modifierText}} ({{../modifierText}}){{/if}} - {{localize attackResultKey}}</p>
     {{#if hasDefenseRoll}}
-    <p class="check"><strong>{{localize 'ADND2E.chat.psionicContest.defenseRoll'}}:</strong> {{defenseRoll}} / {{../defenseScore}} ({{../defenseName}})</p>
+    <p class="check"><strong>{{localize 'ADND2E.chat.psionicContest.defenseRoll'}}:</strong> {{defenseRoll}} / {{../defenseScore}} ({{../defenseName}}){{#if defenseCountsAsOne}} &rarr; {{localize 'ADND2E.chat.psionicContest.countsAsOne'}}{{/if}}</p>
     {{/if}}
     {{#if resolved}}
     <p class="result">{{localize winnerKey}} - {{localize reasonKey}}</p>
