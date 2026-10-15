@@ -1,4 +1,5 @@
 import { SYSTEM_ID } from "../constants";
+import { anyIncapacitating } from "../combat/condition-effects";
 import { applyContestTangents, type ContestFlag } from "../sheets/character/psionic-combat";
 import type { WildFlag } from "../sheets/character/psionic-wild";
 
@@ -38,6 +39,19 @@ export function registerPsionicHooks(): void {
     const uuid = (actor as { uuid: string }).uuid;
     if (touchesFlag(changes as Record<string, unknown>, "psionicApplied")) rerenderContestCards(uuid);
     if (touchesFlag(changes as Record<string, unknown>, "wildApplied")) rerenderWildCards(uuid);
+  });
+  // p.27: tangents (full contacts included) are broken when the attacker is incapacitated. Only the client that
+  // applied the condition writes, once, on the incapacitated actor itself.
+  Hooks.on("createActiveEffect", (effect: unknown, _options: unknown, userId: string) => {
+    if (userId !== game.user?.id) return;
+    const e = effect as { statuses?: Iterable<string>; parent?: { documentName?: string; name?: string; system?: { psionics?: { contacts?: unknown[] } }; update?(d: Record<string, unknown>): Promise<unknown> } };
+    const actor = e.parent;
+    if (!actor || actor.documentName !== "Actor" || !actor.update) return;
+    if ((actor.system?.psionics?.contacts ?? []).length === 0) return;
+    if (!anyIncapacitating(e.statuses ?? [])) return;
+    void actor.update({ "system.psionics.contacts": [] }).then(() => {
+      ui.notifications?.info(game.i18n!.format("ADND2E.sheet.psionics.combat.incapacitatedBroken", { name: actor.name ?? "" }));
+    });
   });
   Hooks.on("createChatMessage", (message: unknown) => {
     const contest = (message as { getFlag(scope: string, key: string): unknown }).getFlag(SYSTEM_ID, "psionicContest") as ContestFlag | undefined;

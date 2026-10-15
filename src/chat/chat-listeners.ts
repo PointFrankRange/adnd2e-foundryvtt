@@ -176,7 +176,10 @@ function wirePsionicContest(message: { id: string; getFlag(s: string, k: string)
   if (rollButton) {
     if (isGm || isOwner(contest.targetActorUuid)) rollButton.addEventListener("click", () => {
         rollButton.disabled = true;
-        void rollDefense(message.id);
+        // a thrown roll must not leave the defender with a dead button (issue #122)
+        void rollDefense(message.id).catch(() => {
+          rollButton.disabled = false;
+        });
       });
     else rollButton.remove();
   }

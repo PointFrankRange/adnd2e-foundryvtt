@@ -402,6 +402,8 @@
           "alreadyRaised": "That defense mode is already raised.",
           "noUpkeep": "No tangents to maintain.",
           "tangentsBroken": "Not enough PSPs: your tangents are broken.",
+          "staleTangents": "{name}: your later attack on another target had already broken these tangents, so they were not recorded.",
+          "incapacitatedBroken": "{name} is incapacitated: all psychic contacts are broken.",
           "noTarget": "Target a token first.",
           "selfTarget": "You cannot attack yourself.",
           "alreadyFullContact": "You already have full contact with that target."

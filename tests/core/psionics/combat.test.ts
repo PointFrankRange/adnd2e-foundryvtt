@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   ATTACK_MODES, DEFENSE_MODES, FULL_CONTACT, attackModifier, breakTangents, endContact, isAttackMode, isDefenseMode, isFullContact,
-  maintainedCheck, needsDefenseRoll, recordTangents, resolveContest, resolveSeries, switchTarget, tangentsOn, upkeepDue, type Contact,
+  applyLateTangents, maintainedCheck, needsDefenseRoll, recordTangents, resolveContest, resolveSeries, switchTarget, tangentsOn, upkeepDue, type Contact,
 } from "../../../src/core/psionics";
 
 describe("Table 14 (PHBR5 p.26)", () => {
@@ -133,5 +133,45 @@ describe("contacts", () => {
     expect(upkeepDue([])).toBe(0);
     expect(tangentsOn([c("a", 2)], "a")).toBe(2);
     expect(tangentsOn([c("a", 2)], "z")).toBe(0);
+  });
+});
+
+describe("issue #122: a maintained defense (p.24)", () => {
+  const r = (attackRoll: number, defenseRoll: number | null, maintained: boolean) =>
+    resolveContest({ attackRoll, attackScore: 15, defenseRoll, defenseScore: 12, defenseMaintained: maintained });
+  it("an ordinary failed defense roll loses outright; a maintained one counts as a success of 1", () => {
+    expect(r(10, 15, false)).toEqual({ attackSuccess: true, winner: "attacker", reason: "attacker-only" });
+    expect(r(10, 15, true)).toEqual({ attackSuccess: true, winner: "attacker", reason: "higher" });
+  });
+  it("a maintained failure still ties at 1 and goes to the defender", () => {
+    expect(r(1, 15, true)).toEqual({ attackSuccess: true, winner: "defender", reason: "tie" });
+  });
+  it("a successful maintained roll is compared as rolled", () => {
+    expect(r(10, 8, true)).toEqual({ attackSuccess: true, winner: "attacker", reason: "higher" });
+    expect(r(8, 10, true)).toMatchObject({ winner: "defender", reason: "higher" });
+  });
+  it("resolveSeries threads the flag", () => {
+    const steps = [{ roll: 10, score: 15 }];
+    expect(resolveSeries(steps, 12, [15], 0, true).steps[0]!.result!.reason).toBe("higher");
+    expect(resolveSeries(steps, 12, [15], 0).steps[0]!.result!.reason).toBe("attacker-only");
+  });
+});
+
+describe("issue #122: applyLateTangents", () => {
+  const c = (target: string, tangents: number) => ({ target, name: target.toUpperCase(), tangents });
+  it("no gain changes nothing", () => {
+    expect(applyLateTangents([c("a", 1)], "b", "B", 0)).toEqual({ contacts: [c("a", 1)], stale: false });
+  });
+  it("a partial result with no partial elsewhere is recorded normally", () => {
+    expect(applyLateTangents([], "b", "B", 2)).toEqual({ contacts: [c("b", 2)], stale: false });
+    expect(applyLateTangents([c("a", 3)], "b", "B", 1)).toEqual({ contacts: [c("a", 3), c("b", 1)], stale: false });
+    expect(applyLateTangents([c("b", 1)], "b", "B", 1)).toEqual({ contacts: [c("b", 2)], stale: false });
+  });
+  it("a partial result is stale when a partial is held on another target", () => {
+    expect(applyLateTangents([c("a", 1)], "b", "B", 1)).toEqual({ contacts: [c("a", 1)], stale: true });
+  });
+  it("a result reaching full contact is kept and never breaks other partials", () => {
+    expect(applyLateTangents([c("a", 1)], "b", "B", 3)).toEqual({ contacts: [c("a", 1), c("b", 3)], stale: false });
+    expect(applyLateTangents([c("b", 2), c("a", 1)], "b", "B", 1)).toEqual({ contacts: [c("a", 1), c("b", 3)], stale: false });
   });
 });

@@ -4,6 +4,7 @@ import { registerPsionicHooks } from "../../src/hooks/psionic-hooks";
 type Handler = (message: unknown, changes?: unknown) => void;
 let handler: Handler;
 let actorHandler: Handler;
+let effectHandler: (effect: unknown, options: unknown, userId: string) => void;
 let rerendered: unknown[];
 let updates: Record<string, unknown>[];
 let uuidMap: Record<string, unknown>;
@@ -25,8 +26,43 @@ beforeEach(() => {
   (globalThis as Record<string, unknown>).game = { user: { id: "u-att" }, messages: { contents: [message(contest()), message(contest({ attackerActorUuid: "Actor.other" })), message(undefined)] } };
   (globalThis as Record<string, unknown>).ui = { chat: { updateMessage: async (m: unknown) => void rerendered.push(m) } };
   (globalThis as Record<string, unknown>).foundry = { utils: { fromUuidSync: (u: string) => uuidMap[u] ?? null } };
-  (globalThis as Record<string, unknown>).Hooks = { on: vi.fn((name: string, fn: Handler) => void (name === "updateActor" ? (actorHandler = fn) : (handler = fn))) };
+  (globalThis as Record<string, unknown>).Hooks = { on: vi.fn((name: string, fn: Handler) => void (name === "updateActor" ? (actorHandler = fn) : name === "createActiveEffect" ? (effectHandler = fn as never) : (handler = fn))) };
   registerPsionicHooks();
+});
+
+describe("issue #122: incapacitation breaks all psychic contacts (p.27)", () => {
+  const actorWith = (contacts: unknown[]) => {
+    const writes: Record<string, unknown>[] = [];
+    return { writes, actor: { documentName: "Actor", name: "Tam", system: { psionics: { contacts } }, update: async (d: Record<string, unknown>) => void writes.push(d) } };
+  };
+  const info = vi.fn();
+  beforeEach(() => {
+    info.mockClear();
+    (globalThis as Record<string, unknown>).ui = { ...((globalThis as Record<string, unknown>).ui as object), notifications: { info } };
+    (globalThis as Record<string, any>).game.i18n = { format: (k: string, d: object) => `${k}:${JSON.stringify(d)}` };
+  });
+  it("clears every contact (full contacts included) when an incapacitating status is applied by this client", async () => {
+    const { writes, actor } = actorWith([{ target: "t", name: "T", tangents: 3 }, { target: "u", name: "U", tangents: 1 }]);
+    effectHandler({ statuses: new Set(["unconscious"]), parent: actor }, {}, "u-att");
+    await flush();
+    expect(writes).toEqual([{ "system.psionics.contacts": [] }]);
+    expect(info).toHaveBeenCalledWith('ADND2E.sheet.psionics.combat.incapacitatedBroken:{"name":"Tam"}');
+  });
+  it("ignores stunned/held, effects with no status, other users' effects, non-actor parents, and actors with no contacts", async () => {
+    const { writes, actor } = actorWith([{ target: "t", name: "T", tangents: 1 }]);
+    effectHandler({ statuses: new Set(["stunned", "held"]), parent: actor }, {}, "u-att");
+    effectHandler({ parent: actor }, {}, "u-att");
+    effectHandler({ statuses: new Set(["dead"]), parent: actor }, {}, "someone-else");
+    effectHandler({ statuses: new Set(["dead"]), parent: { documentName: "Item" } }, {}, "u-att");
+    effectHandler({ statuses: new Set(["dead"]) }, {}, "u-att");
+    const empty = actorWith([]);
+    effectHandler({ statuses: new Set(["dead"]), parent: empty.actor }, {}, "u-att");
+    const noPsionics = { documentName: "Actor", name: "Orc", system: {}, update: async () => undefined };
+    effectHandler({ statuses: new Set(["dead"]), parent: noPsionics }, {}, "u-att");
+    await flush();
+    expect(writes).toEqual([]);
+    expect(empty.writes).toEqual([]);
+  });
 });
 
 describe("registerPsionicHooks", () => {

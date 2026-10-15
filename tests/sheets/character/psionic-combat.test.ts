@@ -213,17 +213,17 @@ describe("attackMode - immediate contests (real powers)", () => {
     await attackMode(a, "mt", { roll: queue(3, 18, 4), targets: () => [t.like], hasOnlineOwner: () => false, userId: "u-att" });
     const flag = created[0]!.flags.adnd2e.psionicContest;
     expect(flag.steps).toEqual([{ roll: 3, score: 17 }, { roll: 18, score: 17 }]);
-    expect(flag.defense).toEqual({ name: "Mind Blank", score: 3 });
+    expect(flag.defense).toEqual({ name: "Mind Blank", score: 4, maintained: true });
   });
 
-  it("applies the Table 14 modifier to the attack score against a Mind Blank target (Wis 12 -> defense score 5; Mind Thrust +5 -> 20)", async () => {
+  it("applies the Table 14 modifier to the attack score against a Mind Blank target (Wis 12 -> defense score 12-3+1 maintained = 6; Mind Thrust +5 -> 20)", async () => {
     const { a, updates } = attacker();
     const t = target({ defense: mindBlank });
-    // attack 3 needs a defense roll (3 <= 5): defense rolls 4 and the tie-break goes to the higher roll; attack 18 beats the defense score 5 outright
+    // attack 3 needs a defense roll (3 <= 6): defense rolls 4 and the tie-break goes to the higher roll; attack 18 beats the defense score 6 outright
     await attackMode(a, "mt", { roll: queue(3, 18, 4), targets: () => [t.like], hasOnlineOwner: () => false, userId: "u-att" });
     const flag = created[0]!.flags.adnd2e.psionicContest;
     expect(flag.steps).toEqual([{ roll: 3, score: 20 }, { roll: 18, score: 20 }]);
-    expect(flag.defense).toEqual({ name: "Mind Blank", score: 5 });
+    expect(flag.defense).toEqual({ name: "Mind Blank", score: 6, maintained: true });
     expect(flag.modifier).toBe(5);
     expect(flag.outcome.steps.map((s: any) => [s.made, s.defenseRoll, s.result.winner, s.result.reason])).toEqual([[true, 4, "defender", "higher"], [true, null, "attacker", "automatic"]]);
     expect(updates).toEqual([{ "system.psionics.psp": 18, "system.psionics.contacts": [{ target: "Actor.tgt", name: "Orc", tangents: 1 }] }]);
@@ -286,12 +286,12 @@ describe("attackMode - the pending path", () => {
   // Thought Shield, target Wis 14: defense score 14 - 3 = 11. Mind Thrust vs TS = -2 -> attack score 13.
   it("posts a pending card, pays now and writes no contacts when a defense roll is needed and an owner is online", async () => {
     const { a, updates } = attacker();
-    const t = target({ defense: ts, wis: 14 });
+    const t = target({ defense: ts, wis: 13 });
     await attackMode(a, "mt", { roll: queue(10, 12), targets: () => [t.like], hasOnlineOwner: (x) => x === (t.actor as never), userId: "u-att" });
     expect(updates).toEqual([{ "system.psionics.psp": 18 }]);
     expect(t.writes).toEqual([]);
     const flag = created[0]!.flags.adnd2e.psionicContest;
-    expect(flag).toMatchObject({ state: "pending", paid: 2, remaining: 18, modifier: -2, defense: { name: "Thought Shield", score: 11 }, attackerActorUuid: "Actor.att", attackerName: "Tam" });
+    expect(flag).toMatchObject({ state: "pending", paid: 2, remaining: 18, modifier: -2, defense: { name: "Thought Shield", score: 11, maintained: true }, attackerActorUuid: "Actor.att", attackerName: "Tam" });
     expect(flag.steps).toEqual([{ roll: 10, score: 13 }, { roll: 12, score: 13 }]);
     expect(flag.outcome).toBeUndefined();
     expect(renderContexts[0]).toMatchObject({ pending: true, showRoll: true, showRecord: false, modifierText: "-2" });
@@ -299,7 +299,7 @@ describe("attackMode - the pending path", () => {
 
   it("pays half when neither attack check succeeds", async () => {
     const { a, updates } = attacker();
-    const t = target({ defense: ts, wis: 14 });
+    const t = target({ defense: ts, wis: 13 });
     // both attack rolls 14+ fail against 13; no defense roll is needed so this is immediate regardless of the online owner
     await attackMode(a, "mt", { roll: queue(14, 20), targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
     expect(updates).toEqual([{ "system.psionics.psp": 19 }]);
@@ -308,15 +308,15 @@ describe("attackMode - the pending path", () => {
 
   it("is immediate when the owner is offline even though a defense roll is needed (the attacker rolls the defense)", async () => {
     const { a, updates } = attacker();
-    const t = target({ defense: ts, wis: 14 });
+    const t = target({ defense: ts, wis: 13 });
     await attackMode(a, "mt", { roll: queue(10, 12, 4), targets: () => [t.like], hasOnlineOwner: () => false, userId: "u-att" });
     expect(created[0]!.flags.adnd2e.psionicContest.state).toBe("resolved");
     expect(updates[0]).toHaveProperty(["system.psionics.contacts"]);
   });
 
-  it("is immediate when no defense roll is needed even with an owner online (defense score 5 is beaten outright)", async () => {
+  it("is immediate when no defense roll is needed even with an owner online (defense score 5, maintained, is beaten outright)", async () => {
     const { a, updates } = attacker();
-    const t = target({ defense: ts, wis: 8 });
+    const t = target({ defense: ts, wis: 7 });
     await attackMode(a, "mt", { roll: queue(10, 12), targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
     const flag = created[0]!.flags.adnd2e.psionicContest;
     expect(flag.state).toBe("resolved");
@@ -326,14 +326,14 @@ describe("attackMode - the pending path", () => {
 
   it("is immediate when the first success already makes full contact (the second attack needs no roll)", async () => {
     const { a } = attacker({ contacts: [{ target: "Actor.tgt", name: "Orc", tangents: 2 }] });
-    const t = target({ defense: ts, wis: 8 });
+    const t = target({ defense: ts, wis: 7 });
     await attackMode(a, "mt", { roll: queue(10, 11), targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
     expect(created[0]!.flags.adnd2e.psionicContest.state).toBe("resolved");
   });
 
   it("with the starting full contact the attack is refused before rolling (info toast, no write, no card)", async () => {
     const { a, updates } = attacker({ contacts: [{ target: "Actor.tgt", name: "Orc", tangents: 3 }] });
-    const t = target({ defense: ts, wis: 14 });
+    const t = target({ defense: ts, wis: 13 });
     let rolled = 0;
     await attackMode(a, "mt", { roll: async () => (rolled++, 10), targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
     expect(updates).toEqual([]);
@@ -344,7 +344,7 @@ describe("attackMode - the pending path", () => {
 
   it("pending with the starting full contact and a defense never happens; pending cost with one failure and one success is full", async () => {
     const { a, updates } = attacker();
-    const t = target({ defense: ts, wis: 14 });
+    const t = target({ defense: ts, wis: 13 });
     await attackMode(a, "mt", { roll: queue(10, 19), targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
     expect(updates).toEqual([{ "system.psionics.psp": 18 }]);
     expect(created[0]!.flags.adnd2e.psionicContest.state).toBe("pending");
@@ -353,7 +353,7 @@ describe("attackMode - the pending path", () => {
   it("an owner that is online but a first attack that auto-wins then needs no roll on the second: dry run follows tangents", async () => {
     // starting 2 tangents, defense 11, attack 12 beats it outright (full contact), 2nd attack not made -> immediate
     const { a } = attacker({ contacts: [{ target: "Actor.tgt", name: "Orc", tangents: 2 }] });
-    const t = target({ defense: ts, wis: 14 });
+    const t = target({ defense: ts, wis: 13 });
     await attackMode(a, "mt", { roll: queue(12, 5), targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
     expect(created[0]!.flags.adnd2e.psionicContest.state).toBe("resolved");
   });
@@ -368,7 +368,7 @@ describe("attackMode - switching targets breaks the old partial tangents (p.27)"
   });
   it("pending path: the old partials are broken at attack time", async () => {
     const { a, updates } = attacker({ contacts: held });
-    const t = target({ defense: ts, wis: 14 });
+    const t = target({ defense: ts, wis: 13 });
     await attackMode(a, "mt", { roll: queue(10, 12), targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
     expect(created[0]!.flags.adnd2e.psionicContest.state).toBe("pending");
     expect(updates).toEqual([{ "system.psionics.psp": 18, "system.psionics.contacts": [{ target: "Actor.d", name: "Di", tangents: 3 }] }]);
@@ -431,7 +431,7 @@ describe("attackMode - refusals leave no writes and no cards", () => {
 describe("attackMode - default dependencies", () => {
   it("reads the first targeted token, the online non-GM owners, the d20 roller and the user id", async () => {
     const { a } = attacker();
-    const t = target({ defense: ts, wis: 14 });
+    const t = target({ defense: ts, wis: 13 });
     (t.actor as Record<string, unknown>).testUserPermission = (u: { id: string }) => u.id === "p1";
     const g = (globalThis as Record<string, any>).game;
     g.user = { id: "u-att", targets: new Set([{ name: "Orc", actor: t.actor }, { name: "Other", actor: null }]) };
@@ -446,7 +446,7 @@ describe("attackMode - default dependencies", () => {
   });
   it("falls back to the roll total, and an offline or GM-only owner set means the attacker rolls the defense", async () => {
     const { a } = attacker();
-    const t = target({ defense: ts, wis: 14 });
+    const t = target({ defense: ts, wis: 13 });
     const g = (globalThis as Record<string, any>).game;
     g.user = { id: "u-att", targets: new Set([{ name: "Orc", actor: t.actor }]) };
     g.users = [{ id: "p1", isGM: false, active: false }];
@@ -526,6 +526,31 @@ describe("rollDefense", () => {
     expect(warn).toHaveBeenCalledWith("ADND2E.chat.psionicContest.alreadyAnswered");
   });
 
+  it("issue #122: the resolved card is posted under the contest id with keepId; a server rejection reads as already answered", async () => {
+    pendingMessage();
+    defender(true);
+    await rollDefense("m1", { roll: queue(10) });
+    const calls = (ChatMessage.create as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+    expect(calls[0]![0]).toMatchObject({ _id: "cid9" });
+    expect(calls[0]![1]).toEqual({ keepId: true });
+    (ChatMessage.create as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("duplicate key"));
+    created.length = 0;
+    warn.mockClear();
+    await rollDefense("m1", { roll: queue(10) });
+    expect(created).toEqual([]);
+    expect(warn).toHaveBeenCalledWith("ADND2E.chat.psionicContest.alreadyAnswered");
+  });
+
+  it("issue #122: a maintained defense whose check fails counts as a success of 1 (it loses to a higher attack roll, ties go to the defender)", async () => {
+    const contest = pendingMessage("mm", "cidM");
+    contest.defense = { name: "Thought Shield", score: 11, maintained: true } as never;
+    defender(true);
+    // attack 10 needs a defense roll; the defender rolls 15 (> 11: a failed check) -> counts as 1; attack 10 > 1 -> attacker wins "higher"
+    await rollDefense("mm", { roll: queue(15) });
+    const outcome = created[0]!.flags.adnd2e.psionicContest.outcome;
+    expect(outcome.steps[0].result).toMatchObject({ winner: "attacker", reason: "higher" });
+  });
+
   it("ignores a message that is missing, not a contest, already resolved or has no defense", async () => {
     await rollDefense("nope");
     messages.push({ id: "plain", getFlag: () => undefined } as never);
@@ -567,6 +592,39 @@ describe("rollDefense", () => {
   });
 });
 
+describe("issue #122: attackMode and applyContestTangents share one write chain", () => {
+  it("a pending result applied while an attack is mid-flight does not lose either write", async () => {
+    const state = { contacts: [] as unknown[], applied: [] as string[], psp: 20 };
+    const { a } = attacker();
+    (a.system.psionics as { contacts: unknown[] }).contacts = [];
+    Object.defineProperty(a.system.psionics, "contacts", { configurable: true, get: () => state.contacts });
+    a.update = async (d: Record<string, unknown>) => {
+      await Promise.resolve();
+      if ("system.psionics.contacts" in d) state.contacts = d["system.psionics.contacts"] as unknown[];
+      if ("system.psionics.psp" in d) state.psp = d["system.psionics.psp"] as number;
+    };
+    uuidMap["Actor.att"] = {
+      isOwner: true,
+      getFlag: () => state.applied,
+      system: a.system,
+      update: async (d: Record<string, unknown>) => {
+        await Promise.resolve();
+        state.contacts = d["system.psionics.contacts"] as unknown[];
+        state.applied = d["flags.adnd2e.psionicApplied"] as string[];
+      },
+    };
+    const t = target();
+    const late = { id: "cidL", attackerActorUuid: "Actor.att", targetActorUuid: "Actor.old", targetName: "Gnoll", outcome: { tangentsGained: 1, steps: [], fullContact: false, anySuccess: true } } as never;
+    await Promise.all([
+      attackMode(a, "mt", { roll: queue(10, 12), targets: () => [t.like], hasOnlineOwner: () => false, userId: "u-att" }),
+      applyContestTangents(late),
+    ]);
+    // the late result (a partial on another target) was applied after or before the attack's write: no lost update either way
+    expect(state.psp).toBe(18);
+    expect((state.contacts as { target: string }[]).some((c) => c.target === "Actor.tgt")).toBe(true);
+  });
+});
+
 describe("applyContestTangents", () => {
   const resolved = (gained: number) => ({
     id: "cid5", attackerActorUuid: "Actor.att", targetActorUuid: "Actor.tgt", targetName: "Orc",
@@ -579,9 +637,20 @@ describe("applyContestTangents", () => {
   };
 
   it("records the tangents and the contest id in one update", async () => {
-    const updates = owned(["old"], [{ target: "Actor.other", name: "Gnoll", tangents: 1 }]);
+    const updates = owned(["old"], [{ target: "Actor.other", name: "Gnoll", tangents: 3 }]);
     expect(await applyContestTangents(resolved(2))).toBe(true);
-    expect(updates).toEqual([{ "system.psionics.contacts": [{ target: "Actor.tgt", name: "Orc", tangents: 2 }], "flags.adnd2e.psionicApplied": ["old", "cid5"] }]);
+    expect(updates).toEqual([{ "system.psionics.contacts": [{ target: "Actor.other", name: "Gnoll", tangents: 3 }, { target: "Actor.tgt", name: "Orc", tangents: 2 }], "flags.adnd2e.psionicApplied": ["old", "cid5"] }]);
+  });
+  it("issue #122: a late partial result is stale when a newer target holds partial tangents - nothing is broken, the id is recorded, the player is told", async () => {
+    const updates = owned([], [{ target: "Actor.newer", name: "Gnoll", tangents: 1 }]);
+    expect(await applyContestTangents(resolved(1))).toBe(true);
+    expect(updates).toEqual([{ "system.psionics.contacts": [{ target: "Actor.newer", name: "Gnoll", tangents: 1 }], "flags.adnd2e.psionicApplied": ["cid5"] }]);
+    expect(info).toHaveBeenCalledWith("ADND2E.sheet.psionics.combat.staleTangents:{\"name\":\"Orc\"}");
+  });
+  it("issue #122: a late result that reaches full contact is kept and leaves the newer target's partials alone", async () => {
+    const updates = owned([], [{ target: "Actor.newer", name: "Gnoll", tangents: 1 }]);
+    expect(await applyContestTangents({ ...(resolved(3) as object) } as never)).toBe(true);
+    expect(updates[0]!["system.psionics.contacts"]).toEqual([{ target: "Actor.newer", name: "Gnoll", tangents: 1 }, { target: "Actor.tgt", name: "Orc", tangents: 3 }]);
   });
   it("is idempotent by contest id", async () => {
     const updates = owned(["cid5"]);
