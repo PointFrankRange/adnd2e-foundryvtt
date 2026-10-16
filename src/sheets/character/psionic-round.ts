@@ -74,7 +74,7 @@ export async function payRoundUpkeep(combat: CombatLike, round: number): Promise
   if (lines.length === 0) return;
   const esc = (s: string): string => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const title = i18n.format("ADND2E.chat.psionicContest.upkeepTitle", { round: String(round) });
-  await ChatMessage.create({ content: `<div class="adnd2e chat-card psionic-upkeep"><h3>${esc(title)}</h3>${lines.map((l) => `<p>${esc(l)}</p>`).join("")}</div>` } as never);
+  await ChatMessage.create({ content: `<div class="adnd2e chat-card psionic-upkeep"><header><h3>${esc(title)}</h3></header>${lines.map((l) => `<p class="check">${esc(l)}</p>`).join("")}</div>` } as never);
 }
 
 /** `updateCombat`: the round advanced (not the first round, not a step back) with the rule on, on the one active GM. */

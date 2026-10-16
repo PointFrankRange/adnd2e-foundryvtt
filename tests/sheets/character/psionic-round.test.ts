@@ -93,6 +93,8 @@ describe("payRoundUpkeep", () => {
     expect(updates).toEqual([{ "system.psionics.psp": 5 }]);
     expect(created).toHaveLength(1);
     expect(created[0]!.content).toContain("ADND2E.chat.psionicContest.upkeepPaid");
+    // the title sits in the card header (the chat-card theme styles `> header`; a bare heading rendered dark on dark)
+    expect(created[0]!.content).toMatch(/<header><h3>[^<]*upkeepTitle[^<]*<\/h3><\/header>/);
   });
   it("ends an unaffordable power and breaks tangents when nothing is left; keeps full contacts", async () => {
     const { actor, updates } = psionicActor({ psp: 2 });
