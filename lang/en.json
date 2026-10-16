@@ -406,8 +406,7 @@
           "staleTangents": "{name}: your later attack on another target had already broken these tangents, so they were not recorded.",
           "incapacitatedBroken": "{name} is incapacitated: all psychic contacts are broken.",
           "noTarget": "Target a token first.",
-          "selfTarget": "You cannot attack yourself.",
-          "alreadyFullContact": "You already have full contact with that target."
+          "selfTarget": "You cannot attack yourself."
         },
         "noClass": "Only a psionicist can do that.",
         "wildNoLearn": "A wild talent only has the powers its table results gave it.",
@@ -1090,6 +1089,23 @@
         "toThree": "all become 3",
         "lose": "lose {n} point(s)",
         "ability": { "wis": "Wisdom", "int": "Intelligence", "con": "Constitution" }
+      },
+      "psionicEffect": {
+        "noEffect": "The power check failed: no effect on the mind.",
+        "saveManual": "The target must roll a save vs {save} (it has no save to roll here).",
+        "mindThrustLose": "{power} is lost to the target for {days} days (the GM applies it).",
+        "mindThrustNone": "The target has no psionic powers: no effect beyond contact.",
+        "dazed": "The target is dazed for {rounds} rounds: -5 to all its die rolls (or 25%), and it cannot cast spells above 3rd level.",
+        "idIdle": "The target can do nothing for {rounds} rounds.",
+        "idTurn": "A roll at the power score: the target turns against its allies for {rounds} rounds.",
+        "crushHurt": "Failed save: the target takes {damage} points of damage.",
+        "crushResisted": "The target made its save: no damage.",
+        "blastLose": "Failed save: the target believes it has lost {lost} hit points (80% of what it has left). They are still there; it passes out when the remaining 20% are gone, and the effect wears off after six turns.",
+        "blastLoseUnknown": "Failed save: the target believes it has lost 80% of its remaining hit points (still there); the effect wears off after six turns.",
+        "blastPassOut": "A roll at the power score: it also passes out for one turn.",
+        "blastResisted": "The target made its save: no effect.",
+        "idNat20": "A natural 20: the attacker's id is unleashed: -1 on all its attack rolls and power checks for one turn.",
+        "crushNat20": "A natural 20: the victim is immune to further crushes from this psionicist for 24 hours."
       },
       "psionicContest": {
         "attackRoll": "Attack",

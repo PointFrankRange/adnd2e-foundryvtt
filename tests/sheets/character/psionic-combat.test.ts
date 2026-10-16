@@ -337,15 +337,15 @@ describe("attackMode - the pending path", () => {
     expect(created[0]!.flags.adnd2e.psionicContest.state).toBe("resolved");
   });
 
-  it("with the starting full contact the attack is refused before rolling (info toast, no write, no card)", async () => {
+  it("issue #180: with the starting full contact the attack is one power check and an effect card, not a contest (no contacts write)", async () => {
     const { a, updates } = attacker({ contacts: [{ target: "Actor.tgt", name: "Orc", tangents: 3 }] });
     const t = target({ defense: ts, wis: 13 });
     let rolled = 0;
-    await attackMode(a, "mt", { roll: async () => (rolled++, 10), targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
-    expect(updates).toEqual([]);
-    expect(created).toEqual([]);
-    expect(rolled).toBe(0);
-    expect(info).toHaveBeenCalledWith("ADND2E.sheet.psionics.combat.alreadyFullContact:{}");
+    await attackMode(a, "mt", { roll: async () => (rolled++, 10), rollDice: async () => 1, rollSave: async () => true, targets: () => [t.like], hasOnlineOwner: () => true, userId: "u-att" });
+    expect(updates).toEqual([{ "system.psionics.psp": 18 }]);
+    expect(rolled).toBe(1);
+    expect(created).toHaveLength(1);
+    expect(renderContexts[0]).toMatchObject({ powerName: "Mind Thrust", roll: 10, success: true });
   });
 
   it("pending with the starting full contact and a defense never happens; pending cost with one failure and one success is full", async () => {
