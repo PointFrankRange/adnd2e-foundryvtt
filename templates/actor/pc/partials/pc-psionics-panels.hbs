@@ -23,6 +23,39 @@
   </div>
 </section>
 
+{{#if adnd2e.psionics.proficiencies.show}}
+<section class="kit-panel">
+  <div class="kit-bar">{{localize 'ADND2E.sheet.psionics.proficiencies.title'}}</div>
+  <div class="kit-body">
+    {{#if adnd2e.psionics.proficiencies.harness.known}}
+    <div class="psionic-harness">
+      <strong>{{localize 'ADND2E.sheet.psionics.proficiencies.harness'}}:</strong>
+      {{#if adnd2e.psionics.proficiencies.harness.active}}
+        <span class="name">+{{adnd2e.psionics.proficiencies.harness.bonus}} {{localize 'ADND2E.sheet.psionics.psp'}}</span>
+        <button type="button" class="kit-small" data-action="psionicEndHarness">{{localize 'ADND2E.sheet.psionics.end'}}</button>
+      {{else}}
+        <button type="button" class="kit-small" data-action="psionicHarness" title="{{localize 'ADND2E.sheet.psionics.proficiencies.harnessHint'}}">{{localize 'ADND2E.sheet.psionics.proficiencies.harnessUse'}}</button>
+      {{/if}}
+    </div>
+    {{/if}}
+    {{#if adnd2e.psionics.proficiencies.focus.known}}
+    <div class="psionic-focus">
+      <strong>{{localize 'ADND2E.sheet.psionics.proficiencies.focus'}}:</strong>
+      {{#if adnd2e.psionics.proficiencies.focus.active}}
+        <span class="name">{{localize (concat 'ADND2E.sheet.psionics.discipline.' adnd2e.psionics.proficiencies.focus.discipline)}}</span>
+        <button type="button" class="kit-small" data-action="psionicEndFocus">{{localize 'ADND2E.sheet.psionics.end'}}</button>
+      {{else}}
+        <select data-psionic-focus>
+          {{#each adnd2e.psionics.proficiencies.disciplines as |d|}}<option value="{{d}}">{{localize (concat 'ADND2E.sheet.psionics.discipline.' d)}}</option>{{/each}}
+        </select>
+        <button type="button" class="kit-small" data-action="psionicFocus" title="{{localize 'ADND2E.sheet.psionics.proficiencies.focusHint'}}">{{localize 'ADND2E.sheet.psionics.proficiencies.focusUse'}}</button>
+      {{/if}}
+    </div>
+    {{/if}}
+  </div>
+</section>
+{{/if}}
+
 <section class="kit-panel">
   <div class="kit-bar">{{localize 'ADND2E.sheet.psionics.combat.title'}}</div>
   <div class="kit-body">

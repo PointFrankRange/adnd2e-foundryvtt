@@ -1,7 +1,9 @@
 import type { Contact } from "../../core/psionics/combat";
+import { knownPsionicProficiencies } from "../../core/psionics/proficiency";
 import { equippedArmorPenalty } from "../../data/derive/character/psionics";
 import type { PsionicPowerItem, PsionicsInput } from "./context-types";
 import { adjustPsp, endPower, payMaintenance, relearnPower, rest as psionicRest, usePower as usePsionicPower } from "./psionic-actions";
+import { endFocus, endHarness, harnessSubconscious, meditativeFocus } from "./psionic-proficiencies";
 import { attackMode, dropDefense, endContactAction, payUpkeep, raiseDefense } from "./psionic-combat";
 
 /* Issue #177: the Psionics tab wiring shared by the PC sheet and the Character NPC sheet,
@@ -9,7 +11,7 @@ import { attackMode, dropDefense, endContactAction, payUpkeep, raiseDefense } fr
 
 type ActorLike = {
   system: {
-    psionics?: { psp: number | null; max: number; level: number; wild?: boolean; maintained: { powerId: string }[]; activeDefense?: string; contacts?: Contact[] };
+    psionics?: { psp: number | null; max: number; level: number; wild?: boolean; maintained: { powerId: string }[]; activeDefense?: string; contacts?: Contact[]; harness?: { bonus: number }; focus?: { discipline: string } };
     abilities: Record<string, { score: number }>;
   };
 };
@@ -34,6 +36,9 @@ export function buildPsionicsInput(actor: ActorLike, items: readonly ItemLike[],
     contacts: p.contacts ?? [],
     abilityScores: Object.fromEntries(Object.entries(actor.system.abilities).map(([k, v]) => [k, v.score])),
     armorPenalty: equippedArmorPenalty(items, armorRuleOn && !p.wild),
+    focusDiscipline: p.focus?.discipline ?? "",
+    harnessBonus: p.harness?.bonus ?? 0,
+    proficiencies: knownPsionicProficiencies(items.filter((i) => i.type === "nonweaponProficiency").map((i) => i.name)),
     powers: items.filter((i) => i.type === "power").map((i) => ({ id: i.id, name: i.name, ...(i.system as Omit<PsionicPowerItem, "id" | "name">) })),
   };
 }
@@ -99,6 +104,20 @@ export const PSIONIC_ACTIONS: Record<string, Handler> = {
   },
   psionicPayUpkeep: async (s) => {
     if (s.isEditable) await payUpkeep(actor(s));
+  },
+  psionicHarness: async (s) => {
+    if (s.isEditable) await harnessSubconscious(actor(s));
+  },
+  psionicEndHarness: async (s) => {
+    if (s.isEditable) await endHarness(actor(s));
+  },
+  psionicFocus: async (s) => {
+    if (!s.isEditable) return;
+    const discipline = s.element.querySelector("[data-psionic-focus]")?.value;
+    if (discipline) await meditativeFocus(actor(s), discipline);
+  },
+  psionicEndFocus: async (s) => {
+    if (s.isEditable) await endFocus(actor(s));
   },
   psionicEndContact: async (s, t) => {
     const { target: contact } = t.dataset;

@@ -5,7 +5,7 @@
   "type": "nonweaponProficiency",
   "img": "icons/svg/book.svg",
   "system": {
-    "description": "The psionicist uses calm concentration to steady the mind and stay centered on psionic work.",
+    "description": "After 12 hours of meditation and a passed check, your power scores in one chosen discipline rise by 2 and all others fall by 1, for 24 hours or until your PSPs reach 0. Use the Focus button on the Psionics tab.",
     "governingAbility": "wis",
     "modifier": 1,
     "slotCost": 1,

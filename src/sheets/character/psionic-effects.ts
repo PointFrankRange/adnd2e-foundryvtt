@@ -1,7 +1,7 @@
 import { TEMPLATE_PATH } from "../../constants";
 import { checkCost, powerScore, rollPowerCheck } from "../../core/psionics";
 import { effectLines, effectPlan, failureNote, type EffectOutcome } from "../../core/psionics/effects";
-import { armorPenaltyOf, currentPsp, warn, type PsionicActor, type PsionicItem, type PsionicRoll } from "./psionic-actions";
+import { armorPenaltyOf, currentPsp, focusModifierOf, warn, type PsionicActor, type PsionicItem, type PsionicRoll } from "./psionic-actions";
 import { noteInitiation } from "./psionic-round";
 
 /* Issue #180: an attack mode against a mind the attacker already holds FULL contact with. The mind is open, so there is
@@ -45,7 +45,7 @@ export async function contactedAttack(actor: PsionicActor, power: PsionicItem, t
   await noteInitiation(actor, power);
   const score = powerScore(
     actor.system.abilities[String(power.system.abilityKey)]?.score ?? 0,
-    Number(power.system.abilityModifier ?? 0) + Number(power.system.scoreBonus ?? 0) + armorPenaltyOf(actor),
+    Number(power.system.abilityModifier ?? 0) + Number(power.system.scoreBonus ?? 0) + armorPenaltyOf(actor) + focusModifierOf(actor, String(power.system.discipline)),
   );
   const natural = await deps.roll();
   const check = rollPowerCheck(natural, score);

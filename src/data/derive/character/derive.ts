@@ -177,6 +177,7 @@ function deriveCharacterBase(snapshot: ActorSnapshot, options: OptionalRules): C
       classes: inPlay,
       scores: { wis: snapshot.abilities.wis, int: snapshot.abilities.int, con: snapshot.abilities.con },
       ...(snapshot.wildTalent ? { wild: snapshot.wildTalent } : {}),
+      ...(snapshot.psionicHarnessBonus ? { harnessBonus: snapshot.psionicHarnessBonus } : {}),
     });
   const mode = classifyArrangement(snapshot.classes);
   const race = snapshot.race ?? "human";
