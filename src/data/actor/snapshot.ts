@@ -56,6 +56,7 @@ export function snapshotActor(actor: Actor.Implementation, options: OptionalRule
       thiefSkills: ThiefSkillsSystem;
       options?: { spellsAndMagic?: { casting?: unknown } };
       wildTalent?: { found: boolean; levelAtDiscovery: number };
+      psionics?: { harness?: { bonus: number } };
       martialArts?: { activeStyleId?: string };
     };
     items: Iterable<{ id: string; type: string; system: unknown }>;
@@ -153,6 +154,7 @@ export function snapshotActor(actor: Actor.Implementation, options: OptionalRule
     thiefSkillAllocations,
     traits: toTraitEntries(items),
     kitEffects: kitEntries.flatMap((k) => k.effects),
+    ...((doc.system.psionics?.harness?.bonus ?? 0) > 0 ? { psionicHarnessBonus: doc.system.psionics!.harness!.bonus } : {}),
     ...(doc.system.wildTalent
       ? {
           wildTalent: {

@@ -3,7 +3,7 @@ import { equippedArmorPenalty } from "../../data/derive/character/psionics";
 import { getOptionalRules } from "../../settings";
 import { noteInitiation } from "./psionic-round";
 import type { Contact } from "../../core/psionics/combat";
-import { applyRecovery, canRelearn, checkCost, powerScore, rollPowerCheck, type Discipline, type KnownPower, type PowerKind, type RecoveryActivity } from "../../core/psionics";
+import { applyRecovery, canRelearn, checkCost, focusModifier, powerScore, rollPowerCheck, type Discipline, type KnownPower, type PowerKind, type RecoveryActivity } from "../../core/psionics";
 
 /* SP15 Plan A - psionic power actions. Foundry glue only; the rules live in
  * src/core/psionics. Every write targets the acting actor's own
@@ -27,7 +27,7 @@ export interface PsionicActor {
   system: {
     abilities: Record<string, { score: number }>;
     /** `level` is the derived cache: 0 = no active psionicist class */
-    psionics: { psp: number | null; maintained: { powerId: string }[]; activeDefense: string; contacts: Contact[]; max: number; level: number; wild?: boolean };
+    psionics: { psp: number | null; maintained: { powerId: string }[]; activeDefense: string; contacts: Contact[]; max: number; level: number; wild?: boolean; harness?: { bonus: number; expiresAt: number | null }; focus?: { discipline: string; expiresAt: number | null } };
   };
   update(data: Record<string, unknown>): Promise<unknown>;
 }
@@ -56,6 +56,17 @@ export function currentPsp(actor: PsionicActor): number {
 }
 
 const isPsionicist = (actor: PsionicActor): boolean => actor.system.psionics.level > 0;
+
+/** Issue #180: the Meditative Focus modifier for a power of `discipline` (0 without a focus or with an empty pool). */
+export function focusModifierOf(
+  actor: { system: { psionics?: { psp?: number | null; max?: number; focus?: { discipline: string } } } },
+  discipline: string,
+): number {
+  const p = actor.system.psionics;
+  if (!p) return 0;
+  const max = p.max ?? 1; // a target that does not report its pool is treated as having PSPs
+  return focusModifier(p.focus?.discipline ?? "", discipline, Math.min(p.psp ?? max, max));
+}
 
 /** Issue #118: the Table 9 armor reduction (<= 0) on every power score; a wild talent is not a psionicist and pays none. */
 export function armorPenaltyOf(actor: { items: Iterable<PsionicItem>; system: { psionics?: { wild?: boolean } } }): number {
@@ -97,7 +108,7 @@ export async function usePower(actor: PsionicActor, powerId: string, roll: Psion
     return;
   }
   const abilityKey = String(power.system.abilityKey);
-  const score = powerScore(actor.system.abilities[abilityKey]?.score ?? 0, Number(power.system.abilityModifier ?? 0) + Number(power.system.scoreBonus ?? 0) + armorPenaltyOf(actor));
+  const score = powerScore(actor.system.abilities[abilityKey]?.score ?? 0, Number(power.system.abilityModifier ?? 0) + Number(power.system.scoreBonus ?? 0) + armorPenaltyOf(actor) + focusModifierOf(actor, String(power.system.discipline)));
   const { inCombat } = await noteInitiation(actor, power);
   const natural = await roll();
   const check = rollPowerCheck(natural, score);
@@ -155,7 +166,9 @@ export async function rest(actor: PsionicActor, activity: RecoveryActivity, hour
     return;
   }
   const { max } = actor.system.psionics;
-  const recovered = applyRecovery(currentPsp(actor), max, activity, hours);
+  // issue #180: the Harness Subconscious bonus can never be recovered once spent - recovery stops at the usual maximum
+  const usual = max - (actor.system.psionics.harness?.bonus ?? 0);
+  const recovered = applyRecovery(currentPsp(actor), usual, activity, hours);
   // a full pool is stored as null so a later level-up's larger maximum is full too
   const update: Record<string, unknown> = { "system.psionics.psp": recovered >= max ? null : recovered };
   // an entry whose power item was deleted must not block rest: prune it in the same write

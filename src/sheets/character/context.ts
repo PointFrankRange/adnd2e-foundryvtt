@@ -56,7 +56,7 @@ import { CONDITIONS } from "../../conditions";
 import { groupInventory } from "./grouping";
 import { xpToNext } from "./xp";
 import { FULL_CONTACT, isAttackMode, isDefenseMode, upkeepDue } from "../../core/psionics/combat";
-import { canRelearn, DISCIPLINES, powerProgression, powerScore, primaryDiscipline, type KnownPower } from "../../core/psionics";
+import { canRelearn, DISCIPLINES, focusModifier, powerProgression, powerScore, primaryDiscipline, type KnownPower } from "../../core/psionics";
 import { levelRulesOf } from "../../core/classes/level-limits";
 import { buildFavoriteRows, isFavorite, normalizeFavorites, type FavoriteKind } from "../kit/favorites";
 import { lockState } from "../kit/lock";
@@ -132,7 +132,7 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
     id: p.id,
     name: p.name,
     kind: p.kind,
-    score: powerScore(input.abilityScores[p.abilityKey] ?? 0, p.abilityModifier + p.scoreBonus + armor),
+    score: powerScore(input.abilityScores[p.abilityKey] ?? 0, p.abilityModifier + p.scoreBonus + armor + focusModifier(input.focusDiscipline ?? "", p.discipline, psp)),
     cost: p.initialCost,
     costNote: p.costNote,
     maintenance: p.maintenanceCost,
@@ -165,7 +165,13 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
     row,
     primary: primaryDiscipline(known),
     armorPenalty: armor < 0 ? { value: armor, armor: input.armorPenalty?.armor ?? "" } : null,
-    activities: [...PSIONIC_ACTIVITIES],
+    proficiencies: {
+      show: !wild && (input.proficiencies?.harness === true || input.proficiencies?.focus === true),
+      harness: { known: input.proficiencies?.harness ?? false, active: (input.harnessBonus ?? 0) > 0, bonus: input.harnessBonus ?? 0 },
+      focus: { known: input.proficiencies?.focus ?? false, active: (input.focusDiscipline ?? "") !== "", discipline: input.focusDiscipline ?? "" },
+      disciplines: [...DISCIPLINES],
+    },
+    activities: [...PSIONIC_ACTIVITIES, ...(input.proficiencies?.rejuvenation ? (["meditate"] as const) : [])],
     maintained,
     groups: DISCIPLINES.map((discipline) => ({
       discipline,

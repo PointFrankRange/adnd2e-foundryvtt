@@ -67,10 +67,10 @@ describe("PSIONIC_ACTIONS", () => {
   const btn = (data: Record<string, string> = {}) => ({ dataset: data });
   const run = (id: string, s: PsionicSheet, data: Record<string, string> = {}) => PSIONIC_ACTIONS[id]!(s, btn(data));
 
-  it("registers the 11 psionic action ids and no wild-talent action", () => {
+  it("registers the 15 psionic action ids and no wild-talent action", () => {
     expect(Object.keys(PSIONIC_ACTIONS).sort()).toEqual([
-      "adjustPsionicPsp", "endPsionicPower", "payPsionicMaintenance", "psionicAttack", "psionicDropDefense", "psionicEndContact",
-      "psionicPayUpkeep", "psionicRaiseDefense", "psionicRest", "relearnPsionicPower", "usePsionicPower",
+      "adjustPsionicPsp", "endPsionicPower", "payPsionicMaintenance", "psionicAttack", "psionicDropDefense", "psionicEndContact", "psionicEndFocus",
+      "psionicEndHarness", "psionicFocus", "psionicHarness", "psionicPayUpkeep", "psionicRaiseDefense", "psionicRest", "relearnPsionicPower", "usePsionicPower",
     ]);
   });
   it("dispatches per-power actions with the power id, and ignores a missing id", async () => {

@@ -2,6 +2,7 @@ import { SYSTEM_ID } from "../constants";
 import { anyIncapacitating } from "../combat/condition-effects";
 import { applyContestTangents, type ContestFlag } from "../sheets/character/psionic-combat";
 import type { WildFlag } from "../sheets/character/psionic-wild";
+import { endFocus, expireProficiencyEffects } from "../sheets/character/psionic-proficiencies";
 import { onCombatUpdate } from "../sheets/character/psionic-round";
 
 /* SP15 Plan C - the psychic-contest result hook. When a defender's roll resolves a
@@ -50,8 +51,19 @@ export function registerPsionicHooks(): void {
     void onCombatUpdate(combat as never, changed as never, options as never);
   });
   Hooks.on("userConnected", () => rerenderPendingContestCards());
-  Hooks.on("updateActor", (actor: unknown, changes: unknown) => {
+  // issue #180: a Harness Subconscious boost and a Meditative Focus end with the world time (the active GM's client only)
+  Hooks.on("updateWorldTime", (worldTime: number) => {
+    const g = game as unknown as { user: { id: string }; users: { activeGM?: { id: string } | null }; actors: Iterable<unknown> };
+    if (g.users.activeGM?.id !== g.user.id) return;
+    void expireProficiencyEffects(g.actors as never, worldTime);
+  });
+  Hooks.on("updateActor", (actor: unknown, changes: unknown, _options?: unknown, userId?: string) => {
     const uuid = (actor as { uuid: string }).uuid;
+    // issue #180: a Meditative Focus ends when the PSPs reach 0 (the client that spent them clears it)
+    const c = changes as { system?: { psionics?: { psp?: unknown } } } & Record<string, unknown>;
+    const spentToZero = c.system?.psionics?.psp === 0 || c["system.psionics.psp"] === 0;
+    const focused = ((actor as { system?: { psionics?: { focus?: { discipline?: string } } } }).system?.psionics?.focus?.discipline ?? "") !== "";
+    if (spentToZero && focused && userId === game.user?.id) void endFocus(actor as never);
     if (touchesFlag(changes as Record<string, unknown>, "psionicApplied")) rerenderContestCards(uuid);
     if (touchesFlag(changes as Record<string, unknown>, "wildApplied")) rerenderWildCards(uuid);
   });

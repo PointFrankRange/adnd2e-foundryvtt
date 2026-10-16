@@ -110,6 +110,16 @@ describe("usePower", () => {
     armorRule = false;
     expect(armorPenaltyOf(on.a)).toBe(0);
   });
+  it("issue #180: a Meditative Focus adds +2 to the focused discipline and -1 to the others", async () => {
+    const on = actor();
+    (on.a.system.psionics as { focus?: { discipline: string } }).focus = { discipline: "telepathy" };
+    await usePower(on.a, "p1", async () => 12); // telepathy, Wis 14 - 4 + 2
+    expect(rendered[0]).toMatchObject({ score: 12 });
+    const other = actor({ items: [power("p1", { discipline: "psychokinesis" })] });
+    (other.a.system.psionics as { focus?: { discipline: string } }).focus = { discipline: "telepathy" };
+    await usePower(other.a, "p1", async () => 9); // 10 - 1
+    expect(rendered[1]).toMatchObject({ score: 9 });
+  });
   it("adds the relearn bonus to the score", async () => {
     const { a } = actor({ items: [power("p1", { scoreBonus: 2 })] });
     await usePower(a, "p1", async () => 12);
