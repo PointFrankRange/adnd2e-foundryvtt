@@ -1,6 +1,7 @@
 import { TEMPLATE_PATH } from "../../constants";
 import { equippedArmorPenalty } from "../../data/derive/character/psionics";
 import { getOptionalRules } from "../../settings";
+import { noteInitiation } from "./psionic-round";
 import type { Contact } from "../../core/psionics/combat";
 import { applyRecovery, canRelearn, checkCost, powerScore, rollPowerCheck, type Discipline, type KnownPower, type PowerKind, type RecoveryActivity } from "../../core/psionics";
 
@@ -97,6 +98,7 @@ export async function usePower(actor: PsionicActor, powerId: string, roll: Psion
   }
   const abilityKey = String(power.system.abilityKey);
   const score = powerScore(actor.system.abilities[abilityKey]?.score ?? 0, Number(power.system.abilityModifier ?? 0) + Number(power.system.scoreBonus ?? 0) + armorPenaltyOf(actor));
+  const { inCombat } = await noteInitiation(actor, power);
   const natural = await roll();
   const check = rollPowerCheck(natural, score);
   const paid = checkCost(cost, check.success);
@@ -117,6 +119,7 @@ export async function usePower(actor: PsionicActor, powerId: string, roll: Psion
     score,
     resultKey: `ADND2E.chat.psionic.result.${check.result}`,
     special: check.special,
+    halfMove: inCombat,
     cost: paid,
     remaining,
     max: actor.system.psionics.max,

@@ -402,6 +402,7 @@
           "alreadyRaised": "That defense mode is already raised.",
           "noUpkeep": "No tangents to maintain.",
           "tangentsBroken": "Not enough PSPs: your tangents are broken.",
+          "secondPower": "{name} has already initiated a power this round (one per round; defense modes excepted). It still goes through - the GM decides.",
           "staleTangents": "{name}: your later attack on another target had already broken these tangents, so they were not recorded.",
           "incapacitatedBroken": "{name} is incapacitated: all psychic contacts are broken.",
           "noTarget": "Target a token first.",
@@ -1023,6 +1024,7 @@
       "standUp": "{name} spends their full move standing up.",
       "psionic": {
         "roll": "Power check",
+        "halfMove": "Concentrating: moves at half rate this round.",
         "special": "The roll equals the power score exactly: a special success.",
         "cost": "PSPs spent",
         "remaining": "Remaining",
@@ -1103,6 +1105,10 @@
         "recordTangent": "Record tangent",
         "notYourDefense": "Only the defender's owner or a GM can roll this defense.",
         "offlineHint": "The defender is offline: you may roll their defense.",
+        "upkeepTitle": "Psionic upkeep - round {round}",
+        "upkeepPaid": "{name}: {paid} PSP",
+        "upkeepEnded": "{name}: {power} ended (not enough PSPs)",
+        "upkeepBroken": "{name}: tangents broken (not enough PSPs)",
         "alreadyAnswered": "This contest has already been answered.",
         "alreadyRecorded": "Those tangents are already recorded.",
         "recorded": "Tangents recorded.",
@@ -1450,6 +1456,10 @@
       "psionicArmorPenalties": {
         "name": "Psionicist armor penalties",
         "hint": "Psionicists may wear any armor, but metal armor lowers every psionic power score: -1 brigandine/ring/scale/splint, -2 chain/banded, -3 plate, -5 field plate, -7 full plate (Complete Psionics Handbook, Table 9). Needs a reload."
+      },
+      "psionicAutoUpkeep": {
+        "name": "Automatic psionic upkeep",
+        "hint": "At each new combat round the GM's client pays every combatant's per-round maintained powers and 1 PSP for partial tangents (a power or tangent that cannot be paid ends). Per-turn and per-hour powers stay manual. Needs a reload."
       },
       "primeRequisiteBonusLevels": {
         "name": "Bonus levels for high prime requisites",

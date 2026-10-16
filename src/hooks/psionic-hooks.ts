@@ -2,6 +2,7 @@ import { SYSTEM_ID } from "../constants";
 import { anyIncapacitating } from "../combat/condition-effects";
 import { applyContestTangents, type ContestFlag } from "../sheets/character/psionic-combat";
 import type { WildFlag } from "../sheets/character/psionic-wild";
+import { onCombatUpdate } from "../sheets/character/psionic-round";
 
 /* SP15 Plan C - the psychic-contest result hook. When a defender's roll resolves a
  * pending contest card, the ATTACKER's client (and only it) records the tangents on
@@ -44,6 +45,10 @@ const touchesFlag = (changes: Record<string, unknown>, key: string): boolean => 
 };
 
 export function registerPsionicHooks(): void {
+  // issue #179: automatic per-round upkeep (optional rule; the active GM's client only)
+  Hooks.on("updateCombat", (combat: unknown, changed: unknown, options: unknown) => {
+    void onCombatUpdate(combat as never, changed as never, options as never);
+  });
   Hooks.on("userConnected", () => rerenderPendingContestCards());
   Hooks.on("updateActor", (actor: unknown, changes: unknown) => {
     const uuid = (actor as { uuid: string }).uuid;

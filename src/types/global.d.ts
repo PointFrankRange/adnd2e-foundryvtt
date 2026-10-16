@@ -64,6 +64,7 @@ declare global {
     "adnd2e.primeRequisiteBonusLevels": boolean;
     "adnd2e.wildTalents": boolean;
     "adnd2e.psionicArmorPenalties": boolean;
+    "adnd2e.psionicAutoUpkeep": boolean;
     "adnd2e.advancedMartialArts": boolean;
     "adnd2e.exceedLevelLimits": string;
     // combatAndTactics — reserved for Sub-project 7
