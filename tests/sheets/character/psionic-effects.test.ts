@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { contactedAttack, defaultRollDice, defaultRollSave, type EffectDeps, type EffectTarget } from "../../../src/sheets/character/psionic-effects";
+import { applyPsionicEffect, contactedAttack, defaultRollDice, defaultRollSave, type EffectDeps, type EffectTarget } from "../../../src/sheets/character/psionic-effects";
 import type { PsionicActor, PsionicItem } from "../../../src/sheets/character/psionic-actions";
 
 const rolls = { saved: vi.fn() };
 vi.mock("../../../src/sheets/character/combat-rolls", () => ({ rollSave: (...a: unknown[]) => rolls.saved(...a) }));
 vi.mock("../../../src/sheets/character/psionic-round", () => ({ noteInitiation: async () => ({ inCombat: false }) }));
+const requests: unknown[] = [];
+vi.mock("../../../src/relay/relay-client", () => ({ requestApply: async (_t: unknown, r: unknown) => (requests.push(r), true) }));
 vi.mock("../../../src/settings", () => ({ getOptionalRules: () => ({ psionicArmorPenalties: false }) }));
 
 let contexts: Record<string, unknown>[] = [];
@@ -83,9 +85,68 @@ describe("contactedAttack", () => {
     await contactedAttack(attacker(), mode("Psionic Blast"), target({ attributes: undefined }), deps());
     expect((contexts[1] as { lines: string[] }).lines[0]).toContain("blastLoseUnknown");
   });
+  it("posts the apply actions on the card flag (Ego Whip daze) and marks the card as applyable", async () => {
+    await contactedAttack(attacker(), mode("Ego Whip"), target(), deps());
+    const create = (globalThis as unknown as { ChatMessage: { create: ReturnType<typeof vi.fn> } }).ChatMessage.create;
+    const created = create.mock.calls.at(-1)![0] as { flags: { adnd2e: { psionicEffect: unknown } } };
+    expect(created.flags.adnd2e.psionicEffect).toEqual({ attackerActorUuid: "", targetUuid: "Actor.t", apply: [{ kind: "condition", conditionId: "dazed", rounds: 3 }], applied: false });
+    expect(contexts.at(-1)).toMatchObject({ hasApply: true });
+  });
   it("a natural 20 fails and adds the book note for Psychic Crush", async () => {
     await contactedAttack(attacker(), mode("Psychic Crush"), target(), deps({}, 20));
     expect(contexts[0]).toMatchObject({ success: false, note: "ADND2E.chat.psionicEffect.crushNat20" });
+  });
+});
+
+describe("the Apply button (issue #180)", () => {
+  const flagOf = (over: Record<string, unknown> = {}) => ({ attackerActorUuid: "Actor.att", targetUuid: "Actor.t", apply: [{ kind: "damage", amount: 4 }, { kind: "condition", conditionId: "dazed", rounds: 2 }], applied: false, ...over });
+  const setup = (flag: unknown, opts: { isGM?: boolean; owner?: boolean; target?: boolean } = {}) => {
+    const updates: Record<string, unknown>[] = [];
+    const g = globalThis as Record<string, unknown>;
+    (g.game as Record<string, unknown>).user = { isGM: opts.isGM ?? false };
+    (g.game as Record<string, unknown>).messages = { get: (id: string) => (id === "m1" ? { getFlag: () => flag, update: async (d: Record<string, unknown>) => void updates.push(d) } : undefined) };
+    (g.foundry as Record<string, unknown>).utils = { fromUuidSync: (u: string) => (u === "Actor.att" ? { isOwner: opts.owner ?? false } : opts.target === false ? null : { isOwner: false }) };
+    requests.length = 0;
+    return updates;
+  };
+  it("the attacker's owner applies each action through the relay and the card is marked applied", async () => {
+    const updates = setup(flagOf(), { owner: true });
+    await applyPsionicEffect("m1");
+    expect(requests).toEqual([{ kind: "damage", targetUuid: "Actor.t", amount: 4 }, { kind: "condition", targetUuid: "Actor.t", conditionId: "dazed", rounds: 2 }]);
+    expect(updates).toEqual([{ "flags.adnd2e.psionicEffect.applied": true }]);
+  });
+  it("a GM may apply too", async () => {
+    const updates = setup(flagOf(), { isGM: true });
+    await applyPsionicEffect("m1");
+    expect(updates).toHaveLength(1);
+  });
+  it("anyone else is refused; an applied card, a card with nothing to apply and an unknown message do nothing", async () => {
+    setup(flagOf());
+    await applyPsionicEffect("m1");
+    expect(warn).toHaveBeenCalledWith("ADND2E.chat.psionicEffect.notYours");
+    setup(flagOf({ applied: true }), { isGM: true });
+    await applyPsionicEffect("m1");
+    setup(flagOf({ apply: [] }), { isGM: true });
+    await applyPsionicEffect("m1");
+    setup(undefined, { isGM: true });
+    await applyPsionicEffect("m1");
+    await applyPsionicEffect("nope");
+    const updates = setup(flagOf(), { isGM: true });
+    await applyPsionicEffect("nope");
+    expect(requests).toEqual([]);
+    expect(updates).toEqual([]);
+  });
+  it("a missing target warns and leaves the card unapplied", async () => {
+    const updates = setup(flagOf(), { isGM: true, target: false });
+    await applyPsionicEffect("m1");
+    expect(warn).toHaveBeenCalledWith("ADND2E.chat.psionicEffect.noTarget");
+    expect(updates).toEqual([]);
+  });
+  it("a second click while the first is in flight does not apply twice", async () => {
+    const updates = setup(flagOf(), { isGM: true });
+    await Promise.all([applyPsionicEffect("m1"), applyPsionicEffect("m1")]);
+    expect(requests).toHaveLength(2);
+    expect(updates).toHaveLength(1);
   });
 });
 

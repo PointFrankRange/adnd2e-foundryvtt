@@ -9,8 +9,8 @@ import { parseGrappleRecord, type GrappleRecord } from "../core/wrestling";
 export const RELAY_QUERY = "adnd2e.applyEffect";
 
 /** The conditions a maneuver may relay (Plan 7d's called shots + grapple, SP10's turned, and SP18 B2's paralyzed and
- *  unconscious from the martial-arts lock and vital-area maneuvers). */
-export const RELAY_CONDITIONS = ["stunned", "prone", "held", "turned", "paralyzed", "unconscious"] as const;
+ *  unconscious from the martial-arts lock and vital-area maneuvers, and #180's dazed from a psionic Ego Whip). */
+export const RELAY_CONDITIONS = ["stunned", "prone", "held", "turned", "paralyzed", "unconscious", "dazed"] as const;
 export type RelayConditionId = (typeof RELAY_CONDITIONS)[number];
 
 export const PLAYER_APPLY_MODES = ["auto", "approve"] as const;

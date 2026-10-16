@@ -87,6 +87,12 @@ export function frightenedAttackPenalty(actorStatuses: StatusSet): number {
   return has(actorStatuses, "frightened") ? -2 : 0;
 }
 
+/** #180: a dazed actor (an Ego Whip on a contacted mind) suffers -5 on its OWN attack rolls; its saves, power checks and
+ *  spell limits are left to the GM (the card says so). */
+export function dazedAttackPenalty(actorStatuses: StatusSet): number {
+  return has(actorStatuses, "dazed") ? -5 : 0;
+}
+
 /** Stunned, held or incapacitated (unconscious, paralyzed, sleeping, incapacitated, dead, mortally fatigued): the actor
  *  cannot take an attack action this round. Scoped to attack rolls only (a deliberate v1 simplification) — saving
  *  throws are NOT gated by this, since resisting something happening to you is treated as still possible. */

@@ -1009,7 +1009,7 @@
         "levitationRate": "Float up, down or sideways at {n1} ft per round.",
         "levitationDuration": "Lasts {n1} rounds.",
         "levitationRules": "Needs one turn of concentration first; no actions while floating; rest one round afterwards.",
-        "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions", "table21": "Target's armor", "maneuver": "Maneuver", "blinded": "Blinded", "invisibleTarget": "Invisible opponent", "fatigue": "Fatigue", "entangled": "Entangled", "frightened": "Frightened", "heldTarget": "Held opponent", "blindFighting": "Blind Fighting (blinded or invisible foe)", "weaponBonus": "Weapon bonus" },
+        "mod": { "armor": "Worn armor", "weaponSize": "Opponent's weapon", "situational": "Conditions", "table21": "Target's armor", "maneuver": "Maneuver", "blinded": "Blinded", "invisibleTarget": "Invisible opponent", "fatigue": "Fatigue", "entangled": "Entangled", "frightened": "Frightened", "dazed": "Dazed", "heldTarget": "Held opponent", "blindFighting": "Blind Fighting (blinded or invisible foe)", "weaponBonus": "Weapon bonus" },
         "weapon": { "ok": "Armed with {weapon}.", "uncovered": "{weapon} is not in a weapon group you have learned for this style.", "notAllowed": "{weapon} cannot be used with this maneuver." }
       },
       "shapechange": {
@@ -1092,10 +1092,14 @@
       },
       "psionicEffect": {
         "noEffect": "The power check failed: no effect on the mind.",
+        "apply": "Apply to target",
+        "applied": "Applied.",
+        "notYours": "Only the attacker's owner or a GM can apply this effect.",
+        "noTarget": "The target is no longer available.",
         "saveManual": "The target must roll a save vs {save} (it has no save to roll here).",
         "mindThrustLose": "{power} is lost to the target for {days} days (the GM applies it).",
         "mindThrustNone": "The target has no psionic powers: no effect beyond contact.",
-        "dazed": "The target is dazed for {rounds} rounds: -5 to all its die rolls (or 25%), and it cannot cast spells above 3rd level.",
+        "dazed": "The target is dazed for {rounds} rounds: -5 to all its die rolls (or 25%), and it cannot cast spells above 3rd level. Apply adds the dazed condition (-5 on its attack rolls); its saves, power checks and spells are for the GM.",
         "idIdle": "The target can do nothing for {rounds} rounds.",
         "idTurn": "A roll at the power score: the target turns against its allies for {rounds} rounds.",
         "crushHurt": "Failed save: the target takes {damage} points of damage.",
