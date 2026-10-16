@@ -6,6 +6,7 @@ import {
   applyLateTangents,
 } from "../../core/psionics/combat";
 import { noteInitiation } from "./psionic-round";
+import { contactedAttack, defaultRollDice, defaultRollSave, type EffectDeps } from "./psionic-effects";
 import { armorPenaltyOf, currentPsp, findPower, info, requirePsionicist, rollD20, warn, type PsionicActor, type PsionicItem, type PsionicRoll } from "./psionic-actions";
 
 /* SP15 Plan C - psionic combat state actions (active defense, upkeep, contacts).
@@ -79,6 +80,9 @@ export interface AttackDeps {
   hasOnlineOwner: (target: TargetActor) => boolean;
   /** issue #178: the users who may answer a pending card (GMs and the target's owners) */
   answerUserIds: (target: TargetActor) => string[];
+  /** issue #180: dice and the target's save for an attack on a contacted mind */
+  rollDice: EffectDeps["rollDice"];
+  rollSave: EffectDeps["rollSave"];
   userId: string;
 }
 
@@ -257,7 +261,13 @@ export async function attackMode(actor: PsionicActor, powerId: string, deps: Par
     return;
   }
   if (tangentsOn(actor.system.psionics.contacts, target.uuid) >= FULL_CONTACT) {
-    info("ADND2E.sheet.psionics.combat.alreadyFullContact");
+    // issue #180: the mind is open - one power check and the mode's effect instead of a contest
+    await contactedAttack(actor, power, target as never, {
+      roll,
+      rollDice: deps.rollDice ?? defaultRollDice,
+      rollSave: deps.rollSave ?? defaultRollSave,
+      writePsp: (remaining) => serialize(attackerUuid, () => actor.update({ "system.psionics.psp": remaining })),
+    });
     return;
   }
   const cost = Number(power.system.initialCost ?? 0);

@@ -32,8 +32,8 @@ describe("chat card stylesheet (#150)", () => {
   });
 
   const files = readdirSync(CHAT_DIR).filter((f) => f.endsWith(".hbs"));
-  it("finds all eighteen chat templates", () => {
-    expect(files.length).toBe(18);
+  it("finds all nineteen chat templates", () => {
+    expect(files.length).toBe(19);
   });
 
   for (const file of files) {

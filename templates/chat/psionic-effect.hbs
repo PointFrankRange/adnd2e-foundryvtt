@@ -1,0 +1,12 @@
+<div class="adnd2e chat-card psionic-effect">
+  <header>
+    <img src="{{attackerImg}}" alt="{{attackerName}}">
+    <h3>{{attackerName}} - {{powerName}}</h3>
+  </header>
+  <p class="target">{{localize 'ADND2E.chat.psionicContest.against' target=targetName}}</p>
+  <p class="check"><strong>{{localize 'ADND2E.chat.psionic.roll'}}:</strong> {{roll}} / {{score}} - {{localize resultKey}}</p>
+  {{#unless success}}<p class="hint">{{localize 'ADND2E.chat.psionicEffect.noEffect'}}</p>{{/unless}}
+  {{#each lines}}<p class="result">{{this}}</p>{{/each}}
+  {{#if note}}<p class="hint">{{note}}</p>{{/if}}
+  <p class="cost">{{localize 'ADND2E.chat.psionicContest.paid'}}: {{paid}} - {{localize 'ADND2E.chat.psionic.remaining'}}: {{remaining}} / {{max}}</p>
+</div>
