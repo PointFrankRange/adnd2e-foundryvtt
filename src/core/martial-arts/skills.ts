@@ -70,7 +70,7 @@ export function blindFightingTotal(blinded: number, invisible: number, known: bo
 }
 
 export interface ConditionMods {
-  blinded: number; invisibleTarget: number; fatigue: number; entangled: number; frightened: number; heldTarget: number;
+  blinded: number; invisibleTarget: number; fatigue: number; entangled: number; frightened: number; dazed: number; heldTarget: number;
 }
 
 /** The attack-roll condition modifiers itemized: one labelled row per non-zero condition; Blind Fighting folds
@@ -85,7 +85,8 @@ export function conditionModifiers(input: ConditionMods & { blindFighting: boole
   }
   rows.push(
     { labelKey: `${P}fatigue`, amount: input.fatigue }, { labelKey: `${P}entangled`, amount: input.entangled },
-    { labelKey: `${P}frightened`, amount: input.frightened }, { labelKey: `${P}heldTarget`, amount: input.heldTarget },
+    { labelKey: `${P}frightened`, amount: input.frightened }, { labelKey: `${P}dazed`, amount: input.dazed },
+    { labelKey: `${P}heldTarget`, amount: input.heldTarget },
   );
   const kept = rows.filter((r) => r.amount !== 0);
   return { total: kept.reduce((n, r) => n + r.amount, 0), rows: kept };

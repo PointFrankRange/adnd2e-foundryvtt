@@ -1,6 +1,6 @@
 # `conditions` pack — source manifest
 
-Twenty-two status conditions the system ships. Each document is an `adnd2e`-subtype
+Twenty-three status conditions the system ships. Each document is an `adnd2e`-subtype
 ActiveEffect carrying identity only — `_id`, `name`, `img`, `statuses`, and
 `system.conditionId` / `system.isCondition`. Per-condition mechanical `changes`
 are deferred to SP3 / SP7; `system.changes` is `[]` here.
@@ -30,6 +30,7 @@ No rulebook prose is stored (`system.description` is not set on these docs).
 | sleeping | Sleeping | `icons/svg/sleep.svg` |
 | charmed | Charmed | `icons/svg/terror.svg` |
 | frightened | Frightened | `icons/svg/terror.svg` |
+| dazed | Dazed | `icons/svg/hazard.svg` |
 | incapacitated | Incapacitated | `icons/svg/downgrade.svg` |
 | dead | Dead | `icons/svg/skull.svg` |
 | lightFatigue | Lightly Fatigued | `icons/svg/degen.svg` |

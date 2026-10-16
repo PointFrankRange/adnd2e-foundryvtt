@@ -1,6 +1,6 @@
 import { TEMPLATE_PATH } from "../../constants";
 import {
-  blindedAttackPenalty, canAct, entangledAttackPenalty, fatigueArmorClassPenalty, fatigueAttackPenalty, frightenedAttackPenalty,
+  blindedAttackPenalty, canAct, dazedAttackPenalty, entangledAttackPenalty, fatigueArmorClassPenalty, fatigueAttackPenalty, frightenedAttackPenalty,
   heldAttackBonus, invisibleTargetPenalty, isHelpless, proneArmorClassPenalty,
 } from "../../combat/condition-effects";
 import {
@@ -172,6 +172,7 @@ function situational(actor: MartialArtsActor, targetStatuses: ReadonlySet<string
     fatigue: fatigueAttackPenalty(actor.statuses),
     entangled: entangledAttackPenalty(actor.statuses),
     frightened: frightenedAttackPenalty(actor.statuses),
+    dazed: dazedAttackPenalty(actor.statuses),
     heldTarget: heldAttackBonus(targetStatuses),
     blindFighting,
   });

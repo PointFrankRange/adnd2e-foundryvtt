@@ -184,7 +184,14 @@ describe("frightenedAttackPenalty", () => {
   });
 });
 
-import { anyIncapacitating } from "../../src/combat/condition-effects";
+import { anyIncapacitating, dazedAttackPenalty } from "../../src/combat/condition-effects";
+
+describe("dazedAttackPenalty (issue #180)", () => {
+  it("is -5 when dazed, else 0", () => {
+    expect(dazedAttackPenalty(new Set(["dazed"]))).toBe(-5);
+    expect(dazedAttackPenalty([])).toBe(0);
+  });
+});
 
 describe("anyIncapacitating (issue #122)", () => {
   it("is true for incapacitating conditions and false for stunned, held or nothing", () => {

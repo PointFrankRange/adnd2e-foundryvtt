@@ -1,6 +1,7 @@
-import { TEMPLATE_PATH } from "../../constants";
+import { SYSTEM_ID, TEMPLATE_PATH } from "../../constants";
+import { requestApply } from "../../relay/relay-client";
 import { checkCost, powerScore, rollPowerCheck } from "../../core/psionics";
-import { effectLines, effectPlan, failureNote, type EffectOutcome } from "../../core/psionics/effects";
+import { effectApplyActions, effectLines, effectPlan, failureNote, type ApplyAction, type EffectOutcome } from "../../core/psionics/effects";
 import { armorPenaltyOf, currentPsp, warn, type PsionicActor, type PsionicItem, type PsionicRoll } from "./psionic-actions";
 import { noteInitiation } from "./psionic-round";
 
@@ -56,6 +57,7 @@ export async function contactedAttack(actor: PsionicActor, power: PsionicItem, t
   const i18n = game.i18n!;
   const plan = effectPlan(power.name, { success: check.success, special: check.special, natural20: natural === 20 });
   const lines: string[] = [];
+  let apply: ApplyAction[] = [];
   if (plan) {
     const outcome: EffectOutcome = { saveFailed: null, duration: null, damage: null, lostPower: null, hp: target.actor.system.attributes?.hp?.value ?? null };
     if (plan.save) {
@@ -72,6 +74,7 @@ export async function contactedAttack(actor: PsionicActor, power: PsionicItem, t
       const powers = [...target.actor.items].filter((i) => i.type === "power");
       if (powers.length > 0) outcome.lostPower = powers[(await deps.rollDice(`1d${powers.length}`)) - 1]?.name ?? null;
     }
+    apply = effectApplyActions(plan, outcome);
     for (const l of effectLines(plan, outcome)) lines.push(i18n.format(`ADND2E.chat.psionicEffect.${l.key}`, Object.fromEntries(Object.entries(l.params).map(([k, v]) => [k, String(v)]))));
   }
   const noteKey = failureNote(power.name, natural === 20);
@@ -86,10 +89,58 @@ export async function contactedAttack(actor: PsionicActor, power: PsionicItem, t
     success: check.success,
     lines,
     note: noteKey ? i18n.localize(`ADND2E.chat.psionicEffect.${noteKey}`) : "",
+    hasApply: apply.length > 0,
     paid,
     remaining,
     max: actor.system.psionics.max,
   };
   const content = await foundry.applications.handlebars.renderTemplate(TEMPLATE_PATH("chat/psionic-effect.hbs"), context);
-  await ChatMessage.create({ speaker: ChatMessage.getSpeaker({ actor: actor as never }), content } as never);
+  const flag: EffectFlag = { attackerActorUuid: actor.uuid ?? "", targetUuid: target.uuid, apply, applied: false };
+  await ChatMessage.create({ speaker: ChatMessage.getSpeaker({ actor: actor as never }), content, flags: { [SYSTEM_ID]: { psionicEffect: flag } } } as never);
+}
+
+/** The data carried in `flags.adnd2e.psionicEffect` on an effect card. */
+export interface EffectFlag {
+  attackerActorUuid: string;
+  targetUuid: string;
+  apply: ApplyAction[];
+  applied: boolean;
+}
+
+/** Message ids whose Apply is in flight in this client (a double click must not apply twice). */
+const applying = new Set<string>();
+
+/**
+ * The card's Apply button: sends each action to the target through the player-applied effects path (applied here for a
+ * GM or the owner, relayed to the GM otherwise), then marks the card applied for every viewer. The attacker (the card's
+ * author) and a GM can do this; anyone else's click is refused. A card applies once.
+ */
+export async function applyPsionicEffect(messageId: string): Promise<void> {
+  const g = game as unknown as {
+    user: { isGM: boolean };
+    messages: { get(id: string): { getFlag(s: string, k: string): unknown; update(d: Record<string, unknown>): Promise<unknown> } | undefined };
+  };
+  const message = g.messages.get(messageId);
+  const flag = message?.getFlag(SYSTEM_ID, "psionicEffect") as EffectFlag | undefined;
+  if (!message || !flag || flag.applied || flag.apply.length === 0) return;
+  const attacker = foundry.utils.fromUuidSync(flag.attackerActorUuid) as { isOwner?: boolean } | null;
+  if (!g.user.isGM && !attacker?.isOwner) {
+    warn("ADND2E.chat.psionicEffect.notYours");
+    return;
+  }
+  if (applying.has(messageId)) return;
+  applying.add(messageId); // synchronously, before the first await
+  try {
+    const target = foundry.utils.fromUuidSync(flag.targetUuid) as (Parameters<typeof requestApply>[0]) | null;
+    if (!target) {
+      warn("ADND2E.chat.psionicEffect.noTarget");
+      return;
+    }
+    for (const action of flag.apply) {
+      await requestApply(target, action.kind === "damage" ? { kind: "damage", targetUuid: flag.targetUuid, amount: action.amount } : { kind: "condition", targetUuid: flag.targetUuid, conditionId: action.conditionId, rounds: action.rounds });
+    }
+    await message.update({ [`flags.${SYSTEM_ID}.psionicEffect.applied`]: true });
+  } finally {
+    applying.delete(messageId);
+  }
 }

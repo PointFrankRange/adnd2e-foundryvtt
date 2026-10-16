@@ -70,7 +70,7 @@ describe("blindFightingTotal", () => {
 });
 
 describe("conditionModifiers", () => {
-  const none = { blinded: 0, invisibleTarget: 0, fatigue: 0, entangled: 0, frightened: 0, heldTarget: 0, blindFighting: false };
+  const none = { blinded: 0, invisibleTarget: 0, fatigue: 0, entangled: 0, frightened: 0, dazed: 0, heldTarget: 0, blindFighting: false };
   const P = "ADND2E.chat.martialArts.mod.";
   it("no conditions gives nothing", () => {
     expect(conditionModifiers(none)).toEqual({ total: 0, rows: [] });
@@ -94,6 +94,11 @@ describe("conditionModifiers", () => {
     expect(r.total).toBe(-2);
     expect(r.rows.map((x) => x.labelKey)).toEqual([`${P}fatigue`, `${P}entangled`, `${P}frightened`, `${P}heldTarget`]);
     expect(r.rows[3]!.amount).toBe(4);
+  });
+  it("a dazed row sits between frightened and the held-target bonus", () => {
+    const r = conditionModifiers({ ...none, frightened: -2, dazed: -5, heldTarget: 4 });
+    expect(r.rows.map((x) => x.labelKey)).toEqual([`${P}frightened`, `${P}dazed`, `${P}heldTarget`]);
+    expect(r.total).toBe(-3);
   });
 });
 
