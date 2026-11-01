@@ -268,6 +268,13 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
         discipline: new StringField({ required: true, blank: true, initial: "" }),
         expiresAt: new NumberField({ required: true, nullable: true, initial: null }),
       }),
+      /** Issue #179: the power being prepared in combat (blank powerId = none), the combat and round it takes effect, and the hit points when it began. */
+      preparing: new SchemaField({
+        powerId: new StringField({ required: true, blank: true, initial: "" }),
+        combatId: new StringField({ required: true, blank: true, initial: "" }),
+        completeRound: new NumberField({ required: true, nullable: true, integer: true, initial: null }),
+        hp: new NumberField({ required: true, integer: true, initial: 0 }),
+      }),
       /** Issue #180: Harness Subconscious - the PSPs added to the maximum (0 = none) and when they end (world-time seconds). */
       harness: new SchemaField({
         bonus: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),

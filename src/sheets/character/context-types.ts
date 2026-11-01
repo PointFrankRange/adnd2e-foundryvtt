@@ -132,6 +132,8 @@ export interface PsionicsInput {
   /** Issue #180: the focused discipline (Meditative Focus), the Harness Subconscious bonus and which psionic proficiencies are owned; absent = none */
   focusDiscipline?: string;
   harnessBonus?: number;
+  /** Issue #179: the power being prepared in combat (absent = none) */
+  preparing?: { powerId: string; completeRound: number | null };
   proficiencies?: { harness: boolean; focus: boolean; rejuvenation: boolean };
   powers: PsionicPowerItem[];
 }
@@ -165,6 +167,8 @@ export interface PsionicsView {
   primary: Discipline | null;
   /** Issue #118: shown when worn armor lowers the power scores (value < 0) */
   armorPenalty: { value: number; armor: string } | null;
+  /** Issue #179: the power being prepared in combat and the round it takes effect */
+  preparing: { name: string; completeRound: number } | null;
   /** Issue #180: the Harness Subconscious / Meditative Focus / Rejuvenation panel */
   proficiencies: {
     show: boolean;

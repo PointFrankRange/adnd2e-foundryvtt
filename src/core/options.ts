@@ -73,6 +73,8 @@ export interface OptionalRules {
   psionicArmorPenalties: boolean;
   /** Issue #179: maintained per-round powers and partial tangents are paid automatically at each new combat round. */
   psionicAutoUpkeep: boolean;
+  /** Issue #179: a power with a preparation time of one or more rounds is prepared over the rounds in combat and is lost if its user is hurt or fails a save meanwhile. */
+  psionicPrepTimes: boolean;
   /** SP7e: Combat & Tactics wrestling replaces the simplified grapple maneuver (requires combatAndTacticsEnabled). */
   wrestling: boolean;
   /** SP18 Plan A: PHBR15 Advanced Martial Arts — martial arts styles, the unarmed attack and the style AC modifier. */
@@ -111,6 +113,7 @@ export const DEFAULT_OPTIONAL_RULES: OptionalRules = {
   wildTalents: false,
   psionicArmorPenalties: false,
   psionicAutoUpkeep: false,
+  psionicPrepTimes: false,
   wrestling: false,
   advancedMartialArts: false,
 };

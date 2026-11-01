@@ -1,6 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerPsionicHooks } from "../../src/hooks/psionic-hooks";
 
+let rules: Record<string, boolean> = { psionicPrepTimes: true };
+vi.mock("../../src/settings", () => ({ getOptionalRules: () => rules }));
+const disrupted: unknown[] = [];
+vi.mock("../../src/sheets/character/psionic-prep", async (orig) => ({
+  ...(await orig<typeof import("../../src/sheets/character/psionic-prep")>()),
+  disruptPreparation: async (...a: unknown[]) => void disrupted.push(a),
+}));
+const named: Record<string, (...a: never[]) => void> = {};
+
 type Handler = (message: unknown, changes?: unknown) => void;
 let handler: Handler;
 let actorHandler: Handler;
@@ -26,7 +35,7 @@ beforeEach(() => {
   (globalThis as Record<string, unknown>).game = { user: { id: "u-att" }, messages: { contents: [message(contest()), message(contest({ attackerActorUuid: "Actor.other" })), message(undefined)] } };
   (globalThis as Record<string, unknown>).ui = { chat: { updateMessage: async (m: unknown) => void rerendered.push(m) } };
   (globalThis as Record<string, unknown>).foundry = { utils: { fromUuidSync: (u: string) => uuidMap[u] ?? null } };
-  (globalThis as Record<string, unknown>).Hooks = { on: vi.fn((name: string, fn: Handler) => void (name === "updateActor" ? (actorHandler = fn) : name === "createActiveEffect" ? (effectHandler = fn as never) : (handler = fn))) };
+  (globalThis as Record<string, unknown>).Hooks = { on: vi.fn((name: string, fn: Handler) => void ((named[name] = fn as never), name === "updateActor" ? (actorHandler = fn) : name === "createActiveEffect" ? (effectHandler = fn as never) : (handler = fn))) };
   registerPsionicHooks();
 });
 
@@ -144,5 +153,84 @@ describe("registerPsionicHooks", () => {
     (globalThis as Record<string, unknown>).game = {};
     actorHandler({ uuid: "Actor.att" }, { flags: { adnd2e: { psionicApplied: [] } } });
     expect(rerendered).toEqual([]);
+  });
+});
+
+describe("issue #179: preparation disruption hooks", () => {
+  const prepActor = (over: Record<string, unknown> = {}) => {
+    const updates: Record<string, unknown>[] = [];
+    return {
+      updates,
+      actor: {
+        uuid: "Actor.p", id: "P", system: { psionics: { preparing: { powerId: "p1", combatId: "c1", completeRound: 5, hp: 30 } } },
+        testUserPermission: () => true, update: async (d: Record<string, unknown>) => void updates.push(d), ...over,
+      },
+    };
+  };
+  beforeEach(() => {
+    disrupted.length = 0;
+    rules = { psionicPrepTimes: true };
+    const g = globalThis as unknown as { game: Record<string, unknown> };
+    g.game.user = { id: "u-att", isActiveGM: true };
+    g.game.users = { activeGM: { id: "gm" }, getDesignatedUser: () => null };
+  });
+  const hit = (actor: unknown, hp: number) => actorHandler(actor, { system: { attributes: { hp: { value: hp } } } });
+
+  it("hit points lost while preparing disrupt it (the active GM's client)", () => {
+    hit(prepActor().actor, 25);
+    expect(disrupted).toHaveLength(1);
+  });
+  it("healing raises the recorded hit points instead", () => {
+    const { actor, updates } = prepActor();
+    hit(actor, 35);
+    expect(disrupted).toEqual([]);
+    expect(updates).toEqual([{ "system.psionics.preparing.hp": 35 }]);
+  });
+  it("an equal hit point total, the rule off, no preparation or a non-numeric change do nothing", () => {
+    hit(prepActor().actor, 30);
+    rules = { psionicPrepTimes: false };
+    hit(prepActor().actor, 10);
+    rules = { psionicPrepTimes: true };
+    hit(prepActor({ system: { psionics: {} } }).actor, 10);
+    actorHandler(prepActor().actor, { system: { attributes: { hp: { value: "x" } } } });
+    expect(disrupted).toEqual([]);
+  });
+  it("a client that is not the active GM leaves it alone", () => {
+    (globalThis as unknown as { game: Record<string, unknown> }).game.user = { id: "u-att", isActiveGM: false };
+    hit(prepActor().actor, 10);
+    expect(disrupted).toEqual([]);
+  });
+  it("with no GM connected the designated owner acts", () => {
+    const g = (globalThis as unknown as { game: Record<string, unknown> }).game;
+    g.users = { activeGM: null, getDesignatedUser: () => g.user };
+    hit(prepActor().actor, 10);
+    expect(disrupted).toHaveLength(1);
+  });
+  it("a failed save while preparing disrupts; a made save or someone else's does not", () => {
+    const saver = prepActor().actor;
+    uuidMap["Actor.p"] = saver;
+    const saveMsg = (success: boolean) => ({ getFlag: (_s: string, k: string) => (k === "save" ? { actorUuid: "Actor.p", success } : undefined) });
+    handler(saveMsg(false) as never);
+    expect(disrupted).toHaveLength(1);
+    handler(saveMsg(true) as never);
+    rules = { psionicPrepTimes: false };
+    handler(saveMsg(false) as never);
+    rules = { psionicPrepTimes: true };
+    uuidMap["Actor.p"] = { id: "Q", system: { psionics: {} } };
+    handler(saveMsg(false) as never);
+    expect(disrupted).toHaveLength(1);
+  });
+  it("a combatant leaving its combat, or the combat ending, drops the preparation", () => {
+    const { actor, updates } = prepActor();
+    named.deleteCombatant!({ actor, combat: { id: "c1" } } as never);
+    named.deleteCombatant!({ actor, combat: { id: "other" } } as never);
+    named.deleteCombatant!({ actor: null, combat: { id: "c1" } } as never);
+    named.deleteCombat!({ id: "c1", combatants: [{ actor }, { actor: null }] } as never);
+    named.deleteCombat!({ id: "other", combatants: [{ actor }] } as never);
+    expect(updates).toEqual([{ "system.psionics.preparing.powerId": "" }, { "system.psionics.preparing.powerId": "" }]);
+    (globalThis as unknown as { game: Record<string, unknown> }).game.user = { id: "u-att", isActiveGM: false };
+    named.deleteCombatant!({ actor, combat: { id: "c1" } } as never);
+    named.deleteCombat!({ id: "c1", combatants: [{ actor }] } as never);
+    expect(updates).toHaveLength(2);
   });
 });

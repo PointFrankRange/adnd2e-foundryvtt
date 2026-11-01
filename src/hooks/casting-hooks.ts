@@ -22,7 +22,7 @@ interface DesignatedUsers {
  * Whether THIS client reacts to a change on `actor`: the active GM when one is connected; with no GM,
  * the designated connected owner of that actor, so exactly one client acts (v14.364 users.mjs:70-90).
  */
-const handlesDisruption = (actor: unknown): boolean => {
+export const handlesDisruption = (actor: unknown): boolean => {
   const users = game.users as unknown as DesignatedUsers;
   if (users.activeGM) return Boolean((game.user as unknown as { isActiveGM?: boolean } | null)?.isActiveGM);
   const doc = actor as { testUserPermission(user: unknown, level: string): boolean };

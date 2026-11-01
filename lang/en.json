@@ -356,6 +356,15 @@
         "rest": "Rest",
         "hours": "Hours",
         "activity": { "hard": "Hard labor", "light": "Light activity", "rest": "Resting", "sleep": "Sleeping", "meditate": "Meditating (Rejuvenation)" },
+        "prep": {
+          "title": "Preparing",
+          "round": "ready at the end of round",
+          "complete": "Complete",
+          "cancel": "Cancel",
+          "already": "You are already preparing a power.",
+          "notYet": "Not yet: the preparation is ready at the end of round {round}.",
+          "gone": "The combat ended: the preparation is lost."
+        },
         "proficiencies": {
           "title": "Psionic proficiencies",
           "harness": "Harness Subconscious",
@@ -1106,6 +1115,11 @@
         "lose": "lose {n} point(s)",
         "ability": { "wis": "Wisdom", "int": "Intelligence", "con": "Constitution" }
       },
+      "psionicPrep": {
+        "begin": "begins preparing {power}: it takes effect at the end of round {round}.",
+        "disrupted": "{power} was disrupted: the time invested is lost (no PSPs spent).",
+        "cancelled": "gives up preparing {power} (no PSPs spent)."
+      },
       "psionicEffect": {
         "noEffect": "The power check failed: no effect on the mind.",
         "apply": "Apply to target",
@@ -1492,6 +1506,10 @@
       "psionicArmorPenalties": {
         "name": "Psionicist armor penalties",
         "hint": "Psionicists may wear any armor, but metal armor lowers every psionic power score: -1 brigandine/ring/scale/splint, -2 chain/banded, -3 plate, -5 field plate, -7 full plate (Complete Psionics Handbook, Table 9). Needs a reload."
+      },
+      "psionicPrepTimes": {
+        "name": "Psionic preparation times",
+        "hint": "In combat, a power with a preparation time of one or more rounds takes that many rounds to prepare and is paid for and rolled when you complete it. Being hurt or failing a save while preparing loses the time, at no PSP cost. Powers with no preparation time, and any use outside combat, are unchanged. Needs a reload."
       },
       "psionicAutoUpkeep": {
         "name": "Automatic psionic upkeep",

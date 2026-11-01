@@ -165,6 +165,11 @@ export function buildPsionicsView(input: PsionicsInput | null | undefined): Psio
     row,
     primary: primaryDiscipline(known),
     armorPenalty: armor < 0 ? { value: armor, armor: input.armorPenalty?.armor ?? "" } : null,
+    preparing: (() => {
+      const prep = input.preparing;
+      const power = prep ? input.powers.find((p) => p.id === prep.powerId) : undefined;
+      return prep && power ? { name: power.name, completeRound: prep.completeRound ?? 0 } : null;
+    })(),
     proficiencies: {
       show: !wild && (input.proficiencies?.harness === true || input.proficiencies?.focus === true),
       harness: { known: input.proficiencies?.harness ?? false, active: (input.harnessBonus ?? 0) > 0, bonus: input.harnessBonus ?? 0 },

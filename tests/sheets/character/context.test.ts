@@ -3408,6 +3408,13 @@ describe("buildPsionicsView (SP15 Plan A)", () => {
     expect(buildPsionicsView(base({ armorPenalty: { value: -1, armor: null } }))!.armorPenalty).toEqual({ value: -1, armor: "" });
   });
 
+  it("issue #179: names the power being prepared and the round it is ready, or null", () => {
+    expect(buildPsionicsView(base())!.preparing).toBeNull();
+    expect(buildPsionicsView(base({ preparing: { powerId: "a", completeRound: 6 } }))!.preparing).toEqual({ name: "a", completeRound: 6 });
+    expect(buildPsionicsView(base({ preparing: { powerId: "a", completeRound: null } }))!.preparing).toEqual({ name: "a", completeRound: 0 });
+    expect(buildPsionicsView(base({ preparing: { powerId: "gone", completeRound: 6 } }))!.preparing).toBeNull();
+  });
+
   it("is null without a psionicist (null or absent input)", () => {
     expect(buildPsionicsView(null)).toBeNull();
     expect(buildPsionicsView(undefined)).toBeNull();
