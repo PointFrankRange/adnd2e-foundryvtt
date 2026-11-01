@@ -30,6 +30,14 @@ describe("derivePsionics", () => {
   });
 });
 
+describe("derivePsionics Harness Subconscious (issue #180)", () => {
+  it("adds the bonus to a psionicist's maximum and ignores it without one", () => {
+    const classes = [{ chassisId: "psionicist", level: 5 }];
+    expect(derivePsionics({ classes, scores, harnessBonus: 15 })?.max).toBe(73 + 15);
+    expect(derivePsionics({ classes, scores })?.max).toBe(73);
+  });
+});
+
 describe("derivePsionics wild talents", () => {
   const one = [{ initialCost: 7, maintenanceCost: 4 }];
   const fighter3 = [{ chassisId: "fighter", level: 3 }];

@@ -129,6 +129,10 @@ export interface PsionicsInput {
   abilityScores: Record<string, number>;
   /** Issue #118: the Table 9 reduction (<= 0) applied to every power score; absent = none */
   armorPenalty?: { value: number; armor: string | null };
+  /** Issue #180: the focused discipline (Meditative Focus), the Harness Subconscious bonus and which psionic proficiencies are owned; absent = none */
+  focusDiscipline?: string;
+  harnessBonus?: number;
+  proficiencies?: { harness: boolean; focus: boolean; rejuvenation: boolean };
   powers: PsionicPowerItem[];
 }
 
@@ -161,6 +165,13 @@ export interface PsionicsView {
   primary: Discipline | null;
   /** Issue #118: shown when worn armor lowers the power scores (value < 0) */
   armorPenalty: { value: number; armor: string } | null;
+  /** Issue #180: the Harness Subconscious / Meditative Focus / Rejuvenation panel */
+  proficiencies: {
+    show: boolean;
+    harness: { known: boolean; active: boolean; bonus: number };
+    focus: { known: boolean; active: boolean; discipline: string };
+    disciplines: string[];
+  };
   activities: RecoveryActivity[];
   maintained: { powerId: string; name: string; cost: number; unit: string }[];
   groups: { discipline: Discipline; powers: PsionicPowerRow[] }[];

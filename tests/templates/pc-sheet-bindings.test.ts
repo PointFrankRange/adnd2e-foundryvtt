@@ -69,7 +69,7 @@ describe("PC sheet templates (sheet redesign R1)", () => {
 
 const PC_ONLY_ACTIONS = ["awardXp", "toggleDualClass", "seedSubAbilities", "allocateThiefSkillPoint", "deallocateThiefSkillPoint", "removeTrait", "useKitPower", "resetKitPower", "newDayKitPowers", "newEncounterKitPowers", "wildTalentTest", "wildTalentReset"];
 // issue #177: gated on @root.psionicsPanel (set by the PC and Character NPC sheets), not pcActions
-const PSIONIC_PANEL_ACTIONS = ["usePsionicPower", "relearnPsionicPower", "psionicRest", "adjustPsionicPsp", "payPsionicMaintenance", "endPsionicPower", "psionicRaiseDefense", "psionicDropDefense", "psionicAttack", "psionicPayUpkeep", "psionicEndContact"];
+const PSIONIC_PANEL_ACTIONS = ["usePsionicPower", "relearnPsionicPower", "psionicRest", "adjustPsionicPsp", "payPsionicMaintenance", "endPsionicPower", "psionicRaiseDefense", "psionicDropDefense", "psionicAttack", "psionicPayUpkeep", "psionicEndContact", "psionicHarness", "psionicEndHarness", "psionicFocus", "psionicEndFocus"];
 
 describe("PC-only actions (sheet redesign R2)", () => {
   it("every PC template that renders a PC-only action gates it on @root.pcActions", () => {

@@ -155,12 +155,13 @@ export async function advanceWeaponMastery(actor: ProficiencyActor, weaponProfIt
  *  invested slots — situational modifier is always 0 for v1 (no manual
  *  prompt, matching saving throws' simplicity rather than attack rolls'
  *  manual-AC dialog). Always posts a chat card. */
-export async function rollNonweaponCheck(actor: ProficiencyActor, nwpItemId: string): Promise<void> {
+/** Rolls the check and posts the card; returns whether it succeeded (null = blocked, no roll made). */
+export async function rollNonweaponCheck(actor: ProficiencyActor, nwpItemId: string): Promise<boolean | null> {
   const item = actor.items.get(nwpItemId);
   const nwp = item as (NwpItemHandle & GenericProficiencyActorItem) | undefined;
   if (!nwp || nwp.type !== "nonweaponProficiency") {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.checkBlockedWarning"));
-    return;
+    return null;
   }
   const ability = nwp.system.governingAbility as AbilityKey;
   const abilityScore = actor.system.abilities[ability]?.score ?? 0;
@@ -178,7 +179,7 @@ export async function rollNonweaponCheck(actor: ProficiencyActor, nwpItemId: str
     });
   } catch {
     ui.notifications?.warn(game.i18n!.localize("ADND2E.sheet.skills.checkBlockedWarning"));
-    return;
+    return null;
   }
   const context = buildNonweaponCheckCardContext({
     actorName: actor.name,
@@ -197,6 +198,7 @@ export async function rollNonweaponCheck(actor: ProficiencyActor, nwpItemId: str
     speaker: ChatMessage.getSpeaker({ actor: actor as never }),
     content,
   } as unknown as Roll.MessageData);
+  return result.success;
 }
 
 /** Points added/removed per click of the +/− allocation buttons. Not a PHB

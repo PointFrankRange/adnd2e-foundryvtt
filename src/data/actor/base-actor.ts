@@ -263,6 +263,16 @@ export function actorCommonSchema(): foundry.data.fields.DataSchema {
       level: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       /** SP15 Plan D: derived cache, true when the PSP pool is a wild talent's (not a psionicist's). */
       wild: new BooleanField({ required: true, initial: false }),
+      /** Issue #180: Meditative Focus - the focused discipline (blank = none) and when it ends (world-time seconds). */
+      focus: new SchemaField({
+        discipline: new StringField({ required: true, blank: true, initial: "" }),
+        expiresAt: new NumberField({ required: true, nullable: true, initial: null }),
+      }),
+      /** Issue #180: Harness Subconscious - the PSPs added to the maximum (0 = none) and when they end (world-time seconds). */
+      harness: new SchemaField({
+        bonus: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+        expiresAt: new NumberField({ required: true, nullable: true, initial: null }),
+      }),
     }),
     /** SP15 Plan D: wild-talent state. `tested` = the one-time test was made; `found` = it succeeded; `levelAtDiscovery` = the class level when it was found (PSP grow 4 per level after). */
     wildTalent: new SchemaField({

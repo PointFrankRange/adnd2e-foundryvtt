@@ -16,11 +16,13 @@ export function derivePsionics(input: {
   classes: readonly { chassisId: string; level: number }[];
   scores: { wis: number; int: number; con: number };
   wild?: { found: boolean; levelAtDiscovery: number; powers: readonly { initialCost: number; maintenanceCost: number; wildMinimum?: number | null }[] };
+  /** issue #180: the PSPs a Harness Subconscious adds to a psionicist's maximum */
+  harnessBonus?: number;
 }): DerivedPsionics | null {
   const entry = input.classes.find((c) => c.chassisId === "psionicist");
   if (entry) {
     const { wis, int, con } = input.scores;
-    return { max: psionicStrength(wis, int, con, entry.level), level: entry.level, row: powerProgression(entry.level), wild: false };
+    return { max: psionicStrength(wis, int, con, entry.level) + (input.harnessBonus ?? 0), level: entry.level, row: powerProgression(entry.level), wild: false };
   }
   if (!input.wild?.found || input.classes.length === 0) return null;
   const level = Math.max(...input.classes.map((c) => c.level));
