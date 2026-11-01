@@ -28,5 +28,9 @@
     "vite": "^8.1.3",
     "vite-plugin-static-copy": "^4.1.1",
     "vitest": "^5.0.0"
+  },
+  "allowScripts": {
+    "classic-level@3.0.0": true,
+    "@parcel/watcher": false
   }
 }
