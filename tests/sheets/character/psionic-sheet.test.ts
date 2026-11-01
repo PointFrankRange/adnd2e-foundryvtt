@@ -1,8 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const calls: [string, ...unknown[]][] = [];
+vi.mock("../../../src/sheets/character/psionic-prep", () => ({
+  useWithPreparation: async (...a: unknown[]) => void calls.push(["use", ...a]),
+  completePreparation: async (...a: unknown[]) => void calls.push(["completePrep", ...a]),
+  cancelPreparation: async (...a: unknown[]) => void calls.push(["cancelPrep", ...a]),
+}));
 vi.mock("../../../src/sheets/character/psionic-actions", () => ({
-  usePower: async (...a: unknown[]) => void calls.push(["use", ...a]),
   relearnPower: async (...a: unknown[]) => void calls.push(["relearn", ...a]),
   rest: async (...a: unknown[]) => void calls.push(["rest", ...a]),
   adjustPsp: async (...a: unknown[]) => void calls.push(["adjust", ...a]),
@@ -47,6 +51,11 @@ describe("buildPsionicsInput", () => {
     expect(buildPsionicsInput(actor({ ...base }), [plate], true)!.armorPenalty).toEqual({ value: -3, armor: "Plate" });
     expect(buildPsionicsInput(actor({ ...base, wild: true }), [plate], true)!.armorPenalty).toEqual({ value: 0, armor: null });
   });
+  it("issue #179: carries a preparation in progress and nothing when blank", () => {
+    expect(buildPsionicsInput(actor({ ...base, preparing: { powerId: "p1", completeRound: 6 } }), [], false)!.preparing).toEqual({ powerId: "p1", completeRound: 6 });
+    expect(buildPsionicsInput(actor({ ...base, preparing: { powerId: "", completeRound: null } }), [], false)!.preparing).toBeUndefined();
+    expect(buildPsionicsInput(actor({ ...base }), [], false)!.preparing).toBeUndefined();
+  });
   it("passes through the raised defense, contacts and wild flag", () => {
     const input = buildPsionicsInput(actor({ ...base, wild: true, activeDefense: "d1", contacts: [{ target: "t", name: "T", tangents: 1 }] }), [], false)!;
     expect(input).toMatchObject({ wild: true, activeDefense: "d1", contacts: [{ target: "t", name: "T", tangents: 1 }] });
@@ -67,10 +76,9 @@ describe("PSIONIC_ACTIONS", () => {
   const btn = (data: Record<string, string> = {}) => ({ dataset: data });
   const run = (id: string, s: PsionicSheet, data: Record<string, string> = {}) => PSIONIC_ACTIONS[id]!(s, btn(data));
 
-  it("registers the 15 psionic action ids and no wild-talent action", () => {
+  it("registers the 17 psionic action ids and no wild-talent action", () => {
     expect(Object.keys(PSIONIC_ACTIONS).sort()).toEqual([
-      "adjustPsionicPsp", "endPsionicPower", "payPsionicMaintenance", "psionicAttack", "psionicDropDefense", "psionicEndContact", "psionicEndFocus",
-      "psionicEndHarness", "psionicFocus", "psionicHarness", "psionicPayUpkeep", "psionicRaiseDefense", "psionicRest", "relearnPsionicPower", "usePsionicPower",
+      "adjustPsionicPsp", "endPsionicPower", "payPsionicMaintenance", "psionicAttack", "psionicCancelPrep", "psionicCompletePrep", "psionicDropDefense", "psionicEndContact", "psionicEndFocus", "psionicEndHarness", "psionicFocus", "psionicHarness", "psionicPayUpkeep", "psionicRaiseDefense", "psionicRest", "relearnPsionicPower", "usePsionicPower",
     ]);
   });
   it("dispatches per-power actions with the power id, and ignores a missing id", async () => {
@@ -123,6 +131,13 @@ describe("PSIONIC_ACTIONS", () => {
     const s = sheet({ "[data-psionic-adjust]": { value: "5" }, "[data-psionic-defense]": { value: "d1" }, "[data-psionic-hours]": { value: "3" } }, false);
     for (const id of Object.keys(PSIONIC_ACTIONS)) await run(id, s, { powerId: "p1", target: "t" });
     expect(calls).toEqual([]);
+  });
+  it("complete and cancel preparation dispatch (and do nothing when not editable)", async () => {
+    await run("psionicCompletePrep", sheet());
+    await run("psionicCancelPrep", sheet());
+    await run("psionicCompletePrep", sheet({}, false));
+    await run("psionicCancelPrep", sheet({}, false));
+    expect(calls.map((c) => c[0])).toEqual(["completePrep", "cancelPrep"]);
   });
   it("psionicActionHandlers runs each handler with this = the sheet", async () => {
     const handlers = psionicActionHandlers();

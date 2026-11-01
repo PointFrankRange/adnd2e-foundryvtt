@@ -97,7 +97,8 @@ export function requirePsionicist(actor: PsionicActor): boolean {
 }
 
 /** Uses a power: d20 check against its score, pays the full or half cost, tracks maintenance, posts a card. */
-export async function usePower(actor: PsionicActor, powerId: string, roll: PsionicRoll = rollD20): Promise<void> {
+/** `tally` (issue #179) is false when completing a preparation, which was already counted when it began. */
+export async function usePower(actor: PsionicActor, powerId: string, roll: PsionicRoll = rollD20, tally = true): Promise<void> {
   if (!requirePsionicist(actor)) return;
   const power = findPower(actor, powerId);
   if (!power) return;
@@ -109,7 +110,7 @@ export async function usePower(actor: PsionicActor, powerId: string, roll: Psion
   }
   const abilityKey = String(power.system.abilityKey);
   const score = powerScore(actor.system.abilities[abilityKey]?.score ?? 0, Number(power.system.abilityModifier ?? 0) + Number(power.system.scoreBonus ?? 0) + armorPenaltyOf(actor) + focusModifierOf(actor, String(power.system.discipline)));
-  const { inCombat } = await noteInitiation(actor, power);
+  const { inCombat } = tally ? await noteInitiation(actor, power) : { inCombat: true };
   const natural = await roll();
   const check = rollPowerCheck(natural, score);
   const paid = checkCost(cost, check.success);

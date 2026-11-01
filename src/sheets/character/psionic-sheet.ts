@@ -2,7 +2,8 @@ import type { Contact } from "../../core/psionics/combat";
 import { knownPsionicProficiencies } from "../../core/psionics/proficiency";
 import { equippedArmorPenalty } from "../../data/derive/character/psionics";
 import type { PsionicPowerItem, PsionicsInput } from "./context-types";
-import { adjustPsp, endPower, payMaintenance, relearnPower, rest as psionicRest, usePower as usePsionicPower } from "./psionic-actions";
+import { adjustPsp, endPower, payMaintenance, relearnPower, rest as psionicRest } from "./psionic-actions";
+import { cancelPreparation, completePreparation, useWithPreparation } from "./psionic-prep";
 import { endFocus, endHarness, harnessSubconscious, meditativeFocus } from "./psionic-proficiencies";
 import { attackMode, dropDefense, endContactAction, payUpkeep, raiseDefense } from "./psionic-combat";
 
@@ -11,7 +12,7 @@ import { attackMode, dropDefense, endContactAction, payUpkeep, raiseDefense } fr
 
 type ActorLike = {
   system: {
-    psionics?: { psp: number | null; max: number; level: number; wild?: boolean; maintained: { powerId: string }[]; activeDefense?: string; contacts?: Contact[]; harness?: { bonus: number }; focus?: { discipline: string } };
+    psionics?: { psp: number | null; max: number; level: number; wild?: boolean; maintained: { powerId: string }[]; activeDefense?: string; contacts?: Contact[]; harness?: { bonus: number }; focus?: { discipline: string }; preparing?: { powerId: string; completeRound: number | null } };
     abilities: Record<string, { score: number }>;
   };
 };
@@ -38,6 +39,7 @@ export function buildPsionicsInput(actor: ActorLike, items: readonly ItemLike[],
     armorPenalty: equippedArmorPenalty(items, armorRuleOn && !p.wild),
     focusDiscipline: p.focus?.discipline ?? "",
     harnessBonus: p.harness?.bonus ?? 0,
+    ...(p.preparing && p.preparing.powerId !== "" ? { preparing: { powerId: p.preparing.powerId, completeRound: p.preparing.completeRound } } : {}),
     proficiencies: knownPsionicProficiencies(items.filter((i) => i.type === "nonweaponProficiency").map((i) => i.name)),
     powers: items.filter((i) => i.type === "power").map((i) => ({ id: i.id, name: i.name, ...(i.system as Omit<PsionicPowerItem, "id" | "name">) })),
   };
@@ -61,7 +63,7 @@ const actor = (s: PsionicSheet): never => s.document as never;
 export const PSIONIC_ACTIONS: Record<string, Handler> = {
   usePsionicPower: async (s, t) => {
     const { powerId } = t.dataset;
-    if (powerId && s.isEditable) await usePsionicPower(actor(s), powerId);
+    if (powerId && s.isEditable) await useWithPreparation(actor(s), powerId);
   },
   relearnPsionicPower: async (s, t) => {
     const { powerId } = t.dataset;
@@ -104,6 +106,12 @@ export const PSIONIC_ACTIONS: Record<string, Handler> = {
   },
   psionicPayUpkeep: async (s) => {
     if (s.isEditable) await payUpkeep(actor(s));
+  },
+  psionicCompletePrep: async (s) => {
+    if (s.isEditable) await completePreparation(actor(s));
+  },
+  psionicCancelPrep: async (s) => {
+    if (s.isEditable) await cancelPreparation(actor(s));
   },
   psionicHarness: async (s) => {
     if (s.isEditable) await harnessSubconscious(actor(s));

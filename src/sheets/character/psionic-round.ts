@@ -27,24 +27,31 @@ export interface PsionicRoundActor {
 
 const combats = (): CombatLike[] => [...((game as unknown as { combats?: Iterable<CombatLike> }).combats ?? [])];
 
+/** The started combat holding this actor, and its combatant. */
+export function startedCombatFor(actor: unknown): { combat: CombatLike; combatant: CombatantLike } | null {
+  for (const combat of combats()) {
+    if (!combat.started) continue;
+    const combatant = combat.getCombatantsByActor(actor)[0];
+    if (combatant) return { combat, combatant };
+  }
+  return null;
+}
+
 /**
  * A power was initiated: tally it on the actor's combatant for this round. Returns whether the actor is in a
  * started combat (the card then reminds about half movement) and warns when it is a second power in the round.
  * Defense modes never count. Writes only the actor's own combatant flag.
  */
 export async function noteInitiation(actor: unknown, power: { name: string; system: Record<string, unknown> }): Promise<{ inCombat: boolean }> {
-  for (const combat of combats()) {
-    if (!combat.started) continue;
-    const combatant = combat.getCombatantsByActor(actor)[0];
-    if (!combatant) continue;
-    const counts = power.system.kind !== "defense" && !isDefenseMode(power.name);
-    const prev = (combatant.getFlag(SYSTEM_ID, "psionicRound") as PowerRound | undefined) ?? null;
-    const { next, second } = noteInitiationPure(prev, combat.id, combat.round, counts);
-    if (next !== prev) await combatant.setFlag(SYSTEM_ID, "psionicRound", next);
-    if (second) ui.notifications?.warn(game.i18n!.format("ADND2E.sheet.psionics.combat.secondPower", { name: (actor as { name: string }).name }));
-    return { inCombat: true };
-  }
-  return { inCombat: false };
+  const found = startedCombatFor(actor);
+  if (!found) return { inCombat: false };
+  const { combat, combatant } = found;
+  const counts = power.system.kind !== "defense" && !isDefenseMode(power.name);
+  const prev = (combatant.getFlag(SYSTEM_ID, "psionicRound") as PowerRound | undefined) ?? null;
+  const { next, second } = noteInitiationPure(prev, combat.id, combat.round, counts);
+  if (next !== prev) await combatant.setFlag(SYSTEM_ID, "psionicRound", next);
+  if (second) ui.notifications?.warn(game.i18n!.format("ADND2E.sheet.psionics.combat.secondPower", { name: (actor as { name: string }).name }));
+  return { inCombat: true };
 }
 
 /** The new combat round has begun: pay every combatant's per-round upkeep (the GM's client only; see the hook). */

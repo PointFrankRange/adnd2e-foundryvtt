@@ -2,6 +2,10 @@ import { SYSTEM_ID } from "../constants";
 import { anyIncapacitating } from "../combat/condition-effects";
 import { applyContestTangents, type ContestFlag } from "../sheets/character/psionic-combat";
 import type { WildFlag } from "../sheets/character/psionic-wild";
+import { hpChangeDisrupts } from "../core/magic/casting-time";
+import { getOptionalRules } from "../settings";
+import { handlesDisruption } from "./casting-hooks";
+import { disruptPreparation, readPreparing } from "../sheets/character/psionic-prep";
 import { endFocus, expireProficiencyEffects } from "../sheets/character/psionic-proficiencies";
 import { onCombatUpdate } from "../sheets/character/psionic-round";
 
@@ -64,6 +68,13 @@ export function registerPsionicHooks(): void {
     const spentToZero = c.system?.psionics?.psp === 0 || c["system.psionics.psp"] === 0;
     const focused = ((actor as { system?: { psionics?: { focus?: { discipline?: string } } } }).system?.psionics?.focus?.discipline ?? "") !== "";
     if (spentToZero && focused && userId === game.user?.id) void endFocus(actor as never);
+    // issue #179: hit points lost while preparing a power disrupt it; healing raises the recorded value (the one disrupting client acts)
+    const newHp = (changes as { system?: { attributes?: { hp?: { value?: unknown } } } }).system?.attributes?.hp?.value;
+    const prep = readPreparing(actor as never);
+    if (typeof newHp === "number" && prep && getOptionalRules().psionicPrepTimes && handlesDisruption(actor)) {
+      if (hpChangeDisrupts(prep.hp, newHp)) void disruptPreparation(actor as never, { announce: true });
+      else if (newHp > prep.hp) void (actor as { update(d: Record<string, unknown>): Promise<unknown> }).update({ "system.psionics.preparing.hp": newHp }).catch(() => {});
+    }
     if (touchesFlag(changes as Record<string, unknown>, "psionicApplied")) rerenderContestCards(uuid);
     if (touchesFlag(changes as Record<string, unknown>, "wildApplied")) rerenderWildCards(uuid);
   });
@@ -80,7 +91,31 @@ export function registerPsionicHooks(): void {
       ui.notifications?.info(game.i18n!.format("ADND2E.sheet.psionics.combat.incapacitatedBroken", { name: actor.name ?? "" }));
     });
   });
+  // issue #179: a combatant removed from a combat, or the combat itself ending, drops any preparation that belonged to it (no card)
+  Hooks.on("deleteCombatant", (combatant: unknown) => {
+    const g = game as unknown as { user?: { isActiveGM?: boolean } };
+    if (!g.user?.isActiveGM) return;
+    const c = combatant as { actor: unknown; combat?: { id: string } | null; parent?: { id: string } | null };
+    const combatId = (c.combat ?? c.parent)?.id;
+    const prep = c.actor ? readPreparing(c.actor as never) : null;
+    if (prep && combatId && prep.combatId === combatId) void (c.actor as { update(d: Record<string, unknown>): Promise<unknown> }).update({ "system.psionics.preparing.powerId": "" });
+  });
+  Hooks.on("deleteCombat", (combat: unknown) => {
+    const g = game as unknown as { user?: { isActiveGM?: boolean } };
+    if (!g.user?.isActiveGM) return;
+    const c = combat as { id: string; combatants: Iterable<{ actor: unknown }> };
+    for (const combatant of c.combatants) {
+      const prep = combatant.actor ? readPreparing(combatant.actor as never) : null;
+      if (prep && prep.combatId === c.id) void (combatant.actor as { update(d: Record<string, unknown>): Promise<unknown> }).update({ "system.psionics.preparing.powerId": "" });
+    }
+  });
   Hooks.on("createChatMessage", (message: unknown) => {
+    // issue #179: a failed saving throw while preparing disrupts (the save card is flagged by rollSave)
+    const saveFlag = (message as { getFlag(scope: string, key: string): unknown }).getFlag(SYSTEM_ID, "save") as { actorUuid?: string; success?: boolean } | undefined;
+    if (saveFlag && saveFlag.success === false && saveFlag.actorUuid && getOptionalRules().psionicPrepTimes) {
+      const saver = foundry.utils.fromUuidSync(saveFlag.actorUuid) as { id?: string } | null;
+      if (saver && readPreparing(saver as never) && handlesDisruption(saver)) void disruptPreparation(saver as never, { announce: true });
+    }
     const contest = (message as { getFlag(scope: string, key: string): unknown }).getFlag(SYSTEM_ID, "psionicContest") as ContestFlag | undefined;
     if (!contest || contest.state !== "resolved" || contest.applied === true) return;
     if (contest.attackerUserId !== game.user?.id) return;
