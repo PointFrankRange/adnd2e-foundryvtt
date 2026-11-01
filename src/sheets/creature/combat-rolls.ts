@@ -7,6 +7,7 @@ import {
   entangledAttackPenalty,
   fatigueArmorClassPenalty,
   fatigueAttackPenalty,
+  dazedAttackPenalty,
   frightenedAttackPenalty,
   heldAttackBonus,
   invisibleTargetPenalty,
@@ -242,6 +243,7 @@ async function rollCreatureAttack(actor: CreatureActor, source: AttackSource): P
       fatigueAttackPenalty(actor.statuses) +
       entangledAttackPenalty(actor.statuses) +
       frightenedAttackPenalty(actor.statuses) +
+      dazedAttackPenalty(actor.statuses) +
       invisibleTargetPenalty(targetStatuses) +
       heldAttackBonus(targetStatuses) +
       armorVsWeaponModifier,

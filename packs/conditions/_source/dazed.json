@@ -1,0 +1,11 @@
+{
+  "_id": "Dz8mQp2LrTt5WaVn",
+  "_key": "!items!Dz8mQp2LrTt5WaVn",
+  "name": "Dazed",
+  "type": "condition",
+  "img": "icons/svg/hazard.svg",
+  "system": {
+    "conditionId": "dazed",
+    "description": ""
+  }
+}

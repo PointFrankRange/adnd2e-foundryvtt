@@ -87,3 +87,27 @@ export function effectLines(plan: EffectPlan, o: EffectOutcome): EffectLine[] {
     }
   }
 }
+
+/** What the card's Apply button does to the target (relayed through the player-applied effects path). */
+export type ApplyAction =
+  | { kind: "damage"; amount: number }
+  | { kind: "condition"; conditionId: "stunned" | "dazed"; rounds: number };
+
+/**
+ * The mechanical part of the effect the system can apply: Psychic Crush's damage on a failed save, Id Insinuation's
+ * "can do nothing" as stunned, Ego Whip's daze as the dazed condition. Everything else (a lost power, the blast's
+ * illusory hit points, turning on allies) stays on the card for the GM.
+ */
+export function effectApplyActions(plan: EffectPlan, o: EffectOutcome): ApplyAction[] {
+  const rounds = o.duration ?? 0;
+  switch (plan.kind) {
+    case "crush":
+      return o.saveFailed && (o.damage ?? 0) >= 1 ? [{ kind: "damage", amount: o.damage! }] : [];
+    case "idle":
+      return plan.special === null && rounds >= 1 ? [{ kind: "condition", conditionId: "stunned", rounds }] : [];
+    case "daze":
+      return rounds >= 1 ? [{ kind: "condition", conditionId: "dazed", rounds }] : [];
+    default:
+      return [];
+  }
+}
