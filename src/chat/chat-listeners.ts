@@ -6,6 +6,7 @@ import { SYSTEM_ID, TEMPLATE_PATH } from "../constants";
 import { parseConditionButton } from "../combat/apply-relay";
 import { requestApply } from "../relay/relay-client";
 import { rerenderContestCards, rerenderWildCards } from "../hooks/psionic-hooks";
+import { applyPsionicEffect, type EffectFlag } from "../sheets/character/psionic-effects";
 import { applyContestTangents, attackerMayAnswer, recordButtonState, rollDefense, type ContestFlag } from "../sheets/character/psionic-combat";
 import { applyDire, type WildFlag } from "../sheets/character/psionic-wild";
 import { answerContest } from "../sheets/character/wrestling-actions";
@@ -221,6 +222,29 @@ function wildApplyState(flag: WildFlag, applied: string[], viewerMayApply: boole
   return viewerMayApply ? "button" : "none";
 }
 
+/** Psionic effect cards (issue #180): the Apply button is hidden from anyone who is neither the attacker's owner nor a GM
+ *  and from an already-applied card (which shows "Applied." instead); applyPsionicEffect re-checks and is authoritative. */
+function wirePsionicEffect(message: { id: string; getFlag(s: string, k: string): unknown }, html: HTMLElement): void {
+  const flag = message.getFlag(SYSTEM_ID, "psionicEffect") as EffectFlag | undefined;
+  if (!flag) return;
+  const button = html.querySelector<HTMLButtonElement>('[data-action="psionicApplyEffect"]');
+  if (!button) return;
+  const attacker = foundry.utils.fromUuidSync(flag.attackerActorUuid) as { isOwner?: boolean } | null;
+  if (flag.applied) {
+    const line = document.createElement("p");
+    line.className = "hint";
+    line.textContent = game.i18n!.localize("ADND2E.chat.psionicEffect.applied");
+    button.replaceWith(line);
+  } else if (game.user?.isGM || attacker?.isOwner) {
+    button.addEventListener("click", () => {
+      button.disabled = true;
+      void applyPsionicEffect(message.id).catch(() => {
+        button.disabled = false;
+      });
+    });
+  } else button.remove();
+}
+
 function wireWildTalent(message: { id: string; getFlag(s: string, k: string): unknown }, html: HTMLElement): void {
   const flag = message.getFlag(SYSTEM_ID, "wildTalent") as WildFlag | undefined;
   if (!flag) return;
@@ -272,6 +296,7 @@ function wireWrestleContest(message: { id: string; getFlag(s: string, k: string)
 export function registerChatListeners(): void {
   Hooks.on("renderChatMessageHTML", (message: unknown, html: HTMLElement) => {
     wirePsionicContest(message as { id: string; getFlag(s: string, k: string): unknown }, html);
+    wirePsionicEffect(message as { id: string; getFlag(s: string, k: string): unknown }, html);
     wireWildTalent(message as { id: string; getFlag(s: string, k: string): unknown }, html);
     wireWrestleContest(message as { id: string; getFlag(s: string, k: string): unknown }, html);
     html.querySelector<HTMLButtonElement>('[data-action="rollDamage"]')?.addEventListener("click", (ev) => {

@@ -14,7 +14,7 @@ import {
 describe("constants", () => {
   it("pins the query name, conditions and apply modes", () => {
     expect(RELAY_QUERY).toBe("adnd2e.applyEffect");
-    expect([...RELAY_CONDITIONS]).toEqual(["stunned", "prone", "held", "turned", "paralyzed", "unconscious"]);
+    expect([...RELAY_CONDITIONS]).toEqual(["stunned", "prone", "held", "turned", "paralyzed", "unconscious", "dazed"]);
     expect([...PLAYER_APPLY_MODES]).toEqual(["auto", "approve"]);
     expect(DEFAULT_PLAYER_APPLY_MODE).toBe("auto");
   });

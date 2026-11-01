@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { effectLines, effectPlan, failureNote, type EffectOutcome } from "../../../src/core/psionics";
+import { effectApplyActions, effectLines, effectPlan, failureNote, type EffectOutcome } from "../../../src/core/psionics";
 
 const ok = { success: true, special: false, natural20: false };
 const outcome = (over: Partial<EffectOutcome> = {}): EffectOutcome => ({ saveFailed: null, duration: null, damage: null, lostPower: null, hp: null, ...over });
@@ -63,5 +63,28 @@ describe("effectLines", () => {
     expect(effectLines(plan("Psionic Blast"), outcome({ saveFailed: true }))).toEqual([{ key: "blastLoseUnknown", params: {} }]);
     expect(effectLines(plan("Psionic Blast", true), outcome({ saveFailed: true, hp: 10 })).map((l) => l.key)).toEqual(["blastLose", "blastPassOut"]);
     expect(effectLines(plan("Psionic Blast"), outcome({ saveFailed: false, hp: 10 }))).toEqual([{ key: "blastResisted", params: {} }]);
+  });
+});
+
+describe("effectApplyActions (what the Apply button does)", () => {
+  const plan = (mode: string, special = false) => effectPlan(mode, { success: true, special, natural20: false })!;
+  it("Psychic Crush: damage only on a failed save", () => {
+    expect(effectApplyActions(plan("Psychic Crush"), outcome({ saveFailed: true, damage: 5 }))).toEqual([{ kind: "damage", amount: 5 }]);
+    expect(effectApplyActions(plan("Psychic Crush"), outcome({ saveFailed: false, damage: 5 }))).toEqual([]);
+    expect(effectApplyActions(plan("Psychic Crush"), outcome({ saveFailed: null }))).toEqual([]);
+    expect(effectApplyActions(plan("Psychic Crush"), outcome({ saveFailed: true }))).toEqual([]);
+  });
+  it("Id Insinuation stuns for the rolled rounds, but a roll at the power score (turn on allies) is left to the GM", () => {
+    expect(effectApplyActions(plan("Id Insinuation"), outcome({ duration: 3 }))).toEqual([{ kind: "condition", conditionId: "stunned", rounds: 3 }]);
+    expect(effectApplyActions(plan("Id Insinuation", true), outcome({ duration: 3 }))).toEqual([]);
+    expect(effectApplyActions(plan("Id Insinuation"), outcome())).toEqual([]);
+  });
+  it("Ego Whip dazes for the rolled rounds", () => {
+    expect(effectApplyActions(plan("Ego Whip"), outcome({ duration: 2 }))).toEqual([{ kind: "condition", conditionId: "dazed", rounds: 2 }]);
+    expect(effectApplyActions(plan("Ego Whip"), outcome())).toEqual([]);
+  });
+  it("Mind Thrust and Psionic Blast apply nothing", () => {
+    expect(effectApplyActions(plan("Mind Thrust"), outcome({ duration: 7, lostPower: "ESP" }))).toEqual([]);
+    expect(effectApplyActions(plan("Psionic Blast"), outcome({ saveFailed: true, hp: 30 }))).toEqual([]);
   });
 });

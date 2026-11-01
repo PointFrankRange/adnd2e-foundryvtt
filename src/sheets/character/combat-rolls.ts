@@ -13,6 +13,7 @@ import {
   entangledAttackPenalty,
   fatigueArmorClassPenalty,
   fatigueAttackPenalty,
+  dazedAttackPenalty,
   frightenedAttackPenalty,
   heldAttackBonus,
   invisibleTargetPenalty,
@@ -359,6 +360,7 @@ export async function rollAttack(
       fatigueAttackPenalty(actor.statuses) +
       entangledAttackPenalty(actor.statuses) +
       frightenedAttackPenalty(actor.statuses) +
+      dazedAttackPenalty(actor.statuses) +
       invisibleTargetPenalty(targetStatuses) +
       heldAttackBonus(targetStatuses) +
       armorVsWeaponModifier +
